@@ -27,9 +27,12 @@ class ShowScreeningHits(CcpnModule):
     self.project = project
     self.setFixedHeight(300)
     # self.createDummyHits()
-    self.moduleArea = self.project._appBase.mainWindow.moduleArea
+    if self._appBase.ui.mainWindow is not None:
+      self.mainWindow = self._appBase.ui.mainWindow
+    else:
+      self.mainWindow = self._appBase._mainWindow
+    self.moduleArea = self.mainWindow.moduleArea
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
-    self.mainWindow = self.project._appBase.mainWindow
 
     ######## ======== Set modules on moduleArea ====== ########
 
@@ -231,7 +234,11 @@ class ShowScreeningHits(CcpnModule):
     currentDisplayed = self.project.strips[0]
     for spectrumView in currentDisplayed.spectrumViews:
       spectrumView.delete()
-    self.project._appBase.mainWindow.clearMarks()
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    mainWindow.clearMarks()
     return currentDisplayed
 
   def _clearListWidget(self):

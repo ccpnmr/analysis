@@ -81,7 +81,12 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       guiSpectrumDisplay.displaySpectrum(ss)
       # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
       #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
-      self._appBase.mainWindow.pythonConsole.writeConsoleCommand(
+
+      if self._appBase.ui.mainWindow is not None:
+        mainWindow = self._appBase.ui.mainWindow
+      else:
+        mainWindow = self._appBase._mainWindow
+      mainWindow.pythonConsole.writeConsoleCommand(
         "module.displaySpectrum(spectrum)", module=displayPid, spectrum=ss
       )
       self._appBase.project._logger.info("module = project.getByPid(%s)" % displayPid)

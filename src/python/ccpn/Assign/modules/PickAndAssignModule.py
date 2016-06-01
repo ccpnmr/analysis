@@ -139,7 +139,11 @@ class PickAndAssignModule(CcpnModule, Base):
                   peakItem.isSelected = True
 
   def _goToPositionInModules(self, nmrResidue=None, row=None, col=None):
-    self.project._appBase.mainWindow.clearMarks()
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    mainWindow.clearMarks()
     navigateToNmrResidue(self.project, nmrResidue, markPositions=True)
 
     self.current.nmrResidue = nmrResidue

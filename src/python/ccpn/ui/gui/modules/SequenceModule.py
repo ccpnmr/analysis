@@ -199,9 +199,12 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
         guiResidue = self.parent.residueDict.get(res.sequenceCode)
         guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                              res.shortName+'</strong></div>')
-
-      if hasattr(self.project._appBase.mainWindow, 'bbModule'):
-        nmrResidueTable = self.project._appBase.mainWindow.bbModule.nmrResidueTable.nmrResidueTable
+      if self._appBase.ui.mainWindow is not None:
+        mainWindow = self._appBase.ui.mainWindow
+      else:
+        mainWindow = self._appBase._mainWindow
+      if hasattr(mainWindow, 'bbModule'):
+        nmrResidueTable = mainWindow.bbModule.nmrResidueTable.nmrResidueTable
         nmrResidueTable.objectLists = self.project.nmrChains
         nmrResidueTable.updateTable()
 

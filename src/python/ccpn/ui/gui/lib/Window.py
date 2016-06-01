@@ -71,7 +71,11 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
     positions = peak.position
     axisCodes = peak.peakList.spectrum.axisCodes
     axisPositions = dict(zip(axisCodes, positions))
-    task = project._appBase.mainWindow.task
+    if project._appBase.ui.mainWindow is not None:
+      mainWindow = project._appBase.ui.mainWindow
+    else:
+      mainWindow = project._appBase._mainWindow
+    task = mainWindow.task
     mark = task.newMark('white', positions, axisCodes)
 
     # if not strip:
@@ -158,8 +162,11 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
 
 
 def markPositionsInStrips(project, strip, axes, atomPositions):
-
-    task = project._appBase.mainWindow.task
+    if project._appBase.ui.mainWindow is not None:
+      mainWindow = project._appBase.ui.mainWindow
+    else:
+      mainWindow = project._appBase._mainWindow
+    task = mainWindow.task
     for ii, axis in enumerate(axes):
       for atomPosition in atomPositions[ii]:
 

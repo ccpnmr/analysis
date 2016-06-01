@@ -20,7 +20,10 @@ class SamplePopup(QtGui.QDialog):
     super(SamplePopup, self).__init__(parent)
 
     self.project = project
-    self.mainWindow = self.project._appBase.mainWindow
+    if self._appBase.ui.mainWindow is not None:
+      self.mainWindow = self._appBase.ui.mainWindow
+    else:
+      self.mainWindow = self._appBase._mainWindow
     self.moduleArea = self.mainWindow.moduleArea
     self.generalPreferences = self.project._appBase.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme

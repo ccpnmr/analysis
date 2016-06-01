@@ -82,7 +82,11 @@ class DropBase(GuiBase):
           #   # We have loaded a new project
           #   return
 
-          self._appBase.mainWindow.pythonConsole.writeConsoleCommand("project.loadData('%s')" % url)
+          if self._appBase.ui.mainWindow is not None:
+            self._appBase.ui.mainWindow.pythonConsole.writeConsoleCommand("project.loadData('%s')" % url)
+          else:
+            self._appBase._mainWindow.pythonConsole.writeConsoleCommand("project.loadData('%s')" % url)
+
           project._logger.info("project.loadData('%s')" % url)
 
           if loaded:

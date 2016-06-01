@@ -284,7 +284,10 @@ class MatchPeaks(QtGui.QWidget):
   def _showHitsModule(self):
     # self.screeningSettingModule.close()
     showScreeningHits = ShowScreeningHits(self.project)
-    self.mainWindow = self.project._appBase.mainWindow
+    if self._appBase.ui.mainWindow is not None:
+      self.mainWindow = self._appBase.ui.mainWindow
+    else:
+      self.mainWindow = self._appBase._mainWindow
     showScreeningHitsModule = self.mainWindow.moduleArea.addModule(showScreeningHits, position='bottom')
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
 

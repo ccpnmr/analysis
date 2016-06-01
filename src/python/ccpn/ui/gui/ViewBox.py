@@ -227,7 +227,11 @@ class ViewBox(pg.ViewBox):
             selectedRegion[1].append(n.region[1])
         for spectrumView in self.current.strip.spectrumViews:
           peakList = spectrumView.spectrum.peakLists[0]
-          console = self.current.project._appBase.mainWindow.pythonConsole
+          if self.current.project._appBase.ui.mainWindow is not None:
+            mainWindow = self.current.project._appBase.ui.mainWindow
+          else:
+            mainWindow = self.current.project._appBase._mainWindow
+          console = mainWindow.pythonConsole
 
 
           if spectrumView.spectrum.dimensionCount > 1:

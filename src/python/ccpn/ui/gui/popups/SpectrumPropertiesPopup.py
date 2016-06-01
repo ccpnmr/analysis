@@ -92,8 +92,11 @@ class GeneralTab(QtGui.QWidget, Base):
     pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
     self.pathData = LineEdit(self, vAlign='t', grid=(2, 1))
     self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
-
-    self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
+    if self.spectrum.project._appBase.ui.mainWindow is not None:
+      mainWindow = self.spectrum.project._appBase.ui.mainWindow
+    else:
+      mainWindow = self.spectrum.project._appBase._mainWindow
+    self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
 
     self.setWindowTitle("Spectrum Information")
@@ -302,7 +305,11 @@ class DimensionsTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, dimensions, parent=None):
     super(DimensionsTab, self).__init__(parent)
     self.spectrum = spectrum
-    self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
+    if self.spectrum.project._appBase.ui.mainWindow is not None:
+      mainWindow = self.spectrum.project._appBase.ui.mainWindow
+    else:
+      mainWindow = self.spectrum.project._appBase._mainWindow
+    self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
     dimensionalityLabel = Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t',)
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
@@ -370,7 +377,11 @@ class ContoursTab(QtGui.QWidget, Base):
     super(ContoursTab, self).__init__(parent)
 
     self.spectrum = spectrum
-    self.pythonConsole = self.spectrum.project._appBase.mainWindow.pythonConsole
+    if self.spectrum.project._appBase.ui.mainWindow is not None:
+      mainWindow = self.spectrum.project._appBase.ui.mainWindow
+    else:
+      mainWindow = self.spectrum.project._appBase._mainWindow
+    self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(1, 0), vAlign='t', hAlign='l')
     positiveContoursCheckBox = CheckBox(self, grid=(1, 1), checked=True, vAlign='t', hAlign='l')

@@ -112,7 +112,11 @@ class BackboneAssignmentModule(CcpnModule):
     add strips to matchModule(s) corresponding to assignment matches.
     """
 
-    self.project._appBase.mainWindow.clearMarks()
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    mainWindow.clearMarks()
 
     self.nmrResidueTable.nmrResidueTable.updateTable()
     selectedDisplays = [display for display in self.project.spectrumDisplays

@@ -24,7 +24,11 @@ class ScreeningSettings(CcpnModule):
     CcpnModule.__init__(self, name='Screening Settings')
     self.project = project
     # self.setFixedHeight(400)
-    self.moduleArea = self.project._appBase.mainWindow.moduleArea
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    self.moduleArea = mainWindow.moduleArea
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
     self.mainFrame = QtGui.QFrame()

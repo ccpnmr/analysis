@@ -876,7 +876,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def showNotesEditor(self):
-    self.notesEditor = NotesEditor(self._appBase.mainWindow.moduleArea, self._project, name='Notes Editor')
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    self.notesEditor = NotesEditor(mainWindow.moduleArea, self._project, name='Notes Editor')
 
   def showMoleculePopup(self):
     """

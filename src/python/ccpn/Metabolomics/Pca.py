@@ -136,4 +136,8 @@ class PcaModule(CcpnModule, Base):
     if self.spectrum:
       spectrumDisplay = self.createSpectrumDisplay(spectrum=None)
       self.setSpectrumDisplay(spectrumDisplay)
-      self.project._appBase.mainWindow.moduleArea.moveModule(spectrumDisplay.module, position='bottom', neighbor=self)
+      if self.project._appBase.ui.mainWindow is not None:
+        mainWindow = self.project._appBase.ui.mainWindow
+      else:
+        mainWindow = self.project._appBase._mainWindow
+      mainWindow.moduleArea.moveModule(spectrumDisplay.module, position='bottom', neighbor=self)

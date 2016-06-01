@@ -436,7 +436,12 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           'This function has not been implemented in the current version',
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'NO':
-      self.notesEditor = NotesEditor(self._appBase.mainWindow.moduleArea, self.project, name='Notes Editor', note=obj)
+      if self._appBase.ui.mainWindow is not None:
+        mainWindow = self._appBase.ui.mainWindow
+      else:
+        mainWindow = self._appBase._mainWindow
+        self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
+                                       name='Notes Editor', note=obj)
 
   def _createNewObject(self, item):
     """Create new object starting from the <New> item

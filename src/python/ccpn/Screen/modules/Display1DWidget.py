@@ -22,7 +22,10 @@ from ccpn.ui.gui.widgets.Module import CcpnModule
 class Display1DWidget(QtGui.QFrame):
   def __init__(self, parent=None, project=None, **kw):
     super(Display1DWidget, self).__init__(parent)
-    self.mainWindow = project._appBase.mainWindow
+    if self._appBase.ui.mainWindow is not None:
+      self.mainWindow = self._appBase.ui.mainWindow
+    else:
+      self.mainWindow = self._appBase._mainWindow
 
     self.mainLayout = QtGui.QVBoxLayout()
     self.setLayout(self.mainLayout)

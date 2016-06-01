@@ -166,7 +166,11 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     Closes spectrum display and deletes it from the project.
     """
     if len(self._appBase.project.spectrumDisplays) == 1:
-      self._appBase.mainWindow.addBlankDisplay()
+      if self._appBase.ui.mainWindow is not None:
+        mainWindow = self._appBase.ui.mainWindow
+      else:
+        mainWindow = self._appBase._mainWindow
+      mainWindow.addBlankDisplay()
     # self.module.close()
     self.delete()
 

@@ -33,7 +33,10 @@ class MixtureAnalysis(CcpnModule):
     CcpnModule.__init__(self, name='Mixture Analysis')
 
     self.project = project
-    self.mainWindow = self.project._appBase.mainWindow
+    if self._appBase.ui.mainWindow is not None:
+      self.mainWindow = self._appBase.ui.mainWindow
+    else:
+      self.mainWindow = self._appBase._mainWindow
     self.moduleArea = self.mainWindow.moduleArea
     self.generalPreferences = self.project._appBase.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
@@ -206,7 +209,11 @@ class MixtureAnalysis(CcpnModule):
 
   def _toggleComponentButton(self, spectrum, sample, componentButton):
     '''  Toggling the component button will populate the peak table and display the molecule on compoundViewer '''
-    self.project._appBase.mainWindow.clearMarks()
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    mainWindow.clearMarks()
     pressedButton = self.sender()
 
     buttons = []
@@ -681,7 +688,11 @@ class MixtureAnalysis(CcpnModule):
   def _navigateToPosition(self, peaks):
     ''' for a given peak, it navigates to the peak position on the display  '''
     displayed = self.project.strips[0].spectrumDisplay
-    self.project._appBase.mainWindow.clearMarks()
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    mainWindow.clearMarks()
     for peak in peaks:
       navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 

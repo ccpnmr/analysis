@@ -29,7 +29,11 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     super(SamplePropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.project = project
-    self.sideBar = project._appBase.mainWindow.sideBar
+    if self._appBase.ui.mainWindow is not None:
+      mainWindow = self._appBase.ui.mainWindow
+    else:
+      mainWindow = self._appBase._mainWindow
+    self.sideBar = mainWindow.sideBar
     # self.newSampleSideBar = item
 
     self.sample = sample

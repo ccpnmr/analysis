@@ -23,7 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import pyqtgraph as pg
-# import os
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
@@ -32,27 +31,15 @@ from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Peak import Peak
 
-from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.CcpnGridItem import CcpnGridItem
-# from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpn.ui.gui.widgets.Widget import Widget
-# from ccpn.ui.gui.widgets.Menu import Menu
-
-# from ccpnmodel.ccpncore.memops import Notifiers
 
 from ccpn.util.Colour import Colour
 from ccpn.util import Ticks
 import typing
 
-# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Axis as ApiAxis
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
-
 from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
-# from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
 def _sufficientlyDifferentWidth(region1, region2):
@@ -806,6 +793,8 @@ def _axisRegionChanged(axis:'Axis'):
 # NB The following two notifiers could be replaced by wrapper notifiers on
 # Mark, 'change'. But it would be rather more clumsy, so leave it as it is.
 
+# NBNB TODO code uses API object. REFACTOR
+
 def _rulerCreated(project:Project, apiRuler:ApiRuler):
   """]Notifier function for creating rulers"""
   axisCode = apiRuler.axisCode # TBD: use label and unit
@@ -844,13 +833,11 @@ def _rulerDeleted(project:Project, apiRuler:ApiRuler):
         strip.plotWidget.removeItem(line)
 
 # Add notifier functions to Project
-Project._setupApiNotifier(_rulerCreated, ApiRuler, 'postInit')
-Project._setupApiNotifier(_rulerDeleted, ApiRuler, 'preDelete')
 
 
 # NB This notifier must be implemented as an API postInint notiier,
 # As it relies on Axs that are not yet created when 'created' notifiers are executed
-def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
+def _setupGuiStrip(project:Project, apiStrip):
   """Set up graphical parameters for completed strips - for notifiers"""
   strip = project._data2Obj[apiStrip]
 
@@ -865,4 +852,3 @@ def _setupGuiStrip(project:Project, apiStrip:ApiStrip):
                                     axisCode=axisOrder[1])
   strip.viewBox.sigStateChanged.connect(strip._moveAxisCodeLabels)
   strip.viewBox.sigRangeChanged.connect(strip._updateRegion)
-Project._setupApiNotifier(_setupGuiStrip, ApiStrip, 'postInit')

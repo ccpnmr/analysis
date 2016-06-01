@@ -223,19 +223,16 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         peakItem = GuiPeakListView.PeakNd(peakListView, peak)
       peakItemDict[apiPeak] = peakItem
 
+# Functions for notifiers
 
-# Could be changed to wrapper level, but would be triggered much more often. Leave  as is.
-def _changedFreeStripAxisOrdering(project:Project, apiStrip:ApiFreeStrip):
-  """Used (and works) for either BoundDisplay of FreeStrip"""
-
-  project._data2Obj[apiStrip]._setZWidgets()
-
-Project._setupApiNotifier(_changedFreeStripAxisOrdering, ApiFreeStrip, 'axisOrder')
+# We are not currently using Free strips
+#
+# # Could be changed to wrapper level, but would be triggered much more often. Leave  as is.
+# def _changedFreeStripAxisOrdering(project:Project, apiStrip:ApiFreeStrip):
+#   """Used (and works) for either BoundDisplay of FreeStrip"""
+#   project._data2Obj[apiStrip]._setZWidgets()
 
 def _changedBoundDisplayAxisOrdering(project:Project, apiDisplay:ApiBoundDisplay):
   """Used (and works) for either BoundDisplay of FreeStrip"""
-
   for strip in project._data2Obj[apiDisplay].strips:
     strip._setZWidgets()
-
-Project._setupApiNotifier(_changedBoundDisplayAxisOrdering, ApiBoundDisplay, 'axisOrder')

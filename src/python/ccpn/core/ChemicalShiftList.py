@@ -135,7 +135,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     self._wrappedData.experiments =  set(x._wrappedData.experiment for x in value)
     
   # Implementation functions
-  def rename(self, value):
+  def rename(self, value:str):
     """Rename ChemicalShiftList, changing Id and Pid of ChemicalShiftList"""
     if not value:
       raise ValueError("ChemicalShiftList name must be set")

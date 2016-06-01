@@ -498,13 +498,13 @@ class AbstractWrapperObject():
     """Set up notifiers for class cls that do not depend on individual objects -
     These will be registered whenever a new project is initialised.
     Parameters are eventually passed to the project.registerNotifier() function
-    (with cls converted to cls.className). Please see the registerNotifier
+    (with cls converted to cls.className). Please see the Project.registerNotifier
     documentation for a precise parameter description
 
     Note that these notifiers are NOT cleared once set up.
     """
 
-    # CCPNINTERNAL - used in top level class definitions (ONLY)
+    # CCPNINTERNAL - used in top level class definitions, Current (ONLY)
 
 
     # NB _coreNotifiers is a class attribute of AbstractWrapperObject

@@ -23,54 +23,44 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-# import functools
-from ccpn.ui.gui.widgets import MessageDialog
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Resonance as ApiNmrAtom
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiNmrResidue
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiSpectrum
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpn.core.Project import Project
+import typing
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.Peak import Peak
+from ccpn.core.NmrChain import NmrChain
+from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
+from ccpn.ui._implementation.Strip import Strip
+from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
-# Fields that are coded automatically
-_autoFields = ['peaks','regions','positions', 'strips', 'nmrChains', 'nmrResidues', 'nmrAtoms',
-               'spectrumDisplays', 'spectrumGroups']
-# NB For each of these fields code is generated to match the explicit code for the 'spectra' field
-# It is assumed that each autofield is plural, ending in a plural 's'
-# Note that the singular value (e.g. 'currentSpectrum') is the last object
-# in the plural value (That is e.g. current.spectra[-1]
+# Classes (in addition to Project) that have a corresponding 'current' field
+_currentClasses = [Spectrum, SpectrumGroup, Peak, NmrChain, NmrResidue, NmrAtom,
+                   SpectrumDisplay, Strip, ]
 
+# 'current' fields that do not correspond to a wrapper class. Must be plural and end in 's'
+_currentExtraFields = ['regions', 'positions']
 
-# Fields in this dictionary
-_notifyDeleteFields = {
-  'peaks':ApiPeak,
-  'strips':ApiStrip,
-  'nmrResidues':ApiNmrResidue,
-  'nmrAtoms':ApiNmrAtom,
-  'spectrumDisplays':ApiBoundDisplay
-}
-
-_fields = ['project', 'spectra'] + _autoFields
+# Fields in current (there is a current.xyz attribute with related functions
+# for every 'xyz' in fields
+_fields = [x._pluralLinkName for x in _currentClasses] + _currentExtraFields
 
 class Current:
 
   def __init__(self, project):
     # initialise non-=auto fields
     self._project = project
-    self._spectra = []
 
-    for field in _autoFields:
-      setattr(self, '_'+field, [])
+    for field in _fields:
+      setattr(self, '_' + field, [])
 
     # initialise notifies
     notifies = self._notifies = {}
-    notifies['spectra'] = []
-    for field in _autoFields:
+    for field in _fields:
       notifies[field] = []
 
   def registerNotify(self, notify, field):
-    # Notifiers are attached to the OBJECT, not to the class
+    # Notifiers are attached to the Current OBJECT, not to the class
     # They are therefore removed when a new project is created/loaded
     # Otherwise it is the responsibility of the adder to remove them when no longer relevant
     # for which the notifier function object must be kept around.
@@ -81,148 +71,95 @@ class Current:
     # If you need a graphics object (e.g. a module) you must make and register a bound method
     # on the module.
 
-    notifies = self._notifies
-    ll = notifies.get(field)
-    if ll is None:
-      notifies[field] = [notify]
-
-    elif notify not in ll:
-      ll.append(notify)
+    self._notifies[field].append(notify)
 
   def unRegisterNotify(self, notify, field):
-    try:
-      self._notifies[field].remove(notify)
-    except ValueError:
-      pass
+    """Remove 'current' notifier"""
+    self._notifies[field].remove(notify)
 
   @property
   def project(self):
     """Project attached to current"""
     return self._project
 
-  @property
-  def spectra(self):
-    """Current spectra"""
-    return list(self._spectra)
+  @classmethod
+  def  _addClassField(cls, param:typing.Union[str, AbstractWrapperObject]):
+    """Add new 'current' field with necessary function for input
+    param (wrapper class or field name)"""
 
-  @spectra.setter
-  def spectra(self, value):
-    if len(set(value)) != len(value):
-      raise ValueError("Current Spectra contains duplicates: %s" % value)
-    self._spectra = list(value)
-    for func in self._notifies.get('spectra', ()):
-      func(self)
+    if isinstance(param, str):
+      plural = param
+      singular = param[:-1]  # It is assumed that param ends in plural 's'
+    else:
+      # param is a wrapper class
+      plural = param._pluralLinkName
+      singular = param.className
+      singular = singular[0].lower() + singular[1:]
 
-  @property
-  def spectrum(self):
-    return self._spectra[-1] if self._spectra else None
+    # getter function for _field; getField(obj) returns obj._field:
+    getField = operator.attrgetter('_' + plural)
 
-  @spectrum.setter
-  def spectrum(self, value):
-    self.spectra = [value]
+    # getFieldItem(obj) returns obj[field]
+    getFieldItem = operator.itemgetter(plural)
 
-  def addSpectrum(self, value):
-    self.spectra = self._spectra + [value]
+    # setField(obj, value) sets obj._field = value and calls notifiers
+    def setField(self, value, plural=plural):
+      if len(set(value)) != len(value):
+        raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
+      setattr(self, '_'+plural, value)
+      funcs = getFieldItem(self._notifies) or ()
+      for func in funcs:
+        func(value)
 
-  def removeSpectrum(self, value):
-    self._spectra.remove(value)
-    self.spectra = self._spectra + [value]
-
-  def clearSpectra(self):
-    self.spectra = []
-
-
-  def deleteSelected(self, parent=None):
-    # TBD: more general deletion
-    if self.peaks:
-      n = len(self.peaks)
-      title = 'Delete Peak%s' % ('' if n == 1 else 's')
-      msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
-      if MessageDialog.showYesNo(title, msg, parent):
-        for peak in self.peaks[:]:
-
-          self.project._appBase.mainWindow.pythonConsole.writeConsoleCommand('peak.delete()',
-                                                                    peak=peak)
-          peak.delete()
-        #self.peaks = [] # not needed since _deletedPeak notifier will clear this out
-
-
-# Add notifiers for deleted spectra
-def current_spectra_deletion_cleanup(self:Project, apiObj):
-
-  current = self._appBase.current
-  if current:
-    obj = self._data2Obj[apiObj]
-    fieldData = current._spectra
-    if obj in fieldData:
-      fieldData.remove(obj)
-#
-Project._setupApiNotifier(current_spectra_deletion_cleanup, ApiSpectrum, 'preDelete')
-
-
-def  _addClassField(cls, field):
-  # getter function for _field; getField(obj) returns obj._field:
-  getField = operator.attrgetter('_' + field)
-
-  # getFieldItem(obj) returns obj[field]
-  getFieldItem = operator.itemgetter(field)
-
-  # setField(obj, value) sets obj._field = value and calls notifiers
-  def setField(self, value, field='_' + field):
-    if len(set(value)) != len(value):
-      msg = "Current %s contains duplicates: %%s" % field
-      raise ValueError(msg % value)
-    setattr(self, field, value)
-    funcs = getFieldItem(self._notifies) or ()
-    for func in funcs:
-      func(value)
-
-  def getter(self):
-    return tuple(getField(self))
-  def setter(self, value):
-    setField(self, list(value))
-  #
-  setattr(cls, field, property(getter, setter, None, "Current %s" % field))
-
-  def getter(self):
-    ll = getField(self)
-    return ll[-1] if ll else None
-  def setter(self, value):
-    setField(self, [value])
-  #
-  setattr(cls, field[:-1], property(getter, setter, None, "Current %s" % field[:-1]))
-
-  def adder(self, value):
-    setField(self, getField(self) + [value])
-  #
-  setattr(cls, 'add' + field.capitalize()[:-1], adder)
-
-  def remover(self, value):
-    ll = getField(self)
-    ll.remove(value)
-    setField(self, ll)
-  #
-  setattr(cls, 'remove' + field.capitalize()[:-1], remover)
-
-  def clearer(self):
-    setField(self, [])
-  #
-  setattr(cls, 'clear' + field.capitalize(), clearer)
-
-  apiClass = _notifyDeleteFields.get(field)
-  if apiClass is not None:
-    # Add notifiers for deleted objects
-    def cleanup(self:Project, apiObj):
-
-      current = self._appBase.current
-      if current:
-        obj = self._data2Obj[apiObj]
-        fieldData = getField(current)
-        if obj in fieldData:
-          fieldData.remove(obj)
-    cleanup.__name__ = 'current_%s_deletion_cleanup' % field
+    def getter(self):
+      return tuple(getField(self))
+    def setter(self, value):
+      setField(self, list(value))
     #
-    Project._setupApiNotifier(cleanup, apiClass, 'preDelete')
+    setattr(cls, plural, property(getter, setter, None, "Current %s" % plural))
 
-for field in _autoFields:
-  _addClassField(Current, field)
+    def getter(self):
+      ll = getField(self)
+      return ll[-1] if ll else None
+    def setter(self, value):
+      setField(self, [value])
+    #
+    setattr(cls, singular, property(getter, setter, None, "Current %s" % singular))
+
+    def adder(self, value):
+      """Add %s to current.%s""" % (singular, plural)
+      setField(self, getField(self) + [value])
+    #
+    setattr(cls, 'add' + singular.capitalize(), adder)
+
+    def remover(self, value):
+      """Remove %s from current.%s""" % (singular, plural)
+      ll = getField(self)
+      ll.remove(value)
+      setField(self, ll)
+    #
+    setattr(cls, 'remove' + singular.capitalize(), remover)
+
+    def clearer(self):
+      """Clear current.%s""" % plural
+      setField(self, [])
+    #
+    setattr(cls, 'clear' + plural.capitalize(), clearer)
+
+    if not isinstance(param, str):
+      # param is a class - Add notifiers for deleted objects
+      def cleanup(self:AbstractWrapperObject):
+        current = self._project._appBase.current
+        if current:
+          fieldData = getField(current)
+          if self in fieldData:
+            fieldData.remove(self)
+      cleanup.__name__ = 'current_%s_deletion_cleanup' % singular
+      #
+      param._setupCoreNotifier('delete', cleanup)
+
+# Add fields to current
+for cls in _currentClasses:
+  Current._addClassField(cls)
+for field in _currentExtraFields:
+  Current._addClassField(field)

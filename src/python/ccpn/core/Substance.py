@@ -376,7 +376,7 @@ class Substance(AbstractWrapperObject):
 
 
   # Implementation functions
-  def rename(self, name=None, labeling=None):
+  def rename(self, name:str=None, labeling:str=None):
     """Rename Substance, changing its Id and Pid, and rename SampleComponents and SpectrumHits
     with matching names. If name or labeling is None, the existing value will be used"""
 

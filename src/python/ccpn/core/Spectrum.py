@@ -830,7 +830,7 @@ class Spectrum(AbstractWrapperObject):
 
   # Implementation functions
 
-  def rename(self, value):
+  def rename(self, value:str):
     """Rename Spectrum, changing Id and Pid"""
     if value:
       self._wrappedData.name = value

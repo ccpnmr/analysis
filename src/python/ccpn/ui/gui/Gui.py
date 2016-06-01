@@ -49,6 +49,9 @@ class Gui(Ui):
     self.application = None
     self.mainWindow = None
 
+    # Controls if delete, rename, adn create commands are automatically echoed to console
+    self._blankConsoleOutput = 0
+
     self._initQtApp()
 
 
@@ -71,7 +74,7 @@ class Gui(Ui):
 
     project = self.framework.project
 
-    # Notifiers
+    # Wrapper Notifiers
     from ccpn.ui.gui.modules import GuiStrip
     notifier = project.registerNotifier('Strip', 'create', GuiStrip.GuiStrip._resetRemoveStripAction)
     project.duplicateNotifier('Strip', 'delete', notifier)
@@ -97,6 +100,31 @@ class Gui(Ui):
 
     from ccpn.ui.gui.widgets import SpinSystemLabel
     project.registerNotifier('NmrResidue', 'rename', SpinSystemLabel._renameNmrResidueForGraphics)
+
+    # API notifiers - see functions for comments on why this is done this way
+    project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
+                                 'ccp.nmr.Nmr.AbstractPeakDimContrib', 'postInit')
+    project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
+                                'ccp.nmr.Nmr.AbstractPeakDimContrib', 'preDelete')
+
+    from ccpn.ui.gui.modules import GuiStripDisplayNd
+    project._registerApiNotifier(GuiStripDisplayNd._changedBoundDisplayAxisOrdering,
+                                 GuiStripDisplayNd.ApiBoundDisplay, 'axisOrder')
+
+
+    from ccpn.ui.gui.modules import GuiStripDisplay1d
+    project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumPlotColour,
+                                 GuiStripDisplay1d.ApiDataSource, 'setSliceColour')
+
+    project._registerApiNotifier(GuiStripDisplay1d._updateSpectrumViewPlotColour,
+                                 GuiStripDisplay1d.ApiSpectrumView, 'setSliceColour')
+
+    project._registerApiNotifier(GuiStrip._rulerCreated, 'ccpnmr.gui.Task.Ruler', 'postInit')
+    project._registerApiNotifier(GuiStrip._rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'preDelete')
+    project._registerApiNotifier(GuiStrip._setupGuiStrip, 'ccpnmr.gui.Task.Strip', 'postInit')
+
+    project._registerApiNotifier(GuiSpectrumDisplay._deletedSpectrumView,
+                                 'ccpnmr.gui.Task.SpectrumView', 'preDelete')
 
   def start(self):
 
@@ -132,6 +160,60 @@ class Gui(Ui):
     mainWindow.namespace['current'] = self.framework.current
 
     return mainWindow
+
+  def blankConsoleOutput(self):
+    """Increase console output blanking level.
+    Output is done only when blanking level is 0"""
+    self._blankConsoleOutput += 1
+
+  def unblankConsoleOutput(self):
+    """Increase console output blanking level.
+    Output is done only when blanking level is 0"""
+    if self._blankConsoleOutput > 0:
+      self._blankConsoleOutput -= 1
+
+
+  def writeConsoleCommand(self, command:str, **objectParameters):
+    """Set keyword:value objectParameters to point to the relevant objects,
+    echo command in console, and set Undo
+
+    Example calls:
+
+    writeConsoleCommand("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
+
+    writeConsoleCommand(
+       "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
+       peak=peakOrPid)
+    """
+
+    # NBNB replacement for equivalent command in IPythonConsole
+
+    # NBNB TODO not yet hooked up
+    project = self.framework.project
+    console = self.framework.mainWindow.pythonConsole
+    undo = project._undo
+
+    if undo.blocking:
+      # While undo is blocked do nothing - echo will be done at top level of block
+      return
+
+    if self._blankConsoleOutput:
+      # Console output is suspended
+      return
+
+    # write lines getting objects by their Pids
+    for parameter in sorted(objectParameters):
+      value = objectParameters[parameter]
+      if not isinstance(value, str):
+        value = value.pid
+      console._write("%s = project.getByPid('%s')\n" % (parameter, value))
+
+    # execute command
+    console._write(command + '\n')
+
+    # set undo step
+    undo.newWaypoint()
+
 
 
 #######################################################################################

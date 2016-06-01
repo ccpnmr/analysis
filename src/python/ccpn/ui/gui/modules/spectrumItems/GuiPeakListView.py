@@ -826,11 +826,6 @@ def _upDateAssignmentsPeakDimContrib(project:Project,
                                      apiPeakDimContrib:Nmr.AbstractPeakDimContrib):
   peak = project._data2Obj[apiPeakDimContrib.peakDim.peak]
   peak._refreshPeakAnnotation()
-#
-Project._setupApiNotifier(_upDateAssignmentsPeakDimContrib, Nmr.AbstractPeakDimContrib, 'postInit')
-Project._setupApiNotifier(_upDateAssignmentsPeakDimContrib, Nmr.AbstractPeakDimContrib, 'preDelete')
-
-
 
 
 # NB, This will be triggered whenever anything about the peak (assignment or position) changes

@@ -66,12 +66,13 @@ class Project(AbstractWrapperObject):
   # Utility map - class shortName and longName to class.
   _className2Class = {}
 
-  # List of CCPN api notifiers
+  # List of CCPN pre-registered api notifiers
   # Format is (wrapperFuncName, parameterDict, apiClassName, apiFuncName
   # The function self.wrapperFuncName(**parameterDict) will be registered
   # in the CCPN api notifier system
   # api notifiers are set automatically,
-  # and are cleared by self._clearApiNotifiers and by self.delete()
+  # and are cleared by self._clearAllApiNotifiers and by self.delete()
+  # RESTRICTED. Direct access in core classes ONLY
   _apiNotifiers = []
 
   # Actions you can notify
@@ -110,7 +111,7 @@ class Project(AbstractWrapperObject):
 
     # Set up notification machinery
 
-    # Old - to be removed eventually
+    # Active notifiers - saved for later cleanup. CORER APPLICAATION ONLY
     self._activeNotifiers = []
 
     # list or None. When set used to accumulate pending notifiers
@@ -123,16 +124,10 @@ class Project(AbstractWrapperObject):
     # Notification blanking level - to allow for nested notification disabling
     self._notificationBlanking = 0
 
+    # Wrapper level notifier tracking.  APPLICATION ONLY
     # {(className,action):OrderedDict(notifier:onceOnly)}
     self._context2Notifiers = {}
 
-
-    #{(className,action):notifierId} dictionary
-    # Actions are: ('rename', 'create', 'delete', 'change')
-    # self._notifierContext2Id = OrderedDict()
-
-    # {notifierId:(func, parameterDict, onceOnly)} dictionary
-    # self._notifierId2funcdata = {}
 
 
     # Special attributes:
@@ -141,92 +136,6 @@ class Project(AbstractWrapperObject):
     # Set for Pre-May-2016 version. NBNB TODO remove when no longer needed
     self._appBase = None
 
-
-    #
-    # # Set required objects in apiProject and ApiNmrProject
-    # wrappedData.initialiseData()
-
-    # #
-    # # NBNB TBD All this should probably be moved to either AppBase initiation or V2 upgrade
-    # # preferably the latter.
-    #
-    # # PeakLists and Spectrum contour colours
-    # for experiment in wrappedData.experiments:
-    #   for dataSource in experiment.dataSources:
-    #
-    #     if not dataSource.findFirstPeakList(dataType='Peak'):
-    #       # Set a peakList for every spectrum
-    #       dataSource.newPeakList()
-    #
-    #     if not dataSource.positiveContourColour or not dataSource.negativeContourColour:
-    #       # set contour colours for every spectrum
-    #       (dataSource.positiveContourColour,
-    #        dataSource.negativeContourColour) = dataSource.getDefaultColours()
-    #     if not dataSource.sliceColour:
-    #       dataSource.sliceColour = dataSource.positiveContourColour
-    #
-    # # MolSystem
-    # apiProject = wrappedData.root
-    # if wrappedData.molSystem is None:
-    #   apiProject.newMolSystem(name=wrappedData.name, code=wrappedData.name,
-    #                           nmrProjects = (wrappedData,))
-    # # SampleStore
-    # apiSampleStore = wrappedData.sampleStore
-    # if apiSampleStore is None:
-    #   apiSampleStore = (apiProject.findFirstSampleStore(name='default') or
-    #                     apiProject.newSampleStore(name='default'))
-    #   wrappedData.sampleStore = apiSampleStore
-    # # RefSampleComponentStore
-    # apiComponentStore = apiSampleStore.refSampleComponentStore
-    # if apiComponentStore is None:
-    #   apiComponentStore = (apiProject.findFirstRefSampleComponentStore(name='default') or
-    #                        apiProject.newRefSampleComponentStore(name='default'))
-    #   apiSampleStore.refSampleComponentStore = apiComponentStore
-    # # Make Substances that match finalised Molecules
-    # for apiMolecule in apiProject.sortedMolecules():
-    #   if apiMolecule.isFinalised:
-    #     # Create matchingMolComponent if none exists
-    #     apiComponentStore.fetchMolComponent(apiMolecule)
-    #
-    # # Fix alpha or semi-broken projects. None of this should eb necessary, but hey!
-    # # NB written to modify nothing for valid projects
-    #
-    # # Get or (re)make default NmrChain
-    # defaultChain = wrappedData.findFirstNmrChain(code=Constants.defaultNmrChainCode)
-    # if defaultChain is None:
-    #   # NO default chain - probably an alpha project or upgraded from V2
-    #   defaultChain = wrappedData.findFirstNmrChain(code='@-')
-    #   if defaultChain is None:
-    #     defaultChain = wrappedData.newNmrChain(code=Constants.defaultNmrChainCode)
-    #   else:
-    #     defaultChain.code = '@-'
-    # # Make sure all non-offset ResonanceGroups have directNmrChain set.
-    # for rg in wrappedData.sortedResonanceGroups():
-    #   if rg.mainGroupSerial == rg.serial:
-    #     rg.mainGroupSerial = None
-    #   if rg.mainGroupSerial is None and rg.directNmrChain is None:
-    #     if hasattr(rg, 'chainSerial') and rg.chainSerial is not None:
-    #       rg.directNmrChain = wrappedData.findFirstNmrChain(serial=rg.chainSerial)
-    #     if rg.directNmrChain is None:
-    #       rg.directNmrChain = defaultChain
-    # # End of API object fixing
-
-    # self._logger = wrappedData.root._logger
-    #
-    # self._registerApiNotifiers()
-    #
-    # for tt in self._coreNotifiers:
-    #   self.registerNotifier(*tt)
-    #
-    # # set appBase attribute - for gui applications
-    # if hasattr(wrappedData.root, '_appBase'):
-    #   appBase = wrappedData.root._appBase
-    #   self._appBase = appBase
-    #   appBase.project = self
-    # else:
-    #   self._appBase = None
-
-    # self._initializeAll()
 
   def _initialiseProject(self):
     """Complete initialisation of project,
@@ -238,7 +147,7 @@ class Project(AbstractWrapperObject):
     self._logger = Logging.getLogger()
 
     # Set up notifiers
-    self._registerApiNotifiers()
+    self._registerPresetApiNotifiers()
 
     for tt in self._coreNotifiers:
       self.registerNotifier(*tt)
@@ -256,7 +165,7 @@ class Project(AbstractWrapperObject):
     self._resetUndo(maxWaypoints=0)
 
     apiIo.cleanupProject(self)
-    self._clearApiNotifiers()
+    self._clearAllApiNotifiers()
     for tag in ('_data2Obj','_pid2Obj'):
       getattr(self,tag).clear()
       # delattr(self,tag)
@@ -391,7 +300,7 @@ class Project(AbstractWrapperObject):
                 changeDataLocations=True, changeBackup=True)
 
 
-  def deleteMultiple(self, *objects:typing.Sequence[typing.Union[Pid.Pid,AbstractWrapperObject]]):
+  def deleteObjects(self, *objects:typing.Sequence[typing.Union[Pid.Pid,AbstractWrapperObject]]):
     """Delete one or more objects, given as either objects or Pids"""
 
 
@@ -481,9 +390,18 @@ class Project(AbstractWrapperObject):
 
   # Old, API-level functions:
 
-  @staticmethod
-  def _setupApiNotifier(func, apiClassOrName, apiFuncName, parameterDict=None):
+  @classmethod
+  def _setupApiNotifier(cls, func, apiClassOrName, apiFuncName, parameterDict=None):
+    """Setting up API notifiers for subsequent registration on each new project
+       RESTRICTED. Use in core classes ONLY"""
+    tt = cls._apiNotifierParameters(func, apiClassOrName, apiFuncName,
+                                parameterDict=parameterDict)
+    cls._apiNotifiers.append(tt)
 
+  @classmethod
+  def _apiNotifierParameters(cls, func, apiClassOrName, apiFuncName, parameterDict=None):
+    """Define func as method of project and return API parameters for notifier setup
+    APPLICATION ONLY"""
     if parameterDict is None:
       parameterDict = {}
 
@@ -492,22 +410,46 @@ class Project(AbstractWrapperObject):
 
     dot = '_dot_'
     wrapperFuncName = '_%s%s%s' % (func.__module__.replace('.', dot), dot, func.__name__)
-
     setattr(Project, wrapperFuncName, func)
-    Project._apiNotifiers.append((wrapperFuncName, parameterDict, apiClassName, apiFuncName))
 
-  def _registerApiNotifiers(self):
-    """Register notifiers"""
+    return (wrapperFuncName, parameterDict, apiClassName, apiFuncName)
+
+  def _registerApiNotifier(self, func, apiClassOrName, apiFuncName, parameterDict=None):
+    """Register notifier for immediate action on current project (only)
+    ADVANCED, but free to use. Must be unregistered when any object referenced is deleted.
+    Use return value as input parameter for _unregisterApiNotifier (if desired)"""
+    tt = self.__class__._apiNotifierParameters(func, apiClassOrName, apiFuncName,
+                                               parameterDict=parameterDict)
+    return self._activateApiNotifier(*tt)
+
+  def _unregisterApiNotifier(self, notifierTuple):
+    """Remove acxtive notifier from project. ADVANVED but free to use.
+    Use return value of _registerApiNotifier to identify the relevant notiifier"""
+    self._activeNotifiers.remove(notifierTuple)
+    Notifiers.unregisterNotify(*notifierTuple)
+
+
+  def _registerPresetApiNotifiers(self):
+    """Register preset API notifiers. APPLCATION ONLY"""
 
     for tt in self._apiNotifiers:
-      wrapperFuncName, parameterDict, apiClassName, apiFuncName = tt
-      notify = functools.partial(getattr(self,wrapperFuncName), **parameterDict)
-      # self._registerNotify(notify, apiClassName, apiFuncName)
-      self._activeNotifiers.append((notify, apiClassName, apiFuncName))
-      Notifiers.registerNotify(notify, apiClassName, apiFuncName)
+      self._activateApiNotifier(*tt)
 
-  def _clearApiNotifiers(self):
+  def _activateApiNotifier(self, wrapperFuncName, parameterDict, apiClassName, apiFuncName):
+    """Activate API notifier. APPLICATION ONLY"""
+
+    notify = functools.partial(getattr(self,wrapperFuncName), **parameterDict)
+    notifierTuple = (notify, apiClassName, apiFuncName)
+    self._activeNotifiers.append(notifierTuple)
+    Notifiers.registerNotify(*notifierTuple)
+    #
+    return notifierTuple
+
+
+
+  def _clearAllApiNotifiers(self):
     """CLear all notifiers, previous to closing or deleting Project
+    APPLICATION ONLY
     """
     while self._activeNotifiers:
       tt = self._activeNotifiers.pop()
@@ -523,9 +465,7 @@ class Project(AbstractWrapperObject):
   #   self._activeNotifiers.remove((notify, apiClassName, apiFuncName))
   #   Notifiers.unregisterNotify(notify, apiClassName, apiFuncName)
 
-  # New notifier system
-
-
+  # New notifier system (Free for use in application code):
 
   def registerNotifier(self, className:str, target:str, func:typing.Callable,
                        parameterDict:dict={}, onceOnly:bool=False) -> typing.Callable:
@@ -670,7 +610,8 @@ class Project(AbstractWrapperObject):
         notifier(*params)
 
 
-  # Functions notified
+  # Standard notified functions.
+  # RESTRICTED. Use in core classes ONLY
 
   def _newApiObject(self, wrappedData, cls:AbstractWrapperObject):
     """Create new wrapper object of class cls, associated with wrappedData.

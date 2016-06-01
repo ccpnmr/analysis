@@ -142,7 +142,7 @@ class Data(AbstractWrapperObject):
     for key,val in value.items():
       self.setParameter(key, val)
 
-  def rename(self, value):
+  def rename(self, value:str):
     """Rename Data, changing its Id and Pid"""
     oldName = self.name
     undo = self._project._undo

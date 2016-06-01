@@ -183,6 +183,8 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
             spectrumView.plot.setPen(apiDataSource.sliceColour)
 
 
+# Functions for nnotifiers
+
 def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
   getDataObj = project._data2Obj.get
   spectrum = getDataObj(apiDataSource)
@@ -191,7 +193,6 @@ def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
       for spectrumDisplay in task.spectrumDisplays:
         if spectrumDisplay.is1D:
           spectrumDisplay._updatePlotColour(spectrum)
-Project._setupApiNotifier(_updateSpectrumPlotColour, ApiDataSource, 'setSliceColour')
 
 def _updateSpectrumViewPlotColour(project:Project, apiSpectrumView:ApiSpectrumView):
   getDataObj = project._data2Obj.get
@@ -200,17 +201,4 @@ def _updateSpectrumViewPlotColour(project:Project, apiSpectrumView:ApiSpectrumVi
     spectrumDisplay = getDataObj(apiSpectrumView.spectrumDisplay)
     if spectrumDisplay.is1D:
       spectrumDisplay._updatePlotColour(spectrum)
-Project._setupApiNotifier(_updateSpectrumViewPlotColour, ApiSpectrumView, 'setSliceColour')
 
-
-# Unnecessary - dimensionOrdering is frozen. RHF
-# def _changedDimensionOrderingSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
-#
-#   for apiStrip in apiSpectrumView.strips:
-#     strip = project._data2Obj[apiStrip]
-#     if isinstance(strip, GuiStrip1d):
-#       strip.setZWidgets()
-#
-# Project._setupNotifier(_changedDimensionOrderingSpectrumView, ApiSpectrumView, 'dimensionOrdering')
-
-# NBNB notifiers are same for 1D and nD and are written in GuiStripDisplayNd

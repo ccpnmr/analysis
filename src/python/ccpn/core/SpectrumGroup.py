@@ -87,7 +87,7 @@ class SpectrumGroup(AbstractWrapperObject):
     self._wrappedData.dataSources = [x._wrappedData for x in value]
 
   # Implementation functions
-  def rename(self, value):
+  def rename(self, value:str):
     """Rename SpectrumGroup, changing its Id and Pid"""
     oldName = self.name
     undo = self._project._undo
@@ -135,10 +135,14 @@ del _newSpectrumGroup
 
 # reverse link Spectrum.spectrumGroups
 def getter(self:Spectrum) -> Tuple[SpectrumGroup, ...]:
+  print ('@~@~ getting spectrumGroups')
   data2Obj = self._project._data2Obj
   return tuple(data2Obj[x] for x in self._wrappedData.sortedSpectrumGroups())
 def setter(self:Spectrum, value):
+  print ('@~@~ setting spectrumGroups 1', value)
+  print ('@~@~ setting spectrumGroups 2', [x._wrappedData for x in value])
   self._wrappedData.spectrumGroups = [x._wrappedData for x in value]
+  print ('@~@~ got spectrumGroups' )
 #
 Spectrum.spectrumGroups = property(getter, setter, None,
                                    "SpectrumGroups that contain Spectrum")

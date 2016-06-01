@@ -30,14 +30,6 @@ from PyQt4 import QtGui, QtCore
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 
-# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-# from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Peak as ApiPeak
-
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
-
-# from ccpn.ui.gui.widgets.Frame import Frame as CoreFrame
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
@@ -50,21 +42,6 @@ from ccpn.ui.gui.base.Frame import Frame as GuiFrame
 from ccpn.ui.gui.base.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.modules.GuiModule import GuiModule
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
-
-# from ccpn.ui.gui.util.Svg import Svg
-
-# def _findPpmRegion(spectrum, axisDim, spectrumDim):
-#
-#   pointCount = spectrum.pointCounts[spectrumDim]
-#   if axisDim < 2: # want entire region
-#     region = (0, pointCount)
-#   else:
-#     n = pointCount // 2
-#     region = (n, n+1)
-#
-#   firstPpm, lastPpm = spectrum.getDimValueFromPoint(spectrumDim, region)
-#
-#   return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
 
 
 class GuiSpectrumDisplay(DropBase, GuiModule):
@@ -289,13 +266,13 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
 
 def _deletedPeak(peak:Peak):
-  """Functoin for notifiers.
+  """Function for notifiers.
   #CCPNINTERNAL """
 
   for spectrumView in peak.peakList.spectrum.spectrumViews:
     spectrumView.strip.spectrumDisplay._deletedPeak(peak)
 
-def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
+def _deletedSpectrumView(project:Project, apiSpectrumView):
   """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""
   spectrumDisplay = project._data2Obj[apiSpectrumView.spectrumDisplay]
   apiDataSource = apiSpectrumView.dataSource
@@ -306,4 +283,3 @@ def _deletedSpectrumView(project:Project, apiSpectrumView:ApiSpectrumView):
   if action:
     spectrumDisplay.spectrumToolBar.removeAction(action)
     del spectrumDisplay.spectrumActionDict[apiDataSource]
-Project._setupApiNotifier(_deletedSpectrumView, ApiSpectrumView, 'preDelete')

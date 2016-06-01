@@ -226,7 +226,7 @@ class RestraintList(AbstractWrapperObject):
     self._wrappedData.tensorResidueType = value
     
   # Implementation functions
-  def rename(self, value):
+  def rename(self, value:str):
     """rename RestraintList, changing Id and Pid"""
     if not value:
       raise ValueError("RestraintList name must be set")

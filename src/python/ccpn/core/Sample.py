@@ -211,7 +211,7 @@ class Sample(AbstractWrapperObject):
     return tuple(ff(x) for x in self._apiSample.sortedSampledDataDims())
 
   # Implementation functions
-  def rename(self, value):
+  def rename(self, value:str):
     """Rename Sample, changing its Id and Pid"""
     oldName = self.name
     undo = self._project._undo

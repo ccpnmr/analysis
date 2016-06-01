@@ -27,6 +27,8 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui
 
+from ccpn.ui.gui.widgets import MessageDialog
+
 # from pyqtgraph.modulearea import DockArea
 from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 # from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
@@ -94,7 +96,7 @@ class GuiWindow(DropBase):
     from functools import partial
     QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll)
     QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll)
-    QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self._appBase.current.deleteSelected, self))
+    QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self.deleteSelectedPeaks))
     QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark)
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
     QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project))
@@ -109,6 +111,26 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
     QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip)
+
+
+
+  def deleteSelectedPeaks(self, parent=None):
+
+    # NBNB Moved here from Current
+    # NBNB TODO: more general deletion
+
+    current = self._appBase.current
+    peaks = current.peaks
+    if peaks:
+      n = len(peaks)
+      title = 'Delete Peak%s' % ('' if n == 1 else 's')
+      msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
+      if MessageDialog.showYesNo(title, msg, parent):
+        for peak in peaks[:]:
+
+          current.project._appBase.mainWindow.pythonConsole.writeConsoleCommand('peak.delete()',
+                                                                    peak=peak)
+          peak.delete()
 
 
 
@@ -176,20 +198,7 @@ class GuiWindow(DropBase):
     strip = self._appBase.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip._newPhasingTrace()
-    
-  """  
-  def newHPhasingTrace(self):
-    
-    strip = self._appBase.current.strip
-    if strip and (strip.spectrumDisplay.window is self):
-      strip.newHPhasingTrace()
-      
-  def newVPhasingTrace(self):
-    
-    strip = self._appBase.current.strip
-    if strip and (strip.spectrumDisplay.window is self):
-      strip.newVPhasingTrace()
-  """
+
       
   def setPhasingPivot(self):
     
@@ -204,14 +213,7 @@ class GuiWindow(DropBase):
     strip = self._appBase.current.strip
     if strip and (strip.spectrumDisplay.window is self):
       strip.removePhasingTraces()
-    
-  """
-  def togglePhasingPivot(self):
-    
-    strip = self._appBase.current.strip
-    if strip and (strip.spectrumDisplay.window is self):
-      strip.togglePhasingPivot()
-  """
+
    
   def _clearCurrentPeaks(self):
     """

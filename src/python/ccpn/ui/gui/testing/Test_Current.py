@@ -32,27 +32,27 @@ def test_current_spectra():
   assert (not current.spectra)
   assert (current.spectrum is None)
 
-  ll = [1,2,3]
-  current.spectra = ll
-  assert (current.spectra == ll)
+  tt = (1,2,3)
+  current.spectra = tt
+  assert (current.spectra == tt)
   assert (current.spectrum == 3)
 
-  def notifier(curr):
-    curr.notifiedSpectra = curr.spectra
+  def notifier(value, current=current):
+    current.notifiedSpectra = tuple(value)
   current.registerNotify(notifier, 'spectra')
 
   try:
     current.addSpectrum(4)
     assert (current.spectrum == 4)
-    assert (current.spectra == ll + [4])
-    assert (current.notifiedSpectra == ll + [4])
+    assert (current.spectra == tt + (4,))
+    assert (current.notifiedSpectra == tt + (4,))
   finally:
     current.unRegisterNotify(notifier, 'spectra')
 
   current.spectrum = 7
   assert (current.spectrum == 7)
-  assert (current.spectra == [7])
-  assert (current.notifiedSpectra == ll + [4])
+  assert (current.spectra == (7,))
+  assert (current.notifiedSpectra == tt + (4,))
 
   current.clearSpectra()
   assert (not current.spectra)

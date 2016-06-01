@@ -140,7 +140,7 @@ class Framework:
     self.styleSheet = None
 
     # Necessary as attribute is queried during initialisation:
-    self.mainWindow = None
+    self._mainWindow = None
 
     # This is needed to make project available in NoUi (if nothing else)
     self.project = None
@@ -152,6 +152,8 @@ class Framework:
     self.styleSheet = self.getStyleSheet(self.preferences)
 
     self.ui = self._getUI()
+
+    self._setupMenus()
 
 
 
@@ -242,7 +244,7 @@ class Framework:
     """Start the program execution"""
 
     # Load / create project
-    projectPath =  self.args.projectPath
+    projectPath = self.args.projectPath
     if projectPath:
       project = self.loadProject(projectPath)
 
@@ -254,14 +256,22 @@ class Framework:
 
     # TODO: Add back in registration ???
 
+    # self.project = project
     self.ui.start()
 
     project._resetUndo(debug=_DEBUG)
+
+
+  def _setupMenus(self):
+    pass
+
 
   def _initialiseProject(self, project:Project):
     """Initialise project and set up links and objects that involve it"""
 
     self.project = project
+
+    # Pass an instance of framework to project so the UI instantiation can happen
     project._appBase = self
 
     # Set up current
@@ -274,7 +284,11 @@ class Framework:
     # Adapt project to preferences
     self.applyPreferences(project)
 
-    self.ui.initialize()
+    self.project = project
+    self.ui.initialize(self._mainWindow)
+
+    # Get the mainWindow out of the framework once it's been transferred to ui
+    del self._mainWindow
 
   def applyPreferences(self, project):
     """Apply user preferences
@@ -308,10 +322,10 @@ class Framework:
       # Cleans up wrapper project, including graphics data objects (Window, Strip, etc.)
       self.project._close()
       self.project._appBase = None
-    if self.mainWindow:
+    if self.ui.mainWindow:
       # ui/gui cleanup
-      self.mainWindow.deleteLater()
-    self.mainWindow = None
+      self.ui.mainWindow.deleteLater()
+    self.ui.mainWindow = None
     self.current = None
     self.project = None
 
@@ -367,6 +381,11 @@ class Framework:
     sys.stderr.write('==> Project successfully saved\n')
     # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
     #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
+
+  def getByPid(self, pid):
+    return self.project.getByPid(pid)
+
+
 ###################################
 
 

@@ -45,7 +45,7 @@ class Gui(Ui):
   def __init__(self, framework):
     
     self.framework = framework
-    
+
     self.application = None
     self.mainWindow = None
 
@@ -61,11 +61,11 @@ class Gui(Ui):
     self.application.setStyleSheet(self.framework.styleSheet)
 
 
-  def initialize(self):
+  def initialize(self, mainWindow):
     """UI operations done after every project load/create"""
 
     # Set up mainWindow
-    self._setupMainWindow()
+    self.mainWindow = self._setupMainWindow(mainWindow)
 
     self.framework.initGraphics()
 
@@ -107,7 +107,8 @@ class Gui(Ui):
     sys.stderr.write('==> Gui interface is ready\n' )
 
     splash.finish(self.mainWindow)
-    
+
+
     self.application.start()
 
   def _showRegisterPopup(self):
@@ -119,12 +120,12 @@ class Gui(Ui):
     popup.exec_()
     self.application.processEvents()
 
-  def _setupMainWindow(self):
+  def _setupMainWindow(self, mainWindow):
     # Set up mainWindow
 
     project = self.framework.project
 
-    mainWindow = self.framework.mainWindow
+    # mainWindow = self.framework.mainWindow
     mainWindow.sideBar.setProject(project)
     mainWindow.sideBar.fillSideBar(project)
     mainWindow.raise_()

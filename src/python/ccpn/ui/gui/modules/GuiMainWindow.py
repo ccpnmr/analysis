@@ -30,8 +30,8 @@ from functools import partial
 from PyQt4 import QtGui, QtCore
 
 from ccpn.Assign.modules.AtomSelector import AtomSelector
-from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
-from ccpn.Assign.modules.PickAndAssignModule import PickAndAssignModule
+# from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
+# from ccpn.Assign.modules.PickAndAssignModule import PickAndAssignModule
 from ccpn.Assign.modules.SequenceGraph import SequenceGraph
 
 from ccpn.core.PeakList import PeakList
@@ -47,14 +47,14 @@ from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
-from ccpn.ui.gui.modules.PeakAssigner import PeakAssigner
+# from ccpn.ui.gui.modules.PeakAssigner import PeakAssigner
 from ccpn.ui.gui.modules.PeakTable import PeakTable
 from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 from ccpn.ui.gui.popups.BackupPopup import BackupPopup
 from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
 from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
 from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-from ccpn.ui.gui.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
+# from ccpn.ui.gui.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
@@ -80,7 +80,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setGeometry(540, 40, 900, 900)
 
     GuiWindow.__init__(self)
-    self._appBase.mainWindow = self
+    # self._appBase._mainWindow = self
+    self.framework._mainWindow = self
     self.recordingMacro = False
     self._setupWindow()
     self._setupMenus()
@@ -189,8 +190,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Creates menu bar for main window and creates the appropriate menus according to the arguments
     passed at startup.
+
+    This currently pulls info on what menus to create from Framework.  Once GUI and Project are
+    separated, Framework should be able to call a method to set the menus.
+
     """
-    self._menuBar =  MenuBar(self)
+
+    self._menuBar = MenuBar(self)
     fileMenu = Menu("Project", self)
     self.screenMenu = Menu("Screen", self)
     self.metabolomicsMenu = Menu("Metabolomics", self)
@@ -316,15 +322,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     helpMenu.addAction(Action(self, "Check for Updates ...", callback=self.showUpdatePopup))
     helpMenu.addAction(Action(self, "Submit Feedback ...", callback=self.showFeedbackPopup))
 
-    assignMenu = Menu("Assign", self)
-    assignMenu.addAction(Action(self, "Setup NmrResidues", callback=self.showSetupNmrResiduesPopup, shortcut='sn'))
-    assignMenu.addAction(Action(self, "Pick and Assign", callback=self.showPickAndAssignModule, shortcut='pa'))
-    assignMenu.addSeparator()
-    assignMenu.addAction(Action(self, "Backbone Assignment", callback=self.showBackboneAssignmentModule, shortcut='bb'))
-    # assignMenu.addAction(Action(self, "Sidechain Assignment", callback=self.showPickAndAssignModule, shortcut='sc'))
-    assignMenu.addSeparator()
-    assignMenu.addAction(Action(self, "Peak Assigner", callback=self.showPeakAssigner, shortcut='aa'))
-    assignMenu.addAction(Action(self, "Residue Information", callback=self.showResidueInformation, shortcut='ri'))
 
     pluginsMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
 
@@ -341,7 +338,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._menuBar.addMenu(self.metabolomicsMenu)
 
     if 'Assignment' in self._appBase.components:
-      self._menuBar.addMenu(assignMenu)
+      assignMenuActions = self.framework.assignMenuActions
+      # assignMenuActions = [("Setup NmrResidues", self.framework.showSetupNmrResiduesPopup, 'sn'),
+      #                      ("Pick and Assign", self.showPickAndAssignModule, 'pa'),
+      #                      (),
+      #                      ("Backbone Assignment", self.showBackboneAssignmentModule, 'bb'),
+      #                      # ("Sidechain Assignment", self.showPickAndAssignModule, 'sc'),
+      #                      (),
+      #                      ("Peak Assigner", self.showPeakAssigner, 'aa'),
+      #                      ("Residue Information", self.showResidueInformation, 'ri'),
+      #                      ]
+      assignMenu = self._addMenu('Assign')
+      self._addMenuActions(assignMenu, assignMenuActions)
 
     if 'Structure' in self._appBase.components:
       self._menuBar.addMenu(restraintsMenu)
@@ -353,6 +361,21 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.setMenuBar(self._menuBar)
     self._menuBar.setNativeMenuBar(False)
     self.show()
+
+  def _addMenu(self, menuTitle):
+    menu = Menu(menuTitle, self)
+    self._menuBar.addMenu(menu)
+    return menu
+
+  def _addMenuActions(self, menu, actions):
+    for action in actions:
+      if len(action) == 0:
+        menu.addSeparator()
+      elif len(action) == 2:
+        menu.addAction(Action(self, action[0], callback=action[1]))
+      elif len(action) == 3:
+        menu.addAction(Action(self, action[0], callback=action[1], shortcut=action[2]))
+
 
   def _queryCloseProject(self, title, phrase):
 
@@ -396,9 +419,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup = ExperimentTypePopup(self, self._project)
     popup.exec_()
 
-  def showSetupNmrResiduesPopup(self):
-    popup = SetupNmrResiduesPopup(self, self._project)
-    popup.exec_()
+  # def showSetupNmrResiduesPopup(self):
+  #   popup = SetupNmrResiduesPopup(self, self._project)
+  #   popup.exec_()
 
 
   def showWrapperDocumentation(self):
@@ -413,12 +436,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       os.system('open %s' % path)
 
 
-  def showPeakAssigner(self, position='bottom', relativeTo=None):
-    """Displays assignment module."""
-    self.assignmentModule = PeakAssigner(self, self._project, self._project._appBase.current.peaks)
-    self.moduleArea.addModule(self.assignmentModule, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
-    self.project._logger.info("application.showAssignmentModule()")
+  # def showPeakAssigner(self, position='bottom', relativeTo=None):
+  #   """Displays assignment module."""
+  #   self.assignmentModule = PeakAssigner(self, self._project, self._project._appBase.current.peaks)
+  #   self.moduleArea.addModule(self.assignmentModule, position=position, relativeTo=relativeTo)
+  #   self.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
+  #   self.project._logger.info("application.showAssignmentModule()")
 
   def showNmrResidueModule(self, position='bottom', relativeTo=None):
     """Shows Nmr Residue Module."""
@@ -513,9 +536,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
     Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
     """
-    self.assigner = SequenceGraph(project=self._project)
-    if hasattr(self, 'bbModule'):
-      self.bbModule._connectSequenceGraph(self.assigner)
+    self.assigner = SequenceGraph(project=self.framework.project)
+    if hasattr(self.framework, 'bbModule'):
+      self.framework.bbModule._connectSequenceGraph(self.assigner)
+
     if nextTo is not None:
       self.moduleArea.addModule(self.assigner, position=position, relativeTo=nextTo)
     else:
@@ -954,24 +978,24 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.project._logger.info("application.showChemicalShiftTable()")
 
 
-  def showBackboneAssignmentModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-    """
-    Displays Backbone Assignment module.
-    """
-    self.bbModule = BackboneAssignmentModule(self._project)
-    self.moduleArea.addModule(self.bbModule, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
-    self.project._logger.info("application.showBackboneAssignmentModule()")
+  # def showBackboneAssignmentModule(self, position:str='bottom', relativeTo:CcpnModule=None):
+  #   """
+  #   Displays Backbone Assignment module.
+  #   """
+  #   self.bbModule = BackboneAssignmentModule(self._project)
+  #   self.moduleArea.addModule(self.bbModule, position=position, relativeTo=relativeTo)
+  #   self.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
+  #   self.project._logger.info("application.showBackboneAssignmentModule()")
+  #
+  #   return self.bbModule
 
-    return self.bbModule
-
-  def showPickAndAssignModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-    """Displays Pick and Assign module."""
-    self.paaModule = PickAndAssignModule(self.moduleArea, self._project)
-    self.moduleArea.addModule(self.paaModule, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
-    self.project._logger.info("application.showPickAndAssignModule()")
-    return self.paaModule
+  # def showPickAndAssignModule(self, position:str='bottom', relativeTo:CcpnModule=None):
+  #   """Displays Pick and Assign module."""
+  #   self.paaModule = PickAndAssignModule(self.moduleArea, self._project)
+  #   self.moduleArea.addModule(self.paaModule, position=position, relativeTo=relativeTo)
+  #   self.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
+  #   self.project._logger.info("application.showPickAndAssignModule()")
+  #   return self.paaModule
 
   def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
     """Displays Atom Selector."""
@@ -981,12 +1005,12 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
 
-  def showResidueInformation(self, position:str='bottom', relativeTo:CcpnModule=None):
-    """Displays Residue Information module."""
-    from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
-    self.moduleArea.addModule(ResidueInformation(self, self._project), position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
-    self.project._logger.info("application.showResidueInformation()")
+  # def showResidueInformation(self, position:str='bottom', relativeTo:CcpnModule=None):
+  #   """Displays Residue Information module."""
+  #   from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
+  #   self.moduleArea.addModule(ResidueInformation(self, self._project), position=position, relativeTo=relativeTo)
+  #   self.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
+  #   self.project._logger.info("application.showResidueInformation()")
 
   def showDataPlottingModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     dpModule = DataPlottingModule(self.moduleArea, position=position, relativeTo=relativeTo)

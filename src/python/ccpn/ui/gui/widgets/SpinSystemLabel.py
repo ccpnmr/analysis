@@ -95,8 +95,10 @@ class SpinSystemLabel(DropBase, Label):
           current.strip = self.strip.guiSpectrumDisplay.strips[sinkIndex]
           current.nmrResidue = nr2
           current.nmrChain = nr2.nmrChain
-        if hasattr(self._appBase.mainWindow, 'bbModule'):
-          self._appBase.mainWindow.bbModule._navigateTo(current.nmrResidue, strip=current.strip)
+
+        # TODO: FIX ME!!!
+        if hasattr(self.framework, 'bbModule'):
+          self.framework.bbModule._navigateTo(current.nmrResidue, strip=current.strip)
           current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
 
 

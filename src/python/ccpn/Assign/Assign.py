@@ -31,6 +31,7 @@ from ccpn.framework.Framework import defineProgramArguments, Framework
 # from ccpn.ui.gui.modules import GuiStripNd
 # from ccpn.ui.gui.modules import GuiSpectrumDisplay
 # from ccpn.ui.gui.modules import GuiStripDisplayNd
+from ccpn.ui.gui.widgets.Module import CcpnModule
 
 
 applicationName = 'AnalysisAssign'
@@ -42,6 +43,20 @@ class Assign(Framework):
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
     Framework.__init__(self, applicationName, applicationVersion, commandLineArguments)
     self.components.add('Assignment')
+
+
+  def _setupMenus(self):
+    super()._setupMenus()
+    self.assignMenuActions = [("Setup NmrResidues", self.showSetupNmrResiduesPopup, 'sn'),
+                         ("Pick and Assign", self.showPickAndAssignModule, 'pa'),
+                         (),
+                         ("Backbone Assignment", self.showBackboneAssignmentModule, 'bb'),
+                         # ("Sidechain Assignment", self.showSetupNmrResiduesPopup, 'sc'),
+                         (),
+                         ("Peak Assigner", self.showPeakAssigner, 'aa'),
+                         ("Residue Information", self.showResidueInformation, 'ri'),
+                         ]
+
 
   def initGraphics(self):
     """Set up graphics system after loading"""
@@ -81,7 +96,7 @@ class Assign(Framework):
         typ, contents, state = layout['main']
 
         # TODO: When UI has a main window, change the call below (then move the whole function!)
-        containers, modules = self.mainWindow.moduleArea.findAll()
+        containers, modules = self.ui.mainWindow.moduleArea.findAll()
         flatten = lambda *n: (e for a in n
         for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
         flatContents = list(flatten(contents))
@@ -89,26 +104,76 @@ class Assign(Framework):
           if item in list(MODULE_DICT.keys()):
             obj = modules.get(item)
             if not obj:
-             func = getattr(self.mainWindow, MODULE_DICT[item])
+             func = getattr(self.ui.mainWindow, MODULE_DICT[item])
              func()
         for s in layout['float']:
           typ, contents, state = s[0]['main']
 
-          containers, modules = self.mainWindow.moduleArea.findAll()
+          containers, modules = self.ui.mainWindow.moduleArea.findAll()
           for item in contents:
             if item[0] == 'module':
               print(obj)
               obj = modules.get(item[1])
               if not obj:
-                func = getattr(self.mainWindow, MODULE_DICT[item[1]])
+                func = getattr(self.ui.mainWindow, MODULE_DICT[item[1]])
                 func()
-        self.mainWindow.moduleArea.restoreState(layout)
+        self.ui.mainWindow.moduleArea.restoreState(layout)
 
 
   def showSetupNmrResiduesPopup(self):
     from ccpn.ui.gui.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
     popup = SetupNmrResiduesPopup(self.ui.mainWindow, self.project)
     popup.exec_()
+
+
+  def showPickAndAssignModule(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+    from ccpn.Assign.modules.PickAndAssignModule import PickAndAssignModule
+
+    """Displays Pick and Assign module."""
+    mainWindow = self.ui.mainWindow
+    self.paaModule = PickAndAssignModule(mainWindow.moduleArea, self.project)
+    mainWindow.moduleArea.addModule(self.paaModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
+    self.project._logger.info("application.showPickAndAssignModule()")
+    return self.paaModule
+
+
+  def showBackboneAssignmentModule(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+    """
+    Displays Backbone Assignment module.
+    """
+    from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
+
+    self.bbModule = BackboneAssignmentModule(self.project)
+
+    mainWindow = self.ui.mainWindow
+    mainWindow.moduleArea.addModule(self.bbModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
+    self.project._logger.info("application.showBackboneAssignmentModule()")
+
+    return self.bbModule
+
+
+  def showPeakAssigner(self, position='bottom', relativeTo=None):
+    """Displays assignment module."""
+    from ccpn.ui.gui.modules.PeakAssigner import PeakAssigner
+
+    mainWindow = self.ui.mainWindow
+    self.assignmentModule = PeakAssigner(self, self.project, self.current.peaks)
+    mainWindow.moduleArea.addModule(self.assignmentModule, position=position, relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showAssignmentModule()")
+    self.project._logger.info("application.showAssignmentModule()")
+
+
+  def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+    """Displays Residue Information module."""
+    from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
+
+    mainWindow = self.ui.mainWindow
+    mainWindow.moduleArea.addModule(ResidueInformation(self, self.project), position=position,
+                              relativeTo=relativeTo)
+    mainWindow.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
+    self.project._logger.info("application.showResidueInformation()")
 
 
 

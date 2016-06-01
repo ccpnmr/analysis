@@ -23,7 +23,7 @@
   "Run Macro": "Macro Uitvoeren",
 
 
-  "Project":  "項目",
+  "Project":  "Project!",
   "Open Recent": "重新開啟",
   "Backup": "備份",
   "Restore": "恢復",
@@ -79,7 +79,7 @@
   "Run Recent": "運算近期的資料",
   "Define User Shortcuts...": "定義使用者的捷徑",
 
-  "&Help": "求助",
+  "Help": "求助",
   "Command...": "指令",
   "Tutorials...": "除厝指導",
   "About CcpNmr V3...": "關於 V3的分析",

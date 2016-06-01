@@ -34,9 +34,11 @@ class Test_Translation(unittest.TestCase):
     self.assertIn('Italian', Translation._get_languages())
     self.assertIn('Chinese', Translation._get_languages())
 
+
   def test_getDutch_translationDictionary(self):
     tDict = Translation._get_translation_dictionary('Dutch')
     self.assertEqual(tDict['New'], 'Nieuw')
+
 
   def test_Dutch_translation(self):
     t = Translation.getTranslator('Dutch')
@@ -46,3 +48,9 @@ class Test_Translation(unittest.TestCase):
   def test_UnknownWord_translation(self):
     t = Translation.getTranslator('Dutch')
     self.assertEqual(t('TestUnknownWord'), 'TestUnknownWord')
+
+
+  def test_Chinese_translation(self):
+    t = Translation.getTranslator('Chinese')
+    self.assertNotEqual(t('New'), 'New')
+    self.assertEqual(t('New'), '新的')

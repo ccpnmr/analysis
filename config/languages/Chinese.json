@@ -1,5 +1,5 @@
 {
-  "&Project":  "項目",
+  "Project":  "項目",
   "New":  "新的",
   "Open...": "開啟...",
   "Open Recent": "重新開啟",
@@ -16,7 +16,7 @@
   "Preferences...": "特殊設定",
   "Close Program": "關閉程式",
 
-  "&Spectra": "光譜",
+  "Spectra": "光譜",
   "Add...": "加入",
   "Remove...": "移除",
   "Rename...": "重新命名",
@@ -30,7 +30,7 @@
   "Delete...": "刪除",
   "Print to File": "輸出至檔案",
 
-  "&Molecules": "分子",
+  "Molecules": "分子",
   "From Fasta...": "從 Fasta",
   "From PDB...": "從 PDB",
   "From NEF...": "從 NEF",
@@ -38,15 +38,15 @@
   "Inspect...": "檢查",
   "Run ChemBuild": "執行 ChemBuild",
 
-  "&Restraints": "限制",
-  "&Structures": "結構",
+  "Restraints": "限制",
+  "Structures": "結構",
   "Reference": "參考參數",
   "Screening": "篩選",
   "Samples": "混和",
   "Deleted": "刪除",
   "Notes": "小結",
 
-  "&View": "顯示光譜",
+  "View": "顯示光譜",
   "1D Spectral Pane": "一維光譜",
   "nD Spectral Pane": "N維光譜",
   "Peak Table": "訊號列表",
@@ -62,12 +62,12 @@
   "Run Recent": "運算近期的資料",
   "Define User Shortcuts...": "定義使用者的捷徑",
 
-  "&Help": "求助",
+  "Help": "求助",
   "Command...": "指令",
   "Tutorials...": "除厝指導",
   "About CcpNmr V3...": "關於 V3的分析",
   "About CCPN...": "關於 CCPN",
   "Inspect Code...": "代碼檢查",
   "Check for Upgrades...": "進行更新的檢查",
-  "Report Bug...": "回報錯誤",
+  "Report Bug...": "回報錯誤"
 }

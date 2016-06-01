@@ -179,8 +179,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
     
-    pointInt = [int(pnt+0.4999) for pnt in point]
-    data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim-1)
+    pointInt = [1+int(pnt+0.4999) for pnt in point]
+    data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
       data0 = numpy.array(data)
       data = Phasing.phaseRealData(data, ph0, ph1, pivot)

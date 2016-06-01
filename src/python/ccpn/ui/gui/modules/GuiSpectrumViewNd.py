@@ -328,8 +328,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
     
-    pointInt = [int(pnt+0.5) for pnt in point]
-    data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim-1)
+    pointInt = [1+int(pnt+0.5) for pnt in point]
+    data = self.spectrum.getSliceData(pointInt, sliceDim=xDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
       data = Phasing.phaseRealData(data, ph0, ph1, pivot)
     x = numpy.array([xDataDim.primaryDataDimRef.pointToValue(p+1) for p in range(xMinFrequency, xMaxFrequency+1)])
@@ -358,8 +358,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     viewBox = strip.viewBox
     viewRegion = plotWidget.viewRange()
     
-    pointInt = [int(pnt+0.5) for pnt in point]
-    data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim-1)
+    pointInt = [1+int(pnt+0.5) for pnt in point]
+    data = self.spectrum.getSliceData(pointInt, sliceDim=yDataDim.dim)
     if ph0 is not None and ph1 is not None and pivot is not None:
       data = Phasing.phaseRealData(data, ph0, ph1, pivot)
     y = numpy.array([yDataDim.primaryDataDimRef.pointToValue(p+1) for p in range(yMinFrequency, yMaxFrequency+1)])
@@ -748,8 +748,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     dimensionCount = spectrum.dimensionCount
         
     if dimensionCount == 2:
-      planeData = spectrum.getPlaneData(xDim=xDim, yDim=yDim)
-      position = [0, 0]
+      planeData = spectrum.getPlaneData(xDim=xDim+1, yDim=yDim+1)
+      position = [1, 1]
       yield position, planeData
     elif dimensionCount == 3:
       # zDim = dataDims[2].dim - 1
@@ -790,13 +790,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       zPointOffset = zDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
       zPointCount = zDataDim.numPoints
             
-      position = dimensionCount * [0]
+      position = dimensionCount * [1]
       for z in range(zPoint0, zPoint1):
         zPosition = z % zTotalPointCount
         zPosition -= zPointOffset
         if 0 <= zPosition < zPointCount:
-          position[dimIndices[2]] = zPosition
-          planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
+          position[dimIndices[2]] = zPosition + 1
+          planeData = spectrum.getPlaneData(position, xDim=xDim+1, yDim=yDim+1)
           yield position, planeData
 
     elif dimensionCount == 4:
@@ -876,18 +876,18 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       wPointOffset = wDataDim.pointOffset if hasattr(zDataDim, "pointOffset") else 0
       wPointCount = wDataDim.numPoints
             
-      position = dimensionCount * [0]
+      position = dimensionCount * [1]
       for z in range(zPoint0, zPoint1):
         zPosition = z % zTotalPointCount
         zPosition -= zPointOffset
         if 0 <= zPosition < zPointCount:
-          position[dimIndices[2]] = zPosition
+          position[dimIndices[2]] = zPosition + 1
           for w in range(wPoint0, wPoint1):
             wPosition = w % wTotalPointCount
             wPosition -= wPointOffset
             if 0 <= wPosition < wPointCount:
-              position[dimIndices[3]] = wPosition
-              planeData = spectrum.getPlaneData(position, xDim=xDim, yDim=yDim)
+              position[dimIndices[3]] = wPosition + 1
+              planeData = spectrum.getPlaneData(position, xDim=xDim+1, yDim=yDim+1)
               yield position, planeData
           
   def _addContoursToDisplayList(self, displayList, contourData, level):

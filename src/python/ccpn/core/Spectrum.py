@@ -862,11 +862,11 @@ class Spectrum(AbstractWrapperObject):
 
     self.assignmentTolerances = tolerances
 
-  def getPlaneData(self, position:Sequence=None, xDim:int=0, yDim:int=1):
+  def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
 
     return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-  def getSliceData(self, position:Sequence=None, sliceDim:int=0):
+  def getSliceData(self, position:Sequence=None, sliceDim:int=1):
 
     return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 

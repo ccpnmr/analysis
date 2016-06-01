@@ -31,7 +31,7 @@ class ResidueInformation(CcpnModule, Base):
     self.residueWidget.setLayout(QtGui.QGridLayout())
     self.project = project
     self.layout.addWidget(self.residueWidget, 1, 0, 1, 5)
-    self.getResidues()
+    self._getResidues()
 
 
 
@@ -43,7 +43,7 @@ class ResidueInformation(CcpnModule, Base):
       self.selectedChain = 'All'
     else:
       self.selectedChain = self.project.getByPid(value)
-    self.getResidues()
+    self._getResidues()
 
 
   def _setCurrentResidue(self, value:str):
@@ -51,7 +51,7 @@ class ResidueInformation(CcpnModule, Base):
     Sets the selected residue to the specified value and updates the module.
     """
     self.selectedResidueType = value
-    self.getResidues()
+    self._getResidues()
 
   def _getResidues(self):
     """
@@ -102,9 +102,3 @@ class ResidueInformation(CcpnModule, Base):
           label3.setStyleSheet(stylesheet)
         self.residueWidget.layout().addWidget(label3, j+i, 2)
         label3.setMaximumHeight(30)
-
-
-
-
-
-

@@ -23,6 +23,7 @@ import json
 import os
 import platform
 import sys
+from functools import partial
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
@@ -31,12 +32,15 @@ from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.ui.gui.Current import Current
+from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
+
+from PyQt4.QtGui import QKeySequence
 
 _DEBUG = True
 
@@ -252,7 +256,7 @@ class Framework:
       project = self.newProject()
 
 
-    sys.stderr.write('==> Done, %s is starting\n' % self.applicationName )
+    sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
     # TODO: Add back in registration ???
 
@@ -262,8 +266,179 @@ class Framework:
     project._resetUndo(debug=_DEBUG)
 
 
+  def _recentProjectsMenuItems(self):
+    """
+    Populates recent projects menu with 10 most recently loaded projects
+    specified in the preferences file.
+    """
+    l = []
+    for recentFile in self.preferences.recentFiles:
+      if (recentFile.startswith('/var/') is False):
+        l.append((recentFile, partial(self.loadProject, recentFile), (('translate', False),)))
+    return l
+
   def _setupMenus(self):
+    self._menuSpec = ms = []
+      # TODO: move callbacks over from GuiMainWindow
+      # TODO: remove QKeySequence
+    # ms.append(('Project', [("New", self.newProject, [('shortcut', 'pn')]),
+    #                        ("Open...", self.loadProject, [('shortcut', 'po')]),
+    #                        ("Open Recent", self._recentProjectsMenuItems()),
+    #                        (),
+    #                        ("Load Spectrum", self.newProject, [('shortcut', 'ls')]),
+    #                        ("Load Data", self.newProject, [('shortcut', 'ld')]),
+    #                        (),
+    #                        ("Save", self.newProject, [('shortcut', 'ps')]),
+    #                        ("Save As...", self.newProject, [('shortcut', 'sa')]),
+    #                        (),
+    #                        ("Undo", self.newProject, [('shortcut', QKeySequence("Ctrl+z"))]),
+    #                        ("Redo", self.newProject, [('shortcut', QKeySequence("Ctrl+y"))]),
+    #                        (),
+    #                        ("Summary", self.newProject),
+    #                        ("Archive", self.newProject),
+    #                        ("Backup...", self.newProject),
+    #                        (),
+    #                        ("Preferences", self.newProject),
+    #                        (),
+    #                        ("Close Program", self.newProject, [('shortcut', 'qt')]),
+    #                       ]
+    #    )
+    #   )
+    ms.append(('Spectrum', [("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
+                            ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
+                            (),
+                            ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
+                            ("Integration", self.showIntegrationModule, [('shortcut', 'it')]),
+                            (),
+                            ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
+                            ("Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
+                           ]
+               )
+              )
+    ms.append(('Molecules', [("Create Molecule...", self.showMoleculePopup),
+                             ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
+                                                                           ('checkable', True),
+                                                                           ('checked', False)
+                                                                          ]),
+                             ("Inspect...", self.inspectMolecule),
+                             (),
+                             ("Reference Chemical Shifts", self.showRefChemicalShifts,
+                                                           [('shortcut', 'rc')])
+                            ]
+              )
+             )
+
+  def loadData(self, paths=None, text=None):
+    """
+    Opens a file dialog box and loads data from selected file.
+    """
+    from ccpn.ui.gui.widgets.FileDialog import FileDialog
+
+    if text is None:
+      text='Load Data'
+    if paths is None:
+      dialog = FileDialog(self, fileMode=0, text=text, preferences=self.preferences.general)
+      paths = dialog.selectedFiles()[0]
+
+    # NBNB TBD I assume here that path is either a string or a list lf string paths.
+    # NBNB FIXME if incorrect
+
+    if not paths:
+      return
+    elif isinstance(paths,str):
+      paths = [paths]
+
+    self.ui.mainWindow.processDropData(paths, dataType='urls')
+
+  def addApplicationMenuSpec(self, spec, position=3):
+    self._menuSpec.insert(position, spec)
+
+
+  def showSpectrumGroupsPopup(self):
     pass
+
+  def showProjectionPopup(self):
+    pass
+
+  def togglePhaseConsole(self):
+    self.ui.mainWindow.togglePhaseConsole(self.ui.mainWindow)
+
+  def showExperimentTypePopup(self):
+    """
+    Displays experiment type popup.
+    """
+    from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
+    popup = ExperimentTypePopup(self.ui.mainWindow, self.project)
+    popup.exec_()
+
+  def showPeakPickPopup(self):
+    """
+    Displays Peak Picking Popup.
+    """
+    from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
+    popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project)
+    popup.exec_()
+
+  def showIntegrationModule(self, position:str='bottom', relativeTo:CcpnModule=None):
+    spectrumDisplay = self.ui.mainWindow.createSpectrumDisplay(self.project.spectra[0])
+    from ccpn.Metabolomics.Integration import IntegrationTable, IntegrationWidget
+    spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.module,
+                                                          project=self.project, grid=(2, 0), gridSpan=(1, 4))
+    spectrumDisplay.integrationTable = IntegrationTable(spectrumDisplay.module,
+                                                        project=self.project, grid=(0, 4), gridSpan=(3, 1))
+    self.current.strip = spectrumDisplay.strips[0]
+    if self.ui.mainWindow.blankDisplay:
+      self.ui.mainWindow.blankDisplay.setParent(None)
+      self.ui.mainWindow.blankDisplay = None
+
+
+  def inspectMolecule(self):
+    from ccpn.ui.gui.widgets import MessageDialog
+    info = MessageDialog.showInfo('Not implemented yet!',
+          'This function has not been implemented in the current version',
+          colourScheme=self.ui.mainWindow.colourScheme)
+
+  def showRefChemicalShifts(self):
+    """Displays Reference Chemical Shifts module."""
+    from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
+    self.refChemShifts = ReferenceChemicalShifts(self.project, self.ui.mainWindow.moduleArea)
+
+  def showMoleculePopup(self):
+    """
+    Displays sequence creation popup.
+    """
+    from ccpn.ui.gui.modules.CreateSequence import CreateSequence
+    popup = CreateSequence(self.ui.mainWindow, project=self.project).exec_()
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
+    self.project._logger.info("application.showMoleculePopup()")
+
+
+  def toggleSequenceModule(self):
+    """Toggles whether Sequence Module is displayed or not"""
+    if hasattr(self, 'sequenceModule'):
+      if self.sequenceModule.isVisible():
+        self.hideSequenceModule()
+    else:
+      self.showSequenceModule()
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
+    self.project._logger.info("application.toggleSequenceModule()")
+
+  def showSequenceModule(self, position='top', relativeTo=None):
+    """
+    Displays Sequence Module at the top of the screen.
+    """
+    from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+
+    self.sequenceModule = SequenceModule(self.project)
+    self.ui.mainWindow.moduleArea.addModule(self.sequenceModule,
+                                            position=position, relativeTo=relativeTo)
+    return self.sequenceModule
+
+  def hideSequenceModule(self):
+    """Hides sequence module"""
+    self.sequenceModule.close()
+    delattr(self, 'sequenceModule')
+
 
 
   def _initialiseProject(self, project:Project):

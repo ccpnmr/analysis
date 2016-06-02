@@ -47,15 +47,16 @@ class Assign(Framework):
 
   def _setupMenus(self):
     super()._setupMenus()
-    self.assignMenuActions = [("Setup NmrResidues", self.showSetupNmrResiduesPopup, 'sn'),
-                         ("Pick and Assign", self.showPickAndAssignModule, 'pa'),
-                         (),
-                         ("Backbone Assignment", self.showBackboneAssignmentModule, 'bb'),
-                         # ("Sidechain Assignment", self.showSetupNmrResiduesPopup, 'sc'),
-                         (),
-                         ("Peak Assigner", self.showPeakAssigner, 'aa'),
-                         ("Residue Information", self.showResidueInformation, 'ri'),
-                         ]
+    menuSpec = ('Assign', [("Setup NmrResidues", self.showSetupNmrResiduesPopup, [('shortcut', 'sn')]),
+                           ("Pick and Assign", self.showPickAndAssignModule, [('shortcut', 'pa')]),
+                           (),
+                           ("Backbone Assignment", self.showBackboneAssignmentModule, [('shortcut', 'bb')]),
+                           # ("Sidechain Assignment", self.showSetupNmrResiduesPopup, 'sc'),
+                           (),
+                           ("Peak Assigner", self.showPeakAssigner, [('shortcut', 'aa')]),
+                           ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
+                          ])
+    self.addApplicationMenuSpec(menuSpec)
 
 
   def initGraphics(self):

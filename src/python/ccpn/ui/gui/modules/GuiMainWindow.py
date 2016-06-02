@@ -200,9 +200,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     fileMenu = Menu("Project", self)
     self.screenMenu = Menu("Screen", self)
     self.metabolomicsMenu = Menu("Metabolomics", self)
-    spectrumMenu = Menu("Spectrum", self)
+    # spectrumMenu = Menu("Spectrum", self)
     viewMenu = Menu("View", self)
-    moleculeMenu = Menu("Molecules", self)
+    # moleculeMenu = Menu("Molecules", self)
     restraintsMenu = Menu("Restraints", self)
     structuresMenu = Menu("Structures", self)
     macroMenu = Menu("Macro", self)
@@ -250,25 +250,26 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.metabolomicsMenu.addAction(Action(self, 'Pick and Fit', callback=self.showPickandFitModule))
     # self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups ...', callback=None))
 
-    spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
-    spectrumMenu.addAction(Action(self, "Set Experiment Types ...", callback=self.showExperimentTypePopup, shortcut='et'))
-    spectrumMenu.addSeparator()
-    spectrumMenu.addAction(Action(self, "Pick Peaks ...", callback=self.showPeakPickPopup, shortcut='pp'))
-    spectrumMenu.addAction(Action(self, 'Integration', callback=self.showIntegrationModule, shortcut='it'))
-    spectrumMenu.addSeparator()
-    spectrumMenu.addAction(Action(self, "Make Projection ...", callback=self.showProjectionPopup, shortcut='pj'))
-    spectrumMenu.addAction(Action(self, "Phasing Console", partial(self.togglePhaseConsole, self), shortcut='pc'))
+    # spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
+    # spectrumMenu.addAction(Action(self, "Set Experiment Types ...", callback=self.showExperimentTypePopup, shortcut='et'))
+    # spectrumMenu.addSeparator()
+    # spectrumMenu.addAction(Action(self, "Pick Peaks ...", callback=self.showPeakPickPopup, shortcut='pp'))
+    # spectrumMenu.addAction(Action(self, 'Integration', callback=self.showIntegrationModule, shortcut='it'))
+    # spectrumMenu.addSeparator()
+    # spectrumMenu.addAction(Action(self, "Make Projection ...", callback=self.showProjectionPopup, shortcut='pj'))
+    # spectrumMenu.addAction(Action(self, "Phasing Console", partial(self.togglePhaseConsole, self), shortcut='pc'))
 
-    moleculeMenu.addAction(Action(self, "Create Molecule ...", callback=self.showMoleculePopup, shortcut='cm'))
-    self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequenceModule, shortcut='sq', checkable=True)
-    if hasattr(self, 'sequenceModule'):
-      self.sequenceAction.setChecked(self.sequenceModule.isVisible())
-    else:
-      self.sequenceAction.setChecked(False)
-    moleculeMenu.addAction(self.sequenceAction)
-    moleculeMenu.addAction(Action(self, "Inspect ...", callback=self.inspectMolecule))
-    moleculeMenu.addSeparator()
-    moleculeMenu.addAction(Action(self, "Reference Chemical Shifts", callback=self.showRefChemicalShifts, shortcut='rc'))
+    # moleculeMenu.addAction(Action(self, "Create Molecule ...", callback=self.showMoleculePopup, shortcut='cm'))
+    # self.sequenceAction = Action(self, 'Show Sequence', callback=self.toggleSequenceModule, shortcut='sq', checkable=True)
+    # self.sequenceAction.setChecked(False)
+    # if hasattr(self, 'sequenceModule'):
+    #   self.sequenceAction.setChecked(self.sequenceModule.isVisible())
+    # else:
+    #   self.sequenceAction.setChecked(False)
+    # moleculeMenu.addAction(self.sequenceAction)
+    # moleculeMenu.addAction(Action(self, "Inspect ...", callback=self.inspectMolecule))
+    # moleculeMenu.addSeparator()
+    # moleculeMenu.addAction(Action(self, "Reference Chemical Shifts", callback=self.showRefChemicalShifts, shortcut='rc'))
 
     macroMenu.addAction(Action(self, "Edit ...", callback=self.showMacroEditor))
     macroMenu.addAction(Action(self, "New from Console ...", callback=self.newMacroFromConsole))
@@ -326,30 +327,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     pluginsMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
 
 
-
     self._menuBar.addMenu(fileMenu)
-    self._menuBar.addMenu(spectrumMenu)
+    # self._menuBar.addMenu(spectrumMenu)
 
-    if self._appBase.applicationName == 'Screen':
-      self._menuBar.addMenu(self.screenMenu)
-    self._menuBar.addMenu(moleculeMenu)
+    # if self._appBase.applicationName == 'Screen':
+    #   self._menuBar.addMenu(self.screenMenu)
+    # self._menuBar.addMenu(moleculeMenu)
 
     if self._appBase.applicationName == 'Metabolomics':
       self._menuBar.addMenu(self.metabolomicsMenu)
 
-    if 'Assignment' in self._appBase.components:
-      assignMenuActions = self.framework.assignMenuActions
-      # assignMenuActions = [("Setup NmrResidues", self.framework.showSetupNmrResiduesPopup, 'sn'),
-      #                      ("Pick and Assign", self.showPickAndAssignModule, 'pa'),
-      #                      (),
-      #                      ("Backbone Assignment", self.showBackboneAssignmentModule, 'bb'),
-      #                      # ("Sidechain Assignment", self.showPickAndAssignModule, 'sc'),
-      #                      (),
-      #                      ("Peak Assigner", self.showPeakAssigner, 'aa'),
-      #                      ("Residue Information", self.showResidueInformation, 'ri'),
-      #                      ]
-      assignMenu = self._addMenu('Assign')
-      self._addMenuActions(assignMenu, assignMenuActions)
+    for m in self.framework._menuSpec:
+      self._createMenu(m)
 
     if 'Structure' in self._appBase.components:
       self._menuBar.addMenu(restraintsMenu)
@@ -362,9 +351,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar.setNativeMenuBar(False)
     self.show()
 
-  def _addMenu(self, menuTitle):
-    menu = Menu(menuTitle, self)
-    self._menuBar.addMenu(menu)
+
+  def _createMenu(self, spec, targetMenu=None):
+    menu = self._addMenu(spec[0], targetMenu)
+    self._addMenuActions(menu, spec[1])
+
+  def _addMenu(self, menuTitle, targetMenu=None):
+    if targetMenu is None:
+      targetMenu = self._menuBar
+    if isinstance(targetMenu, MenuBar):
+      menu = Menu(menuTitle, self)
+      targetMenu.addMenu(menu)
+    else:
+      menu = targetMenu.addMenu(menuTitle)
     return menu
 
   def _addMenuActions(self, menu, actions):
@@ -372,9 +371,13 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if len(action) == 0:
         menu.addSeparator()
       elif len(action) == 2:
-        menu.addAction(Action(self, action[0], callback=action[1]))
+        if callable(action[1]):
+          menu.addAction(Action(self, action[0], callback=action[1]))
+        else:
+          self._createMenu(action, menu)
       elif len(action) == 3:
-        menu.addAction(Action(self, action[0], callback=action[1], shortcut=action[2]))
+        kwDict = dict(action[2])
+        menu.addAction(Action(self, action[0], callback=action[1], **kwDict))
 
 
   def _queryCloseProject(self, title, phrase):
@@ -412,16 +415,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """Displays API documentation in a module."""
     self._showDocumentation("API Documentation", 'apidoc', 'api.html')
 
-  def showExperimentTypePopup(self):
-    """
-    Displays experiment type popup.
-    """
-    popup = ExperimentTypePopup(self, self._project)
-    popup.exec_()
-
-  # def showSetupNmrResiduesPopup(self):
-  #   popup = SetupNmrResiduesPopup(self, self._project)
+  # def showExperimentTypePopup(self):
+  #   """
+  #   Displays experiment type popup.
+  #   """
+  #   popup = ExperimentTypePopup(self, self._project)
   #   popup.exec_()
+  #
+  # # def showSetupNmrResiduesPopup(self):
+  # #   popup = SetupNmrResiduesPopup(self, self._project)
+  # #   popup.exec_()
 
 
   def showWrapperDocumentation(self):
@@ -452,8 +455,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.moduleArea.addModule(newModule, position=position, relativeTo=relativeTo)
 
 
-  def showProjectionPopup(self):
-    pass
+  # def showProjectionPopup(self):
+  #   pass
 
   def addBlankDisplay(self, position='right', relativeTo=None):
     """Adds a Blank Display to the main window if one does not already exist."""
@@ -728,15 +731,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self.blankDisplay = None
 
 
-  def showIntegrationModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    from ccpn.Metabolomics.Integration import IntegrationTable, IntegrationWidget
-    spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.module, project=self._project, grid=(2, 0), gridSpan=(1, 4))
-    spectrumDisplay.integrationTable = IntegrationTable(spectrumDisplay.module, project=self._project, grid=(0, 4), gridSpan=(3, 1))
-    self._appBase.current.strip = spectrumDisplay.strips[0]
-    if self.blankDisplay:
-      self.blankDisplay.setParent(None)
-      self.blankDisplay = None
+  # def showIntegrationModule(self, position:str='bottom', relativeTo:CcpnModule=None):
+  #   spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+  #   from ccpn.Metabolomics.Integration import IntegrationTable, IntegrationWidget
+  #   spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.module, project=self._project, grid=(2, 0), gridSpan=(1, 4))
+  #   spectrumDisplay.integrationTable = IntegrationTable(spectrumDisplay.module, project=self._project, grid=(0, 4), gridSpan=(3, 1))
+  #   self._appBase.current.strip = spectrumDisplay.strips[0]
+  #   if self.blankDisplay:
+  #     self.blankDisplay.setParent(None)
+  #     self.blankDisplay = None
 
   def showIntegralAssigmentModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
@@ -882,19 +885,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       mainWindow = self._appBase._mainWindow
     self.notesEditor = NotesEditor(mainWindow.moduleArea, self._project, name='Notes Editor')
 
-  def showMoleculePopup(self):
-    """
-    Displays sequence creation popup.
-    """
-    from ccpn.ui.gui.modules.CreateSequence import CreateSequence
-    popup = CreateSequence(self, project=self._project).exec_()
-    self.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
-    self.project._logger.info("application.showMoleculePopup()")
+  # def showMoleculePopup(self):
+  #   """
+  #   Displays sequence creation popup.
+  #   """
+  #   from ccpn.ui.gui.modules.CreateSequence import CreateSequence
+  #   popup = CreateSequence(self, project=self._project).exec_()
+  #   self.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
+  #   self.project._logger.info("application.showMoleculePopup()")
 
-  def inspectMolecule(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+  # def inspectMolecule(self):
+  #   info = MessageDialog.showInfo('Not implemented yet!',
+  #         'This function has not been implemented in the current version',
+  #         colourScheme=self.colourScheme)
 
 
 
@@ -1019,10 +1022,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def showDataPlottingModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     dpModule = DataPlottingModule(self.moduleArea, position=position, relativeTo=relativeTo)
 
-  def showRefChemicalShifts(self):
-    """Displays Reference Chemical Shifts module."""
-    from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
-    self.refChemShifts = ReferenceChemicalShifts(self.project, self.moduleArea)
+  # def showRefChemicalShifts(self):
+  #   """Displays Reference Chemical Shifts module."""
+  #   from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
+  #   self.refChemShifts = ReferenceChemicalShifts(self.project, self.moduleArea)
 
   def saveProject(self):
     """Opens save Project as dialog box if project has not been saved before, otherwise saves

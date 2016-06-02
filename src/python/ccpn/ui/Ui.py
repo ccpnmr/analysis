@@ -33,6 +33,17 @@ from ccpn.util import Register
 class Ui:
   """Superclass for all user interface classes"""
 
+  def __init__(self):
+    self.menuBar = []
+
+  def addMenu(self, name, position=None):
+    '''
+    Add a menu specification for the top menu bar.
+    '''
+    if position is None:
+      position = len(self._menuSpec)
+    self._menuSpec.insert(position, (str(name), []))
+
   # Factory functions for UI-specific instantiation of wrapped graphics classes
   _factoryFunctions = {}
 

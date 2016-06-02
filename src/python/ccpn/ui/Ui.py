@@ -33,6 +33,13 @@ from ccpn.util import Register
 class Ui:
   """Superclass for all user interface classes"""
 
+  # Factory functions for UI-specific instantiation of wrapped graphics classes
+  _factoryFunctions = {}
+
+  # Controls if delete, rename, and create commands are automatically echoed to console
+  # Not used in all Uis, but must be in Ui to avoid breaking code
+  _blankConsoleOutput = 1
+
   def __init__(self):
     self.menuBar = []
 
@@ -43,13 +50,6 @@ class Ui:
     if position is None:
       position = len(self._menuSpec)
     self._menuSpec.insert(position, (str(name), []))
-
-  # Factory functions for UI-specific instantiation of wrapped graphics classes
-  _factoryFunctions = {}
-
-  # Controls if delete, rename, and create commands are automatically echoed to console
-  # Not used in all Uis, but must be in Ui to avoid breaking code
-  _blankConsoleOutput = 0
 
   @classmethod
   def setUp(cls):

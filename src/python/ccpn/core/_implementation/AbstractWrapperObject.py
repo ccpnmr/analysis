@@ -594,9 +594,16 @@ class AbstractWrapperObject():
           for notifier in dd:
             notifier(self, oldPid)
 
+      ui = self.framework.ui
+      if not ui._blankConsoleOutput:
+        ui.writeConsoleCommand("project.renameObject(%s, %s)" % (oldPid, self._key ))
       # call rename on children
-      for obj in self._getDirectChildren():
-        obj._finaliseAction('rename')
+      ui.blankConsoleOutput()
+      try:
+        for obj in self._getDirectChildren():
+          obj._finaliseAction('rename')
+      finally:
+        ui.unblankConsoleOutput()
 
     else:
       # Normal case - just call notifiers

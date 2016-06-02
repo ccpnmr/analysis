@@ -307,18 +307,25 @@ class Project(AbstractWrapperObject):
     # NBNB TODO This is not enough. How to do the undo?
     ui = self._appBase.ui
     getDataObj = self._data2Obj.get
-    ui._blankCopnsoleOutput
+    ui._blankCopnsoleOutput()
     objs = [getDataObj(xx) if isinstance(x, str) else xx]
     try:
       for obj in objs:
-        if not obj.isDeleted:
-          # If statement in case deleting one obj triggers teh deletion of another
+        if obj and not obj.isDeleted:
+          # If statement in case deleting one obj triggers the deletion of another
           obj.delete()
     finally:
-      ui._unblankConsoleOutput
+      ui._unblankConsoleOutput()
     command = "project.deleteObjects(%s)" % (', '.join(x.pid for x in objs))
     ui.writeConsoleCommand(command)
 
+  def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
+    """Rename object indicated by objectOrPid to name newName
+    NB at last one class (Substance) has a two-art name - these are passed as one,
+    dot-separated string (e.g. 'Lysozyme.U13C'"""
+    obj = self._data2Obj.get(objectOrPid) if isinstance(objectOrPid, str) else objectOrPid
+    names = newName.split('.')
+    obj.rename(*names)
 
   @property
   def _apiNmrProject(self) -> ApiNmrProject:

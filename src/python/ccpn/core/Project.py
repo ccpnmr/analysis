@@ -305,20 +305,19 @@ class Project(AbstractWrapperObject):
 
 
     # NBNB TODO This is not enough. How to do the undo?
-
-    undo = self._undo
-    if undo is not None:
-      undo.increaseBlocking()
+    ui = self._appBase.ui
+    getDataObj = self._data2Obj.get
+    ui._blankCopnsoleOutput
+    objs = [getDataObj(xx) if isinstance(x, str) else xx]
     try:
-      getDataObj = self._data2Obj.get
-      objs = [getDataObj(x) if isinstance(x, str) else x for x in objects]
       for obj in objs:
         if not obj.isDeleted:
           # If statement in case deleting one obj triggers teh deletion of another
           obj.delete()
     finally:
-      if undo is not None:
-        undo.decreaseBlocking()
+      ui._unblankConsoleOutput
+    command = "project.deleteObjects(%s)" % (', '.join(x.pid for x in objs))
+    ui.writeConsoleCommand(command)
 
 
   @property

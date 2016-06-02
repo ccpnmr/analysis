@@ -49,10 +49,10 @@ class Gui(Ui):
     self.application = None
     self.mainWindow = None
 
-    # Controls if delete, rename, adn create commands are automatically echoed to console
-    self._blankConsoleOutput = 0
-
     self._initQtApp()
+
+    # Controls if delete, rename, and create commands are automatically echoed to console
+    self._blankConsoleOutput = 0
 
 
   def _initQtApp(self):
@@ -160,17 +160,6 @@ class Gui(Ui):
     mainWindow.namespace['current'] = self.framework.current
 
     return mainWindow
-
-  def blankConsoleOutput(self):
-    """Increase console output blanking level.
-    Output is done only when blanking level is 0"""
-    self._blankConsoleOutput += 1
-
-  def unblankConsoleOutput(self):
-    """Increase console output blanking level.
-    Output is done only when blanking level is 0"""
-    if self._blankConsoleOutput > 0:
-      self._blankConsoleOutput -= 1
 
 
   def writeConsoleCommand(self, command:str, **objectParameters):

@@ -36,6 +36,10 @@ class Ui:
   # Factory functions for UI-specific instantiation of wrapped graphics classes
   _factoryFunctions = {}
 
+  # Controls if delete, rename, and create commands are automatically echoed to console
+  # Not used in all Uis, but must be in Ui to avoid breaking code
+  _blankConsoleOutput = 0
+
   @classmethod
   def setUp(cls):
     """Set up graphics data classes, cleaning up previous settings"""
@@ -45,7 +49,7 @@ class Ui:
       _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
 
 
-  def initialize(self):
+  def initialize(self, dummy):
     """UI operations done after every project load/create"""
     pass
 
@@ -73,6 +77,21 @@ class Ui:
     sys.stderr.write('==> Registered to: %s (%s)\n' %
                      (self.framework._registrationDict.get('name'),
                       self.framework._registrationDict.get('organisation')))
+
+  def blankConsoleOutput(self):
+    """Increase console output blanking level.
+    Output is done only when blanking level is 0"""
+    self._blankConsoleOutput += 1
+
+  def unblankConsoleOutput(self):
+    """Increase console output blanking level.
+    Output is done only when blanking level is 0"""
+    if self._blankConsoleOutput > 0:
+      self._blankConsoleOutput -= 1
+
+  def writeConsoleCommand(self, command:str, **objectParameters):
+    """No-op. To be overridden in subclasses"""
+    return
 
   @property
   def _isRegistered(self):

@@ -49,7 +49,7 @@ class Ui:
       _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
 
 
-  def initialize(self, dummy):
+  def initialize(self, mainWindow):
     """UI operations done after every project load/create"""
     pass
 

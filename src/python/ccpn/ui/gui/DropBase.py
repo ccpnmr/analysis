@@ -57,7 +57,6 @@ class DropBase(GuiBase):
     Separate function so it can be called from command line as well.
     """
     project = self._appBase.project
-
     if dataType == 'text':
       # data is a text string
       if hasattr(self, 'processText'):

@@ -179,7 +179,7 @@ class Gui(Ui):
 
     # NBNB TODO not yet hooked up
     project = self.framework.project
-    console = self.framework.mainWindow.pythonConsole
+    console = self.framework.ui.mainWindow.pythonConsole
     undo = project._undo
 
     if undo.blocking:

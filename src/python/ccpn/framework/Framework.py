@@ -543,7 +543,7 @@ class Framework:
     # TODO: convert this to a save and call self.project.save()
     pass
     apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName, createFallback=createFallback)
-    layout = self.mainWindow.moduleArea.saveState()
+    layout = self.ui.mainWindow.moduleArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):
       os.makedirs(layoutPath)

@@ -35,7 +35,6 @@ from ccpn.Assign.modules.AtomSelector import AtomSelector
 from ccpn.Assign.modules.SequenceGraph import SequenceGraph
 
 from ccpn.core.PeakList import PeakList
-from ccpn.Metabolomics.Metabolomics import MetabolomicsModule
 from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
 from ccpn.Screen.modules.ScreeningSettings import ScreeningSettings
 from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
@@ -199,7 +198,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._menuBar = MenuBar(self)
     fileMenu = Menu("Project", self)
     self.screenMenu = Menu("Screen", self)
-    self.metabolomicsMenu = Menu("Metabolomics", self)
+    # self.metabolomicsMenu = Menu("Metabolomics", self)
     # spectrumMenu = Menu("Spectrum", self)
     viewMenu = Menu("View", self)
     # moleculeMenu = Menu("Molecules", self)
@@ -241,13 +240,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.screenMenu.addAction(Action(self, 'Screening Settings', callback=self.showScreeningSetup, shortcut="sc"))
     self.screenMenu.addAction(Action(self, 'Hit Analysis', callback=self.showHitAnalysisModule, shortcut="ha"))
 
-    self.metabolomicsMenu.addSeparator()
-    self.metabolomicsMenu.addAction(Action(self, 'Analyse Metabolite', callback=self.showMetabolomicsModule, shortcut="mm"))
-    self.metabolomicsMenu.addAction(Action(self, 'Integral Assignment', callback=self.showIntegralAssigmentModule, shortcut="ia"))
-    self.decompMenu = self.metabolomicsMenu.addMenu('Decomposition')
-    self.decompMenu.addAction(Action(self, 'Run PCA', callback=self.showPCAModule))
-    self.metabolomicsMenu.addAction(Action(self, 'Peak Assignment', callback=self.showPeakAssigmentModule))
-    self.metabolomicsMenu.addAction(Action(self, 'Pick and Fit', callback=self.showPickandFitModule))
+    # self.metabolomicsMenu.addSeparator()
+    # self.metabolomicsMenu.addAction(Action(self, 'Analyse Metabolite', callback=self.showMetabolomicsModule, shortcut="mm"))
+    # self.metabolomicsMenu.addAction(Action(self, 'Integral Assignment', callback=self.showIntegralAssigmentModule, shortcut="ia"))
+    # self.decompMenu = self.metabolomicsMenu.addMenu('Decomposition')
+    #
+    # self.decompMenu.addAction(Action(self, 'Run PCA', callback=self.showPCAModule))
+    #
+    # self.metabolomicsMenu.addAction(Action(self, 'Peak Assignment', callback=self.showPeakAssigmentModule))
+    # self.metabolomicsMenu.addAction(Action(self, 'Pick and Fit', callback=self.showPickandFitModule))
+
     # self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups ...', callback=None))
 
     # spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
@@ -334,8 +336,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     #   self._menuBar.addMenu(self.screenMenu)
     # self._menuBar.addMenu(moleculeMenu)
 
-    if self._appBase.applicationName == 'Metabolomics':
-      self._menuBar.addMenu(self.metabolomicsMenu)
+    # if self._appBase.applicationName == 'Metabolomics':
+    #   self._menuBar.addMenu(self.metabolomicsMenu)
 
     for m in self.framework._menuSpec:
       self._createMenu(m)
@@ -716,10 +718,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
 
-  def showPCAModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-    from ccpn.Metabolomics.Pca import PcaModule
-    self.pcaModule = PcaModule(self.project)
-    self.moduleArea.addModule(self.pcaModule, position=position)
+  # def showPCAModule(self, position:str='bottom', relativeTo:CcpnModule=None):
+  #   from ccpn.Metabolomics.Pca import PcaModule
+  #   self.pcaModule = PcaModule(self.project)
+  #   self.moduleArea.addModule(self.pcaModule, position=position)
 
   def showPickandFitModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     spectrumDisplay = self.createSpectrumDisplay()

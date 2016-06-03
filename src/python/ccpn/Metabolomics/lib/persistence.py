@@ -71,3 +71,13 @@ def writeBruker(directory, dic, data):
         f.write(data.astype('<i4').tobytes())
 
 
+def spectraDicToBrukerExperiment(spectraDF, directoryName, **kwargs):
+  if isinstance(spectraDF, dict):
+    l = [pd.Series(spectraDF[name][1], index=spectraDF[name][0], name=name)
+         for name in sorted(spectraDF.keys())]
+
+    spectraDF = pd.concat(l, axis=1).T
+  procs = bruker1dDict(spectraDF, SF=500)
+  for pcName in spectraDF:
+    writeBruker(os.path.join(directoryName, pcName), procs, spectraDF[pcName].values)
+

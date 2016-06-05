@@ -327,6 +327,20 @@ class Project(AbstractWrapperObject):
     names = newName.split('.')
     obj.rename(*names)
 
+  def execute(self, pid, funcName, *params, **kwparams):
+    """Get the object obj identified by pid, execute obj.funcName(*params, **kwparams)
+    and return the result"""
+
+    obj = self.getByPid(pid)
+    if obj is None:
+      raise ValueError("No objet found with pid %s" % pid)
+    else:
+      func = getattr(obj, funcName)
+      if func is None:
+        raise ValueError("Object *s has no method named %s" % funcName)
+      else:
+        return func(*params, **kwparams)
+
   @property
   def _apiNmrProject(self) -> ApiNmrProject:
     """API equivalent to object: NmrProject"""

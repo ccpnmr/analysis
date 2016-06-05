@@ -42,7 +42,7 @@ class SpectrumGroup(AbstractWrapperObject):
   # Attribute it necessary as subclasses must use superclass className
   className = 'SpectrumGroup'
 
-  _parentClass = Spectrum
+  _parentClass = Project
 
   #: Name of plural link to instances of class
   _pluralLinkName = 'spectrumGroups'
@@ -135,14 +135,10 @@ del _newSpectrumGroup
 
 # reverse link Spectrum.spectrumGroups
 def getter(self:Spectrum) -> Tuple[SpectrumGroup, ...]:
-  print ('@~@~ getting spectrumGroups')
   data2Obj = self._project._data2Obj
   return tuple(data2Obj[x] for x in self._wrappedData.sortedSpectrumGroups())
 def setter(self:Spectrum, value):
-  print ('@~@~ setting spectrumGroups 1', value)
-  print ('@~@~ setting spectrumGroups 2', [x._wrappedData for x in value])
   self._wrappedData.spectrumGroups = [x._wrappedData for x in value]
-  print ('@~@~ got spectrumGroups' )
 #
 Spectrum.spectrumGroups = property(getter, setter, None,
                                    "SpectrumGroups that contain Spectrum")

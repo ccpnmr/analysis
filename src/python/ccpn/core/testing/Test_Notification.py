@@ -334,12 +334,8 @@ class NotificationTest(WrapperTesting):
     spectrumGroup.spectra = ()
     self.assertEquals(ll, ['modSpectrumGroup', 'modLink', 'modSpectrumGroup', 'modLink'])
     del ll[:]
-    print ('@~@~', spectrum.spectrumGroups)
     self.assertFalse(bool(spectrum.spectrumGroups))
-    print('@~@~', dir(spectrum.__class__.spectrumGroups))
     tt = (spectrumGroup,)
-    print('@~@~ prevalue1', tt)
-    print('@~@~ prevalue2', [x._wrappedData for x in tt])
     spectrum.spectrumGroups = tt
     self.assertEquals(ll, ['modSpectrum', 'modLink'])
     spectrum.rename('HF-copy')

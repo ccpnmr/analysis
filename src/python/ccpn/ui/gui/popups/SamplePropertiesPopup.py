@@ -29,11 +29,13 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     super(SamplePropertiesPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.project = project
-    if self._appBase.ui.mainWindow is not None:
-      mainWindow = self._appBase.ui.mainWindow
-    else:
-      mainWindow = self._appBase._mainWindow
-    self.sideBar = mainWindow.sideBar
+    if len(self.project.windows)>0:
+      self.mainWindow = self.project.windows[0]
+    # if self._appBase.ui.mainWindow is not None:
+    #   mainWindow = self._appBase.ui.mainWindow
+    # else:
+    #   mainWindow = self._appBase._mainWindow
+    self.sideBar = self.mainWindow.sideBar
     # self.newSampleSideBar = item
 
     self.sample = sample
@@ -194,7 +196,7 @@ class SamplePropertiesPopup(QtGui.QDialog, Base):
     ''' This adds components to the sample, to the sideBar and pulldown '''
 
     self.sampleComponent = self.sample.newSampleComponent(name=('NewSC'),labeling=str('H'))
-    self.sideBar.addItem(self.newSampleSideBar, self.sampleComponent)
+    # self.sideBar.addItem(self.newSampleSideBar, self.sampleComponent)
     scPid = self.sampleComponent.pid
     self.scpid[0].append(scPid)
     self.sc.setData(self.scpid[0])

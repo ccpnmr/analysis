@@ -167,7 +167,6 @@ class Framework:
     self.styleSheet = self.getStyleSheet(self.preferences)
     self.ui = self._getUI()
     self._setupMenus()
-    # self.setPythonConsole()
     self.feedbackPopup = None
     self.updatePopup = None
     self.backupPopup = None

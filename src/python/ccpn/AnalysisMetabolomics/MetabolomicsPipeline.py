@@ -26,7 +26,7 @@ from collections import OrderedDict
 
 from PyQt4 import QtCore, QtGui
 
-from ccpn.Metabolomics import GuiPipeLine as gp
+from ccpn.AnalysisMetabolomics import GuiPipeLine as gp
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -38,8 +38,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
-from ccpn.Metabolomics.lib.persistence import MetabolomicsPersistenceDict
-from ccpn.Metabolomics.lib.pipeline import pipeline
+from ccpn.AnalysisMetabolomics.lib.persistence import MetabolomicsPersistenceDict
+from ccpn.AnalysisMetabolomics.lib.pipeline import pipeline
 
 
 

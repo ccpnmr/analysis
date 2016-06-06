@@ -18,8 +18,8 @@ class Metabolomics(Framework):
     self.addApplicationMenuSpec(menuSpec)
 
   def showDecompositionModule(self):
-    from ccpn.Metabolomics.Decomposition import Decomposition
-    from ccpn.Metabolomics.ui.gui.modules.DecompositionModule import DecompositionModule
+    from ccpn.AnalysisMetabolomics.Decomposition import Decomposition
+    from ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule import DecompositionModule
 
     self.decomposition = Decomposition(framework=self)
     self.ui.decompositionModule = DecompositionModule(framework=self,

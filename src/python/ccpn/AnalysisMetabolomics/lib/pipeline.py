@@ -2,9 +2,9 @@ __author__ = 'TJ Ragan'
 
 import numpy as np
 
-from ccpn.Metabolomics.lib import centering
-from ccpn.Metabolomics.lib import normalisation
-from ccpn.Metabolomics.lib import scaling
+from ccpn.AnalysisMetabolomics.lib import centering
+from ccpn.AnalysisMetabolomics.lib import normalisation
+from ccpn.AnalysisMetabolomics.lib import scaling
 
 
 def pipeline(spectra, commands):

@@ -6,7 +6,7 @@ import numpy as np
 import numpy.testing as npt
 import pandas as pd
 
-from ccpn.Metabolomics.lib.decomposition import PCA
+from ccpn.AnalysisMetabolomics.lib.decomposition import PCA
 
 
 class TestPCA(unittest.TestCase):

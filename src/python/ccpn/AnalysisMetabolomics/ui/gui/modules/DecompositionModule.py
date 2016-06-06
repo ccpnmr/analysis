@@ -3,7 +3,7 @@ __author__ = 'TJ Ragan'
 from collections import OrderedDict, namedtuple
 
 import pyqtgraph as pg
-from ccpn.Metabolomics.ui.gui.widgets.PcaWidget import PcaWidget
+from ccpn.AnalysisMetabolomics.ui.gui.widgets.PcaWidget import PcaWidget
 
 from ccpn.util.Colour import hexToRgb
 

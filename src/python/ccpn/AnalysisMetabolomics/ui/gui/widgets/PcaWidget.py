@@ -37,8 +37,8 @@ from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
-from ccpn.Metabolomics.lib.persistence import MetabolomicsPersistenceDict
-from ccpn.Metabolomics.lib.decomposition import PCA
+from ccpn.AnalysisMetabolomics.lib.persistence import MetabolomicsPersistenceDict
+from ccpn.AnalysisMetabolomics.lib.decomposition import PCA
 
 import pyqtgraph as pg
 

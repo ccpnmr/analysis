@@ -6,11 +6,11 @@ import shutil
 
 import pandas as pd
 
-from ccpn.Metabolomics.lib import normalisation
-from ccpn.Metabolomics.lib import centering
-from ccpn.Metabolomics.lib import scaling
-from ccpn.Metabolomics.lib import decomposition
-from ccpn.Metabolomics.lib.persistence import spectraDicToBrukerExperiment
+from ccpn.AnalysisMetabolomics.lib import normalisation
+from ccpn.AnalysisMetabolomics.lib import centering
+from ccpn.AnalysisMetabolomics.lib import scaling
+from ccpn.AnalysisMetabolomics.lib import decomposition
+from ccpn.AnalysisMetabolomics.lib.persistence import spectraDicToBrukerExperiment
 
 METABOLOMICS_SAVE_LOCATION = os.path.join('internal','metabolomics')
 
@@ -36,26 +36,26 @@ class Decomposition:
 
     self.availablePlotData = OrderedDict()
 
-    # self.registerNotifiers()
+    self.registerNotifiers()
 
     self.method = 'PCA'
     self.model = None
     self.auto = False
 
 
-  # def __del__(self):
-  #   self.deRegisterNotifiers()
+  def __del__(self):
+    self.deRegisterNotifiers()
 
 
-  # def registerNotifiers(self):
-  #   self.project._registerNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'postInit')
-  #   self.project._registerNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'delete')
-  #   self.project._registerNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'setName')
+  def registerNotifiers(self):
+    self.project._registerNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'postInit')
+    self.project._registerNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'delete')
+    self.project._registerNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'setName')
 
-  # def deRegisterNotifiers(self):
-  #   self.project._unregisterNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'postInit')
-  #   self.project._unregisterNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'delete')
-  #   self.project._unregisterNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'setName')
+  def deRegisterNotifiers(self):
+    self.project._unregisterNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'postInit')
+    self.project._unregisterNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'delete')
+    self.project._unregisterNotify(self.refreshSourceDataOptions, 'ccp.nmr.Nmr.DataSource', 'setName')
 
 
   @property

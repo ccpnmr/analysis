@@ -5,7 +5,7 @@ import unittest
 
 import pandas as pd
 
-from ccpn.Metabolomics.lib import persistence
+from ccpn.AnalysisMetabolomics.lib import persistence
 
 
 class TestMetabolomicsPersistenceDict(unittest.TestCase):

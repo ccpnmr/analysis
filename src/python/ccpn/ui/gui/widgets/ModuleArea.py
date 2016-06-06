@@ -2,6 +2,8 @@ from PyQt4 import QtGui
 from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.Dock import Dock
 from pyqtgraph.dockarea.Container import Container, TContainer, HContainer, VContainer
+from ccpn.ui.gui.widgets.Module import CcpnModule
+
 
 ModuleArea = DockArea
 Module = Dock
@@ -22,7 +24,7 @@ class CcpnModuleArea(ModuleArea):
 
 
     if module is None:
-      module = Module(**kwds)
+      module = CcpnModule(name='New Module',**kwds)
 
     if position is None:
       position = 'top'

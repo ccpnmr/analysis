@@ -406,12 +406,12 @@ class Framework:
              ))
 
     ms.append(('Macro',     [
-                            ("Edit ...", self.showMacroEditor),
-                            ("New from Console ...", self.newMacroFromConsole),
-                            ("New from Log ...", self.newMacroFromLog),
+                            ("Edit...", self.showMacroEditor),
+                            ("New from Console...", self.newMacroFromConsole),
+                            ("New from Log...", self.newMacroFromLog),
                             (),
-                            ("Record Macro ...", self.startMacroRecord),
-                            ("Run ...", self.runMacro, [('shortcut', 'rm')]),
+                            ("Record Macro...", self.startMacroRecord),
+                            ("Run...", self.runMacro, [('shortcut', 'rm')]),
                             ("Run Recent", self._fillRecentMacrosMenu())
                             ]
              ))
@@ -422,7 +422,7 @@ class Framework:
              ))
 
     ms.append(('Help',      [
-                            ("Command ...", self.showCommandHelp, [('shortcut', 'ss')]),
+                            ("Command...", self.showCommandHelp, [('shortcut', 'ss')]),
                             ("Tutorials",([
                                     # Submenu
                                     ("Beginners Tutorial", self.showBeginnersTutorial),
@@ -432,12 +432,12 @@ class Framework:
                             ("Show CcpNmr V3 Documentation", self.showWrapperDocumentation),
                             ("Show API Documentation", self._showApiDocumentation),
                             (),
-                            ("About CcpNmr V3 ...", self.showAboutPopup),
-                            ("About CCPN ...", self.showAboutCcpnPopup),
+                            ("About CcpNmr V3...", self.showAboutPopup),
+                            ("About CCPN...", self.showAboutCcpnPopup),
                             (),
-                            ("Inspect Code ...", self.showCodeInspectionPopup),
-                            ("Check for Updates ...", self.showUpdatePopup),
-                            ("Submit Feedback ...", self.showFeedbackPopup)
+                            ("Inspect Code...", self.showCodeInspectionPopup),
+                            ("Check for Updates...", self.showUpdatePopup),
+                            ("Submit Feedback...", self.showFeedbackPopup)
                           ]
              ))
 

@@ -66,16 +66,24 @@ class AtomSelector(CcpnModule):
     self.current.registerNotify(self._predictAssignments, 'peaks')
     # self.current.registerNotify(self.predictAssignments, 'peaks')
     nmrResidueLabel = Label(self, 'Current NmrResidue', grid=(0, 0))
-    self.currentNmrResidueLabel = Label(self, grid=(0, 1))
-    self.radioButton1 = RadioButton(self, grid=(0, 2), hAlign='r', callback=self._createBackBoneButtons)
-    self.radioButton1.setChecked(True)
-    self.label1 = Label(self, 'Backbone', grid=(0, 3), hAlign='l')
-    self.radioButton2 = RadioButton(self, grid=(0, 4), hAlign='r', callback=self._createSideChainButtons)
-    self.label2 = Label(self, 'Side chain', grid=(0, 5), hAlign='l')
-    self.molTypeLabel = Label(self, 'Molecule Type', grid=(0, 6))
-    self.molTypePulldown = PulldownList(self, grid=(0, 7))
+    gridLine = -1
+    # gridLine 0
+    gridLine += 1
+    self.molTypeLabel = Label(self, 'Molecule Type', grid=(gridLine, 0))
+    self.molTypePulldown = PulldownList(self, grid=(gridLine, 1))
     self.molTypePulldown.setData(['protein', 'DNA', 'RNA', 'carbohydrate', 'other'])
-    self.layout.addWidget(self.pickAndAssignWidget, 1, 0, 3, 8)
+    self.radioButton1 = RadioButton(self, grid=(gridLine, 2), hAlign='r', callback=self._createBackBoneButtons)
+    self.radioButton1.setChecked(True)
+    self.label1 = Label(self, 'Backbone', grid=(gridLine, 3), hAlign='l')
+    self.radioButton2 = RadioButton(self, grid=(gridLine, 4), hAlign='r', callback=self._createSideChainButtons)
+    self.label2 = Label(self, 'Side chain', grid=(gridLine, 5), hAlign='l')
+    # gridLine 1
+    gridLine += 1
+    nmrResidueLabel = Label(self, 'Current NmrResidue:', grid=(gridLine, 0))
+    self.currentNmrResidueLabel = Label(self, grid=(gridLine, 1))
+    # gridLine 2
+    gridLine += 1
+    self.layout.addWidget(self.pickAndAssignWidget, gridLine, 0, 3, 8)
     self.current.registerNotify(self._updateWidget, 'nmrResidues')
     self.closeModule = self._closeModule
     self.buttons = {}
@@ -105,9 +113,9 @@ class AtomSelector(CcpnModule):
     atoms = ['H', 'N', 'CA', 'CB', 'CO', 'HA', 'HB']
     for ii, atom in enumerate(atoms):
       self.buttons[atom] = []
-      button1 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 0), callback=partial(self._pickAndAssign, '-1', atom))
-      button2 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 1), callback=partial(self._pickAndAssign, '', atom))
-      button3 = Button(self.pickAndAssignWidget, text=atom, grid=(1+ii, 2), callback=partial(self._pickAndAssign, '+1', atom))
+      button1 = Button(self.pickAndAssignWidget, text=atom+' [i-1]', grid=(1+ii, 0), callback=partial(self._pickAndAssign, '-1', atom))
+      button2 = Button(self.pickAndAssignWidget, text=atom+' [i]', grid=(1+ii, 1), callback=partial(self._pickAndAssign, '', atom))
+      button3 = Button(self.pickAndAssignWidget, text=atom+' [i+1]', grid=(1+ii, 2), callback=partial(self._pickAndAssign, '+1', atom))
       self.buttons[atom].append(button1)
       self.buttons[atom].append(button2)
       self.buttons[atom].append(button3)

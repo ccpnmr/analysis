@@ -391,10 +391,8 @@ class SequenceGraph(CcpnModule):
     for possibleMatch in possibleMatches:
       if possibleMatch[0] > 1:
 
-        if hasattr(self.project._appBase.ui.mainWindow, 'sequenceModule'):
-          self.project._appBase.ui.mainWindow.sequenceModule._highlightPossibleStretches(possibleMatch[1])
-        elif hasattr(self.project._appBase._mainWindow, 'sequenceModule'):
-          self.project._appBase._mainWindow.sequenceModule._highlightPossibleStretches(possibleMatch[1])
+        if hasattr(self.project._appBase, 'sequenceModule'):
+          self.project._appBase.sequenceModule._highlightPossibleStretches(possibleMatch[1])
 
 
   def _showBackboneAssignments(self, nmrChain):
@@ -406,10 +404,10 @@ class SequenceGraph(CcpnModule):
       self.addResidue(nmrResidue, direction='+1')
     for ii, res in enumerate(self.guiResiduesShown):
       if ii % 10 == 0:
-        if self._appBase.ui.mainWindow is not None:
-          mainWindow = self._appBase.ui.mainWindow
+        if self.project._appBase.ui.mainWindow is not None:
+          mainWindow = self.project._appBase.ui.mainWindow
         else:
-          mainWindow = self._appBase._mainWindow
+          mainWindow = self.project._appBase._mainWindow
         mainWindow.pythonConsole.writeConsoleCommand('%s residues added' % str(ii))
       if ii+1 < len(self.guiResiduesShown)-1:
         self._addConnectingLine(res['CO'], self.guiResiduesShown[ii+1]['N'], lineColour, 1.0, 0)

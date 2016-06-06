@@ -688,7 +688,7 @@ class Framework:
 
   def showIntegrationModule(self, position: str = 'bottom', relativeTo: CcpnModule = None):
     spectrumDisplay = self.ui.mainWindow.createSpectrumDisplay(self.project.spectra[0])
-    from ccpn.Metabolomics.Integration import IntegrationTable, IntegrationWidget
+    from ccpn.AnalysisMetabolomics.Integration import IntegrationTable, IntegrationWidget
     spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.module,
                                                           project=self.project, grid=(2, 0), gridSpan=(1, 4))
     spectrumDisplay.integrationTable = IntegrationTable(spectrumDisplay.module,
@@ -812,8 +812,8 @@ class Framework:
     """
     from ccpn.Assign.modules.SequenceGraph import SequenceGraph
     self.assigner = SequenceGraph(project=self.project)
-    if hasattr(self.framework, 'bbModule'):
-      self.framework.bbModule._connectSequenceGraph(self.assigner)
+    if hasattr(self, 'bbModule'):
+      self.bbModule._connectSequenceGraph(self.assigner)
 
     if nextTo is not None:
       self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=nextTo)

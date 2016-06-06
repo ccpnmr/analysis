@@ -112,10 +112,10 @@ class BackboneAssignmentModule(CcpnModule):
     add strips to matchModule(s) corresponding to assignment matches.
     """
 
-    if self._appBase.ui.mainWindow is not None:
-      mainWindow = self._appBase.ui.mainWindow
+    if self.project._appBase.ui.mainWindow is not None:
+      mainWindow = self.project._appBase.ui.mainWindow
     else:
-      mainWindow = self._appBase._mainWindow
+      mainWindow = self.project._appBase._mainWindow
     mainWindow.clearMarks()
 
     self.nmrResidueTable.nmrResidueTable.updateTable()

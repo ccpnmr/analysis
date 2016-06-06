@@ -725,7 +725,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showPickandFitModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     spectrumDisplay = self.createSpectrumDisplay()
-    from ccpn.Metabolomics.PickandFit import PickandFit, PickandFitTable
+    from ccpn.AnalysisMetabolomics.PickandFit import PickandFit, PickandFitTable
     fitModule = PickandFit(spectrumDisplay.module, strip=spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
     PickandFitTable(spectrumDisplay.module, project=self._project, fitModule=fitModule, grid=(0, 4), gridSpan=(3, 1))
     if self.blankDisplay:
@@ -745,7 +745,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showIntegralAssigmentModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    from ccpn.Metabolomics.IntegralAssignment import IntegralAssignment
+    from ccpn.AnalysisMetabolomics.IntegralAssignment import IntegralAssignment
     self.iaModule = IntegralAssignment(self)
     spectrumDisplay.module.layout.addWidget(self.iaModule, 2, 0, 1, 4)
     if self.blankDisplay:
@@ -754,7 +754,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def showPeakAssigmentModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    from ccpn.Metabolomics.PeakAssignment import PeakAssignment
+    from ccpn.AnalysisMetabolomics.PeakAssignment import PeakAssignment
     PeakAssignment(spectrumDisplay.module, self._project, grid=(2, 0), gridSpan=(1, 4))
     if self.blankDisplay:
       self.blankDisplay.setParent(None)

@@ -14,18 +14,23 @@ from ccpn.ui.gui.widgets.Slider import Slider
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 
-class SamplePopup(QtGui.QDialog):
+class MixtureGenerationPopup(QtGui.QDialog):
 
   def __init__(self, parent=None, project=None,  **kw):
-    super(SamplePopup, self).__init__(parent)
+    super(MixtureGenerationPopup, self).__init__(parent)
 
     self.project = project
-    if self._appBase.ui.mainWindow is not None:
-      self.mainWindow = self._appBase.ui.mainWindow
-    else:
-      self.mainWindow = self._appBase._mainWindow
+    # if self.parent is not None:
+    #   self.mainWindow = self._appBase.ui.mainWindow
+    # else:
+    #   self.mainWindow = self._appBase._mainWindow
+    # parent=Framework
+    # self.mainWindow = mainWindow
+    # self.moduleArea = moduleArea
+    self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
-    self.generalPreferences = self.project._appBase.preferences.general
+    self.framework = self.mainWindow.framework
+    self.generalPreferences = self.framework.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
 
     ######## ========  Set Main Layout ====== ########

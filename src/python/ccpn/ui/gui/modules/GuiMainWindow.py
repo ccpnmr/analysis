@@ -35,10 +35,10 @@ from ccpn.Assign.modules.AtomSelector import AtomSelector
 from ccpn.Assign.modules.SequenceGraph import SequenceGraph
 
 from ccpn.core.PeakList import PeakList
-from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
-from ccpn.Screen.modules.ScreeningSettings import ScreeningSettings
-from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
-from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
+# from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
+# from ccpn.Screen.modules.ScreeningSettings import ScreeningSettings
+# from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
+# from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
 from ccpn.core.lib.Version import revision
 from ccpn.framework.update.UpdatePopup import UpdatePopup
 from ccpn.ui.gui.modules.DataPlottingModule import DataPlottingModule
@@ -196,60 +196,67 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
 
     self._menuBar = MenuBar(self)
-    fileMenu = Menu("Project", self)
-    self.screenMenu = Menu("Screen", self)
+    for m in self.framework._menuSpec:
+      self._createMenu(m)
+    self.setMenuBar(self._menuBar)
+    self._menuBar.setNativeMenuBar(False)
+    self.show()
+
+    #
+    # fileMenu = Menu("Project", self)
+    # self.screenMenu = Menu("Screen", self)
     # self.metabolomicsMenu = Menu("Metabolomics", self)
     # spectrumMenu = Menu("Spectrum", self)
-    viewMenu = Menu("View", self)
+    # viewMenu = Menu("View", self)
     # moleculeMenu = Menu("Molecules", self)
-    restraintsMenu = Menu("Restraints", self)
-    structuresMenu = Menu("Structures", self)
-    macroMenu = Menu("Macro", self)
-    pluginsMenu = Menu("Plugins", self)
-    helpMenu = Menu("Help", self)
+    # restraintsMenu = Menu("Restraints", self)
+    # structuresMenu = Menu("Structures", self)
+    # macroMenu = Menu("Macro", self)
+    # pluginsMenu = Menu("Plugins", self)
+    # helpMenu = Menu("Help", self)
 
 
-    fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut='pn'))
+    # fileMenu.addAction(Action(self, "New", callback=self.newProject, shortcut='pn'))
+    #
+    # fileMenu.addAction(Action(self, "Open ...", callback=self.loadAProject, shortcut="po"))
+    # self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
+    # self._fillRecentProjectsMenu()
+    # fileMenu.addAction(Action(self, "Load Spectrum", callback=lambda: self.loadData(text='Load Spectrum'), shortcut='ls'))
+    # fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
+    # fileMenu.addSeparator()
+    # fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
+    # fileMenu.addAction(Action(self, "Save As ...", shortcut="sa", callback=self.saveProjectAs))
+    # fileMenu.addSeparator()
+    # fileMenu.addAction(Action(self, "Undo", callback=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
+    # fileMenu.addAction(Action(self, "Redo", callback=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
+    #
+    # fileMenu.addSeparator()
+    # fileMenu.addAction(Action(self, "Summary ...", self.displayProjectSummary))
+    # fileMenu.addAction(Action(self, "Archive", self.archiveProject))
+    # fileMenu.addAction(Action(self, "Backup ...", self.showBackupPopup))
+    # fileMenu.addSeparator()
+    # fileMenu.addAction(Action(self, "Preferences ...", callback=self.showApplicationPreferences))
+    # fileMenu.addSeparator()
+    # fileMenu.addAction(Action(self, "Close Program", callback=self._closeEvent, shortcut="qt"))
 
-    fileMenu.addAction(Action(self, "Open ...", callback=self.loadAProject, shortcut="po"))
-    self.recentProjectsMenu = fileMenu.addMenu("Open Recent")
-    self._fillRecentProjectsMenu()
-    fileMenu.addAction(Action(self, "Load Spectrum", callback=lambda: self.loadData(text='Load Spectrum'), shortcut='ls'))
-    fileMenu.addAction(Action(self, "Load Data", callback=self.loadData, shortcut='ld'))
-    fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Save", callback=self.saveProject, shortcut="ps"))
-    fileMenu.addAction(Action(self, "Save As ...", shortcut="sa", callback=self.saveProjectAs))
-    fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Undo", callback=self.undo, shortcut=QtGui.QKeySequence("Ctrl+z")))
-    fileMenu.addAction(Action(self, "Redo", callback=self.redo, shortcut=QtGui.QKeySequence("Ctrl+y")))
 
-    fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Summary ...", self.displayProjectSummary))
-    fileMenu.addAction(Action(self, "Archive", self.archiveProject))
-    fileMenu.addAction(Action(self, "Backup ...", self.showBackupPopup))
-    fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Preferences ...", callback=self.showApplicationPreferences))
-    fileMenu.addSeparator()
-    fileMenu.addAction(Action(self, "Close Program", callback=self._closeEvent, shortcut="qt"))
-
-
-    self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, 'Generate Mixtures', callback=self.showSamplePopup, shortcut="cs"))
-    self.screenMenu.addAction(Action(self, 'Mixtures Analysis', callback=self.showSampleAnalysis, shortcut="st"))
-    self.screenMenu.addSeparator()
-    self.screenMenu.addAction(Action(self, 'Screening Settings', callback=self.showScreeningSetup, shortcut="sc"))
-    self.screenMenu.addAction(Action(self, 'Hit Analysis', callback=self.showHitAnalysisModule, shortcut="ha"))
+    # self.screenMenu.addSeparator()
+    # self.screenMenu.addAction(Action(self, 'Generate Mixtures', callback=self.showSamplePopup, shortcut="cs"))
+    # self.screenMenu.addAction(Action(self, 'Mixtures Analysis', callback=self.showSampleAnalysis, shortcut="st"))
+    # self.screenMenu.addSeparator()
+    # self.screenMenu.addAction(Action(self, 'Screening Settings', callback=self.showScreeningSetup, shortcut="sc"))
+    # self.screenMenu.addAction(Action(self, 'Hit Analysis', callback=self.showHitAnalysisModule, shortcut="ha"))
 
     # self.metabolomicsMenu.addSeparator()
     # self.metabolomicsMenu.addAction(Action(self, 'Analyse Metabolite', callback=self.showMetabolomicsModule, shortcut="mm"))
     # self.metabolomicsMenu.addAction(Action(self, 'Integral Assignment', callback=self.showIntegralAssigmentModule, shortcut="ia"))
     # self.decompMenu = self.metabolomicsMenu.addMenu('Decomposition')
-    #
+
     # self.decompMenu.addAction(Action(self, 'Run PCA', callback=self.showPCAModule))
-    #
+
     # self.metabolomicsMenu.addAction(Action(self, 'Peak Assignment', callback=self.showPeakAssigmentModule))
     # self.metabolomicsMenu.addAction(Action(self, 'Pick and Fit', callback=self.showPickandFitModule))
-
+    #
     # self.metabolomicsMenu.addAction(Action(self, 'Spectrum Groups ...', callback=None))
 
     # spectrumMenu.addAction(Action(self, "Spectrum Groups ...", callback=self.showProjectionPopup, shortcut='ss'))
@@ -273,27 +280,27 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # moleculeMenu.addSeparator()
     # moleculeMenu.addAction(Action(self, "Reference Chemical Shifts", callback=self.showRefChemicalShifts, shortcut='rc'))
 
-    macroMenu.addAction(Action(self, "Edit ...", callback=self.showMacroEditor))
-    macroMenu.addAction(Action(self, "New from Console ...", callback=self.newMacroFromConsole))
-    macroMenu.addAction(Action(self, "New from Log ...", callback=self.newMacroFromLog))
-    macroMenu.addAction(Action(self, "Record Macro ...", callback=self.startMacroRecord))
-    macroMenu.addSeparator()
-    macroMenu.addAction(Action(self, "Run ...", shortcut="rm", callback=self.runMacro))
-
-    self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
-    self._fillRecentMacrosMenu()
-    macroMenu.addSeparator()
-    macroMenu.addAction(Action(self, "Define User Shortcuts ...", callback=self.defineUserShortcuts))
-
+    # macroMenu.addAction(Action(self, "Edit ...", callback=self.showMacroEditor))
+    # macroMenu.addAction(Action(self, "New from Console ...", callback=self.newMacroFromConsole))
+    # macroMenu.addAction(Action(self, "New from Log ...", callback=self.newMacroFromLog))
+    # macroMenu.addAction(Action(self, "Record Macro ...", callback=self.startMacroRecord))
+    # macroMenu.addSeparator()
+    # macroMenu.addAction(Action(self, "Run ...", shortcut="rm", callback=self.runMacro))
+    #
+    # self.recentMacrosMenu = macroMenu.addMenu("Run Recent")
+    # # self._fillRecentMacrosMenu()
+    # macroMenu.addSeparator()
+    # macroMenu.addAction(Action(self, "Define User Shortcuts ...", callback=self.defineUserShortcuts))
+    # #
     # viewNewMenu = viewMenu.addMenu("New")
-    viewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
-    viewMenu.addSeparator()
-    viewMenu.addAction(Action(self, "Chemical Shift Table", callback=self.showChemicalShiftTable, shortcut="ct"))
-    viewMenu.addAction(Action(self, "NmrResidue Table", callback=self.showNmrResidueTable, shortcut="nt"))
-    viewMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
-    viewMenu.addSeparator()
-    viewMenu.addAction(Action(self, 'Sequence Graph', callback=self.showSequenceGraph, shortcut='sg'))
-    viewMenu.addAction(Action(self, 'Atom Selector', callback=self.showAtomSelector, shortcut='as'))
+    # viewMenu.addAction(Action(self, "New Blank Display", callback=self.addBlankDisplay, shortcut="nd"))
+    # viewMenu.addSeparator()
+    # viewMenu.addAction(Action(self, "Chemical Shift Table", callback=self.showChemicalShiftTable, shortcut="ct"))
+    # viewMenu.addAction(Action(self, "NmrResidue Table", callback=self.showNmrResidueTable, shortcut="nt"))
+    # viewMenu.addAction(Action(self, "Peak Table", callback=self.showPeakTable, shortcut="lt"))
+    # viewMenu.addSeparator()
+    # viewMenu.addAction(Action(self, 'Sequence Graph', callback=self.showSequenceGraph, shortcut='sg'))
+    # viewMenu.addAction(Action(self, 'Atom Selector', callback=self.showAtomSelector, shortcut='as'))
 
 
     #NBNB Need to decide how we are to handle layouts if at all
@@ -302,56 +309,52 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # viewLayoutMenu.addAction(Action(self, "Save", callback=self.saveLayout))
     # viewLayoutMenu.addAction(Action(self, "Save As...", callback=self.saveLayoutAs))
     # viewLayoutMenu.addAction(Action(self, "Restore", callback=self.restoreLayout))
-    viewMenu.addSeparator()
-    self.consoleAction = Action(self, "Console", callback=self.toggleConsole, shortcut="py",
-                                         checkable=True)
-    self.consoleAction.setChecked(self.pythonConsole.isVisible())
-    viewMenu.addAction(self.consoleAction)
+    # viewMenu.addSeparator()
+    # self.consoleAction = Action(self, "Console", callback=self.toggleConsole, shortcut="py",
+    #                                      checkable=True)
+    # self.consoleAction.setChecked(self.pythonConsole.isVisible())
+    # viewMenu.addAction(self.consoleAction)
+    #
+    #
+
+    # helpMenu.addAction(Action(self, "Command ...", callback=self.showCommandHelp))
+    # tutorialsMenu = helpMenu.addMenu("Tutorials")
+    # tutorialsMenu.addAction(Action(self, "Beginners Tutorial", callback=self.showBeginnersTutorial))
+    # tutorialsMenu.addAction(Action(self, "Backbone Tutorial", callback=self.showBackboneTutorial))
+    # helpMenu.addAction(Action(self, "Show Shortcuts", callback=self.showShortcuts))
+    # helpMenu.addAction(Action(self, "Show CcpNmr V3 Documentation", callback=self.showWrapperDocumentation))
+    # helpMenu.addAction(Action(self, "Show API Documentation", callback=self._showApiDocumentation))
+    # helpMenu.addSeparator()
+    # helpMenu.addAction(Action(self, "About CcpNmr V3 ...", callback=self.showAboutPopup))
+    # helpMenu.addAction(Action(self, "About CCPN ...", callback=self.showAboutCcpnPopup))
+    # helpMenu.addSeparator()
+    # helpMenu.addAction(Action(self, "Inspect Code ...", callback=self.showCodeInspectionPopup))
+    # helpMenu.addAction(Action(self, "Check for Updates ...", callback=self.showUpdatePopup))
+    # helpMenu.addAction(Action(self, "Submit Feedback ...", callback=self.showFeedbackPopup))
 
 
+    # pluginsMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
 
-    helpMenu.addAction(Action(self, "Command ...", callback=self.showCommandHelp))
-    tutorialsMenu = helpMenu.addMenu("Tutorials")
-    tutorialsMenu.addAction(Action(self, "Beginners Tutorial", callback=self.showBeginnersTutorial))
-    tutorialsMenu.addAction(Action(self, "Backbone Tutorial", callback=self.showBackboneTutorial))
-    helpMenu.addAction(Action(self, "Show Shortcuts", callback=self.showShortcuts))
-    helpMenu.addAction(Action(self, "Show CcpNmr V3 Documentation", callback=self.showWrapperDocumentation))
-    helpMenu.addAction(Action(self, "Show API Documentation", callback=self._showApiDocumentation))
-    helpMenu.addSeparator()
-    helpMenu.addAction(Action(self, "About CcpNmr V3 ...", callback=self.showAboutPopup))
-    helpMenu.addAction(Action(self, "About CCPN ...", callback=self.showAboutCcpnPopup))
-    helpMenu.addSeparator()
-    helpMenu.addAction(Action(self, "Inspect Code ...", callback=self.showCodeInspectionPopup))
-    helpMenu.addAction(Action(self, "Check for Updates ...", callback=self.showUpdatePopup))
-    helpMenu.addAction(Action(self, "Submit Feedback ...", callback=self.showFeedbackPopup))
-
-
-    pluginsMenu.addAction(Action(self, "PARAssign Setup", callback=self.showParassignSetup, shortcut='q1'))
-
-
-    self._menuBar.addMenu(fileMenu)
+    #
+    # self._menuBar.addMenu(fileMenu)
     # self._menuBar.addMenu(spectrumMenu)
-
+    #
     # if self._appBase.applicationName == 'Screen':
     #   self._menuBar.addMenu(self.screenMenu)
     # self._menuBar.addMenu(moleculeMenu)
-
+    #
     # if self._appBase.applicationName == 'Metabolomics':
     #   self._menuBar.addMenu(self.metabolomicsMenu)
+    #
 
-    for m in self.framework._menuSpec:
-      self._createMenu(m)
+    # if 'Structure' in self._appBase.components:
+    #   self._menuBar.addMenu(restraintsMenu)
+    #   self._menuBar.addMenu(structuresMenu)
+    # self._menuBar.addMenu(viewMenu)
+    # self._menuBar.addMenu(pluginsMenu)
+    # self._menuBar.addMenu(macroMenu)
+    # self._menuBar.addMenu(helpMenu)
 
-    if 'Structure' in self._appBase.components:
-      self._menuBar.addMenu(restraintsMenu)
-      self._menuBar.addMenu(structuresMenu)
-    self._menuBar.addMenu(viewMenu)
-    self._menuBar.addMenu(pluginsMenu)
-    self._menuBar.addMenu(macroMenu)
-    self._menuBar.addMenu(helpMenu)
-    self.setMenuBar(self._menuBar)
-    self._menuBar.setNativeMenuBar(False)
-    self.show()
 
 
   def _createMenu(self, spec, targetMenu=None):
@@ -413,32 +416,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     newModule.addWidget(view)
     self.moduleArea.addModule(newModule)
     
-  def _showApiDocumentation(self):
-    """Displays API documentation in a module."""
-    self._showDocumentation("API Documentation", 'apidoc', 'api.html')
 
-  # def showExperimentTypePopup(self):
-  #   """
-  #   Displays experiment type popup.
-  #   """
-  #   popup = ExperimentTypePopup(self, self._project)
-  #   popup.exec_()
-  #
-  # # def showSetupNmrResiduesPopup(self):
-  # #   popup = SetupNmrResiduesPopup(self, self._project)
-  # #   popup.exec_()
-
-
-  def showWrapperDocumentation(self):
-    """Displays CCPN wrapper documentation in a module."""
-    self._showDocumentation("CCPN Documentation", 'build', 'html', 'index.html')
-
-  def showShortcuts(self):
-    path = os.path.join(Path.getTopDirectory(), 'doc', 'static', 'AnalysisShortcuts.pdf')
-    if 'linux' in sys.platform.lower():
-      os.system("xdg-open %s" % path)
-    else:
-      os.system('open %s' % path)
 
 
   # def showPeakAssigner(self, position='bottom', relativeTo=None):
@@ -673,44 +651,44 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if event:
         event.ignore()
 
-  def showSamplePopup(self):
-    """
-    Displays Sample creation popup.
-    """
-    popup = SamplePopup(parent=None, project=self.project)
-    popup.exec_()
-    popup.raise_()
-    self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
-    self.project._logger.info("application.showSamplePopup()")
-
-  def showSampleAnalysis(self, position='bottom', relativeTo=None):
-    """
-    Displays Sample Analysis Module
-    """
-    showSa = MixtureAnalysis(self._project)
-    self.moduleArea.addModule(showSa, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
-    self.project._logger.info("application.showSampleAnalysis()")
-
-  def showScreeningSetup(self, position='bottom', relativeTo=None):
-    showSc = ScreeningSettings(self.project)
-    self.moduleArea.addModule(showSc, position=position)
-    self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
-    self.project._logger.info("application.showScreeningSetup()")
-
-  def showHitAnalysisModule(self, position='top', relativeTo:CcpnModule=None):
-
-    self.showScreeningHits = ShowScreeningHits(self.project)
-    self.moduleArea.addModule(self.showScreeningHits, position, None)
-    spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-    # spectrum only to create a display
-    self.project.strips[0].viewBox.autoRange()
-    self.showScreeningHits._clearDisplayView()
-    self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=self.showScreeningHits)
-      # returns a clean display
-
-    self.pythonConsole.writeConsoleCommand("application.showScreeningHits()")
-    self.project._logger.info("application.showScreeningHits()")
+  # def showSamplePopup(self):
+  #   """
+  #   Displays Sample creation popup.
+  #   """
+  #   popup = SamplePopup(parent=None, project=self.project)
+  #   popup.exec_()
+  #   popup.raise_()
+  #   self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
+  #   self.project._logger.info("application.showSamplePopup()")
+  #
+  # def showSampleAnalysis(self, position='bottom', relativeTo=None):
+  #   """
+  #   Displays Sample Analysis Module
+  #   """
+  #   showSa = MixtureAnalysis(self._project)
+  #   self.moduleArea.addModule(showSa, position=position, relativeTo=relativeTo)
+  #   self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
+  #   self.project._logger.info("application.showSampleAnalysis()")
+  #
+  # def showScreeningSetup(self, position='bottom', relativeTo=None):
+  #   showSc = ScreeningSettings(self.project)
+  #   self.moduleArea.addModule(showSc, position=position)
+  #   self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
+  #   self.project._logger.info("application.showScreeningSetup()")
+  #
+  # def showHitAnalysisModule(self, position='top', relativeTo:CcpnModule=None):
+  #
+  #   self.showScreeningHits = ShowScreeningHits(self.project)
+  #   self.moduleArea.addModule(self.showScreeningHits, position, None)
+  #   spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
+  #   # spectrum only to create a display
+  #   self.project.strips[0].viewBox.autoRange()
+  #   self.showScreeningHits._clearDisplayView()
+  #   self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=self.showScreeningHits)
+  #     # returns a clean display
+  #
+  #   self.pythonConsole.writeConsoleCommand("application.showScreeningHits()")
+  #   self.project._logger.info("application.showScreeningHits()")
 
   def showMetabolomicsModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     self.showMm = MetabolomicsModule(self.project)

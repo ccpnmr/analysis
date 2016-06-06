@@ -54,11 +54,13 @@ class AtomSelector(CcpnModule):
     self.moveLabel=False
     self.pickAndAssignWidget = Widget(self)
     # self.pickAndAssignWidget.setMaximumSize(500, 300)
-    if self._appBase.ui.mainWindow is not None:
-      self.pythonConsole = self._appBase.ui.mainWindow.pythonConsole
-    else:
-      self.pythonConsole = self._appBase._mainWindow.pythonConsole
     self.parent = parent
+
+    if self.parent is not None:
+      self.pythonConsole = self.parent.pythonConsole
+    else:
+      self.pythonConsole = self._parent.pythonConsole
+
     self.current = self.parent._appBase.current
     self.project = project
     self.current.registerNotify(self._predictAssignments, 'peaks')

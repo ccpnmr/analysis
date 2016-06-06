@@ -15,17 +15,20 @@ class MixtureOptimisation(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self, project):
+  def __init__(self, parent=None, project=None):
     super(MixtureOptimisation, self)
     CcpnModule.__init__(self, name='Mixture Optimisation')
 
     self.project = project
-    if self._appBase.ui.mainWindow is not None:
-      self.mainWindow = self._appBase.ui.mainWindow
-    else:
-      self.mainWindow = self._appBase._mainWindow
+    # if self._appBase.ui.mainWindow is not None:
+    #   self.mainWindow = self._appBase.ui.mainWindow
+    # else:
+    #   self.mainWindow = self._appBase._mainWindow
+
+    self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
-    self.generalPreferences = self.project._appBase.preferences.general
+    self.framework = self.mainWindow.framework
+    self.generalPreferences = self.framework.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
     # self.excludeRegions = ExcludeRegions
     print('This module is under implementation, not active yet')

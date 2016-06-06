@@ -15,6 +15,9 @@ class SpectrumGroupEditor(QtGui.QDialog):
 
     if spectrumGroup is not None:
       self.spectrumGroup = spectrumGroup
+    else:
+      self.spectrumGroup = self.getSpectrumGroup()
+
 
     self.colourScheme = project._appBase.preferences.general.colourScheme
 
@@ -80,6 +83,14 @@ class SpectrumGroupEditor(QtGui.QDialog):
 
     self._populateListWidgetLeft()
     self._initialLabelListWidgetRight()
+
+  def getSpectrumGroup(self):
+    if len(self.project.spectrumGroups) > 0:
+      spectrumGroup = self.project.spectrumGroups[0]
+      return spectrumGroup
+    else:
+      spectrumGroup = self.project.newSpectrumGroup(name='NewSpectrumGroup')
+      return spectrumGroup
 
   def _populateListWidgetLeft(self):
     self.spectrumGroupListWidgetLeft.clear()

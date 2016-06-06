@@ -21,16 +21,21 @@ Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 class ShowScreeningHits(CcpnModule):
-  def __init__(self, project, **kw):
+  def __init__(self, parent=None, project=None, **kw):
     super(ShowScreeningHits, self)
     CcpnModule.__init__(self, name='Hit Analysis')
     self.project = project
     self.setFixedHeight(300)
     # self.createDummyHits()
-    if self._appBase.ui.mainWindow is not None:
-      self.mainWindow = self._appBase.ui.mainWindow
-    else:
-      self.mainWindow = self._appBase._mainWindow
+    # if self._appBase.ui.mainWindow is not None:
+    #   self.mainWindow = self._appBase.ui.mainWindow
+    # else:
+    #   self.mainWindow = self._appBase._mainWindow
+    self.mainWindow = parent
+    self.moduleArea = self.mainWindow.moduleArea
+    self.framework = self.mainWindow.framework
+    self.generalPreferences = self.framework.preferences.general
+    self.colourScheme = self.generalPreferences.colourScheme
     self.moduleArea = self.mainWindow.moduleArea
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 

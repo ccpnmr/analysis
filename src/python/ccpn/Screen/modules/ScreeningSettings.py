@@ -19,17 +19,21 @@ Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
 
 class ScreeningSettings(CcpnModule):
-  def __init__(self, project, **kw):
+  def __init__(self, parent=None, project=None, **kw):
     super(ScreeningSettings, self)
     CcpnModule.__init__(self, name='Screening Settings')
     self.project = project
     # self.setFixedHeight(400)
-    if self._appBase.ui.mainWindow is not None:
-      mainWindow = self._appBase.ui.mainWindow
-    else:
-      mainWindow = self._appBase._mainWindow
-    self.moduleArea = mainWindow.moduleArea
-    self.colourScheme = self.project._appBase.preferences.general.colourScheme
+    # if self._appBase.ui.mainWindow is not None:
+    #   mainWindow = self._appBase.ui.mainWindow
+    # else:
+    #   mainWindow = self._appBase._mainWindow
+
+    self.mainWindow = parent
+    self.moduleArea = self.mainWindow.moduleArea
+    self.framework = self.mainWindow.framework
+    self.generalPreferences = self.framework.preferences.general
+    self.colourScheme = self.generalPreferences.colourScheme
 
     self.mainFrame = QtGui.QFrame()
     self.mainLayout = QtGui.QVBoxLayout()

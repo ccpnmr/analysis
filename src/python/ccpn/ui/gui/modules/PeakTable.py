@@ -138,6 +138,17 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists)
 
 
+  def __del__(self):
+    self.project.unRegisterNotifier('Peak', 'create', self._refreshTable)
+    self.project.unRegisterNotifier('Peak', 'modify', self._refreshTable)
+    self.project.unRegisterNotifier('Peak', 'rename', self._refreshTable)
+    self.project.unRegisterNotifier('Peak', 'delete', self._refreshTable)
+    self.project.unRegisterNotifier('PeakList', 'create', self._updatePeakLists)
+    self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
+    self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
+    self.project.unRegisterNotifier('PeakList', 'delete', self._updatePeakLists)
+
+
   def _updatePeakLists(self, value):
     self.peakTable.objectLists = self.project.peakLists
     self.peakTable._updateSelectorContents()

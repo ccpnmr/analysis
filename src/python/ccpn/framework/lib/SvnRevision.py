@@ -36,7 +36,10 @@ __revision = None
 def revision(update=True):
   global __revision
   if __revision is None:
-    __revision = _getRevisionNumber()
+    try:
+      __revision = _getRevisionNumber()
+    except:
+      __revision = REVISION
     if update is True:
       _changeStoredRevisionNumber()
   return __revision

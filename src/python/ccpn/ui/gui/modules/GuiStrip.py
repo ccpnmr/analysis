@@ -248,7 +248,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
   #   self.viewBox.sigStateChanged.connect(self.moveAxisCodeLabels)
   #   self.viewBox.sigRangeChanged.connect(self.updateRegion)
 
-  def newPhasingTrace(self):
+  def _newPhasingTrace(self):
     for spectrumView in self.spectrumViews:
       spectrumView._newPhasingTrace()
       

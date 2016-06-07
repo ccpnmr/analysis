@@ -26,10 +26,10 @@ import os
 import subprocess
 import re
 
-__all__ = ['revision',]
+__all__ = ['applicationVersion', 'revision']
 
-
-REVISION = '9380'
+applicationVersion = '3.0.0.m0'
+REVISION = '9429'
 __revision = None
 
 

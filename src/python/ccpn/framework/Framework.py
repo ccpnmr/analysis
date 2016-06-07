@@ -39,6 +39,8 @@ from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 from ccpn.util.Common import uniquify
 
+from ccpn.framework.lib import SvnRevision
+
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 
@@ -142,6 +144,7 @@ class Framework:
     self.args = args
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
+    self.revision = SvnRevision.revision()
 
     printCreditsText(sys.stderr, applicationName, applicationVersion)
 

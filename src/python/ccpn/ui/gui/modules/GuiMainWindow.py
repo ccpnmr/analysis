@@ -124,7 +124,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.setProject(project)
 
     self.setWindowTitle('%s %s (Revision: %s): %s' % (self._appBase.applicationName,
-                                            self._appBase.applicationVersion, revision,
+                                            self._appBase.applicationVersion, self._appBase.revision,
                                             project.name))
 
   def _startBackupTimer(self):

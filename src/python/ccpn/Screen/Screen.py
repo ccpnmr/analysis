@@ -1,4 +1,4 @@
-from ccpn.core.lib.Version import applicationVersion
+from ccpn.framework.lib.SvnRevision import applicationVersion
 from ccpn.framework.Framework import defineProgramArguments, Framework
 
 applicationName = 'Screen'

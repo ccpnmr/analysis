@@ -105,7 +105,8 @@ class Assign(Framework):
           if item in list(MODULE_DICT.keys()):
             obj = modules.get(item)
             if not obj:
-             func = getattr(self.ui.mainWindow, MODULE_DICT[item])
+             # func = getattr(self.ui.mainWindow, MODULE_DICT[item])
+             func = getattr(self, MODULE_DICT[item])
              func()
         for s in layout['float']:
           typ, contents, state = s[0]['main']
@@ -116,7 +117,8 @@ class Assign(Framework):
               print(obj)
               obj = modules.get(item[1])
               if not obj:
-                func = getattr(self.ui.mainWindow, MODULE_DICT[item[1]])
+                # func = getattr(self.ui.mainWindow, MODULE_DICT[item[1]])
+                func = getattr(self, MODULE_DICT[item[1]])
                 func()
         self.ui.mainWindow.moduleArea.restoreState(layout)
 

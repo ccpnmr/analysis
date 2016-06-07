@@ -239,11 +239,10 @@ class ShowScreeningHits(CcpnModule):
     currentDisplayed = self.project.strips[0]
     for spectrumView in currentDisplayed.spectrumViews:
       spectrumView.delete()
-    if self._appBase.ui.mainWindow is not None:
-      mainWindow = self._appBase.ui.mainWindow
-    else:
-      mainWindow = self._appBase._mainWindow
-    mainWindow.clearMarks()
+
+    if len(self.project.windows) > 0:
+      self.mainWindow = self.project.windows[0]
+      self.mainWindow.clearMarks()
     return currentDisplayed
 
   def _clearListWidget(self):

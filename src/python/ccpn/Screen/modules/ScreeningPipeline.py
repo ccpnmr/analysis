@@ -222,6 +222,8 @@ class MatchPeaks(QtGui.QWidget):
     QtGui.QWidget.__init__(self, parent)
 
     self.project = project
+    if len(self.project.windows)>0:
+     self.mainWindow = self.project.windows[0]
     self.screeningSettingModule = parent.parent()
 
     self.minimumDistanceValue = str(0.005)
@@ -283,11 +285,11 @@ class MatchPeaks(QtGui.QWidget):
 
   def _showHitsModule(self):
     # self.screeningSettingModule.close()
-    showScreeningHits = ShowScreeningHits(self.project)
-    if self._appBase.ui.mainWindow is not None:
-      self.mainWindow = self._appBase.ui.mainWindow
-    else:
-      self.mainWindow = self._appBase._mainWindow
+    showScreeningHits = ShowScreeningHits(parent=self.mainWindow, project=self.project)
+    # if self._appBase.ui.mainWindow is not None:
+    #   self.mainWindow = self._appBase.ui.mainWindow
+    # else:
+    #   self.mainWindow = self._appBase._mainWindow
     showScreeningHitsModule = self.mainWindow.moduleArea.addModule(showScreeningHits, position='bottom')
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
 

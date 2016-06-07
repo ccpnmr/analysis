@@ -33,10 +33,6 @@ class MixtureAnalysis(CcpnModule):
     CcpnModule.__init__(self, name='Mixture Analysis')
 
     self.project = project
-    # if self._appBase.ui.mainWindow is not None:
-    #   self.mainWindow = self._appBase.ui.mainWindow
-    # else:
-    #   self.mainWindow = self._appBase._mainWindow
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
     self.framework = self.mainWindow.framework
@@ -167,11 +163,11 @@ class MixtureAnalysis(CcpnModule):
     self.selectedTablePeaks = self.peakTable.getSelectedObjects()
     for peak in self.selectedTablePeaks:
       if peak.isSelected:
-        print(self.project._appBase.current.peaks, 'currents')
+        print(self.project.framework.current.peaks, 'currents')
         # self.project._appBase.current.clearPeaks()
       else:
         peak.isSelected = True
-        self.project._appBase.current.peak = peak
+        self.current.peak = peak
 
   def _findSelectedPeaks(self, peaks:None):
     ''' this callback, registered with a notifier, allows to select a peak either on the table, compoundView or
@@ -180,8 +176,8 @@ class MixtureAnalysis(CcpnModule):
     selectedPeaks = []
     if len(self.project.strips)>0:
       currentDisplayed = self.project.strips[0]
-      if len(self.project._appBase.current.peaks):
-        self.currentPeaks = self.project._appBase.current.peaks
+      if len(self.project.framework.current.peaks):
+        self.currentPeaks = self.project.framework.current.peaks
         if len(self.peakTable.objects)>0:
           for peak in self.currentPeaks:
             if peak in self.peakTable.objects:
@@ -212,11 +208,8 @@ class MixtureAnalysis(CcpnModule):
 
   def _toggleComponentButton(self, spectrum, sample, componentButton):
     '''  Toggling the component button will populate the peak table and display the molecule on compoundViewer '''
-    if self._appBase.ui.mainWindow is not None:
-      mainWindow = self._appBase.ui.mainWindow
-    else:
-      mainWindow = self._appBase._mainWindow
-    mainWindow.clearMarks()
+
+    self.mainWindow.clearMarks()
     pressedButton = self.sender()
 
     buttons = []
@@ -691,11 +684,8 @@ class MixtureAnalysis(CcpnModule):
   def _navigateToPosition(self, peaks):
     ''' for a given peak, it navigates to the peak position on the display  '''
     displayed = self.project.strips[0].spectrumDisplay
-    if self._appBase.ui.mainWindow is not None:
-      mainWindow = self._appBase.ui.mainWindow
-    else:
-      mainWindow = self._appBase._mainWindow
-    mainWindow.clearMarks()
+
+    self.mainWindow.clearMarks()
     for peak in peaks:
       navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 
@@ -754,7 +744,7 @@ class MixtureAnalysis(CcpnModule):
   #   self.close()
   def _exportMixturesToXlsx(self):
     ''' Export a simple xlxs file from the results '''
-    dataFrame = self.createDataFrame()
+    dataFrame = self.createMixturesDataFrame()
 
     fType = 'XLSX (*.xlsx)'
     dialog = QtGui.QFileDialog
@@ -765,4 +755,10 @@ class MixtureAnalysis(CcpnModule):
     mixtureOptimisation = MixtureOptimisation(self.project)
     mixtureOptimisationModule = self.moduleArea.addModule(mixtureOptimisation, position='bottom')
 
+  def createMixturesDataFrame(self):
+    from pandas import DataFrame
+    sampleColumn = [str(sample.pid) for sample in self.project.samples if hasattr(sample, 'minScore')]
+    sampleComponents = [str(sample.spectra) for sample in self.project.samples]
+    df = DataFrame({'Mixture': [c.id for c in self.project.sampleComponents]})
 
+    return df

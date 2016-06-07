@@ -18,6 +18,7 @@ class Screen(Framework):
     super()._setupMenus()
 
     menuSpec = ('Screen',[
+                         ("Lookup Setup "      , self.showLookupSetupPopup ),
                          ("Generate Mixtures " , self.showMixtureGenerationPopup, [('shortcut', 'cs')]),
                          ("Mixtures Analysis " , self.showSampleAnalysis,         [('shortcut', 'st')]),
                          ("Screening Settings" , self.showScreeningSetup,         [('shortcut', 'pp')]),
@@ -27,6 +28,13 @@ class Screen(Framework):
 
     self.addApplicationMenuSpec(menuSpec)
 
+  def showLookupSetupPopup(self):
+    from ccpn.Screen.popups.LookupSetupPopup import LookupSetupPopup
+    popup = LookupSetupPopup(parent=self.ui.mainWindow, project=self.project)
+    popup.exec_()
+    popup.raise_()
+    self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
+    self.project._logger.info("application.showSamplePopup()")
 
   def showMixtureGenerationPopup(self):
     """

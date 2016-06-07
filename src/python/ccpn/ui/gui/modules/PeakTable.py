@@ -75,7 +75,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     # self.label.show()
     self.project = project
 
-
     self.peakLists = project.peakLists
     self.label = Label(self, 'Peak List:')
 
@@ -125,6 +124,25 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     if selectedList is not None:
       self.peakListPulldown.setCurrentIndex(self.peakListPulldown.findText(selectedList.pid))
 
+    self.__registerNotifiers()
+
+
+  def __registerNotifiers(self):
+    self.project.registerNotifier('Peak', 'create', self._refreshTable)
+    self.project.registerNotifier('Peak', 'modify', self._refreshTable)
+    self.project.registerNotifier('Peak', 'rename', self._refreshTable)
+    self.project.registerNotifier('Peak', 'delete', self._refreshTable)
+    self.project.registerNotifier('PeakList', 'create', self._updatePeakLists)
+    self.project.registerNotifier('PeakList', 'modify', self._updatePeakLists)
+    self.project.registerNotifier('PeakList', 'rename', self._updatePeakLists)
+    self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists)
+
+
+  def _updatePeakLists(self, value):
+    self.peakTable.objectLists = self.project.peakLists
+    self.peakTable._updateSelectorContents()
+
+
   def _subtractPeakLists(self):
     """
     Subtracts a selected peak list from the peak list currently displayed in the peak table and
@@ -146,7 +164,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
     for peakObject in self.peakTable.table.getSelectedObjects():
       peakObject.delete()
-    self.peakTable.updateTable()
+    self._refreshTable()
 
 
   def _selectPeak(self, peak:Peak, row:int, col:int):
@@ -181,7 +199,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
 
   def _refreshTable(self, item):
-    self.peakTable._updateContents()
+    self.peakTable.updateTable()
 
 
 

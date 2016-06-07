@@ -204,6 +204,9 @@ class PeakList(AbstractWrapperObject):
     self._project.suspendNotification()
 
     try:
+      if dataRange[0] < dataRange[1]:
+        dataRange[0], dataRange[1] = dataRange[1], dataRange[0]
+      # code below assumes that dataRange[1] > dataRange[0]
       peaks = []
       spectrum = self.spectrum
       data1d = spectrum._apiDataSource.get1dSpectrumData()

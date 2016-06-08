@@ -130,10 +130,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   # override of Qt setVisible
   def setVisible(self, visible):
     GuiSpectrumView.setVisible(self, visible)
-    self.borderItem.setVisible(visible)
+    if not self._appBase.preferences.general.spectrumBorderHidden:
+      self.borderItem.setVisible(visible)
     
   def _setupBorderItem(self):
-          
+    
     apiSpectrumView = self._apiStripSpectrumView.spectrumView
     dataDims = apiSpectrumView.orderedDataDims
     ll = apiSpectrumView.dataSource.sortedDataDims()
@@ -151,7 +152,15 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.borderItem = QtGui.QGraphicsRectItem(rect)
     self.borderItem.setPen(pg.functions.mkPen(colour[:3], width=1, style=QtCore.Qt.DotLine))
     self.strip.viewBox.addItem(self.borderItem)
+    
+    self.borderItem.setVisible(not self._appBase.preferences.general.spectrumBorderHidden)
         
+  def _setBorderItemHidden(self, checked):
+    """
+    # CCPN INTERNAL - called by _toggleGeneralOptions method of PreferencesPopup.
+    """
+    self.borderItem.setVisible(not self._appBase.preferences.general.spectrumBorderHidden and self.isVisible())
+  
   def _addSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
       strip.plotWidget.scene().addItem(self)

@@ -103,6 +103,11 @@ class PreferencesPopup(QtGui.QDialog):
     self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNative'))
     row += 1
 
+    self.spectrumBorderLabel = Label(self, text="Hide Spectrum Border: ", grid=(row, 0))
+    self.spectrumBorderBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.spectrumBorderHidden)
+    self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'spectrumBorderHidden'))
+    row += 1
+
     self.licenceLabel = Label(self, text='Licence', grid=(row, 0))
     self.licenceButton = Button(self, text='Show', grid=(row, 1), gridSpan=(1, 1), callback=self._showLicenceInfo)
     row += 1
@@ -178,7 +183,11 @@ class PreferencesPopup(QtGui.QDialog):
       else:
         for strip in self.project.strips:
           strip.guiSpectrumDisplay.spectrumUtilToolBar.show()
-
+    elif preference == 'spectrumBorderHidden':
+      for strip in self.project.strips:
+        for spectrumView in strip.spectrumViews:
+          spectrumView._setBorderItemHidden(checked)
+        
   def _toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)
 

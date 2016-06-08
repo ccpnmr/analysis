@@ -124,7 +124,34 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self._addSpectrumItem(self.strip)
 
     self._setupTrace()
+    
+    self._setupBorderItem()
 
+  # override of Qt setVisible
+  def setVisible(self, visible):
+    GuiSpectrumView.setVisible(self, visible)
+    self.borderItem.setVisible(visible)
+    
+  def _setupBorderItem(self):
+          
+    apiSpectrumView = self._apiStripSpectrumView.spectrumView
+    dataDims = apiSpectrumView.orderedDataDims
+    ll = apiSpectrumView.dataSource.sortedDataDims()
+    # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
+    dimIndices = [x and ll.index(x) for x in dataDims]
+    xDim = dimIndices[0]
+    yDim = dimIndices[1]
+    
+    spectrumLimits = self.spectrum.spectrumLimits
+    xLimits = spectrumLimits[xDim]
+    yLimits = spectrumLimits[yDim]
+
+    colour = Colour.rgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
+    rect = QtCore.QRectF(xLimits[0], yLimits[0], xLimits[1]-xLimits[0], yLimits[1]-yLimits[0])
+    self.borderItem = QtGui.QGraphicsRectItem(rect)
+    self.borderItem.setPen(pg.functions.mkPen(colour[:3], width=1, style=QtCore.Qt.DotLine))
+    self.strip.viewBox.addItem(self.borderItem)
+        
   def _addSpectrumItem(self, strip):
     if self not in strip.plotWidget.scene().items():
       strip.plotWidget.scene().addItem(self)
@@ -530,7 +557,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       return
 
     self.okDataFile = True
-    
+        
     # NBNB this should NEVER be called if self.strip is None (i.e. self is deleted)
     # if self.isVisible() and self.strip is not None:
     if self.isVisible() and not self.isDeleted:

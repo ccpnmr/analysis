@@ -216,7 +216,8 @@ class Framework:
 
     self.project = project
     self.ui.initialize(self._mainWindow)
-    self.setPythonConsole()
+    if self.ui.application is not None: # Are we using a Qt based GUI?
+      self.setPythonConsole()
     # Get the mainWindow out of the framework once it's been transferred to ui
     del self._mainWindow
 

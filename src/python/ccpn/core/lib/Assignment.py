@@ -33,6 +33,7 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               'NE2', 'NH1', 'NH2', 'NZ']}
 
 
+import typing
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrResidue import NmrResidue
@@ -431,4 +432,45 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
 
 
 
+def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict:
+  """From one or more peakLists belonging to the same spectrum,
+  get a dictionary of magnetisationTransferTuple (See Spectrum.magnetisationTransfers
+  for documentation) to a set of NmrAtom pairs tha are coupled by the magnetisation transfer.
+  If the two dimensions have the same nucleus, the NmrAtom pairs are sorted, otherwise
+  they are in the dimension order.
 
+  Peak.assignedNmrAtoms are used to determine which NmrAtoms are connected"""
+
+  # For subsequent filtering, I recommend:
+  # isInterOnlyExpt (this file)
+  # NmrAtom.boundNmrAtoms
+
+  result = {}
+  if peakLists:
+
+    spectrum = peakLists[0].spectrum
+    if any (x for x in peakLists[1:] if x.spectrum is not spectrum):
+      raise ValueError("PeakLists do not belong to the same spectrum: %s" % peakLists)
+
+    magnetisationTransfers = spectrum.magnetisationTransfers
+    for mt in magnetisationTransfers:
+      result[mt] = set()
+
+    # Get sets of NmrAtom pairs
+    for peakList in peakLists:
+      for peak in peakList:
+        for assignment in peak.assignedNmrAtoms:
+          for mt ,aSet in result.items():
+            nmrAtoms = (assignment[mt[0]-1], assignment[mt[1]-1])
+            if not None in nmrAtoms:
+              aSet.add(nmrAtoms)
+
+    # Sort NmrAtoms where the nucleus is the same on both sides (or one is undetermined)
+    for mt, aSet in result:
+      tt = spectrum.isotopeCodes
+      isotopeCodes = (tt[mt[0]-1], tt[mt[1]-1])
+      if None in isotopeCodes or isotopeCodes[0] == isotopeCodes[1]:
+        newSet = set(tuple(sorted(x for x in nmrAtoms)) for nmrAtoms in aSet)
+        result[mt] = newSet
+  #
+  return result

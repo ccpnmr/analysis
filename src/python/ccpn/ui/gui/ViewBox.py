@@ -319,10 +319,14 @@ class ViewBox(pg.ViewBox):
             stripAxisCodes = self.current.strip.axisOrder
             # TODO: Special casing 1D here, seems like a hack.
             if len(spectrumView.spectrum.axisCodes) == 1:
-              # TODO: because 1d peaks only have an x-axis, this will not select based on intensity!!!
+              y0 = startPosition.y()
+              y1 = endPosition.y()
+              y0, y1 = min(y0, y1), max(y0, y1)
               xAxis = 0
+              scale = peakList.spectrum.scale
               for peak in peakList.peaks:
-                if xPositions[0] < float(peak.position[xAxis]) < xPositions[1]:
+                height = peak.height * scale # TBD: is the scale already taken into account in peak.height???
+                if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
                   peak.isSelected = True
                   self.current.addPeak(peak)
             else:

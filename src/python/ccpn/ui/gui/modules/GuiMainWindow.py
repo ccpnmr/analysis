@@ -515,21 +515,21 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     popup = PeakFindPopup(parent=self, project=self.project)
     popup.exec_()
 
-  def showSequenceGraph(self, position:str='bottom', nextTo:CcpnModule=None):
-    """
-    Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
-    """
-    self.assigner = SequenceGraph(project=self.framework.project)
-    if hasattr(self.framework, 'bbModule'):
-      self.framework.bbModule._connectSequenceGraph(self.assigner)
-
-    if nextTo is not None:
-      self.moduleArea.addModule(self.assigner, position=position, relativeTo=nextTo)
-    else:
-      self.moduleArea.addModule(self.assigner, position=position)
-    self.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
-    self.project._logger.info("application.showSequenceGraph()")
-    return self.assigner
+  # def showSequenceGraph(self, position:str='bottom', nextTo:CcpnModule=None):
+  #   """
+  #   Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
+  #   """
+  #   self.assigner = SequenceGraph(self, project=self.framework.project)
+  #   if hasattr(self.framework, 'bbModule'):
+  #     self.framework.bbModule._connectSequenceGraph(self.assigner)
+  #
+  #   if nextTo is not None:
+  #     self.moduleArea.addModule(self.assigner, position=position, relativeTo=nextTo)
+  #   else:
+  #     self.moduleArea.addModule(self.assigner, position=position)
+  #   self.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
+  #   self.project._logger.info("application.showSequenceGraph()")
+  #   return self.assigner
 
   def _raiseObjectProperties(self, item):
     """get object from Pid and dispatch call depending on type

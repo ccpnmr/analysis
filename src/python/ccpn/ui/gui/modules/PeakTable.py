@@ -31,6 +31,8 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
+from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation
+
 from ccpn.ui.gui.popups.SelectObjectsPopup import SelectObjectsPopup
 
 
@@ -45,7 +47,7 @@ class PeakTable(CcpnModule):
     self.peakList = PeakListSimple(self, project, selectedList=selectedList)
     self.layout.addWidget(self.peakList)
     self.current = project._appBase.current
-    self.current.registerNotify(self.peakList._selectPeakInTable, 'peaks')
+    # self.current.registerNotify(self.peakList._selectPeakInTable, 'peak')
     self.closeModule = self._closeModule
     if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
@@ -55,7 +57,7 @@ class PeakTable(CcpnModule):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
-    self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peaks')
+    self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peak')
     self.close()
 
 
@@ -74,7 +76,11 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     # self.label = DockLabel(name, self)
     # self.label.show()
     self.project = project
-
+    self.sampledDims = {}
+    if selectedList is None:
+      self.selectedList = self.project.peakLists[0]
+    else:
+      self.selectedList = selectedList
     self.peakLists = project.peakLists
     self.label = Label(self, 'Peak List:')
 
@@ -94,7 +100,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     label = Label(self, ' Position Unit:')
     widget2.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
     self.posUnitPulldown = PulldownList(self, texts=UNITS, callback=self._refreshTable)
-    widget2.layout().addWidget(self.posUnitPulldown , 0, 1, QtCore.Qt.AlignLeft)
+    widget2.layout().addWidget(self.posUnitPulldown, 0, 1, QtCore.Qt.AlignLeft)
     self.layout().addWidget(widget2, 0, 1)
 
     self.subtractPeakListsButton = Button(self, text='Subtract PeakLists',
@@ -117,32 +123,64 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
               'Textual notes about the peak']
 
     self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=callback, selectionCallback=self._selectPeak,
-                                       columns=columns, selector=self.peakListPulldown,
-                                       tipTexts=tipTexts, multiSelect=True, unitPulldown=self.posUnitPulldown)
+                                       getColumnsFunction=self.getExtraColumns, selector=self.peakListPulldown,
+                                       multiSelect=True, unitPulldown=self.posUnitPulldown)
 
     self.layout().addWidget(self.peakTable, 1, 0, 1, 8)
     if selectedList is not None:
-      self.peakListPulldown.setCurrentIndex(self.peakListPulldown.findText(selectedList.pid))
+      self.peakListPulldown.setCurrentIndex(selectedList)
 
     self.__registerNotifiers()
 
+  def getExtraColumns(self, peakList):
+
+      columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
+               ('Volume', lambda pk: self._getPeakVolume(pk))]
+
+      tipTexts=['Peak serial number',
+              'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
+              'Integral of spectrum intensity around peak location, according to chosen volume method',
+              'Textual notes about the peak']
+      k = 1
+      numDim = peakList.spectrum.dimensionCount
+      for i in range(numDim):
+        j = i + 1
+
+        sampledDim = self.sampledDims.get(i)
+        if sampledDim:
+          text = 'Sampled\n%s' % sampledDim.conditionVaried
+          tipText='Value of sampled plane'
+          unit = sampledDim
+
+        else:
+          text = 'Pos F%d' % j
+          tipText='Peak position in dimension %d' % j
+          unit = self.posUnitPulldown.currentText()
+        c = (text, lambda pk, dim=i, unit=unit:getPeakPosition(pk, dim, unit))
+        columns.insert(k, c)
+        tipTexts.insert(k, tipText)
+        k+=1
+
+      return columns, tipTexts
+
 
   def __registerNotifiers(self):
-    self.project.registerNotifier('Peak', 'create', self._refreshTable)
-    self.project.registerNotifier('Peak', 'modify', self._refreshTable)
-    self.project.registerNotifier('Peak', 'rename', self._refreshTable)
-    self.project.registerNotifier('Peak', 'delete', self._refreshTable)
-    self.project.registerNotifier('PeakList', 'create', self._updatePeakLists)
-    self.project.registerNotifier('PeakList', 'modify', self._updatePeakLists)
-    self.project.registerNotifier('PeakList', 'rename', self._updatePeakLists)
-    self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists)
+
+    self.project.registerNotifier('Peak', 'create', self._refreshPeakTable, onceOnly=True)
+    self.project.registerNotifier('Peak', 'modify', self._refreshPeakTable, onceOnly=True)
+    self.project.registerNotifier('Peak', 'rename', self._refreshPeakTable, onceOnly=True)
+    self.project.registerNotifier('Peak', 'delete', self._refreshPeakTable, onceOnly=True)
+    self.project.registerNotifier('PeakList', 'create', self._updatePeakLists, onceOnly=True)
+    self.project.registerNotifier('PeakList', 'modify', self._updatePeakLists, onceOnly=True)
+    self.project.registerNotifier('PeakList', 'rename', self._updatePeakLists, onceOnly=True)
+    self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists, onceOnly=True)
 
 
   def __del__(self):
-    self.project.unRegisterNotifier('Peak', 'create', self._refreshTable)
-    self.project.unRegisterNotifier('Peak', 'modify', self._refreshTable)
-    self.project.unRegisterNotifier('Peak', 'rename', self._refreshTable)
-    self.project.unRegisterNotifier('Peak', 'delete', self._refreshTable)
+    self.project.unRegisterNotifier('Peak', 'create', self._refreshPeakTable)
+    self.project.unRegisterNotifier('Peak', 'modify', self._refreshPeakTable)
+    self.project.unRegisterNotifier('Peak', 'rename', self._refreshPeakTable)
+    self.project.unRegisterNotifier('Peak', 'delete', self._refreshPeakTable)
     self.project.unRegisterNotifier('PeakList', 'create', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
@@ -185,9 +223,9 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     if not peak:
       return
     else:
-      self.project._appBase.current.unRegisterNotify(self._selectPeakInTable, 'peaks')
+    #   self.project._appBase.current.unRegisterNotify(self._selectPeakInTable, 'peaks')
       self.project._appBase.current.peak = peak
-      self.project._appBase.current.registerNotify(self._selectPeakInTable, 'peaks')
+      # self.project._appBase.current.registerNotify(self._selectPeakInTable, 'peaks')
 
   def _getPeakVolume(self, peak:Peak):
     """
@@ -209,7 +247,11 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
       return '%7.2E' % float(peak.height*peak.peakList.spectrum.scale)
 
 
-  def _refreshTable(self, item):
+  def _refreshTable(self, item=None):
+    self.peakTable.updateTable()
+
+
+  def _refreshPeakTable(self, peak):
     self.peakTable.updateTable()
 
 

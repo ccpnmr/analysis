@@ -25,11 +25,12 @@ __version__ = "$Revision$"
 from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.DropBase import DropBase
+
 from ccpn.ui.gui.modules.CreateSequence import CreateSequence
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
-# from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
+
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
-# from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
+from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
@@ -37,10 +38,10 @@ from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
+from ccpn.ui.gui.widgets.MessageDialog import showInfo
+
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-
-from ccpn.ui.gui.widgets.MessageDialog import showInfo
 
 # NB RestraintList ('RL') is not in for the moment. Needs to be added later
 # NB the order matters!
@@ -64,7 +65,7 @@ classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
 # Try putting in e.g. <New PeakList>, <New SampleComponent> etc.
 # This would 1) Clutter the SideBar with unnecessary words
 #            2) Break the convention that hitting new under a list of objects or parent creates
-#               a new object of that type or a new child.
+#               a new object of that type, or a new child, respectively.
 
 NEW_ITEM_DICT = {
 
@@ -81,7 +82,7 @@ NEW_ITEM_DICT = {
   'Chains': 'CreateSequence',
   'Substances': 'newSubstance',
   'Chemical Shift Lists': 'newChemicalShiftList',
-  'Data Sets': 'newDataSet',
+  'DataSets': 'newDataSet',
   'SpectrumGroups': 'newSpectrumGroup',
 }
 ### Flag example code removed in revision 7686

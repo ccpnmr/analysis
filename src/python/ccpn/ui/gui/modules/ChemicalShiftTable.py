@@ -76,7 +76,7 @@ class NmrAtomShiftTable(ChemicalShiftTable):
 
     self.chemicalShiftLists = chemicalShiftLists
 
-    label = Label(self, "ChemicalShift List:")
+    label = Label(self, "Chemical Shift List:")
     widget1 = QtGui.QWidget(self)
     widget1.setLayout(QtGui.QGridLayout())
     widget1.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)

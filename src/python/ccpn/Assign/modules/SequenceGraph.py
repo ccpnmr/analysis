@@ -31,8 +31,13 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Project import Project
 from ccpn.core.lib.Assignment import getNmrResiduePrediction
-from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Font import Font
+from ccpn.ui.gui.widgets.Icon import Icon
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.ToolBar import ToolBar
 from ccpnmodel.ccpncore.lib.assignment.Assignment import getConnectedAtoms
 
 
@@ -46,7 +51,7 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
 
     super(GuiNmrAtom, self).__init__()
     self.setPlainText(text)
-    self.setPos(QtCore.QPointF(pos[0], pos[1]))
+    self.setPos(QtCore.QPointF((pos[0]-self.boundingRect().x()), (pos[1]-self.boundingRect().y())))
     self.nmrAtom = nmrAtom
     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
     self.connectedAtoms = 0
@@ -114,6 +119,12 @@ class GuiNmrResidue(QtGui.QGraphicsTextItem):
         else:
           self.show()
 
+  def mousePressEvent(self, event):
+    self.nmrResidue.project._appBase.current.nmrResidue = self.nmrResidue
+    # print(self.nmrResidue.project._appBase.current.guiNmrResidue)
+    # print(self.nmrResidue)
+    self.setSelected(True)
+
 
 
 class AssignmentLine(QtGui.QGraphicsLineItem):
@@ -139,7 +150,7 @@ class SequenceGraph(CcpnModule):
   A module for the display of stretches of sequentially linked and assigned stretches of
   Nmr Residues.
   """
-  def __init__(self, project=None):
+  def __init__(self, parent, project=None):
 
     super(SequenceGraph, self).__init__(name='Sequence Graph')
     self.project = project
@@ -153,7 +164,25 @@ class SequenceGraph(CcpnModule):
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
     self.residueCount = 0
-    self.layout.addWidget(self.scrollArea)
+    self.modeLabel = Label(self, 'Mode  ', grid=(0, 0), hAlign='r')
+    self.modePulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 1), callback=self.setMode)
+    self.nmrChain = Label(self, 'NmrChain  ', grid=(0, 2), hAlign='r')
+    self.nmrChainPulldown = PulldownList(self, grid=(0, 3), gridSpan=(1, 1))
+    self.modePulldown.setData(['backbone', 'fragment', 'complete'])
+    self.nmrChainPulldown.setData([c.pid for c in self.project.nmrChains])
+    self.editingToolbar = ToolBar(self, grid=(0, 5), gridSpan=(1, 1), hAlign='r')
+    self.disconnectPreviousAction = self.editingToolbar.addAction("disconnectPrevious", self.disconnectPreviousNmrResidue)
+    self.disconnectPreviousIcon = Icon('icons/previous')
+    self.disconnectPreviousAction.setIcon(self.disconnectPreviousIcon)
+    self.disconnectAction = self.editingToolbar.addAction("disconnect", self.disconnectNmrResidue)
+    self.disconnectIcon = Icon('icons/minus')
+    self.disconnectAction.setIcon(self.disconnectIcon)
+    self.disconnectNextAction = self.editingToolbar.addAction("disconnectNext", self.disconnectNextNmrResidue)
+    self.disconnectNextIcon = Icon('icons/next')
+    self.disconnectNextAction.setIcon(self.disconnectNextIcon)
+    self.parent = parent
+
+    self.layout.addWidget(self.scrollArea, 4, 0, 1, 6)
     self.atomSpacing = 66
     self.guiResiduesShown = []
     self.predictedStretch = []
@@ -162,8 +191,31 @@ class SequenceGraph(CcpnModule):
     self.scene.dragEnterEvent = self.dragEnterEvent
     self.guiNmrResidues = []
     self.guiNmrAtomDict = {}
-
+    self.editingToolbar.hide()
     self.project.registerNotifier('NmrResidue', 'rename', self._resetNmrResiduePidForAssigner)
+
+
+  def setMode(self, mode):
+    if mode != 'fragment':
+      self.editingToolbar.hide()
+    else:
+      self.editingToolbar.show()
+
+
+  def disconnectPreviousNmrResidue(self):
+    self.project._appBase.current.nmrResidue.disconnectPrevious()
+
+
+  def closeModule(self):
+    print(self.parent)
+    delattr(self.parent, 'assigner')
+    self.close()
+
+  def disconnectNextNmrResidue(self):
+    self.project._appBase.current.nmrResidue.disconnectNext()
+
+  def disconnectNmrResidue(self):
+    self.project._appBase.current.nmrResidue.disconnect()
 
   def _resetNmrResiduePidForAssigner(self, nmrResidue, oldPid:str):
     """Reset pid for NmrResidue and all offset NmrResidues"""
@@ -219,10 +271,25 @@ class SequenceGraph(CcpnModule):
     self._addResiduePredictions(nmrResidue, atoms['CA'])
 
 
-  def addSideChainAtoms(self, nmrResidue, cbAtom):
+  def addSideChainAtoms(self, nmrResidue, cbAtom, colour):
+    residue = {}
     for k, v in ATOM_POSITION_DICT[nmrResidue.residueType].items():
-      position = [cbAtom.x()+v[0], cbAtom.y()+v[1]]
-      self.scene.addItem(self._createGuiNmrAtom(k, position, nmrResidue.fetchNmrAtom(name=k)))
+      if k !='boundAtoms':
+        position = [cbAtom.x()+v[0], cbAtom.y()+v[1]]
+        nmrAtom = nmrResidue.fetchNmrAtom(name=k)
+        newAtom = self._createGuiNmrAtom(k, position, nmrAtom)
+        self.scene.addItem(newAtom)
+        residue[k] = newAtom
+        self.guiNmrAtomDict[nmrAtom] = newAtom
+
+    # print(residue)
+    for boundAtomPair in ATOM_POSITION_DICT[nmrResidue.residueType]['boundAtoms']:
+      atom1 = residue[boundAtomPair[0]]
+      atom2 = residue[boundAtomPair[1]]
+      newLine = AssignmentLine(atom1.x(), atom1.y(), atom2.x(), atom2.y(), colour, 1.0)
+      self.scene.addItem(newLine)
+
+
 
 
   def addResidue(self, nmrResidue:NmrResidue, direction:str, atomSpacing=None):
@@ -292,17 +359,17 @@ class SequenceGraph(CcpnModule):
           else:
             cbAtom2 = self._createGuiNmrAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
           if 'N' in nmrAtoms:
-            nAtom2 = self._createGuiNmrAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()),
+            nAtom2 = self._createGuiNmrAtom("N", (caAtom2.x()-self.atomSpacing, coAtom2.y()),
                                   nmrResidue.fetchNmrAtom(name='N'))
           else:
-            nAtom2 = self._createGuiNmrAtom("N",(caAtom2.x()-self.atomSpacing, coAtom2.y()))
+            nAtom2 = self._createGuiNmrAtom("N", (caAtom2.x()-self.atomSpacing, coAtom2.y()))
           if 'H' in nmrAtoms:
             hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
                                   nmrResidue.fetchNmrAtom(name='H'))
           else:
             hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
 
-          atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CB":cbAtom2, "CO":coAtom2, 'N-1': oldGuiResidue['N']}
+          atoms = {'H':hAtom2, "N": nAtom2, "CA": caAtom2, "CB": cbAtom2, "CO": coAtom2, 'N-1': oldGuiResidue['N']}
 
           self.guiResiduesShown.insert(0, atoms)
           self.predictedStretch.insert(0, nmrResidue)
@@ -494,15 +561,22 @@ class SequenceGraph(CcpnModule):
 # Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
 import math
 atomSpacing = 66
-cos36 = math.cos(math.degrees(60))
-sin36 = math.cos(math.degrees(60))
-cos54 = math.cos(math.degrees(60))
-cos60 = math.cos(math.degrees(60))
-sin60 = math.sin(math.degrees(60))
+cos36 = math.cos(math.pi/5)
+sin36 = math.sin(math.pi/5)
+tan36 = math.tan(math.pi/5)
+
+cos54 = math.cos(3*math.pi/10)
+sin54 = math.sin(3*math.pi/10)
+
+cos60 = math.cos(math.pi/3)
+sin60 = math.sin(math.pi/3)
+sin72 = math.sin(2*math.pi/5)
+cos72 = math.cos(2*math.pi/5)
 
 ATOM_POSITION_DICT = {
 
-  'ALA': {'HB%': [0.0, -0.75*atomSpacing]},
+  'ALA': {'HB%': [0.0, -0.75*atomSpacing],
+          'boundAtoms': ['']},
   'CYS': {'SG':  [0.0, -1*atomSpacing], 'HG': [0, -1.75*atomSpacing]},
   'ASP': {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
           'CG': [0, -1*atomSpacing]},
@@ -592,10 +666,36 @@ ATOM_POSITION_DICT = {
           'NZ': [0, -4*atomSpacing], 'HZ%': [0, -4.75*atomSpacing],
           },
   'HIS':  {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
-           'CG':  [0, -1*atomSpacing], 'ND1': [-1*atomSpacing, -1*atomSpacing-(atomSpacing*cos54)],
-           'CD2': [atomSpacing, (-1*atomSpacing-atomSpacing*cos54)],
-           'NE2': [atomSpacing/2, -167.56],
-           'CD1': [-0.5*atomSpacing, -167.56],
+           'CG':  [0, -1*atomSpacing], 'ND1': [-1*atomSpacing, -1*(atomSpacing+(atomSpacing/(2*tan36)))],
+           'CD2': [atomSpacing, -1*(atomSpacing+(atomSpacing/(2*tan36)))],
+           'NE2': [atomSpacing/2, -1*(atomSpacing+(atomSpacing/(2*sin36))+(atomSpacing/(2*tan36)))],
+           'CD1': [-0.5*atomSpacing, -1*(atomSpacing+(atomSpacing/(2*sin36))+(atomSpacing/(2*tan36)))],
+          },
+
+
+  'TRP':  {'HBx': [atomSpacing*-0.75, 0.0], 'HBy': [atomSpacing*0.75, 0.0],
+           'CG':  [0, -1*atomSpacing], 'CD1': [atomSpacing, -1*atomSpacing],
+           'NE1': [atomSpacing+(atomSpacing*cos72), -1*(atomSpacing+(atomSpacing*sin72))],
+           'CE2': [atomSpacing+(atomSpacing*cos72)-(atomSpacing*sin54),
+                   -1*(atomSpacing+(atomSpacing*sin72)+(atomSpacing*cos54))],
+           'CD2': [-1*(atomSpacing*cos72), -1*(atomSpacing+(atomSpacing*sin72))],
+           'CE3': [atomSpacing+(atomSpacing*cos72)-(atomSpacing*sin54)-(2*(atomSpacing*sin60)),
+                   -1*(atomSpacing+(atomSpacing*sin72)+(atomSpacing*cos54))],
+           'CZ2': [atomSpacing+(atomSpacing*cos72)-(atomSpacing*sin54),
+                   -1*(2*atomSpacing+(atomSpacing*sin72)+(atomSpacing*cos54))],
+           'CZ3': [atomSpacing+(atomSpacing*cos72)-(atomSpacing*sin54)-(2*(atomSpacing*sin60)),
+                   -1*(2*atomSpacing+(atomSpacing*sin72)+(atomSpacing*cos54))],
+           'CH2': [-1*(atomSpacing*cos72), -1*(2*atomSpacing+(atomSpacing*sin72)+(atomSpacing*cos54)+(atomSpacing*cos60))],
+
+           'boundAtoms': [['CG', 'CD1'], ['CG', 'CD2'], ['CD2', 'CE3'], ['CD2', 'CE2'],
+                          ['CD1', 'NE1'], ['CE2', 'CZ2'], ['CE3', 'CZ3'], ['CZ3', 'CH2'],
+                          ['CZ2', 'CH2'], ['NE1', 'CE2']]
+          },
+
+  'PRO':  {
+           'CB': [atomSpacing*cos72, -1*(atomSpacing*sin72)+atomSpacing],
+           'CG': [-0.5*atomSpacing, -1*atomSpacing/(2*tan36)],
+           'CD': [-1*(atomSpacing+(atomSpacing*cos72)), -1*(atomSpacing*sin72)+atomSpacing],
           }
 }
 

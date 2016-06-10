@@ -689,7 +689,7 @@ class Framework:
     popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project)
     popup.exec_()
 
-  def showIntegrationModule(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+  def showIntegrationModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     spectrumDisplay = self.ui.mainWindow.createSpectrumDisplay(self.project.spectra[0])
     from ccpn.AnalysisMetabolomics.Integration import IntegrationTable, IntegrationWidget
     spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.module,
@@ -778,7 +778,7 @@ class Framework:
     self.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
     self.project._logger.info("application.addBlankDisplay()")
 
-  def showChemicalShiftTable(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+  def showChemicalShiftTable(self, position:str='bottom', relativeTo:CcpnModule=None):
     """
     Displays Chemical Shift table.
     """
@@ -798,7 +798,7 @@ class Framework:
     self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
 
-  def showPeakTable(self, position: str = 'left', relativeTo: CcpnModule = None, selectedList: PeakList = None):
+  def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):
     """
     Displays Peak table on left of main window with specified list selected.
     """
@@ -809,24 +809,24 @@ class Framework:
     self.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
 
-  def showSequenceGraph(self, position: str = 'bottom', nextTo: CcpnModule = None):
+  def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
     """
     Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
     """
     from ccpn.Assign.modules.SequenceGraph import SequenceGraph
-    self.assigner = SequenceGraph(project=self.project)
+    self.assigner = SequenceGraph(self, project=self.project)
     if hasattr(self, 'bbModule'):
       self.bbModule._connectSequenceGraph(self.assigner)
 
-    if nextTo is not None:
-      self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=nextTo)
+    if relativeTo is not None:
+      self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=relativeTo)
     else:
       self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position)
     self.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
     self.project._logger.info("application.showSequenceGraph()")
     return self.assigner
 
-  def showAtomSelector(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+  def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
     """Displays Atom Selector."""
     from ccpn.Assign.modules.AtomSelector import AtomSelector
     self.atomSelector = AtomSelector(parent=self.ui.mainWindow, project=self.project)

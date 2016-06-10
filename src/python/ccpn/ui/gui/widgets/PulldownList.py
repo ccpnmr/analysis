@@ -57,7 +57,8 @@ class PulldownList(QtGui.QComboBox, Base):
                           """)
     self.setMinimumWidth(100)
     self.setMinimumHeight(25)
-    self.setSizeAdjustPolicy(self.AdjustToContents)
+    self.view().setMinimumHeight(50)
+
 
 
     self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)

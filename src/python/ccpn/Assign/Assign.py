@@ -128,7 +128,7 @@ class Assign(Framework):
     popup.exec_()
 
 
-  def showPickAndAssignModule(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+  def showPickAndAssignModule(self, position:str= 'bottom', relativeTo:CcpnModule=None):
     from ccpn.Assign.modules.PickAndAssignModule import PickAndAssignModule
 
     """Displays Pick and Assign module."""
@@ -140,18 +140,21 @@ class Assign(Framework):
     return self.paaModule
 
 
-  def showBackboneAssignmentModule(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+  def showBackboneAssignmentModule(self, position:str= 'bottom', relativeTo:CcpnModule=None):
     """
     Displays Backbone Assignment module.
     """
     from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
 
-    self.bbModule = BackboneAssignmentModule(self.project)
+    self.bbModule = BackboneAssignmentModule(self, self.project)
 
     mainWindow = self.ui.mainWindow
     mainWindow.moduleArea.addModule(self.bbModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
     self.project._logger.info("application.showBackboneAssignmentModule()")
+    if hasattr(self, 'assigner'):
+      print('yes it does')
+      self.bbModule._connectSequenceGraph(self.assigner)
 
     return self.bbModule
 
@@ -167,7 +170,7 @@ class Assign(Framework):
     self.project._logger.info("application.showAssignmentModule()")
 
 
-  def showResidueInformation(self, position: str = 'bottom', relativeTo: CcpnModule = None):
+  def showResidueInformation(self, position: str='bottom', relativeTo:CcpnModule = None):
     """Displays Residue Information module."""
     from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
 

@@ -65,14 +65,23 @@ class PickAndAssignModule(CcpnModule, Base):
     self.displayList.removeItem = self._removeListWidgetItem
     self.refreshButton.hide()
 
+    self.project.registerNotifier('NmrResidue', 'rename', self._updateListWidget)
+    self.project.registerNotifier('NmrResidue', 'rename', self._updateNmrResidueTable)
+
   def _updateListWidget(self, item):
     if self.displayList.count() == 1 and self.displayList.item(0).text() == '<All>':
       self.displayList.takeItem(0)
     self.displayList.addItem(self.project.getByPid(item).pid)
     self.spectrumSelectionWidget.update()
 
+  def _updateNmrResidueTable(self, nmrResidue, oldPid):
+    self.nmrResidueTable.nmrResidueTable.updateTable()
+    self.nmrResidueTable.nmrResidueTable._updateSelectorContents()
+
+
   def _removeListWidgetItem(self):
     self.displayList.takeItem(self.displayList.currentRow())
+
     if self.displayList.count() == 0:
       self.displayList.addItem('<All>')
     self.spectrumSelectionWidget.update()

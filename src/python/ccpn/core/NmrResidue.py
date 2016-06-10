@@ -474,7 +474,7 @@ class NmrResidue(AbstractWrapperObject):
     creating new connected NmrChains as necessary"""
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
-    defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)#
+    defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
 
     if apiNmrChain is None:
       # offset residue: no-op

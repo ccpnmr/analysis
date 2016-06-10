@@ -46,7 +46,7 @@ from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 class BackboneAssignmentModule(CcpnModule):
 
-  def __init__(self, project):
+  def __init__(self, parent, project):
 
     super(BackboneAssignmentModule, self).__init__(parent=None, name='Backbone Assignment')
 
@@ -56,7 +56,7 @@ class BackboneAssignmentModule(CcpnModule):
     self.nmrChains = project.nmrChains
     self.matchModules = []
     self.nmrResidueTable = NmrResidueTable(self.widget1, project, callback=self._startAssignment)
-
+    self.parent = parent
     self.settingsButton = Button(self.nmrResidueTable, icon='icons/applications-system',
                                 grid=(0, 5), hPolicy='fixed', toggle=True)
 
@@ -72,6 +72,26 @@ class BackboneAssignmentModule(CcpnModule):
     self.chemicalShiftListPulldown = PulldownList(self.widget2, grid=(2, 1), callback=self._setupShiftDicts)
     self.chemicalShiftListPulldown.setData([shiftlist.pid for shiftlist in project.chemicalShiftLists])
     self.settingsButton.setChecked(False)
+
+    self.project.registerNotifier('NmrResidue', 'rename', self._updateNmrResidueTable)
+    self.project.registerNotifier('NmrChain', 'delete', self._updateNmrChainPulldown)
+    self.project.registerNotifier('NmrChain', 'create', self._updateNmrChainList)
+
+
+
+  def _updateNmrChainList(self, nmrChain):
+    self.nmrResidueTable.nmrResidueTable.objectLists.append(nmrChain)
+
+  def _updateNmrChainPulldown(self, nmrChain):
+    self.nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
+    self.nmrResidueTable.nmrResidueTable._updateSelectorContents()
+
+  def _updateNmrResidueTable(self, nmrResidue, oldPid):
+    if nmrResidue == self.current.nmrResidue:
+      # self.nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
+      self.nmrResidueTable.nmrResidueTable._updateSelectorContents()
+      self.nmrResidueTable.nmrResidueTable._changeObjectList(nmrResidue.nmrChain)
+      # self.nmrResidueTable.nmrResidueTable.updateTable()
 
 
   def _toggleWidget2(self):
@@ -280,6 +300,11 @@ class BackboneAssignmentModule(CcpnModule):
           matrix[score] = res
 
     return matrix, scores
+
+  def closeModule(self):
+    print(self.parent)
+    delattr(self.parent, 'bbModule')
+    self.close()
 
 
 

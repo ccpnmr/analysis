@@ -254,7 +254,10 @@ class ViewBox(pg.ViewBox):
                                        selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
                 apiSpectrumView.spectrumView.displayNegativeContours))
           else:
-            newPeaks = peakList.pickPeaks1d(spectrumView,  [startPosition.x(), endPosition.x()])
+            y0 = startPosition.y()
+            y1 = endPosition.y()
+            y0, y1 = min(y0, y1), max(y0, y1)
+            newPeaks = peakList.pickPeaks1d(spectrumView,  [startPosition.x(), endPosition.x()], [y0, y1])
 
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:

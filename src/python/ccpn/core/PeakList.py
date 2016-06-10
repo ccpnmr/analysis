@@ -196,7 +196,7 @@ class PeakList(AbstractWrapperObject):
     return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
 
   # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
-  def pickPeaks1d(self, data1d, dataRange, size:int=3, mode:str='wrap') -> List['Peak']:
+  def pickPeaks1d(self, data1d, dataRange, intensityRange=None, size:int=3, mode:str='wrap') -> List['Peak']:
     """
     Pick 1D peaks form data1d float array
     """
@@ -211,18 +211,24 @@ class PeakList(AbstractWrapperObject):
       spectrum = self.spectrum
       data1d = spectrum._apiDataSource.get1dSpectrumData()
       selectedData = data1d[:, (data1d[0] < dataRange[0]) * (data1d[0] > dataRange[1])]
-      threshold = spectrum.estimateNoise()*10
-      if (selectedData.size == 0) or (selectedData.max() < threshold):
-       return peaks
-      boolsVal = selectedData[1] > threshold
+      if selectedData.size == 0:
+        return peaks
       maxFilter = maximum_filter(selectedData[1], size=size, mode=mode)
       boolsMax = selectedData[1] == maxFilter
-      boolsPeak = boolsVal & boolsMax
+      if intensityRange is None: 
+        spectrum.estimateNoise()*10
+        if selectedData.max() < threshold:
+          return peaks
+        boolsVal = selectedData[1] > threshold
+        boolsPeak = boolsVal & boolsMax
+      else:
+        boolsPeak = boolsMax
       indices = argwhere(boolsPeak) # True positional indices
       for position in indices:
         peakPosition = [float(selectedData[0][position])]
         height = selectedData[1][position]
-        peaks.append(self.newPeak(height=float(height), position=peakPosition))
+        if intensityRange is None or intensityRange[0] <= height <= intensityRange[1]:
+          peaks.append(self.newPeak(height=float(height), position=peakPosition))
 
     finally:
       self._project.resumeNotification()

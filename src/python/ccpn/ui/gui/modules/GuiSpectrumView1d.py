@@ -52,7 +52,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
     # if self.spectrum.sliceColour is None:
     #   self.spectrum.sliceColour = list(spectrumColours.keys())[0]
 
-    self.data = self._apiDataSource.get1dSpectrumData()
+    ###self.data = self._apiDataSource.get1dSpectrumData()
+    self.data = self.spectrum.positions, self.spectrum.intensities
 
     # for strip in self.strips:
     if self.spectrum.sliceColour is None:
@@ -209,6 +210,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     print(self.plot)
     
 
+  # TBD: should function below be removed???
   def getSliceData(self, spectrum=None):
     """
     Gets slice data for drawing 1d spectrum using specified spectrum.

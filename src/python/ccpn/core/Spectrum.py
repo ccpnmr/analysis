@@ -24,6 +24,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import numpy
 import operator
 import collections
 from typing import Sequence, Tuple, Optional
@@ -58,6 +59,13 @@ class Spectrum(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = Nmr.DataSource._metaclass.qualifiedName()
+
+  def __init__(self, project:Project, wrappedData:Nmr.ShiftList):
+
+    self._intensities = None
+    self._positions = None
+
+    super().__init__(project, wrappedData)
 
   # CCPN properties
   @property
@@ -827,6 +835,34 @@ class Spectrum(AbstractWrapperObject):
                 result.append(MagnetisationTransferTuple(dim1, jj+1, tt[0], tt[1]))
     #
     return tuple(result)
+
+  @property
+  def intensities(self) -> numpy.ndarray:
+    """ spectral intensities as NumPy array for 1D spectra """
+    
+    if self.dimensionCount != 1:
+      raise Exception('Currently this method only works for 1D spectra')
+      
+    if self._intensities is None:
+      self._intensities = self.scale * self.getSliceData()
+      
+    return self._intensities
+
+  @property
+  def positions(self) -> numpy.ndarray:
+    """ spectral region in ppm as NumPy array for 1D spectra """
+    
+    if self.dimensionCount != 1:
+      raise Exception('Currently this method only works for 1D spectra')
+      
+    if self._positions is None:
+      spectrumLimits = self.spectrumLimits[0]
+      pointCount = self.pointCounts[0]
+      # WARNING: below assumes that spectrumLimits are "backwards" (as is true for ppm)
+      scale = (spectrumLimits[0] - spectrumLimits[1]) / pointCount
+      self._positions = spectrumLimits[1] + scale*numpy.arange(pointCount, dtype='float32')
+      
+    return self._positions
 
   # Implementation functions
 

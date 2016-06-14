@@ -219,8 +219,7 @@ class Framework:
 
     self.project = project
     self.ui.initialize(self._mainWindow)
-    if self.ui.application is not None: # Are we using a Qt based GUI?
-      self.setPythonConsole()
+
     # Get the mainWindow out of the framework once it's been transferred to ui
     del self._mainWindow
 
@@ -760,9 +759,9 @@ class Framework:
     Displays sequence creation popup.
     """
     from ccpn.ui.gui.modules.CreateSequence import CreateSequence
-    popup = CreateSequence(self.ui.mainWindow, project=self.project).exec_()
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
     self.project._logger.info("application.showMoleculePopup()")
+    popup = CreateSequence(self.ui.mainWindow, project=self.project).exec_()
 
   def toggleSequenceModule(self):
     """Toggles whether Sequence Module is displayed or not"""
@@ -881,35 +880,20 @@ class Framework:
     return self.atomSelector
 
 
-
-  def setPythonConsole(self):
-    # TODO : set initial messages
-
-    from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
-    self.namespace = {
-                        'loadProject': self.loadProject,
-                        'newProject': self.newProject, 'loadData': self.loadData, 'application': self,
-                        'preferences': self.preferences, 'project': self.project,
-                        'current': self.current,
-                        'undo': self.undo, 'redo': self.redo
-                     }
-
-    self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self.ui.mainWindow)
-
   def toggleConsole(self):
     """
     Toggles whether python console is displayed at bottom of the main window.
     """
 
     if 'PYTHON CONSOLE' in self.ui.mainWindow.moduleArea.findAll()[1]:
-      if self.pythonConsoleModule.isVisible():
-        self.pythonConsoleModule.hide()
+      if self.ui.mainWindow.pythonConsoleModule.isVisible():
+        self.ui.mainWindow.pythonConsoleModule.hide()
       else:
         self.ui.mainWindow.moduleArea.moveModule(self.pythonConsoleModule, 'bottom', None)
     else:
-      self.pythonConsoleModule = CcpnModule(name='Python Console')
-      self.pythonConsoleModule.layout.addWidget(self.pythonConsole)
-      self.ui.mainWindow.moduleArea.addModule(self.pythonConsoleModule, 'bottom')
+      self.ui.mainWindow.pythonConsoleModule = CcpnModule(name='Python Console')
+      self.ui.mainWindow.pythonConsoleModule.layout.addWidget(self.ui.mainWindow.pythonConsole)
+      self.ui.mainWindow.moduleArea.addModule(self.ui.mainWindow.pythonConsoleModule, 'bottom')
 
 
   ##################################################################################################################

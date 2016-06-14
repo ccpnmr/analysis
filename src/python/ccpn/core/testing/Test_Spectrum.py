@@ -85,7 +85,24 @@ class SpectrumTest(WrapperTesting):
     self.assertEqual(peakList.pid, 'PL:NEWNAME.1')
     self.assertEqual(peakList.peaks[0].pid, 'PK:NEWNAME.1.1')
 
+class SpectrumIntensitiesTest(WrapperTesting):
 
+  # Path of project to load (None for new project)
+  projectPath = 'Ccpn1Dtesting'
+
+  def test_intensities_get(self):
+    spectrum = self.project.getSpectrum('1D-1')
+    intensities = spectrum.intensities
+    self.assertIs(intensities, spectrum.intensities)
+    
+  def test_intensities_set(self):
+    spectrum = self.project.getSpectrum('1D-1')
+    intensities = spectrum.intensities
+    intensities[0] = 19.23
+    constant1 = intensities[0] # have to do as separate step o/w constant1 has type float instead of numpy.float32
+    constant2 = spectrum.intensities[0]
+    self.assertEqual(constant1, constant2)
+  
 class DummySpectrumTest(WrapperTesting):
 
   # Path of project to load (None for new project)

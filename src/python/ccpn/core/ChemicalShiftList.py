@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -144,7 +145,9 @@ class ChemicalShiftList(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.ChemicalShiftList.name" % Pid.altCharacter)
 
     else:
+      self._startFunctionCommandBlock('rename', value)
       self._wrappedData.name = value
+      self._project._appBase._endCommandBlock()
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> List[Nmr.ShiftList]:
@@ -176,11 +179,19 @@ def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
                           isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
   """Create new ccpn.ChemicalShiftList"""
 
+  defaults = collections.OrderedDict((('name', None), ('unit', 'ppm'), ('isSimulated', False),
+                                     ('comment', None)))
+
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.ChemicalShiftList.name" % Pid.altCharacter)
 
-  obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
-                                       details=comment)
+  self._startFunctionCommandBlock('newChemicalShiftList', values=locals(), defaults=defaults,
+                                  parName='newChemicalShiftList')
+  try:
+    obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
+                                         details=comment)
+  finally:
+    self._project._appBase._endCommandBlock()
   return self._data2Obj.get(obj)
 
 Project.newChemicalShiftList = _newChemicalShiftList

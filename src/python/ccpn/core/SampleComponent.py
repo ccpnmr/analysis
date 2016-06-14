@@ -22,6 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from typing import Tuple
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -30,7 +32,6 @@ from ccpnmodel.ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleC
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpn.util import Pid
-from typing import Tuple
 
 
 class SampleComponent(AbstractWrapperObject):
@@ -166,18 +167,31 @@ def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
   Automatically creates the corresponding Substance if the name is not already taken
   """
 
+  # Default values for 'new' function, as used for echoing to console
+  defaults = collections.OrderedDict(
+    (('name',None), ('labeling',None), ('role', None),
+     ('concentration',None), ('concentrationError',None), ('concentrationUnit', None),
+     ('purity',None), ('comment', None),
+     )
+  )
+
   for ss in (name, labeling):
     if ss and Pid.altCharacter in ss:
       raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
                        (Pid.altCharacter, name, labeling))
 
   apiSample = self._wrappedData
-  substance = self._project.fetchSubstance(name=name, labeling=labeling)
-  obj = apiSample.newSampleComponent(name=name, labeling=substance.labeling,
-                                     concentration=concentration,
-                                     concentrationError=concentrationError,
-                                     concentrationUnit=concentrationUnit, details=comment,
-                                     purity=purity)
+  self._startFunctionCommandBlock('newSampleComponent', name, values=locals(), defaults=defaults,
+                                  parName='newSampleComponent')
+  try:
+    substance = self._project.fetchSubstance(name=name, labeling=labeling)
+    obj = apiSample.newSampleComponent(name=name, labeling=substance.labeling,
+                                       concentration=concentration,
+                                       concentrationError=concentrationError,
+                                       concentrationUnit=concentrationUnit, details=comment,
+                                       purity=purity)
+  finally:
+    self._project._appBase._endCommandBlock()
   return self._project._data2Obj.get(obj)
 
 Sample.newSampleComponent = _newSampleComponent

@@ -22,7 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-# from typing import Sequence
+import typing
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Chain import Chain
@@ -73,10 +74,7 @@ class NmrChain(AbstractWrapperObject):
 
   @property
   def label(self) -> str:
-    """Identifying label of NmrChain.
-
-    Defaults to the canonical name '@ijk' (for unconnected) or '#ijk' (for connected) NmrChains
-    (ijk is an integer.), but freely changeable."""
+    """Identifying label of NmrChain. Defaults to '?'"""
     return self._wrappedData.label
 
   @label.setter
@@ -137,13 +135,21 @@ class NmrChain(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
     else:
       # NB names that clash with existing NmrChains cause ValueError at the API level.
-      wrappedData.code = value
+      self._startFunctionCommandBlock('rename', value)
+      try:
+        wrappedData.code = value
+      finally:
+        self._project._appBase._endCommandBlock()
 
   def deassign(self):
     """Reset NmrChain back to its originalName, cutting all assignment links"""
-    self._wrappedData.code = None
+    self._startFunctionCommandBlock('deassign')
+    try:
+      self._wrappedData.code = None
+    finally:
+      self._project._appBase._endCommandBlock()
 
-  def assignConnectedResidues(self, firstResidue:Residue):
+  def assignConnectedResidues(self, firstResidue:typing.Union[Residue, str]):
     """Assign all NmrResidues in connected NmrChain sequentially,
     with the first NmrResidue assigned to firstResidue.
 
@@ -151,9 +157,17 @@ class NmrChain(AbstractWrapperObject):
     or if any of the Residues are missing or already assigned"""
 
     apiNmrChain = self._wrappedData
+    project = self._project
 
     if not self.isConnected:
       raise ValueError("assignConnectedResidues only allowed for connected NmrChains")
+
+    if isinstance(firstResidue, str):
+      xx = project.getByPid(firstResidue)
+      if xx is None:
+        raise ValueError("No object found matching Pid %s" % firstResidue)
+      else:
+        firstResidue = xx
 
     apiStretch = apiNmrChain.mainResonanceGroups
     if firstResidue.nmrResidue is not None:
@@ -175,9 +189,13 @@ class NmrChain(AbstractWrapperObject):
         residues.append(next)
 
     # If we get here we are OK - assign residues and delete NmrChain
-    for ii,res in enumerate(residues):
-      apiStretch[ii].assignedResidue = res._wrappedData
-    apiNmrChain.delete()
+    self._startFunctionCommandBlock('assignConnectedResidues', firstResidue)
+    try:
+      for ii,res in enumerate(residues):
+        apiStretch[ii].assignedResidue = res._wrappedData
+      apiNmrChain.delete()
+    finally:
+     self._project._appBase._endCommandBlock()
 
 
   @classmethod
@@ -208,17 +226,24 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
   :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later
   :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to '@ijk'/'#ijk'
   :param str comment: comment for new nmrChain (optional)"""
-  
+
+  defaults = collections.OrderedDict((('shortName', None), ('isConnected', False),
+                                     ('label', '?'), ('comment', None)))
+
   nmrProject = self._apiNmrProject
-  
+
   if shortName:
     if Pid.altCharacter in shortName:
       raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
-  else:
-    shortName = None
 
-  newApiNmrChain = nmrProject.newNmrChain(code=shortName, isConnected=isConnected, label=label,
-                                          details=comment)
+
+  self._startFunctionCommandBlock('newNmrChain', values=locals(), defaults=defaults,
+                                  parName='newNmrChain')
+  try:
+    newApiNmrChain = nmrProject.newNmrChain(code=shortName, isConnected=isConnected, label=label,
+                                            details=comment)
+  finally:
+    self._project._appBase._endCommandBlock()
   
   return self._data2Obj.get(newApiNmrChain)
   
@@ -229,15 +254,20 @@ def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   if shortName and Pid.altCharacter in shortName:
     raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
 
-  nmrProject = self._apiNmrProject
-  apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
-  if apiNmrChain is None:
-    if shortName and shortName[0] in '@#' and shortName[1:].isdigit():
-      raise ValueError("Cannot create new NmrChain with reserved name %s" % shortName)
+  self._startFunctionCommandBlock('fetchNmrChain', shortName, parName='newNmrChain')
+  try:
+    nmrProject = self._apiNmrProject
+    apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
+    if apiNmrChain is None:
+      if shortName and shortName[0] in '@#' and shortName[1:].isdigit():
+        raise ValueError("Cannot create new NmrChain with reserved name %s" % shortName)
+      else:
+        result = self._project.newNmrChain(shortName=shortName)
     else:
-      return self._project.newNmrChain(shortName=shortName)
-  else:
-    return self._data2Obj.get(apiNmrChain)
+      result = self._data2Obj.get(apiNmrChain)
+  finally:
+    self._project._appBase._endCommandBlock()
+  return result
 
   
 # Clean-up

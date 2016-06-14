@@ -833,7 +833,11 @@ class Spectrum(AbstractWrapperObject):
   def rename(self, value:str):
     """Rename Spectrum, changing Id and Pid"""
     if value:
-      self._wrappedData.name = value
+      self._startFunctionCommandBlock('rename', value)
+      try:
+        self._wrappedData.name = value
+      finally:
+        self._project._appBase._endCommandBlock()
     else:
       raise ValueError("Spectrum name must be set")
 
@@ -846,21 +850,25 @@ class Spectrum(AbstractWrapperObject):
   # Library functions
 
   def resetAssignmentTolerances(self):
-    """Reset aassignment tolerances to default values"""
+    """Reset assignment tolerances to default values"""
 
-    tolerances = [[]] * self.dimensionCount
-    for ii, isotopeCode in enumerate(self.isotopeCodes):
-      if isotopeCode == '1H':
-        tolerance = max([0.02, self.spectralWidths[ii]/self.pointCounts[ii]])
-        tolerances[ii] = tolerance
-      elif isotopeCode == '13C' or isotopeCode == '15N':
-        tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
-        tolerances[ii] = tolerance
-      else:
-        tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
-        tolerances[ii] = tolerance
+    self._startFunctionCommandBlock('resetAssignmentTolerances')
+    try:
+      tolerances = [[]] * self.dimensionCount
+      for ii, isotopeCode in enumerate(self.isotopeCodes):
+        if isotopeCode == '1H':
+          tolerance = max([0.02, self.spectralWidths[ii]/self.pointCounts[ii]])
+          tolerances[ii] = tolerance
+        elif isotopeCode == '13C' or isotopeCode == '15N':
+          tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
+          tolerances[ii] = tolerance
+        else:
+          tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
+          tolerances[ii] = tolerance
 
-    self.assignmentTolerances = tolerances
+      self.assignmentTolerances = tolerances
+    finally:
+      self._project._appBase._endCommandBlock()
 
   def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
 
@@ -893,13 +901,23 @@ def _newSpectrum(self:Project, name:str) -> Spectrum:
 def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
   """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
 
-  if name and Pid.altCharacter in name:
-    raise ValueError("Character %s not allowed in ccpn.Spectrum.name" % Pid.altCharacter)
+  if name:
+    if Pid.altCharacter in name:
+      raise ValueError("Character %s not allowed in ccpn.Spectrum.name" % Pid.altCharacter)
+    values = {'name':name}
+  else:
+    values = {}
 
-  return self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
+  self._startFunctionCommandBlock('_createDummySpectrum', axisCodes, values=values,
+                                  parName='newSpectrum')
+  try:
+    result = self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
+  finally:
+    self._project._appBase._endCommandBlock()
+  return result
 
 def _spectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):
-  """Add PeakList if none is present"""
+  """Add PeakList if none is present. For notifiers."""
   if not dataSource.findFirstPeakList(dataType='Peak'):
     dataSource.newPeakList()
 Project._setupApiNotifier(_spectrumMakeFirstPeakList, Nmr.DataSource, 'postInit')

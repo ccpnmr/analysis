@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import collections
 from ccpn.util import Pid
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -115,7 +116,11 @@ class Note(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
 
     else:
-      self._wrappedData.name = value
+      self._startFunctionCommandBlock('rename', value)
+      try:
+        self._wrappedData.name = value
+      finally:
+        self._project._appBase._endCommandBlock()
 
 
   # Implementation functions
@@ -128,11 +133,17 @@ class Note(AbstractWrapperObject):
 def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
   """Create new Note"""
 
+  defaults = collections.OrderedDict((('name', None), ('text', None)))
+
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
 
-  return self._data2Obj.get(self._wrappedData.newNote(text=text, name=name))
-
+  self._startFunctionCommandBlock('newNote', values=locals(), defaults=defaults,
+                                  parName='newNote')
+  try:
+    return self._data2Obj.get(self._wrappedData.newNote(text=text, name=name))
+  finally:
+    self._project._appBase._endCommandBlock()
     
     
 # Connections to parents:

@@ -352,9 +352,11 @@ class NmrStretchTest(WrapperTesting):
                                             mergeToExisting=True)
     self.assertIs(mergedResidue, nmrResidues[2])
     self.undo.undo()
-    self.undo.redo()
     self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
                      ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
+    self.undo.redo()
+    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+                     ['X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
 
 
 class NmrResidueTest(WrapperTesting):

@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.IntegralList import IntegralList
@@ -51,7 +51,6 @@ class Integral(AbstractWrapperObject):
 
   # Notifiers are handled through the Peak class (which shares the ApiPeak wrapped object)
   _registerClassNotifiers = False
-  
 
   # CCPN properties  
   @property
@@ -234,10 +233,13 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
                  pointLimits:Sequence[Tuple[float,float]]=()) -> Integral:
   """Create new ccpn.Integral within ccpn.IntegralList"""
 
-  undo = self._project._undo
-  if undo is not None:
-    undo.increaseBlocking()
-  self._project.blankNotification()
+  defaults = collections.OrderedDict((('value', None), ('valueError', None), ('bias', None),
+                                     ('slopes', None), ('figureOfMerit', 1.0), ('annotation', None),
+                                     ('comment', None), ('limits', ()), ('pointLimits', ()) ))
+
+  self._startFunctionCommandBlock('newIntegral', values=locals(), defaults=defaults,
+                                  parName='newIntegral')
+  self._project.blankNotification() # delay notifiers till peak is fully ready
   try:
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak(volume=value, volumeError=valueError, figOfMerit=figureOfMerit,
@@ -253,14 +255,7 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
 
   finally:
     self._project.unblankNotification()
-    if undo is not None:
-      undo.decreaseBlocking()
-
-  if undo is not None:
-    undo.newItem(apiPeak.delete, self.newIntegral, redoKwargs={
-       'value':value, 'valueError':valueError,'figureOfMerit':figureOfMerit,
-      'annotation':annotation, 'comment':comment, 'limits':limits,
-      'pointLimits':pointLimits, 'bias':bias, 'slopes':slopes})
+    self._project._appBase._endCommandBlock()
 
   # Do creation notifications
   result._finaliseAction('create')

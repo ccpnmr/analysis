@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import collections
 import datetime
 from typing import Sequence, Optional
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -51,7 +52,6 @@ class DataSet(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = ApiNmrConstraintStore._metaclass.qualifiedName()
-  
 
   # CCPN properties  
   @property
@@ -173,16 +173,26 @@ def _newDataSet(self:Project, title:str=None, programName:str=None, programVersi
                 dataPath:str=None, creationDate:datetime.datetime=None, uuid:str=None,
                 comment:str=None) -> DataSet:
   """Create new ccpn.DataSet"""
+
+  defaults = collections.OrderedDict((('title', None), ('programName', None),
+                                     ('programVersion', None), ('dataPath', None),
+                                     ('creationDate', None), ('uuid', None), ('comment', None))
+  )
   
   nmrProject = self._wrappedData
-  newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
-                                                                   name=title,
-                                                                   programName=programName,
-                                                                   programVersion=programVersion,
-                                                                   dataPath=dataPath,
-                                                                   creationDate=creationDate,
-                                                                   uuid=uuid,
-                                                                   details=comment)
+  self._startFunctionCommandBlock('newDataSet', values=locals(), defaults=defaults,
+                                  parName='newDataSet')
+  try:
+    newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
+                                                                     name=title,
+                                                                     programName=programName,
+                                                                     programVersion=programVersion,
+                                                                     dataPath=dataPath,
+                                                                     creationDate=creationDate,
+                                                                     uuid=uuid,
+                                                                     details=comment)
+  finally:
+    self._project._appBase._endCommandBlock()
   return self._data2Obj.get(newApiNmrConstraintStore)
     
     

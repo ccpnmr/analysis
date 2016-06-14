@@ -23,6 +23,8 @@ __version__ = "$Revision: 9315 $"
 #=========================================================================================
 
 import sys
+import collections
+import typing
 
 from ccpn.ui.Ui import Ui
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -44,15 +46,9 @@ class Gui(Ui):
   
   def __init__(self, framework):
     
-    self.framework = framework
-
-    self.application = None
-    self.mainWindow = None
+    Ui.__init__(self, framework)
 
     self._initQtApp()
-
-    # Controls if delete, rename, and create commands are automatically echoed to console
-    self._blankConsoleOutput = 0
 
 
   def _initQtApp(self):
@@ -100,6 +96,7 @@ class Gui(Ui):
 
     from ccpn.ui.gui.widgets import SpinSystemLabel
     project.registerNotifier('NmrResidue', 'rename', SpinSystemLabel._renameNmrResidueForGraphics)
+
 
     # API notifiers - see functions for comments on why this is done this way
     project._registerApiNotifier(GuiPeakListView._upDateAssignmentsPeakDimContrib,
@@ -162,46 +159,21 @@ class Gui(Ui):
     return mainWindow
 
 
-  def writeConsoleCommand(self, command:str, **objectParameters):
-    """Set keyword:value objectParameters to point to the relevant objects,
-    echo command in console, and set Undo
-
-    Example calls:
-
-    writeConsoleCommand("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
-
-    writeConsoleCommand(
-       "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
-       peak=peakOrPid)
+  def echoCommands(self, commands:typing.List[str]):
+    """Echo commands strings, one by one, to logger
+    and store them in internal list for perusal
     """
 
-    # NBNB replacement for equivalent command in IPythonConsole
-
-    # NBNB TODO not yet hooked up
-    project = self.framework.project
     console = self.framework.ui.mainWindow.pythonConsole
-    undo = project._undo
+    logger = self.framework.project._logger
 
-    if undo.blocking:
-      # While undo is blocked do nothing - echo will be done at top level of block
-      return
+    for command in commands:
+      console._write(command + '\n')
+      logger.info(command)
 
-    if self._blankConsoleOutput:
-      # Console output is suspended
-      return
-
-    # write lines getting objects by their Pids
-    for parameter in sorted(objectParameters):
-      value = objectParameters[parameter]
-      if not isinstance(value, str):
-        value = value.pid
-      console._write("%s = project.getByPid('%s')\n" % (parameter, value))
-
-    # execute command
-    console._write(command + '\n')
-
-    # set undo step
-    undo.newWaypoint()
+########################################################
+#
+#  Wrapper notifier functions
 
 
 

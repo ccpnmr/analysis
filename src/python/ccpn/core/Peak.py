@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import itertools
+import collections
 import operator
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -345,17 +346,24 @@ class Peak(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None]=None,
-             heightError:Optional[float]=None, volumeError:Union[float, None]=None,
+def _newPeak(self:PeakList,height:Optional[float]=None, volume:Optional[float]=None,
+             heightError:Optional[float]=None, volumeError:Optional[float]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), pointPosition:Sequence[float]=(),
             dimensionAssignments:Sequence[Sequence['NmrAtom']]=(),
             assignments:Sequence[Sequence[Optional['NmrAtom']]]=()) -> Peak:
   """Create new ccpn.Peak within ccpn.peakList"""
 
-  undo = self._project._undo
-  if undo is not None:
-    undo.increaseBlocking()
+  defaults = collections.OrderedDict(
+    (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),
+     ('figureOfMerit', 1.0), ('annotation', None), ('comment', None), ('position', ()),
+     ('pointPosition', ())
+    )
+  )
+  # NBNB TODO Add assignments as well
+
+  self._startFunctionCommandBlock('newPeak', values=locals(), defaults=defaults,
+                                  parName='newPeak')
   self._project.blankNotification()
   try:
     apiPeakList = self._apiPeakList
@@ -399,17 +407,8 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Union[float, None
       apiPeak.setAssignments(resonances)
 
   finally:
+    self._project._appBase._endCommandBlock()
     self._project.unblankNotification()
-    if undo is not None:
-      undo.decreaseBlocking()
-
-  if undo is not None:
-    undo.newItem(apiPeak.delete, self.newPeak, redoKwargs={
-      'height':height, 'volume':volume, 'heightError':heightError, 'volumeError':volumeError,
-      'figureOfMerit':figureOfMerit,
-      'annotation':annotation, 'comment':comment, 'position':position,
-      'pointPosition':pointPosition,  'dimensionAssignments':dimensionAssignments,
-      'assignments':assignments})
 
   result = self._project._data2Obj.get(apiPeak)
 
@@ -423,7 +422,7 @@ del _newPeak
 
 # Additional Notifiers:
 #
-# NB Thes API notifiers will be called for API peaks - which match both Peaks and Integrals
+# NB These API notifiers will be called for API peaks - which match both Peaks and Integrals
 className = Nmr.PeakDim._metaclass.qualifiedName()
 Project._apiNotifiers.append(
   ('_notifyRelatedApiObject', {'pathToObject':'peak', 'action':'change'}, className, ''),

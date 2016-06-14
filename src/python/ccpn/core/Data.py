@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Optional
+import collections
 from ccpnmodel.ccpncore.lib import Util as coreUtil
 from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
@@ -51,7 +52,6 @@ class Data(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = ApiData._metaclass.qualifiedName()
-
 
   # CCPN properties
   @property
@@ -146,6 +146,7 @@ class Data(AbstractWrapperObject):
     """Rename Data, changing its Id and Pid"""
     oldName = self.name
     undo = self._project._undo
+    self._startFunctionCommandBlock('rename', value)
     if undo is not None:
       undo.increaseBlocking()
 
@@ -160,6 +161,7 @@ class Data(AbstractWrapperObject):
         self._finaliseAction('change')
 
     finally:
+      self._project._appBase._endCommandBlock()
       if undo is not None:
         undo.decreaseBlocking()
 
@@ -178,6 +180,8 @@ def _newData(self:DataSet, name:str, attachedObjectPid:str=None,
              attachedObject:AbstractWrapperObject=None) -> Data:
   """Create new ccpn.Data within ccpn.DataSet"""
 
+  defaults = {'attachedObjectPid':None}
+
   project = self.project
 
   if attachedObject is not None:
@@ -188,7 +192,12 @@ def _newData(self:DataSet, name:str, attachedObjectPid:str=None,
         "Either attachedObject or attachedObjectPid must be None - values were %s and %s"
                       % (attachedObject, attachedObjectPid))
 
-  obj = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
+  self._startFunctionCommandBlock('newData', name, values={'attachedObjectPid':attachedObjectPid},
+                                  defaults=defaults, parName='newData')
+  try:
+    obj = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
+  finally:
+    self._project._appBase._endCommandBlock()
   return project._data2Obj.get(obj)
 
 DataSet.newData = _newData

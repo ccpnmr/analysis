@@ -29,11 +29,15 @@ NB Must conform to Python 2.1. Imported in ObjectDomain.
 import os
 import sys
 import datetime
+import random
 from collections import abc as collectionClasses
 from functools import total_ordering
 
 from ccpn.util import Path
 from ccpnmodel.ccpncore.lib import Constants as coreLibConstants
+
+# Max value used for random integer. Set to be expressible as a signed 32-bit integer.
+maxRandomInt =  2000000000
 
 WHITESPACE_AND_NULL =  {'\x00', '\t', '\n', '\r', '\x0b', '\x0c'}
 
@@ -232,8 +236,6 @@ def flattenIfNumpy(data, shape=None):
   #
   return data
 
-
-
 def stringToIdentifier(value:str) -> str:
   """Convert string to identifier, replacing non-alphanumeric values by underscore"""
   if value.isidentifier():
@@ -244,3 +246,9 @@ def stringToIdentifier(value:str) -> str:
 def getTimeStamp() -> str:
   """Get iso-formtted timestamp"""
   return datetime.datetime.today().isoformat()
+
+def getUuid(programName, timeStamp=None):
+  """Get UUid following the NEF convention"""
+  if timeStamp is None:
+    timeStamp = getTimeStamp()
+  return '%s-%s-%s' % (programName, timeStamp, random.randint(0, maxRandomInt))

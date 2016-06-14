@@ -37,7 +37,7 @@ class IntegralListTest(WrapperTesting):
 
 
     spectrum = self.project.createDummySpectrum(axisCodes=('Hc','Ch'), name='HSQC-tst')
-    integralList = spectrum.newIntegralList(name='Int2d', comment='No!')
+    integralList = spectrum.newIntegralList(title='Int2d', comment='No!')
     self.undo.undo()
     self.undo.redo()
     integral1 = integralList.newIntegral()

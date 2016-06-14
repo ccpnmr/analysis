@@ -256,9 +256,10 @@ class AtomSelector(CcpnModule):
       r = self.current.nmrResidue
 
     newNmrAtom = r.fetchNmrAtom(name=name)
-    self.pythonConsole.writeConsoleCommand(
-      "nmrAtom = nmrResidue.fetchNmrAtom(name='%s')" % name, nmrResidue=r.pid
-    )
+    # Replaced  by in-command echo
+    # self.pythonConsole.writeConsoleCommand(
+    #   "nmrAtom = nmrResidue.fetchNmrAtom(name='%s')" % name, nmrResidue=r.pid
+    # )
     for peak in self.current.peaks:
       for strip in self.project.strips:
         for peakListView in strip.peakListViews:

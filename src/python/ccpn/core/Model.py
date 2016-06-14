@@ -23,9 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Sequence
-
 import numpy
-
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.StructureEnsemble import StructureEnsemble
@@ -147,7 +146,7 @@ class Model(AbstractWrapperObject):
     """get wrappedData - all Model children of parent StructureEnsemble"""
     return parent._wrappedData.sortedModels()
 
-def _newModel(self:StructureEnsemble, name:str=None, comment:str=None,
+def _newModel(self:StructureEnsemble, title:str=None, comment:str=None,
               coordinateData:numpy.ndarray=None,
               bFactorData:Sequence[float]=None,
               occupancyData:Sequence[float]=None) -> Model:
@@ -156,40 +155,57 @@ def _newModel(self:StructureEnsemble, name:str=None, comment:str=None,
   CoordinateData can be a numpy.ndarray of the right shape,
   or any nested list or tuple representation that contains the right number of elements"""
 
+  defaults = collections.OrderedDict((('title', None), ('comment', None),
+                                      ('coordinateData', None),
+                                      ('bFactorData', None),
+                                      ('occupancyData', None)
+                                      )
+                                     )
+
   structureEnsemble = self._wrappedData
 
-  if coordinateData:
-    atomCount = structureEnsemble.nAtoms
-    # Sanity check - filter out (most?) wrongly shaped arrays
-    if hasattr(coordinateData, 'shape'):
-      if coordinateData.shape != (atomCount,3):
-        raise ValueError("numpy.ndarray input not of correct shape (%s,3)" % atomCount)
-    else:
-      if len(coordinateData) not in (atomCount, 3*atomCount):
-        raise ValueError("nested sequence input does not match %s*3 array" % atomCount)
+  self._startFunctionCommandBlock('newModel', values=locals(), defaults=defaults,
+                                  parName='newModel')
+  self._project.blankNotification() # delay notifiers till model is fully ready
+  try:
+    if coordinateData:
+      atomCount = structureEnsemble.nAtoms
+      # Sanity check - filter out (most?) wrongly shaped arrays
+      if hasattr(coordinateData, 'shape'):
+        if coordinateData.shape != (atomCount,3):
+          raise ValueError("numpy.ndarray input not of correct shape (%s,3)" % atomCount)
+      else:
+        if len(coordinateData) not in (atomCount, 3*atomCount):
+          raise ValueError("nested sequence input does not match %s*3 array" % atomCount)
 
-    coordinateData = commonUtil.flattenIfNumpy(coordinateData, shape=(atomCount,3))
+      coordinateData = commonUtil.flattenIfNumpy(coordinateData, shape=(atomCount,3))
 
-  newApiModel = structureEnsemble.newModel(name=name, details=comment)
-  if coordinateData:
-    newApiModel.setSubmatrixData('coordinates', coordinateData)
-  if occupancyData:
-    newApiModel.setSubmatrixData('occupancies', occupancyData)
-  if bFactorData:
-    newApiModel.setSubmatrixData('bFactors', bFactorData)
-  # remove cached matrices, which are now out of date:
-  for tag in ('_coordinateData', '_occupancyData', '_bFactorData'):
-    if hasattr(self, tag):
-      delattr(self, tag)
+    newApiModel = structureEnsemble.newModel(name=title, details=comment)
+    if coordinateData:
+      newApiModel.setSubmatrixData('coordinates', coordinateData)
+    if occupancyData:
+      newApiModel.setSubmatrixData('occupancies', occupancyData)
+    if bFactorData:
+      newApiModel.setSubmatrixData('bFactors', bFactorData)
+    # remove cached matrices, which are now out of date:
+    for tag in ('_coordinateData', '_occupancyData', '_bFactorData'):
+      if hasattr(self, tag):
+        delattr(self, tag)
+  finally:
+    self._project.unblankNotification()
+    self._project._appBase._endCommandBlock()
+
+  result = self._project._data2Obj.get(newApiModel)
+
+  # Do creation notifications
+  result._finaliseAction('create')
   #
-  return self._project._data2Obj.get(newApiModel)
+  return result
 
 
 # Connections to parents:
 StructureEnsemble.newModel = _newModel
 del _newModel
-
-# NBNB TBD add New function
 
 # Notifiers:
 

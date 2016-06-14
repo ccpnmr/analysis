@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import collections
 from typing import Tuple, Optional
 from typing import Union
 
@@ -123,8 +124,8 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def offsetNmrResidues(self) -> Tuple['NmrResidue', ...]:
     """"All other NmrResidues with the same sequenceCode sorted by offSet suffix '-1', '+1', etc."""
-    getObj = self._project._data2Obj.get
-    return tuple(getObj(x) for x in self._wrappedData.offsetResonanceGroups)
+    getDataObj = self._project._data2Obj.get
+    return tuple(getDataObj(x) for x in self._wrappedData.offsetResonanceGroups)
 
   def getOffsetNmrResidue(self, offset:int) -> Optional['NmrResidue']:
     """Get offset NmrResidue with indicated offset
@@ -145,15 +146,14 @@ class NmrResidue(AbstractWrapperObject):
     """Next sequentially connected NmrResidue (or None, as appropriate).
     Either from a connected NmrChain,
     or the NmrResidue assigned to the next Residue in the same Chain"""
+
     apiResonanceGroup = self._wrappedData
-    apiResidue = apiResonanceGroup.assignedResidue
     apiNmrChain = apiResonanceGroup.directNmrChain
+    residue = self.residue
 
-    if apiNmrChain is None:
-      # Offset residue result is None
-      result = None
+    result = None
 
-    elif apiNmrChain.isConnected:
+    if apiNmrChain and apiNmrChain.isConnected:
       # Connected stretch
       stretch = apiNmrChain.mainResonanceGroups
       if apiResonanceGroup is stretch[-1]:
@@ -161,21 +161,15 @@ class NmrResidue(AbstractWrapperObject):
       else:
         result = self._project._data2Obj.get(stretch[stretch.index(apiResonanceGroup) + 1])
 
-    elif apiResidue is None:
-      result = None
-
-    else:
+    elif residue:
       # Assigned to residue
-      molResidue = apiResidue.molResidue.nextMolResidue
-      if molResidue is None:
-        result = None
-      else:
-        result = self._project._data2Obj.get(
-          apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
+      nextResidue = residue.nextResidue
+      if nextResidue:
+        result = nextResidue.nmrResidue
     #
     return result
 
-  def connectNext(self, value) -> NmrChain:
+  def connectNext(self, value:Union['NmrResidue', str]) -> NmrChain:
     """Connect free end of self to free end of next residue in sequence,
     and return resulting connected NmrChain
 
@@ -187,74 +181,91 @@ class NmrResidue(AbstractWrapperObject):
     # apiResidue = apiResonanceGroup.assignedResidue
     apiNmrChain = apiResonanceGroup.directNmrChain
 
+    project = self._project
+
     if value is None:
       raise ValueError("Cannot connect to value: None")
+    elif isinstance(value, str):
+      xx = project.getByPid(value)
+      if xx is None:
+        raise ValueError("No object found matching Pid %s" % value)
+      else:
+        value = xx
 
     apiValueNmrChain = value._wrappedData.nmrChain
 
-    if apiValueNmrChain is None:
-      raise ValueError("Cannot connect to offset NmrResidue")
-
-    elif apiNmrChain is None:
+    if self.relativeOffset is not None:
       raise ValueError("Cannot connect from offset residue")
 
+    elif value.relativeOffset is not None:
+      raise ValueError("Cannot connect to offset NmrResidue")
+
+    elif self.residue is not None:
+      raise ValueError("Cannot connect assigned NmrResidue - assign the value instead")
+
+    elif value.residue is not None:
+      raise ValueError("Cannot connect to assigned NmrResidue - assign the NmrResidue instead")
+
     elif self.nextNmrResidue is not None:
-      raise ValueError("Cannot connect from NmrResidue in the middle of a connected NmrChain")
+      raise ValueError("Cannot connect next NmrResidue - it is already connected")
 
-    elif apiResonanceGroup.assignedResidue is not None:
-      raise ValueError("Cannot connect from assigned residue")
+    elif value.previousNmrResidue is not None:
+      raise ValueError("Cannot connect to next NmrResidue - it is already connected")
 
-    elif apiValueNmrChain.isConnected and value.previousNmrResidue is not None:
-      raise ValueError("Cannot connect to NmrResidue in the middle of a connected NmrChain")
-
-    elif apiValueNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
+    elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
       raise ValueError("Cannot make cyclical connected NmrChain")
 
-    elif apiNmrChain.isConnected:
-      # At this point, self must be the last NmrResidue in a connected chain
-      if apiValueNmrChain.isConnected:
-        undo = self._project._undo
-        if undo is not None:
-          undo.increaseBlocking()
-        try:
-          # Value is first NmrResidue in a connected NmrChain
-          for rg in apiValueNmrChain.mainResonanceGroups:
-            rg.directNmrChain = apiNmrChain
-          apiValueNmrChain.delete()
-        finally:
+    self._startFunctionCommandBlock('connectNext', value)
+    try:
+      if apiNmrChain.isConnected:
+        # At this point, self must be the last NmrResidue in a connected chain
+        if apiValueNmrChain.isConnected:
+          undo = project._undo
           if undo is not None:
-            undo.decreaseBlocking()
+            undo.increaseBlocking()
+          try:
+            # Value is first NmrResidue in a connected NmrChain
+            for rg in apiValueNmrChain.mainResonanceGroups:
+              rg.directNmrChain = apiNmrChain
+            apiValueNmrChain.delete()
+          finally:
+            if undo is not None:
+              undo.decreaseBlocking()
 
-        if undo is not None:
-          undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
-      else:
-        value._wrappedData.directNmrChain = apiNmrChain
-      return self.nmrChain
-
-    else:
-      # self is unassigned, unconnected NmrResidue
-      if apiValueNmrChain.isConnected:
-        # At this point value must be the first NmrResidue in a connected NmrChain
-        undo = apiValueNmrChain.root._undo
-        if undo is not None:
-          undo.increaseBlocking()
-        try:
-          apiResonanceGroup.directNmrChain = apiValueNmrChain
-          # Move self from last to first in target NmrChain
-          ll = apiValueNmrChain.__dict__['mainResonanceGroups']
-          ll.insert(0, ll.pop())
-        finally:
           if undo is not None:
-            undo.decreaseBlocking()
+            undo.newItem(self.disconnectNext, self.connectNext, redoArgs=(value,))
+        else:
+          value._wrappedData.directNmrChain = apiNmrChain
+        result = self.nmrChain
 
-        if undo is not None:
-          undo.newItem(apiResonanceGroup.setDirectNmrChain,
-                       self.connectNext, undoArgs=(apiNmrChain,), redoArgs=(value,))
       else:
-        newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-        apiResonanceGroup.directNmrChain = newApiNmrChain
-        value._wrappedData.directNmrChain = newApiNmrChain
-      return value.nmrChain
+        # self is unassigned, unconnected NmrResidue
+        if apiValueNmrChain.isConnected:
+          # At this point value must be the first NmrResidue in a connected NmrChain
+          undo = apiValueNmrChain.root._undo
+          if undo is not None:
+            undo.increaseBlocking()
+          try:
+            apiResonanceGroup.directNmrChain = apiValueNmrChain
+            # Move self from last to first in target NmrChain
+            ll = apiValueNmrChain.__dict__['mainResonanceGroups']
+            ll.insert(0, ll.pop())
+          finally:
+            if undo is not None:
+              undo.decreaseBlocking()
+
+          if undo is not None:
+            undo.newItem(apiResonanceGroup.setDirectNmrChain,
+                         self.connectNext, undoArgs=(apiNmrChain,), redoArgs=(value,))
+        else:
+          newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+          apiResonanceGroup.directNmrChain = newApiNmrChain
+          value._wrappedData.directNmrChain = newApiNmrChain
+        result = value.nmrChain
+    finally:
+      self._project._appBase._endCommandBlock()
+    #
+    return result
 
   def disconnectNext(self):
     """Cut connected NmrChain after NmrResidue, creating new connected NmrChain if necessary
@@ -266,46 +277,46 @@ class NmrResidue(AbstractWrapperObject):
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
 
-    if apiNmrChain is None:
-      # offset residue: no-op
-      return
-
-    elif apiNmrChain.isConnected:
-      # Connected stretch - break stretch, keeping first half in the NmrChain
-      stretch = apiNmrChain.mainResonanceGroups
-
-      if apiResonanceGroup is stretch[-1]:
+    self._startFunctionCommandBlock('disconnectNext')
+    try:
+      if apiNmrChain is None:
+        # offset residue: no-op
         return
 
-      elif apiResonanceGroup is stretch[0]:
-        # chop off end ResonanceGroup
-        apiResonanceGroup.directNmrChain = defaultChain
-        if len(stretch) == 2:
-          stretch[1].directNmrChain = defaultChain
-          # delete one-element remaining chain
-          apiNmrChain.delete()
+      elif apiResonanceGroup.assignedResidue is not None:
+        # Assigned residue with successor residue - error
+        raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
 
-      elif apiResonanceGroup is stretch[-2]:
-        # chop off end ResonanceGroup
-        stretch[-1].directNmrChain = defaultChain
+      if apiNmrChain.isConnected:
+        # Connected stretch - break stretch, keeping first half in the NmrChain
+        stretch = apiNmrChain.mainResonanceGroups
 
-      else:
-        # make new connected NmrChain with rightmost ResonanceGroups
-        newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-        for rg in reversed(stretch):
-          if rg is apiResonanceGroup:
-            break
-          else:
-            rg.directNmrChain = newNmrChain
-        newNmrChain.__dict__['mainResonanceGroups'].reverse()
+        if apiResonanceGroup is stretch[-1]:
+          return
 
-    elif apiResonanceGroup.assignedResidue is not None:
-      # Assigned residue with successor residue - error
-      raise ValueError("Assigned NmrResidue cannot be disconnected")
+        if apiResonanceGroup is stretch[0]:
+          # chop off end ResonanceGroup
+          apiResonanceGroup.directNmrChain = defaultChain
+          if len(stretch) == 2:
+            stretch[1].directNmrChain = defaultChain
+            # delete one-element remaining chain
+            apiNmrChain.delete()
 
-    else:
-      # NextResidue is always None. OK.
-      return
+        elif apiResonanceGroup is stretch[-2]:
+          # chop off end ResonanceGroup
+          stretch[-1].directNmrChain = defaultChain
+
+        else:
+          # make new connected NmrChain with rightmost ResonanceGroups
+          newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+          for rg in reversed(stretch):
+            if rg is apiResonanceGroup:
+              break
+            else:
+              rg.directNmrChain = newNmrChain
+          newNmrChain.__dict__['mainResonanceGroups'].reverse()
+    finally:
+      self._project._appBase._endCommandBlock()
 
   @property
   def previousNmrResidue(self) -> Optional['NmrResidue']:
@@ -313,14 +324,12 @@ class NmrResidue(AbstractWrapperObject):
     Either from a connected NmrChain,
     or the NmrResidue assigned to the previous Residue in the same Chain"""
     apiResonanceGroup = self._wrappedData
-    apiResidue = apiResonanceGroup.assignedResidue
     apiNmrChain = apiResonanceGroup.directNmrChain
+    residue = self.residue
 
-    if apiNmrChain is None:
-      # Offset residue result is None
-      result = None
+    result = None
 
-    elif apiNmrChain.isConnected:
+    if apiNmrChain and apiNmrChain.isConnected:
       # Connected stretch
       stretch = apiNmrChain.mainResonanceGroups
       if apiResonanceGroup is stretch[0]:
@@ -328,17 +337,11 @@ class NmrResidue(AbstractWrapperObject):
       else:
         result = self._project._data2Obj.get(stretch[stretch.index(apiResonanceGroup) - 1])
 
-    elif apiResidue is None:
-      result = None
-
-    else:
+    elif residue:
       # Assigned to residue
-      molResidue = apiResidue.molResidue.previousMolResidue
-      if molResidue is None:
-        result = None
-      else:
-        result = self._project._data2Obj.get(
-          apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
+      previousResidue = residue.previousResidue
+      if previousResidue:
+        result = previousResidue.nmrResidue
     #
     return result
 
@@ -355,69 +358,88 @@ class NmrResidue(AbstractWrapperObject):
     # apiResidue = apiResonanceGroup.assignedResidue
     apiNmrChain = apiResonanceGroup.directNmrChain
 
+    project = self._project
+
     if value is None:
       raise ValueError("Cannot connect to value: None")
 
+    elif isinstance(value, str):
+      xx = project.getByPid(value)
+      if xx is None:
+        raise ValueError("No object found matching Pid %s" % value)
+      else:
+        value = xx
+
     apiValueNmrChain = value._wrappedData.nmrChain
 
-    if apiValueNmrChain is None:
-      raise ValueError("Cannot connect to offset NmrResidue")
 
-    elif apiNmrChain is None:
+    if self.relativeOffset is not None:
       raise ValueError("Cannot connect from offset residue")
 
+    elif value.relativeOffset is not None:
+      raise ValueError("Cannot connect to offset NmrResidue")
+
+    elif self.residue is not None:
+      raise ValueError("Cannot connect assigned NmrResidue - assign the value instead")
+
+    elif value.residue is not None:
+      raise ValueError("Cannot connect to assigned NmrResidue - assign the NmrResidue instead")
+
     elif self.previousNmrResidue is not None:
-      raise ValueError("Cannot connect from NmrResidue in the middle of a connected NmrChain")
+      raise ValueError("Cannot connect previous NmrResidue - it is already connected")
 
-    elif apiResonanceGroup.assignedResidue is not None:
-      raise ValueError("Cannot connect from assigned residue")
+    elif value.nextNmrResidue is not None:
+      raise ValueError("Cannot connect to previous NmrResidue - it is already connected")
 
-    elif apiValueNmrChain.isConnected and value.nextNmrResidue is not None:
-      raise ValueError("Cannot connect to NmrResidue in the middle of a connected NmrChain")
-
-    elif apiValueNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
+    elif apiNmrChain.isConnected and apiValueNmrChain is apiNmrChain:
       raise ValueError("Cannot make cyclical connected NmrChain")
 
-    elif apiNmrChain.isConnected:
-      # At this point, self must be the first NmrResidue in a connected chain
-        undo = apiValueNmrChain.root._undo
-        if undo is not None:
-          undo.increaseBlocking()
-        try:
-          ll = apiNmrChain.__dict__['mainResonanceGroups']
-          if apiValueNmrChain.isConnected:
-            # Value is last NmrResidue in a connected NmrChain
-            for rg in reversed(apiValueNmrChain.mainResonanceGroups):
-              rg.directNmrChain = apiNmrChain
-              ll.insert(0, ll.pop())
-            apiValueNmrChain.delete()
-            if undo is not None:
-              undo.newItem(self.disconnectPrevious,
-                           self.connectPrevious, redoArgs=(value,))
-          else:
-            value._wrappedData.directNmrChain = apiNmrChain
-            # Move value from last to first in target NmrChain
-            ll.insert(0, ll.pop())
-            if undo is not None:
-              undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
-                           undoArgs=(apiValueNmrChain,), redoArgs=(value,))
-
-        finally:
+    self._startFunctionCommandBlock('connectPrevious', value)
+    try:
+      if apiNmrChain.isConnected:
+        # At this point, self must be the first NmrResidue in a connected chain
+          undo = apiValueNmrChain.root._undo
           if undo is not None:
-            undo.decreaseBlocking()
+            undo.increaseBlocking()
+          try:
+            ll = apiNmrChain.__dict__['mainResonanceGroups']
+            if apiValueNmrChain.isConnected:
+              # Value is last NmrResidue in a connected NmrChain
+              for rg in reversed(apiValueNmrChain.mainResonanceGroups):
+                rg.directNmrChain = apiNmrChain
+                ll.insert(0, ll.pop())
+              apiValueNmrChain.delete()
+              if undo is not None:
+                undo.newItem(self.disconnectPrevious,
+                             self.connectPrevious, redoArgs=(value,))
+            else:
+              value._wrappedData.directNmrChain = apiNmrChain
+              # Move value from last to first in target NmrChain
+              ll.insert(0, ll.pop())
+              if undo is not None:
+                undo.newItem(value._wrappedData.setDirectNmrChain, self.connectPrevious,
+                             undoArgs=(apiValueNmrChain,), redoArgs=(value,))
 
-        return self.nmrChain
+          finally:
+            if undo is not None:
+              undo.decreaseBlocking()
 
-    else:
-      # self is unassigned, unconnected NmrResidue
-      if apiValueNmrChain.isConnected:
-        # At this point value must be the last NmrResidue in a connected NmrChain
-        apiResonanceGroup.directNmrChain = apiValueNmrChain
+          result = self.nmrChain
+
       else:
-        newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-        value._wrappedData.directNmrChain = newApiNmrChain
-        apiResonanceGroup.directNmrChain = newApiNmrChain
-      return value.nmrChain
+        # self is unassigned, unconnected NmrResidue
+        if apiValueNmrChain.isConnected:
+          # At this point value must be the last NmrResidue in a connected NmrChain
+          apiResonanceGroup.directNmrChain = apiValueNmrChain
+        else:
+          newApiNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+          value._wrappedData.directNmrChain = newApiNmrChain
+          apiResonanceGroup.directNmrChain = newApiNmrChain
+        result = value.nmrChain
+    finally:
+      self._project._appBase._endCommandBlock()
+    #
+    return result
 
   def disconnectPrevious(self):
     """Cut connected NmrChain before NmrResidue, creating new connected NmrChain if necessary
@@ -429,45 +451,46 @@ class NmrResidue(AbstractWrapperObject):
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
 
-    if apiNmrChain is None:
-      # offset residue: no-op
-      return
-
-    elif apiNmrChain.isConnected:
-      # Connected stretch - break stretch, keeping first half in the NmrChain
-      stretch = apiNmrChain.mainResonanceGroups
-
-      if apiResonanceGroup is stretch[0]:
+    self._startFunctionCommandBlock('disconnectPrevious')
+    try:
+      if apiNmrChain is None:
+        # offset residue: no-op
         return
 
-      elif apiResonanceGroup is stretch[-1]:
-        # chop off end ResonanceGroup
-        apiResonanceGroup.directNmrChain = defaultChain
-        if len(stretch) == 2:
+      elif apiResonanceGroup.assignedResidue is not None:
+        # Assigned residue with successor residue - error
+        raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
+
+      elif apiNmrChain.isConnected:
+        # Connected stretch - break stretch, keeping first half in the NmrChain
+        stretch = apiNmrChain.mainResonanceGroups
+
+        if apiResonanceGroup is stretch[0]:
+          return
+
+        elif apiResonanceGroup is stretch[-1]:
+          # chop off end ResonanceGroup
+          apiResonanceGroup.directNmrChain = defaultChain
+          if len(stretch) == 2:
+            stretch[0].directNmrChain = defaultChain
+            # delete one-element remaining chain
+            apiNmrChain.delete()
+
+        elif apiResonanceGroup is stretch[1]:
+          # chop off end ResonanceGroup
           stretch[0].directNmrChain = defaultChain
-          # delete one-element remaining chain
-          apiNmrChain.delete()
 
-      elif apiResonanceGroup is stretch[1]:
-        # chop off end ResonanceGroup
-        stretch[0].directNmrChain = defaultChain
+        else:
+          # make new connected NmrChain with rightmost ResonanceGroups
+          newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
+          for rg in stretch:
+            if rg is apiResonanceGroup:
+              break
+            else:
+              rg.directNmrChain = newNmrChain
 
-      else:
-        # make new connected NmrChain with rightmost ResonanceGroups
-        newNmrChain = apiNmrChain.nmrProject.newNmrChain(isConnected=True)
-        for rg in stretch:
-          if rg is apiResonanceGroup:
-            break
-          else:
-            rg.directNmrChain = newNmrChain
-
-    elif apiResonanceGroup.assignedResidue is not None:
-      # Assigned residue with successor residue - error
-      raise ValueError("Assigned NmrtResidue cannot be disconnected")
-
-    else:
-      # NextResidue is always None. OK.
-      return
+    finally:
+      self._project._appBase._endCommandBlock()
 
   def disconnect(self):
     """Move NmrResidue from connected NmrChain to default chain,
@@ -476,58 +499,58 @@ class NmrResidue(AbstractWrapperObject):
     apiNmrChain = apiResonanceGroup.directNmrChain
     defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
 
-    if apiNmrChain is None:
-      # offset residue: no-op
-      return
+    self._startFunctionCommandBlock('disconnect')
+    try:
+      if apiNmrChain is None:
+        # offset residue: no-op
+        return
 
-    elif apiNmrChain.isConnected:
-      # Connected stretch - break stretch, keeping first half in the NmrChain
-      stretch = apiNmrChain.mainResonanceGroups
+      elif apiResonanceGroup.assignedResidue is not None:
+        # Assigned residue with successor residue - error
+        raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
 
-      if len(stretch) < 3 or len(stretch) == 3 and apiResonanceGroup is stretch[1]:
-        for rg in reversed(stretch):
-          # reversed to add residues back in proper order (they ar added to end)
-          rg.directNmrChain = defaultChain
-        apiNmrChain.delete()
+      elif apiNmrChain.isConnected:
+        # Connected stretch - break stretch, keeping first half in the NmrChain
+        stretch = apiNmrChain.mainResonanceGroups
 
-      else:
-        index = stretch.index(apiResonanceGroup)
-        data2Obj = self._project._data2Obj
+        if len(stretch) < 3 or len(stretch) == 3 and apiResonanceGroup is stretch[1]:
+          for rg in reversed(stretch):
+            # reversed to add residues back in proper order (they ar added to end)
+            rg.directNmrChain = defaultChain
+          apiNmrChain.delete()
 
-        # NB operations are carefully selected to make sure they undo correctly
-        if apiResonanceGroup is stretch[-1]:
-          apiResonanceGroup.directNmrChain = defaultChain
-
-        elif apiResonanceGroup is stretch[-2]:
-          stretch[-1].directNmrChain = defaultChain
-          apiResonanceGroup.directNmrChain = defaultChain
-
-        elif index == 0:
-          data2Obj[stretch[1]].disconnectPrevious()
-
-        elif index == 1:
-          data2Obj[stretch[1]].disconnectPrevious()
-          data2Obj[stretch[2]].disconnectPrevious()
         else:
-          self.disconnectNext()
-          apiResonanceGroup.directNmrChain = defaultChain
+          index = stretch.index(apiResonanceGroup)
+          data2Obj = self._project._data2Obj
 
-    elif apiResonanceGroup.assignedResidue is not None:
-      # Assigned residue with successor residue - error
-      raise ValueError("Assigned NmrtResidue cannot be disconnected")
+          # NB operations are carefully selected to make sure they undo correctly
+          if apiResonanceGroup is stretch[-1]:
+            apiResonanceGroup.directNmrChain = defaultChain
 
-    else:
-      # NextResidue is always None. OK.
-      return
+          elif apiResonanceGroup is stretch[-2]:
+            stretch[-1].directNmrChain = defaultChain
+            apiResonanceGroup.directNmrChain = defaultChain
+
+          elif index == 0:
+            data2Obj[stretch[1]].disconnectPrevious()
+
+          elif index == 1:
+            data2Obj[stretch[1]].disconnectPrevious()
+            data2Obj[stretch[2]].disconnectPrevious()
+          else:
+            self.disconnectNext()
+            apiResonanceGroup.directNmrChain = defaultChain
+    finally:
+      self._project._appBase._endCommandBlock()
 
   @property
   def probableResidues(self) -> Tuple[Tuple[Residue,float], ...]:
     """tuple of (residue, probability) tuples for probable residue assignments
     sorted by decreasing probability. Probabilities are normalised to 1"""
-    getObj = self._project._data2Obj.get
+    getDataObj = self._project._data2Obj.get
     ll = sorted((x.weight, x.possibility) for x in self._wrappedData.residueProbs)
     totalWeight = sum(tt[0] for tt in ll) or 1.0  # If sum is zero give raw weights
-    return tuple((getObj(tt[1]), tt[0]/totalWeight) for tt in reversed(ll))
+    return tuple((getDataObj(tt[1]), tt[0]/totalWeight) for tt in reversed(ll))
 
   @probableResidues.setter
   def probableResidues(self, value):
@@ -560,9 +583,13 @@ class NmrResidue(AbstractWrapperObject):
 
   def deassign(self):
     """Reset sequenceCode and residueType assignment to default values"""
-    apiResonanceGroup = self._apiResonanceGroup
-    apiResonanceGroup.sequenceCode = None
-    apiResonanceGroup.resetResidueType(None)
+    self._startFunctionCommandBlock('deassign')
+    try:
+      apiResonanceGroup = self._apiResonanceGroup
+      apiResonanceGroup.sequenceCode = None
+      apiResonanceGroup.resetResidueType(None)
+    finally:
+      self._project._appBase._endCommandBlock()
 
   def rename(self, value:str=None):
     """Rename NmrResidue. 'None' deassigns; partly set names ('.xyz' or 'xyz.' partly deassign"""
@@ -583,14 +610,22 @@ class NmrResidue(AbstractWrapperObject):
       if previous is not self._wrappedData and previous is not None:
         raise ValueError("Cannot rename %s to %s - assignment already exists" % (self, value))
     #
-    apiResonanceGroup.sequenceCode = sequenceCode
-    apiResonanceGroup.resetResidueType(residueType)
+    self._startFunctionCommandBlock('rename', value)
+    try:
+      apiResonanceGroup.sequenceCode = sequenceCode
+      apiResonanceGroup.resetResidueType(residueType)
+    finally:
+      self._project._appBase._endCommandBlock()
 
   def moveToNmrChain(self, newNmrChain:Union[NmrChain, str]=None):
     """Reset NmrChain, breaking connected NmrChain if necessary.
 
     If set to None resets to NmrChain '@-'
     Illegal for offset NmrResidues"""
+
+    values ={}
+    if newNmrChain:
+      values['newNmrChain'] = newNmrChain
 
     apiResonanceGroup = self._apiResonanceGroup
     if apiResonanceGroup.relativeOffset is not None:
@@ -603,23 +638,27 @@ class NmrResidue(AbstractWrapperObject):
     else:
       apiNmrChain = newNmrChain._wrappedData
 
-    apiResonanceGroup.moveToNmrChain(apiNmrChain)
+    self._startFunctionCommandBlock('moveToNmrChain', values=values)
+    try:
+      apiResonanceGroup.moveToNmrChain(apiNmrChain)
+    finally:
+      self._project._appBase._endCommandBlock()
 
   def assignTo(self, chainCode:str=None, sequenceCode:Union[int,str]=None,
-               residueType:str=None, mergeToExisting=False) -> 'NmrResidue':
+               residueType:str=None, mergeToExisting:bool=False) -> 'NmrResidue':
 
-    """Assign NmrResidue to new assignment, as defined by the na ming parameters
+    """Assign NmrResidue to new assignment, as defined by the naming parameters
     and return the result.
 
     Empty parameters (e.g. chainCode=None) retain the previous value. E.g.:
     for NmrResidue NR:A.121.ALA
     calling with sequenceCode=123 will reassign to 'A.123.ALA'.
 
-    If the no assignment with the same chainCode and sequenceCode exists, the current NmrResidue
+    If no assignment with the same chainCode and sequenceCode exists, the current NmrResidue
     will be reassigned.
     If an NmrResidue with the same chainCode and sequenceCode already exists,  the function
     will either raise ValueError. If  mergeToExisting is set to False, it will instead merge the
-    two NmrResidues, delete the current one, and return the new one.
+    two NmrResidues, delete the current one, and return the new one .
     NB Merging is NOT undoable.
     WARNING: When calling with mergeToExisting=True, always use in the form "x = x.assignTo(...)",
     as the call 'x.assignTo(...) may cause the source x object to become deleted.
@@ -628,91 +667,106 @@ class NmrResidue(AbstractWrapperObject):
     will cause an error. Use moveToNmrChain(newNmrChainOrPid) instead
     """
 
+    # Get parameter string for console echo - before parameters are changed
+    defaults = collections.OrderedDict(
+      (('chainCode', None), ('sequenceCode', None),
+       ('residueType', None), ('mergeToExisting', False)
+      )
+    )
+
     oldPid = self.longPid
     clearUndo = False
     undo = self._apiResonanceGroup.root._undo
-    sequenceCode = str(sequenceCode) if sequenceCode else None
-    apiResonanceGroup = self._apiResonanceGroup
-
-    # Keep old values to go back to previous statee
-    oldNmrChain =  apiResonanceGroup.nmrChain
-    oldSequenceCode = apiResonanceGroup.sequenceCode
-    oldResidueType = apiResonanceGroup.residueType
-
-    # set missing parameters to existing values
-    chainCode = chainCode or oldNmrChain.code
-    sequenceCode = sequenceCode or oldSequenceCode
-    residueType = residueType or oldResidueType
-
-    for ss in (chainCode, sequenceCode, residueType):
-      if ss and Pid.altCharacter in ss:
-        raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s.%s" %
-                         (Pid.altCharacter, chainCode, sequenceCode, residueType))
-
-    newNmrChain = self._project.fetchNmrChain(chainCode)
-    newApiResonanceGroup = newNmrChain._wrappedData.findFirstResonanceGroup(
-      sequenceCode=sequenceCode)
-
-    if newApiResonanceGroup is apiResonanceGroup:
-      # We are reassigning to self - either a no-op or resetting the residueType
-      result = self
-      if residueType and apiResonanceGroup.residueType != residueType:
-        apiResonanceGroup.resetResidueType(residueType)
-
-    elif newApiResonanceGroup is None:
-      # we are moving to new, free assignment
-      result = self
-
-      try:
-        # NB Complex resetting sequence necessary
-        # # in case we are setting an offset and illegal sequenceCode
-        apiResonanceGroup.sequenceCode = None    # To guarantee against clashes
-        apiResonanceGroup.directNmrChain = newNmrChain._apiNmrChain # Only directNmrChain is settable
-         # Now we can (re)set - will throw error for e.g. illegal offset values
-        apiResonanceGroup.sequenceCode = sequenceCode
-        apiResonanceGroup.resetResidueType(residueType)
-      except:
-        apiResonanceGroup.resetResidueType(oldResidueType)
-        apiResonanceGroup.sequenceCode = None
-        apiResonanceGroup.directNmrChain = oldNmrChain
-        apiResonanceGroup.sequenceCode = oldSequenceCode
-        self._project._logger.error("Attempt to set illegal or inconsistent assignment: %s.%s.%s"
-          % (chainCode, sequenceCode, residueType) + "\n  Reset to original state"
-        )
-        raise
 
 
-    else:
-      #We are assigning to an existing NmrResidue
-      result = self._project._data2Obj[newApiResonanceGroup]
-      if mergeToExisting:
-        self._project._logger.warning("Merging %s into %s. Merging is NOT undoable."
+    self._startFunctionCommandBlock('assignTo', values=locals(), defaults=defaults,
+                                    parName='mergedNmrResidue')
+    try:
+
+      sequenceCode = str(sequenceCode) if sequenceCode else None
+      apiResonanceGroup = self._apiResonanceGroup
+
+      # Keep old values to go back to previous state
+
+      oldNmrChain =  apiResonanceGroup.nmrChain
+      oldSequenceCode = apiResonanceGroup.sequenceCode
+      oldResidueType = apiResonanceGroup.residueType
+
+      # set missing parameters to existing values
+      chainCode = chainCode or oldNmrChain.code
+      sequenceCode = sequenceCode or oldSequenceCode
+
+      for ss in (chainCode, sequenceCode, residueType):
+        if ss and Pid.altCharacter in ss:
+          raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s.%s" %
+                           (Pid.altCharacter, chainCode, sequenceCode, residueType))
+      newNmrChain = self._project.fetchNmrChain(chainCode)
+      newApiResonanceGroup = newNmrChain._wrappedData.findFirstResonanceGroup(
+        sequenceCode=sequenceCode)
+
+      if newApiResonanceGroup is apiResonanceGroup:
+        # We are reassigning to self - either a no-op or resetting the residueType
+        result = self
+        if residueType and apiResonanceGroup.residueType != residueType:
+          apiResonanceGroup.resetResidueType(residueType)
+
+      elif newApiResonanceGroup is None:
+        # we are moving to new, free assignment
+        result = self
+
+        try:
+          # NB Complex resetting sequence necessary
+          # # in case we are setting an offset and illegal sequenceCode
+          apiResonanceGroup.sequenceCode = None    # To guarantee against clashes
+          apiResonanceGroup.directNmrChain = newNmrChain._apiNmrChain # Only directNmrChain is settable
+           # Now we can (re)set - will throw error for e.g. illegal offset values
+          apiResonanceGroup.sequenceCode = sequenceCode
+          if residueType:
+            apiResonanceGroup.resetResidueType(residueType)
+        except:
+          apiResonanceGroup.resetResidueType(oldResidueType)
+          apiResonanceGroup.sequenceCode = None
+          apiResonanceGroup.directNmrChain = oldNmrChain
+          apiResonanceGroup.sequenceCode = oldSequenceCode
+          self._project._logger.error("Attempt to set illegal or inconsistent assignment: %s.%s.%s"
+            % (chainCode, sequenceCode, residueType) + "\n  Reset to original state"
+          )
+          raise
+
+
+      else:
+        #We are assigning to an existing NmrResidue
+        result = self._project._data2Obj[newApiResonanceGroup]
+        if not mergeToExisting:
+          raise ValueError("New assignment clash with existing assignment,"
+                           " and merging is disallowed")
+
+        # Move or merge the NmrAtoms across and delete the current NmrResidue
+        if not residueType or newApiResonanceGroup.residueType == residueType:
+          for resonance in self._wrappedData.resonances:
+            newResonance = newApiResonanceGroup.findFirstResonance(implName=resonance.name)
+            if newResonance is None:
+              resonance.resonanceGroup = newApiResonanceGroup
+            else:
+              # WARNING. This step is NOT undoable, and clears the undo stack
+              clearUndo = True
+              newResonance.absorbResonance(resonance)
+
+          apiResonanceGroup.delete()
+
+        else:
+          # We cannot reassign if it involves changing residueType on an existing NmrResidue
+          raise ValueError("Cannot assign to %s.%s.%s: NR:%s.%s.%s already exists"
+          % (chainCode, sequenceCode, residueType,
+             chainCode, sequenceCode, newApiResonanceGroup.residueType))
+      #
+      if clearUndo:
+        self._project._logger.warning("Merging NmrAtoms from %s into %s. Merging is NOT undoable."
                                       % (oldPid, result.longPid))
-      else:
-        raise ValueError("New assignment clash with existing assignment,"
-                         " and merging is disallowed")
-
-      # Move or merge the NmrAtoms across and delete the current NmrResidue
-      if newApiResonanceGroup.residueType == residueType:
-        for resonance in self._wrappedData.resonances:
-          newResonance = newApiResonanceGroup.findFirstResonance(implName=resonance.name)
-          if newResonance is None:
-            resonance.resonanceGroup = newApiResonanceGroup
-          else:
-            # WARNING. This step is NOT undoable, and clears the undo stack
-            clearUndo = True
-            newResonance.absorbResonance(resonance)
-
-        apiResonanceGroup.delete()
-
-      else:
-        # We cannot reassign if it involves changing residueType on an existing NmrResidue
-        raise ValueError("Cannot assign to %s.%s.%s: NR:%s.%s.%s already exists"
-        % (chainCode, sequenceCode, residueType,
-           chainCode, sequenceCode, newApiResonanceGroup.residueType))
-    #
-    if undo is not None and clearUndo:
-      undo.clear()
+        if undo is not None:
+          undo.clear()
+    finally:
+      self._project._appBase._endCommandBlock()
     #
     return result
 
@@ -766,49 +820,74 @@ NmrChain.mainNmrResidues = property(getter, setter, None, """NmrResidues belongi
 del getter
 del setter
 
-def _newNmrResidue(self:NmrChain, residueType:str=None, sequenceCode:Union[int,str]=None,
+def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:str=None,
                    comment:str=None) -> NmrResidue:
   """Create new ccpn.NmrResidue within ccpn.NmrChain"""
-  sequenceCode = str(sequenceCode) if sequenceCode else None
 
-  for ss in (sequenceCode, residueType):
-    if ss and Pid.altCharacter in ss:
-      raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
-                       (Pid.altCharacter, sequenceCode, residueType))
+  defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None),
+                                     ('comment', None)))
 
-  apiNmrChain = self._wrappedData
-  nmrProject = apiNmrChain.nmrProject
-  obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=residueType, details=comment,
-                                     residueType=residueType, directNmrChain=apiNmrChain)
+  self._startFunctionCommandBlock('newNmrResidue', values=locals(), defaults=defaults,
+                                  parName='newNmrResidue')
+  self._project.blankNotification() # delay notifiers till NmrResidue is fully ready
+  try:
+    sequenceCode = str(sequenceCode) if sequenceCode else None
 
-  if residueType is not None:
-    # get chem comp ID strings from residue type
-    tt = self._project._residueName2chemCompId.get(residueType)
-    if tt is not None:
-      obj.molType, obj.ccpCode = tt
-  #
-  return self._project._data2Obj.get(obj)
-
-
-def fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:str=None) -> NmrResidue:
-  """Fetch NmrResidue with residueType=residueType, creating it if necessary"""
-  if sequenceCode is not None:
-    sequenceCode = str(sequenceCode) or None
-  apiResonanceGroup = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
-  if apiResonanceGroup:
-    if residueType is not None and residueType != apiResonanceGroup.residueType:
-      raise ValueError("%s has residue type %s, not %s" % (sequenceCode,
-                                                           apiResonanceGroup.residueType,
-                                                           residueType))
-    else:
-      result = self._project._data2Obj.get(apiResonanceGroup)
-  else:
     for ss in (sequenceCode, residueType):
       if ss and Pid.altCharacter in ss:
         raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
                          (Pid.altCharacter, sequenceCode, residueType))
 
-    result = self.newNmrResidue(residueType=residueType, sequenceCode=sequenceCode)
+    apiNmrChain = self._wrappedData
+    nmrProject = apiNmrChain.nmrProject
+    obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=residueType, details=comment,
+                                       residueType=residueType, directNmrChain=apiNmrChain)
+
+    if residueType is not None:
+      # get chem comp ID strings from residue type
+      tt = self._project._residueName2chemCompId.get(residueType)
+      if tt is not None:
+        obj.molType, obj.ccpCode = tt
+  finally:
+    self._project.unblankNotification()
+    self._project._appBase._endCommandBlock()
+  #
+  result = self._project._data2Obj.get(obj)
+
+  # Do creation notifications
+  result._finaliseAction('create')
+
+  return result
+
+
+def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
+                     residueType:str=None) -> NmrResidue:
+  """Fetch NmrResidue with residueType=residueType, creating it if necessary"""
+  values = {}
+  if residueType:
+    values['residueType'] = residueType
+  self._startFunctionCommandBlock('fetchNmrResidue', sequenceCode, values=values,
+                                  parName='newNmrResidue')
+  try:
+    if sequenceCode is not None:
+      sequenceCode = str(sequenceCode) or None
+    apiResonanceGroup = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+    if apiResonanceGroup:
+      if residueType is not None and residueType != apiResonanceGroup.residueType:
+        raise ValueError("%s has residue type %s, not %s" % (sequenceCode,
+                                                             apiResonanceGroup.residueType,
+                                                             residueType))
+      else:
+        result = self._project._data2Obj.get(apiResonanceGroup)
+    else:
+      for ss in (sequenceCode, residueType):
+        if ss and Pid.altCharacter in ss:
+          raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
+                           (Pid.altCharacter, sequenceCode, residueType))
+
+      result = self.newNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
+  finally:
+    self._project._appBase._endCommandBlock()
   #
   return result
 
@@ -817,7 +896,7 @@ def fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType
 
 NmrChain.newNmrResidue = _newNmrResidue
 del _newNmrResidue
-NmrChain.fetchNmrResidue = fetchNmrResidue
+NmrChain.fetchNmrResidue = _fetchNmrResidue
 
 def _renameNmrResidue(self:Project, apiResonanceGroup:ApiResonanceGroup):
   """Reset pid for NmrResidue and all offset NmrResidues"""

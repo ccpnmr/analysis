@@ -156,7 +156,7 @@ class PseudoDimension(AbstractWrapperObject):
     #
     return result
 
-# No 'new' function - PseudoDimensions are mad eon spectrum load
+# No 'new' function - PseudoDimensions are made on spectrum load
 
 # Connections to parents:
 

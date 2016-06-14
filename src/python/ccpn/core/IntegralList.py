@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
@@ -113,10 +114,18 @@ class IntegralList(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newIntegralList(self:Spectrum,name:str=None, comment:str=None) -> IntegralList:
+def _newIntegralList(self:Spectrum, title:str=None, comment:str=None) -> IntegralList:
   """Create new ccpn.IntegralList within ccpn.Spectrum"""
+
+  defaults = collections.OrderedDict((('title', None), ('comment', None)))
+
   apiDataSource = self._wrappedData
-  obj = apiDataSource.newPeakList(name=name, details=comment, dataType='Integral')
+  self._startFunctionCommandBlock('newIntegralList', values=locals(), defaults=defaults,
+                                  parName='newIntegralList')
+  try:
+    obj = apiDataSource.newPeakList(name=title, details=comment, dataType='Integral')
+  finally:
+    self._project._appBase._endCommandBlock()
   return self._project._data2Obj.get(obj)
 
 Spectrum.newIntegralList = _newIntegralList

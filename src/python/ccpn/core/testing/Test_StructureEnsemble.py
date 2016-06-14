@@ -106,9 +106,9 @@ class StructureEnsembleTesting2(WrapperTesting):
     atomIds = ['@-.1.ALA.CA', '@-.2.VAL.CB', '@-.3.ASP.CG', '@-.4.LYS.CD']
     ensemble = self.project.newStructureEnsemble()
     ensemble.addAtomIds(atomIds)
-    mod1 = ensemble.newModel(name='blah3', comment='hah', occupancyData=range(4), coordinateData=range(12))
-    mod2 = ensemble.newModel(name='blah1', comment='hah2', occupancyData=range(4), bFactorData=range(4))
-    mod3 = ensemble.newModel(name='blah2', comment='hah3', occupancyData=range(4), coordinateData=range(12))
+    mod1 = ensemble.newModel(title='blah3', comment='hah', occupancyData=range(4), coordinateData=range(12))
+    mod2 = ensemble.newModel(title='blah1', comment='hah2', occupancyData=range(4), bFactorData=range(4))
+    mod3 = ensemble.newModel(title='blah2', comment='hah3', occupancyData=range(4), coordinateData=range(12))
     self.assertEqual(ensemble.atomIds, atomIds)
     data = ensemble.coordinateData
     flat = [x for x in data.flat]

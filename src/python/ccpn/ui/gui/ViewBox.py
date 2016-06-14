@@ -243,12 +243,13 @@ class ViewBox(pg.ViewBox):
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod='gaussian')
 
-            console.writeConsoleCommand(
-              "peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
-                selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
-                apiSpectrumView.spectrumView.displayNegativeContours
-              ), peakList=peakList
-            )
+            # replaced by in-function echoing
+            # console.writeConsoleCommand(
+            #   "peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
+            #     selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
+            #     apiSpectrumView.spectrumView.displayNegativeContours
+            #   ), peakList=peakList
+            # )
             self.current.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
             self.current.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
                                        selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,

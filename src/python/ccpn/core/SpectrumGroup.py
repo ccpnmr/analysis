@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Tuple
-
+import collections
 from ccpn.util import Pid
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -84,12 +84,15 @@ class SpectrumGroup(AbstractWrapperObject):
 
   @spectra.setter
   def spectra(self, value):
+    getDataObj = self._project._data2Obj.get
+    value = [getDataObj(x) if isinstance(x,str) else x for x in value]
     self._wrappedData.dataSources = [x._wrappedData for x in value]
 
   # Implementation functions
   def rename(self, value:str):
     """Rename SpectrumGroup, changing its Id and Pid"""
     oldName = self.name
+    self._startFunctionCommandBlock('rename', value)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -107,6 +110,7 @@ class SpectrumGroup(AbstractWrapperObject):
     finally:
       if undo is not None:
         undo.decreaseBlocking()
+      self._project._appBase._endCommandBlock()
 
     undo.newItem(self.rename, self.rename, undoArgs=(oldName,),redoArgs=(value,))
 
@@ -123,10 +127,27 @@ def _newSpectrumGroup(self:Project, name:str, spectra=()) -> SpectrumGroup:
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
 
-  apiDataSources = [x._wrappedData for x in spectra]
-  return self._data2Obj.get(self._wrappedData.newSpectrumGroup(name=name,
-                                                               dataSources=apiDataSources))
+  if spectra:
+    getByPid = self._project.getByPid
+    spectra = [getByPid(x) if isinstance(x, str) else x for x in spectra]
+    values = {'spectra':tuple(x.pid for x in spectra)}
+  else:
+    values = {}
 
+  self._startFunctionCommandBlock('newSpectrumGroup', name, values=values,
+                                  parName='newSpectrumGroup')
+  self._project.blankNotification()
+  try:
+    result =  self._data2Obj.get(self._wrappedData.newSpectrumGroup(name=name))
+    if spectra:
+      result.spectra = spectra
+  finally:
+    self._project._appBase._endCommandBlock()
+    self._project.unblankNotification()
+
+  # DO creation notifications
+  result._finaliseAction('create')
+  return result
     
 # Connections to parents:
 Project.newSpectrumGroup = _newSpectrumGroup

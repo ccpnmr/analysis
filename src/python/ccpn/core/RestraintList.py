@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
+import collections
 # from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.util.Tensor import Tensor
@@ -235,7 +236,11 @@ class RestraintList(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
 
     else:
-      self._wrappedData.name = value
+      self._startFunctionCommandBlock('rename', value)
+      try:
+        self._wrappedData.name = value
+      finally:
+        self._project._appBase._endCommandBlock()
 
   @classmethod
   def _getAllWrappedData(cls, parent: DataSet)-> list:
@@ -250,6 +255,17 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                       tensorSequenceCode:str=None, tensorResidueType:str=None) -> RestraintList:
   """Create new ccpn.RestraintList of type restraintType within ccpn.DataSet"""
 
+
+
+  # Default values for 'new' function, as used for echoing to console
+  defaults = collections.OrderedDict(
+    (('name',None), ('origin', None),
+     ('comment',None), ('unit',None), ('potentialType', 'unknown'),
+     ('tensorMagnitude', 0.0), ('tensorRhombicity', 0.0), ('tensorIsotropicValue', 0.0),
+     ('tensorChainCode',None), ('tensorSequenceCode',None), ('tensorResidueType', None),
+    )
+  )
+
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
 
@@ -257,17 +273,23 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
   if itemLength is None:
     raise ValueError("restraintType %s not recognised" % restraintType)
 
-  obj = self._wrappedData.newGenericConstraintList(name=name, details=comment, unit=unit,
-                                                   origin=origin,
-                                                   constraintType=restraintType,
-                                                   itemLength=itemLength,
-                                                   potentialType=potentialType,
-                                                   tensorMagnitude=tensorMagnitude,
-                                                   tensorRhombicity=tensorRhombicity,
-                                                   tensorIsotropicValue=tensorIsotropicValue,
-                                                   tensorChainCode=tensorChainCode,
-                                                   tensorSequenceCode=tensorSequenceCode,
-                                                   tensorResidueType=tensorResidueType )
+  self._startFunctionCommandBlock('newRestraintList', restraintType, values=locals(),
+                                  defaults=defaults, parName='newRestraintList')
+  try:
+    obj = self._wrappedData.newGenericConstraintList(name=name, details=comment, unit=unit,
+                                                     origin=origin,
+                                                     constraintType=restraintType,
+                                                     itemLength=itemLength,
+                                                     potentialType=potentialType,
+                                                     tensorMagnitude=tensorMagnitude,
+                                                     tensorRhombicity=tensorRhombicity,
+                                                     tensorIsotropicValue=tensorIsotropicValue,
+                                                     tensorChainCode=tensorChainCode,
+                                                     tensorSequenceCode=tensorSequenceCode,
+                                                     tensorResidueType=tensorResidueType )
+  finally:
+    self._project._appBase._endCommandBlock()
+  #
   return self._project._data2Obj.get(obj)
 
 DataSet.newRestraintList = _newRestraintList

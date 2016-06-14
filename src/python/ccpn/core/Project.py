@@ -29,17 +29,17 @@ import operator
 from collections import OrderedDict
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.util import Pid
+from ccpn.util import Undo
+from ccpn.util import Logging
+
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrProject as ApiNmrProject
 from ccpnmodel.ccpncore.memops import Notifiers
 from ccpnmodel.ccpncore.memops.ApiError import ApiError
 from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
 from ccpnmodel.ccpncore.lib.spectrum import NmrExpPrototype
 from ccpnmodel.ccpncore.lib import Constants
-from ccpn.util import Pid
-from ccpn.util import Undo
-from ccpn.util import Logging
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-
 from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.lib.Io import Fasta as fastaIo
 from ccpnmodel.ccpncore.lib.Io import Pdb as pdbIo
@@ -77,6 +77,9 @@ class Project(AbstractWrapperObject):
 
   # Actions you can notify
   _notifierActions = ('create', 'delete', 'rename', 'change')
+
+  # Qualified name of matching API class
+  _apiClassQualifiedName = ApiNmrProject._metaclass.qualifiedName()
   
   # Top level mapping dictionaries:
   # pid to object and ccpnData to object
@@ -127,8 +130,6 @@ class Project(AbstractWrapperObject):
     # Wrapper level notifier tracking.  APPLICATION ONLY
     # {(className,action):OrderedDict(notifier:onceOnly)}
     self._context2Notifiers = {}
-
-
 
     # Special attributes:
     self._implExperimentTypeMap = None
@@ -256,6 +257,7 @@ class Project(AbstractWrapperObject):
         if not apiNmrCalcStore. isLoaded:
           apiNmrCalcStore.load()
 
+      self._startFunctionCommandBlock('rename', name)
       undo = apiProject._undo
       if undo is not None:
         undo.increaseBlocking()
@@ -290,6 +292,7 @@ class Project(AbstractWrapperObject):
         apiProject.override = False
         if undo is not None:
           undo.decreaseBlocking()
+        self._appBase._endCommandBlock()
 
     if name != apiProject.name:
       # rename and move CCPN project
@@ -303,21 +306,15 @@ class Project(AbstractWrapperObject):
   def deleteObjects(self, *objects:typing.Sequence[typing.Union[Pid.Pid,AbstractWrapperObject]]):
     """Delete one or more objects, given as either objects or Pids"""
 
-
-    # NBNB TODO This is not enough. How to do the undo?
-    ui = self._appBase.ui
-    getDataObj = self._data2Obj.get
-    ui._blankCopnsoleOutput()
-    objs = [getDataObj(xx) if isinstance(x, str) else xx]
+    objs = [getDataObj(x) if isinstance(x, str) else x for x in objects]
+    self._startFunctionCommandBlock('deleteObjects', [x.pid for x in objs])
     try:
       for obj in objs:
         if obj and not obj.isDeleted:
           # If statement in case deleting one obj triggers the deletion of another
           obj.delete()
     finally:
-      ui._unblankConsoleOutput()
-    command = "project.deleteObjects(%s)" % (', '.join(x.pid for x in objs))
-    ui.writeConsoleCommand(command)
+      self._project._appBase._endCommandBlock()
 
   def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
     """Rename object indicated by objectOrPid to name newName
@@ -328,8 +325,10 @@ class Project(AbstractWrapperObject):
     obj.rename(*names)
 
   def execute(self, pid, funcName, *params, **kwparams):
-    """Get the object obj identified by pid, execute obj.funcName(*params, **kwparams)
+    """Get the object identified by pid, execute object.funcName(*params, **kwparams)
     and return the result"""
+
+    # NBNB TODO - probably not useful - remove?
 
     obj = self.getByPid(pid)
     if obj is None:
@@ -475,15 +474,6 @@ class Project(AbstractWrapperObject):
       tt = self._activeNotifiers.pop()
       Notifiers.unregisterNotify(*tt)
 
-  # def _registerNotify(self, notify, apiClassName, apiFuncName):
-  #   """Register a single notifier"""
-  #   self._activeNotifiers.append((notify, apiClassName, apiFuncName))
-  #   Notifiers.registerNotify(notify, apiClassName, apiFuncName)
-
-  # def _unregisterNotify(self, notify, apiClassName, apiFuncName):
-  #   """Unregister a single notifier"""
-  #   self._activeNotifiers.remove((notify, apiClassName, apiFuncName))
-  #   Notifiers.unregisterNotify(notify, apiClassName, apiFuncName)
 
   # New notifier system (Free for use in application code):
 
@@ -633,6 +623,16 @@ class Project(AbstractWrapperObject):
   # Standard notified functions.
   # RESTRICTED. Use in core classes ONLY
 
+  def _startDeleteCommandBlock(self, wrappedData):
+    """Call startCommandBlock for wrapper object delete. Implementation only"""
+    object = self._data2Obj[wrappedData]
+    self._appBase._startCommandBlock("project.deleteObjects(%s)" % (repr(object.longPid)))
+
+
+  def _endCommandBlock(self, dummyWrappedData):
+    """End block for command echoing (wrapper for framework._endCommandBlock, used for notifiers"""
+    self._appBase._endCommandBlock()
+
   def _newApiObject(self, wrappedData, cls:AbstractWrapperObject):
     """Create new wrapper object of class cls, associated with wrappedData.
     and call creation notifiers"""
@@ -659,13 +659,6 @@ class Project(AbstractWrapperObject):
     """
     obj = self._data2Obj[wrappedData]
     obj._finaliseAction('change')
-
-  # def _preDelete(self, wrappedData):
-  #   """ call pre-deletion notifiers
-  #   """
-  #   # get object
-  #   obj = self._data2Obj.get(wrappedData)
-  #   obj._executeNotifiers('preDelete')
 
   def _finaliseApiDelete(self, wrappedData):
     """Clean up after object deletion - and call deletion notifiers

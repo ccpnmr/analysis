@@ -23,6 +23,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import collections
+
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
@@ -129,13 +131,16 @@ class Chain(AbstractWrapperObject):
     #   return self._project._data2Obj[apiComponent]
 
   # CCPN functions
-  def clone(self, shortName:str):
+  def clone(self, shortName:str=None):
     """Make copy of chain."""
 
     molSystem = self._project._wrappedData.molSystem
 
+    if shortName is None:
+      shortName = molSystem._wrappedData.nextChainCode()
+
     if molSystem.findFirstChain(code=shortName) is not None:
-      raise ValueError("Project already hsa one Chain with shortNAme %s" % shortName)
+      raise ValueError("Project already has one Chain with shortNAme %s" % shortName)
     
     ccpnChain = self._wrappedData
     tags = ['molecule', 'role', 'magnEquivalenceCode', 'physicalState', 
@@ -143,16 +148,22 @@ class Chain(AbstractWrapperObject):
     params = {tag:getattr(ccpnChain,tag) for tag in tags}
     params['code'] = shortName
     params['pdbOneLetterCode'] = shortName[0]
-      
-    newCcpnChain = molSystem.newChain(**params)
-    
+    self._startFunctionCommandBlock('clone', shortName, parName='newChain')
+    try:
+      newCcpnChain = molSystem.newChain(**params)
+    finally:
+      self._project._appBase._endCommandBlock()
     #
     return self._project._data2Obj[newCcpnChain]
                                   
 
   def _lock(self):
     """Finalize chain so that it can no longer be modified, and add missing data."""
-    self._wrappedData.molecule.isFinalised = True
+    self._startFunctionCommandBlock('_lock')
+    try:
+      self._wrappedData.molecule.isFinalised = True
+    finally:
+      self._project._appBase._endCommandBlock()
 
 
   # Implementation functions
@@ -163,9 +174,11 @@ class Chain(AbstractWrapperObject):
       raise ValueError("Chain name must be set")
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in Chain.shortName" % Pid.altCharacter)
+    self._startFunctionCommandBlock('rename', value)
     self._apiChain.renameChain(value)
     self._finaliseAction('rename')
     self._finaliseAction('change')
+    self._project._appBase._endCommandBlock()
 
 
   @classmethod
@@ -196,6 +209,12 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
 
   """
 
+  defaults = collections.OrderedDict(
+    (('compoundName', 'Molecule_1'), ('startNumber', 1), ('molType', None), ('isCyclic', False),
+     ('shortName', None), ('role', None), ('comment', None)
+    )
+  )
+
   apiMolSystem = self._wrappedData.molSystem
   if shortName is None:
     shortName = apiMolSystem.nextChainCode()
@@ -216,23 +235,28 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   if apiMolSystem.findFirstChain(code=shortName) is not None:
     raise ValueError("Chain names %s already exists" % shortName)
 
-  substance = self.createPolymerSubstance(sequence=sequence, name=name,
-                                          startNumber=startNumber, molType=molType,
-                                          isCyclic=isCyclic, comment=comment)
+  self._startFunctionCommandBlock('createChain', sequence, values=locals(), defaults=defaults,
+                                  parName='newChain')
+  try:
+    substance = self.createPolymerSubstance(sequence=sequence, name=name,
+                                            startNumber=startNumber, molType=molType,
+                                            isCyclic=isCyclic, comment=comment)
 
-  apiMolecule = substance._apiSubstance.molecule
-  apiMolecule.isFinalised = True
-  # fetch to ensure creation of Substance
-  newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
-                                      details=comment)
-  #
-  return  self._project._data2Obj[newApiChain]
+    apiMolecule = substance._apiSubstance.molecule
+    apiMolecule.isFinalised = True
+    # fetch to ensure creation of Substance
+    newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
+                                        details=comment)
+  finally:
+    self._project._appBase._endCommandBlock()
+  return self._project._data2Obj[newApiChain]
 Project.createChain = _createChain
 
 
 def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
                              comment:str=None) -> Chain:
   """Create new ccpn.Chain that matches ccpn.Substance"""
+  defaults = collections.OrderedDict((('shortName', None), ('role', None), ('comment', None)))
 
   if self.substanceType != 'Molecule':
     raise ValueError("Only Molecule Substances can be used to create chains")
@@ -248,11 +272,17 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
   if Pid.altCharacter in shortName:
     raise ValueError("Character %s not allowed in ccpn.Chain.shortName" % Pid.altCharacter)
 
+  self._startFunctionCommandBlock('createChainFromSubstance', values=locals(), defaults=defaults,
+                                  parName='newChain')
+  try:
+    newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
+                                         details=comment)
+    #
+    result = self._project._data2Obj[newApiChain]
+  finally:
+    self._project._appBase._endCommandBlock()
 
-  newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
-                                       details=comment)
-  #
-  return  self._project._data2Obj[newApiChain]
+  return result
 Substance.createChain = _createChainFromSubstance
 del _createChainFromSubstance
 

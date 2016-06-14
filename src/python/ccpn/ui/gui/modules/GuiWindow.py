@@ -126,13 +126,15 @@ class GuiWindow(DropBase):
       title = 'Delete Peak%s' % ('' if n == 1 else 's')
       msg ='Delete %sselected peak%s?' % ('' if n == 1 else '%d ' % n, '' if n == 1 else 's')
       if MessageDialog.showYesNo(title, msg, parent):
-        for peak in peaks[:]:
-          if current.project._appBase.ui.mainWindow is not None:
-            mainWindow = current.project._appBase.ui.mainWindow
-          else:
-            mainWindow = current.project._appBase._mainWindow
-          mainWindow.pythonConsole.writeConsoleCommand('peak.delete()', peak=peak)
-          peak.delete()
+        current.project.deleteObjects(*peaks)
+        # no longer needed - echo done from function
+        # for peak in peaks[:]:
+        #   if current.project._appBase.ui.mainWindow is not None:
+        #     mainWindow = current.project._appBase.ui.mainWindow
+        #   else:
+        #     mainWindow = current.project._appBase._mainWindow
+        #   mainWindow.pythonConsole.writeConsoleCommand('peak.delete()', peak=peak)
+        #   peak.delete()
 
 
 

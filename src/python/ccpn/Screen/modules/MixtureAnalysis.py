@@ -163,7 +163,7 @@ class MixtureAnalysis(CcpnModule):
     self.selectedTablePeaks = self.peakTable.getSelectedObjects()
     for peak in self.selectedTablePeaks:
       if peak.isSelected:
-        print(self.project.framework.current.peaks, 'currents')
+        print(self.project._appBase.current.peaks, 'currents')
         # self.project._appBase.current.clearPeaks()
       else:
         peak.isSelected = True
@@ -176,8 +176,8 @@ class MixtureAnalysis(CcpnModule):
     selectedPeaks = []
     if len(self.project.strips)>0:
       currentDisplayed = self.project.strips[0]
-      if len(self.project.framework.current.peaks):
-        self.currentPeaks = self.project.framework.current.peaks
+      if len(self.project._appBase.current.peaks):
+        self.currentPeaks = self.project._appBase.current.peaks
         if len(self.peakTable.objects)>0:
           for peak in self.currentPeaks:
             if peak in self.peakTable.objects:

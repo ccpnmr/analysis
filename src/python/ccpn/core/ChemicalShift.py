@@ -22,13 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import collections
 from typing import Tuple
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from typing import List
 
 class ChemicalShift(AbstractWrapperObject):
   """Chemical Shift."""
@@ -119,8 +119,8 @@ class ChemicalShift(AbstractWrapperObject):
 # Connections to parents:
 
 def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:
-  getObj = self._project._data2Obj.get
-  return tuple(sorted(getObj(x) for x in self._wrappedData.shifts))
+  getDataObj = self._project._data2Obj.get
+  return tuple(sorted(getDataObj(x) for x in self._wrappedData.shifts))
 
 NmrAtom.chemicalShifts = property(getter, None, None, "Chemical shifts belonging to NmrAtom")
 
@@ -132,10 +132,17 @@ def _newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
   """Create new ccpn.ChemicalShift within ccpn.ChemicalShiftList"""
 
   nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
-
-  obj = self._wrappedData.newShift(value=value,
-                                   resonance=nmrAtom._wrappedData, error=valueError,
-                                   figOfMerit=figureOfMerit, details=comment)
+  defaults = collections.OrderedDict((('valueError', 0.0), ('figureOfMerit', 1.0),
+                                      ('comment',None)))
+  self._startFunctionCommandBlock('newChemicalShift', value, nmrAtom, values=locals(),
+                                  defaults=defaults, parNAme='newChemicalShift')
+  try:
+    obj = self._wrappedData.newShift(value=value,
+                                     resonance=nmrAtom._wrappedData, error=valueError,
+                                     figOfMerit=figureOfMerit, details=comment)
+  finally:
+    self._wrappedData.molecule.isFinalised = True
+    self._project._appBase._endCommandBlock()
   return self._project._data2Obj.get(obj)
 
 ChemicalShiftList.newChemicalShift = _newChemicalShift

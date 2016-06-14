@@ -163,6 +163,9 @@ class Framework:
     # This is needed to make project available in NoUi (if nothing else)
     self.project = None
 
+    # Blocking level for command echo and logging
+    self._echoBlocking = 0
+
     # NBNB TODO The following block should maybe be moved into _getUi
     self._getUserPrefs()
     self._registrationDict = {}   # Default - overridden elsewhere
@@ -332,12 +335,54 @@ class Framework:
   def getByPid(self, pid):
     return self.project.getByPid(pid)
 
+  def _startCommandBlock(self, command:str, **objectParameters):
+    """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+
+    MUST be paired with _endCommandBlock call - use try ... finally to ensure both are called
+
+    Set keyword:value objectParameters to point to the relevant objects in setup commands,
+    and pass setup commands and command proper to ui for echoing
+
+    Example calls:
+
+    _startCommandBlock("application.createSpectrumDisplay(spectrum)", spectrum=spectrumOrPid)
+
+    _startCommandBlock(
+       "newAssignment = peak.assignDimension(axisCode=%s, value=[newNmrAtom]" % axisCode,
+       peak=peakOrPid)"""
+
+    undo = self.project._undo
+    if not self._echoBlocking and not undo.blocking:
+
+      # set undo step
+      undo.newWaypoint()
+
+      # Get list of command strings
+      commands = []
+      for parameter, value in sorted(objectParameters.items()):
+        if not isinstance(value, str):
+          value = value.longPid
+        commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
+      commands.append(command)
+
+      # echo command strings
+      self.ui.echoCommands(commands)
+
+    self._echoBlocking += 1
+
+
+  def _endCommandBlock(self):
+    """End block for command echoing,
+
+    MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
+    if self._echoBlocking > 0:
+      self._echoBlocking -= 1
 
   def addApplicationMenuSpec(self, spec, position=3):
     self._menuSpec.insert(position, spec)
 
 
-  #########################################    Start setup Menus      ##################################################
+  #########################################    Start setup Menus      ############################
 
   def _setupMenus(self):
     self._menuSpec = ms = []

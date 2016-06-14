@@ -188,7 +188,8 @@ class GeneralTab(QtGui.QWidget, Base):
     if self.nameData.isModified():
       self.spectrum.rename(self.nameData.text())
       self._writeLoggingMessage("spectrum.rename('%s')" % self.nameData.text())
-      self.pythonConsole.writeConsoleCommand("spectrum.rename('%s')" % self.nameData.text(), spectrum=self.spectrum)
+      # Echo now done automatically
+      # self.pythonConsole.writeConsoleCommand("spectrum.rename('%s')" % self.nameData.text(), spectrum=self.spectrum)
 
 
   def _setSpectrumScale(self):

@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Sequence, List, Optional
+import collections
 import numpy
 from numpy import argwhere
 from scipy.ndimage import maximum_filter
@@ -155,8 +156,20 @@ class PeakList(AbstractWrapperObject):
                   fitMethod:str='gaussian', excludedRegions:Sequence=None,
                   excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
 
-    self._project.suspendNotification()
+    defaults = collections.OrderedDict(
+      ( ('positions', None), ('doPos', True), ('doNeg', True),
+        ('fitMethod', 'gaussian'), ('excludedRegions', None), ('excludedDiagonalDims', None),
+        ('excludedDiagonalTransform', None)
+      )
+    )
+    # NBNB TODO dataDims are NOT being echoed.
+    # NBNB TODO function needs refactoring because 1) we have API objects (dataDims) as input
+    # which 2) makes proper echoing impossible.
 
+
+
+    self._startFunctionCommandBlock('pickPeaksNd', values=locals(), defaults=defaults)
+    self._project.suspendNotification()
     try:
 
       startPoint = []
@@ -192,6 +205,7 @@ class PeakList(AbstractWrapperObject):
 
     finally:
       self._project.resumeNotification()
+      self._project._appBase._endCommandBlock()
 
     return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
 
@@ -241,10 +255,14 @@ class PeakList(AbstractWrapperObject):
     """
     Pick 1D peaks form data in  self.spectrum
     """
+    defaults = collections.OrderedDict(
+      ( ('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('noiseThreshold', None)
+      )
+    )
 
-
+    self._startFunctionCommandBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
     self._project.suspendNotification()
-
+    ll = []
     try:
       if not ignoredRegions:
         ignoredRegions = [[-20.1,-19.1]]
@@ -285,6 +303,7 @@ class PeakList(AbstractWrapperObject):
 
     finally:
       self._project.resumeNotification()
+      self._project._appBase._endCommandBlock()
 
     return peaks
 
@@ -360,6 +379,7 @@ class PeakList(AbstractWrapperObject):
       if mapping is not None:
         selectedRegion.insert(ii, [positions[mapping]-tolerances[ii], positions[mapping]+tolerances[ii]])
       else:
+
         selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 
     regionToPick = list(zip(*selectedRegion))
@@ -371,11 +391,19 @@ class PeakList(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newPeakList(self:Spectrum,name:str=None, comment:str=None,
+def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
              isSimulated:bool=False) -> PeakList:
   """Create new empty ccpn.PeakList within ccpn.Spectrum"""
+
+  defaults = collections.OrderedDict((('title', None), ('comment', None), ('isSimulated', False)))
+
   apiDataSource = self._wrappedData
-  obj = apiDataSource.newPeakList(name=name, details=comment, isSimulated=isSimulated)
+  self._startFunctionCommandBlock('newPeakList', values=locals(), defaults=defaults,
+                                  parName='newPeakList')
+  try:
+    obj = apiDataSource.newPeakList(name=title, details=comment, isSimulated=isSimulated)
+  finally:
+    self._project._appBase._endCommandBlock()
   return self._project._data2Obj.get(obj)
 
 Spectrum.newPeakList = _newPeakList

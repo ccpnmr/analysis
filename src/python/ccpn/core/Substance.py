@@ -396,6 +396,7 @@ class Substance(AbstractWrapperObject):
     elif  Pid.altCharacter in labeling:
         raise ValueError("Character %s not allowed in ccpn.Sample.labeling" % Pid.altCharacter)
 
+    self._startFunctionCommandBlock('rename', name, labeling)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -428,6 +429,7 @@ class Substance(AbstractWrapperObject):
     finally:
       if undo is not None:
         undo.decreaseBlocking()
+      self._project._appBase._endCommandBlock()
 
     undo.newItem(self.rename, self.rename, undoArgs=(oldName,oldLabeling),
                  redoArgs=(name, labeling,))
@@ -456,6 +458,17 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
 
   ADVANCED alternatives are 'Cell', 'Material', and 'Composite'"""
 
+  # Default values for 'new' function, as used for echoing to console
+  defaults = OrderedDict(
+    (('labeling','std'), ('substanceType', 'Molecule'),
+     ('userCode',None), ('smiles',None), ('inChi', None),
+     ('casNumber',None), ('empiricalFormula',None), ('molecularMass', None),
+     ('comment',None), ('synonyms',()), ('atomCount', None),
+     ('bondCount',None), ('ringCount',None), ('hBondDonorCount', None),
+     ('hBondAcceptorCount',None), ('polarSurfaceArea',None), ('logPartitionCoefficient', None)
+    )
+  )
+
   for ss in (name, labeling):
     if ss and Pid.altCharacter in ss:
       raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
@@ -474,42 +487,47 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
     'name':name, 'labeling':labeling, 'userCode':userCode, 'synonyms':synonyms,
     'details':comment
   }
-  apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
-  if substanceType == 'Material':
-    if oldSubstance is not None and oldSubstance.className != 'Substance':
-      raise ValueError("Substance name %s clashes with substance of different type: %s"
-                        % (name, oldSubstance.className))
+
+  self._startFunctionCommandBlock('newSubstance', name, values=locals(), defaults=defaults,
+                                  parName='newSubstance')
+  try:
+    if substanceType == 'Material':
+      if oldSubstance is not None and oldSubstance.className != 'Substance':
+        raise ValueError("Substance name %s clashes with substance of different type: %s"
+                          % (name, oldSubstance.className))
+      else:
+        apiResult = apiComponentStore.newSubstance(**params)
+    elif substanceType == 'Cell':
+      if oldSubstance is not None and oldSubstance.className != 'Cell':
+        raise ValueError("Substance name %s clashes with substance of different type: %s"
+                          % (name, oldSubstance.className))
+      else:
+        apiResult = apiComponentStore.newCell(**params)
+    elif substanceType == 'Composite':
+      if oldSubstance is not None and oldSubstance.className != 'Composite':
+        raise ValueError("Substance name %s clashes with substance of different type: %s"
+                          % (name, oldSubstance.className))
+      else:
+        apiResult = apiComponentStore.newComposite(**params)
+    elif substanceType == 'Molecule':
+      if oldSubstance is not None and oldSubstance.className != 'MolComponent':
+        raise ValueError("Substance name %s clashes with substance of different type: %s"
+                          % (name, oldSubstance.className))
+      else:
+        apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
+                                                      empiricalFormula=empiricalFormula,
+                                                      molecularMass=molecularMass,
+                                                      atomCount=atomCount, bondCount=bondCount,
+                                                      ringCount=ringCount,
+                                                      hBondDonorCount=hBondDonorCount,
+                                                      hBondAcceptorCount=hBondAcceptorCount,
+                                                      polarSurfaceArea=polarSurfaceArea,
+                                                      logPartitionCoefficient=logPartitionCoefficient,
+                                                      **params)
     else:
-      apiResult = apiComponentStore.newSubstance(**params)
-  elif substanceType == 'Cell':
-    if oldSubstance is not None and oldSubstance.className != 'Cell':
-      raise ValueError("Substance name %s clashes with substance of different type: %s"
-                        % (name, oldSubstance.className))
-    else:
-      apiResult = apiComponentStore.newCell(**params)
-  elif substanceType == 'Composite':
-    if oldSubstance is not None and oldSubstance.className != 'Composite':
-      raise ValueError("Substance name %s clashes with substance of different type: %s"
-                        % (name, oldSubstance.className))
-    else:
-      apiResult = apiComponentStore.newComposite(**params)
-  elif substanceType == 'Molecule':
-    if oldSubstance is not None and oldSubstance.className != 'MolComponent':
-      raise ValueError("Substance name %s clashes with substance of different type: %s"
-                        % (name, oldSubstance.className))
-    else:
-      apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
-                                                    empiricalFormula=empiricalFormula,
-                                                    molecularMass=molecularMass,
-                                                    atomCount=atomCount, bondCount=bondCount,
-                                                    ringCount=ringCount,
-                                                    hBondDonorCount=hBondDonorCount,
-                                                    hBondAcceptorCount=hBondAcceptorCount,
-                                                    polarSurfaceArea=polarSurfaceArea,
-                                                    logPartitionCoefficient=logPartitionCoefficient,
-                                                    **params)
-  else:
-    raise ValueError("Substance type %s not recognised" % substanceType)
+      raise ValueError("Substance type %s not recognised" % substanceType)
+  finally:
+    self._project._appBase._endCommandBlock()
   #
   return self._data2Obj[apiResult]
 
@@ -537,6 +555,14 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
   """
 
+  defaults = OrderedDict(
+    (
+      ('labeling', 'std'), ('userCode', None), ('smiles', None),
+      ('synonyms', ()), ('comment', None), ('startNumber', 1), ('molType', None),
+      ('isCyclic', False)
+    )
+  )
+
   apiNmrProject = self._wrappedData
 
   if not sequence:
@@ -549,16 +575,22 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
     raise ValueError("Molecule name %s is already in use for API Molecule")
 
-  apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
-                                              name=name, startNumber=startNumber,
-                                              isCyclic=isCyclic)
-  apiMolecule.commonNames =synonyms
-  apiMolecule.smiles = smiles
-  apiMolecule.details=comment
+  self._startFunctionCommandBlock('createPolymerSubstance', sequence, name,
+                                  values=locals(), defaults=defaults,
+                                  parName='newPolymerSubstance')
+  try:
+    apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
+                                                name=name, startNumber=startNumber,
+                                                isCyclic=isCyclic)
+    apiMolecule.commonNames =synonyms
+    apiMolecule.smiles = smiles
+    apiMolecule.details=comment
 
-  result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
-                          apiMolecule, labeling=labeling)]
-  result.userCode = userCode
+    result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
+                            apiMolecule, labeling=labeling)]
+    result.userCode = userCode
+  finally:
+    self._project._appBase._endCommandBlock()
   #
   return result
 
@@ -576,10 +608,19 @@ def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
     if ll:
       apiResult = ll[0]
 
-  if apiResult:
-    return self._data2Obj[apiResult]
+  if labeling is None:
+    values = {}
   else:
-    return self.newSubstance(name=name, labeling=labeling or 'std')
+    values = {'labeling':labeling}
+
+  self._startFunctionCommandBlock('fetchSubstance', name, values=values, parName='newSubstance')
+  try:
+    if apiResult:
+      return self._data2Obj[apiResult]
+    else:
+      return self.newSubstance(name=name, labeling=labeling or 'std')
+  finally:
+    self._project._appBase._endCommandBlock()
 #
 Project.fetchSubstance = _fetchSubstance
 del _fetchSubstance

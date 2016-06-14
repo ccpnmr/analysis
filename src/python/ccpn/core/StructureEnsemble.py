@@ -24,6 +24,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Tuple, Sequence, Optional
+import collections
 
 import numpy
 from ccpn.util import Pid
@@ -580,7 +581,6 @@ class StructureEnsemble(AbstractWrapperObject):
           setattr(self, tag, numpy.append(xx, values, axis=1))
 
 
-
   def _atomId2CoordAtom(self, atomId:str) -> Optional[ApiCoordAtom]:
     """Convert atomId to API MolStructure.Atom"""
     chainCode, sequenceCode, residueType, name = tuple(Pid.splitId(atomId))
@@ -615,14 +615,20 @@ class StructureEnsemble(AbstractWrapperObject):
 
 def _newStructureEnsemble(self:Project, ensembleId:int=None, comment:str=None) -> StructureEnsemble:
   """Create new, empty ccpn.StructureEnsemble"""
+
+  defaults = collections.OrderedDict((('ensembleId', None), ('comment', None)))
   
   nmrProject = self._wrappedData
-  if ensembleId is None:
-    ll = nmrProject.root.structureEnsembles
-    ensembleId = max(x.ensembleId for x in ll) + 1 if ll else 1
-  newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(molSystem=nmrProject.molSystem,
-                                                         ensembleId=ensembleId, details=comment)
-  return self._data2Obj.get(newApiStructureEnsemble)
+  self._startFunctionCommandBlock('newStructureEnsemble', values=locals(), defaults=defaults,
+                                  parName='newStructureEnsemble')
+  try:
+    if ensembleId is None:
+      ll = nmrProject.root.structureEnsembles
+      ensembleId = max(x.ensembleId for x in ll) + 1 if ll else 1
+    newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(molSystem=nmrProject.molSystem,
+                                                           ensembleId=ensembleId, details=comment)
+  finally:
+    return self._data2Obj.get(newApiStructureEnsemble)
     
     
 # Connections to parents:

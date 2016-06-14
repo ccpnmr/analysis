@@ -472,7 +472,7 @@ class CcpnNefIo:
       result['program_version'] = self.programVersion
       result['creation_date'] = timeStamp = commonUtil.getTimeStamp()
       result['uuid'] = '%s-%s-%s' % (self.programName, timeStamp, random.randint(0, maxRandomInt))
-
+      NBNB now set automatically
       # This attribute is only present when exporting DataSets
       del result['ccpn_dataset_comment']
       # This loop is only set when exporting DataSets

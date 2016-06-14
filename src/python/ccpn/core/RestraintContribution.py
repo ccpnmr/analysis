@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Sequence, Tuple
+import collections
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -240,19 +241,39 @@ class RestraintContribution(AbstractWrapperObject):
 
 # Connections to parents:
 def _newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
-                    weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
+                    weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                     scale:float=1.0, isDistanceDependent:bool=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
   """Create new ccpn.RestraintContribution within ccpn.Restraint"""
+
+
+  defaults = collections.OrderedDict(
+    (
+      ('targetValue',None), ('error',None), ('weight',1.0),
+      ('upperLimit',None), ('lowerLimit',None), ('additionalUpperLimit',None),
+      ('additionalLowerLimit',None), ('scale', 1.0), ('isDistanceDependent',None),
+      ('restraintItems',()),
+    )
+  )
+
   func = self._wrappedData.constraint.newGenericContribution
-  obj = func(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
-             lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
-             additionalLowerLimit=additionalLowerLimit, scale=scale,
-             isDistanceDependent=isDistanceDependent)
-  result = self._project._data2Obj.get(obj)
-  result.restraintItems = restraintItems
-  return result
+  self._startFunctionCommandBlock('newRestraintContribution', values=locals(), defaults=defaults,
+                                  parName='newRestraintContribution')
+  self._project.blankNotification() # delay notifiers till object is fully ready
+  try:
+    obj = func(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
+               lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
+               additionalLowerLimit=additionalLowerLimit, scale=scale,
+               isDistanceDependent=isDistanceDependent)
+    result = self._project._data2Obj.get(obj)
+    result.restraintItems = restraintItems
+  finally:
+    self._project.unblankNotification()
+    self._project._appBase._endCommandBlock()
+
+  # Do creation notifications
+  result._finaliseAction('create')
 
 Restraint.newRestraintContribution = _newRestraintContribution
 del _newRestraintContribution

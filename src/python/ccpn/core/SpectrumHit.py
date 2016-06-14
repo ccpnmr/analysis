@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import List
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PseudoDimension import PseudoDimension
@@ -185,20 +186,34 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
                     concentrationUnit:str='M', comment:str=None):
   """Create new ccpn.SpectrumHit within ccpn.Spectrum"""
 
-  if pseudoDimension is not None:
-    if not pseudoDimensionNumber:
-      pseudoDimensionNumber = pseudoDimension,pseudoDimensionNumber
-    elif pseudoDimensionNumber != pseudoDimension.dimension:
-      raise ValueError("pseudoDimension %s incompatible with pseudoDimensionNumber %s"
-                       % (pseudoDimensionNumber, pseudoDimension))
+  # Default values for 'new' function, as used for echoing to console
+  defaults = collections.OrderedDict(
+    (('pointNumber', 0), ('pseudoDimensionNumber', 0),
+     ('figureOfMerit',None), ('meritCode',None), ('normalisedChange', None),
+     ('isConfirmed',None), ('concentration',None), ('concentrationError', None),
+     ('concentrationUnit','M'), ('comment',None)
+     )
+  )
 
-  obj = self._apiDataSource.newSpectrumHit(substanceName=substanceName,
-                                           sampledDimension=pseudoDimensionNumber,
-                                           sampledPoint=pointNumber, figureOfMerit=figureOfMerit,
-                                           meritCode=meritCode, normalisedChange=normalisedChange,
-                                           isConfirmed=isConfirmed, concentration=concentration,
-                                           concentrationError=concentrationError,
-                                           concentrationUnit=concentrationUnit, details=comment)
+  self._startFunctionCommandBlock('newSpectrumHit', substanceName, values=locals(), defaults=defaults,
+                                  parName='newSpectrumHit')
+  try:
+    if pseudoDimension is not None:
+      if not pseudoDimensionNumber:
+        pseudoDimensionNumber = pseudoDimension.dimension
+      elif pseudoDimensionNumber != pseudoDimension.dimension:
+        raise ValueError("pseudoDimension %s incompatible with pseudoDimensionNumber %s"
+                         % (pseudoDimensionNumber, pseudoDimension))
+
+    obj = self._apiDataSource.newSpectrumHit(substanceName=substanceName,
+                                             sampledDimension=pseudoDimensionNumber,
+                                             sampledPoint=pointNumber, figureOfMerit=figureOfMerit,
+                                             meritCode=meritCode, normalisedChange=normalisedChange,
+                                             isConfirmed=isConfirmed, concentration=concentration,
+                                             concentrationError=concentrationError,
+                                             concentrationUnit=concentrationUnit, details=comment)
+  finally:
+    self._project._appBase._endCommandBlock()
 
   return self._project._data2Obj.get(obj)
 

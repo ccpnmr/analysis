@@ -29,6 +29,7 @@ import typing
 from collections import OrderedDict
 
 from ccpn.core.lib import CcpnSorting
+from ccpn.core.lib import Util as coreUtil
 from ccpn.util import Common as commonUtil
 from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
@@ -117,6 +118,9 @@ class AbstractWrapperObject():
 
   # Function to generate custom subclass instances -= overridden in some subclasses
   _factoryFunction = None
+
+  # Default values for paraeters to 'new' function. Overridden in subclasses
+  _defaultInitValues = None
   
   # Implementation methods
   
@@ -341,7 +345,9 @@ class AbstractWrapperObject():
           className = cls._apiClassQualifiedName
           Project._apiNotifiers[:0] = [
             ('_newApiObject', {'cls':cls}, className, '__init__'),
+            ('_startDeleteCommandBlock', {}, className, 'startDeleteBlock'),
             ('_finaliseApiDelete', {}, className, 'delete'),
+            ('_endCommandBlock', {}, className, 'endDeleteBlock'),
             ('_finaliseApiUnDelete', {}, className, 'undelete'),
             ('_modifiedApiObject', {}, className, ''),
         ]
@@ -579,7 +585,7 @@ class AbstractWrapperObject():
     if action == 'rename':
       # Special case
 
-      oldPid = self.pid
+      oldPid = self.longPid
 
       # Wrapper-level processing
       self._finaliseRename()
@@ -594,19 +600,8 @@ class AbstractWrapperObject():
           for notifier in dd:
             notifier(self, oldPid)
 
-      if hasattr(self, 'framework'):
-        ui = self.framework.ui
-      else:
-        ui = self.project._appBase.ui
-      if not ui._blankConsoleOutput:
-        ui.writeConsoleCommand("project.renameObject(%s, %s)" % (oldPid, self._key ))
-      # call rename on children
-      ui.blankConsoleOutput()
-      try:
-        for obj in self._getDirectChildren():
-          obj._finaliseAction('rename')
-      finally:
-        ui.unblankConsoleOutput()
+      for obj in self._getDirectChildren():
+        obj._finaliseAction('rename')
 
     else:
       # Normal case - just call notifiers
@@ -618,5 +613,26 @@ class AbstractWrapperObject():
         for dd in iterator:
           for notifier in dd:
             notifier(self)
+
+  def _startFunctionCommandBlock(self, funcName, *params, values=None, defaults=None, parName=None):
+    """Execute StartCommandBlock for an object creation function,
+    """
+
+    #CCPNINTERNAL
+
+    project = self._project
+
+    parameterString = coreUtil.commandParameterString(*params, values=values, defaults=defaults)
+
+    if self is project:
+      command = "project.%s(%s)" % (funcName, parameterString)
+    else:
+      command = "project.getByPid(%s).%s(%s)" % (self.longPid, funcName, parameterString)
+
+    if parName:
+      command = ''.join((parName, ' = ', command))
+
+    project._appBase._startCommandBlock(command)
+
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

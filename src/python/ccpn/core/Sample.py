@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
+import collections
 
 from ccpn.util import Pid
 
@@ -214,6 +215,7 @@ class Sample(AbstractWrapperObject):
   def rename(self, value:str):
     """Rename Sample, changing its Id and Pid"""
     oldName = self.name
+    self._startFunctionCommandBlock('rename', value)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -231,6 +233,7 @@ class Sample(AbstractWrapperObject):
     finally:
       if undo is not None:
         undo.decreaseBlocking()
+      self._project._appBase._endCommandBlock()
 
     undo.newItem(self.rename, self.rename, undoArgs=(oldName,),redoArgs=(value,))
 
@@ -242,30 +245,45 @@ class Sample(AbstractWrapperObject):
     return parent._wrappedData.sampleStore.sortedSamples()
 
 
-def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=None, amount:float=None,
-              amountUnit:str='L', isHazardous:bool=None, creationDate:datetime=None,
-              batchIdentifier:str=None, plateIdentifier:str=None, rowNumber:int=None,
-              columnNumber:int=None, comment:str=None) -> Sample:
+def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=None,
+               amount:float=None, amountUnit:str='L', isVirtual:bool=False, isHazardous:bool=None,
+               creationDate:datetime=None, batchIdentifier:str=None, plateIdentifier:str=None,
+               rowNumber:int=None, columnNumber:int=None, comment:str=None) -> Sample:
   """Create new ccpn.Sample"""
+
+  # Default values for 'new' function, as used for echoing to console
+  defaults = collections.OrderedDict(
+    (('name',None), ('pH',None), ('ionicStrength', None),
+     ('amount',None), ('amountUnit','L'), ('isVirtual', False), ('isHazardous', None),
+     ('creationDate',None), ('batchIdentifier',None), ('plateIdentifier', None),
+     ('rowNumber',None), ('columnNumber',None), ('comment', None)
+    )
+  )
+
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
 
-  if name is None:
-    # Make default name
-    nextNumber = len(apiSampleStore.samples) + 1
-    name = 'Sample_%s' % nextNumber
-    while apiSampleStore.findFirstSample(name=name) is not None:
-      name = commonUtil.incrementName(name)
+  self._startFunctionCommandBlock('newSample', values=locals(), defaults=defaults,
+                                  parName='newSample')
+  try:
+    if name is None:
+      # Make default name
+      nextNumber = len(apiSampleStore.samples) + 1
+      name = 'Sample_%s' % nextNumber
+      while apiSampleStore.findFirstSample(name=name) is not None:
+        name = commonUtil.incrementName(name)
 
-  if Pid.altCharacter in name:
-    raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+    if Pid.altCharacter in name:
+      raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
-  newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
-                                          amount=amount, amountUnit=amountUnit,
-                                          isHazardous=isHazardous, creationDate=creationDate,
-                                          batchIdentifier=batchIdentifier,
-                                          plateIdentifier=plateIdentifier,rowPosition=rowNumber,
-                                          colPosition=columnNumber, details=comment)
+    newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
+                                            amount=amount, amountUnit=amountUnit, isVirtual=isVirtual,
+                                            isHazardous=isHazardous, creationDate=creationDate,
+                                            batchIdentifier=batchIdentifier,
+                                            plateIdentifier=plateIdentifier,rowPosition=rowNumber,
+                                            colPosition=columnNumber, details=comment)
+  finally:
+    self._project._appBase._endCommandBlock()
   #
   return self._data2Obj.get(newApiSample)
 

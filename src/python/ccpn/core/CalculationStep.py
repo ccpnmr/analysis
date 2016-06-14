@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from typing import Optional, List
+import collections
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import CalculationStep as ApiCalculationStep
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.DataSet import DataSet
@@ -46,7 +47,6 @@ class CalculationStep(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = ApiCalculationStep._metaclass.qualifiedName()
-
 
   # CCPN properties
   @property
@@ -183,6 +183,14 @@ def _newCalculationStep(self:DataSet, programName:str=None, programVersion:str=N
                         inputDataSet:DataSet=None, outputDataSet:DataSet=None,) -> CalculationStep:
   """Create new ccpn.CalculationStep within ccpn.DataSet"""
 
+
+  # Default values for 'new' function, as used for echoing to console
+  defaults = collections.OrderedDict(
+    (('programName', None), ('programVersion', None), ('scriptName', None), ('script',None),
+     ('inputDataUuid', None), ('outputDataUuid', None)
+    )
+  )
+
   project = self.project
   programName = programName or project.programName
 
@@ -200,11 +208,15 @@ def _newCalculationStep(self:DataSet, programName:str=None, programVersion:str=N
       raise ValueError("Either outputDataSet or inputDataUuid must be None - values were %s and %s"
                       % (outputDataSet, outputDataUuid))
 
-
-  obj = self._wrappedData.newCalculationStep(programName=programName, programVersion=programVersion,
-                                             scriptName=scriptName, script=script,
-                                             inputDataUuid=inputDataUuid,
-                                             outputDataUuid=outputDataUuid)
+  self._startFunctionCommandBlock('newCalculationStep', values=locals(), defaults=defaults,
+                                  parName='newCalculationStep')
+  try:
+    obj = self._wrappedData.newCalculationStep(programName=programName, programVersion=programVersion,
+                                               scriptName=scriptName, script=script,
+                                               inputDataUuid=inputDataUuid,
+                                               outputDataUuid=outputDataUuid)
+  finally:
+    project._appBase._endCommandBlock()
   return project._data2Obj.get(obj)
 
 DataSet.newCalculationStep = _newCalculationStep

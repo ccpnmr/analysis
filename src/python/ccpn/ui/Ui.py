@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import sys
+import typing
 
 from ccpn.core.Project import Project
 from ccpn.ui._implementation import _importOrder as _uiClassOrder
@@ -36,12 +37,12 @@ class Ui:
   # Factory functions for UI-specific instantiation of wrapped graphics classes
   _factoryFunctions = {}
 
-  # Controls if delete, rename, and create commands are automatically echoed to console
-  # Not used in all Uis, but must be in Ui to avoid breaking code
-  _blankConsoleOutput = 1
+  def __init__(self, framework):
 
-  def __init__(self):
-    self.menuBar = []
+    self.framework = framework
+
+    self.application = None
+    self.mainWindow = None
 
   def addMenu(self, name, position=None):
     '''
@@ -89,20 +90,17 @@ class Ui:
                      (self.framework._registrationDict.get('name'),
                       self.framework._registrationDict.get('organisation')))
 
-  def blankConsoleOutput(self):
-    """Increase console output blanking level.
-    Output is done only when blanking level is 0"""
-    self._blankConsoleOutput += 1
 
-  def unblankConsoleOutput(self):
-    """Increase console output blanking level.
-    Output is done only when blanking level is 0"""
-    if self._blankConsoleOutput > 0:
-      self._blankConsoleOutput -= 1
+  def echoCommands(self, commands:typing.List[str]):
+    """Echo commands strings, one by one, to logger.
+    Overwritten in subclasses to handle e.g. console putput
+    """
 
-  def writeConsoleCommand(self, command:str, **objectParameters):
-    """No-op. To be overridden in subclasses"""
-    return
+    logger = self.framework.project._logger
+
+    for command in commands:
+      logger.info(command)
+
 
   @property
   def _isRegistered(self):
@@ -110,13 +108,6 @@ class Ui:
     return not Register.isNewRegistration(Register.loadDict())
 
 class NoUi(Ui):
-  
-  def __init__(self, framework):
-    
-    self.framework = framework
-    
-    self.application = None
-    self.mainWindow = None
 
   def _showRegisterPopup(self):
     """Display registration popup"""
@@ -127,4 +118,24 @@ class NoUi(Ui):
     # popup.raise_()
     # popup.exec_()
     # self.application.processEvents()
+
+class TestUi(NoUi):
+
+  def __init__(self, framework):
+
+    Ui.__init__(self, framework)
+    framework._consoleOutput = []
+
+
+  def echoCommands(self, commands:typing.List[str]):
+    """Echo commands strings, one by one, to logger
+    and store them in internal list for perusal
+    """
+
+    self.framework._consoleOutput.extend(commands)
+
+    logger = self.framework.project._logger
+
+    for command in commands:
+      logger.info(command)
 

@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Sequence, Tuple
+import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.RestraintList import RestraintList
@@ -226,13 +227,13 @@ class Restraint(AbstractWrapperObject):
 
 
 def getter(self:Peak) -> Tuple[Restraint, ...]:
-  getObj = self._project._data2Obj.get
+  getDataObj = self._project._data2Obj.get
   result = []
   apiPeak = self._wrappedData
   for restraintList in self._project.restraintLists:
     for apiRestraint in restraintList._wrappedData.sortedRestraints():
       if apiPeak in apiRestraint.peaks:
-        result.append(getObj(apiRestraint))
+        result.append(getDataObj(apiRestraint))
   return tuple(result)
 def setter(self:Peak, value:Sequence):
   apiPeak = self._wrappedData
@@ -250,20 +251,40 @@ def _newRestraint(self:RestraintList,comment:str=None,
                          peaks:Sequence=()) -> Restraint:
   """Create new ccpn.Restraint within ccpn.RestraintList.
 
-  Note that you just create at least one RestraintCOntribution afterwards in order to have valid
+  Note that you just create at least one RestraintContribution afterwards in order to have valid
   data. Use the simpler createSimpleRestraint instead, unless you have specific reasons for
   needing newRestraint"""
+  # Default values for 'new' function, as used for echoing to console
+  values = collections.OrderedDict()
+  if comment:
+    values['comment'] = comment
+  if peaks:
+    getByPid = self._project.getByPid
+    peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
+    values['peaks'] = [x.pid for x in peaks]
   apiConstraintList = self._wrappedData
   creator = apiConstraintList.getattr("new%sConstraint" % self.restraintType)
-  result = self._project._data2Obj.get(creator(details=comment))
-  result.peaks = peaks
+
+  self._startFunctionCommandBlock('newRestraint', values=values, parName='newRestraint')
+  self._project.blankNotification() # delay notifiers till Restraint is fully ready
+  try:
+    obj = creator(details=comment)
+    result = self._project._data2Obj.get(obj)
+    result.peaks = peaks
+  finally:
+    self._project.unblankNotification()
+    self._project._appBase._endCommandBlock()
+
+  # Do creation notifications
+  result._finaliseAction('create')
+  #
   return result
 
 def createSimpleRestraint(self:RestraintList,comment:str=None,
                         peaks:Sequence=(),  targetValue:float=None, error:float=None,
-                        weight:float=None, upperLimit:float=None,  lowerLimit:float=None,
+                        weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                        vectorLength=None, restraintItems:Sequence=()) -> Restraint:
+                        scale=1.0, vectorLength=None, restraintItems:Sequence=()) -> Restraint:
   """Create a Restraint with a single RestraintContribution within the RestraintList.
   The function takes all the information needed and creates the RestraintContribution as
    well as the Restraint proper.
@@ -271,12 +292,32 @@ def createSimpleRestraint(self:RestraintList,comment:str=None,
    This function should be used routinely, unless there is a need to crreate more complex
    Restraints."""
 
-  restraint = self.newRestraint(comment=comment, peaks=peaks)
-  restraint.newRestraintContribution(targetValue=targetValue,error=error, weight=weight,
-                            upperLimit=upperLimit, lowerLimit=lowerLimit,
-                            additionalUpperLimit=additionalUpperLimit,
-                            additionalLowerLimit=additionalLowerLimit,
-                            vectorLength=vectorLength, restraintItems=restraintItems)
+  defaults = collections.OrderedDict(
+    (
+      ('comment',None), ('peaks',()), ('targetValue',None), ('error',None), ('weight',1.0),
+      ('upperLimit',None), ('lowerLimit',None), ('additionalUpperLimit',None),
+      ('additionalLowerLimit',None), ('scale', 1.0) ('vectorLength',None), ('restraintItems',()),
+    )
+  )
+  values = locals().copy()
+  if peaks:
+    getByPid = self._project.getByPid
+    peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
+    values['peaks'] = tuple(x.pid for x in peaks)
+
+
+
+  self._startFunctionCommandBlock('createSimpleRestraint', values=values, defaults=defaults,
+                                  parName='newRestraint')
+  try:
+    restraint = self.newRestraint(comment=comment, peaks=peaks)
+    restraint.newRestraintContribution(targetValue=targetValue,error=error, weight=weight,
+                              upperLimit=upperLimit, lowerLimit=lowerLimit,
+                              additionalUpperLimit=additionalUpperLimit,
+                              additionalLowerLimit=additionalLowerLimit,scale=scale,
+                              vectorLength=vectorLength, restraintItems=restraintItems)
+  finally:
+    self._project._appBase._endCommandBlock()
   #
   return restraint
 

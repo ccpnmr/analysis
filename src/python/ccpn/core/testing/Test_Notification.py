@@ -151,6 +151,8 @@ class NotificationTest(WrapperTesting):
     note2 = project.newNote(name='test2')
 
     project._undo.undo()
+    project._undo.undo()
+    project._undo.redo()
     project._undo.redo()
     self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
     project.newUndoPoint()
@@ -192,6 +194,8 @@ class NotificationTest(WrapperTesting):
     note2 = project.newNote(name='test2')
 
     project._undo.undo()
+    project._undo.undo()
+    project._undo.redo()
     project._undo.redo()
     self.assertEqual(ll, ['createx', 'createx', 'deletex', 'deletex', 'createx', 'createx'])
     project.newUndoPoint()

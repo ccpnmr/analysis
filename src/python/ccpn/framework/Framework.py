@@ -571,6 +571,8 @@ class Framework:
     pass
     apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
                       createFallback=createFallback)
+    self.ui.mainWindow._updateWindowTitle()
+    
     layout = self.ui.mainWindow.moduleArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):

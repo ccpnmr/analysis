@@ -122,10 +122,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     recentFiles = uniquify(recentFiles)
     self._appBase.preferences.recentFiles = recentFiles
     self.pythonConsole.setProject(project)
+    self._updateWindowTitle()
 
+  def _updateWindowTitle(self):
+    """
+    #CCPN INTERNAL - called in saveProject method of Framework
+    """    
     self.setWindowTitle('%s %s (Revision: %s): %s' % (self._appBase.applicationName,
                                             self._appBase.applicationVersion, self._appBase.revision,
-                                            project.name))
+                                            self._project.name))
 
   def _startBackupTimer(self):
     """

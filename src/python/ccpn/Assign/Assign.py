@@ -113,7 +113,7 @@ class Assign(Framework):
 
           containers, modules = self.ui.mainWindow.moduleArea.findAll()
           for item in contents:
-            if item[0] == 'module':
+            if item[0] == 'dock':  # PyQtGraph uses dock, not module
               print(obj)
               obj = modules.get(item[1])
               if not obj:

@@ -829,7 +829,7 @@ class Framework:
     from ccpn.ui.gui.modules.ChemicalShiftTable import NmrAtomShiftTable as Table
     chemicalShiftTable = Table(chemicalShiftLists=self.project.chemicalShiftLists)
     self.ui.mainWindow.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
 
   def showNmrResidueTable(self, position='bottom', relativeTo=None):
@@ -839,7 +839,7 @@ class Framework:
     nmrResidueTableModule = CcpnModule(name='Nmr Residue Table')
     nmrResidueTableModule.layout.addWidget(nmrResidueTable)
     self.ui.mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
 
   def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):
@@ -850,7 +850,7 @@ class Framework:
 
     peakList = PeakTable(self.project, selectedList=selectedList)
     self.ui.mainWindow.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showPeakTable()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
 
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
@@ -866,7 +866,7 @@ class Framework:
       self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=relativeTo)
     else:
       self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position)
-    self.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSequenceGraph()")
     self.project._logger.info("application.showSequenceGraph()")
     return self.assigner
 
@@ -875,7 +875,7 @@ class Framework:
     from ccpn.Assign.modules.AtomSelector import AtomSelector
     self.atomSelector = AtomSelector(parent=self.ui.mainWindow, project=self.project)
     self.ui.mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
     self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
 
@@ -889,7 +889,7 @@ class Framework:
       if self.ui.mainWindow.pythonConsoleModule.isVisible():
         self.ui.mainWindow.pythonConsoleModule.hide()
       else:
-        self.ui.mainWindow.moduleArea.moveModule(self.pythonConsoleModule, 'bottom', None)
+        self.ui.mainWindow.moduleArea.moveModule(self.ui.mainWindow.pythonConsoleModule, 'bottom', None)
     else:
       self.ui.mainWindow.pythonConsoleModule = CcpnModule(name='Python Console')
       self.ui.mainWindow.pythonConsoleModule.layout.addWidget(self.ui.mainWindow.pythonConsole)

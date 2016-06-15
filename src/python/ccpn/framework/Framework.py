@@ -511,11 +511,24 @@ class Framework:
 
     return project
 
-  def loadProject(self, path):
-    """Open new project from path"""
+  def loadProject(self, path=None):
+    """
+       Load project from path
+       If not path then opens a file dialog box and loads project from selected file.
+    """
+    from ccpn.ui.gui.widgets.FileDialog import FileDialog
 
     if self.project is not None:
       self._closeProject()
+
+    if not path:
+      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project', preferences=self.preferences.general)
+      paths = dialog.selectedFiles()
+      if paths:
+        path = paths[0]
+
+    if not path:
+      return
 
     sys.stderr.write('==> Loading "%s" project\n' % path)
     project = coreIo.loadProject(path)

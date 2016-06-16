@@ -67,7 +67,7 @@ class BackboneAssignmentModule(CcpnModule):
     modulesLabel = Label(self.widget2, text="Selected Modules", grid=(1, 0))
     self.modulePulldown = PulldownList(self.widget2, grid=(2, 0), callback=self._selectMatchModule)
     self.modulePulldown.setData(modules)
-    self.moduleList = ListWidget(self.widget2, grid=(3, 0))
+    self.moduleList = ListWidget(self.widget2, grid=(3, 0), )
     chemicalShiftListLabel = Label(self.widget2, text='Chemical Shift List', grid=(1, 1))
     self.chemicalShiftListPulldown = PulldownList(self.widget2, grid=(2, 1), callback=self._setupShiftDicts)
     self.chemicalShiftListPulldown.setData([shiftlist.pid for shiftlist in project.chemicalShiftLists])
@@ -86,12 +86,13 @@ class BackboneAssignmentModule(CcpnModule):
     self.nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
     self.nmrResidueTable.nmrResidueTable._updateSelectorContents()
 
-  def _updateNmrResidueTable(self, nmrResidue, oldPid):
+  def _updateNmrResidueTable(self, nmrResidue, oldPid=None):
     if nmrResidue == self.current.nmrResidue:
       # self.nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
       self.nmrResidueTable.nmrResidueTable._updateSelectorContents()
-      self.nmrResidueTable.nmrResidueTable._changeObjectList(nmrResidue.nmrChain)
-      # self.nmrResidueTable.nmrResidueTable.updateTable()
+      self.nmrResidueTable.nmrResidueTable.selector.select(nmrResidue.nmrChain)
+      # self.nmrResidueTable.nmrResidueTable._updateSelectorContents()
+      self.nmrResidueTable.updateTable()
 
 
   def _toggleWidget2(self):
@@ -105,23 +106,29 @@ class BackboneAssignmentModule(CcpnModule):
     self.matchModules.append(item)
 
 
-
   def _startAssignment(self, nmrResidue:NmrResidue, row:int=None, col:int=None):
     """
     Initiates assignment procedure when triggered by selection of an NmrResidue from the nmrResidueTable
     inside the module.
     """
-
+    print(nmrResidue, nmrResidue.sequenceCode, 'nmrResidue')
     self._setupShiftDicts()
     if hasattr(self, 'assigner'):
       self.assigner.clearAllItems()
     # self.navigateTo(nmrResidue, row, col)
     self.current.nmrChain = nmrResidue.nmrChain
+    self.assigner.nmrChainPulldown.select(self.current.nmrChain.pid)
     if self.current.nmrChain.isConnected:
-      nmrResidues = [nmrResidue for nmrResidue in self.current.nmrChain.nmrResidues if not nmrResidue.sequenceCode.endswith('-1')]
-      for nmrResidue in nmrResidues:
-        if self.assigner:
-          self.assigner.addResidue(nmrResidue, '+1')
+      print(self.current.nmrChain.mainNmrResidues, 'chainResidues')
+      if nmrResidue.sequenceCode.endswith('-1'):
+        nmrResidue = self.current.nmrChain.mainNmrResidues[0].getOffsetNmrResidue(-1)
+      else:
+        nmrResidue = self.current.nmrChain.mainNmrResidues[-1]
+
+      # nmrResidues = [nmrResidue for nmrResidue in self.current.nmrChain.nmrResidues if not nmrResidue.sequenceCode.endswith('-1')]
+      # for nmrResidue in nmrResidues:
+      #   if self.assigner:
+      #     self.assigner.addResidue(nmrResidue, '+1')
     self._navigateTo(nmrResidue, row, col)
 
 
@@ -131,13 +138,12 @@ class BackboneAssignmentModule(CcpnModule):
     to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and
     add strips to matchModule(s) corresponding to assignment matches.
     """
-
+    print(nmrResidue)
     if self.project._appBase.ui.mainWindow is not None:
       mainWindow = self.project._appBase.ui.mainWindow
     else:
       mainWindow = self.project._appBase._mainWindow
     mainWindow.clearMarks()
-
     self.nmrResidueTable.nmrResidueTable.updateTable()
     selectedDisplays = [display for display in self.project.spectrumDisplays
                         if display.pid not in self.matchModules]
@@ -192,7 +198,13 @@ class BackboneAssignmentModule(CcpnModule):
     assignMatrix = self._buildAssignmentMatrix(queryShifts, matchShifts=matchShifts)
     self._createMatchStrips(assignMatrix)
     if hasattr(self, 'assigner'):
-      self.assigner.addResidue(iNmrResidue, direction)
+      print(nmrResidue.nmrChain.pid, self.assigner.nmrChainPulldown.currentText())
+      if self.assigner.nmrChainPulldown.currentText() != nmrResidue.nmrChain.pid:
+        self.assigner.nmrChainPulldown.select(nmrResidue.nmrChain.pid)
+      elif not nmrResidue.nmrChain.isConnected:
+        self.assigner.addResidue(iNmrResidue, direction)
+      else:
+        self.assigner.setNmrChainDisplay(nmrResidue.nmrChain.pid)
 
 
 
@@ -271,6 +283,8 @@ class BackboneAssignmentModule(CcpnModule):
     """
     self.assigner = assigner
     self.project._appBase.current.assigner = assigner
+    self.assigner.nmrResidueTable = self.nmrResidueTable
+    self.assigner.setMode('fragment')
 
 
   def _buildAssignmentMatrix(self, queryShifts:typing.List[ChemicalShift],

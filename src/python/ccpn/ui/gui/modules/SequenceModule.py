@@ -52,9 +52,9 @@ class SequenceModule(CcpnModule):
     CCPN INTERNAL called in predictSequencePosition method of SequenceGraph
     Highlights regions on the sequence specified by the list of residues passed in.
     """
-    for residue in residues:
-      guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
-      guiResidue._styleResidue()
+    for res1 in self.chainLabels[0].residueDict.values():
+      res1._styleResidue()
+
     for residue in residues:
       guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
       guiResidue._styleResidue()
@@ -62,10 +62,14 @@ class SequenceModule(CcpnModule):
       colour = '#e4e15b'
     elif self.project._appBase.preferences.general.colourScheme == 'light':
       colour = '#009a00'
+    guiResidues = []
     for residue in residues:
       guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
+      guiResidues.append(guiResidue)
       guiResidue.setHtml('<div style="color: %s;text-align: center;">' % colour+
                            residue.shortName+'</div>')
+
+
 
 
   def _addChainLabel(self, chain:Chain):
@@ -138,7 +142,7 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
       self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colour2 +
                    self.residue.shortName+'</strong></div>')
     else:
-      self.setHtml('<div style:"text-align: center;">'+self.residue.shortName+'</div')
+      self.setHtml('<div style="color: %s; "text-align: center;">'% self.colour1 + self.residue.shortName+'</div')
 
 
   def _setFontBold(self):
@@ -188,7 +192,7 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     nmrChain = self.project.getByPid(data[0])
     residues = [guiRes.residue]
     toAssign = [nmrResidue for nmrResidue in nmrChain.nmrResidues if '-1' not in nmrResidue.sequenceCode]
-    result = showYesNo('Assignment', 'Assign %s to residue %s?' % (toAssign[0].id, residues[0].id, ))
+    result = showYesNo('Assignment', 'Assign %s to residue %s?' % (toAssign[0].id, residues[0].id))
     if result:
       for ii in range(len(toAssign)-1):
         resid = residues[ii]

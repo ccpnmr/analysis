@@ -60,4 +60,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
   def _setNmrResidue(self, nmrResidue, row, col):
     self.project._appBase.current.nmrResidue = nmrResidue
 
+  def updateTable(self):
+    self.nmrResidueTable.updateTable()
+
 

@@ -128,6 +128,18 @@ class GuiStripNd(GuiStrip):
     printAction.setIcon(printIcon)
     printAction.setToolTip('Print Spectrum Display to File')
 
+    self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+
+    # self.navigateToMenu = self.contextMenu.addMenu('Navigate To')
+    # self.spectrumDisplays = self.getSpectrumDisplays()
+    # for spectrumDisplay in self.spectrumDisplays:
+    #   spectrumDisplayAction = self.navigateToMenu.addAction(spectrumDisplay.pid)
+    #   receiver = lambda spectrumDisplay=spectrumDisplay.pid: self.navigateTo(spectrumDisplay)
+    #   self.connect(spectrumDisplayAction, QtCore.SIGNAL('triggered()'), receiver)
+    #   self.navigateToMenu.addAction(spectrumDisplay)
+
+
+
     self.crossHairAction.setChecked(self.vLine.isVisible())
 
     if self.grid.isVisible():

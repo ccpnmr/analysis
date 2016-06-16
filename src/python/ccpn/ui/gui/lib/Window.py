@@ -11,8 +11,8 @@ import typing
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
-MODULE_DICT = {'ASSIGNER': 'showSequenceGraph',
-               'ASSIGNMENT MODULE': 'showAssignmentModule',
+MODULE_DICT = {'SEQUENCE GRAPH': 'showSequenceGraph',
+               'PEAK ASSIGNER': 'showPeakAssigner',
                'ATOM SELECTOR': 'showAtomSelector',
                'BACKBONE ASSIGNMENT': 'showBackboneAssignmentModule',
                'CHEMICAL SHIFT LISTS':'showChemicalShiftTable',
@@ -79,15 +79,15 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
     mark = task.newMark('white', positions, axisCodes)
 
     # if not strip:
-    for strip in display.strips:
-      for axis in strip.orderedAxes:
-        try:
-          axisCodeMatch = spectrumLib.axisCodeMatch(axis.code, axisCodes)
-          if axisCodeMatch is not None:
-            axis.position = axisPositions[axisCodeMatch]
-            mark = task.newMark('white', [axis.position], [axisCodeMatch])
-        except TypeError:
-          pass
+    # for strip in display.strips:
+    for axis in display.strips[0].orderedAxes:
+      try:
+        axisCodeMatch = spectrumLib.axisCodeMatch(axis.code, axisCodes)
+        if axisCodeMatch is not None:
+          axis.position = axisPositions[axisCodeMatch]
+          mark = task.newMark('white', [axis.position], [axisCodeMatch])
+      except TypeError:
+        pass
 
 
 def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,

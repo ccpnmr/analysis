@@ -27,7 +27,8 @@ from pyqtgraph.Point import Point
 
 from ccpn.ui.gui.widgets.Menu import Menu
 
-from ccpnmodel.ccpncore.lib.spectrum.Spectrum import axisCodeMapping
+
+from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 class ViewBox(pg.ViewBox):
 
@@ -64,7 +65,15 @@ class ViewBox(pg.ViewBox):
     """
     Raise the context menu
     """
+    from functools import partial
+    from ccpn.ui.gui.lib.Window import navigateToPeakPosition
     position = event.screenPos()
+    self.menu.navigateToMenu.clear()
+    if self.current.peak:
+      for spectrumDisplay in self.current.project.spectrumDisplays:
+        if len(list(set(spectrumDisplay.strips[0].axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
+          self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPeakPosition, self.current.project,
+                                                                        self.current.peak, [spectrumDisplay.pid]))
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
 
   def _getMenu(self):

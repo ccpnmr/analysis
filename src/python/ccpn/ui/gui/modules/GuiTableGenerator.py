@@ -51,6 +51,9 @@ class GuiTableGenerator(QtGui.QWidget, Base):
       self.objectList = objectList
       self._updateContents()
 
+    else:
+      self._updateContents()
+
 
   def _updateContents(self):
     """

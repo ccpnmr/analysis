@@ -107,6 +107,9 @@ class PeakAssigner(CcpnModule, Base):
 
   # functions to create empty widgets
 
+  def __del__(self):
+    self.current.unRegisterNotify(self._updateInterface, 'peaks')
+
   def _createEmptyNmrAtomsTable(self, dim:int):
     '''Create an empty table for the specified peak dimension to contain possible Nmr Atoms that
     can be assigned to that peak dimension.
@@ -178,7 +181,6 @@ class PeakAssigner(CcpnModule, Base):
     """
     Assigns dimensionNmrAtoms to peak dimension when called using Assign Button in assignment widget.
     """
-
     nmrChain = self.project.fetchNmrChain(self.chainPulldowns[dim].currentText())
     nmrResidue = nmrChain.fetchNmrResidue(self.seqCodePulldowns[dim].currentText())
     nmrAtom = nmrResidue.fetchNmrAtom(self.atomTypePulldowns[dim].currentText())
@@ -288,6 +290,7 @@ class PeakAssigner(CcpnModule, Base):
        of which nmrAtoms fit to the peaks.
 
     """
+
     self._emptyAllTablesAndLists()
     if not self.current.peaks or not self._peaksAreCompatible():
       return
@@ -326,11 +329,13 @@ class PeakAssigner(CcpnModule, Base):
     nmrAtomsForTables = nmrAtomsForPeaks(peaks, self.project.nmrAtoms,
                                              doubleTolerance=doubleTolerance,
                                              intraResidual=intraResidual)
+
     Ndimensions = len(nmrAtomsForTables)
     for dim, objectTable, nmrAtoms in zip(range(Ndimensions),
                                           self.objectTables,
                                           nmrAtomsForTables):
       if peaksAreOnLine(peaks, dim):
+        objectTable.setObjects(nmrAtomsForTables[dim])
         objectTable.show()
       else:
         objectTable.setObjects([NOL])
@@ -364,7 +369,9 @@ class PeakAssigner(CcpnModule, Base):
       index = self.listWidgets.index(listWidget)
       assignmentArray[index] = assignments
 
-    self.current.peak.dimensionNmrAtoms = assignmentArray
+    print(assignmentArray, 'assignmentArray')
+    for peak in self.current.peaks:
+      peak.dimensionNmrAtoms = assignmentArray
 
   def _updateLayout(self, layout:QtGui.QLayout, ndim:int):
     """
@@ -437,7 +444,7 @@ class PeakAssigner(CcpnModule, Base):
 
     deltas = []
     for peak in self.current.peaks:
-      shiftList = peak.peakList.chemicalShiftList
+      shiftList = peak.peakList.spectrum.chemicalShiftList
       if shiftList:
         shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:
@@ -455,9 +462,8 @@ class PeakAssigner(CcpnModule, Base):
 
     if nmrAtom is NOL:
       return ''
-
     for peak in self.current.peaks:
-      shiftList = peak.peakList.chemicalShiftList
+      shiftList = peak.peakList.spectrum.chemicalShiftList
       if shiftList:
         shift = shiftList.getChemicalShift(nmrAtom.id)
         if shift:

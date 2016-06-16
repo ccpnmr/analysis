@@ -847,6 +847,7 @@ class Framework:
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
 
+
   def showNmrResidueTable(self, position='bottom', relativeTo=None):
     """Displays Nmr Residue Table"""
     from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
@@ -873,6 +874,10 @@ class Framework:
     Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
     """
     from ccpn.Assign.modules.SequenceGraph import SequenceGraph
+
+    if hasattr(self, 'assigner'):
+      return
+
     self.assigner = SequenceGraph(self, project=self.project)
     if hasattr(self, 'bbModule'):
       self.bbModule._connectSequenceGraph(self.assigner)
@@ -1014,15 +1019,14 @@ class Framework:
                                   colourScheme=self.ui.mainWindow.colourScheme)
 
   def showBeginnersTutorial(self):
-    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BeginnersTutorial.pdf')
+    path = os.path.join(Path.getTopDirectory(), 'tutorials', 'BeginnersTutorial.pdf')
     if 'linux' in sys.platform.lower():
       os.system("xdg-open %s" % path)
     else:
       os.system('open %s' % path)
 
   def showBackboneTutorial(self):
-    path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial',
-                        'BackboneAssignmentTutorial.pdf')
+    path = os.path.join(Path.getTopDirectory(), 'tutorials', 'BackboneAssignmentTutorial.pdf')
     if 'linux' in sys.platform.lower():
       os.system("xdg-open %s" % path)
     else:

@@ -72,7 +72,7 @@ class IpythonConsole(Widget, Base):
       self.ipythonWidget.execute('%history')
 
 
-    def _write(self, msg:str, html=False):
+    def _write(self, msg:str=None, html=False):
       """
       writes the specified string to the python console text box.
       """
@@ -82,6 +82,7 @@ class IpythonConsole(Widget, Base):
       else:
         # self.textEditor.textCursor().insertHtml("</div><br><div style='font-weight: normal; background-color: #FFF;'>")
         self.textEditor.insertPlainText(msg)
+        self.textEditor.insertPlainText('\n')
         self.mainWindow.statusBar().showMessage(msg)
       if self.mainWindow.recordingMacro is True:
         self.mainWindow.macroEditor.textBox.insertPlainText(msg)
@@ -110,6 +111,7 @@ class IpythonConsole(Widget, Base):
       """
 
       # write lines getting objects by their Pids
+
       for parameter in sorted(objectParameters):
         value = objectParameters[parameter]
         if not isinstance(value, str):
@@ -117,7 +119,7 @@ class IpythonConsole(Widget, Base):
         self._write("%s = project.getByPid('%s')\n" % (parameter, value))
 
       # execute command
-      self._write(command + '\n')
+      self._write(msg=command)
 
       # set undo step
       self._setUndoWaypoint()

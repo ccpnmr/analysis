@@ -24,6 +24,7 @@ __version__ = "$Revision: 9395 $"
 
 import json
 import typing
+import numpy as np
 
 from PyQt4 import QtGui, QtCore
 
@@ -38,7 +39,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ToolBar import ToolBar
-from ccpnmodel.ccpncore.lib.assignment.Assignment import getConnectedAtoms
+from ccpn.core.lib.Assignment import nmrAtomPairsByDimensionTransfer
 
 
 class GuiNmrAtom(QtGui.QGraphicsTextItem):
@@ -163,13 +164,13 @@ class SequenceGraph(CcpnModule):
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
+    self.current = self.project._appBase.current
     self.residueCount = 0
     self.modeLabel = Label(self, 'Mode  ', grid=(0, 0), hAlign='r')
     self.modePulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 1), callback=self.setMode)
-    self.nmrChain = Label(self, 'NmrChain  ', grid=(0, 2), hAlign='r')
-    self.nmrChainPulldown = PulldownList(self, grid=(0, 3), gridSpan=(1, 1))
-    self.modePulldown.setData(['backbone', 'fragment', 'complete'])
-    self.nmrChainPulldown.setData([c.pid for c in self.project.nmrChains])
+    self.nmrChainLabel = Label(self, 'NmrChain  ', grid=(0, 2), hAlign='r')
+    self.nmrChainPulldown = PulldownList(self, grid=(0, 3), gridSpan=(1, 1), callback=self.setNmrChainDisplay)
+    self.modePulldown.setData(['fragment', 'Assigned - backbone', 'Assigned - All'])
     self.editingToolbar = ToolBar(self, grid=(0, 5), gridSpan=(1, 1), hAlign='r')
     self.disconnectPreviousAction = self.editingToolbar.addAction("disconnectPrevious", self.disconnectPreviousNmrResidue)
     self.disconnectPreviousIcon = Icon('icons/previous')
@@ -193,29 +194,70 @@ class SequenceGraph(CcpnModule):
     self.guiNmrAtomDict = {}
     self.editingToolbar.hide()
     self.project.registerNotifier('NmrResidue', 'rename', self._resetNmrResiduePidForAssigner)
+    self.project.registerNotifier('NmrChain', 'delete', self.removeNmrChainFromPulldown)
+    self.project.registerNotifier('NmrChain', 'create', self.addNmrChainToPulldown)
+    # self.modePulldown.select('fragment')
+    self.setMode('fragment')
 
+
+  def updateNmrResidueTable(self):
+    if hasattr(self, 'nmrResidueTable'):
+      self.nmrResidueTable.updateTable()
 
   def setMode(self, mode):
-    if mode != 'fragment':
-      self.editingToolbar.hide()
-    else:
+    self.editingToolbar.hide()
+    if mode == 'fragment':
       self.editingToolbar.show()
+      self.nmrChainPulldown.setData([c.pid for c in self.project.nmrChains])
+      self.nmrChainLabel.setText('Nmr Chain')
+    elif mode == 'Assigned - backbone':
+      self.nmrChainLabel.setText('Chain')
+      self.nmrChainPulldown.setData([self.project.getByPid('NC:%s' % chain.shortName).pid for chain in self.project.chains])
+    self.modePulldown.select(mode)
+    self.setNmrChainDisplay(self.nmrChainPulldown.currentText())
 
+
+  def setNmrChainDisplay(self, nmrChainPid):
+    self.clearAllItems()
+    if self.modePulldown.currentText() == 'fragment':
+      nmrChain = self.project.getByPid(nmrChainPid)
+      if nmrChain.isConnected:
+        for nmrResidue in nmrChain.mainNmrResidues:
+          self.addResidue(nmrResidue, '+1')
+      if len(self.predictedStretch) > 2:
+        self.predictSequencePosition(self.predictedStretch)
+    elif self.modePulldown.currentText() == 'Assigned - backbone':
+      nmrChain = self.project.getByPid(nmrChainPid)
+      self._showBackboneAssignments(nmrChain)
+
+  def addNmrChainToPulldown(self, nmrChain):
+    self.nmrChainPulldown.addItem(nmrChain.pid)
+
+
+  def removeNmrChainFromPulldown(self, nmrChain):
+    item = self.nmrChainPulldown.findText(nmrChain.pid)
+    self.nmrChainPulldown.removeItem(item)
 
   def disconnectPreviousNmrResidue(self):
-    self.project._appBase.current.nmrResidue.disconnectPrevious()
+    self.current.nmrResidue.disconnectPrevious()
+    self.setNmrChainDisplay(self.current.nmrResidue.nmrChain.pid)
+    self.updateNmrResidueTable()
 
 
   def closeModule(self):
-    print(self.parent)
     delattr(self.parent, 'assigner')
     self.close()
 
   def disconnectNextNmrResidue(self):
-    self.project._appBase.current.nmrResidue.disconnectNext()
+    self.current.nmrResidue.disconnectNext()
+    self.setNmrChainDisplay(self.current.nmrResidue.nmrChain.pid)
+    self.updateNmrResidueTable
 
   def disconnectNmrResidue(self):
-    self.project._appBase.current.nmrResidue.disconnect()
+    self.current.nmrResidue.disconnect()
+    self.setNmrChainDisplay(self.current.nmrResidue.nmrChain.pid)
+    self.updateNmrResidueTable()
+
 
   def _resetNmrResiduePidForAssigner(self, nmrResidue, oldPid:str):
     """Reset pid for NmrResidue and all offset NmrResidues"""
@@ -230,12 +272,12 @@ class SequenceGraph(CcpnModule):
     """
     for item in self.scene.items():
       self.scene.removeItem(item)
-      self.residueCount = 0
-      self.predictedStretch = []
-      self.guiResiduesShown = []
-      self.guiNmrResidues = []
-      self.guiNmrAtomDict = {}
 
+    self.residueCount = 0
+    self.predictedStretch = []
+    self.guiResiduesShown = []
+    self.guiNmrResidues = []
+    self.guiNmrAtomDict = {}
     self.scene.clear()
 
 
@@ -274,7 +316,7 @@ class SequenceGraph(CcpnModule):
   def addSideChainAtoms(self, nmrResidue, cbAtom, colour):
     residue = {}
     for k, v in ATOM_POSITION_DICT[nmrResidue.residueType].items():
-      if k !='boundAtoms':
+      if k != 'boundAtoms':
         position = [cbAtom.x()+v[0], cbAtom.y()+v[1]]
         nmrAtom = nmrResidue.fetchNmrAtom(name=k)
         newAtom = self._createGuiNmrAtom(k, position, nmrAtom)
@@ -282,14 +324,11 @@ class SequenceGraph(CcpnModule):
         residue[k] = newAtom
         self.guiNmrAtomDict[nmrAtom] = newAtom
 
-    # print(residue)
     for boundAtomPair in ATOM_POSITION_DICT[nmrResidue.residueType]['boundAtoms']:
       atom1 = residue[boundAtomPair[0]]
       atom2 = residue[boundAtomPair[1]]
       newLine = AssignmentLine(atom1.x(), atom1.y(), atom2.x(), atom2.y(), colour, 1.0)
       self.scene.addItem(newLine)
-
-
 
 
   def addResidue(self, nmrResidue:NmrResidue, direction:str, atomSpacing=None):
@@ -299,127 +338,53 @@ class SequenceGraph(CcpnModule):
     Nmr Residue name displayed beneath CA of residue drawn and residue type predictions displayed
     beneath Nmr Residue name
     """
+    atoms = {}
     if atomSpacing:
       self.atomSpacing = atomSpacing
-
     nmrAtoms = [nmrAtom.name for nmrAtom in nmrResidue.nmrAtoms]
-    print(nmrResidue.residueType, nmrAtoms)
+
+    residueAtoms = {"H": np.array([0, 0]),
+                    "N": np.array([0, -1*self.atomSpacing]),
+                    "CA": np.array([self.atomSpacing, -1*self.atomSpacing]),
+                    "CB": np.array([self.atomSpacing, -2*self.atomSpacing]),
+                    "CO": np.array([2*self.atomSpacing, -1*self.atomSpacing])
+                    }
     if self.residueCount == 0:
-
-      if 'H' in nmrAtoms:
-        hAtom = self._createGuiNmrAtom("H", (0, self.atomSpacing), nmrResidue.fetchNmrAtom(name='H'))
-      else:
-        hAtom = self._createGuiNmrAtom("H", (0, self.atomSpacing))
-      if 'N' in nmrAtoms:
-        nAtom = self._createGuiNmrAtom("N", (0, hAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='N'))
-      else:
-        nAtom = self._createGuiNmrAtom("N", (0, hAtom.y()-self.atomSpacing))
-      if 'CA' in nmrAtoms:
-        caAtom = self._createGuiNmrAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()), nmrResidue.fetchNmrAtom(name='CA'))
-      else:
-        caAtom = self._createGuiNmrAtom("CA", (nAtom.x()+self.atomSpacing, nAtom.y()))
-      if 'CB' in nmrAtoms:
-        cbAtom = self._createGuiNmrAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing), nmrResidue.fetchNmrAtom(name='CB'))
-      else:
-        # cbAtom = None
-        cbAtom = self._createGuiNmrAtom("CB", (caAtom.x(), caAtom.y()-self.atomSpacing))
-      if 'CO' in nmrAtoms:
-        coAtom = self._createGuiNmrAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()), nmrResidue.fetchNmrAtom(name='CO'))
-      else:
-        coAtom = self._createGuiNmrAtom("CO", (caAtom.x()+abs(caAtom.x()-nAtom.x()),nAtom.y()))
-      coAtom.setZValue(10)
-
-      atoms = {'H': hAtom, 'N': nAtom, 'CA': caAtom, 'CB': cbAtom, 'CO': coAtom}
+      for k, v in residueAtoms.items():
+        if k in nmrAtoms:
+          nmrAtom = nmrResidue.fetchNmrAtom(name=k)
+        else:
+          nmrAtom = None
+        atoms[k] = self._createGuiNmrAtom(k, v, nmrAtom)
 
       self.guiResiduesShown.append(atoms)
       self.predictedStretch.append(nmrResidue)
 
     else:
-        if self.residueCount == 1:
-          self.nmrResidueLabel._update()
-        if nmrResidue.sequenceCode.endswith('-1') or direction == '-1':
+      for k, v in residueAtoms.items():
+        if k in nmrAtoms:
+          nmrAtom = nmrResidue.fetchNmrAtom(name=k)
+        else:
+          nmrAtom = None
 
-          oldGuiResidue = self.guiResiduesShown[0]
-          if 'CO' in nmrAtoms:
-            coAtom2 = self._createGuiNmrAtom("CO", (oldGuiResidue["N"].x()-abs(oldGuiResidue["CA"].x()
-            -oldGuiResidue["N"].x())-(oldGuiResidue["N"].boundingRect().width()/2), oldGuiResidue["CA"].y()),
-                                   nmrResidue.fetchNmrAtom(name='CO'))
-          else:
-            coAtom2 = self._createGuiNmrAtom("CO", (oldGuiResidue["N"].x()-abs(oldGuiResidue["CA"].x()
-            -oldGuiResidue["N"].x())-(oldGuiResidue["N"].boundingRect().width()/2), oldGuiResidue["CA"].y()))
-          coAtom2.setZValue(10)
-          if 'CA' in nmrAtoms:
-            caAtom2 = self._createGuiNmrAtom("CA", ((coAtom2.x()-self.atomSpacing), oldGuiResidue["N"].y()),
-                                   nmrResidue.fetchNmrAtom(name='CA'))
-          else:
-            caAtom2 = self._createGuiNmrAtom("CA", ((coAtom2.x()-self.atomSpacing), oldGuiResidue["N"].y()))
-          if 'CB' in nmrAtoms:
-            cbAtom2 = self._createGuiNmrAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
-                                   nmrResidue.fetchNmrAtom(name='CB'))
-          else:
-            cbAtom2 = self._createGuiNmrAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing))
-          if 'N' in nmrAtoms:
-            nAtom2 = self._createGuiNmrAtom("N", (caAtom2.x()-self.atomSpacing, coAtom2.y()),
-                                  nmrResidue.fetchNmrAtom(name='N'))
-          else:
-            nAtom2 = self._createGuiNmrAtom("N", (caAtom2.x()-self.atomSpacing, coAtom2.y()))
-          if 'H' in nmrAtoms:
-            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
-                                  nmrResidue.fetchNmrAtom(name='H'))
-          else:
-            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
-
-          atoms = {'H':hAtom2, "N": nAtom2, "CA": caAtom2, "CB": cbAtom2, "CO": coAtom2, 'N-1': oldGuiResidue['N']}
-
-          self.guiResiduesShown.insert(0, atoms)
-          self.predictedStretch.insert(0, nmrResidue)
+        if direction == '-1':
+          pos = np.array([self.guiResiduesShown[0]['H'].x()-3*self.atomSpacing, self.guiResiduesShown[0]['H'].y()])
+          atoms[k] = self._createGuiNmrAtom(k, v+pos, nmrAtom)
 
         else:
+          pos = np.array([self.guiResiduesShown[-1]['H'].x()+3*self.atomSpacing, self.guiResiduesShown[-1]['H'].y()])
+          atoms[k] = self._createGuiNmrAtom(k, v+pos, nmrAtom)
 
-          oldGuiResidue = self.guiResiduesShown[-1]
-          if 'N' in nmrAtoms:
-            nAtom2 = self._createGuiNmrAtom("N", (oldGuiResidue["CO"].x()+self.atomSpacing +
-            oldGuiResidue["CO"].boundingRect().width()/2, oldGuiResidue["CA"].y()),
-                                  nmrResidue.fetchNmrAtom(name='N'))
-          else:
-            nAtom2 = self._createGuiNmrAtom("N", (oldGuiResidue["CO"].x()+self.atomSpacing+
-            oldGuiResidue["CO"].boundingRect().width()/2, oldGuiResidue["CA"].y()))
-          if 'H' in nmrAtoms:
-            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing),
-                                  nmrResidue.fetchNmrAtom(name='H'))
-          else:
-            hAtom2 = self._createGuiNmrAtom("H", (nAtom2.x(), nAtom2.y()+self.atomSpacing))
-          if 'CA' in nmrAtoms:
-            caAtom2 = self._createGuiNmrAtom("CA", (nAtom2.x()+(nAtom2.x()-oldGuiResidue["CO"].x())
-                  -(oldGuiResidue["CO"].boundingRect().width()/2), oldGuiResidue["CO"].y()),
-                                   nmrResidue.fetchNmrAtom(name='CA'))
-          else:
-            caAtom2 = self._createGuiNmrAtom("CA", (nAtom2.x()+(nAtom2.x()-oldGuiResidue["CO"].x())
-                  -(oldGuiResidue["CO"].boundingRect().width()/2), oldGuiResidue["CO"].y()))
-          if 'CB' in nmrAtoms:
-            cbAtom2 = self._createGuiNmrAtom("CB", (caAtom2.x(), caAtom2.y()-self.atomSpacing),
-                                   nmrResidue.fetchNmrAtom(name='CB'))
-          else:
-            cbAtom2 = None
-          if 'CO' in nmrAtoms:
-            coAtom2 = self._createGuiNmrAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()),
-                                   nmrResidue.fetchNmrAtom(name='CO'))
-          else:
-            coAtom2 = self._createGuiNmrAtom("CO", (caAtom2.x()+abs(caAtom2.x()-nAtom2.x()),nAtom2.y()))
-          coAtom2.setZValue(10)
+      if direction == '-1':
+        self.guiResiduesShown.insert(0, atoms)
+        self.predictedStretch.insert(0, nmrResidue)
+      else:
+        self.guiResiduesShown.append(atoms)
+        self.predictedStretch.append(nmrResidue)
 
-
-          atoms = {'H':hAtom2, "N": nAtom2, "CA":caAtom2, "CO":coAtom2, 'N-1': oldGuiResidue['N']}
-          if cbAtom2:
-            atoms["CB"] = cbAtom2
-
-          self.guiResiduesShown.append(atoms)
-          self.predictedStretch.append(nmrResidue)
     self._assembleResidue(nmrResidue, atoms)
 
 
-    if len(self.predictedStretch) > 2:
-      self.predictSequencePosition(self.predictedStretch)
 
     self.residueCount += 1
 
@@ -431,7 +396,6 @@ class SequenceGraph(CcpnModule):
     """
 
     predictions = list(set(map(tuple, (getNmrResiduePrediction(nmrResidue, self.project.chemicalShiftLists[0])))))
-    print(predictions)
     predictions.sort(key=lambda a: float(a[1][:-1]), reverse=True)
     for prediction in predictions:
       predictionLabel = QtGui.QGraphicsTextItem()
@@ -441,8 +405,8 @@ class SequenceGraph(CcpnModule):
       elif self.project._appBase.preferences.general.colourScheme == 'light':
         predictionLabel.setDefaultTextColor(QtGui.QColor('#555D85'))
       predictionLabel.setFont(Font(size=12, bold=True))
-      # caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+30)
-      predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2, caAtom.y()+(30*(predictions.index(prediction)+2)))
+      predictionLabel.setPos(caAtom.x()-caAtom.boundingRect().width()/2,
+                             caAtom.y()+(30*(predictions.index(prediction)+2)))
       self.scene.addItem(predictionLabel)
 
   def predictSequencePosition(self, nmrResidues:list):
@@ -455,30 +419,34 @@ class SequenceGraph(CcpnModule):
     possibleMatches = getSpinSystemsLocation(self.project, nmrResidues,
                       self.project.chains[0], self.project.chemicalShiftLists[0])
 
+    print('predicting', nmrResidues)
     for possibleMatch in possibleMatches:
-      if possibleMatch[0] > 1:
-
+      if possibleMatch[0] > 1 and not len(possibleMatch[1]) < len(nmrResidues):
         if hasattr(self.project._appBase, 'sequenceModule'):
           self.project._appBase.sequenceModule._highlightPossibleStretches(possibleMatch[1])
 
 
   def _showBackboneAssignments(self, nmrChain):
-    if self.project._appBase.preferences.general.colourScheme == 'dark':
-      lineColour = '#f7ffff'
-    elif self.project._appBase.preferences.general.colourScheme == 'light':
-      lineColour = ''
-    for nmrResidue in nmrChain.nmrResidues:
-      self.addResidue(nmrResidue, direction='+1')
-    for ii, res in enumerate(self.guiResiduesShown):
-      if ii % 10 == 0:
-        if self.project._appBase.ui.mainWindow is not None:
-          mainWindow = self.project._appBase.ui.mainWindow
-        else:
-          mainWindow = self.project._appBase._mainWindow
-        mainWindow.pythonConsole.writeConsoleCommand('%s residues added' % str(ii))
-      if ii+1 < len(self.guiResiduesShown)-1:
-        self._addConnectingLine(res['CO'], self.guiResiduesShown[ii+1]['N'], lineColour, 1.0, 0)
-    self._getAssignmentsFromSpectra()
+    self.project._startFunctionCommandBlock('_showBackboneAssignments', nmrChain)
+    try:
+      if self.project._appBase.preferences.general.colourScheme == 'dark':
+        lineColour = '#f7ffff'
+      elif self.project._appBase.preferences.general.colourScheme == 'light':
+        lineColour = ''
+      for nmrResidue in nmrChain.nmrResidues:
+        self.addResidue(nmrResidue, direction='+1')
+      for ii, res in enumerate(self.guiResiduesShown):
+        if ii % 10 == 0:
+          if self.project._appBase.ui.mainWindow is not None:
+            mainWindow = self.project._appBase.ui.mainWindow
+          else:
+            mainWindow = self.project._appBase._mainWindow
+          mainWindow.pythonConsole.writeConsoleCommand('%s residues added' % str(ii))
+        if ii+1 < len(self.guiResiduesShown)-1:
+          self._addConnectingLine(res['CO'], self.guiResiduesShown[ii+1]['N'], lineColour, 1.0, 0)
+      self._getAssignmentsFromSpectra()
+    finally:
+      self.project._appBase._endCommandBlock()
 
 
   def _addConnectingLine(self, atom1:GuiNmrAtom, atom2:GuiNmrAtom, colour:str, width:float, displacement:float, style:str=None):
@@ -527,13 +495,12 @@ class SequenceGraph(CcpnModule):
 
   def _getAssignmentsFromSpectra(self):
     for spectrum in self.project.spectra:
-      apiDataSource = spectrum._wrappedData
-      connections = list(set(map(tuple, getConnectedAtoms(apiDataSource))))
+      connections = [x for x in list(nmrAtomPairsByDimensionTransfer(spectrum.peakLists).values()) for x in x]
       for ii, connection in enumerate(connections):
-        nmrAtomPair = [self.project._data2Obj.get(connection[0]).nmrAtom,
-                       self.project._data2Obj.get(connection[1]).nmrAtom]
+        # nmrAtomPair = [self.project._data2Obj.get(connection[0]).nmrAtom,
+        #                self.project._data2Obj.get(connection[1]).nmrAtom]
         # sorting makes sure drawing is done properly
-        guiNmrAtomPair = [self.guiNmrAtomDict.get(a) for a in sorted(nmrAtomPair, reverse=True)]
+        guiNmrAtomPair = [self.guiNmrAtomDict.get(a) for a in sorted(connection, reverse=True)]
         if None not in guiNmrAtomPair:
           displacement = min(guiNmrAtomPair[0].connectedAtoms, guiNmrAtomPair[1].connectedAtoms)
           self._addConnectingLine(guiNmrAtomPair[0], guiNmrAtomPair[1], spectrum.positiveContourColour, 2.0, displacement)

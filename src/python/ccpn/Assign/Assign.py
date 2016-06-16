@@ -110,11 +110,9 @@ class Assign(Framework):
              func()
         for s in layout['float']:
           typ, contents, state = s[0]['main']
-
           containers, modules = self.ui.mainWindow.moduleArea.findAll()
           for item in contents:
-            if item[0] == 'dock':  # PyQtGraph uses dock, not module
-              print(obj)
+            if item[0] == 'dock':
               obj = modules.get(item[1])
               if not obj:
                 func = getattr(self, MODULE_DICT[item[1]])
@@ -133,6 +131,7 @@ class Assign(Framework):
 
     """Displays Pick and Assign module."""
     mainWindow = self.ui.mainWindow
+    print(mainWindow.pythonConsole)
     self.paaModule = PickAndAssignModule(mainWindow.moduleArea, self.project)
     mainWindow.moduleArea.addModule(self.paaModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
@@ -145,6 +144,9 @@ class Assign(Framework):
     Displays Backbone Assignment module.
     """
     from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
+
+    if hasattr(self, 'bbModule'):
+      return
 
     self.bbModule = BackboneAssignmentModule(self, self.project)
 

@@ -24,9 +24,10 @@ class ListWidget(QtGui.QListWidget, Base):
     self.contextMenuItem = 'Delete'
 
   def contextCallback(self, remove=True):
-    self.rightMouseCallback()
+
     if remove:
       self.removeItem()
+    self.rightMouseCallback()
 
 
   def removeItem(self):
@@ -35,7 +36,7 @@ class ListWidget(QtGui.QListWidget, Base):
 
   def mousePressEvent(self, event):
     self._mouse_button = event.button()
-    if event.button() == QtCore.Qt.RightButton and self.contextMenu:
+    if event.button() == QtCore.Qt.RightButton:
       self.raiseContextMenu(event)
     elif event.button() == QtCore.Qt.LeftButton:
       if self.itemAt(event.pos()) is None:

@@ -458,15 +458,15 @@ def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict
 
     # Get sets of NmrAtom pairs
     for peakList in peakLists:
-      for peak in peakList:
+      for peak in peakList.peaks:
         for assignment in peak.assignedNmrAtoms:
-          for mt ,aSet in result.items():
+          for mt, aSet in result.items():
             nmrAtoms = (assignment[mt[0]-1], assignment[mt[1]-1])
             if not None in nmrAtoms:
               aSet.add(nmrAtoms)
 
     # Sort NmrAtoms where the nucleus is the same on both sides (or one is undetermined)
-    for mt, aSet in result:
+    for mt, aSet in result.items():
       tt = spectrum.isotopeCodes
       isotopeCodes = (tt[mt[0]-1], tt[mt[1]-1])
       if None in isotopeCodes or isotopeCodes[0] == isotopeCodes[1]:

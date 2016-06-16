@@ -441,8 +441,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         mainWindow = self._appBase.ui.mainWindow
       else:
         mainWindow = self._appBase._mainWindow
-        self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
-                                       name='Notes Editor', note=obj)
+      self.notesEditor = NotesEditor(mainWindow.moduleArea, self.project,
+                                     name='Notes Editor', note=obj)
 
   def _createNewObject(self, item):
     """Create new object starting from the <New> item

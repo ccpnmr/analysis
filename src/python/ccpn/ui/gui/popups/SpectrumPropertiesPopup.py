@@ -99,7 +99,7 @@ class GeneralTab(QtGui.QWidget, Base):
     self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
 
-    self.setWindowTitle("Spectrum Information")
+    self.setWindowTitle("Spectrum Properties")
 
     apiDataStore = spectrum._apiDataSource.dataStore
     if apiDataStore.dataLocationStore.name == 'standard':
@@ -393,13 +393,13 @@ class ContoursTab(QtGui.QWidget, Base):
         positiveContoursCheckBox.setChecked(False)
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
     positiveContoursCheckBox.stateChanged.connect(self._changePositiveContourDisplay)
-    positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='t', hAlign='l')
+    positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='c', hAlign='l')
     positiveBaseLevelData = DoubleSpinbox(self, grid=(2, 1), vAlign='t')
     positiveBaseLevelData.setMaximum(1e12)
     positiveBaseLevelData.setMinimum(0.1)
     positiveBaseLevelData.setValue(spectrum.positiveContourBase)
     positiveBaseLevelData.valueChanged.connect(partial(self._lineEditTextChanged1, spectrum))
-    positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(3, 0), vAlign='t', hAlign='l')
+    positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(3, 0), vAlign='c', hAlign='l')
     positiveMultiplierData = DoubleSpinbox(self, grid=(3, 1), vAlign='t')
     positiveMultiplierData.setSingleStep(0.1)
     positiveMultiplierData.setValue(float(spectrum.positiveContourFactor))
@@ -407,11 +407,11 @@ class ContoursTab(QtGui.QWidget, Base):
     # positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*(positiveMultiplierData.value()-1))
     # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
     positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*0.1)
-    positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(4, 0), vAlign='t', hAlign='l')
+    positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(4, 0), vAlign='c', hAlign='l')
     positiveContourCountData = Spinbox(self, grid=(4, 1), vAlign='t')
     positiveContourCountData.setValue(int(spectrum._apiDataSource.positiveContourCount))
     positiveContourCountData.valueChanged.connect(partial(self._lineEditTextChanged3, spectrum))
-    positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(5, 0), vAlign='t', hAlign='l')
+    positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(5, 0), vAlign='c', hAlign='l')
     self.positiveColourBox = PulldownList(self, grid=(5, 1), vAlign='t')
 
     for item in spectrumColours.items():
@@ -428,7 +428,7 @@ class ContoursTab(QtGui.QWidget, Base):
     self.positiveColourButton.clicked.connect(partial(self._changePosSpectrumColour, spectrum))
 
 
-    negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0), vAlign='t', hAlign='l')
+    negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0), vAlign='c', hAlign='l')
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True, vAlign='t', hAlign='l')
     for spectrumView in self.spectrum.spectrumViews:
       if spectrumView._wrappedData.spectrumView.displayNegativeContours is True:
@@ -436,13 +436,13 @@ class ContoursTab(QtGui.QWidget, Base):
       else:
         negativeContoursCheckBox.setChecked(False)
     negativeContoursCheckBox.stateChanged.connect(self.displayNegativeContours)
-    negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='t', hAlign='l')
+    negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='c', hAlign='l')
     negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1), vAlign='t')
     negativeBaseLevelData.setMaximum(-0.1)
     negativeBaseLevelData.setMinimum(-1e12)
     negativeBaseLevelData.setValue(spectrum.negativeContourBase)
     negativeBaseLevelData.valueChanged.connect(partial(self._lineEditTextChanged4, spectrum))
-    negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(8, 0), vAlign='t', hAlign='l')
+    negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(8, 0), vAlign='c', hAlign='l')
     negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t')
     negativeMultiplierData.setValue(spectrum.negativeContourFactor)
     negativeMultiplierData.setSingleStep(0.1)
@@ -451,11 +451,11 @@ class ContoursTab(QtGui.QWidget, Base):
     # negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*negativeMultiplierData.value()-1)
     # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
     negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*0.1)
-    negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(9, 0), vAlign='t', hAlign='l')
+    negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(9, 0), vAlign='c', hAlign='l')
     negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
     negativeContourCountData.setValue(spectrum.negativeContourCount)
     negativeContourCountData.valueChanged.connect(partial(self._lineEditTextChanged6, spectrum))
-    negativeContourColourLabel = Label(self, text="Colour",grid=(10, 0), vAlign='t', hAlign='l')
+    negativeContourColourLabel = Label(self, text="Colour",grid=(10, 0), vAlign='c', hAlign='l')
     self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
     for item in spectrumColours.items():
       pix=QtGui.QPixmap(QtCore.QSize(20,20))

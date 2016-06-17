@@ -19,10 +19,10 @@ class MacroEditor(DropBase, CcpnModule):
     CcpnModule.__init__(self, name=name)
     widget = QtGui.QWidget()
     self.parent = parent
-    self.parent.addModule(self)
-    self.preferences = mainWindow.preferences.general
-    self.textBox = TextEditor()
     self.mainWindow = mainWindow
+    self.parent.addModule(self)
+    self.preferences = self.mainWindow.framework.preferences
+    self.textBox = TextEditor()
     widgetLayout = QtGui.QGridLayout()
     widget.setLayout(widgetLayout)
     self.label1 = Label(self, 'Macro Name')
@@ -64,10 +64,10 @@ class MacroEditor(DropBase, CcpnModule):
     """
     Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
     """
-    macroPath = self.preferences.macroPath
-    colourScheme = self.preferences.colourScheme
+    macroPath = self.preferences.general.macroPath
+    # colourScheme = self.preferences.general.colourScheme
     newText = self.textBox.toPlainText()
-    filePath = FileDialog(self, text='Save Macro As...', acceptMode=1, fileMode=0, preferences=self.preferences,
+    filePath = FileDialog(self, text='Save Macro As...', acceptMode=1, fileMode=0, preferences=self.preferences.general,
                            directory=macroPath, selectedFilter='*.py')
 
     if not filePath:
@@ -83,9 +83,9 @@ class MacroEditor(DropBase, CcpnModule):
     Opens a file dialog box at the macro path specified in the application preferences and loads the
     contents of the macro file into the textbox.
     """
-    macroPath = self.preferences.macroPath
+    macroPath = self.preferences.general.macroPath
     filePath = FileDialog(self, text='Open Macro', fileMode=1, acceptMode=0, directory=macroPath,
-                          preferences=self.preferences)
+                          preferences=self.preferences.general)
 
     with open(filePath, 'r') as f:
       for line in f.readlines():

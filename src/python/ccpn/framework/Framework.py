@@ -212,6 +212,7 @@ class Framework:
 
     # This wraps the underlying data, including the wrapped graphics data
     #  - the project is now ready to use
+
     project._initialiseProject()
 
     # Adapt project to preferences
@@ -293,7 +294,7 @@ class Framework:
     return True on error
     """
     if self.ui is None:
-        return True
+      return True
 
     popup = RegisterPopup(version=self.applicationVersion, modal=True)
     popup.show()
@@ -385,114 +386,122 @@ class Framework:
 
   def _setupMenus(self):
     self._menuSpec = ms = []
-      # TODO: remove QKeySequence
+    # TODO: remove QKeySequence
 
 
 
     ms.append(('Project',   [
-                            ("New", self.newProject, [('shortcut', 'pn')]),
-                            ("Open...", self.loadProject, [('shortcut', 'po')]),
-                            ("Open Recent", ()),
+      ("New", self.createNewProject, [('shortcut', 'pn')]),
+      ("Open...", self.openProject, [('shortcut', 'po')]),
+      ("Open Recent", ()),
 
-                            ("Load Spectrum", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
-                            ("Load Data", self.loadData, [('shortcut', 'ld')]),
-                            (),
-                            ("Save", self.saveProject, [('shortcut', 'ps')]),
-                            ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
-                            (),
-                            ("Undo", self.undo, [('shortcut', QKeySequence("Ctrl+z"))]),
-                            ("Redo", self.redo, [('shortcut', QKeySequence("Ctrl+y"))]),
-                            (),
-                            ("Summary", self.displayProjectSummary),
-                            ("Archive", self.archiveProject),
-                            ("Backup...", self.showBackupPopup),
-                            (),
-                            ("Preferences", self.showApplicationPreferences),
-                            (),
-                            ("Close Program", self._closeEvent, [('shortcut', 'qt')]),
-                            ]
-             ))
+      ("Load Spectrum", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
+      ("Load Data", self.loadData, [('shortcut', 'ld')]),
+      (),
+      ("Save", self.saveProject, [('shortcut', 'ps')]),
+      ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
+      (),
+      ("Undo", self.undo, [('shortcut', QKeySequence("Ctrl+z"))]),
+      ("Redo", self.redo, [('shortcut', QKeySequence("Ctrl+y"))]),
+      (),
+      ("Summary", self.displayProjectSummary),
+      ("Archive", self.archiveProject),
+      ("Backup...", self.showBackupPopup),
+      (),
+      ("Preferences", self.showApplicationPreferences),
+      (),
+      ("Close Program", self._closeEvent, [('shortcut', 'qt')]),
+    ]
+               ))
 
     ms.append(('Spectrum',  [
-                            ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
-                            ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
-                            (),
-                            ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
-                            ("Integration", self.showIntegrationModule, [('shortcut', 'it')]),
-                            (),
-                            ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
-                            ("Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
-                            ]
-             ))
+      ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
+      ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
+      (),
+      ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
+      ("Integration", self.showIntegrationModule, [('shortcut', 'it')]),
+      (),
+      ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
+      ("Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
+    ]
+               ))
 
     ms.append(('Molecules', [
-                            ("Create Molecule...", self.showMoleculePopup),
-                            ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
-                                                                          ('checkable', True),
-                                                                          ('checked', False)
-                                                                          ]),
-                             ("Inspect...", self.inspectMolecule),
-                             (),
-                             ("Reference Chemical Shifts", self.showRefChemicalShifts,[('shortcut', 'rc')]),
-                            ]
-             ))
+      ("Create Molecule...", self.showMoleculePopup),
+      ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
+                                                    ('checkable', True),
+                                                    ('checked', False)
+                                                    ]),
+      ("Inspect...", self.inspectMolecule),
+      (),
+      ("Reference Chemical Shifts", self.showRefChemicalShifts,[('shortcut', 'rc')]),
+    ]
+               ))
 
     ms.append(('View',      [
-                            ("New Blank Display", self.addBlankDisplay, [('shortcut', 'nd')]),
-                            (),
-                            ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
-                            ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
-                            ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
-                            (),
-                            ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
-                            ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
-                            (),
-                            ("Console", self.toggleConsole, [('shortcut', 'py'),
-                                                            ('checkable', True),
-                                                            ('checked', False)])
-                            ]
-             ))
+      ("New Blank Display", self.addBlankDisplay, [('shortcut', 'nd')]),
+      (),
+      ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
+      ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
+      ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
+      (),
+      ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
+      ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
+      (),
+      ("Console", self.toggleConsole, [('shortcut', 'py'),
+                                       ('checkable', True),
+                                       ('checked', False)])
+    ]
+               ))
 
     ms.append(('Macro',     [
-                            ("Edit...", self.showMacroEditor),
-                            ("New from Console...", self.newMacroFromConsole),
-                            ("New from Log...", self.newMacroFromLog),
-                            (),
-                            ("Record Macro...", self.startMacroRecord),
-                            ("Run...", self.runMacro, [('shortcut', 'rm')]),
-                            ("Run Recent", ())
-                            ]
-             ))
+      ("Edit...", self.showMacroEditor),
+      ("New from Console...", self.newMacroFromConsole),
+      ("New from Log...", self.newMacroFromLog),
+      (),
+      ("Record Macro...", self.startMacroRecord),
+      ("Run...", self.runMacro, [('shortcut', 'rm')]),
+      ("Run Recent", ())
+    ]
+               ))
 
     ms.append(('Plugins',   [
-                            ("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1')]),
-                            ]
-             ))
+      ("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1')]),
+    ]
+               ))
 
     ms.append(('Help',      [
-                            ("Command...", self.showCommandHelp, [('shortcut', 'ss')]),
-                            ("Tutorials",([
-                                    # Submenu
-                                    ("Beginners Tutorial", self.showBeginnersTutorial),
-                                    ("Backbone Tutorial", self.showBackboneTutorial)
-                                    ])),
-                            ("Show Shortcuts", self.showShortcuts),
-                            ("Show CcpNmr V3 Documentation", self.showWrapperDocumentation),
-                            ("Show API Documentation", self._showApiDocumentation),
-                            (),
-                            ("About CcpNmr V3...", self.showAboutPopup),
-                            ("About CCPN...", self.showAboutCcpnPopup),
-                            (),
-                            ("Inspect Code...", self.showCodeInspectionPopup),
-                            ("Check for Updates...", self.showUpdatePopup),
-                            ("Submit Feedback...", self.showFeedbackPopup)
-                          ]
-             ))
+      ("Command...", self.showCommandHelp, [('shortcut', 'ss')]),
+      ("Tutorials",([
+        # Submenu
+        ("Beginners Tutorial", self.showBeginnersTutorial),
+        ("Backbone Tutorial", self.showBackboneTutorial)
+      ])),
+      ("Show Shortcuts", self.showShortcuts),
+      ("Show CcpNmr V3 Documentation", self.showWrapperDocumentation),
+      ("Show API Documentation", self._showApiDocumentation),
+      (),
+      ("About CcpNmr V3...", self.showAboutPopup),
+      ("About CCPN...", self.showAboutCcpnPopup),
+      (),
+      ("Inspect Code...", self.showCodeInspectionPopup),
+      ("Check for Updates...", self.showUpdatePopup),
+      ("Submit Feedback...", self.showFeedbackPopup)
+    ]
+               ))
 
 
   ###################################################################################################################
   ## MENU callbacks:  Project
   ###################################################################################################################
+
+
+  def createNewProject(self):
+    okToContinue = self.ui.mainWindow._queryCloseProject(title='New Project',
+                                                         phrase='create a new')
+    if okToContinue:
+      self.newProject()
+
 
   def newProject(self, name='default'):
     # """Create new, empty project"""
@@ -510,6 +519,11 @@ class Framework:
     project._resetUndo(debug=_DEBUG)
 
     return project
+
+
+  def openProject(self, path=None):
+    return self.ui.mainWindow.loadProject(projectDir=path)
+
 
   def loadProject(self, path=None):
     """
@@ -578,7 +592,7 @@ class Framework:
     apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
                       createFallback=createFallback)
     self.ui.mainWindow._updateWindowTitle()
-    
+
     layout = self.ui.mainWindow.moduleArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
     if not os.path.exists(layoutPath):
@@ -601,7 +615,7 @@ class Framework:
     if newPath:
       newProjectPath = apiIo.ccpnProjectPath(newPath)
       self.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath),
-                                createFallback=False)
+                       createFallback=False)
 
   def saveBackup(self):
     pass

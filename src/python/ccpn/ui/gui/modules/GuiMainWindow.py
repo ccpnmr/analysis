@@ -420,12 +420,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           
     return result
     
-  def newProject(self):
-    
-    result = self._queryCloseProject(title='New Project', phrase='create a new')
-    
-    if result:
-      self._appBase.newProject()
+  # def newProject(self):
+  #   result = self._queryCloseProject(title='New Project', phrase='create a new')
+  #
+  #   if result:
+  #     self.framework.newProject()
     
   def _showDocumentation(self, title, *args):
     
@@ -512,7 +511,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
     self.project._logger.info("application.toggleSequenceModule()")
 
-  def loadAProject(self, projectDir=None):
+
+  def loadProject(self, projectDir=None):
     """
     Opens a loadProject dialog box if project directory is not specified.
     Loads the selected project.
@@ -524,7 +524,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         projectDir = dialog.selectedFiles()[0]
 
       if projectDir:
-        self._appBase.loadProject(projectDir)
+        self.framework.loadProject(projectDir)
+
 
   def showPeakPickPopup(self):
     """

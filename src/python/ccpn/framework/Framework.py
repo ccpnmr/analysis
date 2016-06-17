@@ -841,7 +841,7 @@ class Framework:
       self.blankDisplay = GuiBlankDisplay(self.ui.mainWindow.moduleArea)
       self.ui.mainWindow.moduleArea.addModule(self.blankDisplay, position, None)
 
-    self.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
     self.project._logger.info("application.addBlankDisplay()")
 
   def showChemicalShiftTable(self, position:str='bottom', relativeTo:CcpnModule=None):
@@ -954,7 +954,7 @@ class Framework:
     Displays macro editor with contents of python console inside.
     """
     editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
-    editor.textBox.setText(self.pythonConsole.textEditor.toPlainText())
+    editor.textBox.setText(self.ui.mainWindow.pythonConsole.textEditor.toPlainText())
 
   def newMacroFromLog(self):
     """
@@ -970,7 +970,7 @@ class Framework:
     Displays macro editor with additional buttons for recording a macro.
     """
     self.macroEditor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor", showRecordButtons=True)
-    self.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
 
 
@@ -988,7 +988,7 @@ class Framework:
       macroFile = QtGui.QFileDialog.getOpenFileName(self.ui.mainWindow, "Run Macro", self.preferences.general.macroPath)
     self.preferences.recentMacros.append(macroFile)
     # self._fillRecentMacrosMenu()
-    self.pythonConsole._runMacro(macroFile)
+    self.ui.mainWindow.pythonConsole._runMacro(macroFile)
 
 
 

@@ -392,7 +392,7 @@ class Framework:
     ms.append(('Project',   [
                             ("New", self.newProject, [('shortcut', 'pn')]),
                             ("Open...", self.loadProject, [('shortcut', 'po')]),
-                            ("Open Recent",self._recentProjectsMenuItems()),
+                            ("Open Recent", ()),
 
                             ("Load Spectrum", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
                             ("Load Data", self.loadData, [('shortcut', 'ld')]),
@@ -460,7 +460,7 @@ class Framework:
                             (),
                             ("Record Macro...", self.startMacroRecord),
                             ("Run...", self.runMacro, [('shortcut', 'rm')]),
-                            ("Run Recent", self._fillRecentMacrosMenu())
+                            ("Run Recent", ())
                             ]
              ))
 
@@ -539,22 +539,15 @@ class Framework:
 
     return project
 
-  def _recentProjectsMenuItems(self):
-    """
-    Populates recent projects menu with 10 most recently loaded projects
-    specified in the preferences file.
-    """
-    l = []
-    for recentFile in self.preferences.recentFiles:
-      if (recentFile.startswith('/var/') is False):
-        l.append((recentFile, partial(self.loadProject, recentFile), (('translate', False),)))
 
-    return l
-
-  def clearRecentProjectsMenu(self):
-    # self.recentProjectsMenu.clear()
+  def clearRecentProjects(self):
     self.preferences.recentFiles = []
-    self._recentProjectsMenuItems()
+    self.ui.mainWindow._fillRecentProjectsMenu()
+
+
+  def clearRecentMacros(self):
+    self.preferences.recentMacros = []
+    self.ui.mainWindow._fillRecentMacrosMenu()
 
 
   def loadData(self, paths=None, text=None):
@@ -966,28 +959,6 @@ class Framework:
     self.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
 
-  def _fillRecentMacrosMenu(self):
-    """
-    Populates recent macros menu with last ten macros ran.
-    """
-
-    recentMacros = uniquify(self.preferences.recentMacros)
-    l = []
-    for recentMacro in self.preferences.recentMacros:
-      if recentMacro:
-        l.append((recentMacro, partial(self.runMacro, recentMacro)))
-    return l
-
-    # translator.setSilent()
-    # for recentMacro in recentMacros:
-    #   self.action = Action(parent=self.ui.mainWindow, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))
-    #   self.recentMacrosMenu.addAction(self.action)
-    # translator.setLoud()
-    # self.recentMacrosMenu.addAction(Action(parent=self.ui.mainWindow, text='Clear', callback=self.clearRecentMacros))
-
-  def clearRecentMacros(self):
-    # self.recentMacrosMenu.clear()
-    self.preferences.recentMacros = []
 
   def defineUserShortcuts(self):
     info = MessageDialog.showInfo('Not implemented yet!',

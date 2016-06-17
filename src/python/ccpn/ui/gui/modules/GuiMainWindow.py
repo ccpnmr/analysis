@@ -146,6 +146,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if self.backupTimer.isActive():
       self.backupTimer.stop()
 
+
+  def getMenuAction(self, menuString, topMenuAction=None):
+    if topMenuAction is None:
+      topMenuAction = self._menuBar
+    splitMenuString = menuString.split('->')
+    if len(splitMenuString) > 1:
+      topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
+    for a in topMenuAction.actions():
+      if a.text() == splitMenuString[-1]:
+        return a.menu() or a
+    raise ValueError('Menu item not found.')
+
+
   def backupProject(self):
     
     apiIo.backupProject(self._project._wrappedData.parent)
@@ -359,7 +372,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # self._menuBar.addMenu(pluginsMenu)
     # self._menuBar.addMenu(macroMenu)
     # self._menuBar.addMenu(helpMenu)
-
+    self._fillRecentProjectsMenu()
+    self._fillRecentMacrosMenu()
 
 
   def _createMenu(self, spec, targetMenu=None):
@@ -557,13 +571,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Populates recent projects menu with 10 most recently loaded projects
     specified in the preferences file.
     """
-    # translator.setSilent()
-    for recentFile in self._appBase.preferences.recentFiles:
-      self.action = Action(self, text=recentFile, translate=False,
-                           callback=partial(self.loadAProject, projectDir=recentFile))
-      self.recentProjectsMenu.addAction(self.action)
-    # translator.setLoud()
-    self.recentProjectsMenu.addAction(Action(self, text='Clear', callback=self.clearRecentProjectsMenu))
+    recentFileLocations = uniquify(self.framework.preferences.recentFiles)
+    recentFileMenu = self.getMenuAction('Project->Open Recent')
+    recentFileMenu.clear()
+    for recentFile in recentFileLocations:
+      recentFileMenu.addAction(Action(recentFileMenu, text=recentFile, translate=False,
+                                      callback=partial(self.framework.loadProject,
+                                                       projectDir=recentFile)))
+    recentFileMenu.addSeparator()
+    recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
+                                    callback=self.framework.clearRecentProjects))
+
+
 
   def saveBackup(self):
     pass
@@ -836,25 +855,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _fillRecentMacrosMenu(self):
     """
     Populates recent macros menu with last ten macros ran.
+    TODO: make sure that running a macro adds it to the prefs and calls this function
     """
 
-    recentMacros = uniquify(self._appBase.preferences.recentMacros)
-
-    translator.setSilent()
+    recentMacros = uniquify(self.framework.preferences.recentMacros)
+    recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
+    recentMacrosMenu.clear()
     for recentMacro in recentMacros:
-      self.action = Action(self, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))
-      self.recentMacrosMenu.addAction(self.action)
-    translator.setLoud()
-    self.recentMacrosMenu.addAction(Action(self, text='Clear', callback=self.clearRecentMacros))
-
-
-  def clearRecentMacros(self):
-    self.recentMacrosMenu.clear()
-    self._appBase.preferences.recentMacros = []
-
-  def clearRecentProjectsMenu(self):
-    self.recentProjectsMenu.clear()
-    self._appBase.preferences.recentFiles = []
+      action = Action(self, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))
+      recentMacrosMenu.addAction(action)
+    recentMacrosMenu.addSeparator()
+    recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
+                                      callback=self.framework.clearRecentMacros))
 
 
   def defineUserShortcuts(self):

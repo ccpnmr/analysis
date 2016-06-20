@@ -33,7 +33,7 @@ except ImportError:
 
 class Action(QtGui.QAction, Base):
   def __init__(self, parent, text, callback=None, shortcut=None, checked=True, checkable=False,
-               icon=None, translate=True, **kw):
+               icon=None, translate=True, enabled=True, **kw):
     # tr = getTranslator('Dutch')
     # title = tr(title)
     if translate:
@@ -57,6 +57,7 @@ class Action(QtGui.QAction, Base):
       # PyQt4 always seems to add a checked argument for Action callbacks
       self.triggered.connect(lambda checked, *args, **kw: callback(*args, **kw))
 
+    self.setEnabled(enabled)
     # Base.__init__(self, **kw)
 
 

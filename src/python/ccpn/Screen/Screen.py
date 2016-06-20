@@ -14,8 +14,8 @@ class Screen(Framework):
 
 
   #########################################    Start setup Menu      #############################################
-  def _setupMenus(self):
-    super()._setupMenus()
+  def setupMenus( self ):
+    super().setupMenus( )
 
     menuSpec = ('Screen',[
                          ("Lookup Setup "      , self.showLookupSetupPopup ),

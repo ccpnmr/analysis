@@ -23,12 +23,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 # from ccpn.ui.gui.AppBase import AppBase, defineProgramArguments
-from ccpn.ui.gui.lib.Window import MODULE_DICT
-from ccpn.ui.gui.modules import GuiStrip
+# from ccpn.ui.gui.lib.Window import MODULE_DICT
+# from ccpn.ui.gui.modules import GuiStrip
 
-from ccpn.framework.lib.SvnRevision import applicationVersion
+# from ccpn.framework.lib.SvnRevision import applicationVersion
 
-from ccpn.framework.Framework import defineProgramArguments, Framework
+from ccpn.framework.Framework import Framework
 # from ccpn.ui.gui.modules import GuiStripNd
 # from ccpn.ui.gui.modules import GuiSpectrumDisplay
 # from ccpn.ui.gui.modules import GuiStripDisplayNd
@@ -46,8 +46,8 @@ class Assign(Framework):
     self.components.add('Assignment')
 
 
-  def _setupMenus(self):
-    super()._setupMenus()
+  def setupMenus(self):
+    super().setupMenus()
     menuSpec = ('Assign', [("Setup NmrResidues", self.showSetupNmrResiduesPopup, [('shortcut', 'sn')]),
                            ("Pick and Assign", self.showPickAndAssignModule, [('shortcut', 'pa')]),
                            (),
@@ -60,64 +60,64 @@ class Assign(Framework):
     self.addApplicationMenuSpec(menuSpec)
 
 
-  def initGraphics(self):
-    """Set up graphics system after loading"""
-
-    # Initialise strips
-    project = self.project
-    for strip in project.strips:
-      GuiStrip._setupGuiStrip(project, strip._wrappedData)
-
-      # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
-      #   strip.setZWidgets()
-
-    # Initialise Rulers
-    for task in project.tasks:
-      for apiMark in task._wrappedData.sortedMarks():
-        for apiRuler in apiMark.sortedRulers():
-          GuiStrip._rulerCreated(project, apiRuler)
-
-    # Initialise SpectrumViews
-    for spectrumDisplay in project.spectrumDisplays:
-      for strip in spectrumDisplay.strips:
-        for spectrumView in strip.spectrumViews:
-          spectrumView._createdSpectrumView()
-          for peakList in spectrumView.spectrum.peakLists:
-            strip.showPeaks(peakList)
-
-    self.initLayout()
-
-  def initLayout(self):
-    """
-    Restore layout of modules from previous save after graphics have been set up.
-    """
-    import yaml, os
-    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
-      with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
-        layout = yaml.load(f)
-        typ, contents, state = layout['main']
-
-        # TODO: When UI has a main window, change the call below (then move the whole function!)
-        containers, modules = self.ui.mainWindow.moduleArea.findAll()
-        flatten = lambda *n: (e for a in n
-        for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
-        flatContents = list(flatten(contents))
-        for item in flatContents:
-          if item in list(MODULE_DICT.keys()):
-            obj = modules.get(item)
-            if not obj:
-             func = getattr(self, MODULE_DICT[item])
-             func()
-        for s in layout['float']:
-          typ, contents, state = s[0]['main']
-          containers, modules = self.ui.mainWindow.moduleArea.findAll()
-          for item in contents:
-            if item[0] == 'dock':
-              obj = modules.get(item[1])
-              if not obj:
-                func = getattr(self, MODULE_DICT[item[1]])
-                func()
-        self.ui.mainWindow.moduleArea.restoreState(layout)
+  # def initGraphics(self):
+  #   """Set up graphics system after loading"""
+  #
+  #   # Initialise strips
+  #   project = self.project
+  #   for strip in project.strips:
+  #     GuiStrip._setupGuiStrip(project, strip._wrappedData)
+  #
+  #     # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
+  #     #   strip.setZWidgets()
+  #
+  #   # Initialise Rulers
+  #   for task in project.tasks:
+  #     for apiMark in task._wrappedData.sortedMarks():
+  #       for apiRuler in apiMark.sortedRulers():
+  #         GuiStrip._rulerCreated(project, apiRuler)
+  #
+  #   # Initialise SpectrumViews
+  #   for spectrumDisplay in project.spectrumDisplays:
+  #     for strip in spectrumDisplay.strips:
+  #       for spectrumView in strip.spectrumViews:
+  #         spectrumView._createdSpectrumView()
+  #         for peakList in spectrumView.spectrum.peakLists:
+  #           strip.showPeaks(peakList)
+  #
+  #   self.initLayout()
+  #
+  # def initLayout(self):
+  #   """
+  #   Restore layout of modules from previous save after graphics have been set up.
+  #   """
+  #   import yaml, os
+  #   if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+  #     with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+  #       layout = yaml.load(f)
+  #       typ, contents, state = layout['main']
+  #
+  #       # TODO: When UI has a main window, change the call below (then move the whole function!)
+  #       containers, modules = self.ui.mainWindow.moduleArea.findAll()
+  #       flatten = lambda *n: (e for a in n
+  #       for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
+  #       flatContents = list(flatten(contents))
+  #       for item in flatContents:
+  #         if item in list(MODULE_DICT.keys()):
+  #           obj = modules.get(item)
+  #           if not obj:
+  #            func = getattr(self, MODULE_DICT[item])
+  #            func()
+  #       for s in layout['float']:
+  #         typ, contents, state = s[0]['main']
+  #         containers, modules = self.ui.mainWindow.moduleArea.findAll()
+  #         for item in contents:
+  #           if item[0] == 'dock':
+  #             obj = modules.get(item[1])
+  #             if not obj:
+  #               func = getattr(self, MODULE_DICT[item[1]])
+  #               func()
+  #       self.ui.mainWindow.moduleArea.restoreState(layout)
 
 
   def showSetupNmrResiduesPopup(self):
@@ -181,16 +181,3 @@ class Assign(Framework):
                               relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
     self.project._logger.info("application.showResidueInformation()")
-
-
-
-if __name__ == '__main__':
-
-  # argument parser
-  parser = defineProgramArguments()
-  # add any additional commandline argument here
-  commandLineArguments = parser.parse_args()
-
-  program = Assign(applicationName, applicationVersion, commandLineArguments)
-  program.start()
-

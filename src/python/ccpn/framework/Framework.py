@@ -86,9 +86,9 @@ def defineProgramArguments():
   """
   import argparse
   parser = argparse.ArgumentParser(description='Process startup arguments')
-  for component in componentNames:
-    parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
-                                                help='Show %s component' % component.lower())
+  # for component in componentNames:
+  #   parser.add_argument('--'+component.lower(), dest='include'+component, action='store_true',
+  #                                               help='Show %s component' % component.lower())
   parser.add_argument('--language',
                       help=('Language for menus, etc.; valid options = (%s); default=%s' %
                             ('|'.join(languages) ,defaultLanguage)),
@@ -172,7 +172,7 @@ class Framework:
     self._setLanguage()
     self.styleSheet = self.getStyleSheet(self.preferences)
     self.ui = self._getUI()
-    self._setupMenus()
+    self.setupMenus()
     self.feedbackPopup = None
     self.updatePopup = None
     self.backupPopup = None
@@ -325,11 +325,65 @@ class Framework:
     dataUrl.url = Implementation.Url(path=dataPath)
 
 
-  def initGraphics(self):
-    """Set up graphics system after loading - to be overridden in subclasses"""
-    # for window in self.project.windows:
-    #   window.initGraphics()
-    pass
+def initGraphics(self):
+  """Set up graphics system after loading"""
+  from ccpn.ui.gui.lib.Window import MODULE_DICT
+  from ccpn.ui.gui.modules import GuiStrip
+  # Initialise strips
+  project = self.project
+  for strip in project.strips:
+    GuiStrip._setupGuiStrip(project, strip._wrappedData)
+
+    # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
+    #   strip.setZWidgets()
+
+  # Initialise Rulers
+  for task in project.tasks:
+    for apiMark in task._wrappedData.sortedMarks():
+      for apiRuler in apiMark.sortedRulers():
+        GuiStrip._rulerCreated(project, apiRuler)
+
+  # Initialise SpectrumViews
+  for spectrumDisplay in project.spectrumDisplays:
+    for strip in spectrumDisplay.strips:
+      for spectrumView in strip.spectrumViews:
+        spectrumView._createdSpectrumView()
+        for peakList in spectrumView.spectrum.peakLists:
+          strip.showPeaks(peakList)
+
+  self._initLayout()
+
+  def _initLayout(self):
+    """
+    Restore layout of modules from previous save after graphics have been set up.
+    """
+    import yaml, os
+    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+      with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+        layout = yaml.load(f)
+        typ, contents, state = layout['main']
+
+        # TODO: When UI has a main window, change the call below (then move the whole function!)
+        containers, modules = self.ui.mainWindow.moduleArea.findAll()
+        flatten = lambda *n: (e for a in n
+        for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
+        flatContents = list(flatten(contents))
+        for item in flatContents:
+          if item in list(MODULE_DICT.keys()):
+            obj = modules.get(item)
+            if not obj:
+             func = getattr(self, MODULE_DICT[item])
+             func()
+        for s in layout['float']:
+          typ, contents, state = s[0]['main']
+          containers, modules = self.ui.mainWindow.moduleArea.findAll()
+          for item in contents:
+            if item[0] == 'dock':
+              obj = modules.get(item[1])
+              if not obj:
+                func = getattr(self, MODULE_DICT[item[1]])
+                func()
+        self.ui.mainWindow.moduleArea.restoreState(layout)
 
 
   def getByPid(self, pid):
@@ -384,7 +438,7 @@ class Framework:
 
   #########################################    Start setup Menus      ############################
 
-  def _setupMenus(self):
+  def setupMenus( self ):
     self._menuSpec = ms = []
     # TODO: remove QKeySequence
 
@@ -405,8 +459,8 @@ class Framework:
       ("Redo", self.redo, [('shortcut', QKeySequence("Ctrl+y"))]),
       (),
       ("Summary", self.displayProjectSummary),
-      ("Archive", self.archiveProject),
-      ("Backup...", self.showBackupPopup),
+      ("Archive", self.archiveProject, [('enabled', False)]),
+      ("Backup...", self.showBackupPopup, [('enabled', False)]),
       (),
       ("Preferences", self.showApplicationPreferences),
       (),
@@ -420,7 +474,7 @@ class Framework:
       (),
       ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
       ("Integration", self.showIntegrationModule, [('shortcut', 'it'),
-                                                   ('setEnabled', False)]),
+                                                   ('enabled', False)]),
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
       ("Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
@@ -491,6 +545,9 @@ class Framework:
                ))
 
 
+  ###################################################################################################################
+  ## These will eventually move to gui (probably via a set of lambda functions.
+  ###################################################################################################################
   ###################################################################################################################
   ## MENU callbacks:  Project
   ###################################################################################################################

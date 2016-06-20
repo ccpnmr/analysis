@@ -45,7 +45,7 @@ from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
 
 from ccpn.ui import interfaces, defaultInterface
-from ccpn.ui.gui.Current import Current
+from ccpn.framework.Current import Current
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
@@ -419,7 +419,8 @@ class Framework:
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
       ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
-      ("Integration", self.showIntegrationModule, [('shortcut', 'it')]),
+      ("Integration", self.showIntegrationModule, [('shortcut', 'it'),
+                                                   ('setEnabled', False)]),
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
       ("Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
@@ -479,7 +480,6 @@ class Framework:
       ])),
       ("Show Shortcuts", self.showShortcuts),
       ("Show CcpNmr V3 Documentation", self.showWrapperDocumentation),
-      ("Show API Documentation", self._showApiDocumentation),
       (),
       ("About CcpNmr V3...", self.showAboutPopup),
       ("About CCPN...", self.showAboutCcpnPopup),

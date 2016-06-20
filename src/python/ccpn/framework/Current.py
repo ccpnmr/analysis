@@ -28,6 +28,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumGroup import SpectrumGroup
 from ccpn.core.Peak import Peak
+from ccpn.core.Integral import Integral
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
@@ -35,7 +36,7 @@ from ccpn.ui._implementation.Strip import Strip
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 # Classes (in addition to Project) that have a corresponding 'current' field
-_currentClasses = [Spectrum, SpectrumGroup, Peak, NmrChain, NmrResidue, NmrAtom,
+_currentClasses = [Spectrum, SpectrumGroup, Peak, Integral, NmrChain, NmrResidue, NmrAtom,
                    SpectrumDisplay, Strip, ]
 
 # 'current' fields that do not correspond to a wrapper class. Must be plural and end in 's'

@@ -113,14 +113,14 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.widget3.layout().addWidget(self.subtractPeakListsButton, 0, 0)
     self.widget3.layout().addWidget(self.deletePeakButton, 0, 1)
     self.layout().addWidget(self.widget3, 0, 6, 1, 2)
-
-    columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
-               ('Volume', lambda pk: self._getPeakVolume(pk))]
-
-    tipTexts=['Peak serial number',
-              'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
-              'Integral of spectrum intensity around peak location, according to chosen volume method',
-              'Textual notes about the peak']
+    #
+    # columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
+    #            ('Volume', lambda pk: self._getPeakVolume(pk))]
+    #
+    # tipTexts=['Peak serial number',
+    #           'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
+    #           'Integral of spectrum intensity around peak location, according to chosen volume method',
+    #           'Textual notes about the peak']
 
     self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=callback, selectionCallback=self._selectPeak,
                                        getColumnsFunction=self.getExtraColumns, selector=self.peakListPulldown,
@@ -143,6 +143,12 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
               'Textual notes about the peak']
       k = 1
       numDim = peakList.spectrum.dimensionCount
+      for i in range(numDim):
+        j = i + 1
+        c = ('Assign F%d' % j, lambda pk, dim=i:getPeakAnnotation(pk, dim))
+        columns.insert(k, c)
+        tipTexts.insert(k, 'NmrAtom assignments of peak in dimension %d' % j)
+        k+=1
       for i in range(numDim):
         j = i + 1
 

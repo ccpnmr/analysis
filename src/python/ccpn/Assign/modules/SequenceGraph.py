@@ -54,6 +54,7 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     self.setPlainText(text)
     self.setPos(QtCore.QPointF((pos[0]-self.boundingRect().x()), (pos[1]-self.boundingRect().y())))
     self.nmrAtom = nmrAtom
+    self.project = project
     self.setTextInteractionFlags(QtCore.Qt.TextSelectableByMouse)
     self.connectedAtoms = 0
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
@@ -72,7 +73,12 @@ class GuiNmrAtom(QtGui.QGraphicsTextItem):
     else:
       self.setDefaultTextColor(QtGui.QColor(colour1))
 
+  def mouseDoubleClickEvent(self, event):
 
+    if not hasattr(self.project._appBase, 'maModule'):
+      self.project._appBase.showModifyAssignmentModule(self.nmrAtom)
+    else:
+      self.project._appBase.current.nmrAtom = self.nmrAtom
 
 class GuiNmrResidue(QtGui.QGraphicsTextItem):
 
@@ -197,7 +203,9 @@ class SequenceGraph(CcpnModule):
     self.project.registerNotifier('NmrChain', 'delete', self.removeNmrChainFromPulldown)
     self.project.registerNotifier('NmrChain', 'create', self.addNmrChainToPulldown)
     # self.modePulldown.select('fragment')
+    self.project.registerNotifier('Peak', 'change', self._updateShownAssignments)
     self.setMode('fragment')
+
 
 
   def updateNmrResidueTable(self):
@@ -218,6 +226,7 @@ class SequenceGraph(CcpnModule):
 
 
   def setNmrChainDisplay(self, nmrChainPid):
+    self.current.nmrChain = self.project.getByPid(nmrChainPid)
     self.clearAllItems()
     if self.modePulldown.currentText() == 'fragment':
       nmrChain = self.project.getByPid(nmrChainPid)
@@ -426,6 +435,9 @@ class SequenceGraph(CcpnModule):
           self.project._appBase.sequenceModule._highlightPossibleStretches(possibleMatch[1])
 
 
+  def _updateShownAssignments(self, peak):
+    self.setNmrChainDisplay(self.current.nmrChain.pid)
+
   def _showBackboneAssignments(self, nmrChain):
     self.project._startFunctionCommandBlock('_showBackboneAssignments', nmrChain)
     try:
@@ -507,25 +519,6 @@ class SequenceGraph(CcpnModule):
           guiNmrAtomPair[0].connectedAtoms += 1.0
           guiNmrAtomPair[1].connectedAtoms += 1.0
 
-
-#NBNB TBD:
-# The below should be replaced. See commented-out code at the end fo Assigner.__init__
-# After refactoring, guiNmrResidues should not be global
-
-#
-# def _resetNmrResiduePidForAssigner(project:Project, apiResonanceGroup:ApiResonanceGroup):
-#   """Reset pid for NmrResidue and all offset NmrResidues"""
-#   if hasattr(project._appBase.mainWindow, 'assigner'):
-#     getDataObj = project._data2Obj.get
-#     obj = getDataObj(apiResonanceGroup)
-#     for guiNmrResidue in guiNmrResidues:
-#       guiNmrResidue.update()
-#
-#
-# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setSequenceCode')
-# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setDirectNmrChain')
-# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setResidueType')
-# Project._setupApiNotifier(_resetNmrResiduePidForAssigner, ApiResonanceGroup, 'setAssignedResidue')
 import math
 atomSpacing = 66
 cos36 = math.cos(math.pi/5)

@@ -397,7 +397,7 @@ class PeakAssigner(CcpnModule, Base):
     assignment widget.
     """
     nmrAtom = self.project.getByPid(item.text())
-    self.project._appBase.current.nmrAtom = nmrAtom
+    # self.project._appBase.current.nmrAtom = nmrAtom
     chain = nmrAtom.nmrResidue.nmrChain
     sequenceCode = nmrAtom.nmrResidue.sequenceCode
     self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])

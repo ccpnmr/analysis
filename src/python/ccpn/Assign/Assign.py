@@ -55,6 +55,7 @@ class Assign(Framework):
                            # ("Sidechain Assignment", self.showSetupNmrResiduesPopup, 'sc'),
                            (),
                            ("Peak Assigner", self.showPeakAssigner, [('shortcut', 'aa')]),
+                           ("Modify Assignments", self.showModifyAssignmentModule, [('shortcut', 'ma')]),
                            ("Residue Information", self.showResidueInformation, [('shortcut', 'ri')]),
                           ])
     self.addApplicationMenuSpec(menuSpec)
@@ -131,7 +132,6 @@ class Assign(Framework):
 
     """Displays Pick and Assign module."""
     mainWindow = self.ui.mainWindow
-    print(mainWindow.pythonConsole)
     self.paaModule = PickAndAssignModule(mainWindow.moduleArea, self.project)
     mainWindow.moduleArea.addModule(self.paaModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
@@ -155,7 +155,6 @@ class Assign(Framework):
     mainWindow.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
     self.project._logger.info("application.showBackboneAssignmentModule()")
     if hasattr(self, 'assigner'):
-      print('yes it does')
       self.bbModule._connectSequenceGraph(self.assigner)
 
     return self.bbModule
@@ -172,7 +171,7 @@ class Assign(Framework):
     self.project._logger.info("application.showAssignmentModule()")
 
 
-  def showResidueInformation(self, position: str='bottom', relativeTo:CcpnModule = None):
+  def showResidueInformation(self, position: str='bottom', relativeTo:CcpnModule=None):
     """Displays Residue Information module."""
     from ccpn.ui.gui.modules.ResidueInformation import ResidueInformation
 
@@ -181,3 +180,11 @@ class Assign(Framework):
                               relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showResidueInformation()")
     self.project._logger.info("application.showResidueInformation()")
+
+
+  def showModifyAssignmentModule(self, nmrAtom=None, position: str='bottom', relativeTo:CcpnModule=None):
+    from ccpn.Assign.modules.ModifyAssignmentModule import ModifyAssignmentModule
+    mainWindow = self.ui.mainWindow
+    self.modifyAssignmentsModule = ModifyAssignmentModule(mainWindow.moduleArea, self.project, nmrAtom=nmrAtom)
+    mainWindow.moduleArea.addModule(self.maModule, position=position,
+                              relativeTo=relativeTo)

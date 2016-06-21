@@ -1,6 +1,7 @@
 
 def getPeakPosition(peak, dim, unit='ppm'):
 
+  if len(peak.dimensionNmrAtoms) > dim:
     # peakDim = peak.position[dim]
 
     if peak.position[dim] is None:
@@ -24,6 +25,6 @@ def getPeakPosition(peak, dim, unit='ppm'):
     return '%7.2f' % float(value)
 
 def getPeakAnnotation(peak, dim):
-
-  if len(peak.dimensionNmrAtoms[dim]) > 0:
-    return peak.dimensionNmrAtoms[dim][0].pid.id
+  if len(peak.dimensionNmrAtoms) > dim:
+    if len(peak.dimensionNmrAtoms[dim]) > 0:
+      return peak.dimensionNmrAtoms[dim][0].pid.id

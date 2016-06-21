@@ -243,9 +243,9 @@ Dock QPushButton::pressed {
                           }
 
 Dock QPushButton::hover {
-                          color: #122043;
                           background-color: #e4e15b;
                           border: 1px solid #182548;
+                          color: #122043;
                           padding: 2px;
                           }
 
@@ -296,17 +296,17 @@ QTreeWidget::branch:open::hover {
 
 
 QTreeWidget::branch:closed:has-children {
+background-color: #0E1A3D;
 border-image: none;
 image: url(:/dark-side.png);
 padding-left: 10px;
-background-color: #0E1A3D;
 }
 
 QTreeWidget::branch:open {
+background-color: #0E1A3D;
 border-image: none;
 image: url(:/dark-down.png);
 padding-left: 10px;
-background-color: #0E1A3D;
 
 }
 

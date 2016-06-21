@@ -87,6 +87,10 @@ def setHashCode(registrationDict):
   
 def isNewRegistration(registrationDict):
   
+  for attrib in userAttributes:
+    if not registrationDict.get(attrib):
+      return True
+
   if 'hashcode' not in registrationDict:
     return True
     

@@ -324,6 +324,9 @@ class PeakList(AbstractWrapperObject):
         else:
           return peak
 
+    self._startFunctionCommandBlock('subtractPeakLists', values={'peakList2':peakList2},
+                                    parName='newPeakList')
+
     self._project.suspendNotification()
 
     try:
@@ -347,21 +350,23 @@ class PeakList(AbstractWrapperObject):
 
     finally:
       self._project.resumeNotification()
+      self._project._appBase._endCommandBlock()
 
     return peakList3
 
-  def copyPeaks(self, sinkSpectrum:'Spectrum', fitPositions:bool=False):
-    refAxisCodes = self.spectrum.axisCodes
-    sinkAxisCodes = sinkSpectrum.axisCodes
-
-    if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
-      print('axis codes of the source and sink peaklists do not match')
-      return
-
-    if not fitPositions:
-      copySubTree(self, sinkSpectrum)
-
-    # else:
+  # # Removede as not used in project: Rasmus Fogh 21/6/2016
+  # def copyPeaks(self, sinkSpectrum:'Spectrum', fitPositions:bool=False):
+  #   refAxisCodes = self.spectrum.axisCodes
+  #   sinkAxisCodes = sinkSpectrum.axisCodes
+  #
+  #   if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
+  #     print('axis codes of the source and sink peaklists do not match')
+  #     return
+  #
+  #   if not fitPositions:
+  #     copySubTree(self, sinkSpectrum)
+  #
+  #   # else:
 
   def refit(self, method:str='gaussian'):
     fitExistingPeakList(self._apiPeakList, method)

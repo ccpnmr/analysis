@@ -34,9 +34,7 @@ def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> P
 
   If the API project contains several NmrProjects (rare),
   nmrProjectName lets you select which one to open"""
-
   path = os.path.normpath(path)
-
   apiProject = apiIo.loadProject(path, useFileLogger=useFileLogger)
 
   # # Ad hoc fixes for temporary internal versions (etc.).

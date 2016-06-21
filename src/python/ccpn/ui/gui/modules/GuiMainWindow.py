@@ -725,12 +725,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project with name specified in the file dialog."""
-    from ccpn.ui.gui import AppBase  # has to be here because of circular import
-    apiProject = self._project._wrappedData.root
-    newPath = AppBase.getSaveDirectory(apiProject, self._appBase.preferences)
+    # Imported here to avoid risk of circular imports.
+    from ccpn.framework import Framework
+    # TODO try to refactor this
+    newPath = Framework.getSaveDirectory()
     if newPath:
-      newProjectPath = apiIo.ccpnProjectPath(newPath)
-      self._appBase.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath), createFallback=False)
+      # Next line unnecessary, but does no harm
+      newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
+      #self._appBase.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath),
+      # createFallback=False)
+      self._appBase.saveProject(newPath=newProjectPath, createFallback=False)
 
 
   def printToFile(self, spectrumDisplay=None):

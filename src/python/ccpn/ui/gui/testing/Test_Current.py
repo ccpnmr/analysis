@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.ui.gui import Current
+from ccpn.framework import Current
 
 # NBNB This should obviously use the proper objects.as
 #  But since the code does not type check or go into the objects, this will do

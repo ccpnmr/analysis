@@ -38,6 +38,10 @@ dirsep = '/'
 # note, cannot just use os.sep below because can have window file names cropping up on unix machines
 winsep = '\\'
 
+CCPN_API_DIRECTORY = 'ccpnv3'
+CCPN_DIRECTORY_SUFFIX = '.ccpn'
+CCPN_BACKUP_SUFFIX = '_backup'
+
 def normalisePath(path, makeAbsolute=None):
   """
   Normalises the path, e.g. removes redundant .. and slashes and

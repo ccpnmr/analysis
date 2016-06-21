@@ -106,9 +106,9 @@ class ProjectTestRename(WrapperTesting):
     self.assertEqual(apiNmrProject.root.name, newName)
     self.assertEqual(apiNmrProject.name, newName)
     self.assertEqual(self.project.name, newName)
-    newLocation = apiNmrProject.root.findFirstRepository(name='userData').url.getDataLocation()
+    newPath = self.project.path
     nn = len(apiIo.CCPN_DIRECTORY_SUFFIX)
-    self.assertEqual(newName, newLocation[-len(newName)-nn:-nn])
+    self.assertEqual(newName, newPath[-len(newName)-nn:-nn])
 
 class ProjectTestExperimentTypeMap(WrapperTesting):
 
@@ -130,3 +130,26 @@ class ProjectTestExperimentTypeMap(WrapperTesting):
     self.undo.undo()
     self.undo.redo()
     self.assertIs (experimentTypeMap, experimentTypeMap2)
+
+class ProjectTestIo(WrapperTesting):
+
+  # Path of project to load (None for new project)
+  projectPath = 'CcpnCourse2b'
+
+  def test_name(self):
+
+    project = self.project
+    print('@~@~1', project.name, project.path)
+    project.rename('_TEMPORARY_RENAMED')
+    print('@~@~2', project.name, project.path)
+    project.save(newProjectName='_SAVED_TO_NAME')
+    print('@~@~3', project.name, project.path)
+    inPath = os.path.dirname(project.path)
+    newPath = os.path.join(inPath, '_SAVED_TO_DIR.ccpn')
+    project.save(newPath)
+    print('@~@~4', project.name, project.path)
+    newPath = os.path.join(inPath, '_SAVED_TO_DIR')
+    project.save(newPath)
+    print('@~@~5', project.name, project.path)
+
+    self.assertEqual("Rename functionality needs redoing and testing", "not done yet")

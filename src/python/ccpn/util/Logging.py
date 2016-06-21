@@ -66,14 +66,13 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a', removeO
 
   assert mode in ('a', 'w'), 'for now mode must be "a" or "w"'
 
-  repository = project.findFirstRepository(name='userData')
-  if not repository:
-    raise Exception('no userData repository found')
+  from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+  repositoryPath = apiIo.getRepositoryPath(project, 'userData')
+  logDirectory = os.path.join(repositoryPath, 'logs')
 
   today = datetime.date.today()
   fileName = 'log_%s_%02d%02d%02d.txt' % (loggerName, today.year, today.month, today.day)
 
-  logDirectory = os.path.join(repository.url.path, 'logs')
   logPath = os.path.join(logDirectory, fileName)
 
   if os.path.exists(logDirectory):

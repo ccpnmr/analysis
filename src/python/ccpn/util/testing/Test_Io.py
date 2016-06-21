@@ -41,11 +41,11 @@ class IoTest(CoreTesting):
     
     newPath = os.environ.get('HOME') or os.getcwd()
     newPath = os.path.join(newPath, 'tmpCcpnTestProject')
-    newPath = apiIo.ccpnProjectPath(newPath)
+    newPath = apiIo.addCcpnDirectorySuffix(newPath)
     if os.path.exists(newPath):
       shutil.rmtree(newPath)
     apiIo.saveProject(self.project, newPath)
     # pathToCheck = os.path.join(ApiPath.getTopObjectPath(self.project), 'memops', 'Implementation')
-    pathToCheck = os.path.join(newPath, 'memops', 'Implementation')
+    pathToCheck = os.path.join(newPath, 'ccpnv3', 'memops', 'Implementation')
     assert os.path.exists(pathToCheck), 'path "%s" does not exist' % pathToCheck
 

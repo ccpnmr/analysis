@@ -722,7 +722,7 @@ class Framework:
   def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
     # TODO: convert this to a save and call self.project.save()
     pass
-    apiIo.saveProject(self.project._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
+    self.project.save(newPath=newPath, newProjectName=newProjectName,
                       createFallback=createFallback)
     self.ui.mainWindow._updateWindowTitle()
 
@@ -741,14 +741,12 @@ class Framework:
     #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
   def saveProjectAs(self):
-    """Opens save Project as dialog box and saves project with name specified in the file dialog."""
-    from ccpn.ui.gui import AppBase  # has to be here because of circular import
-    apiProject = self.ui.mainWindow._wrappedData.root
-    newPath = AppBase.getSaveDirectory(apiProject, self.preferences)
+    """Opens save Project as dialog box and saves project to path specified in the file dialog."""
+    newPath = getSaveDirectory()
     if newPath:
-      newProjectPath = apiIo.ccpnProjectPath(newPath)
-      self.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath),
-                       createFallback=False)
+      # Next line unnecessary, but does not hurt
+      newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
+      self.saveProject(newPath=newProjectPath, createFallback=False)
 
   def saveBackup(self):
     pass
@@ -1232,6 +1230,43 @@ class Framework:
       if not path:
         return
       spectrumDisplay.printToFile(path)
+
+
+
+def getSaveDirectory():
+  """Opens save Project as dialog box and gets directory specified in the file dialog."""
+  preferences = getPreferences()
+  dialog = QtGui.QFileDialog(caption='Save Project As...')
+  dialog.setFileMode(QtGui.QFileDialog.AnyFile)
+  dialog.setAcceptMode(1)
+  if preferences.general.colourScheme == 'dark':
+    dialog.setStyleSheet("""
+                        QFileDialog QWidget {
+                                            background-color: #2a3358;
+                                            color: #f7ffff;
+                                            }
+                        """)
+  elif preferences.general.colourScheme == 'light':
+    dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+
+  if not dialog.exec_():
+    return ''
+  fileNames = dialog.selectedFiles()
+  if not fileNames:
+    return ''
+  newPath = fileNames[0]
+  if newPath:
+    newPath = apiIo.addCcpnDirectorySuffix(newPath)
+    if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
+      # should not really need to check the second and third condition above, only
+      # the Qt dialog stupidly insists a directory exists before you can select it
+      # so if it exists but is empty then don't bother asking the question
+      title = 'Overwrite path'
+      msg ='Path "%s" already exists, continue?' % newPath
+      if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
+        newPath = ''
+
+  return newPath
 
 
 ########

@@ -218,8 +218,8 @@ class Project(AbstractWrapperObject):
 
   @property
   def path(self) -> str:
-    """path of/to Project"""
-    return apiIo.getRepositoryPath(self._wrappedData.memopsRoot, 'userData')
+    """path to directory containing Project"""
+    return apiIo.getRepositoryPath(self._wrappedData.root, 'userData')
 
   @property
   def programName(self) -> str:
@@ -237,6 +237,8 @@ class Project(AbstractWrapperObject):
     """Rename Project, and rename the underlying API project and the directory stored on disk.
     Name change is not undoable, but the undo stack is left untouched
     so that previous steps can still be undone"""
+
+    oldPath = self.path
 
     apiNmrProject = self._apiNmrProject
     apiProject = apiNmrProject.root
@@ -296,8 +298,7 @@ class Project(AbstractWrapperObject):
 
     if name != apiProject.name:
       # rename and move CCPN project
-      location = apiProject.findFirstRepository(name='userData').url.getDataLocation()
-      dirName, oldName = os.path.split(location)
+      dirName, oldName = os.path.split(oldPath)
       self.save(newProjectName=name, newPath=os.path.join(dirName,name),
                 overwriteExisting=True, checkValid=True, createFallback=True,
                 changeDataLocations=True, changeBackup=True)

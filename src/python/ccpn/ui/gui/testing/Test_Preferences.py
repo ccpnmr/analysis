@@ -22,32 +22,32 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import os
-from ccpn.ui.gui import AppBase
+from ccpn.framework import Framework
 
 def test_get_preferences():
 
-  preferences = AppBase.getPreferences()
+  preferences = Framework.getPreferences()
 
   print(preferences)
 
 def test_get_preferences_default():
 
   defaultPreferencesPath = os.path.join(os.path.dirname(__file__), 'defaultv3settingsTest.json')
-  preferences = AppBase.getPreferences(defaultPreferencesPath=defaultPreferencesPath)
+  preferences = Framework.getPreferences(defaultPreferencesPath=defaultPreferencesPath)
 
   print(preferences)
 
 def test_get_preferences_user():
 
   userPreferencesPath = os.path.join(os.path.dirname(__file__), 'userv3settingsTest.json')
-  preferences = AppBase.getPreferences(userPreferencesPath=userPreferencesPath)
+  preferences = Framework.getPreferences(userPreferencesPath=userPreferencesPath)
   print(preferences)
 
 def test_get_preferences_default_user():
 
   defaultPreferencesPath = os.path.join(os.path.dirname(__file__), 'defaultv3settingsTest.json')
   userPreferencesPath = os.path.join(os.path.dirname(__file__), 'userv3settingsTest.json')
-  preferences = AppBase.getPreferences(defaultPreferencesPath=defaultPreferencesPath,
+  preferences = Framework.getPreferences(defaultPreferencesPath=defaultPreferencesPath,
                                userPreferencesPath=userPreferencesPath)
   print(preferences)
 

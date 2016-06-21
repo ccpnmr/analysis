@@ -169,12 +169,13 @@ class Framework:
 
     # NBNB TODO The following block should maybe be moved into _getUi
     self._getUserPrefs()
-    self._registrationDict = {}   # Default - overridden elsewhere
+    self._registrationDict = {}
     self._setLanguage()
     self.styleSheet = self.getStyleSheet(self.preferences)
     self.ui = self._getUI()
     self.setupMenus()
     self.feedbackPopup = None
+    self.submitMacroPopup = None
     self.updatePopup = None
     self.backupPopup = None
 
@@ -192,11 +193,12 @@ class Framework:
 
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
-    # TODO: Add back in registration ???
+    if not self._checkRegistration():
+      return
 
     # self.project = project
     self.ui.start()
-
+    
     project._resetUndo(debug=_DEBUG)
 
 
@@ -289,26 +291,26 @@ class Framework:
     return not Register.isNewRegistration(self._registrationDict)
 
 
-  def register(self):
+  def _checkRegistration(self):
     """
     Display registration popup if there is a gui
-    return True on error
+    return True if ok
+    return False on error
     """
-    if self.ui is None:
-      return True
+    from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
 
-    popup = RegisterPopup(version=self.applicationVersion, modal=True)
-    popup.show()
-    popup.raise_()
-    popup.exec_()
-    self.gui.processEvents()
+    if self.ui:
+      if not self._isRegistered():
+        popup = RegisterPopup(version=self.applicationVersion, modal=True)
+        popup.show()
+        popup.raise_()
+        popup.exec_()
 
     if not self._isRegistered():
-      return True
+      return False
 
     Register.updateServer(self._registrationDict, self.applicationVersion)
-    return False
-
+    return True
 
   def applyPreferences(self, project):
     """Apply user preferences
@@ -613,7 +615,8 @@ class Framework:
       (),
       ("Inspect Code...", self.showCodeInspectionPopup),
       ("Check for Updates...", self.showUpdatePopup),
-      ("Submit Feedback...", self.showFeedbackPopup)
+      ("Submit Feedback...", self.showFeedbackPopup),
+      ###("Submit Macro...", self.showSubmitMacroPopup)
     ]
                ))
 
@@ -1202,6 +1205,14 @@ class Framework:
       self.feedbackPopup = FeedbackPopup(parent=self.ui.mainWindow)
     self.feedbackPopup.show()
     self.feedbackPopup.raise_()
+
+  def showSubmitMacroPopup(self):
+    from ccpn.ui.gui.popups.SubmitMacroPopup import SubmitMacroPopup
+
+    if not self.submitMacroPopup:
+      self.submitMacroPopup = SubmitMacroPopup(parent=self.ui.mainWindow)
+    self.submitMacroPopup.show()
+    self.submitMacroPopup.raise_()
 
 
 

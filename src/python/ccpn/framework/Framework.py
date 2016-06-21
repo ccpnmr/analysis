@@ -37,7 +37,7 @@ from ccpn.core.PeakList import PeakList
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
-from ccpn.util.Common import uniquify
+# from ccpn.util.Common import uniquify
 
 from ccpn.framework.lib import SvnRevision
 
@@ -49,7 +49,8 @@ from ccpn.framework.Current import Current
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
-from ccpn.ui.gui.widgets.Action import Action
+# from ccpn.ui.gui.widgets.Action import Action
+from ccpn.ui.gui.lib.Window import MODULE_DICT
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QKeySequence
@@ -148,7 +149,7 @@ class Framework:
 
     printCreditsText(sys.stderr, applicationName, applicationVersion)
 
-    self.setupComponents(args)
+    # self.setupComponents(args)
 
     self.useFileLogger = not self.args.nologging
 
@@ -255,14 +256,14 @@ class Framework:
     return styleSheet
 
 
-  def setupComponents(self, args):
-    # components (for menus)
-    self.components = set()
-    for component in componentNames:
-      if getattr(args, 'include' + component):
-        self.components.add(component)
-
-
+  # def setupComponents(self, args):
+  #   # components (for menus)
+  #   self.components = set()
+  #   for component in componentNames:
+  #     if getattr(args, 'include' + component):
+  #       self.components.add(component)
+  #
+  #
   def _getUserPrefs(self):
     # user preferences
     if not self.args.skipUserPreferences:
@@ -325,33 +326,33 @@ class Framework:
     dataUrl.url = Implementation.Url(path=dataPath)
 
 
-def initGraphics(self):
-  """Set up graphics system after loading"""
-  from ccpn.ui.gui.lib.Window import MODULE_DICT
-  from ccpn.ui.gui.modules import GuiStrip
-  # Initialise strips
-  project = self.project
-  for strip in project.strips:
-    GuiStrip._setupGuiStrip(project, strip._wrappedData)
+  def initGraphics(self):
+    """Set up graphics system after loading"""
+    from ccpn.ui.gui.lib.Window import MODULE_DICT
+    from ccpn.ui.gui.modules import GuiStrip
+    # Initialise strips
+    project = self.project
+    for strip in project.strips:
+      GuiStrip._setupGuiStrip(project, strip._wrappedData)
 
-    # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
-    #   strip.setZWidgets()
+      # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:
+      #   strip.setZWidgets()
 
-  # Initialise Rulers
-  for task in project.tasks:
-    for apiMark in task._wrappedData.sortedMarks():
-      for apiRuler in apiMark.sortedRulers():
-        GuiStrip._rulerCreated(project, apiRuler)
+    # Initialise Rulers
+    for task in project.tasks:
+      for apiMark in task._wrappedData.sortedMarks():
+        for apiRuler in apiMark.sortedRulers():
+          GuiStrip._rulerCreated(project, apiRuler)
 
-  # Initialise SpectrumViews
-  for spectrumDisplay in project.spectrumDisplays:
-    for strip in spectrumDisplay.strips:
-      for spectrumView in strip.spectrumViews:
-        spectrumView._createdSpectrumView()
-        for peakList in spectrumView.spectrum.peakLists:
-          strip.showPeaks(peakList)
+    # Initialise SpectrumViews
+    for spectrumDisplay in project.spectrumDisplays:
+      for strip in spectrumDisplay.strips:
+        for spectrumView in strip.spectrumViews:
+          spectrumView._createdSpectrumView()
+          for peakList in spectrumView.spectrum.peakLists:
+            strip.showPeaks(peakList)
 
-  self._initLayout()
+    self._initLayout()
 
   def _initLayout(self):
     """
@@ -438,7 +439,7 @@ def initGraphics(self):
 
   #########################################    Start setup Menus      ############################
 
-  def setupMenus( self ):
+  def setupMenus(self):
     self._menuSpec = ms = []
     # TODO: remove QKeySequence
 

@@ -43,7 +43,7 @@ class Assign(Framework):
 
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
     Framework.__init__(self, applicationName, applicationVersion, commandLineArguments)
-    self.components.add('Assignment')
+    # self.components.add('Assignment')
 
 
   def setupMenus(self):

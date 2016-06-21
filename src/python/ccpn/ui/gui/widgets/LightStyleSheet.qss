@@ -77,10 +77,15 @@ QMenu::item {background-color: #EDDFBC;
 QMenu::item::selected { color: #FDFDFC;
                         background: #009A00;
                       }
-QMenu::item::hover {
-      background-color: #555D85;
-      color: #009A00
-      }
+
+QMenu::item::disabled {background-color: #EDDFBC;
+             color: #a19373;
+              }
+
+QMenu::item::disabled::selected {background-color: #EDDFBC;
+             color: #a19373;
+              }
+
 
 Dock DockLabel  {
           background-color : #8087B3;

@@ -474,8 +474,8 @@ class Framework:
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
       ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
-      # ("Integration", self.showIntegrationModule, [('shortcut', 'it'),
-      #                                              ('enabled', False)]),
+      ("Integration", self.showIntegrationModule, [('shortcut', 'it'),
+                                                   ('enabled', False)]),
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
       ("Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])

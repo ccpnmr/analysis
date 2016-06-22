@@ -27,11 +27,10 @@ if nDim < 2:
   print('Too few dimensions for XZ flip')
 
 else:
-
   axisOrder = [current.strip.axisOrder[1], current.strip.axisOrder[0]]
 
   if nDim > len(axisOrder):
-    axisOrder = axisOrder + current.strip.axisOrder[2:]
+    axisOrder.extend(current.strip.axisOrder[2:])
 
   spectra = current.strip.spectra
   newDisplay = application.createSpectrumDisplay(spectra[0], axisOrder=axisOrder)

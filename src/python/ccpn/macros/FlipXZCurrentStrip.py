@@ -29,7 +29,7 @@ if nDim < 3:
 else:
   axisOrder = [current.strip.axisOrder[2], current.strip.axisOrder[1], current.strip.axisOrder[0]]
   if nDim > len(axisOrder):
-    axisOrder = axisOrder + current.strip.axisOrder[3:]
+    axisOrder.extend(current.strip.axisOrder[3:])
   spectra = current.strip.spectra
   newDisplay = application.createSpectrumDisplay(spectra[0], axisOrder=axisOrder)
   for spectrum in spectra:

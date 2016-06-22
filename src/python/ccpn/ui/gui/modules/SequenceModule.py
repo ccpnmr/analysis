@@ -207,8 +207,8 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
         mainWindow = self._appBase.ui.mainWindow
       else:
         mainWindow = self._appBase._mainWindow
-      if hasattr(mainWindow, 'bbModule'):
-        nmrResidueTable = mainWindow.bbModule.nmrResidueTable.nmrResidueTable
+      if hasattr(mainWindow, 'backboneModule'):
+        nmrResidueTable = mainWindow.backboneModule.nmrResidueTable.nmrResidueTable
         nmrResidueTable.objectLists = self.project.nmrChains
         nmrResidueTable.updateTable()
 

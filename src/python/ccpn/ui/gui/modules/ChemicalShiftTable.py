@@ -95,7 +95,7 @@ class NmrAtomShiftTable(ChemicalShiftTable):
                ('Std. Dev.', lambda chemicalShift: ('%6.3f' % chemicalShift.valueError
                                                     if chemicalShift.valueError else '   0   ')),
                ('Shift list peaks',
-                lambda chemicalShift: '%3d ' % self.getShiftPeakCount(chemicalShift)),
+                lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift)),
                ('All peaks',
                 lambda chemicalShift: '%3d ' % len(set(x for x in
                                                        chemicalShift.nmrAtom.assignedPeaks))

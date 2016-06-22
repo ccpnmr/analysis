@@ -1017,8 +1017,8 @@ class Framework:
       return
 
     self.assigner = SequenceGraph(self, project=self.project)
-    if hasattr(self, 'bbModule'):
-      self.bbModule._connectSequenceGraph(self.assigner)
+    if hasattr(self, 'backboneModule'):
+      self.backboneModule._connectSequenceGraph(self.assigner)
 
     if relativeTo is not None:
       self.ui.mainWindow.moduleArea.addModule(self.assigner, position=position, relativeTo=relativeTo)

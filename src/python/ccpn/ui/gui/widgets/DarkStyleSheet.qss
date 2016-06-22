@@ -85,11 +85,11 @@ QMenu::item::selected { color: #f7ffff;
                       }
 
 QMenu::item::disabled {background-color: #424a71;
-                       color: #8082B2;
+                       color: #7f88ac;
                       }
 
 QMenu::item::disabled::selected {background-color: #424a71;
-                       color: #8082B2;
+                       color: #7f88ac;
                       }
 
 Dock DockLabel  {

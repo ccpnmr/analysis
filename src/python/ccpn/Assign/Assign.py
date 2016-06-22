@@ -132,11 +132,11 @@ class Assign(Framework):
 
     """Displays Pick and Assign module."""
     mainWindow = self.ui.mainWindow
-    self.paaModule = PickAndAssignModule(mainWindow.moduleArea, self.project)
-    mainWindow.moduleArea.addModule(self.paaModule, position=position, relativeTo=relativeTo)
+    self.pickAndAssignModule = PickAndAssignModule(mainWindow.moduleArea, self.project)
+    mainWindow.moduleArea.addModule(self.pickAndAssignModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showPickAndAssignModule()")
     self.project._logger.info("application.showPickAndAssignModule()")
-    return self.paaModule
+    return self.pickAndAssignModule
 
 
   def showBackboneAssignmentModule(self, position:str= 'bottom', relativeTo:CcpnModule=None):
@@ -145,19 +145,19 @@ class Assign(Framework):
     """
     from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
 
-    if hasattr(self, 'bbModule'):
+    if hasattr(self, 'backboneModule'):
       return
 
-    self.bbModule = BackboneAssignmentModule(self, self.project)
+    self.backboneModule = BackboneAssignmentModule(self, self.project)
 
     mainWindow = self.ui.mainWindow
-    mainWindow.moduleArea.addModule(self.bbModule, position=position, relativeTo=relativeTo)
+    mainWindow.moduleArea.addModule(self.backboneModule, position=position, relativeTo=relativeTo)
     mainWindow.pythonConsole.writeConsoleCommand("application.showBackboneAssignmentModule()")
     self.project._logger.info("application.showBackboneAssignmentModule()")
     if hasattr(self, 'assigner'):
-      self.bbModule._connectSequenceGraph(self.assigner)
+      self.backboneModule._connectSequenceGraph(self.assigner)
 
-    return self.bbModule
+    return self.backboneModule
 
 
   def showPeakAssigner(self, position='bottom', relativeTo=None):
@@ -186,5 +186,5 @@ class Assign(Framework):
     from ccpn.Assign.modules.ModifyAssignmentModule import ModifyAssignmentModule
     mainWindow = self.ui.mainWindow
     self.modifyAssignmentsModule = ModifyAssignmentModule(mainWindow.moduleArea, self.project, nmrAtom=nmrAtom)
-    mainWindow.moduleArea.addModule(self.maModule, position=position,
+    mainWindow.moduleArea.addModule(self.modifyAssignmentsModule, position=position,
                               relativeTo=relativeTo)

@@ -317,7 +317,7 @@ class BackboneAssignmentModule(CcpnModule):
 
   def closeModule(self):
     print(self.parent)
-    delattr(self.parent, 'bbModule')
+    delattr(self.parent, 'backboneModule')
     self.close()
 
 

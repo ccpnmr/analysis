@@ -96,9 +96,8 @@ class SpinSystemLabel(DropBase, Label):
           current.nmrResidue = nr2
           current.nmrChain = nr2.nmrChain
 
-        # TODO: FIX ME!!!
-        if hasattr(self.framework, 'bbModule'):
-          self.framework.bbModule._navigateTo(current.nmrResidue, strip=current.strip)
+        if hasattr(self.framework, 'backboneModule'):
+          self.framework.backboneModule._navigateTo(current.nmrResidue, strip=current.strip)
           current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
 
 

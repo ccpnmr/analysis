@@ -31,7 +31,6 @@ import urllib
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -50,7 +49,6 @@ class SubmitMacroPopup(QtGui.QDialog):
 
   # parent mandatory and that needs to have attributes _appBase and colourScheme
   def __init__(self, parent, title='SubmitMacro Form'):
-     
     QtGui.QDialog.__init__(self, parent=parent)
     self.setWindowTitle(title)
 
@@ -80,7 +78,8 @@ class SubmitMacroPopup(QtGui.QDialog):
 
   def _selectMacro(self):
     
-    dialog = FileDialog(parent=self.parent(), fileMode=FileDialog.ExistingFile, text='Select Macro', preferences=self.parent().framework.preferences.general)
+    dialog = FileDialog(parent=self.parent(), fileMode=FileDialog.ExistingFile, text='Select Macro',
+                        preferences=self.parent().framework.preferences.general)
     paths = dialog.selectedFiles()
     if paths:
       path = paths[0]
@@ -90,8 +89,8 @@ class SubmitMacroPopup(QtGui.QDialog):
 
   def _submitMacro(self):
     
-    appBase = self.parent()._appBase
-    logger = appBase.project._logger
+    framework = self.parent.framework
+    logger = framework.project._logger
     
     filePath = self.pathEntry.get()
     if not filePath or not os.path.exists(filePath) or not os.path.isfile(filePath):
@@ -113,7 +112,7 @@ class SubmitMacroPopup(QtGui.QDialog):
     description = description.strip()
     
     data = {}
-    data['version'] = appBase.applicationVersion
+    data['version'] = framework.applicationVersion
     data['keywords'] = keywords
     data['description'] = description
     

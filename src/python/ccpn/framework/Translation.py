@@ -48,10 +48,8 @@ translationDirectory = 'translation'  # assumes that all translations are in sub
 
 #languages = ['English-UK', 'Italiano']
 import pkgutil
-try:
-  import ccpn.util.translation as tModule
-except ImportError:
-  import ccpn.framework.languages as tModule
+import ccpn.framework.languages as tModule
+
 languages = [defaultLanguage] + [name for _, name, _ in pkgutil.iter_modules(tModule.__path__)]
 if 'rude' in languages:
   languages.remove('rude')

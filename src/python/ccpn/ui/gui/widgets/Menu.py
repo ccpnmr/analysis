@@ -26,10 +26,7 @@ from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Font import Font
-try:
-  from ccpn.util.Translation import translator
-except ImportError:
-  from ccpn.framework.Translation import translator
+from ccpn.framework.Translation import translator
 
 
 class Menu(QtGui.QMenu, Base):

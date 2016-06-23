@@ -65,10 +65,7 @@ from ccpn.ui.gui.widgets.SideBar import SideBar
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpn.util import Path
 from ccpn.util.Common import uniquify
-try:
-  from ccpn.util.Translation import translator
-except ImportError:
-  from ccpn.framework.Translation import translator
+from ccpn.framework.Translation import translator
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):

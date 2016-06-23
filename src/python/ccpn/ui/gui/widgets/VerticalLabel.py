@@ -25,7 +25,7 @@ __author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.util.Translation import translator
+from ccpn.framework.Translation import translator
 
 
 class VerticalLabel(QtGui.QWidget, Base):

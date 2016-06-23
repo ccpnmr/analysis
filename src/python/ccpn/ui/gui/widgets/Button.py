@@ -26,10 +26,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
-try:
-  from ccpn.util.Translation import translator
-except ImportError:
-  from ccpn.framework.Translation import translator
+from ccpn.framework.Translation import translator
 
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked

@@ -34,10 +34,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
-try:
-  from ccpn.util.Translation import languages
-except ImportError:
-  from ccpn.framework.Translation import languages
+from ccpn.framework.Translation import languages
 
 COLOUR_SCHEMES = ['light', 'dark']
 

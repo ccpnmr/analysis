@@ -23,10 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 from PyQt4 import QtGui, QtCore
 
-try:
-  from ccpn.util.Translation import Translation
-except ImportError:
-  from ccpn.framework.Translation import Translation
+from ccpn.framework.Translation import Translation
 
 from pyqtgraph.dockarea import Dock
 

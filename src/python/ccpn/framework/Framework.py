@@ -616,7 +616,7 @@ class Framework:
       ("Inspect Code...", self.showCodeInspectionPopup),
       ("Check for Updates...", self.showUpdatePopup),
       ("Submit Feedback...", self.showFeedbackPopup),
-      ###("Submit Macro...", self.showSubmitMacroPopup)
+      ("Submit Macro...", self.showSubmitMacroPopup)
     ]
                ))
 

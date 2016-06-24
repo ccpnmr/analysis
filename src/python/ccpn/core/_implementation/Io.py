@@ -27,12 +27,32 @@ import os
 # NB this import cna cause circular imports, but ccpn.__init__ makes sure it does not happen
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+from ccpnmodel.ccpncore.lib import ApiPath
 
 
-def loadProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
-  """Open RAW project matching the API Project stored at path.
+def loadProject(path:str, useFileLogger:bool=True) -> Project:
+  """Open Project stored at path."""
+  project = _loadNmrProject(path, useFileLogger=useFileLogger)
+  projectPath = project.path
+  oldName = project.name
+  newName = os.path.basename(apiIo.removeCcpnDirectorySuffix(projectPath))
+  if oldName != newName:
+    # Directory name has changed. Change project name and move Project xml file.
+    apiProject = project._wrappedData.root
+    oldProjectFilePath = ApiPath.getProjectFile(projectPath, oldName)
+    if os.path.exists(oldProjectFilePath):
+      os.remove(oldProjectFilePath)
+    apiProject.__dict__['name'] = newName
+    apiProject.__dict__['isModified'] = True
+    apiProject.save()
+  #
+  return project
 
-  If the API project contains several NmrProjects (rare),
+
+def _loadNmrProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
+  """Open project matching the API Project stored at path. ADVANCED - requires post-processing
+
+  If the API project contains several NmrProjects (rare, and only for legacy projects),
   nmrProjectName lets you select which one to open"""
   path = os.path.normpath(path)
   apiProject = apiIo.loadProject(path, useFileLogger=useFileLogger)

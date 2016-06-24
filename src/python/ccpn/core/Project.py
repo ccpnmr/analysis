@@ -195,13 +195,13 @@ class Project(AbstractWrapperObject):
     """Parent (containing) object."""
     return None
 
-  def save(self, newPath:str=None, newProjectName:str=None, changeBackup:bool=True,
+  def save(self, newPath:str=None, changeBackup:bool=True,
                   createFallback:bool=False, overwriteExisting:bool=False,
                   checkValid:bool=False, changeDataLocations:bool=False):
     """Save project with all data, optionally to new location or with new name.
     Unlike lower-level functions, this function ensures that data in high level caches are also saved """
     self._flushCachedData()
-    apiIo.saveProject(self._wrappedData.root, newPath=newPath, newProjectName=newProjectName,
+    apiIo.saveProject(self._wrappedData.root, newPath=newPath,
                        changeBackup=changeBackup, createFallback=createFallback,
                        overwriteExisting=overwriteExisting, checkValid=checkValid,
                        changeDataLocations=changeDataLocations)
@@ -210,11 +210,12 @@ class Project(AbstractWrapperObject):
   @property
   def name(self) -> str:
     """name of Project"""
-    apiNmrProject = self._wrappedData
-    if len(apiNmrProject.root.nmrProjects) == 1:
-      return apiNmrProject.root.name
-    else:
-      return apiNmrProject.name
+    return self._wrappedData.root.name
+    # apiNmrProject = self._wrappedData
+    # if len(apiNmrProject.root.nmrProjects) == 1:
+    #   return apiNmrProject.root.name
+    # else:
+    #   return apiNmrProject.name
 
   @property
   def path(self) -> str:
@@ -233,75 +234,75 @@ class Project(AbstractWrapperObject):
     for structureEnsemble in self.structureEnsembles:
       structureEnsemble._flushCachedData()
 
-  def rename(self, name:str) -> None:
-    """Rename Project, and rename the underlying API project and the directory stored on disk.
-    Name change is not undoable, but the undo stack is left untouched
-    so that previous steps can still be undone"""
-
-    oldPath = self.path
-
-    apiNmrProject = self._apiNmrProject
-    apiProject = apiNmrProject.root
-    oldName = apiNmrProject.name
-
-    if apiProject.findFirstNmrProject(name=name) not in (apiNmrProject, None):
-      raise ValueError("Cannot rename to %s - name is in use for another NmrProject" % name)
-
-    if name != oldName:
-      # rename NmrProject
-
-      # Load packages that (might) have hard links to the Nmr package,
-      # to make sure the name change does not break them
-      for apiNmrEntryStore in apiProject.nmrEntryStores:
-        if not apiNmrEntryStore.isLoaded:
-          apiNmrEntryStore.load()
-      for apiNmrCalcStore in apiProject.nmrCalcStores:
-        if not apiNmrCalcStore. isLoaded:
-          apiNmrCalcStore.load()
-
-      self._startFunctionCommandBlock('rename', name)
-      undo = apiProject._undo
-      if undo is not None:
-        undo.increaseBlocking()
-      apiProject.override = True
-      try:
-        apiNmrProject.name = name
-        parentDict = apiProject.__dict__['nmrProjects']
-        del parentDict[oldName]
-        parentDict[name] = apiNmrProject
-        self._finaliseRename()
-
-        # Do notifications - NB project has special behaviour, so it is done here
-        if not self._notificationBlanking:
-          className = self.className
-          iterator = (self._context2Notifiers.setdefault((name, 'rename'), OrderedDict())
-                     for name in (className, 'AbstractWrapperObject'))
-          ll = self._pendingNotifications
-          if self._notificationSuspension:
-            for dd in iterator:
-              for notifier, onceOnly in dd.items():
-                ll.append((notifier, onceOnly, self, self.pid))
-          else:
-            for dd in iterator:
-              for notifier in dd:
-                notifier(self, self.pid)
-      except:
-        apiNmrProject.name = oldName
-        parentDict[oldName] = apiNmrProject
-        print("ERROR while renaming NmrProject. Project may be left in an invalid state")
-        raise
-      finally:
-        apiProject.override = False
-        if undo is not None:
-          undo.decreaseBlocking()
-        self._appBase._endCommandBlock()
-
-    if name != apiProject.name:
-      # rename and move CCPN project
-      dirName, oldName = os.path.split(oldPath)
-      self.save(newProjectName=name, newPath=os.path.join(dirName,name),
-                overwriteExisting=True, checkValid=True, createFallback=True,
-                changeDataLocations=True, changeBackup=True)
+  # def rename(self, name:str) -> None:
+  #   """Rename Project, and rename the underlying API project and the directory stored on disk.
+  #   Name change is not undoable, but the undo stack is left untouched
+  #   so that previous steps can still be undone"""
+  #
+  #   oldPath = self.path
+  #
+  #   apiNmrProject = self._apiNmrProject
+  #   apiProject = apiNmrProject.root
+  #   oldName = apiNmrProject.name
+  #
+  #   if apiProject.findFirstNmrProject(name=name) not in (apiNmrProject, None):
+  #     raise ValueError("Cannot rename to %s - name is in use for another NmrProject" % name)
+  #
+  #   if name != oldName:
+  #     # rename NmrProject
+  #
+  #     # Load packages that (might) have hard links to the Nmr package,
+  #     # to make sure the name change does not break them
+  #     for apiNmrEntryStore in apiProject.nmrEntryStores:
+  #       if not apiNmrEntryStore.isLoaded:
+  #         apiNmrEntryStore.load()
+  #     for apiNmrCalcStore in apiProject.nmrCalcStores:
+  #       if not apiNmrCalcStore. isLoaded:
+  #         apiNmrCalcStore.load()
+  #
+  #     self._startFunctionCommandBlock('rename', name)
+  #     undo = apiProject._undo
+  #     if undo is not None:
+  #       undo.increaseBlocking()
+  #     apiProject.override = True
+  #     try:
+  #       apiNmrProject.name = name
+  #       parentDict = apiProject.__dict__['nmrProjects']
+  #       del parentDict[oldName]
+  #       parentDict[name] = apiNmrProject
+  #       self._finaliseRename()
+  #
+  #       # Do notifications - NB project has special behaviour, so it is done here
+  #       if not self._notificationBlanking:
+  #         className = self.className
+  #         iterator = (self._context2Notifiers.setdefault((name, 'rename'), OrderedDict())
+  #                    for name in (className, 'AbstractWrapperObject'))
+  #         ll = self._pendingNotifications
+  #         if self._notificationSuspension:
+  #           for dd in iterator:
+  #             for notifier, onceOnly in dd.items():
+  #               ll.append((notifier, onceOnly, self, self.pid))
+  #         else:
+  #           for dd in iterator:
+  #             for notifier in dd:
+  #               notifier(self, self.pid)
+  #     except:
+  #       apiNmrProject.name = oldName
+  #       parentDict[oldName] = apiNmrProject
+  #       print("ERROR while renaming NmrProject. Project may be left in an invalid state")
+  #       raise
+  #     finally:
+  #       apiProject.override = False
+  #       if undo is not None:
+  #         undo.decreaseBlocking()
+  #       self._appBase._endCommandBlock()
+  #
+  #   if name != apiProject.name:
+  #     # rename and move CCPN project
+  #     dirName, oldName = os.path.split(oldPath)
+  #     self.save(newProjectName=name, newPath=os.path.join(dirName,name),
+  #               overwriteExisting=True, checkValid=True, createFallback=True,
+  #               changeDataLocations=True, changeBackup=True)
 
 
   def deleteObjects(self, *objects:typing.Sequence[typing.Union[Pid.Pid,AbstractWrapperObject]]):

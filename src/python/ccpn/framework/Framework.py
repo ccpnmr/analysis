@@ -37,7 +37,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
-# from ccpn.util.Common import uniquify
 
 from ccpn.framework.lib import SvnRevision
 
@@ -719,11 +718,10 @@ class Framework:
 
     self.ui.mainWindow.processDropData(paths, dataType='urls')
 
-  def saveProject(self, newPath=None, newProjectName=None, createFallback=True):
+  def saveProject(self, newPath=None, createFallback=True):
     # TODO: convert this to a save and call self.project.save()
     pass
-    self.project.save(newPath=newPath, newProjectName=newProjectName,
-                      createFallback=createFallback)
+    self.project.save(newPath=newPath, createFallback=createFallback)
     self.ui.mainWindow._updateWindowTitle()
 
     layout = self.ui.mainWindow.moduleArea.saveState()
@@ -734,7 +732,7 @@ class Framework:
     with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
       yaml.dump(layout, stream)
       stream.close()
-    saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
+    # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
 
     sys.stderr.write('==> Project successfully saved\n')
     # MessageDialog.showMessage('Project saved', 'Project successfully saved!',

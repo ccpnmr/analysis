@@ -22,7 +22,6 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from ccpn.util.Undo import Undo
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.testing.CoreTesting import CoreTesting
 
 

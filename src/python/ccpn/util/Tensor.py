@@ -74,7 +74,7 @@ class Tensor:
     dd = dd.copy()
     om = dd.get('orientationMatrix')
     if om is not None:
-      dd['orientationMatrix'] = numpy.ndarray(om)
+      dd['orientationMatrix'] = numpy.asarray(om)
     #
     return cls(**dd)
 

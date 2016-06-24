@@ -97,18 +97,6 @@ class ProjectTestRename(WrapperTesting):
     oldLocation =  apiNmrProject.root.findFirstRepository(name='userData').url.getDataLocation()
     self.assertTrue(os.path.isdir(oldLocation))
 
-    # rename and check again
-    newName = '_TEMPORARY_RENAMED'
-    self.project.rename(newName)
-    # Undo and redo all operations
-    self.undo.undo()
-    self.undo.redo()
-    self.assertEqual(apiNmrProject.root.name, newName)
-    self.assertEqual(apiNmrProject.name, newName)
-    self.assertEqual(self.project.name, newName)
-    newPath = self.project.path
-    nn = len(apiIo.CCPN_DIRECTORY_SUFFIX)
-    self.assertEqual(newName, newPath[-len(newName)-nn:-nn])
 
 class ProjectTestExperimentTypeMap(WrapperTesting):
 
@@ -139,17 +127,12 @@ class ProjectTestIo(WrapperTesting):
   def test_name(self):
 
     project = self.project
-    print('@~@~1', project.name, project.path)
-    project.rename('_TEMPORARY_RENAMED')
-    print('@~@~2', project.name, project.path)
-    project.save(newProjectName='_SAVED_TO_NAME')
-    print('@~@~3', project.name, project.path)
-    inPath = os.path.dirname(project.path)
-    newPath = os.path.join(inPath, '_SAVED_TO_DIR.ccpn')
-    project.save(newPath)
-    print('@~@~4', project.name, project.path)
-    newPath = os.path.join(inPath, '_SAVED_TO_DIR')
-    project.save(newPath)
-    print('@~@~5', project.name, project.path)
+    self.assertTrue(project.name.startswith('CcpnCourse2b'))
+    baseDir, projDir = os.path.split(project.path)
+    self.assertEquals(projDir[-5:], '.ccpn')
+    self.assertTrue(projDir.startswith('CcpnCourse2b'))
 
-    self.assertEqual("Rename functionality needs redoing and testing", "not done yet")
+    project.save(newPath=os.path.join(baseDir, '_SAVED_TO_NAME.ccpn'))
+    print ('@~@~ project name ', project.name)
+    self.assertTrue(project.name.startswith('_SAVED_TO_NAME'))
+    self.assertTrue(project.name == '_SAVED_TO_NAME' or project.name[14] == '_')

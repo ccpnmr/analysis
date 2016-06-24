@@ -93,7 +93,7 @@ def uploadData(serverUser, serverPassword, serverScript, fileData, serverDbRoot,
   authheader = 'Basic %s' % auth
   req = urllib.request.Request(serverScript)
   req.add_header("Authorization", authheader)
-  req.add_data(data.encode('utf-8'))
+  req.data = data.encode('utf-8')
   response = urlopen(req)
   result = response.read().decode('utf-8')
 

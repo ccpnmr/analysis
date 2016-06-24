@@ -293,6 +293,7 @@ if __name__ == '__main__':
 
     else:
       projectDir = sys.argv[3]
+      # NBNB TODO change this - no direct apiIo.load
       ccpnProject = apiIo.loadProject(projectDir)
       nmrProj = ccpnProject.findFirstNmrProject()
       Export.prepareNmrProject(nmrProj)

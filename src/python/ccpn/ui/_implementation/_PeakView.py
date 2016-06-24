@@ -1,4 +1,4 @@
-"""Peak View in a specific  PeakList View
+"""Peak View in a specific PeakList View. NB currently NOT used
 
 """
 #=========================================================================================
@@ -32,7 +32,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import PeakView as ApiPeakView
 
 
 class PeakView(AbstractWrapperObject):
-  """Peak View for 1D or nD PeakList"""
+  """Peak View for 1D or nD PeakList. Currently NOT used."""
   
   #: Short class name, for PID.
   shortClassName = 'GP'
@@ -87,16 +87,14 @@ class PeakView(AbstractWrapperObject):
     return parent._wrappedData.sortedPeakViews()
 
   #CCPN functions
-  
 
-def _connectWrapperClass():
-  """Connect class to network of active wrapper classes"""
 
-  # newPeakView functions: None
+# newPeakView functions: None
 
-  # Peak.peakViews property
-  def getter(peak:Peak) -> Tuple[PeakView]:
-    return tuple(peak._project._data2Obj[x]
-                 for x in peak._wrappedData.sortedPeakViews())
-  Peak.peakViews = property(getter, None, None,
-                                           "PeakListViews showing Spectrum")
+# NB This will be needed when (if) we start using PeakViews
+# # Peak.peakViews property
+# def getter(peak:Peak) -> Tuple[PeakView]:
+#   return tuple(peak._project._data2Obj[x]
+#                for x in peak._wrappedData.sortedPeakViews())
+# Peak.peakViews = property(getter, None, None,
+#                                          "PeakListViews showing Spectrum")

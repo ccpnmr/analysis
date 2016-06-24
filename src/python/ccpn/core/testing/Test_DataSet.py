@@ -23,6 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 import collections
 import datetime
+import numpy
+from ccpn.util.Tensor import Tensor
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
@@ -149,7 +151,8 @@ class DataTest(WrapperTesting):
   def test_data_parameters(self):
     testpars = collections.OrderedDict()
     for key,val in [
-      ('bbb',1), ('ccc',[1,2,3]), ('ddd',True), ('aaa',())
+      ('bbb',1), ('ccc',[1,2,3]), ('ddd',True), ('aaa',()),  ('xxx','xxx'), ('dict', {1:1}),
+      ('odict', collections.OrderedDict(((2,100), (1,10))))
     ]:
       testpars[key] = val
 
@@ -180,6 +183,33 @@ class DataTest(WrapperTesting):
     undo.undo()
     undo.redo()
     self.assertEqual(data1.pid, 'DA:1.different')
+
+  def test_numpy_parameter(self):
+
+      dataSet = self.project.newDataSet()
+      data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
+      undo = self.project._undo
+      undo.newWaypoint()
+      data1.setParameter('ndarray', numpy.ndarray((5,3,1)))
+      undo.undo()
+      undo.redo()
+      self.assertTrue(isinstance(data1.parameters['ndarray'], numpy.ndarray))
+
+  def test_tensor_parameter(self):
+
+      dataSet = self.project.newDataSet()
+      data1 = dataSet.newData(name='try1', attachedObjectPid=dataSet.pid)
+      undo = self.project._undo
+      undo.newWaypoint()
+      data1.setParameter('tensor', Tensor._fromDict({'orientationMatrix':numpy.identity(3),
+                                     'isotropic':2.1, 'axial':-3, 'rhombic':0.9}))
+      undo.undo()
+      undo.redo()
+      tensor = data1.parameters['tensor']
+      self.assertTrue(isinstance(tensor, Tensor))
+      self.assertEquals(tensor.isotropic, 2.1)
+      self.assertEquals(tensor.axial, -3)
+      self.assertEquals(tensor.rhombic, 0.9)
 
 
 

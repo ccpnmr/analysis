@@ -96,6 +96,24 @@ class IntegralList(AbstractWrapperObject):
   @title.setter
   def title(self, value:str):
     self._wrappedData.name = value
+
+  @property
+  def symbolColour(self) -> str:
+    """Symbol colour for integral annotation display"""
+    return self._wrappedData.symbolColour
+
+  @symbolColour.setter
+  def symbolColour(self, value:str):
+    self._wrappedData.symbolColour = value
+
+  @property
+  def textColour(self) -> str:
+    """Text colour for integral annotation display"""
+    return self._wrappedData.textColour
+
+  @textColour.setter
+  def textColour(self, value:str):
+    self._wrappedData.textColour = value
   
   @property
   def comment(self) -> str:

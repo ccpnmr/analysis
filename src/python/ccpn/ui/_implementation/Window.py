@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from typing import Sequence
+import collections
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -108,15 +109,26 @@ def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -
   if title and Pid.altCharacter in title:
     raise ValueError("Character %s not allowed in gui.core.Window.title" % Pid.altCharacter)
 
-  windowStore = self.nmrProject.windowStore
+  apiWindowStore = self._project._wrappedData.windowStore
 
-  newApiWindow = windowStore.newWindow(title=title)
-  if position:
-    newApiWindow.position = position
-  if size:
-    newApiWindow.size = size
 
-  return self._data2Obj.get(newApiWindow)
+  defaults = collections.OrderedDict((('title', None), ('position', ()), ('size', ())))
+
+  self._startFunctionCommandBlock('newWindow', values=locals(), defaults=defaults,
+                                  parName='newWindow')
+  try:
+
+    newApiWindow = apiWindowStore.newWindow(title=title)
+    if position:
+      newApiWindow.position = position
+    if size:
+      newApiWindow.size = size
+  finally:
+    self._project._appBase._endCommandBlock()
+
+  result =  self._data2Obj.get(newApiWindow)
+
+  return result
 Project.newWindow = _newWindow
 del _newWindow
 

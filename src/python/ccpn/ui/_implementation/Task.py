@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 from typing import Sequence, Tuple
+import collections
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -111,40 +112,42 @@ class Task(AbstractWrapperObject):
     nmrProject = parent._wrappedData
     return nmrProject.sortedGuiTasks()
 
-  # CCPN functions
-  def passivate(self):
-    """passivate active task"""
-    if self.status == 'active':
-      self._wrappedData.passivate()
-      self._unwrapAll()
-    else:
-      raise ValueError("Cannot passivate %s task: %s" % (self.status, self))
 
-  def activate(self, window:Window=None):
-    """activate passive task"""
-    if self.status == 'passive':
-      window=window and window._wrappedData
-      self._wrappedData.activate(window=window)
-      self._initializeAll()
-    else:
-      raise ValueError("Cannot activate %s task: %s" % (self.status, self))
-
-  def clone(self, name:str, nameSpace:str=None):
-    """copy task exactly, first passivating if active"""
-    return self._project._data2Obj.get(self._wrappedData.clone())
-
-  def loadAsTemplate(self, name:str, nameSpace:str=None, window:Window=None):
-    """copy and activate template task, adapting and pruning contents to fit"""
-
-    window = self.getByPid(window) if isinstance(window, str) else window
-    window=window and window._wrappedData
-    newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
-                                           window=window, name=name, nameSpace=nameSpace)
-    return self._project._data2Obj.get(newObj)
-
-  def pruneSpectrumViews(self, name:str, nameSpace:str=None):
-    """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
-    self._wrappedData.pruneSpectrumViews()
+  # # NBNB Commented out 22/6/2016 as the functions are not in use (and likely never will be
+  # # CCPN functions
+  # def passivate(self):
+  #   """passivate active task"""
+  #   if self.status == 'active':
+  #     self._wrappedData.passivate()
+  #     self._unwrapAll()
+  #   else:
+  #     raise ValueError("Cannot passivate %s task: %s" % (self.status, self))
+  #
+  # def activate(self, window:Window=None):
+  #   """activate passive task"""
+  #   if self.status == 'passive':
+  #     window=window and window._wrappedData
+  #     self._wrappedData.activate(window=window)
+  #     self._initializeAll()
+  #   else:
+  #     raise ValueError("Cannot activate %s task: %s" % (self.status, self))
+  #
+  # def clone(self, name:str, nameSpace:str=None):
+  #   """copy task exactly, first passivating if active"""
+  #   return self._project._data2Obj.get(self._wrappedData.clone())
+  #
+  # def loadAsTemplate(self, name:str, nameSpace:str=None, window:Window=None):
+  #   """copy and activate template task, adapting and pruning contents to fit"""
+  #
+  #   window = self.getByPid(window) if isinstance(window, str) else window
+  #   window=window and window._wrappedData
+  #   newObj = self._wrappedData.adaptedCopy(nmrProject=self._project._wrappedData,
+  #                                          window=window, name=name, nameSpace=nameSpace)
+  #   return self._project._data2Obj.get(newObj)
+  #
+  # def pruneSpectrumViews(self, name:str, nameSpace:str=None):
+  #   """Remove spectrum views that do not match existing spectra, e.g. after loading a template"""
+  #   self._wrappedData.pruneSpectrumViews()
 
 # newTask function
 def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
@@ -160,7 +163,14 @@ def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Ta
   if nameSpace is not None:
     dd['nameSpace'] = nameSpace
 
-  newApiTask = nmrProject.root.newGuiTask(**dd)
+  defaults = collections.OrderedDict((('nameSpace', None), ('comment', None)))
+
+  self._startFunctionCommandBlock('newTask', name, values=locals(), defaults=defaults,
+                                  parName='newTask')
+  try:
+    newApiTask = nmrProject.root.newGuiTask(**dd)
+  finally:
+    self._project._appBase._endCommandBlock()
 
   return self._data2Obj.get(newApiTask)
 Project.newTask = _newTask

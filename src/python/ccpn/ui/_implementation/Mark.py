@@ -19,8 +19,9 @@ __date__ = "$Date$"
 __version__ = "$Revision$"
 
 #=========================================================================================
-# Start of code+++++++++++++++++++++==========
-from collections import namedtuple
+# Start of code
+#=========================================================================================
+import collections
 from typing import Sequence, Tuple
 
 from ccpn.core.Project import Project
@@ -30,7 +31,7 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Mark as ApiMark
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 
 
-RulerData = namedtuple('RulerData', ['axisCode', 'position', 'unit', 'label'])
+RulerData = collections.namedtuple('RulerData', ['position', 'axisCode', 'unit', 'label'])
 
 
 class Mark(AbstractWrapperObject):
@@ -135,15 +136,21 @@ class Mark(AbstractWrapperObject):
 
   @property
   def rulerData(self) -> tuple:
-    """tuple of RulerData ('axisCode', 'position', 'unit', 'label') for the lines in the Mark"""
+    """tuple of RulerData ('position', 'axisCode', 'unit', 'label') for the lines in the Mark"""
     return tuple(RulerData(*(getattr(x, tag) for tag in RulerData._fields))
                  for x in self._wrappedData.sortedRulers())
 
-  def newLine(self, axisCode:str, position:float, unit:str='ppm', label:str=None):
+  def newLine(self, position:float, axisCode:str, unit:str='ppm', label:str=None):
     """Add an extra line to the mark."""
     if unit is  None:
       unit = 'ppm'
-    self._wrappedData.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
+    defaults = collections.OrderedDict((('unit', 'ppm'), ('label', None)))
+    self._startFunctionCommandBlock('newLine', position, axisCode, values=locals(),
+                                    defaults=defaults)
+    try:
+      self._wrappedData.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
+    finally:
+      self._project._appBase._endCommandBlock()
 
   # Implementation functions
   @classmethod
@@ -165,24 +172,34 @@ def _newMark(self:Task, colour:str, positions:Sequence, axisCodes:Sequence, styl
   :param tuple/list units: Axis units for all lines in the mark, Default: all ppm
   :param tuple/list labels: Ruler labels for all lines in the mark. Default: None"""
 
-  apiMark = self._wrappedData.newMark(colour=colour, style=style)
+  defaults = collections.OrderedDict((('style', 'simple'), ('units', ()),
+                                     ('labels', ())))
 
-  for ii,position in enumerate(positions):
-    dd = {'position':position, 'axisCode':axisCodes[ii]}
-    if units:
-      unit = units[ii]
-      if unit is not None:
-       dd['unit'] = unit
-    if labels:
-      label = labels[ii]
-      if label is not None:
-       dd['label'] = label
-    apiRuler = apiMark.newRuler(**dd)
-  #
-  return self._project._data2Obj.get(apiMark)
+  self._startFunctionCommandBlock('newMark', colour, positions, axisCodes, values=locals(),
+                                  defaults=defaults, parName='newMark')
+  try:
+    apiMark = self._wrappedData.newMark(colour=colour, style=style)
+
+    for ii,position in enumerate(positions):
+      dd = {'position':position, 'axisCode':axisCodes[ii]}
+      if units:
+        unit = units[ii]
+        if unit is not None:
+         dd['unit'] = unit
+      if labels:
+        label = labels[ii]
+        if label is not None:
+         dd['label'] = label
+      apiRuler = apiMark.newRuler(**dd)
+    #
+    result =  self._project._data2Obj.get(apiMark)
+  finally:
+    self._project._appBase._endCommandBlock()
+
+  return result
 Task.newMark = _newMark
 
-def _newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:str='simple',
+def _newSimpleMark(self:Task, colour:str, position:float, axisCode:str, style:str='simple',
             unit:str='ppm', label:str=None) -> Mark:
   """Create new child Mark with a single line
 
@@ -193,12 +210,25 @@ def _newSimpleMark(self:Task, colour:str, axisCode:str, position:float, style:st
   :param tuple/list unit: Axis unit. Default: all ppm
   :param tuple/list label: Line label. Default: None"""
 
-  apiMark = self._wrappedData.newMark(colour=colour, style=style)
-  if unit is None:
-    unit = 'ppm'
-  apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
-  #
-  return self._project._data2Obj.get(apiMark)
+  defaults = collections.OrderedDict((('style', 'simple'), ('unit', 'ppm'),
+                                     ('label', None)))
+
+  self._startFunctionCommandBlock('newSimpleMark', colour, position, axisCode, values=locals(),
+                                  defaults=defaults, parName='newMark')
+  try:
+
+    apiMark = self._wrappedData.newMark(colour=colour, style=style)
+    if unit is None:
+      unit = 'ppm'
+    apiMark.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
+    #
+    result =  self._project._data2Obj.get(apiMark)
+  finally:
+    self._project._appBase._endCommandBlock()
+
+  return result
+
+
 Task.newSimpleMark = _newSimpleMark
 
 # Notifiers:

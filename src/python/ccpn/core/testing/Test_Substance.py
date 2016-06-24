@@ -30,7 +30,7 @@ class SubstanceTest(WrapperTesting):
 
   def test_simple_create(self):
     substance1 = self.project.newSubstance('MolComp1', userCode='userCode',smiles=':-)')
-    self.assertEqual(substance1.id, 'MolComp1.std')
+    self.assertEqual(substance1.id, 'MolComp1.')
     self.assertEqual(substance1.smiles, ':-)')
     self.assertEqual(substance1.substanceType, 'Molecule')
 
@@ -50,15 +50,15 @@ class SubstanceTest(WrapperTesting):
     substance1 = chain1.substance
     chain2 = substance1.createChain(shortName='Y')
     self.assertEqual(len(substance1.chains), 2)
-    self.assertEqual(substance1._id, 'hardrock.std')
+    self.assertEqual(substance1._id, 'hardrock.')
     self.assertEqual(chain2.compoundName, 'hardrock')
     self.assertEqual(substance1.chains, (chain1, chain2))
 
     sample1 = self.project.newSample(name='S1')
-    sc1 = sample1.newSampleComponent(name='hardrock', labeling='std')
+    sc1 = sample1.newSampleComponent(name='hardrock')
     sample1 = self.project.newSample(name='S2')
     sc2 = sample1.newSampleComponent(name='hardrock', labeling='adhesive')
-    self.assertEqual(sc1._id, 'S1.hardrock.std')
+    self.assertEqual(sc1._id, 'S1.hardrock.')
     self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
     self.assertEqual(substance1.sampleComponents, (sc1,))
     self.project.newUndoPoint()
@@ -68,8 +68,8 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
     self.assertEqual(substance1.sampleComponents, (sc1,))
     self.project._undo.undo()
-    self.assertEqual(substance1._id, 'hardrock.std')
-    self.assertEqual(sc1._id, 'S1.hardrock.std')
+    self.assertEqual(substance1._id, 'hardrock.')
+    self.assertEqual(sc1._id, 'S1.hardrock.')
     self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
     self.assertEqual(substance1.sampleComponents, (sc1,))
     self.project._undo.redo()
@@ -77,6 +77,8 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(sc1._id, 'S1.electrical.cafe')
     self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
     self.assertEqual(substance1.sampleComponents, (sc1,))
+    substance1.rename(name='notmuch', labeling=None)
+    self.assertEqual(sc1._id, 'S1.notmuch.')
 
 
 

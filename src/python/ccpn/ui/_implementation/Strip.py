@@ -125,6 +125,11 @@ class Strip(AbstractWrapperObject):
   def delete(self):
     """Overrides normal delete"""
 
+    # NBNB TODO - should this not be moved to the corresponding GUI class?
+    # Is there always a layout, regardless of framework?
+
+    # NB - echoing should be done normally, through the delete command
+
     ccpnStrip = self._wrappedData
     n = len(ccpnStrip.spectrumDisplay.strips)
     if n > 1:
@@ -167,10 +172,14 @@ class Strip(AbstractWrapperObject):
   #CCPN functions
   def clone(self):
     """create new strip that duplicates this one, appending it at the end"""
-    newStrip = self._project._data2Obj.get(self._wrappedData.clone())
+    self._startFunctionCommandBlock('clone')
+    try:
+      newStrip = self._project._data2Obj.get(self._wrappedData.clone())
 
-    # NBNB TBD Why is this necessary? Presumably it should be the same width as the source?
-    newStrip.setMinimumWidth(200)
+      # NBNB TODO Why is this necessary? Presumably it should be the same width as the source?
+      newStrip.setMinimumWidth(200)
+    finally:
+      self._project._appBase._endCommandBlock()
     
     return newStrip
 
@@ -180,9 +189,18 @@ class Strip(AbstractWrapperObject):
     currentIndex = self._wrappedData.index
     if currentIndex == newIndex:
       return
-      
-    # management of API objects
-    self._wrappedData.moveTo(newIndex)
+
+    self._startFunctionCommandBlock('moveTo', newIndex)
+    try:
+      # management of API objects
+      self._wrappedData.moveTo(newIndex)
+    finally:
+      self._project._appBase._endCommandBlock()
+
+    # NB - no exho blocking below, as none of the layout stuff is modeled (?)
+
+    # NBNB TODO - should the stuff below not be moved to the corresponding GUI class?
+    # Is there always a layout, regardless of framework?
     
     # management of Qt layout
     # TBD: need to soup up below with extra loop when have tiles
@@ -232,7 +250,12 @@ class Strip(AbstractWrapperObject):
 
   def resetAxisOrder(self):
     """Reset display to original axis order"""
-    self._wrappedData.resetAxisOrder()
+    self._startFunctionCommandBlock('resetAxisOrder')
+    try:
+      self._wrappedData.resetAxisOrder()
+    finally:
+      self._project._appBase._endCommandBlock()
+
 
   def findAxis(self, axisCode):
     """Reset display to original axis order"""
@@ -288,11 +311,19 @@ class Strip(AbstractWrapperObject):
     else:
       stripSerial = 0
 
-    # Make spectrumView
-    obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
-                                                   stripSerial=stripSerial, dataSource=dataSource,
-                                                   dimensionOrdering=dimensionOrdering)
-    return self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
+
+    self._startFunctionCommandBlock('displaySpectrum', spectrum, values=locals(),
+                                    defaults={'axisOrder':()})
+    try:
+      # Make spectrumView
+      obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
+                                                     stripSerial=stripSerial, dataSource=dataSource,
+                                                     dimensionOrdering=dimensionOrdering)
+    finally:
+      self._project._appBase._endCommandBlock()
+    result =  self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
+    #
+    return result
 
   def peakIsInPlane(self, peak:Peak) -> bool:
     """is peak in currently displayed planes for strip?"""
@@ -316,40 +347,44 @@ class Strip(AbstractWrapperObject):
     return True
 
 
-def _connectWrapperClass():
-  """Connect class to network of active wrapper classes"""
-
 # newStrip functions
 # We should NOT have any newStrip function, except possibly for FreeStrips
-def copyStrip(spectrumDisplay:SpectrumDisplay, strip:Strip, newIndex=None):
-  """Make copy of strip in SpectrumDisplay, at position newIndex - or rightmost"""
+def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
+  """Make copy of strip in self, at position newIndex - or rightmost"""
 
-  strip = spectrumDisplay.getByPid(strip) if isinstance(strip, str) else strip
+  strip = self.getByPid(strip) if isinstance(strip, str) else strip
 
-  if strip.spectrumDisplay is spectrumDisplay:
-    # Within same display. Not that useful, but harmless
-    newStrip = strip.clone()
-    if newIndex is not None:
-      newStrip.moveTo(newIndex)
-
-  else:
-    mapIndices = libSpectrum._axisCodeMapIndices(strip.axisOrder, spectrumDisplay.axisOrder)
-    if mapIndices is None:
-      raise ValueError("Strip %s not compatible with window %s" % (strip.pid, spectrumDisplay.pid))
-    else:
-      positions = strip.positions
-      widths = strip.widths
-      newStrip = spectrumDisplay.orderedStrips[0].clone()
+  self._startFunctionCommandBlock('copyStrip', strip, values=locals(), defaults={'newIndex:None'},
+                                  parName='newStrip')
+  try:
+    if strip.spectrumDisplay is self:
+      # Within same display. Not that useful, but harmless
+      newStrip = strip.clone()
       if newIndex is not None:
         newStrip.moveTo(newIndex)
-      for ii,axis in enumerate(newStrip.orderedAxes):
-        ind = mapIndices[ii]
-        if ind is not None and axis._wrappedData.axis.stripSerial != 0:
-          # Override if there is a mapping and axis is not shared for all strips
-          axis.position = positions[ind]
-          axis.widths = widths[ind]
-SpectrumDisplay.copyStrip = copyStrip
-del copyStrip
+
+    else:
+      mapIndices = libSpectrum._axisCodeMapIndices(strip.axisOrder, self.axisOrder)
+      if mapIndices is None:
+        raise ValueError("Strip %s not compatible with window %s" % (strip.pid, self.pid))
+      else:
+        positions = strip.positions
+        widths = strip.widths
+        newStrip = self.orderedStrips[0].clone()
+        if newIndex is not None:
+          newStrip.moveTo(newIndex)
+        for ii,axis in enumerate(newStrip.orderedAxes):
+          ind = mapIndices[ii]
+          if ind is not None and axis._wrappedData.axis.stripSerial != 0:
+            # Override if there is a mapping and axis is not shared for all strips
+            axis.position = positions[ind]
+            axis.widths = widths[ind]
+  finally:
+    self._project._appBase._endCommandBlock()
+  #
+  return newStrip
+SpectrumDisplay.copyStrip = _copyStrip
+del _copyStrip
 
 # SpectrumDisplay.orderedStrips property
 def getter(self) -> Tuple[Strip, ...]:

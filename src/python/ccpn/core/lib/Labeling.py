@@ -1,9 +1,12 @@
-"""molecule labeling library functions
+"""Labeling scheme handling.
+
+WARNING not tested since V3 upgrade
 
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -29,6 +32,8 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Sample import Sample
 from ccpn.util.Pid import Pid
 from typing import Sequence
+
+from ccpn.util.Common import DEFAULT_LABELING
 
 
 def atomLabelingFractions(project:Project, atom:(Atom,NmrAtom,str), labeling:str) -> dict:
@@ -83,33 +88,6 @@ def atomPairLabelingFractions(project:Project, atomPair:Sequence, labeling:str) 
   return {}
 
 
-def sampleChainLabeling(sample:Sample, chainCode:str) -> str:
-  """Get labeling string for chain chainCode in sample
-  If chainCode does not match a SampleComponent, look for unambiguous global labeling:
-  Heuristics: If there is only one SampleComponent, use that labeling
-  If all SampleComponents with explicit chainCodes have the same labeling, use that labeling"""
-
-  labeling = Labeling.NULL_LABELING
-
-  sampleComponents = sample.sortedSampleComponents()
-  if len(sampleComponents) == 1:
-    labeling = sampleComponents[0].labeling
-
-  else:
-    for sampleComponent in sampleComponents:
-      if chainCode in sampleComponent.chainCodes:
-        labeling = sampleComponent.labeling
-        break
-
-    else:
-      labelings = [x.labeling for x in sample.sampleComponents if x.chainCodes]
-      if len(labelings) == 1:
-        # Only one labeling in use in sample - use it
-        labeling = labelings.pop()
-  #
-  return labeling
-
-
 def sampleLabelingFractions(sample:Sample, atom:(Atom,NmrAtom,str)) -> dict:
   """get {isotopeCode:labelingFraction} with given labeling for atom/nmrAtom or ID string"""
 
@@ -117,8 +95,8 @@ def sampleLabelingFractions(sample:Sample, atom:(Atom,NmrAtom,str)) -> dict:
   fields = Pid(atomId).fields
   if len(fields) == 4:
     chainCode, dummy, residueType, atomName = fields
-    labeling = sampleChainLabeling(sample, chainCode)
-    if labeling == Labeling.NULL_LABELING:
+    labeling = Labeling.sampleChainLabeling(sample, chainCode)
+    if labeling == DEFAULT_LABELING:
       # No labeling found - return empty
       return {}
     else:
@@ -141,7 +119,7 @@ def samplePairLabelingFractions(sample:Sample, atomPair:Sequence) -> dict:
     if len(fields) == 4:
       atomNames.append(fields[3])
       residueTypes.add(fields[2])
-      labelings.add(sampleChainLabeling(sample, fields[0]))
+      labelings.add(Labeling.sampleChainLabeling(sample, fields[0]))
     else:
       break
 

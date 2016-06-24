@@ -24,7 +24,7 @@ class TestSampleComponentCreation(WrapperTesting):
 
     sc = self.sample.newSampleComponent('test sample component')
 
-    self.assertEqual(sc.pid, 'SC:test sample.test sample component.std')
+    self.assertEqual(sc.pid, 'SC:test sample.test sample component.')
     self.assertEqual(len(self.project.sampleComponents), 1)
     self.assertEqual(len(self.project.substances), 1)
     self.assertIs(self.project.sampleComponents[0], sc)

@@ -835,7 +835,7 @@ def _rulerDeleted(project:Project, apiRuler:ApiRuler):
 # Add notifier functions to Project
 
 
-# NB This notifier must be implemented as an API postInint notiier,
+# NB This notifier must be implemented as an API postInit notifier,
 # As it relies on Axs that are not yet created when 'created' notifiers are executed
 def _setupGuiStrip(project:Project, apiStrip):
   """Set up graphical parameters for completed strips - for notifiers"""

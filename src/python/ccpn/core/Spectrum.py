@@ -94,7 +94,7 @@ class Spectrum(AbstractWrapperObject):
   # Attributes of DataSource and Experiment:
 
   @property
-  def dimensionCount(self) -> str:
+  def dimensionCount(self) -> int:
     """Number of dimensions in spectrum"""
     return self._wrappedData.numDim
 

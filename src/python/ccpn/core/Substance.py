@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections import OrderedDict
+from ccpn.util.Common import DEFAULT_LABELING
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -76,7 +77,12 @@ class Substance(AbstractWrapperObject):
   def _key(self) -> str:
     """id string - name.labeling"""
     obj =  self._wrappedData
-    return Pid.createId(*(getattr(obj,tag) for tag in ('name', 'labeling')))
+
+    name = obj.name
+    labeling = obj.labeling
+    if labeling == DEFAULT_LABELING:
+      labeling = ''
+    return Pid.createId(name, labeling)
 
   @property
   def name(self) -> str:
@@ -86,7 +92,11 @@ class Substance(AbstractWrapperObject):
   @property
   def labeling(self) -> str:
     """labeling descriptor of Substance (default is 'std')"""
-    return self._wrappedData.labeling
+    result = self._wrappedData.labeling
+    if result == DEFAULT_LABELING:
+      result = None
+    #
+    return result
     
   @property
   def _parent(self) -> Sample:
@@ -346,13 +356,15 @@ class Substance(AbstractWrapperObject):
   def sampleComponents(self) -> Tuple[SampleComponent, ...]:
     """SampleComponents that correspond to Substance"""
     name = self.name
-    labeling = self.labeling
+    apiLabeling = self.labeling
+    if apiLabeling is None:
+      apiLabeling = DEFAULT_LABELING
     apiSampleStore = self._project._apiNmrProject.sampleStore
     data2Obj = self._project._data2Obj
     return tuple(data2Obj[x]
                  for y in apiSampleStore.sortedSamples()
                  for x in y.sortedSampleComponents()
-                 if x.name == name and x.labeling == labeling)
+                 if x.name == name and x.labeling == apiLabeling)
 
 
   @property
@@ -378,11 +390,8 @@ class Substance(AbstractWrapperObject):
   # Implementation functions
   def rename(self, name:str=None, labeling:str=None):
     """Rename Substance, changing its Id and Pid, and rename SampleComponents and SpectrumHits
-    with matching names. If name or labeling is None, the existing value will be used"""
-
-    if name is None and labeling is None:
-      self._project._logger.warning("renaming to name=None, labeling=None has no effect")
-      return
+    with matching names. If name is None, the existing value will be used.
+    Labeling 'None'  means 'Natural abundance'"""
 
     oldName = self.name
     if name is None:
@@ -391,8 +400,9 @@ class Substance(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
     oldLabeling = self.labeling
+    apiLabeling = labeling
     if labeling is None:
-      labeling = oldLabeling
+      apiLabeling = DEFAULT_LABELING
     elif  Pid.altCharacter in labeling:
         raise ValueError("Character %s not allowed in ccpn.Sample.labeling" % Pid.altCharacter)
 
@@ -414,13 +424,13 @@ class Substance(AbstractWrapperObject):
 
         # NB this must be done AFTER the spectrumHit loop to avoid breaking links
         coreUtil._resetParentLink(sampleComponent._wrappedData, 'sampleComponents',
-          OrderedDict((('name',name), ('labeling',labeling)))
+          OrderedDict((('name',name), ('labeling',apiLabeling)))
         )
         renamedObjects.append(sampleComponent)
 
       # NB this must be done AFTER the sampleComponent loop to avoid breaking links
       coreUtil._resetParentLink(self._wrappedData, 'components',
-          OrderedDict((('name',name), ('labeling',labeling)))
+          OrderedDict((('name',name), ('labeling',apiLabeling)))
         )
       for obj in renamedObjects:
         obj._finaliseAction('rename')
@@ -446,7 +456,7 @@ class Substance(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str='Molecule',
+def _newSubstance(self:Project, name:str, labeling:str=None, substanceType:str='Molecule',
                   userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,
                   empiricalFormula:str=None, molecularMass:float=None, comment:str=None,
                   synonyms:Sequence[str]=(), atomCount:int=None, bondCount:int=None,
@@ -458,9 +468,14 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
 
   ADVANCED alternatives are 'Cell', 'Material', and 'Composite'"""
 
+  if labeling is None:
+    apiLabeling = DEFAULT_LABELING
+  else:
+    apiLabeling = labeling
+
   # Default values for 'new' function, as used for echoing to console
   defaults = OrderedDict(
-    (('labeling','std'), ('substanceType', 'Molecule'),
+    (('labeling',None), ('substanceType', 'Molecule'),
      ('userCode',None), ('smiles',None), ('inChi', None),
      ('casNumber',None), ('empiricalFormula',None), ('molecularMass', None),
      ('comment',None), ('synonyms',()), ('atomCount', None),
@@ -477,14 +492,14 @@ def _newSubstance(self:Project, name:str, labeling:str='std', substanceType:str=
   apiNmrProject = self._wrappedData
   apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
 
-  if apiComponentStore.findFirstComponent(name=name, labeling=labeling) is not None:
+  if apiComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
     raise ValueError("Substance %s.%s already exists" % (name, labeling))
 
   else:
     oldSubstance = apiComponentStore.findFirstComponent(name=name)
 
   params = {
-    'name':name, 'labeling':labeling, 'userCode':userCode, 'synonyms':synonyms,
+    'name':name, 'labeling':apiLabeling, 'userCode':userCode, 'synonyms':synonyms,
     'details':comment
   }
 
@@ -535,7 +550,7 @@ Project.newSubstance = _newSubstance
 del _newSubstance
 
 
-def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labeling:str='std',
+def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labeling:str=None,
               userCode:str=None, smiles:str=None, synonyms:Sequence[str]=(),comment:str=None,
               startNumber:int=1, molType:str=None, isCyclic:bool=False) -> Substance:
   """Make new Substance from sequence of residue codes, using default linking and variants
@@ -544,7 +559,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
   :param Sequence sequence: string of one-letter codes or sequence of residueNames
   :param str name: name of new substance
-  :param str labeling: labeling for new substance (mandatory, defaults to 'std')
+  :param str labeling: labeling for new substance. Optional - None means 'natural abundance'
   :param str userCode: user code for new substance (optional)
   :param str smiles: smiles string for new substance (optional)
   :param Sequence[str] synonyms: synonyms for Substance name
@@ -555,9 +570,14 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
   """
 
+  if labeling is None:
+    apiLabeling = DEFAULT_LABELING
+  else:
+    apiLabeling = labeling
+
   defaults = OrderedDict(
     (
-      ('labeling', 'std'), ('userCode', None), ('smiles', None),
+      ('labeling', None), ('userCode', None), ('smiles', None),
       ('synonyms', ()), ('comment', None), ('startNumber', 1), ('molType', None),
       ('isCyclic', False)
     )
@@ -569,7 +589,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
     raise ValueError("createPolymerSubstance requires non-empty sequence")
 
   elif apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
-        labeling=labeling) is not None:
+        labeling=apiLabeling) is not None:
     raise ValueError("Substance %s.%s already exists" % (name, labeling))
 
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
@@ -587,7 +607,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
     apiMolecule.details=comment
 
     result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
-                            apiMolecule, labeling=labeling)]
+                            apiMolecule, labeling=apiLabeling)]
     result.userCode = userCode
   finally:
     self._project._appBase._endCommandBlock()
@@ -598,29 +618,28 @@ Project.createPolymerSubstance = _createPolymerSubstance
 del _createPolymerSubstance
 
 def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
-  """get or create ccpn.Substance with given name and labeling.
-  If labeling is not set it defaults to 'std',
-  except that Substances with matching name take priority"""
-  apiRefComponentStore= self._apiNmrProject.sampleStore.refSampleComponentStore
-  apiResult = apiRefComponentStore.findFirstComponent(name=name, labeling=labeling or 'std')
-  if labeling is None and apiResult is None:
-    ll = [x for x in apiRefComponentStore.sortedComponents() if x.name == name]
-    if ll:
-      apiResult = ll[0]
+  """get or create ccpn.Substance with given name and labeling."""
+
 
   if labeling is None:
-    values = {}
+    apiLabeling = DEFAULT_LABELING
   else:
-    values = {'labeling':labeling}
+    apiLabeling = labeling
+
+  values = {'labeling':labeling}
+
+  apiRefComponentStore= self._apiNmrProject.sampleStore.refSampleComponentStore
+  apiResult = apiRefComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
 
   self._startFunctionCommandBlock('fetchSubstance', name, values=values, parName='newSubstance')
   try:
     if apiResult:
-      return self._data2Obj[apiResult]
+      result = self._data2Obj[apiResult]
     else:
-      return self.newSubstance(name=name, labeling=labeling or 'std')
+      result = self.newSubstance(name=name, labeling=labeling)
   finally:
     self._project._appBase._endCommandBlock()
+  return result
 #
 Project.fetchSubstance = _fetchSubstance
 del _fetchSubstance
@@ -628,7 +647,8 @@ del _fetchSubstance
 
 def getter(self:SampleComponent) -> Optional[Substance]:
   apiRefComponentStore = self._parent._apiSample.sampleStore.refSampleComponentStore
-  apiComponent = apiRefComponentStore.findFirstComponent(name=self.name, labeling=self.labeling)
+  apiComponent = apiRefComponentStore.findFirstComponent(name=self.name,
+                                                         labeling=self.labeling or DEFAULT_LABELING)
   if apiComponent is None:
     return None
   else:

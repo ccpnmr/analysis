@@ -51,6 +51,9 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           + defaultFileNameChar)
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
+# Default name for natural abundance labeling - given as None externally
+DEFAULT_LABELING = '_NATURAL_ABUNDANCE'
+
 @total_ordering
 class __MinType(object):
     def __le__(self, other):

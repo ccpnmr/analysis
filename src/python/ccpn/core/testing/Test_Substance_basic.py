@@ -20,7 +20,7 @@ class TestSubstanceCreation(WrapperTesting):
 
     self.assertEqual(len(self.project.substances), 1)
     self.assertIs(self.project.substances[0], s)
-    self.assertEqual(s.pid, 'SU:test substance.std')
+    self.assertEqual(s.pid, 'SU:test substance.')
 
 
   def test_newSubstance_WithFields(self):
@@ -30,7 +30,7 @@ class TestSubstanceCreation(WrapperTesting):
 
     self.assertEqual(len(self.project.substances), 1)
     self.assertIs(self.project.substances[0], s)
-    self.assertEqual(s.pid, 'SU:test substance.std')
+    self.assertEqual(s.pid, 'SU:test substance.')
     self.assertEqual(s.userCode, 'test_userCode')
     self.assertEqual(s.smiles, ';-)')
 
@@ -51,7 +51,7 @@ class TestSubstanceCreation(WrapperTesting):
     s1 = self.project.newSubstance('test substance')
     s2 = self.project.fetchSubstance('another test substance')
 
-    self.assertEqual(s2.pid, 'SU:another test substance.std')
+    self.assertEqual(s2.pid, 'SU:another test substance.')
     self.assertIsNot(s1, s2)
 
 
@@ -62,7 +62,7 @@ class TestSubstanceCreation(WrapperTesting):
     sample.newSampleComponent('test sample component')
 
     self.assertEqual(len(self.project.substances), 1)
-    self.assertEqual(self.project.substances[0].pid, 'SU:test sample component.std')
+    self.assertEqual(self.project.substances[0].pid, 'SU:test sample component.')
 
 
   def test_newPhysicalChainMakesNewSubstances(self):
@@ -71,7 +71,7 @@ class TestSubstanceCreation(WrapperTesting):
     self.project.createChain('acd', molType='protein')
 
     self.assertEqual(len(self.project.substances), 1)
-    self.assertEqual(self.project.substances[0].pid, 'SU:Molecule_1.std')
+    self.assertEqual(self.project.substances[0].pid, 'SU:Molecule_1.')
 
 
 
@@ -107,13 +107,13 @@ class SubstanceProperties(WrapperTesting):
   def test_bareSubstanceProperties(self):
     s = self.project.newSubstance('test substance')
 
-    self.assertEqual(s.pid, 'SU:test substance.std')
-    self.assertEqual(s.longPid, 'Substance:test substance.std')
+    self.assertEqual(s.pid, 'SU:test substance.')
+    self.assertEqual(s.longPid, 'Substance:test substance.')
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, 'std')
-    self.assertEqual(s.id, 'test substance.std')
+    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Molecule')
     self.assertIs(s.project, self.project)
 
@@ -150,13 +150,13 @@ class SubstanceProperties(WrapperTesting):
   def test_bareMoleculeSubstanceProperties(self):
     s = self.project.newSubstance('test substance', substanceType='Molecule')
 
-    self.assertEqual(s.pid, 'SU:test substance.std')
-    self.assertEqual(s.longPid, 'Substance:test substance.std')
+    self.assertEqual(s.pid, 'SU:test substance.')
+    self.assertEqual(s.longPid, 'Substance:test substance.')
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, 'std')
-    self.assertEqual(s.id, 'test substance.std')
+    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Molecule')
     self.assertIs(s.project, self.project)
 
@@ -285,13 +285,13 @@ class SubstanceProperties(WrapperTesting):
     # MOved below initialisation of 's'. Rasmus.
     self.assertIsNone(s.smiles)
 
-    self.assertEqual(s.pid, 'SU:test substance.std')
-    self.assertEqual(s.longPid, 'Substance:test substance.std')
+    self.assertEqual(s.pid, 'SU:test substance.')
+    self.assertEqual(s.longPid, 'Substance:test substance.')
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, 'std')
-    self.assertEqual(s.id, 'test substance.std')
+    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Material')
     self.assertIs(s.project, self.project)
 
@@ -321,13 +321,13 @@ class SubstanceProperties(WrapperTesting):
     # name, labeling, usercode, synonyms, details
     s = self.project.newSubstance('test substance', substanceType='Cell')
 
-    self.assertEqual(s.pid, 'SU:test substance.std')
-    self.assertEqual(s.longPid, 'Substance:test substance.std')
+    self.assertEqual(s.pid, 'SU:test substance.')
+    self.assertEqual(s.longPid, 'Substance:test substance.')
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, 'std')
-    self.assertEqual(s.id, 'test substance.std')
+    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Cell')
     self.assertIs(s.project, self.project)
 
@@ -356,13 +356,13 @@ class SubstanceProperties(WrapperTesting):
   def test_bareCompositeSubstanceProperties(self):
     s = self.project.newSubstance('test substance', substanceType='Composite')
 
-    self.assertEqual(s.pid, 'SU:test substance.std')
-    self.assertEqual(s.longPid, 'Substance:test substance.std')
+    self.assertEqual(s.pid, 'SU:test substance.')
+    self.assertEqual(s.longPid, 'Substance:test substance.')
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, 'std')
-    self.assertEqual(s.id, 'test substance.std')
+    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Composite')
     self.assertIs(s.project, self.project)
 

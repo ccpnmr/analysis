@@ -128,7 +128,7 @@ class Data(AbstractWrapperObject):
     apiData = self._wrappedData
     parameter = apiData.findFirstParameter(name=name)
     if parameter is None:
-      raise KeyError("No parameters named %s" % name)
+      raise KeyError("No parameter named %s" % name)
     else:
       parameter.delete()
 

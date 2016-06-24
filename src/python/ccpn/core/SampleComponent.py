@@ -24,6 +24,7 @@ __version__ = "$Revision$"
 
 from typing import Tuple
 import collections
+from ccpn.util.Common import DEFAULT_LABELING
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -63,7 +64,12 @@ class SampleComponent(AbstractWrapperObject):
   def _key(self) -> str:
     """id string - name.labeling"""
     obj =  self._wrappedData
-    return Pid.createId(*(getattr(obj,tag) for tag in ('name', 'labeling')))
+
+    name = obj.name
+    labeling = obj.labeling
+    if labeling == DEFAULT_LABELING:
+      labeling = ''
+    return Pid.createId(name, labeling)
 
   @property
   def name(self) -> str:
@@ -72,8 +78,12 @@ class SampleComponent(AbstractWrapperObject):
 
   @property
   def labeling(self) -> str:
-    """labeling descriptor of SampleComponent and corresponding substance (default is 'std')"""
-    return self._wrappedData.labeling
+    """labeling descriptor of SampleComponent and corresponding substance """
+    result = self._wrappedData.labeling
+    if result == DEFAULT_LABELING:
+      result = None
+    #
+    return result
     
   @property
   def _parent(self) -> Sample:
@@ -185,7 +195,9 @@ def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
                                   parName='newSampleComponent')
   try:
     substance = self._project.fetchSubstance(name=name, labeling=labeling)
-    obj = apiSample.newSampleComponent(name=name, labeling=substance.labeling,
+    # NB - using substance._wrappedData.labeling because we need the API labeling value,
+    # which is different for the default case
+    obj = apiSample.newSampleComponent(name=name, labeling=substance._wrappedData.labeling,
                                        concentration=concentration,
                                        concentrationError=concentrationError,
                                        concentrationUnit=concentrationUnit, details=comment,

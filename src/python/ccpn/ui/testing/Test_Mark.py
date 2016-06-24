@@ -51,14 +51,14 @@ class MarkTest(WrapperTesting):
     self.task.delete()
 
   def test_extend_mark(self):
-    data = ('Hc', 1.27, None, None)
+    data = (1.27, 'Hc', None, None)
     self.task = self.project.newTask('TestTask')
     mark1 = self.task.newMark('red', positions=self.positions, axisCodes=self.axisCodes,
                                units=self.units, labels=self.labels)
     mark1.newLine(*data)
 
-    ll = list(zip(self.axisCodes, self.positions, self.units, self.labels))
-    ll.append(('Hc', 1.27, 'ppm', None))
+    ll = list(zip(self.positions, self.axisCodes, self.units, self.labels))
+    ll.append((1.27, 'Hc', 'ppm', None))
 
     assert mark1.rulerData == tuple(Mark.RulerData(*x) for x in ll)
 
@@ -67,9 +67,8 @@ class MarkTest(WrapperTesting):
 
   def test_create_single_mark(self):
     self.task = self.project.newTask('TestTask')
-    data = ('Hc', 1.27, None, None)
+    data = (1.27, 'Hc', None, None)
     mark1 = self.task.newSimpleMark('red', data[0], data[1])
-    print('mark1.rulerData', mark1.rulerData)
-    assert  mark1.rulerData == (Mark.RulerData('Hc', 1.27, 'ppm', None),)
+    assert  mark1.rulerData == (Mark.RulerData(1.27, 'Hc', 'ppm', None),)
 
     self.task.delete()

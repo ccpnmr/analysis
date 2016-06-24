@@ -117,7 +117,7 @@ class Chain(AbstractWrapperObject):
     substances = [x for x in self.project.substances if x.name == compoundName]
 
     # Select 'std' labeling if present
-    substances = [x for x in substances if x.labeling == 'std'] or substances
+    substances = [x for x in substances if x.labeling is None] or substances
 
     return substances[0] if substances else None
 

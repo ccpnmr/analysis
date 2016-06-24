@@ -260,7 +260,7 @@ class SequenceGraph(CcpnModule):
   def disconnectNextNmrResidue(self):
     self.current.nmrResidue.disconnectNext()
     self.setNmrChainDisplay(self.current.nmrResidue.nmrChain.pid)
-    self.updateNmrResidueTable
+    self.updateNmrResidueTable()
 
   def disconnectNmrResidue(self):
     self.current.nmrResidue.disconnect()

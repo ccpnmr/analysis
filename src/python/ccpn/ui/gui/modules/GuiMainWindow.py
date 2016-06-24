@@ -418,18 +418,18 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     info = MessageDialog.showInfo('Not implemented yet',
           'This function has not been implemented in the current version', colourScheme=self.colourScheme)
 
-  def archiveProject(self):
-
-    project = self._project
-    apiProject = project._wrappedData.parent
-    projectPath = project.path
-    now = datetime.datetime.now().strftime('%y%m%d%H%M%S')
-    filePrefix = '%s_%s' % (os.path.basename(projectPath), now)
-    filePrefix = os.path.join(os.path.dirname(projectPath), filePrefix)
-    fileName = apiIo.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
-    
-    MessageDialog.showInfo('Project Archived',
-          'Project archived to %s' % fileName, colourScheme=self.colourScheme)
+  # def archiveProject(self):
+  #
+  #   project = self._project
+  #   apiProject = project._wrappedData.parent
+  #   projectPath = project.path
+  #   now = datetime.datetime.now().strftime('%y%m%d%H%M%S')
+  #   filePrefix = '%s_%s' % (os.path.basename(projectPath), now)
+  #   filePrefix = os.path.join(os.path.dirname(projectPath), filePrefix)
+  #   fileName = apiIo.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
+  #
+  #   MessageDialog.showInfo('Project Archived',
+  #         'Project archived to %s' % fileName, colourScheme=self.colourScheme)
     
   def showBackupPopup(self):
     
@@ -715,23 +715,25 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     project with existing project name."""
     apiProject = self._project._wrappedData.root
     if hasattr(apiProject, '_temporaryDirectory'):
-      self.saveProjectAs()
+      # self.saveProjectAs()
+      # Replaced by equivalent framework function
+      self._appBase.saveProjectAs()
     else:
       self._appBase.saveProject()
     
 
-  def saveProjectAs(self):
-    """Opens save Project as dialog box and saves project with name specified in the file dialog."""
-    # Imported here to avoid risk of circular imports.
-    from ccpn.framework import Framework
-    # TODO try to refactor this
-    newPath = Framework.getSaveDirectory()
-    if newPath:
-      # Next line unnecessary, but does no harm
-      newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
-      #self._appBase.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath),
-      # createFallback=False)
-      self._appBase.saveProject(newPath=newProjectPath, createFallback=False)
+  # def saveProjectAs(self):
+  #   """Opens save Project as dialog box and saves project with name specified in the file dialog."""
+  #   # Imported here to avoid risk of circular imports.
+  #   from ccpn.framework import Framework
+  #   # TODO try to refactor this
+  #   newPath = Framework.getSaveDirectory()
+  #   if newPath:
+  #     # Next line unnecessary, but does no harm
+  #     newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
+  #     #self._appBase.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath),
+  #     # createFallback=False)
+  #     self._appBase.saveProject(newPath=newProjectPath, createFallback=False)
 
 
   def printToFile(self, spectrumDisplay=None):

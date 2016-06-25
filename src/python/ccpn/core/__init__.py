@@ -35,7 +35,6 @@ Classes are organised in a hierarchy, with all data objects ultimately contained
   |       Chain
   |       |       Residue
   |       |       |       Atom
-  |       Bond
   |       NmrChain
   |       |       NmrResidue
   |       |       |       NmrAtom
@@ -200,7 +199,7 @@ import collections
 _importOrder = [
   'Project',  'Spectrum',  'SpectrumReference',  'SpectrumGroup',  'PeakList',  'Peak',
   'IntegralList',  'Integral',  'PseudoDimension',  'SpectrumHit',  'Sample',  'SampleComponent',
-  'Substance',  'Chain',  'Residue', 'Atom',  'Bond',  'NmrChain',  'NmrResidue',  'NmrAtom',
+  'Substance',  'Chain',  'Residue', 'Atom',  'NmrChain',  'NmrResidue',  'NmrAtom',
   'ChemicalShiftList',  'ChemicalShift',  'DataSet',  'RestraintList',  'Restraint',
   'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note'
 ]

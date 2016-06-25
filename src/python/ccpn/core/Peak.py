@@ -277,6 +277,7 @@ class Peak(AbstractWrapperObject):
           nmrAtoms = [None]
         allAtoms.append(nmrAtoms)
 
+      # NB this gives a lit of tuples
       result += itertools.product(*allAtoms)
     #
     return tuple(sorted(result))
@@ -302,18 +303,33 @@ class Peak(AbstractWrapperObject):
     # set assignments
     apiPeak.setAssignments(resonances)
 
-  def addAssignment(self, value:Union[str, 'NmrAtom']):
+  def addAssignment(self, value:Sequence[Union[str, 'NmrAtom']]):
     """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
-
-    # NBNB TBD FIXME check for duplicates
 
     if len(value) != self._wrappedData.peakList.numDim:
       raise ValueError("Length of assignment value %s does not match peak dimensionality %s "
       % (value, self._wrappedData.peakList.numDim))
 
+    # Convert to tuple and check for non-existing pids
+    ll = []
+    for val in value:
+      if isinstance(val, str):
+        vv = self.getByPid(val)
+        if vv is None:
+          raise ValueError("No NmrAtom matching string pid %s" % val)
+        else:
+          ll .append(vv)
+      else:
+        ll .append(val)
+    value = tuple(value)
+
     assignedNmrAtoms = list(self.assignedNmrAtoms)
-    assignedNmrAtoms.append(value)
-    self.assignedNmrAtoms = assignedNmrAtoms
+    if value in assignedNmrAtoms:
+      self._project._logger.warning("Attempt to add already existing Peak Assignment: %s - ignored"
+                                    % value)
+    else:
+      assignedNmrAtoms.append(value)
+      self.assignedNmrAtoms = assignedNmrAtoms
 
   def assignDimension(self, axisCode:str, value:Union[Union[str,'NmrAtom'],
                                                             Sequence[Union[str,'NmrAtom']]]):
@@ -349,10 +365,14 @@ class Peak(AbstractWrapperObject):
 def _newPeak(self:PeakList,height:Optional[float]=None, volume:Optional[float]=None,
              heightError:Optional[float]=None, volumeError:Optional[float]=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
-            position:Sequence[float]=(), pointPosition:Sequence[float]=(),
-            dimensionAssignments:Sequence[Sequence['NmrAtom']]=(),
-            assignments:Sequence[Sequence[Optional['NmrAtom']]]=()) -> Peak:
-  """Create new ccpn.Peak within ccpn.peakList"""
+            position:Sequence[float]=(), pointPosition:Sequence[float]=()) -> Peak:
+  """Create new ccpn.Peak within ccpn.peakList
+
+  NB you must create the peak before you can assign it. The assignment attributes are:
+
+  - assignedNmrAtoms - A list of all (e.g.) assignment triplets for a 3D spectrum
+
+  - dimensionNmrAtoms - A list of list of assignments, one for each dimension"""
 
   defaults = collections.OrderedDict(
     (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),
@@ -360,7 +380,6 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Optional[float]=N
      ('pointPosition', ())
     )
   )
-  # NBNB TODO Add assignments as well
 
   self._startFunctionCommandBlock('newPeak', values=locals(), defaults=defaults,
                                   parName='newPeak')
@@ -379,32 +398,6 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Optional[float]=N
     elif pointPosition:
       for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
         peakDim.position = pointPosition[ii]
-
-    # Setting assignments
-    if dimensionAssignments:
-      dimResonances = list(dimensionAssignments)
-      for ii, atoms in enumerate(dimResonances):
-        dimValues = tuple(x._wrappedData for x in dimensionAssignments[ii])
-        dimResonances[ii] = tuple(x for x in dimValues if x is not None)
-
-      # set dimensionAssignments
-      apiPeak.assignByDimensions(dimResonances)
-
-    if assignments:
-      peakDims = apiPeak.sortedPeakDims()
-      dimensionCount = len(peakDims)
-
-      # get resonance, all tuples and per dimension
-      resonances = []
-      for tt in assignments:
-        ll = dimensionCount*[None]
-        resonances.append(ll)
-        for ii,atom in enumerate(tt):
-          if atom is not None:
-            ll[ii] = atom._wrappedData
-
-      # set assignments
-      apiPeak.setAssignments(resonances)
 
   finally:
     self._project._appBase._endCommandBlock()

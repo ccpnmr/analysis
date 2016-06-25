@@ -345,7 +345,8 @@ class PeakList(AbstractWrapperObject):
         values1 = [peak1.position[dim] for dim in range(len(peak1.position))]
         if not _havePeakNearPosition(values1, tolerances, peaks2):
           peakList3.newPeak(height=peak1.height, volume=peak1.volume, figureOfMerit=peak1.figureOfMerit,
-                           annotation=peak1.annotation, position=peak1.position, pointPosition=peak1.pointPosition)
+                            annotation=peak1.annotation, position=peak1.position,
+                            pointPosition=peak1.pointPosition)
 
 
     finally:

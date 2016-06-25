@@ -28,7 +28,7 @@ import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
-from ccpn.core.SampleComponent import SampleComponent
+# from ccpn.core.SampleComponent import SampleComponent
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
@@ -121,26 +121,21 @@ class Chain(AbstractWrapperObject):
 
     return substances[0] if substances else None
 
-    # apiMolecule = self._apiChain.molecule
-    # apiRefComponentStore = self._project._apiNmrProject.sampleStore.refSampleComponentStore
-    # apiComponent = (apiRefComponentStore.findFirstComponent(name=apiMolecule.name, labeling='std') or
-    #                 apiRefComponentStore.findFirstComponent(name=apiMolecule.name))
-    # if apiComponent is None:
-    #   return None
-    # else:
-    #   return self._project._data2Obj[apiComponent]
 
   # CCPN functions
   def clone(self, shortName:str=None):
     """Make copy of chain."""
 
-    molSystem = self._project._wrappedData.molSystem
+    # Imported here to avoid circular imports
+    from ccpn.core.lib import Molecule as MoleculeLib
+
+    apiMolSystem = self._project._wrappedData.molSystem
 
     if shortName is None:
-      shortName = molSystem._wrappedData.nextChainCode()
+      shortName = apiMolSystem.nextChainCode()
 
-    if molSystem.findFirstChain(code=shortName) is not None:
-      raise ValueError("Project already has one Chain with shortNAme %s" % shortName)
+    if apiMolSystem.findFirstChain(code=shortName) is not None:
+      raise ValueError("Project already has one Chain with shortName %s" % shortName)
     
     ccpnChain = self._wrappedData
     tags = ['molecule', 'role', 'magnEquivalenceCode', 'physicalState', 
@@ -150,11 +145,13 @@ class Chain(AbstractWrapperObject):
     params['pdbOneLetterCode'] = shortName[0]
     self._startFunctionCommandBlock('clone', shortName, parName='newChain')
     try:
-      newCcpnChain = molSystem.newChain(**params)
+      newCcpnChain = apiMolSystem.newChain(**params)
+      result = self._project._data2Obj[newCcpnChain]
+      MoleculeLib.duplicateAtomBonds({self:result})
     finally:
       self._project._appBase._endCommandBlock()
     #
-    return self._project._data2Obj[newCcpnChain]
+    return result
                                   
 
   def _lock(self):

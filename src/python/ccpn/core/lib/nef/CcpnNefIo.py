@@ -166,6 +166,9 @@ class CcpnNefIo:
         ('residue_type', 'residueType'),
         ('linking', 'linking'), ('residue_variant', 'residueVariant'),
        ))),
+
+      # NBNB REDO - (we no longer have Bonds
+
       ('nef_covalent_links', OD((               # Matching class : Bond
         ('chain_code_1', None), ('sequence_code_1', None),
         ('residue_type_1', None), ('atom_name_1', None),
@@ -366,7 +369,7 @@ class CcpnNefIo:
     programName = programName or project.programName
     if programVersion is None:
       self.programVersion = ('%s-%s' % (Version.applicationVersion, Version.revision)
-                             if appBase is None else project._appBase.applicationVersion)
+                             if project._appBase is None else project._appBase.applicationVersion)
 
     self.ccpn2SaveFrameName = {}
 
@@ -472,7 +475,11 @@ class CcpnNefIo:
       result['program_version'] = self.programVersion
       result['creation_date'] = timeStamp = commonUtil.getTimeStamp()
       result['uuid'] = '%s-%s-%s' % (self.programName, timeStamp, random.randint(0, maxRandomInt))
-      NBNB now set automatically
+
+
+      # TODO NBNB now set automatically
+
+
       # This attribute is only present when exporting DataSets
       del result['ccpn_dataset_comment']
       # This loop is only set when exporting DataSets
@@ -517,6 +524,9 @@ class CcpnNefIo:
 
       loop = result['nef_covalent_links']
       bonds = chains[0].project.bonds
+
+      # NBNB REDO - we no longer have bonds
+
       if bonds:
         columns = ['chain_code_1', 'sequence_code_1', 'residue_type_1', 'atom_name_1',
                    'chain_code_2', 'sequence_code_2', 'residue_type_2', 'atom_name_2',

@@ -58,27 +58,27 @@ class ComplexUndoTest(WrapperTesting):
 
 
   def test_copy_chain_undo(self):
-    from ccpnmodel.ccpncore.lib import CopyData
-    project = self.project._wrappedData.root
-    project._undo = Undo()
-    project._undo.newWaypoint()
-    molSystem = project.findFirstMolSystem(code='MS1')
-    chainA = molSystem.findFirstChain(code='A')
-    chainB = CopyData.copySubTree(chainA, molSystem, topObjectParameters={'code':'B'})
-    project._undo.undo()
-    project.checkAllValid()
+    apiProject = self.project._wrappedData.root
+    apiProject._undo = Undo()
+    apiProject._undo.newWaypoint()
+    molSystem = apiProject.findFirstMolSystem(code='MS1')
+    apiChainA = molSystem.findFirstChain(code='A')
+    chainA = self.project._data2Obj.get(apiChainA)
+    chainB = chainA.clone()
+    apiProject._undo.undo()
+    apiProject.checkAllValid()
 
   def test_copy_chain_undo_redo(self):
-    from ccpnmodel.ccpncore.lib import CopyData
-    project = self.project._wrappedData.root
-    project._undo = Undo()
-    project._undo.newWaypoint()
-    molSystem = project.findFirstMolSystem(code='MS1')
-    chainA = molSystem.findFirstChain(code='A')
-    chainB = CopyData.copySubTree(chainA, molSystem, topObjectParameters={'code':'B'})
-    project._undo.undo()
-    project._undo.redo()
-    project.checkAllValid()
+    apiProject = self.project._wrappedData.root
+    apiProject._undo = Undo()
+    apiProject._undo.newWaypoint()
+    molSystem = apiProject.findFirstMolSystem(code='MS1')
+    apiChainA = molSystem.findFirstChain(code='A')
+    chainA = self.project._data2Obj.get(apiChainA)
+    chainB = chainA.clone()
+    apiProject._undo.undo()
+    apiProject._undo.redo()
+    apiProject.checkAllValid()
 
   def test_delete_residues_undo(self):
       project = self.project._wrappedData.root

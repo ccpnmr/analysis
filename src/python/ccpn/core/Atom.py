@@ -87,9 +87,27 @@ class Atom(AbstractWrapperObject):
   @property
   def boundAtoms(self) -> typing.Tuple['Atom']:
     """Atoms that are covalently bound to this Atom"""
-    getDataObj = self._data2Obj.get
-    boundAtoms = (getDataObj(x) for x in self._wrappedData.boundAtoms)
-    return tuple(x for x in boundAtoms if x is not None)
+    getDataObj = self._project._data2Obj.get
+    apiAtom = self._wrappedData
+
+    boundApiAtoms = list(apiAtom.boundAtoms)
+    for apiBond in apiAtom.genericBonds:
+      ll = list(apiBond.atoms)
+      apiAtom2 = ll[0] if apiAtom is ll[1] else ll[1]
+      boundApiAtoms.append(apiAtom2)
+    boundAtoms = (getDataObj(x) for x in boundApiAtoms)
+    return tuple(sorted(x for x in boundAtoms if x is not None))
+
+  def addInterAtomBond(self, atom:'Atom'):
+    """ADVANCED Add generic bond between atoms - for creating disulfides or other crosslinks
+    The bound-to atom will appear in self.boundAtoms.
+
+    NB This function does not remove superfluous atoms (like CYS HG),
+    or check for chemical plausibility. Programmer beware!"""
+    project = self._project
+    project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
+
+
 
   # Utility functions
     

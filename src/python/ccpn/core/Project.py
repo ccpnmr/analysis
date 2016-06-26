@@ -197,14 +197,15 @@ class Project(AbstractWrapperObject):
 
   def save(self, newPath:str=None, changeBackup:bool=True,
                   createFallback:bool=False, overwriteExisting:bool=False,
-                  checkValid:bool=False, changeDataLocations:bool=False):
+                  checkValid:bool=False, changeDataLocations:bool=False) -> bool:
     """Save project with all data, optionally to new location or with new name.
-    Unlike lower-level functions, this function ensures that data in high level caches are also saved """
+    Unlike lower-level functions, this function ensures that data in high level caches are saved.
+    Return True if save succeeded otherwise return False (or throw error)"""
     self._flushCachedData()
-    apiIo.saveProject(self._wrappedData.root, newPath=newPath,
-                       changeBackup=changeBackup, createFallback=createFallback,
-                       overwriteExisting=overwriteExisting, checkValid=checkValid,
-                       changeDataLocations=changeDataLocations)
+    return apiIo.saveProject(self._wrappedData.root, newPath=newPath,
+                             changeBackup=changeBackup, createFallback=createFallback,
+                             overwriteExisting=overwriteExisting, checkValid=checkValid,
+                             changeDataLocations=changeDataLocations)
 
   
   @property

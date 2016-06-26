@@ -87,7 +87,7 @@ class StructureEnsembleTesting2(WrapperTesting):
     self.assertEqual( ensemble.atomIds[:8], ['A.10.ASN. N', 'A.10.ASN. CA', 'A.10.ASN. C',
                                             'A.10.ASN. O', 'A.10.ASN. CB', 'A.10.ASN. CG',
                                             'A.10.ASN. OD1', 'A.10.ASN. ND2'])
-    self.project.save()
+    self.assertTrue(self.project.save())
     # loadedProject = core.loadProject(self.project.path)
     loadedProject = Framework.getFramework(projectPath=self.project.path).project
     try:
@@ -159,7 +159,7 @@ class StructureEnsembleTesting2(WrapperTesting):
     self.assertEqual(list(ensemble.occupancyData.flat[2:]), [2.0, 3.0, 0.0, 1.0, 2.0, 3.0])
     self.assertTrue(numpy.isnan(ensemble.occupancyData.flat[1]))
 
-    self.project.save()
+    self.assertTrue(self.project.save())
     # loadedProject = core.loadProject(self.project.path)
     loadedProject = Framework.getFramework(projectPath=self.project.path).project
     try:

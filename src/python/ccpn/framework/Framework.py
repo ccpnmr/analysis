@@ -718,10 +718,16 @@ class Framework:
 
     self.ui.mainWindow.processDropData(paths, dataType='urls')
 
-  def saveProject(self, newPath=None, createFallback=True):
+  def saveProject(self, newPath=None, createFallback=True) -> bool:
+    """Save project to newPath and return True if successful"""
     # TODO: convert this to a save and call self.project.save()
     pass
-    self.project.save(newPath=newPath, createFallback=createFallback)
+    successful = self.project.save(newPath=newPath, createFallback=createFallback)
+    if not successful:
+      sys.stderr.write('==> Project save failed\n')
+
+      # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
+
     self.ui.mainWindow._updateWindowTitle()
 
     layout = self.ui.mainWindow.moduleArea.saveState()
@@ -738,13 +744,25 @@ class Framework:
     # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
     #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
+    return successful
+
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
     newPath = getSaveDirectory()
     if newPath:
       # Next line unnecessary, but does not hurt
       newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
-      self.saveProject(newPath=newProjectPath, createFallback=False)
+      successful = self.saveProject(newPath=newProjectPath, createFallback=False)
+
+      if not successful:
+        self.project._logger.warning("Saving project to %s aborted" % newProjectPath)
+    else:
+      successful = False
+      self.project._logger.info("Project not saved - no valid destination selected")
+    #
+    return successful
+
+    # NBNB TODO Consider appropriate failure handling. Is this OK?
 
   def saveBackup(self):
     pass

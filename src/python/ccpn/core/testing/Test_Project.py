@@ -132,6 +132,7 @@ class ProjectTestIo(WrapperTesting):
     self.assertEquals(projDir[-5:], '.ccpn')
     self.assertTrue(projDir.startswith('CcpnCourse2b'))
 
-    project.save(newPath=os.path.join(baseDir, '_SAVED_TO_NAME.ccpn'), overwriteExisting=True)
+    self.assertTrue(project.save(newPath=os.path.join(baseDir, '_SAVED_TO_NAME.ccpn'),
+                                 overwriteExisting=True))
     self.assertTrue(project.name.startswith('_SAVED_TO_NAME'))
     self.assertTrue(project.name == '_SAVED_TO_NAME' or project.name[14] == '_')

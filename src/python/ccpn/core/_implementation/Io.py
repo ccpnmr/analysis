@@ -43,7 +43,7 @@ def loadProject(path:str, useFileLogger:bool=True) -> Project:
     if os.path.exists(oldProjectFilePath):
       os.remove(oldProjectFilePath)
     apiProject.__dict__['name'] = newName
-    apiProject.__dict__['isModified'] = True
+    apiProject.touch()
     apiProject.save()
   #
   return project

@@ -33,7 +33,7 @@ class NoteTest(WrapperTesting):
 
   def test_make_and_save_note(self):
     self.project.newNote(text='Balaclava')
-    self.project.save()
+    self.assertTrue(self.project.save())
     # loadedProject = core.loadProject(self.project.path)
     loadedProject = Framework.getFramework(projectPath=self.project.path).project
     loadedProject.delete()

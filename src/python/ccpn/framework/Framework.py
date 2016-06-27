@@ -1094,7 +1094,7 @@ class Framework:
     """
     Displays macro editor.
     """
-    editor = MacroEditor(self.ui.mainWindow.moduleArea, self.ui.mainWindow, "Macro Editor")
+    editor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor")
 
   def newMacroFromConsole(self):
     """

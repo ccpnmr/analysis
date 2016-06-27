@@ -21,7 +21,7 @@ class MacroEditor(DropBase, CcpnModule):
     self.parent = parent
     self.mainWindow = mainWindow
     self.parent.addModule(self)
-    self.preferences = self.mainWindow.framework.preferences
+    self.preferences = self.mainWindow.preferences
     self.textBox = TextEditor()
     widgetLayout = QtGui.QGridLayout()
     widget.setLayout(widgetLayout)

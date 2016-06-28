@@ -514,8 +514,8 @@ class ContoursTab(QtGui.QWidget, Base):
 
   def _lineEditTextChanged3(self, spectrum, value):
     spectrum.positiveContourCount = int(value)
-    self._writeLoggingMessage("spectrum.positiveContourCount = %f" % int(value))
-    self.pythonConsole.writeConsoleCommand("spectrum.positiveContourCount = %f" % int(value), spectrum=spectrum)
+    self._writeLoggingMessage("spectrum.positiveContourCount = %d" % int(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.positiveContourCount = %d" % int(value), spectrum=spectrum)
 
   def _lineEditTextChanged4(self, spectrum, value):
     spectrum.negativeContourBase = float(value)
@@ -529,8 +529,8 @@ class ContoursTab(QtGui.QWidget, Base):
 
   def _lineEditTextChanged6(self, spectrum, value):
     spectrum.negativeContourCount = int(value)
-    self._writeLoggingMessage("spectrum.negativeContourCount = %f" % int(value))
-    self.pythonConsole.writeConsoleCommand("spectrum.negativeContourCount = %f" % int(value), spectrum=spectrum)
+    self._writeLoggingMessage("spectrum.negativeContourCount = %d" % int(value))
+    self.pythonConsole.writeConsoleCommand("spectrum.negativeContourCount = %d" % int(value), spectrum=spectrum)
 
   def _changePosSpectrumColour(self, spectrum):
     dialog = ColourDialog()

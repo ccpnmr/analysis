@@ -672,7 +672,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     """
     
     xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
-    
+
     if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
       or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]]):
       self._releaseDisplayLists(self.posDisplayLists)
@@ -701,7 +701,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if doNegLevels:
       negLevelsArray = numpy.array(negLevels, numpy.float32)
       self._createDisplayLists(negLevelsArray, self.negDisplayLists)
-      
+
+    self.posLevelsPrev = list(posLevels)
+    self.negLevelsPrev = list(negLevels)
+    self.xDataDimPrev = xDataDim
+    self.yDataDimPrev = yDataDim
+    self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])
+
     if not doPosLevels and not doNegLevels:
       return
       
@@ -748,13 +754,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         self._addContoursToDisplayList(self.negDisplayLists[n], contourData, negLevels[n])
       
     ###GL.glDisableClientState(GL.GL_VERTEX_ARRAY)
-    
-    self.posLevelsPrev = list(posLevels)
-    self.negLevelsPrev = list(negLevels)
-    self.xDataDimPrev = xDataDim
-    self.yDataDimPrev = yDataDim
-    self.zRegionPrev = tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])
-    
+
   def _releaseDisplayLists(self, displayLists):
 
     for displayList in displayLists:

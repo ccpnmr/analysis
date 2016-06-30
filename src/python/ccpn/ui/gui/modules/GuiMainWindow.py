@@ -347,7 +347,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if result:
       if projectDir is None:
         dialog = FileDialog(self, fileMode=2, text="Open Project", acceptMode=0, preferences=self._appBase.preferences.general)
-        projectDir = dialog.selectedFiles()[0]
+        projectDir = dialog.selectedFile()
+
 
       if projectDir:
         self.framework.loadProject(projectDir)

@@ -51,7 +51,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
     layout = QtGui.QGridLayout()
     self.setLayout(layout)
     tabWidget = QtGui.QTabWidget()
-    tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
+    # tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     if spectrum.dimensionCount == 1:
       tabWidget.addTab(GeneralTab(spectrum), "General")
       tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
@@ -63,7 +63,7 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
 
 
     self.layout().addWidget(tabWidget, 0, 0, 2, 2)
-    buttonBox = Button(self, grid=(3, 1), callback=self.accept, text='Close',
+    buttonBox = Button(self, grid=(2, 1), callback=self.accept, text='Close',
                            vPolicy='fixed')
     if sys.platform.lower() == 'linux':
       if spectrum.project._appBase.preferences.general.colourScheme == 'dark':

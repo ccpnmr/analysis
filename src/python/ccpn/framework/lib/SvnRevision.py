@@ -29,7 +29,7 @@ import re
 __all__ = ['applicationVersion', 'revision']
 
 applicationVersion = '3.0.0.m0'
-REVISION = '9497'
+REVISION = '9534'
 __revision = None
 
 

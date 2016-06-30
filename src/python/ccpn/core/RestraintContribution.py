@@ -182,7 +182,7 @@ class RestraintContribution(AbstractWrapperObject):
     """restraint items of contribution - given as a tuple of tuples of AtomId (not Pid).
 
     Example value:
-    (('A.127.ALA.HA','A.130.Ser.H'), ('A.93.Val.HA','A.93.TYR.H'))
+    (('A.127.ALA.HA','A.130.SER.H'), ('A.93.VAL.HA','A.93.TYR.H'))
     """
 
     itemLength = self._wrappedData.constraint.parentList.itemLength

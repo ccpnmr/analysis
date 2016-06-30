@@ -724,6 +724,10 @@ class Project(AbstractWrapperObject):
     getDataObj = self._data2Obj.get
 
     target = operator.attrgetter(pathToObject)(wrappedData)
+
+    self._project._logger.debug('_notifyRelatedApiObject: %s: %s.%s = %s'
+                                % (action, wrappedData, pathToObject, target))
+
     if not target:
       pass
     elif hasattr(target, '_metaclass'):

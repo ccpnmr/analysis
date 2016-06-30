@@ -390,7 +390,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     for recentFile in recentFileLocations:
       recentFileMenu.addAction(Action(recentFileMenu, text=recentFile, translate=False,
                                       callback=partial(self.framework.loadProject,
-                                                       projectDir=recentFile)))
+                                                       path=recentFile)))
     recentFileMenu.addSeparator()
     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
                                     callback=self.framework.clearRecentProjects))

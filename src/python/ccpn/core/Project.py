@@ -507,7 +507,7 @@ class Project(AbstractWrapperObject):
       is triggered when a cross link (NOT a parent-child link) between the className and
       the target class is modified
 
-    param: Callable func: The function to call when the notifier is triggered.
+    :param Callable func: The function to call when the notifier is triggered.
 
       for actions 'create', 'delete' and 'change' the function is called with the object
       created (deleted, undeleted, changed) as the only parameter
@@ -520,7 +520,7 @@ class Project(AbstractWrapperObject):
 
     param: dict parameterDict: Parameters passed to the notifier function before execution.
 
-    This allows you to use the same function with different parameters in different contexts
+      This allows you to use the same function with different parameters in different contexts
 
     param: bool onceOnly: If True, only one of multiple copies is executed
 

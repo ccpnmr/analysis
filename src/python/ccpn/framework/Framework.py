@@ -412,6 +412,7 @@ class Framework:
 
       # set undo step
       undo.newWaypoint()
+      self.project.suspendNotification()
 
       # Get list of command strings
       commands = []
@@ -432,7 +433,9 @@ class Framework:
 
     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
     if self._echoBlocking > 0:
+      # If statement should always be True, but to avoid weird behaviour in error situations we check
       self._echoBlocking -= 1
+    self.project.resumeNotification()
 
   def addApplicationMenuSpec(self, spec, position=3):
     self._menuSpec.insert(position, spec)

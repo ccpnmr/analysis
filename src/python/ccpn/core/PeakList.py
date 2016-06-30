@@ -169,7 +169,6 @@ class PeakList(AbstractWrapperObject):
 
 
     self._startFunctionCommandBlock('pickPeaksNd', values=locals(), defaults=defaults)
-    self._project.suspendNotification()
     try:
 
       startPoint = []
@@ -204,7 +203,6 @@ class PeakList(AbstractWrapperObject):
       data2ObjDict = self._project._data2Obj
 
     finally:
-      self._project.resumeNotification()
       self._project._appBase._endCommandBlock()
 
     return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
@@ -261,7 +259,6 @@ class PeakList(AbstractWrapperObject):
     )
 
     self._startFunctionCommandBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
-    self._project.suspendNotification()
     ll = []
     try:
       if not ignoredRegions:
@@ -302,7 +299,6 @@ class PeakList(AbstractWrapperObject):
         peaks.append(self.newPeak(height=float(height), position=peakPosition))
 
     finally:
-      self._project.resumeNotification()
       self._project._appBase._endCommandBlock()
 
     return peaks
@@ -327,8 +323,6 @@ class PeakList(AbstractWrapperObject):
     self._startFunctionCommandBlock('subtractPeakLists', values={'peakList2':peakList2},
                                     parName='newPeakList')
 
-    self._project.suspendNotification()
-
     try:
 
       spectrum = self.spectrum
@@ -350,7 +344,6 @@ class PeakList(AbstractWrapperObject):
 
 
     finally:
-      self._project.resumeNotification()
       self._project._appBase._endCommandBlock()
 
     return peakList3

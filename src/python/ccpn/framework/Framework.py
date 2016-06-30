@@ -771,10 +771,16 @@ class Framework:
     pass
 
   def undo(self):
+    self.ui.echoCommands(['application.undo()'])
+    self._echoBlocking += 1
     self.project._undo.undo()
+    self._echoBlocking -= 1
 
   def redo(self):
+    self.ui.echoCommands(['application.redo()'])
+    self._echoBlocking += 1
     self.project._undo.redo()
+    self._echoBlocking -= 1
 
   def saveLogFile(self):
     pass

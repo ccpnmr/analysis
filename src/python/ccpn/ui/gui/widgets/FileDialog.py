@@ -59,12 +59,29 @@ class FileDialog(QtGui.QFileDialog):
       elif preferences.colourScheme == 'light':
         self.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
 
+    # self.result is '' (first case) or 0 (second case) if Cancel button selected
     if preferences and preferences.useNative and not sys.platform.lower() == 'linux':
       funcName = staticFunctionDict[(acceptMode, fileMode)]
-      getattr(self, funcName)(caption=text, **kw)
+      self.result = getattr(self, funcName)(caption=text, **kw)
     else:
-      self.exec_()
+      self.result = self.exec_()
 
+  # overrides Qt function, which does not pay any attention to whether Cancel button selected
+  def selectedFiles(self):
+
+    if self.result:
+      return QtGui.QFileDialog.selectedFiles(self)
+    else:
+      return []
+
+  # Qt does not have this but useful if you know you only want one file
+  def selectedFile(self):
+
+    files = self.selectedFiles()
+    if files:
+      return files[0]
+    else:
+      return None
 
 
 

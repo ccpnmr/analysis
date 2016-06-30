@@ -612,6 +612,8 @@ class AbstractWrapperObject():
       else:
         for dd in iterator:
           for notifier in dd:
+            self._project._logger.debug('finaliseAction notifier: %s; %s; %s'
+                                        % (action, self, notifier))
             notifier(self)
 
   def _startFunctionCommandBlock(self, funcName, *params, values=None, defaults=None, parName=None):

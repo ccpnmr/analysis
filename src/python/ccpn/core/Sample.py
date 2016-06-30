@@ -21,21 +21,21 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import collections
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
-import collections
 
-from ccpn.util import Pid
-
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumHit import SpectrumHit
-from ccpnmodel.ccpncore.lib import Util as coreUtil
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.util import Common as commonUtil
+from ccpn.util import Pid
+from ccpn.util import Constants
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.lib import Util as coreUtil
 
 
 class Sample(AbstractWrapperObject):
@@ -98,7 +98,7 @@ class Sample(AbstractWrapperObject):
 
   @property
   def amount(self) -> float:
-    """amount of sample, in uint of amountUnit. In most cases this is the volume, but
+    """amount of sample, in unit of amountUnit. In most cases this is the volume, but
     there are other possibilities, e.g. for solid state NMR."""
     return self._wrappedData.amount
 
@@ -108,11 +108,21 @@ class Sample(AbstractWrapperObject):
 
   @property
   def amountUnit(self) -> str:
-    """amountUnit for sample"""
-    return self._wrappedData.amountUnit
+    """amountUnit for sample, one of %s""" % Constants.amountUnits
+    result =  self._wrappedData.amountUnit
+    if result not in Constants.amountUnits:
+      self._project._logger.warning(
+        "Unsupported stored value %s for Sample.amountUnit."
+        % result)
+    #
+    return result
 
   @amountUnit.setter
   def amountUnit(self, value:str):
+    if value not in Constants.amountUnits:
+      self._project._logger.warning(
+        "Setting unsupported value %s for Sample.amountUnit."
+        % value)
     self._wrappedData.amountUnit = value
 
   @property
@@ -246,7 +256,7 @@ class Sample(AbstractWrapperObject):
 
 
 def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=None,
-               amount:float=None, amountUnit:str='L', isVirtual:bool=False, isHazardous:bool=None,
+               amount:float=None, amountUnit:str=None, isVirtual:bool=False, isHazardous:bool=None,
                creationDate:datetime=None, batchIdentifier:str=None, plateIdentifier:str=None,
                rowNumber:int=None, columnNumber:int=None, comment:str=None) -> Sample:
   """Create new ccpn.Sample"""
@@ -254,11 +264,15 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
   # Default values for 'new' function, as used for echoing to console
   defaults = collections.OrderedDict(
     (('name',None), ('pH',None), ('ionicStrength', None),
-     ('amount',None), ('amountUnit','L'), ('isVirtual', False), ('isHazardous', None),
+     ('amount',None), ('amountUnit',None), ('isVirtual', False), ('isHazardous', None),
      ('creationDate',None), ('batchIdentifier',None), ('plateIdentifier', None),
      ('rowNumber',None), ('columnNumber',None), ('comment', None)
     )
   )
+  if amountUnit not in Constants.amountUnits:
+    self._project._logger.warning(
+      "Unsupported value %s for Sample.amountUnit."
+      % amountUnit)
 
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
@@ -277,7 +291,8 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
       raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
     newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
-                                            amount=amount, amountUnit=amountUnit, isVirtual=isVirtual,
+                                            amount=amount, amountUnit=amountUnit,
+                                            isVirtual=isVirtual,
                                             isHazardous=isHazardous, creationDate=creationDate,
                                             batchIdentifier=batchIdentifier,
                                             plateIdentifier=plateIdentifier,rowPosition=rowNumber,
@@ -334,7 +349,8 @@ Project._apiNotifiers.extend(
     ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'removeSampledDataDim'),
     ('_modifiedLink', {'classNames':('Sample','SpectrumHit')}, className, 'setSampledDataDims'),
     ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'addSampledDataDim'),
-    ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'removeSampledDataDim'),
+    ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className,
+     'removeSampledDataDim'),
     ('_modifiedLink', {'classNames':('Sample','PseudoDimension')}, className, 'setSampledDataDims'),
   )
 )

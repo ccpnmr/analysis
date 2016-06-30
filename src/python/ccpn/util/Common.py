@@ -26,10 +26,10 @@ __version__ = "$Revision$"
 NB Must conform to Python 2.1. Imported in ObjectDomain.
 """
 
-import os
-import sys
 import datetime
+import os
 import random
+import sys
 from collections import abc as collectionClasses
 from functools import total_ordering
 
@@ -51,8 +51,6 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           + defaultFileNameChar)
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
-# Default name for natural abundance labeling - given as None externally
-DEFAULT_LABELING = '_NATURAL_ABUNDANCE'
 
 @total_ordering
 class __MinType(object):

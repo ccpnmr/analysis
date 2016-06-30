@@ -23,19 +23,19 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections import OrderedDict
-from ccpn.util.Common import DEFAULT_LABELING
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from typing import Tuple, Optional, Sequence
+
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
-from ccpn.core.Spectrum import Spectrum
-from typing import Tuple, Optional, Sequence
-from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
 from ccpn.core.SampleComponent import SampleComponent
-from ccpnmodel.ccpncore.lib import Util as coreUtil
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.util import Pid
+from ccpn.util.Constants import DEFAULT_LABELING
 from ccpnmodel.ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.util import Pid
-
+from ccpnmodel.ccpncore.lib import Util as coreUtil
+from ccpnmodel.ccpncore.lib.molecule import MoleculeModify
 
 _apiClassNameMap = {
   'MolComponent':'Molecule',
@@ -113,8 +113,8 @@ class Substance(AbstractWrapperObject):
 
     - Material is a mixture, like fetal calf serum, growth medium, or standard buffer,
 
-    - Composite is multiple components in fixed ratio, like a protein-ligand or multiprotein complex,
-    or (technically) a Cell containing a particular plasmid.
+    - Composite is multiple components in fixed ratio, like a protein-ligand or multiprotein
+    complex, or (technically) a Cell containing a particular plasmid.
     """
     result = self._wrappedData.className
     return _apiClassNameMap.get(result, result)
@@ -188,7 +188,8 @@ class Substance(AbstractWrapperObject):
   def empiricalFormula(self) -> Optional[str]:
     """Empirical molecular formula string - for substances that have one"""
     apiRefComponent = self._wrappedData
-    return apiRefComponent.empiricalFormula if hasattr(apiRefComponent, 'empiricalFormula') else None
+    return (apiRefComponent.empiricalFormula if hasattr(apiRefComponent, 'empiricalFormula')
+            else None)
 
   @empiricalFormula.setter
   def empiricalFormula(self, value):
@@ -417,8 +418,8 @@ class Substance(AbstractWrapperObject):
         for spectrumHit in sampleComponent.spectrumHits:
           coreUtil._resetParentLink(spectrumHit._wrappedData, 'spectrumHits',
             OrderedDict((('substanceName',name),
-                        ('sampledDimension',spectrumHit.sampledDimension),
-                        ('sampledPoint',spectrumHit.sampledPoint)))
+                        ('sampledDimension',spectrumHit.pseudoDimensionNumber),
+                        ('sampledPoint',spectrumHit.pointNumber)))
           )
           renamedObjects.append(spectrumHit)
 
@@ -530,15 +531,10 @@ def _newSubstance(self:Project, name:str, labeling:str=None, substanceType:str='
                           % (name, oldSubstance.className))
       else:
         apiResult = apiComponentStore.newMolComponent(smiles=smiles, inChi=inChi, casNum=casNumber,
-                                                      empiricalFormula=empiricalFormula,
-                                                      molecularMass=molecularMass,
-                                                      atomCount=atomCount, bondCount=bondCount,
-                                                      ringCount=ringCount,
-                                                      hBondDonorCount=hBondDonorCount,
-                                                      hBondAcceptorCount=hBondAcceptorCount,
-                                                      polarSurfaceArea=polarSurfaceArea,
-                                                      logPartitionCoefficient=logPartitionCoefficient,
-                                                      **params)
+          empiricalFormula=empiricalFormula, molecularMass=molecularMass, atomCount=atomCount,
+          bondCount=bondCount, ringCount=ringCount, hBondDonorCount=hBondDonorCount,
+          hBondAcceptorCount=hBondAcceptorCount, polarSurfaceArea=polarSurfaceArea,
+          logPartitionCoefficient=logPartitionCoefficient, **params)
     else:
       raise ValueError("Substance type %s not recognised" % substanceType)
   finally:

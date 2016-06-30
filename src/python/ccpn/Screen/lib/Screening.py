@@ -2,13 +2,13 @@ __author__ = 'luca'
 
 
 import numpy as np
-import pandas as pd
+# import pandas as pd
 
 from collections import namedtuple
-from math import sin, cos, pi, log
+# from math import sin, cos, pi, log
 import os
-from numpy import argwhere
-from scipy.ndimage import maximum_filter
+# from numpy import argwhere
+# from scipy.ndimage import maximum_filter
 
 
 Peak = namedtuple('Peak', ['frequency', 'linewidth', 'intensity', 'phase'])

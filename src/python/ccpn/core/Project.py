@@ -629,7 +629,7 @@ class Project(AbstractWrapperObject):
   def _startDeleteCommandBlock(self, wrappedData):
     """Call startCommandBlock for wrapper object delete. Implementation only"""
     object = self._data2Obj[wrappedData]
-    self._appBase._startCommandBlock("project.deleteObjects(%s)" % (repr(object.longPid)))
+    self._appBase._startCommandBlock("project.deleteObjects(%s)" % (repr(object.pid)))
 
 
   def _endCommandBlock(self, dummyWrappedData):

@@ -417,7 +417,7 @@ class Framework:
       commands = []
       for parameter, value in sorted(objectParameters.items()):
         if not isinstance(value, str):
-          value = value.longPid
+          value = value.pid
         commands.append("%s = project.getByPid(%s)\n" % (parameter, repr(value)))
       commands.append(command)
 

@@ -22,17 +22,19 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple
 import collections
-from ccpn.util.Common import DEFAULT_LABELING
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from typing import Tuple
+
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
 from ccpn.core.SpectrumHit import SpectrumHit
-from ccpnmodel.ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
-from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
-from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.util import Pid
+from ccpn.util import Constants
+from ccpn.util.Constants import DEFAULT_LABELING
+from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
+from ccpnmodel.ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
+from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 
 class SampleComponent(AbstractWrapperObject):
@@ -121,11 +123,22 @@ class SampleComponent(AbstractWrapperObject):
 
   @property
   def concentrationUnit(self) -> str:
-    """Unit of SampleComponent.concentration, one of: 'g/L', 'M', 'L/L', 'mol/mol', 'g/g' """
-    return self._wrappedData.concentrationUnit
+    """Unit of SampleComponent.concentration, one of: %s """ % Constants.concentrationUnits
+
+    result =  self._wrappedData.concentrationUnit
+    if result not in Constants.concentrationUnits:
+      self._project._logger.warning(
+        "Unsupported stored value %s for SampleComponent.concentrationUnit"
+        % result)
+    #
+    return result
 
   @concentrationUnit.setter
   def concentrationUnit(self, value:str):
+    if value not in Constants.concentrationUnits:
+      self._project._logger.warning(
+        "Setting unsupported value %s for SampleComponent.concentrationUnit."
+        % value)
     self._wrappedData.concentrationUnit = value
 
   @property
@@ -189,6 +202,12 @@ def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
     if ss and Pid.altCharacter in ss:
       raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
                        (Pid.altCharacter, name, labeling))
+
+
+  if concentrationUnit not in Constants.concentrationUnits:
+    self._project._logger.warning(
+      "Unsupported value %s for SampleComponent.concentrationUnit"
+      % concentrationUnit)
 
   apiSample = self._wrappedData
   self._startFunctionCommandBlock('newSampleComponent', name, values=locals(), defaults=defaults,

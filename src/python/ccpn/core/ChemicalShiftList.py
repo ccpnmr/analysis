@@ -89,12 +89,8 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   @property
   def unit(self) -> str:
-    """Measurement unit of ChemicalShiftList"""
-    return self._wrappedData.unit
-
-  @unit.setter
-  def unit(self, value:str):
-    self._wrappedData.unit = value
+    """Measurement unit of ChemicalShiftList. By definition must always be 'ppm'"""
+    return 'ppm'
 
   @property
   def autoUpdate(self) -> bool:
@@ -175,11 +171,11 @@ PeakList.chemicalShiftList = property(getter, setter, None,
 del getter
 del setter
 
-def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
+def _newChemicalShiftList(self:Project, name:str=None,
                           isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
   """Create new ccpn.ChemicalShiftList"""
 
-  defaults = collections.OrderedDict((('name', None), ('unit', 'ppm'), ('isSimulated', False),
+  defaults = collections.OrderedDict((('name', None), ('isSimulated', False),
                                      ('comment', None)))
 
   if name and Pid.altCharacter in name:
@@ -188,7 +184,7 @@ def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm',
   self._startFunctionCommandBlock('newChemicalShiftList', values=locals(), defaults=defaults,
                                   parName='newChemicalShiftList')
   try:
-    obj = self._wrappedData.newShiftList(name=name, unit=unit, isSimulated=isSimulated,
+    obj = self._wrappedData.newShiftList(name=name, isSimulated=isSimulated,
                                          details=comment)
   finally:
     self._project._appBase._endCommandBlock()

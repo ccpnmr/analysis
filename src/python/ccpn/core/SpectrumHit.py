@@ -29,6 +29,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
 from ccpn.util import Pid
+from ccpn.util import Constants
 
 
 class SpectrumHit(AbstractWrapperObject):
@@ -157,11 +158,21 @@ class SpectrumHit(AbstractWrapperObject):
 
   @property
   def concentrationUnit(self) -> str:
-    """Unit of SpectrumHit.concentration, one of: 'g/L', 'M', 'L/L', 'mol/mol', 'g/g' """
-    return self._wrappedData.concentrationUnit
+    """Unit of SpectrumHit.concentration, one of: %s """ % Constants.concentrationUnits
+
+    result = self._wrappedData.concentrationUnit
+    if result not in Constants.concentrationUnits:
+      self._project._logger.warning(
+        "Unsupported stored value %s for SpectrumHit.concentrationUnit."
+        % result)
+    return result
 
   @concentrationUnit.setter
   def concentrationUnit(self, value:str):
+    if value not in Constants.concentrationUnits:
+      self._project._logger.warning(
+        "Setting unsupported value %s for SpectrumHit.concentrationUnit."
+        % value)
     self._wrappedData.concentrationUnit = value
 
   @property
@@ -183,7 +194,7 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
                      pseudoDimensionNumber:int=0, pseudoDimension:PseudoDimension=None,
                     figureOfMerit:float=None,  meritCode:str=None, normalisedChange:float=None,
                     isConfirmed:bool=None, concentration:float=None, concentrationError:float=None,
-                    concentrationUnit:str='M', comment:str=None):
+                    concentrationUnit:str=None, comment:str=None):
   """Create new ccpn.SpectrumHit within ccpn.Spectrum"""
 
   # Default values for 'new' function, as used for echoing to console
@@ -191,9 +202,14 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
     (('pointNumber', 0), ('pseudoDimensionNumber', 0),
      ('figureOfMerit',None), ('meritCode',None), ('normalisedChange', None),
      ('isConfirmed',None), ('concentration',None), ('concentrationError', None),
-     ('concentrationUnit','M'), ('comment',None)
+     ('concentrationUnit',None), ('comment',None)
      )
   )
+
+  if concentrationUnit not in Constants.concentrationUnits:
+    self._project._logger.warning(
+      "Unsupported value %s for SpectrumHit.concentrationUnit."
+      % concentrationUnit)
 
   self._startFunctionCommandBlock('newSpectrumHit', substanceName, values=locals(), defaults=defaults,
                                   parName='newSpectrumHit')

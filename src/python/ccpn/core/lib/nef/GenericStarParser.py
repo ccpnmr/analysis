@@ -236,7 +236,7 @@ class StarContainer(NamedOrderedDict):
 
   def multiColumnValues(self, columns) -> list:
     """get tuple of orderedDict of values for columns.
-    WIll work whether columns are in a loop or single values
+    Will work whether columns are in a loop or single values
     If columns match a single loop or nothing, return the loop data.
     Otherwise return a tuple with a single OrderedDict.
     If no column matches return None
@@ -486,10 +486,10 @@ class Loop:
     lines.append('\n')
 
     # write data
-    # First convert to strings to get correct columns widths
     data = self.data
     if data:
 
+      # First convert to strings to get correct columns widths
       if isinstance((data[0]), OrderedDict):
         data = [[valueToString(y) for y in list(x.values())] for x in self.data]
       else:

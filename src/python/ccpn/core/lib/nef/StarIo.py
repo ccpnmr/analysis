@@ -30,10 +30,9 @@ __version__ = "$Revision$"
 # - loopcategories share a namespace with tags within a saveframe
 # - DataBlocks can contain only saveframes.
 # - tag prefixes ('_', 'save_', 'data_' are stripped
-# - to
 
 
-# NBNB some longer variable names;
+# TODO NBNB some longer variable names;
 
 import keyword
 import os
@@ -94,7 +93,7 @@ parseNmrStarFile.__annotations__['return'] = NmrDataExtent
 class NmrLoop(GenericStarParser.Loop):
   """Loop for NMRSTAR/NEF object tree
 
-  The contents, self.data is a list of namedlist objects matching the column names.
+  The contents, self.data is a list of OrderedDicts matching the column names.
   rows can be modified or deleted from data, but adding new rows directly is likely to
   break - use the newRow function."""
 

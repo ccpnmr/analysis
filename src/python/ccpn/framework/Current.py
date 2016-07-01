@@ -129,15 +129,18 @@ class Current:
 
     def adder(self, value):
       """Add %s to current.%s""" % (singular, plural)
-      setField(self, getField(self) + [value])
+      values = getField(self)
+      if value not in values:
+        setField(self, values + [value])
     #
     setattr(cls, 'add' + singular.capitalize(), adder)
 
     def remover(self, value):
       """Remove %s from current.%s""" % (singular, plural)
-      ll = getField(self)
-      ll.remove(value)
-      setField(self, ll)
+      values = getField(self)
+      if value in values:
+        values.remove(value)
+      setField(self, values)
     #
     setattr(cls, 'remove' + singular.capitalize(), remover)
 

@@ -42,3 +42,5 @@ class Spinbox(QtGui.QSpinBox, Base):
 
     if showButtons is False:
       self.setButtonSymbols(QtGui.QAbstractSpinBox.NoButtons)
+
+

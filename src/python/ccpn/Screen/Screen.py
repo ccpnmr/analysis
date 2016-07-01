@@ -9,7 +9,7 @@ class Screen(Framework):
 
   def __init__(self, applicationName, applicationVersion, commandLineArguments):
     Framework.__init__(self, applicationName, applicationVersion, commandLineArguments)
-    self.components.add('Screen')
+    # self.components.add('Screen')
 
 
 
@@ -18,7 +18,7 @@ class Screen(Framework):
     super().setupMenus( )
 
     menuSpec = ('Screen',[
-                         ("Lookup Setup "      , self.showLookupSetupPopup ),
+                         ("Pick Peaks "      , self.showPickPeakPopup),
                          ("Generate Mixtures " , self.showMixtureGenerationPopup, [('shortcut', 'cs')]),
                          ("Mixtures Analysis " , self.showSampleAnalysis,         [('shortcut', 'st')]),
                          ("Screening Settings" , self.showScreeningSetup,         [('shortcut', 'pp')]),
@@ -28,13 +28,13 @@ class Screen(Framework):
 
     self.addApplicationMenuSpec(menuSpec)
 
-  def showLookupSetupPopup(self):
-    from ccpn.Screen.popups.LookupSetupPopup import LookupSetupPopup
-    popup = LookupSetupPopup(parent=self.ui.mainWindow, project=self.project)
+  def showPickPeakPopup(self):
+    from ccpn.ui.gui.popups.PickPeaks1DPopup import PickPeak1DPopup
+    popup = PickPeak1DPopup(parent=self.ui.mainWindow, project=self.project)
     popup.exec_()
     popup.raise_()
-    self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
-    self.project._logger.info("application.showSamplePopup()")
+    # self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
+    # self.project._logger.info("application.showSamplePopup()")
 
   def showMixtureGenerationPopup(self):
     """
@@ -55,15 +55,15 @@ class Screen(Framework):
     from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
     showSa = MixtureAnalysis(self.ui.mainWindow,  project=self.project)
     self.ui.mainWindow.moduleArea.addModule(showSa, position=position, relativeTo=relativeTo)
-    self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
-    self.project._logger.info("application.showSampleAnalysis()")
+    # self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
+    # self.project._logger.info("application.showSampleAnalysis()")
 
   def showScreeningSetup(self, position='bottom', relativeTo=None):
     from ccpn.Screen.modules.ScreeningSettings import ScreeningSettings
     showSc = ScreeningSettings(self.ui.mainWindow,  project=self.project)
     self.ui.mainWindow.moduleArea.addModule(showSc, position=position)
-    self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
-    self.project._logger.info("application.showScreeningSetup()")
+    # self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
+    # self.project._logger.info("application.showScreeningSetup()")
 
   def showHitAnalysisModule(self, position='top', relativeTo= None):
     from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
@@ -76,8 +76,8 @@ class Screen(Framework):
     # self.moduleArea.moveModule(spectrumDisplay.module, position='top', neighbor=self.showScreeningHits)
     # returns a clean display
 
-    self.pythonConsole.writeConsoleCommand("application.showScreeningHits()")
-    self.project._logger.info("application.showScreeningHits()")
+    # self.pythonConsole.writeConsoleCommand("application.showScreeningHits()")
+    # self.project._logger.info("application.showScreeningHits()")
     #########################################    End setup Menus      #############################################
 if __name__ == '__main__':
 

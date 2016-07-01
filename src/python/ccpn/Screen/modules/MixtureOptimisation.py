@@ -9,30 +9,115 @@ from ccpn.ui.gui.widgets.Spinbox import Spinbox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 # from ccpn.ui.gui.popups.SampleSetupPopup import ExcludeRegions
+from collections import OrderedDict
+from ccpn.Screen.lib.SimulatedAnnealing import  iterateAnnealing,  scoreMixture
+from ccpn.Screen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
 
+
+
+class SimulatedAnnealingWidgets(QtGui.QFrame):
+  def __init__(self, initialTemp=1000, finalTemp=1, stepTemp=1000, constantTemp=30, coolingMethod='Linear', iterations=3):
+    QtGui.QFrame.__init__(self)
+
+    self.mainLayout = QtGui.QGridLayout()
+    self.setLayout(self.mainLayout)
+    self.coolingMethod = coolingMethod
+
+
+  # def _createWidgets(self):
+    #0  initial Temperature
+    self.initialTempLabel = Label(self, 'Initial Temperature')
+    self.initialTempSpinbox = Spinbox(self)
+    self.initialTempSpinbox.setMaximum(100000)
+    self.initialTempSpinbox.setValue(initialTemp)
+
+
+    # 1  final Temperature
+    self.finalTempLabel = Label(self, 'Final Temperature')
+    self.finalTempSpinbox = Spinbox(self)
+    self.finalTempSpinbox.setMaximum(100000)
+    self.finalTempSpinbox.setValue(finalTemp)
+
+
+    # 2  Step Temperature
+    self.stepTempLabel = Label(self, 'Max Steps')
+    self.stepTempSpinbox = Spinbox(self)
+    self.stepTempSpinbox.setMaximum(100000)
+    self.stepTempSpinbox.setValue(stepTemp)
+
+
+    # 3  constant Temperature
+    self.constantTempLabel = Label(self, 'Probability Constant')
+    self.constantTempSpinbox = Spinbox(self)
+    self.constantTempSpinbox.setMaximum(100000)
+    self.constantTempSpinbox.setValue(constantTemp)
+
+
+
+
+    # 4  cooling Method
+    self.coolingLabel = Label(self, 'Cooling method')
+    self.coolingMethodRadiobutton = RadioButtons(self,
+                                               texts=['Exponential', 'Linear'],
+                                               selectedInd=1,
+                                               callback=None,
+                                               tipTexts=None)
+
+    # 5  constant Temperature
+    self.iterationLabel = Label(self, 'Iteration')
+    self.iterationSpinbox = Spinbox(self)
+    self.iterationSpinbox.setMaximum(100000)
+    self.iterationSpinbox.setValue(iterations)
+
+    if self.coolingMethod == 'Linear':
+      print(self.coolingMethod)
+      self.coolingMethodRadiobutton.radioButtons[1].setChecked(True)
+    else:
+      print(self.coolingMethod)
+      self.coolingMethodRadiobutton.radioButtons[0].setChecked(True)
+
+    self._addWidgetsToLayout()
+
+  def _addWidgetsToLayout(self):
+    self.widgets = [self.initialTempLabel,self.initialTempSpinbox,
+                    self.finalTempLabel,self.finalTempSpinbox,
+                    self.stepTempLabel,self.stepTempSpinbox,
+                    self.constantTempLabel,self.constantTempSpinbox,
+                    self.coolingLabel,self.coolingMethodRadiobutton,
+                    self.iterationLabel,self.iterationSpinbox]
+
+    count = int(len(self.widgets) / 2)
+    self.positions = [[i + 1, j] for i in range(count) for j in range(2)]
+    for position, widget in zip(self.positions, self.widgets):
+      i, j = position
+      self.mainLayout.addWidget(widget, i, j)
+
+  def _getParam(self):
+
+    param = OrderedDict((
+                        ('initialTemp', self.initialTempSpinbox.value()),
+                        ('finalTemp', self.finalTempSpinbox.value()),
+                        ('max steps', self.stepTempSpinbox.value()),
+                        ('temp constant', self.constantTempSpinbox.value()),
+                        ('cooling method', str(self.coolingMethodRadiobutton.get())),
+                        ('iteration' , self.iterationSpinbox.value())
+                        ))
+    return param
 
 class MixtureOptimisation(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self, parent=None, project=None):
+  def __init__(self, parent=None, virtualSamples=None, mixtureAnalysisModule=None, project=None):
     super(MixtureOptimisation, self)
     CcpnModule.__init__(self, name='Mixture Optimisation')
 
     self.project = project
-    # if self._appBase.ui.mainWindow is not None:
-    #   self.mainWindow = self._appBase.ui.mainWindow
-    # else:
-    #   self.mainWindow = self._appBase._mainWindow
-
     self.mainWindow = parent
-    self.moduleArea = self.mainWindow.moduleArea
     self.framework = self.mainWindow.framework
-    self.generalPreferences = self.framework.preferences.general
-    self.colourScheme = self.generalPreferences.colourScheme
-    # self.excludeRegions = ExcludeRegions
-    print('This module is under implementation, not active yet')
-    self.implementationLabel = Label(self, 'This module is under implementation, not active yet')
+    self.mixtureAnalysisModule = mixtureAnalysisModule
+
+    self.virtualSamples = virtualSamples
 
     ######## ======== Set Main Layout ====== ########
     self.mainFrame = QtGui.QFrame()
@@ -49,69 +134,59 @@ class MixtureOptimisation(CcpnModule):
     ######## ======== Set Tabs  ====== ########
     self.tabWidget = QtGui.QTabWidget()
     self.settingFrameLayout.addWidget(self.tabWidget)
-    # self.tabWidget.setTabBar(VerticalTabWidget(width=130,height=25))
-    # self.tabWidget.setTabPosition(QtGui.QTabWidget.West)
+
 
     ######## ======== Set Buttons  ====== ########
-    self.panelButtons = ButtonList(self, texts=['Show Status', 'Show Graph', 'Cancel', 'Perform'],
-                                   callbacks=[None, None, None, None],
-                                   icons=[None, None, None, None],
-                                   tipTexts=[None, None, None, None],
+    self.panelButtons = ButtonList(self, texts=['Show Status', 'Show Graph', 'Cancel', 'Perform','Apply'],
+                                   callbacks=[None, None, None, self._recalculateMixtures, self._applyNewMixtures],
+                                   icons=[None, None, None, None, None],
+                                   tipTexts=[None, None, None, None, None],
                                    direction='H')
     self.buttonsFrameLayout.addWidget(self.panelButtons)
-    self._disableButtons()
+    # self._disableButtons()
 
     ######## ======== Set 1 Tab  ====== ########
-    self.tab1Frame = QtGui.QFrame()
-    self.tab1Layout = QtGui.QGridLayout()
-    self.tab1Frame.setLayout(self.tab1Layout)
-    self.tabWidget.addTab(self.tab1Frame, 'Iterations')
+    self.tabWidget.addTab(SimulatedAnnealingWidgets(), 'SA settings')
 
-    self.selectNumberLabel = Label(self, 'Select Number of Iterations')
-    self.iterationBox = Spinbox(self, value=1, min=1)
-    # self.iterationBox.setFixedWidth(80)
-    self.tab1Layout.addWidget(self.selectNumberLabel, 0,0)
-    self.tab1Layout.addWidget(self.iterationBox, 0,1)
-    self.tab1Layout.addWidget(self.implementationLabel, 1, 0, 1, 1)
 
-    ######## ======== Set 2 Tab  ====== ########
+
+  def _setTabOtherOptions(self):
     self.tab2Frame = QtGui.QFrame()
     self.tab2Layout = QtGui.QGridLayout()
     self.tab2Frame.setLayout(self.tab2Layout)
-    self.tabWidget.addTab(self.tab2Frame, 'Minimal overlap')
+    self.tabWidget.addTab(self.tab2Frame, 'Others')
 
-    self.distanceLabel = Label(self, text="Minimal distance between peaks")
-    self.ppmDistance = DoubleSpinbox(self)
-    # self.ppmDistance.setFixedWidth(80)
-    self.tab2Layout.addWidget(self.distanceLabel, 0,0)
-    self.tab2Layout.addWidget(self.ppmDistance, 0,1)
-
-    ######## ======== Set 3 Tab  ====== ########
-    self.tab3Frame = QtGui.QFrame()
-    self.tab3Layout = QtGui.QGridLayout()
-    self.tab3Frame.setLayout(self.tab3Layout)
-    self.tabWidget.addTab(self.tab3Frame, 'Exclude Regions')
-
-    # self.excludeRegions = ExcludeRegions()
-    # self.tab3Layout.addWidget(self.excludeRegions)
-
-
-    ######## ======== Set 4 Tab  ====== ########
-    self.tab4Frame = QtGui.QFrame()
-    self.tab4Layout = QtGui.QGridLayout()
-    self.tab4Frame.setLayout(self.tab4Layout)
-    self.tabWidget.addTab(self.tab4Frame, 'Others')
-
+  def _setOtherOptionsWidgets(self):
     self.replaceMixtureLabel = Label(self, text="Replace Mixtures")
     self.replaceRadioButtons = RadioButtons(self,
                                             texts=['Yes', 'No'],
                                             selectedInd=0,
                                             callback=None,
                                             tipTexts=None)
-    self.tab4Layout.addWidget(self.replaceMixtureLabel, 0,0)
-    self.tab4Layout.addWidget(self.replaceRadioButtons, 0,1)
+    self.tab2Layout.addWidget(self.replaceMixtureLabel, 0,0)
+    self.tab2Layout.addWidget(self.replaceRadioButtons, 0,1)
 
   def _disableButtons(self):
     for button in self.panelButtons.buttons:
       button.setEnabled(False)
       button.setStyleSheet("background-color:#868D9D; color: #000000")
+
+  def _recalculateMixtures(self):
+    simulatedAnnealing = SimulatedAnnealingWidgets()
+    params = simulatedAnnealing._getParam()
+    i, f, s, k, c, it = list(params.values())
+    mixtures = _getMixturesFromVirtualSamples(self.virtualSamples)
+    newMixtures = iterateAnnealing(mixtures, i, f, s, k, c, it)
+    self.newMixtures = newMixtures
+
+
+  def _applyNewMixtures(self):
+    self.deleteCurrentVirtualSamples(self.virtualSamples)
+    _createSamples(self.project, self.newMixtures)
+    self.mixtureAnalysisModule.scoringTable.setObjects(self.mixtureAnalysisModule._getVirtualSamples())
+    self.close()
+
+
+  def deleteCurrentVirtualSamples(self, virtualSamples):
+    for sample in virtualSamples:
+      sample.delete()

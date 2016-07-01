@@ -7,7 +7,7 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 class ListWidget(QtGui.QListWidget, Base):
 
-  def __init__(self, parent, callback=None, rightMouseCallback=None, contextMenu=None, **kw):
+  def __init__(self, parent, callback=None, rightMouseCallback=None, contextMenu=True, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -37,7 +37,8 @@ class ListWidget(QtGui.QListWidget, Base):
   def mousePressEvent(self, event):
     self._mouse_button = event.button()
     if event.button() == QtCore.Qt.RightButton:
-      self.raiseContextMenu(event)
+      if self.contextMenu:
+        self.raiseContextMenu(event)
     elif event.button() == QtCore.Qt.LeftButton:
       if self.itemAt(event.pos()) is None:
         self.clearSelection()

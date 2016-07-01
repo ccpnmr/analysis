@@ -36,6 +36,7 @@ from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import EditSampleComponentPopup
+from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
@@ -122,6 +123,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.substancesItem = dd['SU'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.substancesItem.setFlags(self.substancesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.substancesItem.setText(0, "Substances")
+    self.newSubstance = QtGui.QTreeWidgetItem(self.substancesItem)
+    self.newSubstance.setFlags(self.newSubstance.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    self.newSubstance.setText(0, "<New>")
     self.chainItem = dd['MC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chainItem.setFlags(self.chainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chainItem.setText(0, "Chains")
@@ -384,7 +388,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SU':
-      pass
+      popup = SubstancePropertiesPopup(substance=obj)
+      popup.exec_()
+      popup.raise_()
     elif obj.shortClassName == 'NC':
       popup = NmrChainPopup(nmrChain=obj)
       popup.exec_()
@@ -465,6 +471,16 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         popup.exec_()
         popup.raise_()
         return
+      elif item.parent().text(0) == 'Substances':
+        popup = SubstancePropertiesPopup(project=self.project)
+        popup.exec_()
+        popup.raise_()
+        return
+      elif item.parent().text(0) == 'SpectrumGroups':
+        popup = SpectrumGroupEditor(project=self.project, addNew=True)
+        popup.exec_()
+        popup.raise_()
+        return
       else:
         itemParent = self.project
         funcName = NEW_ITEM_DICT.get(item.parent().text(0))
@@ -487,9 +503,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       else:
         funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
     if funcName is not None:
-      if (item.parent().text(0)) == 'SpectrumGroups':
-        getattr(itemParent, funcName)('NewSpectrumGroup')
-      else:
+      # if (item.parent().text(0)) == 'SpectrumGroups':
+      #   getattr(itemParent, funcName)('NewSpectrumGroup')
+      # else:
         getattr(itemParent, funcName)()
     else:
       info = showInfo('Not implemented yet!',

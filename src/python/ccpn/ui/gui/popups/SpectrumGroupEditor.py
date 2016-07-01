@@ -8,15 +8,18 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
 
 class SpectrumGroupEditor(QtGui.QDialog):
-  def __init__(self, parent=None, project=None, spectrumGroup=None,   **kw):
+  def __init__(self, parent=None, project=None, spectrumGroup=None, addNew=False, **kw):
     super(SpectrumGroupEditor, self).__init__(parent)
 
     self.project = project
 
+    if addNew:
+      self._createNewSpectrumGroup()
+
     if spectrumGroup is not None:
       self.spectrumGroup = spectrumGroup
     else:
-      self.spectrumGroup = self.getSpectrumGroup()
+      self.spectrumGroup = self._getSpectrumGroup()
 
 
     self.colourScheme = project._appBase.preferences.general.colourScheme
@@ -84,13 +87,18 @@ class SpectrumGroupEditor(QtGui.QDialog):
     self._populateListWidgetLeft()
     self._initialLabelListWidgetRight()
 
-  def getSpectrumGroup(self):
+  def _createNewSpectrumGroup(self):
+    spectrumGroup = self.project.newSpectrumGroup(name='NewSpectrumGroup-' + str(len(self.project.spectrumGroups)))
+    return spectrumGroup
+
+  def _getSpectrumGroup(self):
     if len(self.project.spectrumGroups) > 0:
       spectrumGroup = self.project.spectrumGroups[0]
       return spectrumGroup
     else:
-      spectrumGroup = self.project.newSpectrumGroup(name='NewSpectrumGroup')
-      return spectrumGroup
+      self._createNewSpectrumGroup()
+      # spectrumGroup = self.project.newSpectrumGroup(name='NewSpectrumGroup-'+str(len(self.project.spectrumGroups)))
+      # return spectrumGroup
 
   def _populateListWidgetLeft(self):
     self.spectrumGroupListWidgetLeft.clear()
@@ -187,10 +195,12 @@ class SpectrumGroupEditor(QtGui.QDialog):
   def _changeLeftSpectrumGroupName(self):
     if self.leftSpectrumGroupLineEdit.isModified():
       self.spectrumGroup.rename(self.leftSpectrumGroupLineEdit.text())
+      self._changeButtonStatus()
 
   def _changeRightSpectrumGroupName(self):
     if self.rightSpectrumGroupLineEdit.isModified():
       self.spectrumGroup.rename(self.rightSpectrumGroupLineEdit.text())
+      self._changeButtonStatus()
 
   def _getItemListWidgets(self):
     leftWidgets = []

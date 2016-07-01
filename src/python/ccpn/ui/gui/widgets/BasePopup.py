@@ -169,15 +169,15 @@ if __name__ == '__main__':
     if popup:
       popup.open()
 
-  button = Button(window, text='new popup', callback=new)
+  button = Button(window, text='new popup', grid=(0,0), callback=new)
 
-  button = Button(window, text='lift popup', callback=lift)
+  button = Button(window, text='lift popup',grid=(1,0), callback=lift)
 
-  button = Button(window, text='open popup', callback=open_)
+  button = Button(window, text='open popup',grid=(2,0), callback=open_)
 
-  button = Button(window, text='close popup', callback=close)
+  button = Button(window, text='close popup',grid=(3,0), callback=close)
 
-  button = Button(window, text='quit', callback=app.quit)
+  button = Button(window, text='quit',grid=(4,0), callback=app.quit)
 
   window.show()
   window.raise_()

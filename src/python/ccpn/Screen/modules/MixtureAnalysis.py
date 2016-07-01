@@ -6,8 +6,9 @@ from functools import partial
 from PyQt4 import QtCore, QtGui
 from ccpn.Screen.modules.MixtureOptimisation import MixtureOptimisation
 from numpy import array, amin, average
-
-from ccpn.Screen.lib.MixtureGeneration import setupSamples, scoring
+from ccpn.Screen.lib.MixturesGeneration import getCompounds, _createSamples
+from ccpn.Screen.lib.SimulatedAnnealing import randomDictMixtures,  getMixtureInfo , scoreMixture
+from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.lib.Window import navigateToPeakPosition
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -101,18 +102,14 @@ class MixtureAnalysis(CcpnModule):
 
 
 
-  def _getMixture(self):
+  def _getVirtualSamples(self):
     ''' Returns spectra mixtures (virtual samples) across all project sample '''
-    self.mixtureList= []
+    self.virtualSamples= []
     if len(self.project.samples)>0:
       for sample in self.project.samples:
-        if hasattr(sample, 'minScore'):
-          if len(sample.sampleComponents) and len(sample.spectra) >0:
-            self.mixtureList.append(sample)
-          else:
-            sample.delete()
-
-    return self.mixtureList
+        if sample.isVirtual:
+          self.virtualSamples.append(sample)
+    return self.virtualSamples
 
 
   '''######## ======== Scoring and Selection Table ====== ########'''
@@ -121,14 +118,15 @@ class MixtureAnalysis(CcpnModule):
     ''' Fills the first table on the module with the virtual sample information '''
 
     columns = [Column('Mixture Name', lambda sample:str(sample.pid)),
-               Column('N Components', lambda sample: (int(len(sample.spectra)))),
-               Column('Min Score', lambda sample: int(sample.minScore)),
-               Column('Average Score', lambda sample: int(sample.averageScore))]
+               Column('N Components', lambda sample:str(len(sample.sampleComponents))),
+               Column('N Overlaps', lambda sample:str(sample.overlaps)),
+               Column('Score',lambda sample:str(sample.score)),
+              ]
 
     self.scoringTable = ObjectTable(self, columns, objects=[], selectionCallback=self._tableSelection)
     self.scoringTable.setFixedWidth(400)
-    if len(self._getMixture())>0:
-      self.scoringTable.setObjects(self._getMixture())
+    if len(self._getVirtualSamples())>0:
+      self.scoringTable.setObjects(self._getVirtualSamples())
     self.analysisFrameLayout.addWidget(self.scoringTable)
 
   def _tableSelection(self, row:int=None, col:int=None, obj:object=None):
@@ -199,7 +197,8 @@ class MixtureAnalysis(CcpnModule):
   def _createButtons(self, sample):
     ''' This creates buttons according with how many spectra are inside the mixture. '''
     self.toolBarComponents.clear()
-    for spectrum in sample.spectra:
+    for sampleComponent in sample.sampleComponents:
+      spectrum = sampleComponent.substance.referenceSpectra[0]
       self.componentButton = Button(self, text=spectrum.id)#,toggle=True)
       self.componentButton.clicked.connect(partial(self._toggleComponentButton, spectrum, sample, self.componentButton))
       # self.componentButton.setChecked(False)
@@ -294,15 +293,19 @@ class MixtureAnalysis(CcpnModule):
   def _mixtureManagementWidgets(self):
     ''' creates all the widgets present in the mixture Management tab '''
     currentMixture = self.scoringTable.getCurrentObject()
-    self.leftListWidget = ListWidget(self, rightMouseCallback=self._rightClickListWidget)
-    self.rightListWidget = ListWidget(self,rightMouseCallback=None)
-    self.calculateButtons = ButtonList(self, texts = ['Reset','ReFresh'],
-                                       callbacks=[self._resetMixtureScore, self._predictScores],
-                                       tipTexts=[None,None], direction='h', hAlign='r')
+    self.contextMenu = Menu('', self, isFloatWidget=True)
+    self.contextMenu.addItem("", callback=None)
+    self.leftListWidget = ListWidget(self, contextMenu=False)
 
-    self.applyButtons = ButtonList(self, texts = ['Cancel','Apply'],
-                                   callbacks=[self._resetInitialState, self._createNewMixture],
-                                   tipTexts=[None,None], direction='h', hAlign='r')
+
+    self.rightListWidget = ListWidget(self, contextMenu=True)
+    self.calculateButtons = ButtonList(self, texts = ['Reset','Predict','Apply'],
+                                       callbacks=[self._resetMixtureScore, self._predictScores, self._createNewMixture],
+                                       tipTexts=[None,'CLick to predict new mixtures',None], direction='h', hAlign='r')
+
+    self.applyButtons = ButtonList(self, texts = ['Cancel'],
+                                   callbacks=[self._resetInitialState],
+                                   tipTexts=[None], direction='h', hAlign='r')
     self.warningLabel = Label(self,'Cancel or Apply to continue')
 
     self.pullDownSelection = PulldownList(self,)
@@ -321,15 +324,15 @@ class MixtureAnalysis(CcpnModule):
     self.leftMixtureLineEdit.editingFinished.connect(self._changeLeftMixtureName)
     self.rightMixtureLineEdit.editingFinished.connect(self._changeRightMixtureName)
 
+    self.calculateButtons.buttons[2].setEnabled(False)
+
     self._disableRecalculateButtons()
     self.applyButtons.hide()
     self.warningLabel.hide()
     self.leftListWidget.contextMenuItem = 'Not Implemented Yet'
 
   def _rightClickListWidget(self):
-      print('Not Implemented Yet')
-
-
+      print(self.sender())
 
   def _populateLeftListWidget(self):
     ''' fills the left widget with spectra scores from the selected mixture on the scoring table '''
@@ -344,15 +347,10 @@ class MixtureAnalysis(CcpnModule):
       self.leftListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(sampleComponent.score[0]))
+        item = QtGui.QListWidgetItem(str(spectrum.id))
         self.leftListWidget.addItem(item)
 
-        # if len(sampleComponent.score[2]) > 0:
-        #   item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
-        #                                # + ' Overlapped at Ppm ' + str(sampleComponent.score[2]))
-        #   self.leftListWidget.addItem(item)
-        # else:
-        #   item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
+
         #   self.leftListWidget.addItem(item)
 
     self.connect(self.rightListWidget, QtCore.SIGNAL("dropped"), self._itemsDropped)
@@ -363,7 +361,7 @@ class MixtureAnalysis(CcpnModule):
     ''' fills the pulldown with the mixtures on the project (excludes the one already selected on the left listWidget)  '''
     currentMixture = self.scoringTable.getCurrentObject()
     self.dataPullDown = ['Select An Option', 'New empty mixture']
-    for mixture in self._getMixture():
+    for mixture in self._getVirtualSamples():
       if mixture.name != currentMixture.name:
        self.dataPullDown.append(mixture.name)
     self.pullDownSelection.setData(self.dataPullDown)
@@ -403,7 +401,7 @@ class MixtureAnalysis(CcpnModule):
       self.rightListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ' + str(sampleComponent.score[0]))
+        item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ')
         self.rightListWidget.addItem(item)
       self.rightListWidget.currentItemChanged.connect(self._getListWidgetItems)
 
@@ -461,7 +459,7 @@ class MixtureAnalysis(CcpnModule):
 
   def _upDateScoringTable(self):
     ''' refresh the scoring table '''
-    self.scoringTable.setObjects(self._getMixture())
+    self.scoringTable.setObjects(self._getVirtualSamples())
 
 
   def _createNewMixture(self):
@@ -475,14 +473,20 @@ class MixtureAnalysis(CcpnModule):
     leftMixtureName = str(self.leftMixtureLineEdit.text())
     rightMixtureName = str(self.rightMixtureLineEdit.text())
 
-    newLeftMixture = setupSamples(getLeftSpectra, 'nSamples', 1, 0.01 , leftMixtureName+'-')
-    newRightMixture = setupSamples(getRightSpectra, 'nSamples',1, 0.01 , rightMixtureName+'-')
 
-    oldLeftMixture.delete()
+
     if self.pullDownSelection.getText() == 'New empty mixture':
-      pass
+      rightMixtureName = 'Mixture-'+str(len(self._getVirtualSamples())+1)
+      mixtures = {leftMixtureName: self.leftCompounds, rightMixtureName: self.rightCompounds}
+      oldLeftMixture.delete()
+      _createSamples(self.project, mixtures)
+
     else:
+      mixtures = {leftMixtureName: self.leftCompounds, rightMixtureName: self.rightCompounds}
       oldRightMixture.delete()
+      oldLeftMixture.delete()
+      _createSamples(self.project, mixtures)
+
     self._confirmNewMixtures()
 
 
@@ -494,117 +498,52 @@ class MixtureAnalysis(CcpnModule):
     ''' mouse left click, return the item clicked'''
     pass
 
-  def _predictScores(self):  # to do much shorter!!
+  def _predictScores(self):  # to do
     ''' Predict scores before to create a different mixture given the left spectra '''
+    print('This is leftSpectra')
+    leftSpectra = self._getListWidgetItems()['leftSpectra']
+    self.leftCompounds = getCompounds(leftSpectra)
+    # newLeftMixture = randomDictMixtures('Mixture-'+str(len(self._getVirtualSamples())), leftCompounds, 1)
+    getMixtureInfo(self.leftCompounds, 0.01)
 
-    getLeftSpectra = self._getListWidgetItems()['leftSpectra']
-    leftResults = []
-    self.leftListWidget.clear()
-    for spectrum in getLeftSpectra:
-      singleScore = scoring(spectrum,getLeftSpectra)[0]
-      itemRight = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(singleScore))
-      self.leftListWidget.addItem(itemRight)
-      leftResults.append(singleScore)
+    print('This is rightSpectra')
+    rightSpectra = self._getListWidgetItems()['rightSpectra']
+    self.rightCompounds = getCompounds(rightSpectra)
+    # newrighttMixture = randomDictMixtures('Mixture-' + str(len(self._getVirtualSamples())), rightCompounds, 1)
+    getMixtureInfo(self.rightCompounds, 0.01)
+    self.calculateButtons.buttons[2].setEnabled(True)
 
-    leftMinScore = int(amin(array(leftResults)))
-    leftAverageScore = math.floor(average(array(leftResults)))
 
-    itemMinScore = QtGui.QListWidgetItem(str('MinScore ') + str(leftMinScore))
-    self.leftListWidget.addItem(itemMinScore)
-    itemAverageScore = QtGui.QListWidgetItem(str('AverageScore ') + str(leftAverageScore))
-    self.leftListWidget.addItem(itemAverageScore)
-
-    self.oldLeftMixture = getLeftSpectra[0].sample
-
-    if leftMinScore > self.oldLeftMixture.minScore:
-      itemMinScore.setTextColor(green)
-    if leftMinScore == self.oldLeftMixture.minScore:
-      itemMinScore.setTextColor(yellow)
-    else:
-      itemMinScore.setTextColor(red)
-
-    if leftAverageScore > self.oldLeftMixture.averageScore:
-      itemAverageScore.setTextColor(green)
-    if leftAverageScore == self.oldLeftMixture.averageScore:
-      itemAverageScore.setTextColor(yellow)
-    else:
-      itemAverageScore.setTextColor(red)
-
-    ''' Predict scores before to create a different mixture given the right spectra '''
-    getRightSpectra = self._getListWidgetItems()['rightSpectra']
-
-    rightResults = []
-    self.rightListWidget.clear()
-    for spectrum in getRightSpectra:
-      singleScore = scoring(spectrum,getRightSpectra)[0]
-      rightResults.append(singleScore)
-      itemRight = QtGui.QListWidgetItem(str(spectrum.id)+ ' Single Score ' + str(singleScore))
-      self.rightListWidget.addItem(itemRight)
-
-    rightMinScore = int(amin(array(rightResults)))
-    rightAverageScore = math.floor(average(array(rightResults)))
-
-    itemMinScore = QtGui.QListWidgetItem(str('MinScore ') + str(rightMinScore))
-    self.rightListWidget.addItem(itemMinScore)
-    itemAverageScore = QtGui.QListWidgetItem(str('AverageScore ') + str(rightAverageScore))
-    self.rightListWidget.addItem(itemAverageScore)
-
-    self.oldRightMixture = getRightSpectra[0].sample
-
-    if rightMinScore > self.oldRightMixture.minScore:
-      itemMinScore.setTextColor(green)
-    if rightMinScore == self.oldRightMixture.minScore:
-      itemMinScore.setTextColor(yellow)
-    else:
-      itemMinScore.setTextColor(red)
-
-    if rightAverageScore > self.oldRightMixture.averageScore:
-      itemAverageScore.setTextColor(green)
-    if rightAverageScore == self.oldRightMixture.averageScore:
-      itemAverageScore.setTextColor(yellow)
-    else:
-      itemAverageScore.setTextColor(red)
-
-    self._temporaryScoringStatus()
 
   def _temporaryScoringStatus(self): # to do shorter
     ''' Disable all the commands so user is forced to take a decision with the new scoring after a mixture has been recalculated '''
-    self.pullDownSelection.setEnabled(False)
-    for i in range(3):
-      self.tabWidget.setTabEnabled(i,False)
-    self.calculateButtons.hide()
-    self.applyButtons.show()
-    self.rightListWidget.setAcceptDrops(False)
-    self.leftListWidget.setAcceptDrops(False)
-    for item in self._getListWidgetItemsTest(self.leftListWidget):
-      item.setFlags(QtCore.Qt.NoItemFlags)
-    for item in self._getListWidgetItemsTest(self.rightListWidget):
-      item.setFlags(QtCore.Qt.NoItemFlags)
-    self.warningLabel.show()
-    self.scoringTable.selectionCallback = None
-    print('Selection Table Disabled. Cancel or apply the new mixtures scores')
+    pass
+    # self.pullDownSelection.setEnabled(False)
+    # for i in range(3):
+    #   self.tabWidget.setTabEnabled(i,False)
+    # self.calculateButtons.hide()
+    # self.applyButtons.show()
+    # self.rightListWidget.setAcceptDrops(False)
+    # self.leftListWidget.setAcceptDrops(False)
+    # for item in self._getListWidgetItemsTest(self.leftListWidget):
+    #   item.setFlags(QtCore.Qt.NoItemFlags)
+    # for item in self._getListWidgetItemsTest(self.rightListWidget):
+    #   item.setFlags(QtCore.Qt.NoItemFlags)
+    # self.warningLabel.show()
+    # self.scoringTable.selectionCallback = None
+    # print('Selection Table Disabled. Cancel or apply the new mixtures scores')
 
   def _confirmNewMixtures(self): # to do shorter
-    ''' restore the normal behavior if the buttons and tabs '''
-    for i in range(3):
-      self.tabWidget.setTabEnabled(i,True)
-    self.pullDownSelection.setEnabled(True)
+    ''' restore the normal behavior if the buttons '''
+
     self._selectAnOptionState()
     self._upDateScoringTable()
-    self.calculateButtons.show()
-    self._disableRecalculateButtons()
-    self.applyButtons.hide()
-    self._populateLeftListWidget()
-    self.warningLabel.hide()
-    self.scoringTable.selectionCallback = self._tableSelection
+
 
   def _resetMixtureScore(self):
     ''' restore the first scores calculated  '''
     self._resetInitialState()
-    # self.populateLeftListWidget()
-    # self.populateRightListWidget(self.getMixtureFromPullDown)
-    # self.warningLabel.hide()
-    # self.scoringTable.selectionCallback = self.tableSelection
+
 
   def _getMixtureFromPullDown(self):
     ''' Documentation '''
@@ -661,16 +600,18 @@ class MixtureAnalysis(CcpnModule):
     ''' disables the buttons until a change occurs  '''
     for button in self.calculateButtons.buttons:
       button.setEnabled(False)
-      button.setStyleSheet("background-color:#868D9D; color: #000000")
+      # button.setStyleSheet("background-color:#868D9D; color: #000000")
+
 
   def _changeButtonStatus(self):
     ''' enables the buttons when a change occurs '''
     for button in self.calculateButtons.buttons:
       button.setEnabled(True)
-      if self.colourScheme == 'dark':
-        button.setStyleSheet("background-color:#535a83; color: #bec4f3")
-      else:
-       button.setStyleSheet("background-color:#bd8413; color: #fdfdfc")
+      # if self.colourScheme == 'dark':
+      #   button.setStyleSheet("background-color:#535a83; color: #bec4f3")
+      # else:
+      #  button.setStyleSheet("background-color:#bd8413; color: #fdfdfc")
+    self.calculateButtons.buttons[2].setEnabled(False)
 
 
   ''' ######## ==== Gui Spectrum View properties  ====  ########   '''
@@ -678,8 +619,8 @@ class MixtureAnalysis(CcpnModule):
   def _displayMixture(self, sample):
     ''' displays all the spectra present in a mixture '''
     currentDisplay = self._clearDisplayView()
-    for spectrum in sample.spectra:
-      currentDisplay.displaySpectrum(spectrum)
+    for sampleComponent in sample.sampleComponents:
+      currentDisplay.displaySpectrum(sampleComponent.substance.referenceSpectra[0])
 
   def _navigateToPosition(self, peaks):
     ''' for a given peak, it navigates to the peak position on the display  '''
@@ -752,7 +693,7 @@ class MixtureAnalysis(CcpnModule):
     dataFrame.to_excel(filePath, sheet_name='Mixtures', index=False)
 
   def _openOptimisationModule(self):
-    mixtureOptimisation = MixtureOptimisation(self.mainWindow,project=self.project)
+    mixtureOptimisation = MixtureOptimisation(self.mainWindow, virtualSamples=self._getVirtualSamples(), mixtureAnalysisModule=self, project=self.project)
     mixtureOptimisationModule = self.moduleArea.addModule(mixtureOptimisation, position='bottom')
 
   def createMixturesDataFrame(self):

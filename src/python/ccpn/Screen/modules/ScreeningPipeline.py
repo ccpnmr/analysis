@@ -1,13 +1,14 @@
 __author__ = 'luca'
 
-import decimal
-from functools import partial
 
-import pyqtgraph as pg
-from PyQt4 import QtCore, QtGui
 from ccpn.Screen.lib.Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
 
 from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
+
+import decimal
+from functools import partial
+import pyqtgraph as pg
+from PyQt4 import QtCore, QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
@@ -27,36 +28,40 @@ class StdSpectrumCreator(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
     self.project = project
-    self.path = '/Users/luca/Desktop/ScreeningData/demoSamples/'
+    self.path = self.project._appBase.preferences.general.auxiliaryFilesPath+'/'
+
 
     self.createButton = Button(self, text = 'create new spectrum', callback=self._createSpectrumDifference,
                                grid=(0, 0), hAlign='c')
-    self.lineEditPath = LineEdit(self, text=str(self.path),  hAlign='l', grid=(0, 1), gridSpan=(0,2))
-    self.lineEditPath.setFixedWidth = 300
+    self.pullDownOffRes = PulldownList(self, texts=['SG:STD_OFF_Res'], grid=(0,1))
+    self.pullDownOffRes = PulldownList(self, texts=['SG:STD_ON_Res'], grid=(0, 2))
+    self.lineEditPath = LineEdit(self, text=str(self.path),  hAlign='l', grid=(0, 3), gridSpan=(0,3))
+    # self.lineEditPath.setFixedWidth = 300
+
+    # self.sgSTDdiff = self.project.newSpectrumGroup('STD_DIFF')
 
   def _createSpectrumDifference(self):
     for sample in self.project.samples:
-      if hasattr(sample, 'minScore'):
-        pass
-      else:
+      if not sample.isVirtual:
+
         spectrumDiff = createStdDifferenceSpectrum(sample.spectra[0], sample.spectra[1])
-        self.newFilePath = self.lineEditPath.text()+sample.name + '_Std_diff'
+        if self.lineEditPath.text().endswith("/"):
+          self.newFilePath = self.lineEditPath.text()+sample.name + '_Std_diff'
+        else:
+          self.newFilePath = self.lineEditPath.text()+'/'+ sample.name + '_Std_diff'
         writeBruker(self.newFilePath, spectrumDiff)
         self._loadSpectrumDifference(self.newFilePath + '/pdata/1/1r')
 
   def _loadSpectrumDifference(self, path):
     self.newSpectrumStd = self.project.loadData(path)
     self.newSpectrumStd[0].scale = float(0.1)
-    # self.newSpectrumStd[0].dimensionCount = 1
     spectrumName = str(self.newSpectrumStd[0].name)
 
     for sample in self.project.samples:
-      if hasattr(sample, 'minScore'):
-        pass
-      else:
+      if not sample.isVirtual:
         if sample.name == spectrumName.replace('_Std_diff-1',''):
           sample.spectra += (self.newSpectrumStd[0],)
-          spectrumGroupSTD = self.project.getByPid('SG:STD')
+          spectrumGroupSTD = self.project.getByPid('SG:STD_DIFF')
           spectrumGroupSTD.spectra += (self.newSpectrumStd[0],)
           print(self.newSpectrumStd[0].id, 'created and loaded in the project')
 
@@ -92,15 +97,16 @@ class ExcludeRegions(QtGui.QWidget):
             'Carbon Tetrachloride & water ': [0,0, 1.20, 1.10],
             'water': [0,0, 5, 4.5]}
 
-    self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='c')
-    self.pulldownSolvents.setFixedWidth(105)
+    self.pulldownSolvents = PulldownList(self, grid=(0, 1),)
+    # self.pulldownSolvents.setFixedWidth(105)
     self.pulldownSolvents.activated[str].connect(self._addRegions)
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
-    self.SolventsLabel = Label(self, "Select Regions or \nsolvents to exclude", grid=(0, 0), hAlign='c')
+    self.SolventsLabel = Label(self, "Select Regions or \nsolvents to exclude", grid=(0, 0), hAlign='l')
     self.scrollArea = ScrollArea(self, grid=(2, 0), gridSpan=(2,2))
     self.scrollArea.setWidgetResizable(True)
-    self.scrollAreaWidgetContents = QtGui.QWidget()
+    self.scrollAreaWidgetContents = QtGui.QFrame()
+
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
     self.regioncount = 0
     self.excludedRegions = []
@@ -265,7 +271,7 @@ class MatchPeaks(QtGui.QWidget):
           componentPosition = [peak.position[0] for peak in componentPeakList]
           componentDict = {sampleComponent:componentPosition}
           componentList.append(componentDict)
-          newPeakList = sampleComponent.substance.referenceSpectra[0].newPeakList(name='matchedPeaks')
+          newPeakList = sampleComponent.substance.referenceSpectra[0].newPeakList()
 
         for components in componentList:
           for sampleComponent, peakPositions in components.items():

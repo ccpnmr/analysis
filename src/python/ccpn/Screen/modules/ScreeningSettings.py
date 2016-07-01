@@ -23,11 +23,7 @@ class ScreeningSettings(CcpnModule):
     super(ScreeningSettings, self)
     CcpnModule.__init__(self, name='Screening Settings')
     self.project = project
-    # self.setFixedHeight(400)
-    # if self._appBase.ui.mainWindow is not None:
-    #   mainWindow = self._appBase.ui.mainWindow
-    # else:
-    #   mainWindow = self._appBase._mainWindow
+
 
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
@@ -50,15 +46,24 @@ class ScreeningSettings(CcpnModule):
     # self.scrollArea.setFixedHeight(200)
     self.scrollArea.setWidget(self.pipelineMainGroupBox)
     self.scrollArea.setWidgetResizable(True)
-    self.widget = (PipelineWidgets(self, project))
-    self.pipelineMainVLayout.addWidget(self.widget)
+    self.widget0 = (PipelineWidgets(self, project))
+    self.widget1 = (PipelineWidgets(self, project))
+    self.widget2 = (PipelineWidgets(self, project))
+    self.pipelineMainVLayout.addWidget(self.widget0)
+    self.pipelineMainVLayout.addWidget(self.widget1)
+    self.pipelineMainVLayout.addWidget(self.widget2)
     # self.pipelineMainVLayout.addWidget(Display1DWidget(project=project))
     # self.goArea = GoArea(self, project)
     # self.pipelineMainVLayout.addWidget(self.goArea)
     # self.mainLayout.addWidget(self.scrollArea)
     # self.mainLayout.addWidget(self.goArea, 0)
 
-
+    self.widget0._addMethod('Create std difference spectrum')
+    self.widget0.pulldownAction.select('Create std difference spectrum')
+    self.widget1._addMethod('Peak Picking')
+    self.widget1.pulldownAction.select('Peak Picking')
+    self.widget2._addMethod('Match Peaks')
+    self.widget2.pulldownAction.select('Match Peaks')
 
 
 class GoArea(QtGui.QWidget):
@@ -122,7 +127,7 @@ class PipelineWidgets(QtGui.QWidget):
       ('Noise Threshold', sp.ExcludeBaselinePoints(self, self.project)),
       ('Exclude Regions', sp.ExcludeRegions(self)),
       ('Peak Picking',sp.PickPeaksWidget(self, self.project)),
-      ('Match Peaks ', sp.MatchPeaks(self, self.project)),
+      ('Match Peaks', sp.MatchPeaks(self, self.project)),
       ))
 
 

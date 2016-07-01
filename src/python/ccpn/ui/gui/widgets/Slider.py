@@ -2,12 +2,13 @@ __author__ = 'luca'
 
 from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Spinbox import Spinbox
 
 class Slider(QtGui.QSlider, Base):
   def __init__(self, parent, startVal=0, endVal=100, value=None,
                direction='h', step=1, bigStep=None, callback=None,
                tracking=True, showNumber=True, tickInterval=None,
-               tickPosition=None, listener=None, **kw):
+               tickPosition=None, listener=None, spinbox=False, **kw):
 
     QtGui.QSlider.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -16,6 +17,7 @@ class Slider(QtGui.QSlider, Base):
 
     if value is None:
       value = startVal
+
 
     if not bigStep:
       bigStep = step
@@ -29,6 +31,7 @@ class Slider(QtGui.QSlider, Base):
 
       self.setTickInterval(tickInterval)
       self.setTickPosition(tickPosition)
+
 
     self.showNumber = showNumber
     self.setRange(startVal, endVal)
@@ -126,3 +129,39 @@ class Slider(QtGui.QSlider, Base):
   def setState(self, state):
 
     self.setEnabled(state)
+
+
+
+
+
+class SliderSpinBox(QtGui.QWidget, Base):
+  def __init__(self,parent, startVal=0, endVal=100, value=None, step=1, bigStep=5, **kw):
+    QtGui.QWidget.__init__(self, parent)
+    Base.__init__(self, **kw)
+
+    if value is None:
+      value = startVal
+
+    if not bigStep:
+      bigStep = step
+
+    slider = Slider(self, value=value, startVal=startVal, endVal=endVal, bigStep=bigStep, grid=(0, 1))
+    self.spinBox = Spinbox(self, value=value, min=startVal, max=endVal, grid=(0, 0))
+    slider.valueChanged.connect(self.spinBox.setValue)
+    self.spinBox.valueChanged.connect(slider.setValue)
+
+  def getValue(self):
+    return self.spinBox.value()
+
+  def set(self, value):
+    self.spinBox.setValue(value)
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.BasePopup import BasePopup
+  app = TestApplication()
+  popup = BasePopup(title='Test slider')
+  popup.setSize(250, 50)
+  slider = SliderSpinBox(parent=popup, startVal=0, endVal=100, value=5)
+  app.start()

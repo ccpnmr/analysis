@@ -354,7 +354,7 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
 
   strip = self.getByPid(strip) if isinstance(strip, str) else strip
 
-  self._startFunctionCommandBlock('copyStrip', strip, values=locals(), defaults={'newIndex:None'},
+  self._startFunctionCommandBlock('copyStrip', strip, values=locals(), defaults={'newIndex':None},
                                   parName='newStrip')
   try:
     if strip.spectrumDisplay is self:

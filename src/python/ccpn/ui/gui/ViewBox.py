@@ -136,10 +136,9 @@ class ViewBox(pg.ViewBox):
 
           # NBNB TBD FIXME. We need to deselect ALL peaks
           for spectrumView in self.current.strip.spectrumViews:
-            if spectrumView.isVisible():
-              for peakList in spectrumView.spectrum.peakLists:
-                for peak in peakList.peaks:
-                  peak.isSelected = False
+            for peakList in spectrumView.spectrum.peakLists:
+              for peak in peakList.peaks:
+                peak.isSelected = False
 
           # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
           # Probably we should replace 'peak.isSelected' with 'peak in current.peaks'
@@ -153,9 +152,9 @@ class ViewBox(pg.ViewBox):
         for spectrumView in self.current.strip.spectrumViews:
           if spectrumView.spectrum.dimensionCount == 1:
             continue
-          if spectrumView.isVisible():
-            for peakList in spectrumView.spectrum.peakLists:
-              for peak in peakList.peaks:
+          for peakListView in spectrumView.peakListViews:
+            if peakListView.isVisible():
+              for peak in peakListView.peakList.peaks:
                 if (xPositions[0] < float(peak.position[0]) < xPositions[1]
                   and yPositions[0] < float(peak.position[1]) < yPositions[1]):
                   if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
@@ -323,9 +322,10 @@ class ViewBox(pg.ViewBox):
         # selectedPeaks = []
         #self.current.clearPeaks()
         for spectrumView in self.current.strip.spectrumViews:
-          if not spectrumView.isVisible():
-            continue
-          for peakList in spectrumView.spectrum.peakLists:
+          for peakListView in spectrumView.peakListViews:
+            if not peakListView.isVisible():
+              continue
+            peakList = peakListView.peakList
             stripAxisCodes = self.current.strip.axisOrder
             # TODO: Special casing 1D here, seems like a hack.
             if len(spectrumView.spectrum.axisCodes) == 1:

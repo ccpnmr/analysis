@@ -24,20 +24,24 @@ __version__ = "$Revision$"
 from functools import partial
 from collections import deque
 
-def deleteAll(objects):
-  """Delete each object in objects - utility for undoing multi-object creation functions"""
-  for obj in objects:
-    obj.delete()
+# def deleteAll(objects):
+#   """Delete each object in objects - utility for undoing multi-object creation functions"""
+#   for obj in objects:
+#     obj.delete()
 
 
-def deleteAllApiObjects(objsToBeDeleted):
-  """Delete all API objects in set, together.
+def _deleteAllApiObjects(objsToBeDeleted):
+  """Delete all API objects in collection, together.
   Does NOT look for additional deletes or do any checks. Programmer beware!!!
   Does NOT do undo handling, as it is designed to be used within the Undo machinery"""
 
+  ##CCPNINTERNAL
+
+  # NBNB USee with EXTREME CARE, and make sure you get ALL API objects being created
+
   for obj in objsToBeDeleted:
     if (obj.__dict__.get('isDeleted')):
-      raise ValueError("""%s: deleteAllApiObjects
+      raise ValueError("""%s: _deleteAllApiObjects
        called on deleted object""" % obj.qualifiedName
       )
 

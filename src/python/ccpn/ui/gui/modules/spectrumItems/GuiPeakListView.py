@@ -680,6 +680,10 @@ class PeakNd(QtGui.QGraphicsItem):
       return
 
     if self.peak: # TBD: is this ever not true??
+
+      if self.peak.isDeleted:
+        return
+
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):
       # if self.isInPlane():

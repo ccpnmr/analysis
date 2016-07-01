@@ -580,7 +580,7 @@ class AbstractWrapperObject():
     className = self.className
     iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
-    ll = project._pendingNotifications
+    pendingNotifications = project._pendingNotifications
 
     if action == 'rename':
       # Special case
@@ -594,7 +594,7 @@ class AbstractWrapperObject():
       if project._notificationSuspension:
         for dd in iterator:
           for notifier, onceOnly in dd.items():
-            ll.append((notifier, onceOnly, self, oldPid))
+            pendingNotifications.append((notifier, onceOnly, self, oldPid))
       else:
         for dd in iterator:
           for notifier in dd:
@@ -608,7 +608,7 @@ class AbstractWrapperObject():
       if project._notificationSuspension:
         for dd in iterator:
           for notifier, onceOnly in dd.items():
-            ll.append((notifier, onceOnly, self))
+            pendingNotifications.append((notifier, onceOnly, self))
       else:
         for dd in iterator:
           for notifier in dd:

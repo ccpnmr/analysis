@@ -533,6 +533,8 @@ class Project(AbstractWrapperObject):
     if target in self._notifierActions:
       tt = (className, target)
     else:
+      # This is right, it just looks strange. But if target is not an action it is
+      # another className, and if so the names must be sorted.
       tt = tuple(sorted([className, target]))
 
     od = self._context2Notifiers.setdefault(tt, OrderedDict())
@@ -540,7 +542,11 @@ class Project(AbstractWrapperObject):
       notifier = functools.partial(func, **parameterDict)
     else:
       notifier = func
-    od[notifier] = onceOnly
+    if od.get(notifier) is None:
+      od[notifier] = onceOnly
+    else:
+      raise TypeError("Coding error - notifier %s set twice for %s,%s "
+                      % (notifier, className, target))
     #
     return notifier
 
@@ -552,6 +558,8 @@ class Project(AbstractWrapperObject):
     if target in self._notifierActions:
       tt = (className, target)
     else:
+      # This is right, it just looks strange. But if target is not an action it is
+      # another className, and if so the names must be sorted.
       tt = tuple(sorted([className, target]))
 
     for od in self._context2Notifiers.values():
@@ -568,6 +576,8 @@ class Project(AbstractWrapperObject):
     if target in self._notifierActions:
       tt = (className, target)
     else:
+      # This is right, it just looks strange. But if target is not an action it is
+      # another className, and if so the names must be sorted.
       tt = tuple(sorted([className, target]))
     od = self._context2Notifiers.get((tt), {})
     try:
@@ -607,9 +617,9 @@ class Project(AbstractWrapperObject):
     if self._notificationSuspension <= 0:
       scheduledNotifiers = set()
       executeNotifications = []
-      ll = self._pendingNotifications
-      while ll:
-        notification = ll.pop()
+      pendingNotifications = self._pendingNotifications
+      while pendingNotifications:
+        notification = pendingNotifications.pop()
         notifier = notification[0]
         onceOnly = notification[1]
         if onceOnly:

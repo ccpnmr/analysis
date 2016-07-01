@@ -348,7 +348,7 @@ class PeakList(AbstractWrapperObject):
 
     return peakList3
 
-  # # Removede as not used in project: Rasmus Fogh 21/6/2016
+  # # Removed as not used in project: Rasmus Fogh 21/6/2016
   # def copyPeaks(self, sinkSpectrum:'Spectrum', fitPositions:bool=False):
   #   refAxisCodes = self.spectrum.axisCodes
   #   sinkAxisCodes = sinkSpectrum.axisCodes

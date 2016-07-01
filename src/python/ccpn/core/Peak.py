@@ -25,6 +25,7 @@ import itertools
 import collections
 import operator
 
+from ccpn.util import Undo
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
@@ -381,9 +382,11 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Optional[float]=N
     )
   )
 
+  undo = self._project._undo
   self._startFunctionCommandBlock('newPeak', values=locals(), defaults=defaults,
                                   parName='newPeak')
   self._project.blankNotification()
+  undo.increaseBlocking()
   try:
     apiPeakList = self._apiPeakList
     apiPeak = apiPeakList.newPeak(height=height, volume=volume,
@@ -392,16 +395,24 @@ def _newPeak(self:PeakList,height:Optional[float]=None, volume:Optional[float]=N
 
     # set peak position
     # NBNB TBD currently unused parameters could be added, and will have to come in here as well
+    apiPeakDims = apiPeak.sortedPeakDims()
     if position:
-      for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
+      for ii,peakDim in enumerate(apiPeakDims):
         peakDim.value = position[ii]
     elif pointPosition:
-      for ii,peakDim in enumerate(apiPeak.sortedPeakDims()):
+      for ii,peakDim in enumerate(apiPeakDims):
         peakDim.position = pointPosition[ii]
 
   finally:
     self._project._appBase._endCommandBlock()
     self._project.unblankNotification()
+    undo.decreaseBlocking()
+
+  apiObjectsCreated = [apiPeak]
+  apiObjectsCreated.extend(apiPeakDims)
+  undo.newItem(Undo._deleteAllApiObjects, apiPeak.root._unDelete,
+               undoArgs=(apiObjectsCreated,),
+               redoArgs=(apiObjectsCreated,  (apiPeak.topObject,)))
 
   result = self._project._data2Obj.get(apiPeak)
 

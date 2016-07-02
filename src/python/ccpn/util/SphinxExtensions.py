@@ -26,27 +26,32 @@ import re
 
 replaceInDocStrings = (
   ('typing.', ''),
-  # ('NoneType', 'None')
+  ('NoneType', 'None')
 )
 
-# Format for inserting class documentation in wrapper module
-wrappedClassFormat= """
-
-.. _%(moduleName)s-%(className)s-ref:
-
-%(moduleName)s.%(className)s
-%(underline)s
-
-.. autoclass:: %(moduleName)s.%(className)s
-"""
+# # Format for inserting class documentation in wrapper module
+# wrappedClassFormat= """
+#
+# .. _%(moduleName)s-%(className)s-ref:
+#
+# %(moduleName)s.%(className)s
+# %(underline)s
+#
+# .. autoclass:: %(moduleName)s.%(className)s
+# """
 
 # Pattern for replacing (e.g.) 'ccpn._wrapper._Spectrum.Spectrum' with 'ccpn.Spectrum'
-wrappedClassFullName = re.compile(
-  "(ccpn|application)[.](_wrapper[.]_(?P<classname>[a-zA-Z]+)[.])(?P=classname)"
-)
+# wrappedClassFullName = re.compile(
+#   "(ccpn|application)[.](_wrapper[.]_(?P<classname>[a-zA-Z]+)[.])(?P=classname)"
+# )
 optionalType = re.compile("Union\[(.+), *NoneType\]")
 
 classRepresentation = re.compile("<class '(.*?)'>")
+
+forwardReference = re.compile("_ForwardRef \('(.*?)'\)")
+
+# TODO fix this, probably not OK now!
+typeUnion = re.compile("Union[(.*?], *(.*?)]")
 
 classesHeader = [
   '',
@@ -63,14 +68,16 @@ def autodoc_process_docstring():
   In the first version it adds type and  modifiability annotation to properties"""
   def process(app, what_, name, obj, options, lines):
     """
-    Emitted when autodoc has read and processed a docstring. lines is a list of strings - the lines of the processed docstring - that the event handler can modify in place to change what Sphinx puts into the output.
+    Emitted when autodoc has read and processed a docstring. lines is a list of strings - the lines
+    of the processed docstring - that the event handler can modify in place to change what Sphinx
+    puts into the output.
     Parameters:
 
         app - the Sphinx application object
         what - the type of the object which the docstring belongs to (one of "module", "class", "exception", "function", "method", "attribute")
         name - the fully qualified name of the object
         obj - the object itself
-        options - the options given to the directive: an object with attributes inherited_members, undoc_members, show_inheritance and noindex that are true if the flag option of same name was given to the auto directive
+        options - the options given to the directive: an object with attributes inherited_members,undoc_members, show_inheritance and noindex that are true if the flag option of same name was given to the auto directive
         lines - the lines of the docstring, see above
     """
 
@@ -83,6 +90,9 @@ def autodoc_process_docstring():
           # Necessary because functools.partial objects do note have __annotations__ attribute
           typ =repr(obj.fget.__annotations__.get('return'))
           typ = optionalType.sub(r'\g<1>=None',typ)
+          typ = classRepresentation.sub(r'\g<1>', typ)
+          typ = forwardReference.sub(r'\g<1>', typ)
+          # typ = typeUnion.sub(r'\g<1>|\g<2>', typ)
           for fromText, toText in replaceInDocStrings:
             typ = typ.replace(fromText, toText)
           ll = []
@@ -95,21 +105,21 @@ def autodoc_process_docstring():
             #lines[:0] = [', '.join(ll) + '\n', '\n']
             lines[:0] = ['\- %s - ' % ', '.join(ll)]
 
-    elif what_ == 'module' and hasattr(obj, '_sphinxWrappedClasses'):
-      # Probably obsolete, but will not be executed if attribute is missing
-      lines.extend(classesHeader)
-      for cls in obj._sphinxWrappedClasses:
-        tag = cls.__name__
-        name = obj.__name__
-        text = wrappedClassFormat % {'className':tag, 'moduleName':name,
-                                     'underline':'^'*(len(tag)+len(name)+1)}
-        lines.extend(text.splitlines())
-
-    # Change wrapped class names to shorter form,
-    for ii,line in enumerate(lines):
-      # removing '_wrapper._ClassName'
-      lines[ii] = wrappedClassFullName.sub(r'\g<1>.\g<3>',line)
-      lines[ii] = classRepresentation.sub(r'\g<1>', lines[ii])
+    # elif what_ == 'module' and hasattr(obj, '_sphinxWrappedClasses'):
+    #   # Probably obsolete, but will not be executed if attribute is missing
+    #   lines.extend(classesHeader)
+    #   for cls in obj._sphinxWrappedClasses:
+    #     tag = cls.__name__
+    #     name = obj.__name__
+    #     text = wrappedClassFormat % {'className':tag, 'moduleName':name,
+    #                                  'underline':'^'*(len(tag)+len(name)+1)}
+    #     lines.extend(text.splitlines())
+    #
+    # # Change wrapped class names to shorter form,
+    # for ii,line in enumerate(lines):
+    #   # removing '_wrapper._ClassName'
+    #   lines[ii] = wrappedClassFullName.sub(r'\g<1>.\g<3>',line)
+    #   lines[ii] = classRepresentation.sub(r'\g<1>', lines[ii])
 
   #
   return process
@@ -139,12 +149,14 @@ def autodoc_process_signature():
     """
 
     if signature:
-      signature = wrappedClassFullName.sub(r'\g<1>.\g<3>', signature)
+      # signature = wrappedClassFullName.sub(r'\g<1>.\g<3>', signature)
       signature = classRepresentation.sub(r'\g<1>', signature)
+      signature = forwardReference.sub(r'\g<1>', signature)
+      # signature = typeUnion.sub(r'\g<1>|\g<2>', signature)
       for fromText, toText in replaceInDocStrings:
         signature = signature.replace(fromText, toText)
     if return_annotation:
-      return_annotation = wrappedClassFullName.sub(r'\g<1>.\g<3>', return_annotation)
+      # return_annotation = wrappedClassFullName.sub(r'\g<1>.\g<3>', return_annotation)
       return_annotation = classRepresentation.sub(r'\g<1>', return_annotation)
       for fromText, toText in replaceInDocStrings:
         return_annotation = return_annotation.replace(fromText, toText)

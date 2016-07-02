@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""Pid (Project ID) class for within-project unique ID strings.
 """
 #=========================================================================================
 # Licence, Reference and Credits

@@ -1,4 +1,4 @@
-"""Module Documentation here
+"""Library functions for Molecule-related data
 
 """
 #=========================================================================================

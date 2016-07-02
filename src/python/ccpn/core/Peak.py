@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -302,7 +301,7 @@ class Peak(AbstractWrapperObject):
           ll[ii] = atom._wrappedData
 
     # set assignments
-    apiPeak.setAssignments(resonances)
+    apiPeak.assignByContributions(resonances)
 
   def addAssignment(self, value:Sequence[Union[str, 'NmrAtom']]):
     """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""

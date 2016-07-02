@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -594,6 +593,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
   self._startFunctionCommandBlock('createPolymerSubstance', sequence, name,
                                   values=locals(), defaults=defaults,
                                   parName='newPolymerSubstance')
+  self._project.blankNotification()
   try:
     apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
                                                 name=name, startNumber=startNumber,
@@ -607,6 +607,10 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
     result.userCode = userCode
   finally:
     self._project._appBase._endCommandBlock()
+    self._project.unblankNotification()
+
+  # DO creation notifications
+  result._finaliseAction('create')
   #
   return result
 

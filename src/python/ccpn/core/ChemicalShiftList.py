@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -142,8 +141,10 @@ class ChemicalShiftList(AbstractWrapperObject):
 
     else:
       self._startFunctionCommandBlock('rename', value)
-      self._wrappedData.name = value
-      self._project._appBase._endCommandBlock()
+      try:
+        self._wrappedData.name = value
+      finally:
+        self._project._appBase._endCommandBlock()
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> List[Nmr.ShiftList]:

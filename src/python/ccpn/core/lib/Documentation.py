@@ -1,4 +1,4 @@
-"""Module Documentation here
+"""Generation of Sphinx automatic documentation
 
 """
 #=========================================================================================
@@ -64,8 +64,8 @@ def refreshSphinxDocumentation():
   precommand = ['sphinx-apidoc']
   # documentation target - filled in below
   precommand.extend(('-o', 'output TBD'))
-  # Project name header:
-  precommand.extend(('-H', Version.projectName))
+  # PUt module documentation before submodule documentation:
+  precommand.append('--module-first')
   # Project name header:
   precommand.extend(('-A', Version.authors))
   # Project name header:
@@ -77,7 +77,7 @@ def refreshSphinxDocumentation():
   module = 'ccpn'
   target = joinPath(pythonDirectory, module)
   skipDirs = getNamedSubdirectories(target, 'testing')
-  command = precommand + [target] + skipDirs
+  command = precommand + ['-H','CCPN', target] + skipDirs
   # Additional directories to skip
   command.append(joinPath(pythonDirectory, 'ccpn/macros'))
   command[2] = outputDirs[module]
@@ -89,7 +89,7 @@ def refreshSphinxDocumentation():
   module = 'ccpnmodel'
   target = joinPath(pythonDirectory, module)
   skipDirs = getNamedSubdirectories(target, ('testing', 'v_'))
-  command = precommand + [target] + skipDirs
+  command = precommand + ['-H', 'CCPN storage implementation', target] + skipDirs
   # Additional directories to skip
   command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/memops'))
   command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/xml'))

@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""Implementation of CCPN data classes, including links to underlying storage.
 """
 #=========================================================================================
 # Licence, Reference and Credits

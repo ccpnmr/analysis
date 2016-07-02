@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -172,10 +171,12 @@ class Chain(AbstractWrapperObject):
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in Chain.shortName" % Pid.altCharacter)
     self._startFunctionCommandBlock('rename', value)
-    self._apiChain.renameChain(value)
-    self._finaliseAction('rename')
-    self._finaliseAction('change')
-    self._project._appBase._endCommandBlock()
+    try:
+      self._apiChain.renameChain(value)
+      self._finaliseAction('rename')
+      self._finaliseAction('change')
+    finally:
+      self._project._appBase._endCommandBlock()
 
 
   @classmethod

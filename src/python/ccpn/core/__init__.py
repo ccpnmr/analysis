@@ -1,9 +1,4 @@
-"""CCPN package. High level interface for normal data access
-
-All data are organised in Projects. The standard ways of starting a project are:
-
-- myProject = :ref:`ccpn-loadProject-ref` (*path*, ...)
-- myProject = :ref:`ccpn-newProject-ref` (*projectName*, ...)
+"""CCPN core package. High level interface for normal data access
 
 Projects are saved by myProject.save(path, ...)
 
@@ -145,28 +140,41 @@ Other common prefixes for function names include 'add' and 'remove' (which add a
 pre-existing objects to collections), 'copy', 'clear', 'load', 'process' and 'toggle',
 all of which should be self-explanatory.
 
-
-
-.. currentmodule:: ccpn
-
-Module level functions :
-------------------------
-
-.. _ccpn-loadProject-ref:
-
-ccpn.loadProject
-^^^^^^^^^^^^^^^^
-
-.. autofunction:: ccpn.loadProject
-
-.. _ccpn-newProject-ref:
-
-ccpn.newProject
-^^^^^^^^^^^^^^^
-
-.. autofunction:: ccpn.newProject
-
 """
+
+
+
+# Previous documentation with links to top level functions. Kept here to serve as example
+
+
+
+# All data are organised in Projects. The standard ways of starting a project are:
+#
+# - myProject = :ref:`ccpn-loadProject-ref` (*path*, ...)
+# - myProject = :ref:`ccpn-newProject-ref` (*projectName*, ...)
+
+
+# .. currentmodule:: ccpn
+#
+# Module level functions :
+# ------------------------
+#
+# .. _ccpn-loadProject-ref:
+#
+# ccpn.loadProject
+# ^^^^^^^^^^^^^^^^
+#
+# .. autofunction:: ccpn.loadProject
+#
+# .. _ccpn-newProject-ref:
+#
+# ccpn.newProject
+# ^^^^^^^^^^^^^^^
+#
+# .. autofunction:: ccpn.newProject
+
+
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================

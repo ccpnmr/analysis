@@ -1,4 +1,6 @@
-"""Module Documentation here
+"""Utilities for path handling
+
+Includes extensions of sys.path functions and CCPN-specific functionality
 
 """
 #=========================================================================================

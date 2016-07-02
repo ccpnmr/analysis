@@ -345,7 +345,7 @@ class LoopRow(OrderedDict):
   def _get(self, name:str):
     """Returns value of attribute 'name', or None if attribute is not defined
 
-    Will treat a series of attributes 'foo_1', 'foo_2', 'foo+_3', etc. as a single
+    Will treat a series of attributes 'foo_1', 'foo_2', 'foo_3', etc. as a single
     tuple attribute 'foo' """
 
     if  not name in self and (name + '_1') in self:
@@ -358,7 +358,7 @@ class LoopRow(OrderedDict):
   def _set(self, name:str, value:object):
     """Sets attribute 'name' to value
 
-    Will treat a series of attributes 'foo_1', 'foo_2', 'foo+_3', etc. as a single
+    Will treat a series of attributes 'foo_1', 'foo_2', 'foo_3', etc. as a single
     tuple attribute 'foo' """
 
     if name in self:
@@ -948,7 +948,7 @@ class GeneralStarParser:
           if jj < len(tags):
             tag = tags[jj]
           else:
-            # This line contains tae last of the tags - it is the line we want
+            # This line contains the last of the tags - it is the line we want
             break
         else:
           # nothing found here - try next line

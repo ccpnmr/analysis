@@ -1,5 +1,4 @@
-"""Module Documentation here
-
+"""
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -33,9 +32,9 @@ from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
 from ccpnmodel.ccpncore.lib.CopyData import copySubTree
-from ccpnmodel.ccpncore.lib.ccp.nmr.Nmr.PeakList import fitExistingPeakList
+from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
-from ccpnmodel.ccpncore.lib.ccp.nmr.Nmr.PeakList import pickNewPeaks
+from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 
 class PeakList(AbstractWrapperObject):
   """Peak List."""

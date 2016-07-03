@@ -13,6 +13,7 @@ class Screen(Framework):
 
 
 
+
   #########################################    Start setup Menu      #############################################
   def setupMenus( self ):
     super().setupMenus( )
@@ -33,8 +34,8 @@ class Screen(Framework):
     popup = PickPeak1DPopup(parent=self.ui.mainWindow, project=self.project)
     popup.exec_()
     popup.raise_()
-    # self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
-    # self.project._logger.info("application.showSamplePopup()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
+    self.project._logger.info("application.showSamplePopup()")
 
   def showMixtureGenerationPopup(self):
     """
@@ -45,7 +46,7 @@ class Screen(Framework):
     popup = MixtureGenerationPopup(self.ui.mainWindow,  project=self.project)
     popup.exec_()
     popup.raise_()
-    self.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSamplePopup()")
     self.project._logger.info("application.showSamplePopup()")
 
   def showSampleAnalysis(self, position='bottom', relativeTo=None):
@@ -55,7 +56,7 @@ class Screen(Framework):
     from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
     showSa = MixtureAnalysis(self.ui.mainWindow,  project=self.project)
     self.ui.mainWindow.moduleArea.addModule(showSa, position=position, relativeTo=relativeTo)
-    # self.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
     # self.project._logger.info("application.showSampleAnalysis()")
 
   def showScreeningSetup(self, position='bottom', relativeTo=None):

@@ -10,9 +10,9 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 # from ccpn.ui.gui.popups.SampleSetupPopup import ExcludeRegions
 from collections import OrderedDict
-from ccpn.Screen.lib.SimulatedAnnealing import  iterateAnnealing,  scoreMixture
+from ccpn.Screen.lib.SimulatedAnnealing import  iterateAnnealing,  scoreMixture, showScoresPerMixture
 from ccpn.Screen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
-
+from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 
 class SimulatedAnnealingWidgets(QtGui.QFrame):
@@ -108,7 +108,7 @@ class MixtureOptimisation(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self, parent=None, virtualSamples=None, mixtureAnalysisModule=None, project=None):
+  def __init__(self, parent=None, virtualSamples=None, mixtureAnalysisModule=None, minimalDistance=0.01, project=None):
     super(MixtureOptimisation, self)
     CcpnModule.__init__(self, name='Mixture Optimisation')
 
@@ -116,6 +116,7 @@ class MixtureOptimisation(CcpnModule):
     self.mainWindow = parent
     self.framework = self.mainWindow.framework
     self.mixtureAnalysisModule = mixtureAnalysisModule
+    self.minimalDistance = minimalDistance
 
     self.virtualSamples = virtualSamples
 
@@ -134,7 +135,8 @@ class MixtureOptimisation(CcpnModule):
     ######## ======== Set Tabs  ====== ########
     self.tabWidget = QtGui.QTabWidget()
     self.settingFrameLayout.addWidget(self.tabWidget)
-
+    self.scoringListWidget = ListWidget(self, contextMenu=False)
+    self.settingFrameLayout.addWidget(self.scoringListWidget)
 
     ######## ======== Set Buttons  ====== ########
     self.panelButtons = ButtonList(self, texts=['Show Status', 'Show Graph', 'Cancel', 'Perform','Apply'],
@@ -147,6 +149,8 @@ class MixtureOptimisation(CcpnModule):
 
     ######## ======== Set 1 Tab  ====== ########
     self.tabWidget.addTab(SimulatedAnnealingWidgets(), 'SA settings')
+
+
 
 
 
@@ -176,13 +180,14 @@ class MixtureOptimisation(CcpnModule):
     params = simulatedAnnealing._getParam()
     i, f, s, k, c, it = list(params.values())
     mixtures = _getMixturesFromVirtualSamples(self.virtualSamples)
-    newMixtures = iterateAnnealing(mixtures, i, f, s, k, c, it)
+    newMixtures = iterateAnnealing(mixtures, i, f, s, k, c, it, minDistance=self.minimalDistance)
     self.newMixtures = newMixtures
+    self.showScoresOnListWidget(newMixtures)
 
 
   def _applyNewMixtures(self):
     self.deleteCurrentVirtualSamples(self.virtualSamples)
-    _createSamples(self.project, self.newMixtures)
+    _createSamples(self.project, self.newMixtures,self.minimalDistance)
     self.mixtureAnalysisModule.scoringTable.setObjects(self.mixtureAnalysisModule._getVirtualSamples())
     self.close()
 
@@ -190,3 +195,8 @@ class MixtureOptimisation(CcpnModule):
   def deleteCurrentVirtualSamples(self, virtualSamples):
     for sample in virtualSamples:
       sample.delete()
+
+  def showScoresOnListWidget(self, newMixtures):
+    scores = showScoresPerMixture(newMixtures, self.minimalDistance)
+    for score in scores:
+      self.scoringListWidget.addItem(score)

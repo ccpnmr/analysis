@@ -25,6 +25,18 @@ class CompoundView(QtGui.QGraphicsView, Base):
 
     self.parent = parent
     self.preferences = preferences
+    if self.preferences is not None:
+      self.colourScheme = self.preferences.general.colourScheme
+      if self.colourScheme == 'light':
+        self.backgroundColor = self.setStyleSheet('background-color: #bd8413')
+      else:
+        self.backgroundColor = self.setStyleSheet('background-color: #020F31')
+        self.setAtomColorWhite = True
+    #
+    else:
+      self.backgroundColor = QtGui.QColor(10, 1, 0, 0)
+    self.bondColor = Qt.white
+
     # self.setCompound = self.setCompound
     self.rotatePos = None
     if variant:
@@ -84,10 +96,9 @@ class CompoundView(QtGui.QGraphicsView, Base):
     self.editProxy = self.scene.addWidget(self.editWidget)
     self.editProxy.setZValue(2)
 
-    self.backgroundColor = QtGui.QColor(10,  1,  0, 0)
-    self.bondColor = Qt.white
 
-    self.setBackgroundBrush(self.backgroundColor)
+
+    # self.setBackgroundBrush(self.backgroundColor)
 
     # TODO: Add settings for this
     self.showSkeletalFormula = False
@@ -113,6 +124,7 @@ class CompoundView(QtGui.QGraphicsView, Base):
     self.updateAll()
 
     self.show()
+
 
 
   def resizeEvent(self, event):
@@ -1264,10 +1276,10 @@ class AtomLabel(QtGui.QGraphicsItem):
       if self.hover:
         painter.setPen(Qt.white)
       elif not isinstance(self.compoundView, QtGui.QGraphicsItem):
-        if self.compoundView.backgroundColor == Qt.darkGray:
-          painter.setPen(ATOM_NAME_FG)
+        if self.compoundView.setAtomColorWhite:
+          painter.setPen(Qt.white)
         else:
-          painter.setPen(Qt.darkGray)
+          painter.setPen(Qt.black)
 
       painter.drawText(point, text)
     painter.setRenderHint(QtGui.QPainter.Antialiasing, False)

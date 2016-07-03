@@ -28,6 +28,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
   def __init__(self, substance=None, project=None, parent=None, sampleComponent=None,   **kw):
     super(SubstancePropertiesPopup, self).__init__(parent)
     self.project = project
+    # ?? self.preferences = ??
     self.sample = parent
     self.sampleComponent = sampleComponent
     if substance is not None:
@@ -205,6 +206,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
     else:
       smiles = smiles
     self.compoundView = CompoundView(self, smiles=smiles, preferences=None)
+
     self.compoundView.centerView()
     self.compoundView.updateAll()
 

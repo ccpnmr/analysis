@@ -26,15 +26,12 @@ class ShowScreeningHits(CcpnModule):
     CcpnModule.__init__(self, name='Hit Analysis')
     self.project = project
     self.setFixedHeight(300)
-    # self.createDummyHits()
-    # if self._appBase.ui.mainWindow is not None:
-    #   self.mainWindow = self._appBase.ui.mainWindow
-    # else:
-    #   self.mainWindow = self._appBase._mainWindow
+
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
     self.framework = self.mainWindow.framework
-    self.generalPreferences = self.framework.preferences.general
+    self.preferences = self.framework.preferences
+    self.generalPreferences = self.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
     self.moduleArea = self.mainWindow.moduleArea
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
@@ -521,7 +518,7 @@ class ShowScreeningHits(CcpnModule):
     substance = self._getPullDownObj().substance
     self.smiles = substance.smiles
     if self.smiles is not None:
-      self.compoundView  = CompoundView(self, smiles=self.smiles)
+      self.compoundView  = CompoundView(self, smiles=self.smiles, preferences=self.preferences)
       self.hitDetailsGroupLayout.addWidget(self.compoundView, 1,1)
       self.compoundView.centerView()
       self.compoundView.resetView()

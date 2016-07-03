@@ -127,9 +127,12 @@ def getMixtureInfo(mixture, minDist):
 
     if overlaped is None:
       print(compoundName, 'No Overlapped peaks found')
+
     else:
       score = len(overlaped) / len(compoundPeakList)
+
       print(compoundName, ' --> Counts',len(list(set(overlaped))), ' --> Overlapped positions:', overlaped, 'score: -->', score)
+
   print('====================')
 
 def calculateOverlapCount(compoundA, mixture, minimalOverlap):
@@ -262,7 +265,7 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
   copyMixtures = copy.deepcopy(mixtures)
   print('startingScore',startingScore)
   if startingScore == 0:
-    showScoresPerMixture(mixtures,minDistance)
+    # showScoresPerMixture(mixtures,minDistance)
     return mixtures
   i = 0
   while  i <= nIterations:
@@ -271,7 +274,7 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
     copyNewMixtures = copy.deepcopy(newMixtures)
     currScore = calculateTotalScore(newMixtures,minDistance)
     if currScore == 0:
-      showScoresPerMixture(copyNewMixtures,minDistance)
+      # showScoresPerMixture(copyNewMixtures,minDistance)
       return copyNewMixtures
     if currScore <= startingScore:
       print(currScore, 'Step Score')
@@ -282,7 +285,7 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
   if len(bestIteration)>0:
     bestMixtures = findBestMixtures(bestIteration)
     print(calculateTotalScore(bestMixtures,minDistance), 'Best Score')
-    showScoresPerMixture(bestMixtures,minDistance)
+    # showScoresPerMixture(bestMixtures,minDistance)
     return bestMixtures
   else:
     print('No Better Iteration found, original mixtures are returned')
@@ -292,8 +295,10 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
 
 
 def showScoresPerMixture(mixtures,minDistance):
+  scoring = []
   for mixtureName, mixCompounds in mixtures.items():
-    print(mixtureName, 'score: ', scoreMixture(mixCompounds, minDistance))
+    scoring.append(str(mixtureName)+ '  score: ' + str(scoreMixture(mixCompounds, minDistance)))
+  return scoring
 
     # overlappedPositions = [posA for posB in spectrumBpositions for posA in compounds if abs(posA - posB) < 0.01]
 

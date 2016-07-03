@@ -7,7 +7,7 @@ from PyQt4 import QtCore, QtGui
 from ccpn.Screen.modules.MixtureOptimisation import MixtureOptimisation
 from numpy import array, amin, average
 from ccpn.Screen.lib.MixturesGeneration import getCompounds, _createSamples
-from ccpn.Screen.lib.SimulatedAnnealing import randomDictMixtures,  getMixtureInfo , scoreMixture
+from ccpn.Screen.lib.SimulatedAnnealing import randomDictMixtures,  getMixtureInfo , calculateOverlapCount,scoreMixture
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.lib.Window import navigateToPeakPosition
 from ccpn.ui.gui.widgets.Button import Button
@@ -29,7 +29,7 @@ class MixtureAnalysis(CcpnModule):
 
   '''Creates a module to analyse the mixtures'''
 
-  def __init__(self, parent=None, project=None):
+  def __init__(self, parent=None, minimalDistance=0.01, project=None):
     super(MixtureAnalysis, self)
     CcpnModule.__init__(self, name='Mixture Analysis')
 
@@ -37,11 +37,13 @@ class MixtureAnalysis(CcpnModule):
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
     self.framework = self.mainWindow.framework
-    self.generalPreferences = self.framework.preferences.general
+    self.preferences = self.framework.preferences
+    self.generalPreferences = self.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
 
-    self.listOfSample = []
 
+    self.listOfSample = []
+    self.minimalDistance = minimalDistance
     ######## ======== Icons ====== ########
     self.settingIcon = Icon('icons/applications-system')
     self.exportIcon = Icon('icons/export')
@@ -232,7 +234,7 @@ class MixtureAnalysis(CcpnModule):
     for sampleComponent in sample.sampleComponents:
       if sampleComponent.substance.referenceSpectra[0] == spectrum:
         smiles = sampleComponent.substance.smiles
-        self.compoundView  = CompoundView(self, smiles=smiles, preferences=self.generalPreferences)
+        self.compoundView  = CompoundView(self, smiles=smiles, preferences=self.preferences)
         self.tabPeaksMoleculeLayout.addWidget(self.compoundView, 1,1)
 
         self.compoundView.resetView()
@@ -247,7 +249,7 @@ class MixtureAnalysis(CcpnModule):
     for component in sample.sampleComponents:
       chemicalName = (''.join(str(x) for x in component.substance.synonyms))
       smiles = component.substance.smiles
-      self.compoundViewTab2 = CompoundView(self, smiles=smiles, preferences=self.generalPreferences)
+      self.compoundViewTab2 = CompoundView(self, smiles=smiles, preferences=self.preferences)
       self.compoundViewTab2.setMaximumWidth(180)
       self.tabMoleculeViewLayout.addWidget(self.compoundViewTab2)
 
@@ -347,7 +349,7 @@ class MixtureAnalysis(CcpnModule):
       self.leftListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(spectrum.id))
+        item = QtGui.QListWidgetItem(str(sampleComponent.name) + ' Single Score = ' + str(sampleComponent.score))
         self.leftListWidget.addItem(item)
 
 
@@ -401,7 +403,7 @@ class MixtureAnalysis(CcpnModule):
       self.rightListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
         spectrum = sampleComponent.substance.referenceSpectra[0]
-        item = QtGui.QListWidgetItem(str(spectrum.id) + ' Single Score ')
+        item = QtGui.QListWidgetItem(str(sampleComponent.name) + ' Single Score = ' + str(sampleComponent.score))
         self.rightListWidget.addItem(item)
       self.rightListWidget.currentItemChanged.connect(self._getListWidgetItems)
 
@@ -479,13 +481,13 @@ class MixtureAnalysis(CcpnModule):
       rightMixtureName = 'Mixture-'+str(len(self._getVirtualSamples())+1)
       mixtures = {leftMixtureName: self.leftCompounds, rightMixtureName: self.rightCompounds}
       oldLeftMixture.delete()
-      _createSamples(self.project, mixtures)
+      _createSamples(self.project, mixtures, self.minimalDistance)
 
     else:
       mixtures = {leftMixtureName: self.leftCompounds, rightMixtureName: self.rightCompounds}
       oldRightMixture.delete()
       oldLeftMixture.delete()
-      _createSamples(self.project, mixtures)
+      _createSamples(self.project, mixtures, self.minimalDistance)
 
     self._confirmNewMixtures()
 
@@ -503,17 +505,45 @@ class MixtureAnalysis(CcpnModule):
     print('This is leftSpectra')
     leftSpectra = self._getListWidgetItems()['leftSpectra']
     self.leftCompounds = getCompounds(leftSpectra)
-    # newLeftMixture = randomDictMixtures('Mixture-'+str(len(self._getVirtualSamples())), leftCompounds, 1)
-    getMixtureInfo(self.leftCompounds, 0.01)
+    leftComponentsScores = self.temporarySampleComponentsScore(self.leftCompounds, self.minimalDistance )
+    self.leftListWidget.clear()
+    header = QtGui.QListWidgetItem(
+      'Predicted Tot Score' + str(round(scoreMixture(self.leftCompounds, self.minimalDistance), 2)))
+    header.setFlags(QtCore.Qt.NoItemFlags)
+    header.setTextColor(QtGui.QColor('Red'))
+    self.leftListWidget.addItem(header)
 
-    print('This is rightSpectra')
+    for i in leftComponentsScores:
+      self.leftListWidget.addItem(i)
+
     rightSpectra = self._getListWidgetItems()['rightSpectra']
     self.rightCompounds = getCompounds(rightSpectra)
-    # newrighttMixture = randomDictMixtures('Mixture-' + str(len(self._getVirtualSamples())), rightCompounds, 1)
-    getMixtureInfo(self.rightCompounds, 0.01)
+    rightComponentsScores = self.temporarySampleComponentsScore(self.rightCompounds , self.minimalDistance)
+    self.rightListWidget.clear()
+
+    header = QtGui.QListWidgetItem('Predicted Tot Score' + str(round(scoreMixture(self.rightCompounds, self.minimalDistance), 2)))
+    header.setFlags(QtCore.Qt.NoItemFlags)
+    header.setTextColor(QtGui.QColor('Red'))
+    self.rightListWidget.addItem(header)
+    for i in rightComponentsScores:
+      self.rightListWidget.addItem(i)
+
     self.calculateButtons.buttons[2].setEnabled(True)
 
+  def temporarySampleComponentsScore(self, mixtureCompounds, minDist ):
+    self.componentsScores = []
+    for compound in mixtureCompounds:
+      compoundName, compoundPeakList = compound
+      compoundsToCompare = [c[1] for c in mixtureCompounds if c[0] != compoundName]
+      overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist)
 
+      if overlaped is None:
+        self.componentsScores.append(str(compoundName)+' temp Score= 0' )
+
+      else:
+        score = len(overlaped) / len(compoundPeakList)
+        self.componentsScores.append(str(compoundName) + ' temp Score= ' + str(round(score,2)))
+    return self.componentsScores
 
   def _temporaryScoringStatus(self): # to do shorter
     ''' Disable all the commands so user is forced to take a decision with the new scoring after a mixture has been recalculated '''
@@ -536,8 +566,10 @@ class MixtureAnalysis(CcpnModule):
   def _confirmNewMixtures(self): # to do shorter
     ''' restore the normal behavior if the buttons '''
 
-    self._selectAnOptionState()
+
     self._upDateScoringTable()
+    self._selectAnOptionState()
+    self._populateLeftListWidget()
 
 
   def _resetMixtureScore(self):
@@ -693,12 +725,14 @@ class MixtureAnalysis(CcpnModule):
     dataFrame.to_excel(filePath, sheet_name='Mixtures', index=False)
 
   def _openOptimisationModule(self):
-    mixtureOptimisation = MixtureOptimisation(self.mainWindow, virtualSamples=self._getVirtualSamples(), mixtureAnalysisModule=self, project=self.project)
+    mixtureOptimisation = MixtureOptimisation(self.mainWindow, virtualSamples=self._getVirtualSamples(),
+                          mixtureAnalysisModule=self, minimalDistance = self.minimalDistance, project=self.project)
+
     mixtureOptimisationModule = self.moduleArea.addModule(mixtureOptimisation, position='bottom')
 
   def createMixturesDataFrame(self):
     from pandas import DataFrame
-    sampleColumn = [str(sample.pid) for sample in self.project.samples if hasattr(sample, 'minScore')]
+    sampleColumn = [str(sample.pid) for sample in self.project.samples if sample.isVirtual]
     sampleComponents = [str(sample.spectra) for sample in self.project.samples]
     df = DataFrame({'Mixture': [c.id for c in self.project.sampleComponents]})
 

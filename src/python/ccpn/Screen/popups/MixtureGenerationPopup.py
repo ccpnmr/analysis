@@ -31,8 +31,8 @@ class MixtureGenerationPopup(QtGui.QDialog):
     self.colourScheme = self.generalPreferences.colourScheme
     self.settingIcon = Icon('icons/applications-system')
     self.excludedRegionsWidgets = ExcludeRegions()
-    self.simulatedAnnealingParams = [OrderedDict([('initialTemp', 1000), ('finalTemp', 1), ('max steps', 1000),
-                                    ('temp constant', 50), ('cooling method', 'Linear'), ('iteration', 3)])]
+    self.simulatedAnnealingParams = [OrderedDict([('initialTemp', 100), ('finalTemp', 1), ('max steps', 10),
+                                    ('temp constant', 50), ('cooling method', 'Linear'), ('iteration', 1)])]
 
     self._setMainLayout()
     self._setTabs()
@@ -79,15 +79,15 @@ class MixtureGenerationPopup(QtGui.QDialog):
 
   def _createWidgetsGeneralTab(self):
 
-    methods = ['Simulated Annealing', 'Greedy']
+    methods = ['Simulated Annealing']
     mode = ['Select number of Mixtures','Select number of components']
 
     #
-    self.calculationMethodLabel = Label(self, 'Select calculation method')
+    self.calculationMethodLabel = Label(self, 'Calculation method')
     self.calculationMethod = RadioButtons(self, texts= methods,
                                                selectedInd=0,
                                                callback=self._showSAoptionWidgets,
-                                               direction='v',
+                                               direction='h',
                                                tipTexts=None)
     #
     self.saSettingsLabel = Label(self, 'SA settings')
@@ -348,7 +348,7 @@ class MixtureGenerationPopup(QtGui.QDialog):
 
   def _openMixtureAnalysisModule(self):
     '''   '''
-    mixtureAnalysis = MixtureAnalysis(parent=self.mainWindow, project=self.project)
+    mixtureAnalysis = MixtureAnalysis(parent=self.mainWindow, minimalDistance=self.ppmDistance.value(),project=self.project)
     mixtureAnalysisModule = self.moduleArea.addModule(mixtureAnalysis, position='bottom')
 
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])

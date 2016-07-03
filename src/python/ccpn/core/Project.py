@@ -308,15 +308,18 @@ class Project(AbstractWrapperObject):
   def deleteObjects(self, *objects:typing.Sequence[typing.Union[Pid.Pid,AbstractWrapperObject]]):
     """Delete one or more objects, given as either objects or Pids"""
 
-    objs = [getDataObj(x) if isinstance(x, str) else x for x in objects]
-    self._startFunctionCommandBlock('deleteObjects', [x.pid for x in objs])
+    getByPid = self.getByPid
+
+    objs = [getByPid(x) if isinstance(x, str) else x for x in objects]
+    apiObjs = [x._wrappedData for x in objs]
+    self._startDeleteCommandBlock(*apiObjs)
     try:
       for obj in objs:
         if obj and not obj.isDeleted:
           # If statement in case deleting one obj triggers the deletion of another
           obj.delete()
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endDeleteCommandBlock(*apiObjs)
 
   def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
     """Rename object indicated by objectOrPid to name newName
@@ -635,15 +638,34 @@ class Project(AbstractWrapperObject):
   # Standard notified functions.
   # RESTRICTED. Use in core classes ONLY
 
-  def _startDeleteCommandBlock(self, wrappedData):
+  def _startDeleteCommandBlock(self, *allWrappedData):
     """Call startCommandBlock for wrapper object delete. Implementation only"""
-    object = self._data2Obj[wrappedData]
-    self._appBase._startCommandBlock("project.deleteObjects(%s)" % (repr(object.pid)))
+
+    undo = self._undo
+    if not self._appBase._echoBlocking and not undo.blocking:
+
+      # set undo step
+      undo.newWaypoint()
+      getDataObj =  self._data2Obj.get
+      ll = [getDataObj(x) for x in allWrappedData]
+      ss = ', '.join(repr(x.pid) for x in ll if x is not None)
+      if not ss:
+        raise ValueError("No object for deletion recognised among API objects: %s"
+                         % allWrappedData)
+      command = "project.deleteObjects(%s)" % ss
+      # echo command strings
+      self._appBase.ui.echoCommands((command,))
+
+    self._appBase._echoBlocking += 1
 
 
-  def _endCommandBlock(self, dummyWrappedData):
-    """End block for command echoing (wrapper for framework._endCommandBlock, used for notifiers"""
-    self._appBase._endCommandBlock()
+  def _endDeleteCommandBlock(self, *dummyWrappedData):
+    """End block for delete command echoing
+
+    MUST be paired with _startDeleteCommandBlock call - use try ... finally to ensure both are called"""
+    if self._appBase._echoBlocking > 0:
+      # If statement should always be True, but to avoid weird behaviour in error situations we check
+      self._appBase._echoBlocking -= 1
 
   def _newApiObject(self, wrappedData, cls:AbstractWrapperObject):
     """Create new wrapper object of class cls, associated with wrappedData.
@@ -676,7 +698,6 @@ class Project(AbstractWrapperObject):
     """Clean up after object deletion - and call deletion notifiers
     Notifiers are called AFTER wrappedData are deleted, but BEFORE  wrapper objects are modified
     """
-
     if not wrappedData.isDeleted:
       raise ValueError("_finaliseApiDelete called before wrapped data are deleted: %s" % wrappedData)
 

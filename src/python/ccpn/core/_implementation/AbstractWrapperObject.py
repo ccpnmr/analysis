@@ -346,7 +346,7 @@ class AbstractWrapperObject():
             ('_newApiObject', {'cls':cls}, className, '__init__'),
             ('_startDeleteCommandBlock', {}, className, 'startDeleteBlock'),
             ('_finaliseApiDelete', {}, className, 'delete'),
-            ('_endCommandBlock', {}, className, 'endDeleteBlock'),
+            ('_endDeleteCommandBlock', {}, className, 'endDeleteBlock'),
             ('_finaliseApiUnDelete', {}, className, 'undelete'),
             ('_modifiedApiObject', {}, className, ''),
         ]
@@ -604,7 +604,8 @@ class AbstractWrapperObject():
 
     else:
       # Normal case - just call notifiers
-      if project._notificationSuspension:
+      if project._notificationSuspension and action != 'delete':
+        # NB Deletion notifiers must currently be executed immediately
         for dd in iterator:
           for notifier, onceOnly in dd.items():
             pendingNotifications.append((notifier, onceOnly, self))

@@ -56,7 +56,8 @@ def getLogger():
 
   return logger
 
-def createLogger(loggerName, project, stream=None, level=None, mode='a', removeOldLogsDays=MAX_LOG_FILE_DAYS):
+def createLogger(loggerName, project, stream=None, level=None, mode='a',
+                 removeOldLogsDays=MAX_LOG_FILE_DAYS):
   """Return a (unique) logger for this project and with given programName, if any.
      Puts log output into a log file but also optionally can have output go to
      another, specified, stream (e.g. a console)

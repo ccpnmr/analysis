@@ -611,10 +611,14 @@ class Project(AbstractWrapperObject):
 
   def suspendNotification(self):
     """Suspend notifier execution and accumulate notifiers for later execution"""
+    return
+    # TODO suspension temporarily disabled
     self._notificationSuspension += 1
 
   def resumeNotification(self):
     """Execute accumulated notifiers and resume immediate notifier execution"""
+    return
+    # TODO suspension temporarily disabled
     self._notificationSuspension -= 1
     if self._notificationSuspension <= 0:
       scheduledNotifiers = set()
@@ -793,7 +797,8 @@ class Project(AbstractWrapperObject):
     # self._doNotification(classNames[0], classNames[1], self)
     iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
-    if self._notificationSuspension:
+    # TODO suspension temporarily disabled
+    if False and self._notificationSuspension:
       ll = self._pendingNotifications
       for dd in iterator:
         for notifier, onceOnly in dd.items():

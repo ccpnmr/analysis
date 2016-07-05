@@ -225,14 +225,18 @@ data_mmcif_nef.dic
                multiline    char
                '[][ \n()_,.;:"&<>/\{}'`~!@#$%?+=*A-Za-z0-9|^-]*'
 ;              All printable ascii characters (includind space) plus linebreak
+               Like type text, except that '\t'is not allowed
 ;
                singleline    char
                '[][ ()_,.;:"&<>/\{}'`~!@#$%?+=*A-Za-z0-9|^-]*'
-;              All printable ascii characters (includind space). Equivalent to atcode, but renamed to avoid confusion
+;              All printable ascii characters (including space)
+               Like type line, except that '\t'is not allowed
+               Equivalent to atcode, but renamed to avoid confusion
 ;
                word    char
                '[][()_,.;:"&<>/\{}'`~!@#$%?+=*A-Za-z0-9|^-]*'
 ;              All printable ascii characters (NOT including space).
+               Like singleline except for not allowing space.
 ;
                nef_framecode    char
                '[][()_,.;:&<>/\{}`~!@$%?+=*A-Za-z0-9|^-]*'

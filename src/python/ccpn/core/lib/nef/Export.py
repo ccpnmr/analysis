@@ -22,6 +22,9 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+# NBNB FILE OBSOLETE
+
+
 import datetime
 import os
 import random

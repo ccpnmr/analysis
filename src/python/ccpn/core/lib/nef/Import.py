@@ -22,12 +22,17 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+
+# NBNB FILE OBSOLETE
+
+
+
 import collections
 import os
 import sys
 
 # from ccpn.util import Common as commonUtil
-from ccpn.core.lib.nef import Export
+from ccpn.core.lib.nef import _Export
 from ccpn.util.Bmrb import bmrb
 
 def bmrbEntry2Data1(entry:bmrb.entry)-> dict:
@@ -296,7 +301,7 @@ if __name__ == '__main__':
       # NBNB TODO change this - no direct apiIo.load
       ccpnProject = apiIo.loadProject(projectDir)
       nmrProj = ccpnProject.findFirstNmrProject()
-      Export.prepareNmrProject(nmrProj)
+      _Export.prepareNmrProject(nmrProj)
 
       pp = Project(nmrProj)
 

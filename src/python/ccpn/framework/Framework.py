@@ -143,7 +143,7 @@ class Framework:
     self.args = args
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
-    self.revision = Version.revision()
+    self.revision = Version.revision
 
     printCreditsText(sys.stderr, applicationName, applicationVersion)
 

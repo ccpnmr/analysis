@@ -2,7 +2,7 @@ __author__ = 'TJ'
 
 from ccpn.core.lib.Version import applicationVersion
 from ccpn.framework.Framework import defineProgramArguments
-from ccpn.Screen.AnalysisScreen import Screen
+from ccpn.AnalysisScreen.Screen import Screen
 
 
 if __name__ == '__main__':

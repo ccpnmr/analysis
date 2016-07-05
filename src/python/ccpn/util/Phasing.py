@@ -26,7 +26,8 @@ from scipy import signal
 
 from typing import Sequence
 
-def phaseRealData(data:Sequence, ph0:float=0.0, ph1:float=0.0, pivot:float=1.0) -> Sequence:
+def phaseRealData(data:Sequence[float], ph0:float=0.0, ph1:float=0.0,
+                  pivot:float=1.0) -> Sequence[float]:
   # data is the (1D) spectrum data (real)
   # ph0 and ph1 are in degrees
   
@@ -37,7 +38,8 @@ def phaseRealData(data:Sequence, ph0:float=0.0, ph1:float=0.0, pivot:float=1.0) 
   
   return data
   
-def phaseComplexData(data:Sequence, ph0:float=0.0, ph1:float=0.0, pivot:float=1.0) -> Sequence:
+def phaseComplexData(data:Sequence[complex], ph0:float=0.0, ph1:float=0.0,
+                     pivot:float=1.0) -> Sequence[complex]:
   # data is the (1D) spectrum data (complex)
   # ph0 and ph1 are in degrees
   

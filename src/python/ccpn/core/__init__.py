@@ -52,7 +52,7 @@ Common Class elements
 All classes in this module are subclasses of the :ref:`ccpn-AbstractWrapperObject-ref`,
 and inherit the following elements:
 
-**project** - *ccpn.Project*
+**project** - *ccpn.core.Project*
 
 The Project (root) containing the object.
 

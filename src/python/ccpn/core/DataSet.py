@@ -144,7 +144,7 @@ class DataSet(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.sortedNmrConstraintStores()
 
-  def _fetchFixedResonance(self, assignment:Sequence) -> ApiFixedResonance:
+  def _fetchFixedResonance(self, assignment:Sequence[str]) -> ApiFixedResonance:
     """Fetch FixedResonance matching assignment tuple, creating anew if needed."""
 
     apiNmrConstraintStore = self._wrappedData

@@ -150,10 +150,12 @@ class PeakList(AbstractWrapperObject):
 
   # Library functions
 
-  def pickPeaksNd(self, positions:Sequence=None, dataDims:Sequence=None,
+  def pickPeaksNd(self, positions:Sequence[float]=None, dataDims:Sequence['DataDim']=None,
                   doPos:bool=True, doNeg:bool=True,
-                  fitMethod:str='gaussian', excludedRegions:Sequence=None,
-                  excludedDiagonalDims:Sequence=None, excludedDiagonalTransform:Sequence=None):
+                  fitMethod:str='gaussian', excludedRegions=None,
+                  excludedDiagonalDims=None, excludedDiagonalTransform=None):
+
+    # TODO NBNB Add doc string and put type annotation on all parameters
 
     defaults = collections.OrderedDict(
       ( ('positions', None), ('doPos', True), ('doNeg', True),

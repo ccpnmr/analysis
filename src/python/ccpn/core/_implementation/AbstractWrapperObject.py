@@ -313,6 +313,9 @@ class AbstractWrapperObject():
       newAncestors = ancestors + [cls]
       if cls not in Project._allLinkedWrapperClasses:
         Project._allLinkedWrapperClasses.append(cls)
+
+        classFullName = repr(cls)[7:-2]
+
         # add getCls in all ancestors
         funcName = 'get' + cls.className
         #  NB Ancestors is never None at this point
@@ -320,7 +323,7 @@ class AbstractWrapperObject():
           # Add getDescendant function
           def func(self,  relativeId: str) -> cls:
             return cls._getDescendant(self, relativeId)
-          func.__doc__= "Get contained %s object by relative ID" % cls
+          func.__doc__= "Get contained %s object by relative ID" % classFullName
           setattr(ancestor, funcName, func)
 
         # Add descendant links
@@ -333,7 +336,7 @@ class AbstractWrapperObject():
           prop = property(func,
                             None, None,
                             ("\- *(%s,)*  - contained %s objects sorted by id" %
-                              (cls, cls.className)
+                              (classFullName, cls.className)
                             )
                           )
           setattr(ancestor, linkName, prop)

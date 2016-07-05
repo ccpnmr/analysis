@@ -906,11 +906,11 @@ class Spectrum(AbstractWrapperObject):
     finally:
       self._project._appBase._endCommandBlock()
 
-  def getPlaneData(self, position:Sequence=None, xDim:int=1, yDim:int=2):
+  def getPlaneData(self, position=None, xDim:int=1, yDim:int=2):
 
     return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)
 
-  def getSliceData(self, position:Sequence=None, sliceDim:int=1):
+  def getSliceData(self, position=None, sliceDim:int=1):
 
     return self._apiDataSource.getSliceData(position=position, sliceDim=sliceDim)
 

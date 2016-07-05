@@ -280,7 +280,7 @@ def _newRestraint(self:RestraintList,comment:str=None,
   return result
 
 def createSimpleRestraint(self:RestraintList,comment:str=None,
-                        peaks:Sequence=(),  targetValue:float=None, error:float=None,
+                        peaks:Sequence[Peak]=(),  targetValue:float=None, error:float=None,
                         weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                         scale=1.0, vectorLength=None, restraintItems:Sequence=()) -> Restraint:

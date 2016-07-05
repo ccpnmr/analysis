@@ -38,7 +38,7 @@ joinPath = corePath.joinPath
 
 
 # Relative path to documentation directory
-documentationPath = 'doc/source/sphinx'
+documentationPath = 'doc'
 
 def refreshSphinxDocumentation():
   """(Re)create sphinx documentation. Locations are hardwired"""
@@ -49,7 +49,8 @@ def refreshSphinxDocumentation():
 
   # Remove sphinx-apidoc files
   outputDirs = {}
-  for ss in ('ccpn', 'ccpnmodel'):
+  for ss in ('ccpn',):
+  # for ss in ('ccpn', 'ccpnmodel'):
     inDirectory = joinPath(docDirectory, 'source', ss)
     outputDirs[ss] = inDirectory
     if os.path.exists(inDirectory):
@@ -85,37 +86,18 @@ def refreshSphinxDocumentation():
   apidoc.main(command)
 
 
-  # Generate documentation - ccpn:
-  module = 'ccpnmodel'
-  target = joinPath(pythonDirectory, module)
-  skipDirs = getNamedSubdirectories(target, ('testing', 'v_'))
-  command = precommand + ['-H', 'CCPN storage implementation', target] + skipDirs
-  # Additional directories to skip
-  command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/memops'))
-  command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/xml'))
-  command[2] = outputDirs[module]
-  # print ('\n\n@~@~', command)
-  apidoc.main(command)
+  # # Generate documentation - ccpn:
+  # module = 'ccpnmodel'
+  # target = joinPath(pythonDirectory, module)
+  # skipDirs = getNamedSubdirectories(target, ('testing', 'v_'))
+  # command = precommand + ['-H', 'CCPN storage implementation', target] + skipDirs
+  # # Additional directories to skip
+  # command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/memops'))
+  # command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/xml'))
+  # command[2] = outputDirs[module]
+  # # print ('\n\n@~@~', command)
+  # apidoc.main(command)
 
-
-  # ll = ['../doc/source/sphinx/source/ccpn', 'ccpn',
-  #       'ccpncore/memops/', 'ccpncore/testing/', 'ccpncore/xml/', 'ccpncore/api',
-  #       'ccpncore/lib/Bmrb/unit_tests']
-  # ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  #
-  #
-  # # # then ccpn.ui.gui
-  # ll = ['../doc/source/application', 'application']
-  # ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  # apidoc.main(ll)
-  #
-  # # then ccpn
-  # ll = ['../doc/source/ccpn', 'ccpn', 'ccpn/lib/wrapper']
-  # ll = ['sphinx-apidoc', '-o'] + [joinPath(pythonDirectory, xx) for xx in ll]
-  # apidoc.main(ll)
-  #subprocess.call(ll)
-
-  #subprocess.call(ll)
 
   # rebuild docs
   subprocess.call(['make', '-C', docDirectory, 'html'])

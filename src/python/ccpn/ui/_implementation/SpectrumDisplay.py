@@ -314,9 +314,9 @@ Task.newSpectrumDisplay = _newSpectrumDisplay
 del _newSpectrumDisplay
 
 
-def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Sequence=(),
-                          axisOrder:Sequence=(), name:str=None, positions:Sequence=(),
-                          widths:Sequence=(), units:Sequence=(),
+def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Sequence[str]=(),
+                          axisOrder:Sequence[str]=(), name:str=None, positions:Sequence[float]=(),
+                          widths:Sequence[float]=(), units:Sequence[str]=(),
                           stripDirection:str='Y', is1D:bool=False,
                           independentStrips:bool=False):
 

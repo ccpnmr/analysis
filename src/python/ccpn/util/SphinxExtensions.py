@@ -46,12 +46,12 @@ replaceInDocStrings = (
 # )
 optionalType = re.compile("Union\[(.+), *NoneType\]")
 
-classRepresentation = re.compile("<class '(.*?)'>")
+classRepresentation = re.compile("<class *'(.*?)'>")
 
-forwardReference = re.compile("_ForwardRef \('(.*?)'\)")
+forwardReference = re.compile("_ForwardRef *\('(.*?)'\)")
 
 # TODO fix this, probably not OK now!
-typeUnion = re.compile("Union[(.*?], *(.*?)]")
+typeUnion = re.compile("Union\[(.*?), *(.*?)\]")
 
 classesHeader = [
   '',
@@ -92,7 +92,7 @@ def autodoc_process_docstring():
           typ = optionalType.sub(r'\g<1>=None',typ)
           typ = classRepresentation.sub(r'\g<1>', typ)
           typ = forwardReference.sub(r'\g<1>', typ)
-          # typ = typeUnion.sub(r'\g<1>|\g<2>', typ)
+          typ = typeUnion.sub(r'\g<1> | \g<2>', typ)
           for fromText, toText in replaceInDocStrings:
             typ = typ.replace(fromText, toText)
           ll = []
@@ -152,6 +152,8 @@ def autodoc_process_signature():
       # signature = wrappedClassFullName.sub(r'\g<1>.\g<3>', signature)
       signature = classRepresentation.sub(r'\g<1>', signature)
       signature = forwardReference.sub(r'\g<1>', signature)
+      signature = optionalType.sub(r'\g<1>=None',signature)
+      signature = typeUnion.sub(r'\g<1> | \g<2>', signature)
       # signature = typeUnion.sub(r'\g<1>|\g<2>', signature)
       for fromText, toText in replaceInDocStrings:
         signature = signature.replace(fromText, toText)

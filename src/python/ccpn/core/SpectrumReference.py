@@ -239,7 +239,7 @@ class SpectrumReference(AbstractWrapperObject):
 
 
 def _newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:float,
-                       isotopeCodes:Sequence, axisCode:str=None, measurementType:str='Shift',
+                       isotopeCodes:Sequence[str], axisCode:str=None, measurementType:str='Shift',
                        maxAliasedFrequency:float=None, minAliasedFrequency:float=None,
                        foldingMode:str=None, axisUnit:str=None, referencePoint:float=0.0,
                        referenceValue:float=0.0) -> SpectrumReference:

@@ -616,7 +616,7 @@ class NmrResidue(AbstractWrapperObject):
     finally:
       self._project._appBase._endCommandBlock()
 
-  def moveToNmrChain(self, newNmrChain:Union[NmrChain, str]=None):
+  def moveToNmrChain(self, newNmrChain:Union['NmrChain', str]=None):
     """Reset NmrChain, breaking connected NmrChain if necessary.
 
     If set to None resets to NmrChain '@-'

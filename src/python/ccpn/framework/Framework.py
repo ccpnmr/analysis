@@ -54,7 +54,7 @@ from ccpn.ui.gui.lib.Window import MODULE_DICT
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QKeySequence
 
-_DEBUG = True
+_DEBUG = False
 
 componentNames = ('Assignment', 'Screening', 'Structure')
 
@@ -426,12 +426,17 @@ class Framework:
       self.ui.echoCommands(commands)
 
     self._echoBlocking += 1
+    self.project._logger.debug('startCommandBlock. command=%s, echoBlocking=%s, undo.blocking=%s'
+                               % (command, self._echoBlocking, undo.blocking))
 
 
   def _endCommandBlock(self):
     """End block for command echoing,
 
     MUST be paired with _startCommandBlock call - use try ... finally to ensure both are called"""
+
+    self.project._logger.debug('endCommandBlock. echoBlocking=%s' % self._echoBlocking)
+
     if self._echoBlocking > 0:
       # If statement should always be True, but to avoid weird behaviour in error situations we check
       self._echoBlocking -= 1

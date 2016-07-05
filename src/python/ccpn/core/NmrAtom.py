@@ -188,8 +188,7 @@ class NmrAtom(AbstractWrapperObject):
 
     If the assignedTo NmrAtom already exists the function raises ValueError.
     If mergeToExisting is True it instead merges the current NmrAtom into the target
-     and returns the merged target.
-    NB Merging is NOT undoable
+    and returns the merged target. NB Merging is NOT undoable
 
     WARNING: is mergeToExisting is True, always use in the form "x = x.assignTo(...)",
     as the call 'x.assignTo(...) may cause the source x object to be deleted.

@@ -332,7 +332,7 @@ class Peak(AbstractWrapperObject):
       self.assignedNmrAtoms = assignedNmrAtoms
 
   def assignDimension(self, axisCode:str, value:Union[Union[str,'NmrAtom'],
-                                                            Sequence[Union[str,'NmrAtom']]]):
+                                                      Sequence[Union[str,'NmrAtom']]]):
     """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)
     """
 
@@ -362,8 +362,8 @@ class Peak(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newPeak(self:PeakList,height:Optional[float]=None, volume:Optional[float]=None,
-             heightError:Optional[float]=None, volumeError:Optional[float]=None,
+def _newPeak(self:PeakList,height:float=None, volume:float=None,
+             heightError:float=None, volumeError:float=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), pointPosition:Sequence[float]=()) -> Peak:
   """Create new ccpn.Peak within ccpn.peakList

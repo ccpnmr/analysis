@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui package &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../index.html" />
+    <link rel="up" title="ccpn package" href="ccpn.html" />
+    <link rel="next" title="ccpn.util package" href="ccpn.util.html" />
+    <link rel="prev" title="ccpn.framework.update package" href="ccpn.framework.update.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.util.html" title="ccpn.util package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.framework.update.html" title="ccpn.framework.update package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" accesskey="U">ccpn package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ccpn.ui">
+<span id="ccpn-ui-package"></span><h1>ccpn.ui package<a class="headerlink" href="#module-ccpn.ui" title="Permalink to this headline">¶</a></h1>
+<p>User interfaces available for applications</p>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpn.ui.Ui">
+<span id="ccpn-ui-ui-module"></span><h2>ccpn.ui.Ui module<a class="headerlink" href="#module-ccpn.ui.Ui" title="Permalink to this headline">¶</a></h2>
+<p>Default framework no-user-interface UI implementation</p>
+<dl class="class">
+<dt id="ccpn.ui.Ui.NoUi">
+<em class="property">class </em><code class="descclassname">ccpn.ui.Ui.</code><code class="descname">NoUi</code><span class="sig-paren">(</span><em>framework</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#NoUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.NoUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.Ui.Ui" title="ccpn.ui.Ui.Ui"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.Ui.Ui</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.Ui.TestUi">
+<em class="property">class </em><code class="descclassname">ccpn.ui.Ui.</code><code class="descname">TestUi</code><span class="sig-paren">(</span><em>framework</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#TestUi"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.TestUi" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.Ui.NoUi" title="ccpn.ui.Ui.NoUi"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.Ui.NoUi</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.Ui.TestUi.echoCommands">
+<code class="descname">echoCommands</code><span class="sig-paren">(</span><em>commands: List[str]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#TestUi.echoCommands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.TestUi.echoCommands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Echo commands strings, one by one, to logger
+and store them in internal list for perusal</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.Ui.Ui">
+<em class="property">class </em><code class="descclassname">ccpn.ui.Ui.</code><code class="descname">Ui</code><span class="sig-paren">(</span><em>framework</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#Ui"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.Ui" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Superclass for all user interface classes</p>
+<dl class="method">
+<dt id="ccpn.ui.Ui.Ui.addMenu">
+<code class="descname">addMenu</code><span class="sig-paren">(</span><em>name</em>, <em>position=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#Ui.addMenu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.Ui.addMenu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a menu specification for the top menu bar.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.Ui.Ui.echoCommands">
+<code class="descname">echoCommands</code><span class="sig-paren">(</span><em>commands: List[str]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#Ui.echoCommands"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.Ui.echoCommands" title="Permalink to this definition">¶</a></dt>
+<dd><p>Echo commands strings, one by one, to logger.
+Overwritten in subclasses to handle e.g. console putput</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.Ui.Ui.initialize">
+<code class="descname">initialize</code><span class="sig-paren">(</span><em>mainWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#Ui.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.Ui.initialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>UI operations done after every project load/create</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ccpn.ui.Ui.Ui.setUp">
+<em class="property">classmethod </em><code class="descname">setUp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#Ui.setUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.Ui.setUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set up graphics data classes, cleaning up previous settings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.Ui.Ui.start">
+<code class="descname">start</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/Ui.html#Ui.start"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.Ui.Ui.start" title="Permalink to this definition">¶</a></dt>
+<dd><p>Start the program execution</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ccpn.ui package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.Ui">ccpn.ui.Ui module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ccpn.framework.update.html"
+                        title="previous chapter">ccpn.framework.update package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ccpn.util.html"
+                        title="next chapter">ccpn.util package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ccpn/ccpn.ui.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.util.html" title="ccpn.util package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.framework.update.html" title="ccpn.framework.update package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

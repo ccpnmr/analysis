@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.Assign.Assign &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.Assign.Assign</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-06-22 09:30:38 +0100 (Wed, 22 Jun 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: skinnersp $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-06-22 09:30:38 +0100 (Wed, 22 Jun 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9495 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="c"># from ccpn.ui.gui.AppBase import AppBase, defineProgramArguments</span>
+<span class="c"># from ccpn.ui.gui.lib.Window import MODULE_DICT</span>
+<span class="c"># from ccpn.ui.gui.modules import GuiStrip</span>
+
+<span class="c"># from ccpn.framework.lib.SvnRevision import applicationVersion</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">Framework</span>
+<span class="c"># from ccpn.ui.gui.modules import GuiStripNd</span>
+<span class="c"># from ccpn.ui.gui.modules import GuiSpectrumDisplay</span>
+<span class="c"># from ccpn.ui.gui.modules import GuiStripDisplayNd</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Module</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+
+
+<span class="n">applicationName</span> <span class="o">=</span> <span class="s">&#39;AnalysisAssign&#39;</span>
+
+<span class="c"># class Assign(AppBase):</span>
+<div class="viewcode-block" id="Assign"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign">[docs]</a><span class="k">class</span> <span class="nc">Assign</span><span class="p">(</span><span class="n">Framework</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Root class for Assign application&quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
+    <span class="n">Framework</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
+    <span class="c"># self.components.add(&#39;Assignment&#39;)</span>
+
+
+<div class="viewcode-block" id="Assign.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign.setupMenus">[docs]</a>  <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setupMenus</span><span class="p">()</span>
+    <span class="n">menuSpec</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Assign&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s">&quot;Setup NmrResidues&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showSetupNmrResiduesPopup</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s">&#39;sn&#39;</span><span class="p">)]),</span>
+                           <span class="p">(</span><span class="s">&quot;Pick and Assign&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPickAndAssignModule</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s">&#39;pa&#39;</span><span class="p">)]),</span>
+                           <span class="p">(),</span>
+                           <span class="p">(</span><span class="s">&quot;Backbone Assignment&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showBackboneAssignmentModule</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s">&#39;bb&#39;</span><span class="p">)]),</span>
+                           <span class="c"># (&quot;Sidechain Assignment&quot;, self.showSetupNmrResiduesPopup, &#39;sc&#39;),</span>
+                           <span class="p">(),</span>
+                           <span class="p">(</span><span class="s">&quot;Peak Assigner&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPeakAssigner</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s">&#39;aa&#39;</span><span class="p">)]),</span>
+                           <span class="p">(</span><span class="s">&quot;Modify Assignments&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showModifyAssignmentModule</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s">&#39;ma&#39;</span><span class="p">)]),</span>
+                           <span class="p">(</span><span class="s">&quot;Residue Information&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showResidueInformation</span><span class="p">,</span> <span class="p">[(</span><span class="s">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s">&#39;ri&#39;</span><span class="p">)]),</span>
+                          <span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addApplicationMenuSpec</span><span class="p">(</span><span class="n">menuSpec</span><span class="p">)</span></div>
+
+
+  <span class="c"># def initGraphics(self):</span>
+  <span class="c">#   &quot;&quot;&quot;Set up graphics system after loading&quot;&quot;&quot;</span>
+  <span class="c">#</span>
+  <span class="c">#   # Initialise strips</span>
+  <span class="c">#   project = self.project</span>
+  <span class="c">#   for strip in project.strips:</span>
+  <span class="c">#     GuiStrip._setupGuiStrip(project, strip._wrappedData)</span>
+  <span class="c">#</span>
+  <span class="c">#     # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:</span>
+  <span class="c">#     #   strip.setZWidgets()</span>
+  <span class="c">#</span>
+  <span class="c">#   # Initialise Rulers</span>
+  <span class="c">#   for task in project.tasks:</span>
+  <span class="c">#     for apiMark in task._wrappedData.sortedMarks():</span>
+  <span class="c">#       for apiRuler in apiMark.sortedRulers():</span>
+  <span class="c">#         GuiStrip._rulerCreated(project, apiRuler)</span>
+  <span class="c">#</span>
+  <span class="c">#   # Initialise SpectrumViews</span>
+  <span class="c">#   for spectrumDisplay in project.spectrumDisplays:</span>
+  <span class="c">#     for strip in spectrumDisplay.strips:</span>
+  <span class="c">#       for spectrumView in strip.spectrumViews:</span>
+  <span class="c">#         spectrumView._createdSpectrumView()</span>
+  <span class="c">#         for peakList in spectrumView.spectrum.peakLists:</span>
+  <span class="c">#           strip.showPeaks(peakList)</span>
+  <span class="c">#</span>
+  <span class="c">#   self.initLayout()</span>
+  <span class="c">#</span>
+  <span class="c"># def initLayout(self):</span>
+  <span class="c">#   &quot;&quot;&quot;</span>
+  <span class="c">#   Restore layout of modules from previous save after graphics have been set up.</span>
+  <span class="c">#   &quot;&quot;&quot;</span>
+  <span class="c">#   import yaml, os</span>
+  <span class="c">#   if os.path.exists(os.path.join(self.project.path, &#39;layouts&#39;, &#39;layout.yaml&#39;)):</span>
+  <span class="c">#     with open(os.path.join(self.project.path, &#39;layouts&#39;, &#39;layout.yaml&#39;)) as f:</span>
+  <span class="c">#       layout = yaml.load(f)</span>
+  <span class="c">#       typ, contents, state = layout[&#39;main&#39;]</span>
+  <span class="c">#</span>
+  <span class="c">#       # TODO: When UI has a main window, change the call below (then move the whole function!)</span>
+  <span class="c">#       containers, modules = self.ui.mainWindow.moduleArea.findAll()</span>
+  <span class="c">#       flatten = lambda *n: (e for a in n</span>
+  <span class="c">#       for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))</span>
+  <span class="c">#       flatContents = list(flatten(contents))</span>
+  <span class="c">#       for item in flatContents:</span>
+  <span class="c">#         if item in list(MODULE_DICT.keys()):</span>
+  <span class="c">#           obj = modules.get(item)</span>
+  <span class="c">#           if not obj:</span>
+  <span class="c">#            func = getattr(self, MODULE_DICT[item])</span>
+  <span class="c">#            func()</span>
+  <span class="c">#       for s in layout[&#39;float&#39;]:</span>
+  <span class="c">#         typ, contents, state = s[0][&#39;main&#39;]</span>
+  <span class="c">#         containers, modules = self.ui.mainWindow.moduleArea.findAll()</span>
+  <span class="c">#         for item in contents:</span>
+  <span class="c">#           if item[0] == &#39;dock&#39;:</span>
+  <span class="c">#             obj = modules.get(item[1])</span>
+  <span class="c">#             if not obj:</span>
+  <span class="c">#               func = getattr(self, MODULE_DICT[item[1]])</span>
+  <span class="c">#               func()</span>
+  <span class="c">#       self.ui.mainWindow.moduleArea.restoreState(layout)</span>
+
+
+<div class="viewcode-block" id="Assign.showSetupNmrResiduesPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign.showSetupNmrResiduesPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showSetupNmrResiduesPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SetupNmrResiduesPopup</span> <span class="kn">import</span> <span class="n">SetupNmrResiduesPopup</span>
+    <span class="n">popup</span> <span class="o">=</span> <span class="n">SetupNmrResiduesPopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="Assign.showPickAndAssignModule"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign.showPickAndAssignModule">[docs]</a>  <span class="k">def</span> <span class="nf">showPickAndAssignModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span> <span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.Assign.modules.PickAndAssignModule</span> <span class="kn">import</span> <span class="n">PickAndAssignModule</span>
+
+    <span class="sd">&quot;&quot;&quot;Displays Pick and Assign module.&quot;&quot;&quot;</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignModule</span> <span class="o">=</span> <span class="n">PickAndAssignModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s">&quot;application.showPickAndAssignModule()&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;application.showPickAndAssignModule()&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignModule</span></div>
+
+
+<div class="viewcode-block" id="Assign.showBackboneAssignmentModule"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign.showBackboneAssignmentModule">[docs]</a>  <span class="k">def</span> <span class="nf">showBackboneAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span> <span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Displays Backbone Assignment module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.Assign.modules.BackboneAssignmentModule</span> <span class="kn">import</span> <span class="n">BackboneAssignmentModule</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;backboneModule&#39;</span><span class="p">):</span>
+      <span class="k">return</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span> <span class="o">=</span> <span class="n">BackboneAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s">&quot;application.showBackboneAssignmentModule()&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;application.showBackboneAssignmentModule()&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;assigner&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span></div>
+
+
+<div class="viewcode-block" id="Assign.showPeakAssigner"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign.showPeakAssigner">[docs]</a>  <span class="k">def</span> <span class="nf">showPeakAssigner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Displays assignment module.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PeakAssigner</span> <span class="kn">import</span> <span class="n">PeakAssigner</span>
+
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assignmentModule</span> <span class="o">=</span> <span class="n">PeakAssigner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assignmentModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s">&quot;application.showAssignmentModule()&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;application.showAssignmentModule()&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Assign.showResidueInformation"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign.showResidueInformation">[docs]</a>  <span class="k">def</span> <span class="nf">showResidueInformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Displays Residue Information module.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.ResidueInformation</span> <span class="kn">import</span> <span class="n">ResidueInformation</span>
+
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">ResidueInformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">),</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                              <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s">&quot;application.showResidueInformation()&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;application.showResidueInformation()&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Assign.showModifyAssignmentModule"><a class="viewcode-back" href="../../../ccpn/ccpn.Assign.html#ccpn.Assign.Assign.Assign.showModifyAssignmentModule">[docs]</a>  <span class="k">def</span> <span class="nf">showModifyAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.Assign.modules.ModifyAssignmentModule</span> <span class="kn">import</span> <span class="n">ModifyAssignmentModule</span>
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modifyAssignmentsModule</span> <span class="o">=</span> <span class="n">ModifyAssignmentModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="n">nmrAtom</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modifyAssignmentsModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
+                              <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

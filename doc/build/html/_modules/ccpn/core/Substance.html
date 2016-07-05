@@ -1,0 +1,769 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.Substance &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.Substance</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.SampleComponent</span> <span class="kn">import</span> <span class="n">SampleComponent</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">DEFAULT_LABELING</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.lims.RefSampleComponent</span> <span class="kn">import</span> <span class="n">AbstractComponent</span> <span class="k">as</span> <span class="n">ApiRefComponent</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.molecule</span> <span class="kn">import</span> <span class="n">MoleculeModify</span>
+
+<span class="n">_apiClassNameMap</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s">&#39;MolComponent&#39;</span><span class="p">:</span><span class="s">&#39;Molecule&#39;</span><span class="p">,</span>
+  <span class="s">&#39;Substance&#39;</span><span class="p">:</span><span class="s">&#39;Material&#39;</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="Substance"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Substance">[docs]</a><span class="k">class</span> <span class="nc">Substance</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Substance (molecule, material, buffer, cell, ..).</span>
+
+<span class="sd">  The default substanceType is &#39;Molecule&#39;, corresponding to one or more molecules.</span>
+<span class="sd">  It is possible (but not mandatory)to make a Substance associated to a single chain molecule,</span>
+<span class="sd">  using the Project.createPolymerSubstance function. There is currently no provision for</span>
+<span class="sd">  associating a Substance with several chains in a multi-chain - use Composite instead.</span>
+<span class="sd">   &quot;&quot;&quot;</span>
+  
+  <span class="c">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;SU&#39;</span>
+  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;Substance&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;substances&#39;</span>
+  
+  <span class="c">#: List of child classes.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Qualified name of matching API class</span>
+  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiRefComponent</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+  <span class="c"># CCPN properties  </span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_apiSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiRefComponent</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; API RefSampleComponent matching Substance&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;id string - name.labeling&quot;&quot;&quot;</span>
+    <span class="n">obj</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">labeling</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">labeling</span>
+    <span class="k">if</span> <span class="n">labeling</span> <span class="o">==</span> <span class="n">DEFAULT_LABELING</span><span class="p">:</span>
+      <span class="n">labeling</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;name of Substance&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">labeling</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;labeling descriptor of Substance (default is &#39;std&#39;)&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">labeling</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="n">DEFAULT_LABELING</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c">#</span>
+    <span class="k">return</span> <span class="n">result</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sample</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Project containing Substance.&quot;&quot;&quot;</span>
+    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">substanceType</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Category of substance: Molecule, Cell, Material, or Composite</span>
+
+<span class="sd">    - Molecule is a single molecule, including plasmids</span>
+
+<span class="sd">    - Cell is a cell,</span>
+
+<span class="sd">    - Material is a mixture, like fetal calf serum, growth medium, or standard buffer,</span>
+
+<span class="sd">    - Composite is multiple components in fixed ratio, like a protein-ligand or multiprotein</span>
+<span class="sd">    complex, or (technically) a Cell containing a particular plasmid.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">className</span>
+    <span class="k">return</span> <span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">synonyms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Synonyms for Substance name&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">synonyms</span>
+
+  <span class="nd">@synonyms.setter</span>
+  <span class="k">def</span> <span class="nf">synonyms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Synonyms for Substance name&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">synonyms</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">userCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;User-defined compound code&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">userCode</span>
+
+  <span class="nd">@userCode.setter</span>
+  <span class="k">def</span> <span class="nf">userCode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">userCode</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Smiles string - for substances that have one&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">smiles</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;smiles&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@smiles.setter</span>
+  <span class="k">def</span> <span class="nf">smiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;smiles&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">smiles</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;smiles&#39;&quot;</span> <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">inChi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;inChi string - for substances that have one&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">inChi</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;inChi&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@inChi.setter</span>
+  <span class="k">def</span> <span class="nf">inChi</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;inChi&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">inChi</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;inChi&#39;&quot;</span> <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">casNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;CAS number string - for substances that have one&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">casNum</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;casNum&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@casNumber.setter</span>
+  <span class="k">def</span> <span class="nf">casNumber</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;casNum&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">casNum</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;casNumber&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">empiricalFormula</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Empirical molecular formula string - for substances that have one&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">apiRefComponent</span><span class="o">.</span><span class="n">empiricalFormula</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;empiricalFormula&#39;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+  <span class="nd">@empiricalFormula.setter</span>
+  <span class="k">def</span> <span class="nf">empiricalFormula</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;empiricalFormula&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">empiricalFormula</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;empiricalFormula&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sequenceString</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Molecular sequence string - set by the createPolymerSubstance function. Substances</span>
+<span class="sd">    created by this function can be used to generate matching chains with the</span>
+<span class="sd">    createChainFromSubstance function</span>
+
+<span class="sd">    For standard polymers defaults to a string of one-letter codes;</span>
+<span class="sd">    for other molecules to a comma-separated tuple of three-letter codes&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">seqString</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;seqString&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">molecularMass</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Molecular mass - for substances that have one&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">molecularMass</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;molecularMass&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@molecularMass.setter</span>
+  <span class="k">def</span> <span class="nf">molecularMass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;molecularMass&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">molecularMass</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;molecularMass&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">atomCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Number of atoms in the molecule - for Molecular substances&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">atomCount</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;atomCount&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@atomCount.setter</span>
+  <span class="k">def</span> <span class="nf">atomCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;atomCount&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">atomCount</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;atomCount&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">bondCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Number of bonds in the molecule - for Molecular substances&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">bondCount</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;bondCount&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@bondCount.setter</span>
+  <span class="k">def</span> <span class="nf">bondCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;bondCount&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">bondCount</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;bondCount&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">ringCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Number of rings in the molecule - for Molecular substances&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">ringCount</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;ringCount&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@ringCount.setter</span>
+  <span class="k">def</span> <span class="nf">ringCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;ringCount&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">ringCount</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;ringCount&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">hBondDonorCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Number of hydrogen bond donors in the molecule - for Molecular substances&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">hBondDonorCount</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;hBondDonorCount&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+
+  <span class="nd">@hBondDonorCount.setter</span>
+  <span class="k">def</span> <span class="nf">hBondDonorCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;hBondDonorCount&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">hBondDonorCount</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;hBondDonorCount&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">hBondAcceptorCount</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Number of hydrogen bond acceptors in the molecule - for Molecular substances&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">apiRefComponent</span><span class="o">.</span><span class="n">hBondAcceptorCount</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;hBondAcceptorCount&#39;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+  <span class="nd">@hBondAcceptorCount.setter</span>
+  <span class="k">def</span> <span class="nf">hBondAcceptorCount</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;hBondAcceptorCount&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">hBondAcceptorCount</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;hBondAcceptorCount&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">polarSurfaceArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Polar surface area (in square Angstrom) of the molecule - for Molecular substances&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">apiRefComponent</span><span class="o">.</span><span class="n">polarSurfaceArea</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;polarSurfaceArea&#39;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+  <span class="nd">@polarSurfaceArea.setter</span>
+  <span class="k">def</span> <span class="nf">polarSurfaceArea</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;polarSurfaceArea&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">polarSurfaceArea</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;polarSurfaceArea&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">logPartitionCoefficient</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Logarithm of the octanol-water partition coefficient (logP) - for Molecular substances&quot;&quot;&quot;</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">apiRefComponent</span><span class="o">.</span><span class="n">logPartitionCoefficient</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;logPartitionCoefficient&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span><span class="p">)</span>
+
+  <span class="nd">@logPartitionCoefficient.setter</span>
+  <span class="k">def</span> <span class="nf">logPartitionCoefficient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiRefComponent</span><span class="p">,</span> <span class="s">&#39;logPartitionCoefficient&#39;</span><span class="p">):</span>
+      <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">logPartitionCoefficient</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">apiRefComponent</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span> <span class="s">&quot;</span><span class="si">%s</span><span class="s"> type Substance has no attribute &#39;logPartitionCoefficient&#39;&quot;</span>
+                       <span class="o">%</span><span class="n">_apiClassNameMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">ss</span><span class="p">))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+
+  <span class="nd">@comment.setter</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SampleComponent</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;SampleComponents that correspond to Substance&quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labeling</span>
+    <span class="k">if</span> <span class="n">apiLabeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELING</span>
+    <span class="n">apiSampleStore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span>
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
+                 <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">apiSampleStore</span><span class="o">.</span><span class="n">sortedSamples</span><span class="p">()</span>
+                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">sortedSampleComponents</span><span class="p">()</span>
+                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">labeling</span> <span class="o">==</span> <span class="n">apiLabeling</span><span class="p">)</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">referenceSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Spectrum</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Reference Spectra acquired for Substance.</span>
+<span class="sd">    There should be only one reference spectrum for each experiment type&quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">sortedExperiments</span><span class="p">()</span>
+                 <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">sortedDataSources</span><span class="p">()</span>
+                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
+
+  <span class="nd">@referenceSpectra.setter</span>
+  <span class="k">def</span> <span class="nf">referenceSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">:</span>
+      <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+      <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">=</span> <span class="n">name</span>
+
+
+  <span class="c"># Implementation functions</span>
+<div class="viewcode-block" id="Substance.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Substance.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rename Substance, changing its Id and Pid, and rename SampleComponents and SpectrumHits</span>
+<span class="sd">    with matching names. If name is None, the existing value will be used.</span>
+<span class="sd">    Labeling &#39;None&#39;  means &#39;Natural abundance&#39;&quot;&quot;&quot;</span>
+
+    <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">oldName</span>
+    <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.Sample.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+    <span class="n">oldLabeling</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">labeling</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labeling</span>
+    <span class="k">if</span> <span class="n">labeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELING</span>
+    <span class="k">elif</span>  <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">labeling</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.Sample.labeling&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">)</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">renamedObjects</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">spectrumHit</span> <span class="ow">in</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">spectrumHits</span><span class="p">:</span>
+          <span class="n">coreUtil</span><span class="o">.</span><span class="n">_resetParentLink</span><span class="p">(</span><span class="n">spectrumHit</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s">&#39;spectrumHits&#39;</span><span class="p">,</span>
+            <span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;substanceName&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s">&#39;sampledDimension&#39;</span><span class="p">,</span><span class="n">spectrumHit</span><span class="o">.</span><span class="n">pseudoDimensionNumber</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s">&#39;sampledPoint&#39;</span><span class="p">,</span><span class="n">spectrumHit</span><span class="o">.</span><span class="n">pointNumber</span><span class="p">)))</span>
+          <span class="p">)</span>
+          <span class="n">renamedObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumHit</span><span class="p">)</span>
+
+        <span class="c"># NB this must be done AFTER the spectrumHit loop to avoid breaking links</span>
+        <span class="n">coreUtil</span><span class="o">.</span><span class="n">_resetParentLink</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s">&#39;sampleComponents&#39;</span><span class="p">,</span>
+          <span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;labeling&#39;</span><span class="p">,</span><span class="n">apiLabeling</span><span class="p">)))</span>
+        <span class="p">)</span>
+        <span class="n">renamedObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sampleComponent</span><span class="p">)</span>
+
+      <span class="c"># NB this must be done AFTER the sampleComponent loop to avoid breaking links</span>
+      <span class="n">coreUtil</span><span class="o">.</span><span class="n">_resetParentLink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s">&#39;components&#39;</span><span class="p">,</span>
+          <span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="n">name</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;labeling&#39;</span><span class="p">,</span><span class="n">apiLabeling</span><span class="p">)))</span>
+        <span class="p">)</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">renamedObjects</span><span class="p">:</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;change&#39;</span><span class="p">)</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+
+    <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">oldName</span><span class="p">,</span><span class="n">oldLabeling</span><span class="p">),</span>
+                 <span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">,))</span></div>
+
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData (SampleComponent) for all SampleComponent children of parent Sample&quot;&quot;&quot;</span>
+    <span class="n">componentStore</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
+    <span class="k">if</span> <span class="n">componentStore</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">componentStore</span><span class="o">.</span><span class="n">sortedComponents</span><span class="p">()</span></div>
+
+<span class="c"># Connections to parents:</span>
+
+<span class="k">def</span> <span class="nf">_newSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">substanceType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;Molecule&#39;</span><span class="p">,</span>
+                  <span class="n">userCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">inChi</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">casNumber</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">empiricalFormula</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">molecularMass</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">synonyms</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span> <span class="n">atomCount</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bondCount</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">ringCount</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hBondDonorCount</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hBondAcceptorCount</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">polarSurfaceArea</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">logPartitionCoefficient</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span>
+                 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new substance WITHOUT storing the sequence internally</span>
+<span class="sd">  (and hence not suitable for making chains). SubstanceType defaults to &#39;Molecule&#39;.</span>
+
+<span class="sd">  ADVANCED alternatives are &#39;Cell&#39;, &#39;Material&#39;, and &#39;Composite&#39;&quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">labeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELING</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labeling</span>
+
+  <span class="c"># Default values for &#39;new&#39; function, as used for echoing to console</span>
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span>
+    <span class="p">((</span><span class="s">&#39;labeling&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;substanceType&#39;</span><span class="p">,</span> <span class="s">&#39;Molecule&#39;</span><span class="p">),</span>
+     <span class="p">(</span><span class="s">&#39;userCode&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;smiles&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;inChi&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s">&#39;casNumber&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;empiricalFormula&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;molecularMass&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;synonyms&#39;</span><span class="p">,()),</span> <span class="p">(</span><span class="s">&#39;atomCount&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s">&#39;bondCount&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;ringCount&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;hBondDonorCount&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s">&#39;hBondAcceptorCount&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;polarSurfaceArea&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;logPartitionCoefficient&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="p">)</span>
+  <span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.Substance id: </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+                       <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">))</span>
+
+  <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+  <span class="n">apiComponentStore</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
+
+  <span class="k">if</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Substance </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">))</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">oldSubstance</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">&#39;name&#39;</span><span class="p">:</span><span class="n">name</span><span class="p">,</span> <span class="s">&#39;labeling&#39;</span><span class="p">:</span><span class="n">apiLabeling</span><span class="p">,</span> <span class="s">&#39;userCode&#39;</span><span class="p">:</span><span class="n">userCode</span><span class="p">,</span> <span class="s">&#39;synonyms&#39;</span><span class="p">:</span><span class="n">synonyms</span><span class="p">,</span>
+    <span class="s">&#39;details&#39;</span><span class="p">:</span><span class="n">comment</span>
+  <span class="p">}</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newSubstance&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newSubstance&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">substanceType</span> <span class="o">==</span> <span class="s">&#39;Material&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">oldSubstance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span> <span class="o">!=</span> <span class="s">&#39;Substance&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Substance name </span><span class="si">%s</span><span class="s"> clashes with substance of different type: </span><span class="si">%s</span><span class="s">&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">apiResult</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">substanceType</span> <span class="o">==</span> <span class="s">&#39;Cell&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">oldSubstance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span> <span class="o">!=</span> <span class="s">&#39;Cell&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Substance name </span><span class="si">%s</span><span class="s"> clashes with substance of different type: </span><span class="si">%s</span><span class="s">&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">apiResult</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">newCell</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">substanceType</span> <span class="o">==</span> <span class="s">&#39;Composite&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">oldSubstance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span> <span class="o">!=</span> <span class="s">&#39;Composite&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Substance name </span><span class="si">%s</span><span class="s"> clashes with substance of different type: </span><span class="si">%s</span><span class="s">&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">apiResult</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">newComposite</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">substanceType</span> <span class="o">==</span> <span class="s">&#39;Molecule&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">oldSubstance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span> <span class="o">!=</span> <span class="s">&#39;MolComponent&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Substance name </span><span class="si">%s</span><span class="s"> clashes with substance of different type: </span><span class="si">%s</span><span class="s">&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">oldSubstance</span><span class="o">.</span><span class="n">className</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">apiResult</span> <span class="o">=</span> <span class="n">apiComponentStore</span><span class="o">.</span><span class="n">newMolComponent</span><span class="p">(</span><span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">inChi</span><span class="o">=</span><span class="n">inChi</span><span class="p">,</span> <span class="n">casNum</span><span class="o">=</span><span class="n">casNumber</span><span class="p">,</span>
+          <span class="n">empiricalFormula</span><span class="o">=</span><span class="n">empiricalFormula</span><span class="p">,</span> <span class="n">molecularMass</span><span class="o">=</span><span class="n">molecularMass</span><span class="p">,</span> <span class="n">atomCount</span><span class="o">=</span><span class="n">atomCount</span><span class="p">,</span>
+          <span class="n">bondCount</span><span class="o">=</span><span class="n">bondCount</span><span class="p">,</span> <span class="n">ringCount</span><span class="o">=</span><span class="n">ringCount</span><span class="p">,</span> <span class="n">hBondDonorCount</span><span class="o">=</span><span class="n">hBondDonorCount</span><span class="p">,</span>
+          <span class="n">hBondAcceptorCount</span><span class="o">=</span><span class="n">hBondAcceptorCount</span><span class="p">,</span> <span class="n">polarSurfaceArea</span><span class="o">=</span><span class="n">polarSurfaceArea</span><span class="p">,</span>
+          <span class="n">logPartitionCoefficient</span><span class="o">=</span><span class="n">logPartitionCoefficient</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Substance type </span><span class="si">%s</span><span class="s"> not recognised&quot;</span> <span class="o">%</span> <span class="n">substanceType</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiResult</span><span class="p">]</span>
+
+<span class="n">Project</span><span class="o">.</span><span class="n">newSubstance</span> <span class="o">=</span> <span class="n">_newSubstance</span>
+<span class="k">del</span> <span class="n">_newSubstance</span>
+
+
+<span class="k">def</span> <span class="nf">_createPolymerSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">userCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">smiles</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">synonyms</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span><span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">startNumber</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Make new Substance from sequence of residue codes, using default linking and variants</span>
+
+<span class="sd">  NB: For more complex substances, you must use advanced, API-level commands.</span>
+
+<span class="sd">  :param Sequence sequence: string of one-letter codes or sequence of residueNames</span>
+<span class="sd">  :param str name: name of new substance</span>
+<span class="sd">  :param str labeling: labeling for new substance. Optional - None means &#39;natural abundance&#39;</span>
+<span class="sd">  :param str userCode: user code for new substance (optional)</span>
+<span class="sd">  :param str smiles: smiles string for new substance (optional)</span>
+<span class="sd">  :param Sequence[str] synonyms: synonyms for Substance name</span>
+<span class="sd">  :param str comment: comment for new substance (optional)</span>
+<span class="sd">  :param int startNumber: number of first residue in sequence</span>
+<span class="sd">  :param str molType: molType (&#39;protein&#39;,&#39;DNA&#39;, &#39;RNA&#39;). Required only if sequence is a string.</span>
+<span class="sd">  :param bool isCyclic: Should substance created be cyclic?</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">labeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELING</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labeling</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span>
+    <span class="p">(</span>
+      <span class="p">(</span><span class="s">&#39;labeling&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;userCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;smiles&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+      <span class="p">(</span><span class="s">&#39;synonyms&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;startNumber&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;molType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+      <span class="p">(</span><span class="s">&#39;isCyclic&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+    <span class="p">)</span>
+  <span class="p">)</span>
+
+  <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;createPolymerSubstance requires non-empty sequence&quot;</span><span class="p">)</span>
+
+  <span class="k">elif</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Substance </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">))</span>
+
+  <span class="k">elif</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstMolecule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Molecule name </span><span class="si">%s</span><span class="s"> is already in use for API Molecule&quot;</span><span class="p">)</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;createPolymerSubstance&#39;</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span>
+                                  <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newPolymerSubstance&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">MoleculeModify</span><span class="o">.</span><span class="n">createMolecule</span><span class="p">(</span><span class="n">apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span>
+                                                <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">startNumber</span><span class="o">=</span><span class="n">startNumber</span><span class="p">,</span>
+                                                <span class="n">isCyclic</span><span class="o">=</span><span class="n">isCyclic</span><span class="p">)</span>
+    <span class="n">apiMolecule</span><span class="o">.</span><span class="n">commonNames</span> <span class="o">=</span><span class="n">synonyms</span>
+    <span class="n">apiMolecule</span><span class="o">.</span><span class="n">smiles</span> <span class="o">=</span> <span class="n">smiles</span>
+    <span class="n">apiMolecule</span><span class="o">.</span><span class="n">details</span><span class="o">=</span><span class="n">comment</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span><span class="o">.</span><span class="n">fetchMolComponent</span><span class="p">(</span>
+                            <span class="n">apiMolecule</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)]</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">userCode</span> <span class="o">=</span> <span class="n">userCode</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+
+  <span class="c"># DO creation notifications</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;create&#39;</span><span class="p">)</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+<span class="n">Project</span><span class="o">.</span><span class="n">createPolymerSubstance</span> <span class="o">=</span> <span class="n">_createPolymerSubstance</span>
+<span class="k">del</span> <span class="n">_createPolymerSubstance</span>
+
+<span class="k">def</span> <span class="nf">_fetchSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;get or create ccpn.Substance with given name and labeling.&quot;&quot;&quot;</span>
+
+
+  <span class="k">if</span> <span class="n">labeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELING</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">labeling</span>
+
+  <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;labeling&#39;</span><span class="p">:</span><span class="n">labeling</span><span class="p">}</span>
+
+  <span class="n">apiRefComponentStore</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
+  <span class="n">apiResult</span> <span class="o">=</span> <span class="n">apiRefComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">apiLabeling</span><span class="p">)</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;fetchSubstance&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newSubstance&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">apiResult</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiResult</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">labeling</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">result</span>
+<span class="c">#</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">fetchSubstance</span> <span class="o">=</span> <span class="n">_fetchSubstance</span>
+<span class="k">del</span> <span class="n">_fetchSubstance</span>
+
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">SampleComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Substance</span><span class="p">]:</span>
+  <span class="n">apiRefComponentStore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_apiSample</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
+  <span class="n">apiComponent</span> <span class="o">=</span> <span class="n">apiRefComponentStore</span><span class="o">.</span><span class="n">findFirstComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                                         <span class="n">labeling</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">labeling</span> <span class="ow">or</span> <span class="n">DEFAULT_LABELING</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">apiComponent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">None</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiComponent</span><span class="p">]</span>
+<span class="c">#</span>
+<span class="n">SampleComponent</span><span class="o">.</span><span class="n">substance</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                                     <span class="s">&quot;Substance corresponding to SampleComponent&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Substance</span><span class="p">:</span>
+  <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponent</span>
+  <span class="k">return</span> <span class="n">apiRefComponent</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiRefComponent</span><span class="p">]</span>
+<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Substance</span><span class="p">):</span>
+  <span class="n">apiRefComponent</span> <span class="o">=</span> <span class="n">value</span> <span class="ow">or</span> <span class="n">value</span><span class="o">.</span><span class="n">_apiSubstance</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">refComponent</span> <span class="o">=</span> <span class="n">apiRefComponent</span>
+<span class="c">#</span>
+<span class="n">Spectrum</span><span class="o">.</span><span class="n">referenceSubstance</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                                       <span class="s">&quot;Substance that has this Spectrum as reference spectrum&quot;</span><span class="p">)</span>
+<span class="k">del</span> <span class="n">getter</span>
+<span class="k">del</span> <span class="n">setter</span>
+
+<span class="c"># Notifiers:</span>
+
+<span class="c"># Substance - SampleComponent link is derived through the keys of the linked objects</span>
+<span class="c"># There is therefore no need to monitor the link, and notifiers should be put</span>
+<span class="c"># on object creation and renaming</span>
+<span class="n">className</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+  <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s">&#39;Substance&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setRefComponentName&#39;</span><span class="p">),</span>
+<span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

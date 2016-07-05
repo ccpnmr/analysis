@@ -1,0 +1,307 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.ChemicalShiftList &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.ChemicalShiftList</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span>
+
+
+<div class="viewcode-block" id="ChemicalShiftList"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.ChemicalShiftList.ChemicalShiftList">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftList</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Chemical Shift list. A chemical shift list named &#39;default&#39; is used by default for</span>
+<span class="sd">   new experiments, and is created if necessary.&quot;&quot;&quot;</span>
+  
+  <span class="c">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;CL&#39;</span>
+  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;ChemicalShiftList&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;chemicalShiftLists&#39;</span>
+  
+  <span class="c">#: List of child classes.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Qualified name of matching API class</span>
+  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">ShiftList</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="n">Nmr</span><span class="o">.</span><span class="n">ShiftList</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="o">=</span> <span class="n">wrappedData</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="n">defaultName</span> <span class="o">=</span> <span class="s">&#39;Shifts</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">serial</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setUniqueStringKey</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">defaultName</span><span class="p">)</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
+
+  <span class="c"># CCPN properties  </span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_apiShiftList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">ShiftList</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; CCPN ShiftList matching ChemicalShiftList&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;name, regularised as used for id&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Shift list serial number&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;name of ChemicalShiftList. Changing it will rename the ChemicalShiftList&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Measurement unit of ChemicalShiftList. By definition must always be &#39;ppm&#39;&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&#39;ppm&#39;</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">autoUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Automatically update Chemical Shifts from assigned peak - yes/no??&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">autoUpdate</span>
+
+  <span class="nd">@autoUpdate.setter</span>
+  <span class="k">def</span> <span class="nf">autoUpdate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">bool</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">autoUpdate</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">isSimulated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    is ChemicalShiftList simulated?&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isSimulated</span>
+
+  <span class="nd">@isSimulated.setter</span>
+  <span class="k">def</span> <span class="nf">isSimulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">bool</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isSimulated</span> <span class="o">=</span> <span class="n">value</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+    
+  <span class="nd">@comment.setter</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Spectrum</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;ccpn.Spectra that use ChemicalShiftList to store chemical shifts&quot;&quot;&quot;</span>
+    <span class="n">ff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedExperiments</span><span class="p">()</span>
+                 <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">sortedDataSources</span><span class="p">())</span>
+
+  <span class="nd">@spectra.setter</span>
+  <span class="k">def</span> <span class="nf">spectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Spectrum</span><span class="p">]):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">experiments</span> <span class="o">=</span>  <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">experiment</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span>
+    
+  <span class="c"># Implementation functions</span>
+<div class="viewcode-block" id="ChemicalShiftList.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.ChemicalShiftList.ChemicalShiftList.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rename ChemicalShiftList, changing Id and Pid of ChemicalShiftList&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;ChemicalShiftList name must be set&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.ChemicalShiftList.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+      <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Nmr</span><span class="o">.</span><span class="n">ShiftList</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData (ShiftLists) for all ShiftList children of parent Project&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">measurementLists</span>
+            <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s">&#39;ShiftList&#39;</span><span class="p">),</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">))</span></div>
+
+<span class="c"># Connections to parents:</span>
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemicalShiftList</span><span class="p">:</span>
+  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">shiftList</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">ChemicalShiftList</span><span class="p">):</span>
+  <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">shiftList</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">_apiShiftList</span>
+<span class="n">Spectrum</span><span class="o">.</span><span class="n">chemicalShiftList</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                          <span class="s">&quot;ccpn.ChemicalShiftList used for ccpn.Spectrum&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">PeakList</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemicalShiftList</span><span class="p">:</span>
+  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">shiftList</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">PeakList</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">ChemicalShiftList</span><span class="p">):</span>
+  <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">value</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span><span class="o">.</span><span class="n">shiftList</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">_apiShiftList</span>
+<span class="n">PeakList</span><span class="o">.</span><span class="n">chemicalShiftList</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                                      <span class="s">&quot;ChemicalShiftList associated with PeakList.&quot;</span><span class="p">)</span>
+<span class="k">del</span> <span class="n">getter</span>
+<span class="k">del</span> <span class="n">setter</span>
+
+<span class="k">def</span> <span class="nf">_newChemicalShiftList</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                          <span class="n">isSimulated</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ChemicalShiftList</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new ccpn.ChemicalShiftList&quot;&quot;&quot;</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;isSimulated&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+
+  <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.ChemicalShiftList.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newChemicalShiftList&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newChemicalShiftList&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newShiftList</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">isSimulated</span><span class="o">=</span><span class="n">isSimulated</span><span class="p">,</span>
+                                         <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="n">Project</span><span class="o">.</span><span class="n">newChemicalShiftList</span> <span class="o">=</span> <span class="n">_newChemicalShiftList</span>
+<span class="k">del</span> <span class="n">_newChemicalShiftList</span>
+
+<span class="c"># Notifiers</span>
+<span class="n">className</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">ShiftList</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setName&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;Spectrum&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;addExperiment&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;Spectrum&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span>
+     <span class="s">&#39;removeExperiment&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;Spectrum&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setExperiments&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;PeakList&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;addPeakList&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;PeakList&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;removePeakList&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;PeakList&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setPeakLists&#39;</span><span class="p">),</span>
+  <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;PeakList&#39;</span><span class="p">)},</span>
+                              <span class="n">Nmr</span><span class="o">.</span><span class="n">PeakList</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s">&#39;setSpecificShiftList&#39;</span><span class="p">)</span>
+                             <span class="p">)</span>
+<span class="n">className</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;Spectrum&#39;</span><span class="p">)},</span><span class="n">className</span><span class="p">,</span> <span class="s">&#39;setShiftList&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;ChemicalShiftList&#39;</span><span class="p">,</span> <span class="s">&#39;PeakList&#39;</span><span class="p">)},</span><span class="n">className</span><span class="p">,</span> <span class="s">&#39;setShiftList&#39;</span><span class="p">),</span>
+  <span class="p">)</span>
+<span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

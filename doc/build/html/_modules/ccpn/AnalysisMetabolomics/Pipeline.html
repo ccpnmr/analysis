@@ -1,0 +1,216 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisMetabolomics.Pipeline &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisMetabolomics.Pipeline</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - : 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;: 7686 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="nb">reduce</span>
+<span class="c">#</span>
+<span class="c"># class Pipeline(object):</span>
+<span class="c">#   def __init__(self, *args):</span>
+<span class="c">#     if args:</span>
+<span class="c">#       self._func_list=args</span>
+<span class="c">#     else:</span>
+<span class="c">#       self._func_list=[]</span>
+<span class="c">#</span>
+<span class="c">#   def __call__(self, *args, **kwargs):</span>
+<span class="c">#     (fargs,fkwargs) = (args,kwargs)</span>
+<span class="c">#     for f in self:</span>
+<span class="c">#       results = f(*fargs, **fkwargs)</span>
+<span class="c">#       if isinstance(results, tuple) and len(results) == 2 and \</span>
+<span class="c">#               isinstance(results[0],list) and isinstance(results[1],dict):</span>
+<span class="c">#         fargs,kwargs = results</span>
+<span class="c">#       else:</span>
+<span class="c">#         fargs = [results]</span>
+<span class="c">#         fkwargs = {}</span>
+<span class="c">#     return results</span>
+<span class="c">#</span>
+<span class="c">#   def __iter__(self):</span>
+<span class="c">#     for f in self._func_list:</span>
+<span class="c">#       yield f</span>
+<span class="c">#     raise StopIteration</span>
+<span class="c">#</span>
+<span class="c">#   def __eq__(self, other):</span>
+<span class="c">#     return self._func_list == other._func_list</span>
+<span class="c">#</span>
+<span class="c">#   def __add__(self, other):</span>
+<span class="c">#     funcs = other</span>
+<span class="c">#     if callable(other):</span>
+<span class="c">#        funcs = [other]</span>
+<span class="c">#     args = list(self._func_list) + list(funcs)</span>
+<span class="c">#     return Pipeline(*args)</span>
+<span class="c">#</span>
+<span class="c">#   def push(self, f):</span>
+<span class="c">#     return self._func_list.insert(0, f)</span>
+<span class="c">#</span>
+<span class="c">#   def pop(self, *args, **kwargs):</span>
+<span class="c">#     return self._func_list.pop(*args, **kwargs)</span>
+<span class="c">#</span>
+<span class="c">#   def append(self, *args, **kwargs):</span>
+<span class="c">#     return self._func_list.append(*args, **kwargs)</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c"># def add_1(x, y):</span>
+<span class="c">#   return x+y</span>
+<span class="c">#</span>
+<span class="c"># def mul_2(x):</span>
+<span class="c">#     return (x * 2)</span>
+<span class="c">#</span>
+<span class="c"># def identity(x):</span>
+<span class="c">#     return x</span>
+
+
+
+<div class="viewcode-block" id="alignSpectra"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.alignSpectra">[docs]</a><span class="k">def</span> <span class="nf">alignSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;alignSpectra&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="alignToReference"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.alignToReference">[docs]</a><span class="k">def</span> <span class="nf">alignToReference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;alignToReference&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="excludeRegions"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.excludeRegions">[docs]</a><span class="k">def</span> <span class="nf">excludeRegions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;excludeRegions&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="polyBaseLine"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.polyBaseLine">[docs]</a><span class="k">def</span> <span class="nf">polyBaseLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;polyBaseLine&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="whittakerBaseline"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.whittakerBaseline">[docs]</a><span class="k">def</span> <span class="nf">whittakerBaseline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;whittakerBaseline&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="segmentalAlign"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.segmentalAlign">[docs]</a><span class="k">def</span> <span class="nf">segmentalAlign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;segmentalAlign&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="bin"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.bin">[docs]</a><span class="k">def</span> <span class="nf">bin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;bin&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="excludeSignalFreeRegions"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.excludeSignalFreeRegions">[docs]</a><span class="k">def</span> <span class="nf">excludeSignalFreeRegions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;excludeSignalFreeRegions&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="whittakerSmooth"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.whittakerSmooth">[docs]</a><span class="k">def</span> <span class="nf">whittakerSmooth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;whittakerSmooth&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="excludeBaselinePoints"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.excludeBaselinePoints">[docs]</a><span class="k">def</span> <span class="nf">excludeBaselinePoints</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;excludeBaselinePoints&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="normalise"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.normalise">[docs]</a><span class="k">def</span> <span class="nf">normalise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;normalise&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="autoScale"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.autoScale">[docs]</a><span class="k">def</span> <span class="nf">autoScale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;autoScale&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="meanCentre"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.meanCentre">[docs]</a><span class="k">def</span> <span class="nf">meanCentre</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;meanCentre&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="scale"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.Pipeline.scale">[docs]</a><span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputData</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;scale&#39;</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

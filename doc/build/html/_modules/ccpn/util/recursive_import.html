@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.recursive_import &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.recursive_import</h1><div class="highlight"><pre>
+<span class="c">#!/usr/bin/env python</span>
+
+<span class="sd">&quot;&quot;&quot;python-recursive-import-test [&lt;options&gt;] [&lt;dir&gt; ...]</span>
+
+<span class="sd">Recursively find the files under the given directories and launch Python</span>
+<span class="sd">subprocess that attempt to import them individually.  This is used to check</span>
+<span class="sd">initalization time problems and dependencies: a well-written program should not</span>
+<span class="sd">do much on module initialization.  In other words, a good program allows its</span>
+<span class="sd">modules to be imported individually.  This has important consequences in large</span>
+<span class="sd">codebases, and allows more flexibility.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Martin Blais &lt;blais@furius.ca&gt;&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;Revision: 1.10 &quot;</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;&quot;&quot;Copyright (C) 2006 Martin Blais &lt;blais@furius.ca&gt;.</span>
+<span class="s">This code is distributed under the terms of the GNU General Public License.&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">re</span><span class="o">,</span> <span class="nn">subprocess</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="o">*</span>
+
+
+<div class="viewcode-block" id="find_pyfiles"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.find_pyfiles">[docs]</a><span class="k">def</span> <span class="nf">find_pyfiles</span><span class="p">(</span><span class="n">dirs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find all the files ending with .py</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">dn</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+        <span class="n">dn</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="n">dn</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="s">&#39;.svn&#39;</span><span class="p">,</span> <span class="s">&#39;CVS&#39;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">dirs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+
+            <span class="n">pyfiles</span> <span class="o">=</span> <span class="p">[</span><span class="n">fn</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">files</span> <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.py&#39;</span><span class="p">)]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">pyfiles</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c"># Find the root of the packages.</span>
+            <span class="n">packroot</span> <span class="o">=</span> <span class="n">root</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">packroot</span><span class="p">,</span> <span class="s">&#39;__init__.py&#39;</span><span class="p">)):</span>
+                    <span class="k">break</span>
+                <span class="n">packroot</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">pyfiles</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:],</span> <span class="n">fn</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="filename2module"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.filename2module">[docs]</a><span class="k">def</span> <span class="nf">filename2module</span><span class="p">(</span><span class="n">fn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Given a Python source filename, return a module name to import.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">basename</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span> <span class="o">==</span> <span class="s">&#39;__init__.py&#39;</span><span class="p">:</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">dirname</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s">&#39;\.py$&#39;</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">,</span> <span class="s">&#39;.&#39;</span><span class="p">))</span></div>
+    
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">optparse</span>
+    <span class="n">parser</span> <span class="o">=</span> <span class="n">optparse</span><span class="o">.</span><span class="n">OptionParser</span><span class="p">(</span><span class="n">__doc__</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+    <span class="n">opts</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">find_pyfiles</span><span class="p">(</span><span class="n">args</span> <span class="ow">or</span> <span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">,)):</span>
+        <span class="n">modname</span> <span class="o">=</span> <span class="n">filename2module</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;import </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> <span class="p">(</span><span class="s">&#39;python&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;import </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<span class="c">##############################################################################</span>
+<span class="c"># Alternative added by Rasmus Fogh, CCPN project 2/2/2016</span>
+
+<div class="viewcode-block" id="find_all_pyfiles"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.find_all_pyfiles">[docs]</a><span class="k">def</span> <span class="nf">find_all_pyfiles</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">ignoreDirs</span><span class="o">=</span><span class="p">(),</span> <span class="n">ignoreFiles</span><span class="o">=</span><span class="p">()):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Find all the files ending with .py inside topDirectory</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">dn</span> <span class="o">=</span> <span class="n">packroot</span> <span class="o">=</span> <span class="n">abspath</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dn</span><span class="p">,</span> <span class="n">followlinks</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">ignoreDirs</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">dirs</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+          <span class="k">print</span><span class="p">(</span><span class="s">&quot;test skipping:  </span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">r</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+          <span class="k">pass</span>
+
+      <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">fn</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s">&#39;.py&#39;</span><span class="p">):</span>
+          <span class="k">if</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">ignoreFiles</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&quot;test skipping:  </span><span class="si">%s</span><span class="s">/</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span><span class="n">fn</span><span class="p">))</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">packroot</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">:],</span> <span class="n">fn</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="importAllPyfiles"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.recursive_import.importAllPyfiles">[docs]</a><span class="k">def</span> <span class="nf">importAllPyfiles</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">ignoreDirs</span><span class="o">=</span><span class="p">(),</span><span class="n">ignoreFiles</span><span class="o">=</span><span class="p">()):</span>
+  <span class="sd">&quot;&quot;&quot;Test import all python files in a directory tree.</span>
+<span class="sd">  topDirectory must be (intended to be) on the Python path&quot;&quot;&quot;</span>
+  <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">find_all_pyfiles</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">ignoreDirs</span><span class="o">=</span><span class="n">ignoreDirs</span><span class="p">,</span> <span class="n">ignoreFiles</span><span class="o">=</span><span class="n">ignoreFiles</span><span class="p">):</span>
+    <span class="n">modname</span> <span class="o">=</span> <span class="n">filename2module</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s">&quot;test import </span><span class="si">%s</span><span class="s"> :&quot;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span>
+    <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">(</span> <span class="p">(</span><span class="s">&#39;python&#39;</span><span class="p">,</span> <span class="s">&#39;-c&#39;</span><span class="p">,</span> <span class="s">&#39;import </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">modname</span><span class="p">)</span> <span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

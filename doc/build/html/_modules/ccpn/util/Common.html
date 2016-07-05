@@ -1,0 +1,344 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.Common &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.Common</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Miscellaneous common utilities</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;Common utilities</span>
+
+<span class="sd">NB Must conform to Python 2.1. Imported in ObjectDomain.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">abc</span> <span class="k">as</span> <span class="n">collectionClasses</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">total_ordering</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">coreLibConstants</span>
+
+<span class="c"># Max value used for random integer. Set to be expressible as a signed 32-bit integer.</span>
+<span class="n">maxRandomInt</span> <span class="o">=</span>  <span class="mi">2000000000</span>
+
+<span class="n">WHITESPACE_AND_NULL</span> <span class="o">=</span>  <span class="p">{</span><span class="s">&#39;</span><span class="se">\x00</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\r</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\x0b</span><span class="s">&#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\x0c</span><span class="s">&#39;</span><span class="p">}</span>
+
+<span class="c"># valid characters for file names</span>
+<span class="c"># NB string.ascii_letters and string.digits are not compatible</span>
+<span class="c"># with Python 2.1 (used in ObjectDomain)</span>
+<span class="n">defaultFileNameChar</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span>
+<span class="n">separatorFileNameChar</span> <span class="o">=</span> <span class="s">&#39;+&#39;</span>
+<span class="n">validFileNamePartChars</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;abcdefghijklmnopqrstuvwxyz&#39;</span>
+                          <span class="s">&#39;ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789&#39;</span>
+                          <span class="o">+</span> <span class="n">defaultFileNameChar</span><span class="p">)</span>
+<span class="n">validCcpnFileNameChars</span>  <span class="o">=</span> <span class="n">validFileNamePartChars</span> <span class="o">+</span> <span class="s">&#39;-.&#39;</span> <span class="o">+</span> <span class="n">separatorFileNameChar</span>
+
+
+<span class="nd">@total_ordering</span>
+<span class="k">class</span> <span class="nc">__MinType</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span><span class="p">)</span>
+
+<span class="n">__smallest</span> <span class="o">=</span> <span class="n">__MinType</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="convertStringToFileName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.convertStringToFileName">[docs]</a><span class="k">def</span> <span class="nf">convertStringToFileName</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">,</span> <span class="n">validChars</span><span class="o">=</span><span class="n">validCcpnFileNameChars</span><span class="p">,</span>
+                            <span class="n">defaultChar</span><span class="o">=</span><span class="n">defaultFileNameChar</span><span class="p">):</span>
+
+  <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fileNameString</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">char</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ll</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">char</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">validChars</span><span class="p">:</span>
+      <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">defaultChar</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getCcpFileString"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getCcpFileString">[docs]</a><span class="k">def</span> <span class="nf">getCcpFileString</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Changes an input string to the one used for a component of file names.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">return</span> <span class="n">convertStringToFileName</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">,</span> <span class="n">validFileNamePartChars</span><span class="p">,</span>
+                                   <span class="n">defaultFileNameChar</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="incrementName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.incrementName">[docs]</a><span class="k">def</span> <span class="nf">incrementName</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Add &#39;_1&#39; to name or change suffix &#39;_n&#39; to &#39;_(n+1) &quot;&quot;&quot;</span>
+  <span class="n">ll</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="k">return</span> <span class="s">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+      <span class="k">pass</span>
+
+  <span class="k">return</span> <span class="n">name</span> <span class="o">+</span> <span class="s">&#39;_1&#39;</span></div>
+
+
+<div class="viewcode-block" id="recursiveImport"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.recursiveImport">[docs]</a><span class="k">def</span> <span class="nf">recursiveImport</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">modname</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ignoreModules</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; recursively import all .py files</span>
+<span class="sd">  (not starting with &#39;__&#39; and not containing internal &#39;.&#39; in their name)</span>
+<span class="sd">  from directory dirname and all its subdirectories, provided they</span>
+<span class="sd">  contain &#39;__init__.py&#39;</span>
+<span class="sd">  Serves to check that files compile without error</span>
+
+<span class="sd">  modname is the module name (dot-separated) corresponding to the directory</span>
+<span class="sd">  dirName.</span>
+<span class="sd">  If modname is None, dirname must be on the pythonPath</span>
+
+<span class="sd">  Note that there are potential problems if the files we want are not</span>
+<span class="sd">  the ones encountered first on the pythonPath</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">listdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirname</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">listdir</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s">&#39;__init__.py&#39;</span><span class="p">)</span>
+  <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+      <span class="k">return</span>
+
+  <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">ignoreModules</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">ignoreModules</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="n">modname</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="n">modname</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span>
+
+  <span class="n">listdir2</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">:</span>
+    <span class="n">head</span><span class="p">,</span><span class="n">ext</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="n">head</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ignoreModules</span><span class="p">:</span>
+      <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">ext</span> <span class="o">==</span> <span class="s">&#39;.py&#39;</span> <span class="ow">and</span> <span class="n">head</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">head</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">listdir2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="c"># import directory and underlying directories</span>
+  <span class="k">if</span> <span class="n">modname</span><span class="p">:</span>
+    <span class="c"># Note that files is never empty, so module is lowest level not toplevel</span>
+    <span class="k">for</span> <span class="n">ff</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="nb">__import__</span><span class="p">(</span><span class="n">modname</span><span class="p">,</span> <span class="p">{},</span> <span class="p">{},</span> <span class="p">[</span><span class="n">ff</span><span class="p">])</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="c"># We want log output, not an Exception in all cases here</span>
+        <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+        <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Import failed for </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">modname</span><span class="p">,</span><span class="n">ff</span><span class="p">))</span>
+
+  <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">listdir2</span><span class="p">:</span>
+    <span class="n">newdirname</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">newdirname</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+      <span class="n">recursiveImport</span><span class="p">(</span><span class="n">newdirname</span><span class="p">,</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">name</span><span class="p">,</span><span class="n">ignoreModules</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="isWindowsOS"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isWindowsOS">[docs]</a><span class="k">def</span> <span class="nf">isWindowsOS</span><span class="p">():</span>
+
+  <span class="k">return</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;win&#39;</span></div>
+
+
+<div class="viewcode-block" id="parseSequenceCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.parseSequenceCode">[docs]</a><span class="k">def</span> <span class="nf">parseSequenceCode</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;split sequence code into (seqCode,seqInsertCode, offset) tuple&quot;&quot;&quot;</span>
+
+  <span class="c"># sequenceCodePattern = re.compile(&#39;(\d+)?(.*?)(\+\d+|\-\d+)?$&#39;)</span>
+
+  <span class="n">tt</span> <span class="o">=</span> <span class="n">coreLibConstants</span><span class="o">.</span><span class="n">sequenceCodePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+    <span class="c"># special case: entire string matches offset modifier and is misread</span>
+    <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">None</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">(</span>
+      <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>      <span class="c"># None or an integer</span>
+      <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>                     <span class="c"># Text string, possibly empty</span>
+      <span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span>      <span class="c"># None or an integer</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="splitIntFromChars"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.splitIntFromChars">[docs]</a><span class="k">def</span> <span class="nf">splitIntFromChars</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;convert a string with a leading integer optionally followed by characters</span>
+<span class="sd">  into an (integer,string) tuple&quot;&quot;&quot;</span>
+
+  <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+  <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[:</span><span class="n">ii</span><span class="p">])</span>
+      <span class="n">chars</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">:]</span>
+      <span class="k">break</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+      <span class="k">continue</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">chars</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="k">return</span> <span class="n">number</span><span class="p">,</span><span class="n">chars</span></div>
+
+<div class="viewcode-block" id="dictionaryProduct"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.dictionaryProduct">[docs]</a><span class="k">def</span> <span class="nf">dictionaryProduct</span><span class="p">(</span><span class="n">dict1</span><span class="p">:</span><span class="nb">dict</span><span class="p">,</span> <span class="n">dict2</span><span class="p">:</span><span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">key1</span><span class="p">,</span><span class="n">val1</span> <span class="ow">in</span> <span class="n">dict1</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">key2</span><span class="p">,</span><span class="n">val2</span> <span class="ow">in</span> <span class="n">dict2</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="n">result</span><span class="p">[(</span><span class="n">key1</span><span class="p">,</span><span class="n">key2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">val1</span> <span class="o">*</span> <span class="n">val2</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="uniquify"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.uniquify">[docs]</a><span class="k">def</span> <span class="nf">uniquify</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span><span class="n">collectionClasses</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Get list of unique elements in sequence, in order of first appearance&quot;&quot;&quot;</span>
+  <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+  <span class="n">seen_add</span> <span class="o">=</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sequence</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">seen_add</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="isClose"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isClose">[docs]</a><span class="k">def</span> <span class="nf">isClose</span><span class="p">(</span><span class="n">a</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">relTolerance</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1e-05</span><span class="p">,</span> <span class="n">absTolerance</span><span class="o">=</span><span class="mf">1e-08</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Are a and b identical within reasonable floating point tolerance?</span>
+<span class="sd">  Uses sum of relative (relTolerance) and absolute (absTolerance) difference</span>
+
+<span class="sd">  Inspired by numpy.isclose()&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">absTolerance</span> <span class="o">+</span> <span class="n">relTolerance</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="flattenIfNumpy"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.flattenIfNumpy">[docs]</a><span class="k">def</span> <span class="nf">flattenIfNumpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;If data are Numpy, convert to flat array</span>
+<span class="sd">  If shape is given, check that numpy fits shape, and flat sequence fits total number of elements&quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s">&#39;flat&#39;</span><span class="p">):</span>
+    <span class="c"># Numpy array</span>
+    <span class="k">if</span> <span class="n">shape</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Shape of array data is </span><span class="si">%s</span><span class="s">, should be </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">flat</span>
+
+  <span class="k">elif</span> <span class="n">shape</span><span class="p">:</span>
+      <span class="n">elementCount</span> <span class="o">=</span> <span class="mi">1</span>
+      <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">:</span>
+        <span class="n">elementCount</span> <span class="o">*=</span> <span class="n">x</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">elementCount</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Number of elements in data sequence is </span><span class="si">%s</span><span class="s">, should be </span><span class="si">%s</span><span class="s">&quot;</span>
+                         <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">elementCount</span><span class="p">))</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="stringToIdentifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringToIdentifier">[docs]</a><span class="k">def</span> <span class="nf">stringToIdentifier</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Convert string to identifier, replacing non-alphanumeric values by underscore&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">isidentifier</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">value</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span> <span class="k">else</span> <span class="s">&#39;_&#39;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getTimeStamp"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getTimeStamp">[docs]</a><span class="k">def</span> <span class="nf">getTimeStamp</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Get iso-formtted timestamp&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="getUuid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.getUuid">[docs]</a><span class="k">def</span> <span class="nf">getUuid</span><span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get UUid following the NEF convention&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">timeStamp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">timeStamp</span> <span class="o">=</span> <span class="n">getTimeStamp</span><span class="p">()</span>
+  <span class="k">return</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">timeStamp</span><span class="p">,</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">maxRandomInt</span><span class="p">))</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

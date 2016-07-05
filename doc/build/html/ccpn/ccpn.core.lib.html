@@ -1,0 +1,394 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.lib package &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../index.html" />
+    <link rel="up" title="ccpn.core package" href="ccpn.core.html" />
+    <link rel="next" title="ccpn.framework package" href="ccpn.framework.html" />
+    <link rel="prev" title="ccpn.core package" href="ccpn.core.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.framework.html" title="ccpn.framework package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.core.html" title="ccpn.core package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.core.html" accesskey="U">ccpn.core package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ccpn.core.lib">
+<span id="ccpn-core-lib-package"></span><h1>ccpn.core.lib package<a class="headerlink" href="#module-ccpn.core.lib" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpn.core.lib.Assignment">
+<span id="ccpn-core-lib-assignment-module"></span><h2>ccpn.core.lib.Assignment module<a class="headerlink" href="#module-ccpn.core.lib.Assignment" title="Permalink to this headline">¶</a></h2>
+<p>Library functions for (semi)automatic assignment routines</p>
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.assignAlphas">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">assignAlphas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue, peaks: List[ccpn.core.Peak.Peak]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#assignAlphas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.assignAlphas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns CA and CA-1 NmrAtoms to dimensions of specified peaks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.assignBetas">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">assignBetas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue, peaks: List[ccpn.core.Peak.Peak]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#assignBetas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.assignBetas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assigns CB and CB-1 NmrAtoms to dimensions of specified peaks.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.copyAssignments">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">copyAssignments</code><span class="sig-paren">(</span><em>referencePeakList: ccpn.core.PeakList.PeakList</em>, <em>matchPeakList: ccpn.core.PeakList.PeakList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#copyAssignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.copyAssignments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a reference peakList and assigns NmrAtoms to dimensions
+of a match peakList based on matching axis codes.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.getNmrAtomPrediction">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">getNmrAtomPrediction</code><span class="sig-paren">(</span><em>ccpCode: str</em>, <em>value: float</em>, <em>isotopeCode: str</em>, <em>strict: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#getNmrAtomPrediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.getNmrAtomPrediction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes a ccpCode, a chemical shift value and an isotope code and returns a dictionary of
+atom type predictions to confidence values..</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.getNmrResiduePrediction">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">getNmrResiduePrediction</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>chemicalShiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em>, <em>prior: float = 0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#getNmrResiduePrediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.getNmrResiduePrediction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
+confidence levels for that NmrResidue.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.getSpinSystemsLocation">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">getSpinSystemsLocation</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project, nmrResidues: List[ccpn.core.NmrResidue.NmrResidue], chain: ccpn.core.Chain.Chain, chemicalShiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#getSpinSystemsLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.getSpinSystemsLocation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines location of a set of NmrResidues in the specified chain using residue type
+predictions.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.isInterOnlyExpt">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">isInterOnlyExpt</code><span class="sig-paren">(</span><em>experimentType: str</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#isInterOnlyExpt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.isInterOnlyExpt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the specified experiment is an inter-residual only experiment</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.nmrAtomPairsByDimensionTransfer">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">nmrAtomPairsByDimensionTransfer</code><span class="sig-paren">(</span><em>peakLists: Sequence[ccpn.core.PeakList.PeakList]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#nmrAtomPairsByDimensionTransfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.nmrAtomPairsByDimensionTransfer" title="Permalink to this definition">¶</a></dt>
+<dd><p>From one or more peakLists belonging to the same spectrum,
+get a dictionary of magnetisationTransferTuple (See Spectrum.magnetisationTransfers
+for documentation) to a set of NmrAtom pairs tha are coupled by the magnetisation transfer.
+If the two dimensions have the same nucleus, the NmrAtom pairs are sorted, otherwise
+they are in the dimension order.</p>
+<p>Peak.assignedNmrAtoms are used to determine which NmrAtoms are connected</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Assignment.propagateAssignments">
+<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">propagateAssignments</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak] = None</em>, <em>referencePeak: ccpn.core.Peak.Peak = None</em>, <em>current: object = None</em>, <em>tolerances: List[float] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#propagateAssignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.propagateAssignments" title="Permalink to this definition">¶</a></dt>
+<dd><p>Propagates dimensionNmrAtoms for each dimension of the specified peaks to dimensions of other
+peaks.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.CcpnSorting">
+<span id="ccpn-core-lib-ccpnsorting-module"></span><h2>ccpn.core.lib.CcpnSorting module<a class="headerlink" href="#module-ccpn.core.lib.CcpnSorting" title="Permalink to this headline">¶</a></h2>
+<p>Ccpn-specific variant of functions for sorting and comparison.</p>
+<dl class="function">
+<dt id="ccpn.core.lib.CcpnSorting.stringSortKey">
+<code class="descclassname">ccpn.core.lib.CcpnSorting.</code><code class="descname">stringSortKey</code><span class="sig-paren">(</span><em>key: str</em><span class="sig-paren">)</span> &rarr; tuple<a class="reference internal" href="../_modules/ccpn/core/lib/CcpnSorting.html#stringSortKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnSorting.stringSortKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sort key for strings.</p>
+<p>Usage: sorted(aList, key=stringSortKey) or aList.sort(key=stringSortKey)</p>
+<p>Custom CCPN version of stringSortKey that sorts Pids on their individual components.</p>
+<p>Advanced:</p>
+<p>Splits on embedded dots before further processing, and
+Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,
+where the float is the converted value of the substring.
+First and last element are always strings.</p>
+<p>If the entire string evaluates to a float, the result is (&#8216;&#8217;, &#8216;(floatVal, stringVal), &#8216;&#8217;)</p>
+<p>Otherwise the numeric tuples are (intVal, subStringVal).
+Substrings recognised as integers are an optional series of &#8216; &#8216;,
+an optional sign, and a series of digits - or REGEX &#8216;[ ]*[+-]?d+&#8217;
+For this type the key tuple is extended by (0,&#8217;&#8216;),
+# so that end-of-key sorts as 0 rather thn coming first.</p>
+<p>Example of sorting order
+[&#8216;&#8217;, &#8216;NaN&#8217;, &#8216;-1&#8217;, &#8216;-1A&#8217;, &#8216;0.0&#8217;, &#8216;1&#8217;, &#8216;2&#8217;, &#8216;15&#8217;, &#8216;3.2e12&#8217;, &#8216;Inf&#8217;,
+&#8216;Ahh&#8217;, &#8216;b&#8217;,  &#8216;b2&#8217;, &#8216;b12&#8217;, &#8216;bb&#8217;, &#8216;ciao&#8217;]</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.CcpnSorting.universalSortKey">
+<code class="descclassname">ccpn.core.lib.CcpnSorting.</code><code class="descname">universalSortKey</code><span class="sig-paren">(</span><em>key</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnSorting.html#universalSortKey"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnSorting.universalSortKey" title="Permalink to this definition">¶</a></dt>
+<dd><p>Custom universalSortKey, used to sort a list of mixed-type Python objects.</p>
+<p>Usage: sorted(aList, key=universalSortKey) or aList.sort(key=universalSortKey)</p>
+<p>Uses the local stringSortKey variant for strings and
+CCPN WrapperObjects sorted together</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.Documentation">
+<span id="ccpn-core-lib-documentation-module"></span><h2>ccpn.core.lib.Documentation module<a class="headerlink" href="#module-ccpn.core.lib.Documentation" title="Permalink to this headline">¶</a></h2>
+<p>Generation of Sphinx automatic documentation</p>
+<dl class="function">
+<dt id="ccpn.core.lib.Documentation.getNamedSubdirectories">
+<code class="descclassname">ccpn.core.lib.Documentation.</code><code class="descname">getNamedSubdirectories</code><span class="sig-paren">(</span><em>path</em>, <em>prefixes=()</em><span class="sig-paren">)</span> &rarr; List[str]<a class="reference internal" href="../_modules/ccpn/core/lib/Documentation.html#getNamedSubdirectories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Documentation.getNamedSubdirectories" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a list of all subdirectories of path whose basename starts with one of the prefixes</p>
+<p>Does not look inside the selected subdirectories</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Documentation.refreshSphinxDocumentation">
+<code class="descclassname">ccpn.core.lib.Documentation.</code><code class="descname">refreshSphinxDocumentation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Documentation.html#refreshSphinxDocumentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Documentation.refreshSphinxDocumentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>(Re)create sphinx documentation. Locations are hardwired</p>
+</dd></dl>
+
+</div>
+<div class="section" id="ccpn-core-lib-labeling-module">
+<h2>ccpn.core.lib.Labeling module<a class="headerlink" href="#ccpn-core-lib-labeling-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.lib.Labeling"></span><p>Labeling scheme handling.</p>
+<p>WARNING not tested since V3 upgrade</p>
+<dl class="function">
+<dt id="ccpn.core.lib.Labeling.atomLabelingFractions">
+<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">atomLabelingFractions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#atomLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.atomLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dd><p>get {isotopeCode:labelingFraction} in given sample for atom/nmrAtom or ID string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Labeling.atomPairLabelingFractions">
+<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">atomPairLabelingFractions</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project, atomPair: Sequence[T_co], labeling: str</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#atomPairLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.atomPairLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dd><p>get {(isotopeCode1,isotopeCode2):labelingFraction with given labeling for atom pair
+each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Labeling.sampleLabelingFractions">
+<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">sampleLabelingFractions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#sampleLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.sampleLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dd><p>get {isotopeCode:labelingFraction} with given labeling for atom/nmrAtom or ID string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Labeling.samplePairLabelingFractions">
+<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">samplePairLabelingFractions</code><span class="sig-paren">(</span><em>sample: ccpn.core.Sample.Sample, atomPair: Sequence[T_co]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#samplePairLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.samplePairLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dd><p>get {(isotopeCode1,isotopeCode2):labelingFraction in given sample for atom pair
+each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.Molecule">
+<span id="ccpn-core-lib-molecule-module"></span><h2>ccpn.core.lib.Molecule module<a class="headerlink" href="#module-ccpn.core.lib.Molecule" title="Permalink to this headline">¶</a></h2>
+<p>Library functions for Molecule-related data</p>
+<dl class="function">
+<dt id="ccpn.core.lib.Molecule.duplicateAtomBonds">
+<code class="descclassname">ccpn.core.lib.Molecule.</code><code class="descname">duplicateAtomBonds</code><span class="sig-paren">(</span><em>chainMap: Dict[ccpn.core.Chain.Chain, ccpn.core.Chain.Chain]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Molecule.html#duplicateAtomBonds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Molecule.duplicateAtomBonds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duplicate atom-atom bonds within source chains to target chains,
+skipping those that already exist.</p>
+<p>Input is a map from source chains to corresponding trget chains.</p>
+<p>Atoms are mapped on matching Pids (with different chain codes</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.Restraint">
+<span id="ccpn-core-lib-restraint-module"></span><h2>ccpn.core.lib.Restraint module<a class="headerlink" href="#module-ccpn.core.lib.Restraint" title="Permalink to this headline">¶</a></h2>
+<p>General utilities for Restraints</p>
+<dl class="function">
+<dt id="ccpn.core.lib.Restraint.dihedralName">
+<code class="descclassname">ccpn.core.lib.Restraint.</code><code class="descname">dihedralName</code><span class="sig-paren">(</span><em>project</em>, <em>restraintItem: tuple</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/core/lib/Restraint.html#dihedralName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Restraint.dihedralName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dihedral angle name from four-element atomId tuple</p>
+</dd></dl>
+
+</div>
+<div class="section" id="ccpn-core-lib-util-module">
+<h2>ccpn.core.lib.Util module<a class="headerlink" href="#ccpn-core-lib-util-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.lib.Util"></span><p>CCPN-level utility code independent of model content</p>
+<dl class="class">
+<dt id="ccpn.core.lib.Util.AtomIdTuple">
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">AtomIdTuple</code><span class="sig-paren">(</span><em>chainCode</em>, <em>sequenceCode</em>, <em>residueType</em>, <em>atomName</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.lib.Util.AtomIdTuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.core.lib.Util.AtomIdTuple.atomName">
+<code class="descname">atomName</code><a class="headerlink" href="#ccpn.core.lib.Util.AtomIdTuple.atomName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Util.AtomIdTuple.chainCode">
+<code class="descname">chainCode</code><a class="headerlink" href="#ccpn.core.lib.Util.AtomIdTuple.chainCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Util.AtomIdTuple.residueType">
+<code class="descname">residueType</code><a class="headerlink" href="#ccpn.core.lib.Util.AtomIdTuple.residueType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Util.AtomIdTuple.sequenceCode">
+<code class="descname">sequenceCode</code><a class="headerlink" href="#ccpn.core.lib.Util.AtomIdTuple.sequenceCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Util.commandParameterString">
+<code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">commandParameterString</code><span class="sig-paren">(</span><em>*params</em>, <em>*</em>, <em>values: dict = None</em>, <em>defaults: dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#commandParameterString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.commandParameterString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make  parameter string to insert into function call string.</p>
+<p>params are positional parameters in order, values are keyword prameters.
+If the defaults dictionary is passed in,
+only parameters in defaults are added to the string, and only if the value differs from the
+default. This allows you to pass in values=locals(). The order of keyword parameters
+follows defaults if given, else values, so you can get ordered parametrs by passing in
+ordered dictionaries.</p>
+<p>Wrapper object values are replaced with their Pids</p>
+<p>values is a dict of values to use, mandatories are mandatory positional parameters (in order),
+defaults are a (parameter:default} ordered dictionary for keyword arguments.
+Only values given in mandatories or defaults are added, and values equal to their default
+are not added to the string.
+Wrapper object values are replaced with their Pids</p>
+<p>Example:</p>
+<dl class="docutils">
+<dt>commandParameterString(11, values={a:1, b:&lt;Note NO:notename&gt;, c:2, d:3, e:4},</dt>
+<dd><blockquote class="first">
+<div>defaults=OrderedDict(d=8, b=None, c=2))</div></blockquote>
+<p>will return</p>
+<p class="last">&#8220;11, d=8, b=&#8217;NO:notename&#8217;&#8221;</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Util.expandDollarFilePath">
+<code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">expandDollarFilePath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#expandDollarFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.expandDollarFilePath" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expand paths that start with $REPOSITORY to full path</p>
+<p>NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Util.pid2PluralName">
+<code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">pid2PluralName</code><span class="sig-paren">(</span><em>pid: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#pid2PluralName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.pid2PluralName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get plural class name, (e.g. &#8216;peaks&#8217;, &#8216;spectra&#8217; from short-form or long-form, Pid string
+Unrecognised strings are returned unchanged</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.Version">
+<span id="ccpn-core-lib-version-module"></span><h2>ccpn.core.lib.Version module<a class="headerlink" href="#module-ccpn.core.lib.Version" title="Permalink to this headline">¶</a></h2>
+<p>Top level application version file</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ccpn.core.lib package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.Assignment">ccpn.core.lib.Assignment module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.CcpnSorting">ccpn.core.lib.CcpnSorting module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.Documentation">ccpn.core.lib.Documentation module</a></li>
+<li><a class="reference internal" href="#ccpn-core-lib-labeling-module">ccpn.core.lib.Labeling module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.Molecule">ccpn.core.lib.Molecule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.Restraint">ccpn.core.lib.Restraint module</a></li>
+<li><a class="reference internal" href="#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.Version">ccpn.core.lib.Version module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ccpn.core.html"
+                        title="previous chapter">ccpn.core package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ccpn.framework.html"
+                        title="next chapter">ccpn.framework package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ccpn/ccpn.core.lib.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.framework.html" title="ccpn.framework package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.core.html" title="ccpn.core package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.core.html" >ccpn.core package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

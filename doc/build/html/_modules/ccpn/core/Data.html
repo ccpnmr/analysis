@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.Data &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.Data</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">Data</span> <span class="k">as</span> <span class="n">ApiData</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">Parameter</span> <span class="k">as</span> <span class="n">ApiParameter</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">DataSet</span>
+
+
+<div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Data.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;CalculationStep information, for tracking successive calculations.</span>
+<span class="sd">  Orderd from oldest to newest&quot;&quot;&quot;</span>
+  
+  <span class="c">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;DA&#39;</span>
+  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;Data&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">DataSet</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;data&#39;</span>
+
+  <span class="c">#: List of child classes.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Qualified name of matching API class</span>
+  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiData</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+  <span class="c"># CCPN properties</span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_apiData</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiData</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; CCPN Data object matching Data&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;id string - name&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;name of Data object, used in Pid and to identify the Data object. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSet</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;DataSet containing ccpn.Data.&quot;&quot;&quot;</span>
+    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrConstraintStore</span><span class="p">]</span>
+  
+  <span class="n">calculationStep</span> <span class="o">=</span> <span class="n">_parent</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">attachedObjectPid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Pid for attached object - used to calculate the attachedObject&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">attachedObjectPid</span>
+
+  <span class="nd">@attachedObjectPid.setter</span>
+  <span class="k">def</span> <span class="nf">attachedObjectPid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">attachedObjectPid</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">attachedObject</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">AbstractWrapperObject</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;attached object - synchronised with self.attachedObjectPid.</span>
+
+<span class="sd">    NB if the attached object is renamed, this is link is broken,</span>
+<span class="sd">    and the attachedObjectPid is kept unchanged&quot;&quot;&quot;</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">attachedObjectPid</span>
+    <span class="k">if</span> <span class="n">ss</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+  <span class="nd">@attachedObject.setter</span>
+  <span class="k">def</span> <span class="nf">attachedObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">attachedObjectPid</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">pid</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">attachedObjectPid</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Keyword-value dictionary of parameters.</span>
+<span class="sd">    NB the value is a copy - modifying it will not modify the actual data.</span>
+
+<span class="sd">    Values can be anything that can be exported to JSON,</span>
+<span class="sd">    including OrderedDict, numpy.ndarray, ccpn.util.Tensor,</span>
+<span class="sd">    or pandas DataFrame, Series, or Panel&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">dict</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Data.setParameter"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Data.Data.setParameter">[docs]</a>  <span class="k">def</span> <span class="nf">setParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add name:value to parameters, overwriting existing entries&quot;&quot;&quot;</span>
+    <span class="n">apiData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">parameter</span> <span class="o">=</span> <span class="n">apiData</span><span class="o">.</span><span class="n">findFirstParameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">apiData</span><span class="o">.</span><span class="n">newParameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">parameter</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="n">value</span></div>
+
+<div class="viewcode-block" id="Data.deleteParameter"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Data.Data.deleteParameter">[docs]</a>  <span class="k">def</span> <span class="nf">deleteParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Delete parameter named &#39;name&#39;&quot;&quot;&quot;</span>
+    <span class="n">apiData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">parameter</span> <span class="o">=</span> <span class="n">apiData</span><span class="o">.</span><span class="n">findFirstParameter</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">parameter</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s">&quot;No parameter named </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">parameter</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Data.clearParameters"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Data.Data.clearParameters">[docs]</a>  <span class="k">def</span> <span class="nf">clearParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Delete all parameters&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">parameter</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+      <span class="n">parameter</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Data.updateParameters"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Data.Data.updateParameters">[docs]</a>  <span class="k">def</span> <span class="nf">updateParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;update parameters&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setParameter</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Data.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Data.Data.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rename Data, changing its Id and Pid&quot;&quot;&quot;</span>
+    <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Data name must be set&quot;</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.Data.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">coreUtil</span><span class="o">.</span><span class="n">_resetParentLink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;change&#39;</span><span class="p">)</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+
+    <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">oldName</span><span class="p">,),</span><span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">,))</span></div>
+
+
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">DataSet</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData - all ConstraintList children of parent NmrConstraintStore&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedData</span><span class="p">()</span></div>
+
+<span class="c"># Connections to parents:</span>
+
+<span class="k">def</span> <span class="nf">_newData</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">DataSet</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">attachedObjectPid</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">attachedObject</span><span class="p">:</span><span class="n">AbstractWrapperObject</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Data</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new ccpn.Data within ccpn.DataSet&quot;&quot;&quot;</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;attachedObjectPid&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">}</span>
+
+  <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+
+  <span class="k">if</span> <span class="n">attachedObject</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">attachedObjectPid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">attachedObjectPid</span> <span class="o">=</span> <span class="n">attachedObject</span><span class="o">.</span><span class="n">pid</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">raiseValueError</span><span class="p">(</span>
+        <span class="s">&quot;Either attachedObject or attachedObjectPid must be None - values were </span><span class="si">%s</span><span class="s"> and </span><span class="si">%s</span><span class="s">&quot;</span>
+                      <span class="o">%</span> <span class="p">(</span><span class="n">attachedObject</span><span class="p">,</span> <span class="n">attachedObjectPid</span><span class="p">))</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newData&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;attachedObjectPid&#39;</span><span class="p">:</span><span class="n">attachedObjectPid</span><span class="p">},</span>
+                                  <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newData&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newData</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">attachedObjectPid</span><span class="o">=</span><span class="n">attachedObjectPid</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="n">DataSet</span><span class="o">.</span><span class="n">newData</span> <span class="o">=</span> <span class="n">_newData</span>
+<span class="k">del</span> <span class="n">_newData</span>
+
+<span class="c"># Notifiers:</span>
+<span class="c"># Data change whenever a parameter is created, deleted, or changed</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+  <span class="p">(</span>
+    <span class="p">(</span><span class="s">&#39;_notifyRelatedApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;pathToObject&#39;</span><span class="p">:</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;action&#39;</span><span class="p">:</span><span class="s">&#39;change&#39;</span><span class="p">},</span>
+     <span class="n">ApiParameter</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_notifyRelatedApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;pathToObject&#39;</span><span class="p">:</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;action&#39;</span><span class="p">:</span><span class="s">&#39;change&#39;</span><span class="p">},</span>
+     <span class="n">ApiParameter</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s">&#39;__init__&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_notifyRelatedApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;pathToObject&#39;</span><span class="p">:</span><span class="s">&#39;data&#39;</span><span class="p">,</span> <span class="s">&#39;action&#39;</span><span class="p">:</span><span class="s">&#39;change&#39;</span><span class="p">},</span>
+     <span class="n">ApiParameter</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s">&#39;delete&#39;</span><span class="p">),</span>
+  <span class="p">)</span>
+<span class="p">)</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

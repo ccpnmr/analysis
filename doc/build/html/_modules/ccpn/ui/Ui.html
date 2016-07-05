@@ -1,0 +1,230 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.Ui &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.Ui</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Default framework no-user-interface UI implementation</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-06-14 14:06:23 +0100 (Tue, 14 Jun 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Simon P Skinner &amp; Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license &quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-06-14 14:06:23 +0100 (Tue, 14 Jun 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9460 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui._implementation</span> <span class="kn">import</span> <span class="n">_importOrder</span> <span class="k">as</span> <span class="n">_uiClassOrder</span>
+<span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreClassMap</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
+
+<div class="viewcode-block" id="Ui"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui">[docs]</a><span class="k">class</span> <span class="nc">Ui</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Superclass for all user interface classes&quot;&quot;&quot;</span>
+
+  <span class="c"># Factory functions for UI-specific instantiation of wrapped graphics classes</span>
+  <span class="n">_factoryFunctions</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">framework</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">framework</span> <span class="o">=</span> <span class="n">framework</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">None</span>
+
+<div class="viewcode-block" id="Ui.addMenu"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.addMenu">[docs]</a>  <span class="k">def</span> <span class="nf">addMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Add a menu specification for the top menu bar.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">position</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">position</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_menuSpec</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="p">[]))</span></div>
+
+  <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Ui.setUp"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.setUp">[docs]</a>  <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set up graphics data classes, cleaning up previous settings&quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">className</span> <span class="ow">in</span> <span class="n">_uiClassOrder</span><span class="p">:</span>
+      <span class="c"># Remove ui-specific settings. Will be reset as necessary in subclasses</span>
+      <span class="n">_coreClassMap</span><span class="p">[</span><span class="n">className</span><span class="p">]</span><span class="o">.</span><span class="n">_factoryFunction</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_factoryFunctions</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Ui.initialize"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.initialize">[docs]</a>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mainWindow</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;UI operations done after every project load/create&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Ui.start"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.start">[docs]</a>  <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Start the program execution&quot;&quot;&quot;</span>
+
+    <span class="c"># self._checkRegistered()</span>
+    <span class="c"># Register.updateServer(Register.loadDict(), self.framework.applicationVersion)</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;==&gt; </span><span class="si">%s</span><span class="s"> interface is ready</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_checkRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if registered and if not popup registration and if still no good then exit&quot;&quot;&quot;</span>
+
+    <span class="c"># checking the registration; need to have the app running, but before the splashscreen, as it will hang</span>
+    <span class="c"># in case the popup is needed.</span>
+    <span class="c"># We want to give some feedback; sometimes this takes a while (e.g. poor internet)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;==&gt; Checking registration ... </span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>  <span class="c"># It seems to be necessary as without the output comes after the registration screen</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_showRegisterPopup</span><span class="p">()</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">### INVALID REGISTRATION, terminating</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;==&gt; Registered to: </span><span class="si">%s</span><span class="s"> (</span><span class="si">%s</span><span class="s">)</span><span class="se">\n</span><span class="s">&#39;</span> <span class="o">%</span>
+                     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">),</span>
+                      <span class="bp">self</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;organisation&#39;</span><span class="p">)))</span>
+
+
+<div class="viewcode-block" id="Ui.echoCommands"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.Ui.echoCommands">[docs]</a>  <span class="k">def</span> <span class="nf">echoCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger.</span>
+<span class="sd">    Overwritten in subclasses to handle e.g. console putput</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
+
+    <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_isRegistered</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;return True if registered&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">Register</span><span class="o">.</span><span class="n">isNewRegistration</span><span class="p">(</span><span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="NoUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.NoUi">[docs]</a><span class="k">class</span> <span class="nc">NoUi</span><span class="p">(</span><span class="n">Ui</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">_showRegisterPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Display registration popup&quot;&quot;&quot;</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">### Please register, using another application</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span></div>
+    <span class="c"># popup = RegisterPopup(version=self.framework.applicationVersion, modal=True)</span>
+    <span class="c"># popup.show()</span>
+    <span class="c"># popup.raise_()</span>
+    <span class="c"># popup.exec_()</span>
+    <span class="c"># self.application.processEvents()</span>
+
+<div class="viewcode-block" id="TestUi"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.TestUi">[docs]</a><span class="k">class</span> <span class="nc">TestUi</span><span class="p">(</span><span class="n">NoUi</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">framework</span><span class="p">):</span>
+
+    <span class="n">Ui</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">framework</span><span class="p">)</span>
+    <span class="n">framework</span><span class="o">.</span><span class="n">_consoleOutput</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="TestUi.echoCommands"><a class="viewcode-back" href="../../../ccpn/ccpn.ui.html#ccpn.ui.Ui.TestUi.echoCommands">[docs]</a>  <span class="k">def</span> <span class="nf">echoCommands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">commands</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Echo commands strings, one by one, to logger</span>
+<span class="sd">    and store them in internal list for perusal</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">_consoleOutput</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span>
+
+    <span class="n">logger</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">framework</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
+
+    <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">command</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

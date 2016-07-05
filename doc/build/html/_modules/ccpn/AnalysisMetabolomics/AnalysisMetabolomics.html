@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisMetabolomics.AnalysisMetabolomics &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisMetabolomics.AnalysisMetabolomics</h1><div class="highlight"><pre>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;TJ&#39;</span>
+
+<span class="c"># from ccpn.framework.lib.SvnRevision import applicationVersion</span>
+<span class="c"># from ccpn.framework.Framework import defineProgramArguments, Framework</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">Framework</span>
+
+
+<div class="viewcode-block" id="Metabolomics"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics">[docs]</a><span class="k">class</span> <span class="nc">Metabolomics</span><span class="p">(</span><span class="n">Framework</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Root class for Metabolomics application&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
+    <span class="n">Framework</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Metabolomics.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.setupMenus">[docs]</a>  <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setupMenus</span><span class="p">(</span> <span class="p">)</span>
+    <span class="n">menuSpec</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Metabolomics&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s">&quot;Decomposition (PCA)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showDecompositionModule</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPipeline</span><span class="p">,)</span>
+                                 <span class="p">])</span>
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">addApplicationMenuSpec</span><span class="p">(</span><span class="n">menuSpec</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Metabolomics.showDecompositionModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showDecompositionModule">[docs]</a>  <span class="k">def</span> <span class="nf">showDecompositionModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.Decomposition</span> <span class="kn">import</span> <span class="n">Decomposition</span>
+    <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule</span> <span class="kn">import</span> <span class="n">DecompositionModule</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span> <span class="o">=</span> <span class="n">Decomposition</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span> <span class="o">=</span> <span class="n">DecompositionModule</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+                                                      <span class="n">interactor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="p">,</span>
+                                                      <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="o">.</span><span class="n">presenter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Metabolomics.showPipeline"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showPipeline">[docs]</a>  <span class="k">def</span> <span class="nf">showPipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.MetabolomicsPipeline</span> <span class="kn">import</span> <span class="n">MetabolomicsModule</span>
+    <span class="n">pipelineModule</span> <span class="o">=</span> <span class="n">MetabolomicsModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">pipelineModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s">&quot;application.showMetabolomicsPipeline()&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;application.showMetabolomicsPipeline()&quot;</span><span class="p">)</span></div></div>
+
+<span class="c"># if __name__ == &#39;__main__&#39;:</span>
+<span class="c">#</span>
+<span class="c">#   # argument parser</span>
+<span class="c">#   parser = defineProgramArguments()</span>
+<span class="c">#</span>
+<span class="c">#   # add any additional commandline argument here</span>
+<span class="c">#   commandLineArguments = parser.parse_args()</span>
+<span class="c">#</span>
+<span class="c">#   program = Metabolomics(applicationName, applicationVersion, commandLineArguments)</span>
+<span class="c">#   program.start()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

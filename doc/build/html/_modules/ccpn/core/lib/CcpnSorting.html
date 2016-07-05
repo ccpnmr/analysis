@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.lib.CcpnSorting &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.lib.CcpnSorting</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot; Ccpn-specific variant of functions for sorting and comparison.&quot;&quot;&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c">#  Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9315 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span>  <span class="n">Sorting</span>
+<span class="n">SPLITONDOTS</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;([.])&quot;</span><span class="p">)</span>
+
+<span class="n">_keyCache</span> <span class="o">=</span> <span class="p">{}</span>
+
+<span class="c">#</span>
+<div class="viewcode-block" id="stringSortKey"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnSorting.stringSortKey">[docs]</a><span class="k">def</span> <span class="nf">stringSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Sort key for strings.</span>
+
+<span class="sd">  Usage: sorted(aList, key=stringSortKey) or aList.sort(key=stringSortKey)</span>
+
+<span class="sd">  Custom CCPN version of stringSortKey that sorts Pids on their individual components.</span>
+
+<span class="sd">  Advanced:</span>
+
+<span class="sd">  Splits on embedded dots before further processing, and</span>
+<span class="sd">  Returns an alternating tuple of (possibly empty) strings interspersed with (float,string) tuples,</span>
+<span class="sd">  where the float is the converted value of the substring.</span>
+<span class="sd">  First and last element are always strings.</span>
+
+<span class="sd">  If the entire string evaluates to a float, the result is (&#39;&#39;, &#39;(floatVal, stringVal), &#39;&#39;)</span>
+
+<span class="sd">  Otherwise the numeric tuples are (intVal, subStringVal).</span>
+<span class="sd">  Substrings recognised as integers are an optional series of &#39; &#39;,</span>
+<span class="sd">  an optional sign, and a series of digits - or REGEX &#39;[ ]*[+-]?\d+&#39;</span>
+<span class="sd">  For this type the key tuple is extended by (0,&#39;&#39;),</span>
+<span class="sd">  # so that end-of-key sorts as 0 rather thn coming first.</span>
+
+<span class="sd">  Example of sorting order</span>
+<span class="sd">  [&#39;&#39;, &#39;NaN&#39;, &#39;-1&#39;, &#39;-1A&#39;, &#39;0.0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;15&#39;, &#39;3.2e12&#39;, &#39;Inf&#39;,</span>
+<span class="sd">  &#39;Ahh&#39;, &#39;b&#39;,  &#39;b2&#39;, &#39;b12&#39;, &#39;bb&#39;, &#39;ciao&#39;] &quot;&quot;&quot;</span>
+
+  <span class="n">keyEnd</span> <span class="o">=</span> <span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="s">&#39;&#39;</span><span class="p">),</span><span class="s">&#39;&#39;</span><span class="p">)</span>
+
+  <span class="k">global</span> <span class="n">_keyCache</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">_keyCache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">tt</span> <span class="o">=</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">_floatStringKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tt</span><span class="p">:</span>
+      <span class="c"># Read as floating point number if possible</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">tt</span><span class="p">,)</span>
+    <span class="k">elif</span> <span class="s">&#39;.&#39;</span>  <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+      <span class="c"># Otherwise treat dot (&#39;.&#39;) as a field separator</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">Sorting</span><span class="o">.</span><span class="n">_numericSplitString</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">SPLITONDOTS</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="s">&#39;&#39;</span><span class="p">]</span>
+      <span class="c"># result = tuple(x if x[-1] else x + keyEnd for x in ll)</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="n">keyEnd</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># Simple string</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">_numericSplitString</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+      <span class="c"># if len(result) &gt; 1 and result[-1] == &#39;&#39;:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c"># String ended with a numeric field. Add keyEnd so that this sorts as 0</span>
+        <span class="c"># against keys where the next field is also numeric</span>
+        <span class="n">result</span> <span class="o">+=</span> <span class="n">keyEnd</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span><span class="p">,)</span>
+    <span class="c">#</span>
+    <span class="n">_keyCache</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="k">def</span> <span class="nf">_ccpnOrderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Special case sorting key for CCPN - groups CCPN AbstractWrapperObjects together</span>
+<span class="sd">  before sorting by class name&quot;&quot;&quot;</span>
+
+  <span class="c"># import here to avoid circular imports</span>
+  <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+
+  <span class="n">cls</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__class__</span>
+
+  <span class="n">ordering</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
+    <span class="n">ordering</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="p">(</span><span class="n">ordering</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">cls</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="universalSortKey"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnSorting.universalSortKey">[docs]</a><span class="k">def</span> <span class="nf">universalSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Custom universalSortKey, used to sort a list of mixed-type Python objects.</span>
+
+<span class="sd">  Usage: sorted(aList, key=universalSortKey) or aList.sort(key=universalSortKey)</span>
+
+<span class="sd">  Uses the local stringSortKey variant for strings and</span>
+<span class="sd">  CCPN WrapperObjects sorted together&quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">Sorting</span><span class="o">.</span><span class="n">universalSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">_stringOrderingHook</span><span class="o">=</span><span class="n">stringSortKey</span><span class="p">,</span>
+                                  <span class="n">_orderedKeyHook</span><span class="o">=</span><span class="n">_ccpnOrderedKey</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

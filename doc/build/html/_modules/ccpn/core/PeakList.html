@@ -1,0 +1,501 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.PeakList &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.PeakList</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">argwhere</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">maximum_filter</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">PeakList</span> <span class="k">as</span> <span class="n">ApiPeakList</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.CopyData</span> <span class="kn">import</span> <span class="n">copySubTree</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList</span> <span class="kn">import</span> <span class="n">fitExistingPeakList</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">spectrumLib</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList</span> <span class="kn">import</span> <span class="n">pickNewPeaks</span>
+
+<div class="viewcode-block" id="PeakList"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList">[docs]</a><span class="k">class</span> <span class="nc">PeakList</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Peak List.&quot;&quot;&quot;</span>
+  
+  <span class="c">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;PL&#39;</span>
+  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;PeakList&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Spectrum</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;peakLists&#39;</span>
+  
+  <span class="c">#: List of child classes.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Qualified name of matching API class</span>
+  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiPeakList</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+  <span class="c"># Special error-raising functions for people who think PeakList is a list</span>
+  <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;&#39;PeakList object is not iterable - for a list of peaks use Peaklist.peaks&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;&#39;PeakList object does not support indexing - for a list of peaks use Peaklist.peaks&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;&#39;PeakList object has no length - for a list of peaks use Peaklist.peaks&quot;</span><span class="p">)</span>
+
+  <span class="c"># CCPN properties  </span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_apiPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiPeakList</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; API peakLists matching PeakList&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;serial number of PeakList, used in Pid and to identify the PeakList. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Spectrum</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Spectrum containing Peaklist.&quot;&quot;&quot;</span>
+    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataSource</span><span class="p">]</span>
+  
+  <span class="n">spectrum</span> <span class="o">=</span> <span class="n">_parent</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;title of PeakList&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+    
+  <span class="nd">@title.setter</span>
+  <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+    
+  <span class="nd">@comment.setter</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">symbolStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Symbol style for peak annotation display&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">symbolStyle</span>
+
+  <span class="nd">@symbolStyle.setter</span>
+  <span class="k">def</span> <span class="nf">symbolStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">symbolStyle</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">symbolColour</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Symbol colour for peak annotation display&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">symbolColour</span>
+
+  <span class="nd">@symbolColour.setter</span>
+  <span class="k">def</span> <span class="nf">symbolColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">symbolColour</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">textColour</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Text colour for peak annotation display&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">textColour</span>
+
+  <span class="nd">@textColour.setter</span>
+  <span class="k">def</span> <span class="nf">textColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">textColour</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">isSimulated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Is peakList simulated&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isSimulated</span>
+
+  <span class="nd">@isSimulated.setter</span>
+  <span class="k">def</span> <span class="nf">isSimulated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">bool</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isSimulated</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="c"># Implementation functions</span>
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData (PeakLists) for all PeakList children of parent Spectrum&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakLists</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">dataType</span> <span class="o">==</span> <span class="s">&#39;Peak&#39;</span><span class="p">]</span>
+
+  <span class="c"># Library functions</span>
+
+<div class="viewcode-block" id="PeakList.pickPeaksNd"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.pickPeaksNd">[docs]</a>  <span class="k">def</span> <span class="nf">pickPeaksNd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">dataDims</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="s">&#39;DataDim&#39;</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">doPos</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doNeg</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                  <span class="n">fitMethod</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">excludedRegions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">excludedDiagonalDims</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">excludedDiagonalTransform</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="c"># TODO NBNB Add dock string and put type annotation on all parameters</span>
+
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+      <span class="p">(</span> <span class="p">(</span><span class="s">&#39;positions&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;doPos&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;doNeg&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;fitMethod&#39;</span><span class="p">,</span> <span class="s">&#39;gaussian&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;excludedRegions&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;excludedDiagonalDims&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+        <span class="p">(</span><span class="s">&#39;excludedDiagonalTransform&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+      <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="c"># NBNB TODO dataDims are NOT being echoed.</span>
+    <span class="c"># NBNB TODO function needs refactoring because 1) we have API objects (dataDims) as input</span>
+    <span class="c"># which 2) makes proper echoing impossible.</span>
+
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;pickPeaksNd&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+
+      <span class="n">startPoint</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">endPoint</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">dataDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataDims</span><span class="p">):</span>
+        <span class="c"># -1 below because points start at 1 in data model</span>
+        <span class="n">position0</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">position1</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">position0</span><span class="p">,</span> <span class="n">position1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">position0</span><span class="p">,</span> <span class="n">position1</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">position0</span><span class="p">,</span> <span class="n">position1</span><span class="p">)</span>
+        <span class="c"># want integer grid points above position0 and below position1</span>
+        <span class="c"># add 1 to position0 because above</span>
+        <span class="c"># add 1 to position1 because doing start &lt;= x &lt; end not &lt;= end</span>
+        <span class="c"># yes, this negates -1 above but they are for different reasons</span>
+        <span class="n">position0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">position0</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">position1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">position1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">startPoint</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">position0</span><span class="p">))</span>
+        <span class="n">endPoint</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">position1</span><span class="p">))</span>
+
+      <span class="n">startPoints</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">startPoint</span><span class="p">)]</span>
+      <span class="n">endPoints</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">endPoint</span><span class="p">)]</span>
+      <span class="c"># print(isoOrdering, startPoint, startPoints, endPoint, endPoints)</span>
+
+      <span class="n">posLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span> <span class="k">if</span> <span class="n">doPos</span> <span class="k">else</span> <span class="bp">None</span>
+      <span class="n">negLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span> <span class="k">if</span> <span class="n">doNeg</span> <span class="k">else</span> <span class="bp">None</span>
+
+      <span class="n">apiPeaks</span> <span class="o">=</span> <span class="n">pickNewPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span><span class="p">,</span> <span class="n">startPoint</span><span class="o">=</span><span class="n">startPoints</span><span class="p">,</span> <span class="n">endPoint</span><span class="o">=</span><span class="n">endPoints</span><span class="p">,</span>
+                     <span class="n">posLevel</span><span class="o">=</span><span class="n">posLevel</span><span class="p">,</span> <span class="n">negLevel</span><span class="o">=</span><span class="n">negLevel</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="n">fitMethod</span><span class="p">,</span> <span class="n">excludedRegions</span><span class="o">=</span><span class="n">excludedRegions</span><span class="p">,</span>
+                     <span class="n">excludedDiagonalDims</span><span class="o">=</span><span class="n">excludedDiagonalDims</span><span class="p">,</span> <span class="n">excludedDiagonalTransform</span><span class="o">=</span><span class="n">excludedDiagonalTransform</span><span class="p">)</span>
+
+      <span class="n">data2ObjDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="p">[</span><span class="n">data2ObjDict</span><span class="p">[</span><span class="n">apiPeak</span><span class="p">]</span> <span class="k">for</span> <span class="n">apiPeak</span> <span class="ow">in</span> <span class="n">apiPeaks</span><span class="p">]</span></div>
+
+  <span class="c"># def pickPeaks1d(self:&#39;PeakList&#39;, spectrumView, size:int=3, mode:str=&#39;wrap&#39;):</span>
+<div class="viewcode-block" id="PeakList.pickPeaks1d"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.pickPeaks1d">[docs]</a>  <span class="k">def</span> <span class="nf">pickPeaks1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data1d</span><span class="p">,</span> <span class="n">dataRange</span><span class="p">,</span> <span class="n">intensityRange</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;wrap&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s">&#39;Peak&#39;</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pick 1D peaks form data1d float array</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">suspendNotification</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">dataRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">dataRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">dataRange</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dataRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataRange</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">dataRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="c"># code below assumes that dataRange[1] &gt; dataRange[0]</span>
+      <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span>
+      <span class="n">data1d</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">get1dSpectrumData</span><span class="p">()</span>
+      <span class="n">selectedData</span> <span class="o">=</span> <span class="n">data1d</span><span class="p">[:,</span> <span class="p">(</span><span class="n">data1d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">dataRange</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="n">data1d</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dataRange</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+      <span class="k">if</span> <span class="n">selectedData</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">peaks</span>
+      <span class="n">maxFilter</span> <span class="o">=</span> <span class="n">maximum_filter</span><span class="p">(</span><span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+      <span class="n">boolsMax</span> <span class="o">=</span> <span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">maxFilter</span>
+      <span class="k">if</span> <span class="n">intensityRange</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> 
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">estimateNoise</span><span class="p">()</span><span class="o">*</span><span class="mi">10</span>
+        <span class="k">if</span> <span class="n">selectedData</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">peaks</span>
+        <span class="n">boolsVal</span> <span class="o">=</span> <span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold</span>
+        <span class="n">boolsPeak</span> <span class="o">=</span> <span class="n">boolsVal</span> <span class="o">&amp;</span> <span class="n">boolsMax</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">boolsPeak</span> <span class="o">=</span> <span class="n">boolsMax</span>
+      <span class="n">indices</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">boolsPeak</span><span class="p">)</span> <span class="c"># True positional indices</span>
+      <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+        <span class="n">peakPosition</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">selectedData</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">position</span><span class="p">])]</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">position</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">intensityRange</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">intensityRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">height</span> <span class="o">&lt;=</span> <span class="n">intensityRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+          <span class="n">peaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">height</span><span class="p">),</span> <span class="n">position</span><span class="o">=</span><span class="n">peakPosition</span><span class="p">))</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">resumeNotification</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">peaks</span></div>
+
+
+<div class="viewcode-block" id="PeakList.pickPeaks1dFiltered"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.pickPeaks1dFiltered">[docs]</a>  <span class="k">def</span> <span class="nf">pickPeaks1dFiltered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;wrap&#39;</span><span class="p">,</span> <span class="n">ignoredRegions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                          <span class="n">noiseThreshold</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pick 1D peaks form data in  self.spectrum</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+      <span class="p">(</span> <span class="p">(</span><span class="s">&#39;size&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;mode&#39;</span><span class="p">,</span> <span class="s">&#39;wrap&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;ignoredRegions&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;noiseThreshold&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+      <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;pickPeaks1dFiltered&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">ignoredRegions</span><span class="p">:</span>
+        <span class="n">ignoredRegions</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mf">20.1</span><span class="p">,</span><span class="o">-</span><span class="mf">19.1</span><span class="p">]]</span>
+
+      <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span>
+
+      <span class="n">data</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">get1dSpectrumData</span><span class="p">()</span>
+
+
+      <span class="n">ppmValues</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+      <span class="k">if</span> <span class="n">noiseThreshold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">noiseThreshold</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">estimateNoise</span><span class="p">()</span><span class="o">*</span><span class="mi">5</span>
+
+      <span class="n">masks</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">ignoredRegions</span><span class="p">:</span>
+
+        <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ppmValues</span> <span class="o">&gt;</span> <span class="n">region</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">|</span> <span class="p">(</span><span class="n">ppmValues</span> <span class="o">&lt;</span> <span class="n">region</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+      <span class="n">fullmask</span> <span class="o">=</span> <span class="p">[</span><span class="nb">all</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="k">for</span> <span class="n">mask</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">masks</span><span class="p">)]</span>
+      <span class="n">newArray2</span> <span class="o">=</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">logical_not</span><span class="p">((</span><span class="n">fullmask</span><span class="p">,</span> <span class="n">fullmask</span><span class="p">))))</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">newArray2</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">noiseThreshold</span><span class="p">):</span>
+       <span class="k">return</span> <span class="n">peaks</span>
+      <span class="n">boolsVal</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">noiseThreshold</span>
+      <span class="n">maxFilter</span> <span class="o">=</span> <span class="n">maximum_filter</span><span class="p">(</span><span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+
+
+      <span class="n">boolsMax</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">maxFilter</span>
+      <span class="n">boolsPeak</span> <span class="o">=</span> <span class="n">boolsVal</span> <span class="o">&amp;</span> <span class="n">boolsMax</span>
+      <span class="n">indices</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">boolsPeak</span><span class="p">)</span> <span class="c"># True positional indices</span>
+      <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+        <span class="n">peakPosition</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">newArray2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">position</span><span class="p">])]</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">position</span><span class="p">]</span>
+        <span class="n">peaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">height</span><span class="p">),</span> <span class="n">position</span><span class="o">=</span><span class="n">peakPosition</span><span class="p">))</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">peaks</span></div>
+
+
+
+<div class="viewcode-block" id="PeakList.subtractPeakLists"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.subtractPeakLists">[docs]</a>  <span class="k">def</span> <span class="nf">subtractPeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList2</span><span class="p">:</span><span class="s">&#39;PeakList&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;PeakList&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Subtracts peaks in peakList2 from peaks in peakList1, based on position,</span>
+<span class="sd">    and puts those in a new peakList3.  Assumes a common spectrum for now.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">_havePeakNearPosition</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">tolerances</span><span class="p">,</span> <span class="n">peaks</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s">&#39;Peak&#39;</span><span class="p">]:</span>
+
+      <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">position</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">):</span>
+          <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">values</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&gt;</span> <span class="n">tolerances</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">peak</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;subtractPeakLists&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="p">{</span><span class="s">&#39;peakList2&#39;</span><span class="p">:</span><span class="n">peakList2</span><span class="p">},</span>
+                                    <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newPeakList&#39;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span>
+
+      <span class="k">assert</span> <span class="n">spectrum</span> <span class="ow">is</span> <span class="n">peakList2</span><span class="o">.</span><span class="n">spectrum</span><span class="p">,</span> <span class="s">&#39;For now requires both peak lists to be in same spectrum&#39;</span>
+
+      <span class="c"># dataDims = spectrum.sortedDataDims()</span>
+      <span class="n">tolerances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span>
+
+      <span class="n">peaks2</span> <span class="o">=</span> <span class="n">peakList2</span><span class="o">.</span><span class="n">peaks</span>
+      <span class="n">peakList3</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">()</span>
+
+      <span class="k">for</span> <span class="n">peak1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+        <span class="n">values1</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak1</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">peak1</span><span class="o">.</span><span class="n">position</span><span class="p">))]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_havePeakNearPosition</span><span class="p">(</span><span class="n">values1</span><span class="p">,</span> <span class="n">tolerances</span><span class="p">,</span> <span class="n">peaks2</span><span class="p">):</span>
+          <span class="n">peakList3</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span><span class="n">height</span><span class="o">=</span><span class="n">peak1</span><span class="o">.</span><span class="n">height</span><span class="p">,</span> <span class="n">volume</span><span class="o">=</span><span class="n">peak1</span><span class="o">.</span><span class="n">volume</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="o">=</span><span class="n">peak1</span><span class="o">.</span><span class="n">figureOfMerit</span><span class="p">,</span>
+                            <span class="n">annotation</span><span class="o">=</span><span class="n">peak1</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">peak1</span><span class="o">.</span><span class="n">position</span><span class="p">,</span>
+                            <span class="n">pointPosition</span><span class="o">=</span><span class="n">peak1</span><span class="o">.</span><span class="n">pointPosition</span><span class="p">)</span>
+
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">peakList3</span></div>
+
+  <span class="c"># # Removed as not used in project: Rasmus Fogh 21/6/2016</span>
+  <span class="c"># def copyPeaks(self, sinkSpectrum:&#39;Spectrum&#39;, fitPositions:bool=False):</span>
+  <span class="c">#   refAxisCodes = self.spectrum.axisCodes</span>
+  <span class="c">#   sinkAxisCodes = sinkSpectrum.axisCodes</span>
+  <span class="c">#</span>
+  <span class="c">#   if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):</span>
+  <span class="c">#     print(&#39;axis codes of the source and sink peaklists do not match&#39;)</span>
+  <span class="c">#     return</span>
+  <span class="c">#</span>
+  <span class="c">#   if not fitPositions:</span>
+  <span class="c">#     copySubTree(self, sinkSpectrum)</span>
+  <span class="c">#</span>
+  <span class="c">#   # else:</span>
+
+<div class="viewcode-block" id="PeakList.refit"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.refit">[docs]</a>  <span class="k">def</span> <span class="nf">refit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;gaussian&#39;</span><span class="p">):</span>
+    <span class="n">fitExistingPeakList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PeakList.restrictedPick"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.restrictedPick">[docs]</a>  <span class="k">def</span> <span class="nf">restrictedPick</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positionCodeDict</span><span class="p">,</span> <span class="n">doPos</span><span class="p">,</span> <span class="n">doNeg</span><span class="p">):</span>
+
+    <span class="n">codes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">positionCodeDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">positionCodeDict</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">]</span>
+    <span class="n">axisCodeMapping</span> <span class="o">=</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">_axisCodeMapIndices</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+    <span class="n">tolerances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span>
+    <span class="n">limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumLimits</span>
+    <span class="n">selectedRegion</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">mapping</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodeMapping</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">mapping</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">selectedRegion</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="p">[</span><span class="n">positions</span><span class="p">[</span><span class="n">mapping</span><span class="p">]</span><span class="o">-</span><span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="n">positions</span><span class="p">[</span><span class="n">mapping</span><span class="p">]</span><span class="o">+</span><span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]])</span>
+      <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">selectedRegion</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">ii</span><span class="p">,</span> <span class="p">[</span><span class="n">limits</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">limits</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">1</span><span class="p">]])</span>
+
+    <span class="n">regionToPick</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">selectedRegion</span><span class="p">))</span>
+    <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksNd</span><span class="p">(</span><span class="n">regionToPick</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedDataDims</span><span class="p">(),</span> <span class="n">doPos</span><span class="o">=</span><span class="n">doPos</span><span class="p">,</span>
+                             <span class="n">doNeg</span><span class="o">=</span><span class="n">doNeg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">peaks</span></div></div>
+
+
+
+<span class="c"># Connections to parents:</span>
+
+<span class="k">def</span> <span class="nf">_newPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+             <span class="n">isSimulated</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PeakList</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new empty ccpn.PeakList within ccpn.Spectrum&quot;&quot;&quot;</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;isSimulated&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)))</span>
+
+  <span class="n">apiDataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newPeakList&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newPeakList&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">apiDataSource</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">isSimulated</span><span class="o">=</span><span class="n">isSimulated</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="n">Spectrum</span><span class="o">.</span><span class="n">newPeakList</span> <span class="o">=</span> <span class="n">_newPeakList</span>
+<span class="k">del</span> <span class="n">_newPeakList</span>
+
+<span class="c"># Notifiers:</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,378 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.NmrChain &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.NmrChain</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">NmrChain</span> <span class="k">as</span> <span class="n">ApiNmrChain</span>
+
+
+<div class="viewcode-block" id="NmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain">[docs]</a><span class="k">class</span> <span class="nc">NmrChain</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Nmr Assignment Chain.&quot;&quot;&quot;</span>
+  
+  <span class="c">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;NC&#39;</span>
+  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;NmrChain&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;nmrChains&#39;</span>
+  
+  <span class="c">#: List of child classes.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Qualified name of matching API class</span>
+  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiNmrChain</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+  
+
+  <span class="c"># CCPN properties  </span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_apiNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiNmrChain</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; CCPN NmrChain matching NmrChain&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;short form of name, as used for id with illegal characters replaced by Pid.altCharacter&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">shortName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;short form of name, used in Pid and to identify the NmrChain</span>
+<span class="sd">    Names of the form &#39;\@ijk&#39; and &#39;#ijk&#39; (where ijk is an integers)</span>
+<span class="sd">    are reserved and cannot be set. They can be obtained by the deassign command.</span>
+<span class="sd">    Connected NmrChains (isConnected == True) always have canonical names of the form &#39;#ijk&#39;&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Identifying label of NmrChain. Defaults to &#39;?&#39;&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">label</span>
+
+  <span class="nd">@label.setter</span>
+  <span class="k">def</span> <span class="nf">label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">isConnected</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Is this NmrChain a connected stretch</span>
+<span class="sd">    (in which case the mainNmrResidues are sequentially connected&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isConnected</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+
+  <span class="nd">@comment.setter</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">chain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chain</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Chain to which NmrChain is assigned&quot;&quot;&quot;</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">chain</span>
+    <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">chain</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+
+  <span class="nd">@chain.setter</span>
+  <span class="k">def</span> <span class="nf">chain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Chain</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">chain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deassign</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># NB The API code will throw ValueError if there is already an NmrChain with that code</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+
+<div class="viewcode-block" id="NmrChain.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rename NmrChain, changing its Id and Pid.</span>
+<span class="sd">    Use the &#39;deassign&#39; function if you want to revert to the canonical name&quot;&quot;&quot;</span>
+    <span class="n">wrappedData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrChain</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Connected NmrChain cannot be renamed&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;NmrChain name must be set&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">value</span> <span class="o">==</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">code</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="k">elif</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">==</span> <span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;NmrChain:</span><span class="si">%s</span><span class="s"> cannot be renamed&quot;</span> <span class="o">%</span> <span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrChain.shortName&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># NB names that clash with existing NmrChains cause ValueError at the API level.</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="n">value</span>
+      <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NmrChain.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.deassign">[docs]</a>  <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reset NmrChain back to its originalName, cutting all assignment links&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;deassign&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NmrChain.assignConnectedResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.assignConnectedResidues">[docs]</a>  <span class="k">def</span> <span class="nf">assignConnectedResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">firstResidue</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">Residue</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;Assign all NmrResidues in connected NmrChain sequentially,</span>
+<span class="sd">    with the first NmrResidue assigned to firstResidue.</span>
+
+<span class="sd">    Returns ValueError if NmrChain is not connected,</span>
+<span class="sd">    or if any of the Residues are missing or already assigned&quot;&quot;&quot;</span>
+
+    <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;assignConnectedResidues only allowed for connected NmrChains&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">firstResidue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="n">xx</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">firstResidue</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;No object found matching Pid </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">firstResidue</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">firstResidue</span> <span class="o">=</span> <span class="n">xx</span>
+
+    <span class="n">apiStretch</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span>
+    <span class="k">if</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot assign </span><span class="si">%s</span><span class="s"> NmrResidue stretch: First Residue </span><span class="si">%s</span><span class="s"> is already assigned&quot;</span>
+      <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">),</span> <span class="n">firstResidue</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+
+    <span class="n">residues</span> <span class="o">=</span> <span class="p">[</span><span class="n">firstResidue</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="n">res</span> <span class="o">=</span> <span class="n">residues</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+      <span class="nb">next</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">nextResidue</span>
+      <span class="k">if</span> <span class="nb">next</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot assign </span><span class="si">%s</span><span class="s"> NmrResidues to </span><span class="si">%s</span><span class="s"> Residues from Chain&quot;</span>
+                         <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">residues</span><span class="p">)))</span>
+      <span class="k">elif</span> <span class="nb">next</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot assign </span><span class="si">%s</span><span class="s"> NmrResidue stretch: Residue </span><span class="si">%s</span><span class="s"> is already assigned&quot;</span>
+        <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStretch</span><span class="p">),</span> <span class="nb">next</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">residues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">)</span>
+
+    <span class="c"># If we get here we are OK - assign residues and delete NmrChain</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;assignConnectedResidues&#39;</span><span class="p">,</span> <span class="n">firstResidue</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residues</span><span class="p">):</span>
+        <span class="n">apiStretch</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">_wrappedData</span>
+      <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedNmrChains</span><span class="p">()</span></div>
+
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Chain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
+  <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+  <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Chain</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">NmrChain</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;nmrChain cannot be set to None&quot;</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+     <span class="n">value</span><span class="o">.</span><span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span>
+<span class="n">Chain</span><span class="o">.</span><span class="n">nmrChain</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;NmrChain to which Chain is assigned&quot;</span><span class="p">)</span>
+
+<span class="k">del</span> <span class="n">getter</span>
+<span class="k">del</span> <span class="n">setter</span>
+
+<span class="k">def</span> <span class="nf">_newNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isConnected</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;?&#39;</span><span class="p">,</span>
+                 <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new ccpn.NmrChain. Set isConnected=True to get connected NmrChain.</span>
+
+<span class="sd">  :param str shortName: shortName for new nmrChain (optional, defaults to &#39;@ijk&#39; or &#39;#ijk&#39;,  ijk positive integer</span>
+<span class="sd">  :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later</span>
+<span class="sd">  :param str label: Modifiable NmrChain identifier that does not change with reassignment. Defaults to &#39;@ijk&#39;/&#39;#ijk&#39;</span>
+<span class="sd">  :param str comment: comment for new nmrChain (optional)&quot;&quot;&quot;</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;shortName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;isConnected&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;label&#39;</span><span class="p">,</span> <span class="s">&#39;?&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+
+  <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span>
+
+  <span class="k">if</span> <span class="n">shortName</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">shortName</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrChain.shortName&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newNmrChain&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newNmrChain&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">newApiNmrChain</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">isConnected</span><span class="o">=</span><span class="n">isConnected</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">,</span>
+                                            <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  
+  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiNmrChain</span><span class="p">)</span>
+  
+<div class="viewcode-block" id="fetchNmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.fetchNmrChain">[docs]</a><span class="k">def</span> <span class="nf">fetchNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Fetch chain with given shortName; If none exists call newNmrChain to make one first</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">shortName</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">shortName</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrChain.shortName&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;fetchNmrChain&#39;</span><span class="p">,</span> <span class="n">shortName</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newNmrChain&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span>
+    <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">shortName</span> <span class="ow">and</span> <span class="n">shortName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s">&#39;@#&#39;</span> <span class="ow">and</span> <span class="n">shortName</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot create new NmrChain with reserved name </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">shortName</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">=</span><span class="n">shortName</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiNmrChain</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+  
+<span class="c"># Clean-up</span>
+    
+<span class="c"># Connections to parents:</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">newNmrChain</span> <span class="o">=</span> <span class="n">_newNmrChain</span>
+<span class="k">del</span> <span class="n">_newNmrChain</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">fetchNmrChain</span> <span class="o">=</span> <span class="n">fetchNmrChain</span>
+
+<span class="c"># Notifiers:</span>
+<span class="n">className</span> <span class="o">=</span> <span class="n">ApiNmrChain</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setImplCode&#39;</span><span class="p">),</span>
+  <span class="p">)</span>
+<span class="p">)</span>
+<span class="n">Chain</span><span class="o">.</span><span class="n">_setupCoreNotifier</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="o">.</span><span class="n">_finaliseRelatedObjectFromRename</span><span class="p">,</span>
+                          <span class="p">{</span><span class="s">&#39;pathToObject&#39;</span><span class="p">:</span><span class="s">&#39;nmrChain&#39;</span><span class="p">,</span> <span class="s">&#39;action&#39;</span><span class="p">:</span><span class="s">&#39;rename&#39;</span><span class="p">})</span>
+
+<span class="c"># NB Chain&lt;-&gt;NmrChain link depends solely on the NmrChain name.</span>
+<span class="c"># So no notifiers on the link - notify on the NmrChain rename instead.</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

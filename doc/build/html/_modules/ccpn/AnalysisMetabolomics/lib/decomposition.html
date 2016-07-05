@@ -1,0 +1,331 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisMetabolomics.lib.decomposition &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisMetabolomics.lib.decomposition</h1><div class="highlight"><pre>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;TJ Ragan&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="kn">import</span> <span class="n">svd</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+
+<span class="kn">import</span> <span class="nn">sklearn.decomposition</span>
+
+
+<span class="c"># class PCA_old:</span>
+<span class="c">#   &#39;&#39;&#39;</span>
+<span class="c">#   For expediency, we&#39;re using the scikit-learn PCA algorithm, which mean centers just before the</span>
+<span class="c">#   SVD step.  In the future we should implement our own to remove the forced mean centering.</span>
+<span class="c">#   &#39;&#39;&#39;</span>
+<span class="c">#   def __init__(self, spectra, nComponents=None):</span>
+<span class="c">#     self.inputSpectra = spectra</span>
+<span class="c">#     self.nComponents = nComponents</span>
+<span class="c">#     self._translateData()</span>
+<span class="c">#     self.fittedModel = self._fitPcaModel()</span>
+<span class="c">#</span>
+<span class="c">#   @property</span>
+<span class="c">#   def loadings(self):</span>
+<span class="c">#     loadings = self._fittedPcaModel.components_.T</span>
+<span class="c">#     columnNames = [&#39;PC{}&#39;.format(i+1) for i in range(loadings.shape[1])]</span>
+<span class="c">#     loadingsDF = pd.DataFrame(loadings, index=self._inputDF.columns, columns=columnNames)</span>
+<span class="c">#     loadingsDF.columns.rename(&#39;Principle Components&#39;, inplace=True)</span>
+<span class="c">#     loadingsDF.index.rename(&#39;ppm&#39;, inplace=True)</span>
+<span class="c">#     return loadingsDF</span>
+<span class="c">#</span>
+<span class="c">#   @property</span>
+<span class="c">#   def scores(self):</span>
+<span class="c">#     scores = self._fittedPcaModel.transform(self._inputDF)</span>
+<span class="c">#     colNames = [&#39;PC{}&#39;.format(i+1) for i in range(scores.shape[1])]</span>
+<span class="c">#     scoresDF = pd.DataFrame(scores, index=self._inputDF.index, columns=colNames)</span>
+<span class="c">#     scoresDF.columns.rename(&#39;Principle Components&#39;, inplace=True)</span>
+<span class="c">#     scoresDF.index.rename(&#39;samples&#39;, inplace=True)</span>
+<span class="c">#     return scoresDF</span>
+<span class="c">#</span>
+<span class="c">#   @property</span>
+<span class="c">#   def explainedVariance(self):</span>
+<span class="c">#     return self._fittedPcaModel.explained_variance_ratio_</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#   def _translateData(self):</span>
+<span class="c">#     l = [pd.Series(self.inputSpectra[name][1], index=self.inputSpectra[name][0], name=name)</span>
+<span class="c">#          for name in sorted(self.inputSpectra.keys())]</span>
+<span class="c">#</span>
+<span class="c">#     self._inputDF = pd.concat(l, axis=1).T</span>
+<span class="c">#</span>
+<span class="c">#</span>
+<span class="c">#   def _fitPcaModel(self):</span>
+<span class="c">#     self._fittedPcaModel = sklearn.decomposition.PCA(n_components=self.nComponents)</span>
+<span class="c">#     self._fittedPcaModel.fit(self._inputDF)</span>
+
+
+
+<div class="viewcode-block" id="PCA"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.decomposition.PCA">[docs]</a><span class="k">class</span> <span class="nc">PCA</span><span class="p">:</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">nComponents</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">confidenceLimit</span><span class="o">=</span><span class="mf">0.95</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span> <span class="o">=</span> <span class="n">dataFrame</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span> <span class="o">=</span> <span class="n">nComponents</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">confidenceLimit</span> <span class="o">=</span> <span class="n">confidenceLimit</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_fitPcaModel</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_fitPcaModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;PCA must be done on 2D array.&#39;</span><span class="p">)</span>
+
+    <span class="n">U</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">V</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_calculateEigenvalues</span><span class="p">(</span><span class="n">S</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_calculateLoadings</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_calculateEigenvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">S</span><span class="p">):</span>
+    <span class="n">minSize</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">maxSize</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">S</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="n">maxSize</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">pcStrings</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PC{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">minSize</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">eigenvalues</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">eigenvalues</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">pcStrings</span><span class="p">)</span>
+    <span class="n">eigenvalues</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;Principle Components&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__eigenvalues_</span> <span class="o">=</span> <span class="n">eigenvalues</span>
+
+
+  <span class="k">def</span> <span class="nf">_calculateLoadings</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">V</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__loadings_</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">V</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__loadings_</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__loadings_</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">__loadings_</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;Features&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__loadings_</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PC{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__loadings_</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;Principle Components&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">nComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__nComponents</span>
+  <span class="nd">@nComponents.setter</span>
+  <span class="k">def</span> <span class="nf">nComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">__nComponents</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">n</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">n</span><span class="o">%</span><span class="mi">1</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Number of components must be a positive integer.&#39;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">__nComponents</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">__nComponents</span> <span class="o">=</span> <span class="n">n</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">confidenceLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__confLimit</span>
+  <span class="nd">@confidenceLimit.setter</span>
+  <span class="k">def</span> <span class="nf">confidenceLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cl</span><span class="p">):</span>
+    <span class="k">if</span> <span class="mi">0</span> <span class="o">&lt;</span> <span class="n">cl</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">__confLimit</span> <span class="o">=</span> <span class="n">cl</span>
+    <span class="k">elif</span> <span class="mi">1</span> <span class="o">&lt;</span> <span class="n">cl</span> <span class="o">&lt;</span> <span class="mi">100</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">__confLimit</span> <span class="o">=</span> <span class="n">cl</span><span class="o">/</span><span class="mi">100</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Confidence Limits should be a value between 0 and 1.&#39;</span><span class="p">)</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">loadings_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__loadings_</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span><span class="p">]</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">explainedVariance_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">explainedVariance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues_</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues_</span><span class="p">)</span>
+    <span class="n">pcStrings</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PC{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+    <span class="n">explainedVariance</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">explainedVariance</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">pcStrings</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">explainedVariance</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span><span class="p">]</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">scores_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadings_</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">scoresDF</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+    <span class="n">scoresDF</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;PC{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">scoresDF</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span>
+    <span class="n">scoresDF</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;Principle Components&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">scoresDF</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">index</span>
+    <span class="k">if</span> <span class="n">scoresDF</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">scoresDF</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;Observations&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">scoresDF</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">eigenvalues_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eigenvalues_</span><span class="p">[:</span><span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span><span class="p">]</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">residualEigenvalues_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__eigenvalues_</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span><span class="p">:]</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">predictions_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadings_</span><span class="p">)</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">residuals_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictions_</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">qScores_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals_</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residuals_</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">t2Scores_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">tconDF_F</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="p">))</span> <span class="o">/</span>
+                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loadings_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="n">tconDF_F</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mp</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadings_</span><span class="p">)</span>
+
+    <span class="n">tconDF_M</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">mp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="p">))</span> <span class="o">/</span>
+                      <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="n">tconDF_M</span><span class="p">[:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scores_</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">mp</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">loadings_</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">tconDF_F</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">,</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">power</span><span class="p">(</span><span class="n">tconDF_M</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">t2ConfLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    from http://users.stat.umn.edu/~gary/classes/5401/handouts/11.hotellingt.handout.pdf</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nComponents</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">nMeasurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">criticalValue</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confidenceLimit</span><span class="p">,</span> <span class="n">nComponents</span><span class="p">,</span> <span class="n">nMeasurements</span><span class="o">-</span><span class="n">nComponents</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">nMeasurements</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">nComponents</span> <span class="o">/</span> <span class="p">(</span><span class="n">nMeasurements</span><span class="o">-</span><span class="n">nComponents</span><span class="p">))</span> <span class="o">*</span> <span class="n">criticalValue</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">qConfLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    From:</span>
+<span class="sd">    J. Edward Jackson and Govind S. Mudholkar Technometrics</span>
+<span class="sd">    Vol. 21, No. 3 (Aug., 1979), pp. 341-349</span>
+<span class="sd">    http://www.jstor.org/stable/1267757?seq=1#page_scan_tab_contents</span>
+<span class="sd">    :return:</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nComponents</span> <span class="o">==</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">)):</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="n">theta1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residualEigenvalues_</span><span class="p">)</span>
+    <span class="n">theta2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residualEigenvalues_</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="n">theta3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residualEigenvalues_</span> <span class="o">**</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="n">h0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">theta1</span> <span class="o">*</span> <span class="p">(</span><span class="n">theta3</span> <span class="o">/</span> <span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="n">theta2</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span>
+    <span class="n">ca</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">norm</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confidenceLimit</span><span class="p">)</span>
+
+    <span class="n">qAlpha</span> <span class="o">=</span> <span class="n">theta1</span> <span class="o">*</span> <span class="p">(((</span><span class="n">ca</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">theta2</span> <span class="o">*</span> <span class="p">(</span><span class="n">h0</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span> <span class="o">/</span> <span class="n">theta1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span>
+                       <span class="p">((</span><span class="n">theta2</span> <span class="o">*</span> <span class="n">h0</span> <span class="o">*</span> <span class="p">(</span><span class="n">h0</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta1</span><span class="o">**</span><span class="mi">2</span><span class="p">)))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">h0</span><span class="p">)</span>  <span class="c"># Eq 3.4</span>
+    <span class="k">return</span> <span class="n">qAlpha</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">confidenceLimits_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">nMeasurements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDF</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">nDim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues_</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">p</span> <span class="o">=</span> <span class="n">nDim</span>  <span class="c"># What is p???</span>
+      <span class="n">ppf</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">f</span><span class="o">.</span><span class="n">ppf</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">confidenceLimit</span><span class="p">,</span> <span class="n">nDim</span><span class="p">,</span> <span class="n">nMeasurements</span><span class="o">-</span><span class="n">p</span><span class="p">)</span>
+      <span class="n">df</span><span class="p">[</span><span class="n">nDim</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eigenvalues_</span> <span class="o">*</span> <span class="p">(</span><span class="n">nMeasurements</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">p</span> <span class="o">/</span> <span class="p">(</span><span class="n">nMeasurements</span><span class="o">-</span><span class="n">p</span><span class="p">)</span> <span class="o">*</span> <span class="n">ppf</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;nDim&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s">&#39;Principle Components&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

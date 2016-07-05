@@ -1,0 +1,527 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.NmrAtom &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.NmrAtom</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Atom</span> <span class="kn">import</span> <span class="n">Atom</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Util</span> <span class="kn">import</span> <span class="n">AtomIdTuple</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum.Spectrum</span> <span class="kn">import</span> <span class="n">name2IsotopeCode</span>
+
+
+<div class="viewcode-block" id="NmrAtom"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.NmrAtom">[docs]</a><span class="k">class</span> <span class="nc">NmrAtom</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Nmr Atom, used for assigning,peaks and shifts. (corresponds to ApiResonance).&quot;&quot;&quot;</span>
+
+  
+  <span class="c">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;NA&#39;</span>
+  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;NmrAtom&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">NmrResidue</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;nmrAtoms&#39;</span>
+  
+  <span class="c">#: List of child classes.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Qualified name of matching API class</span>
+  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Resonance</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+  <span class="c"># CCPN properties  </span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_apiResonance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Resonance</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; CCPN atom matching Atom&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrResidue</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonanceGroup</span><span class="p">]</span>
+  
+  <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">_parent</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Atom name string (e.g. &#39;HA&#39;) regularised as used for ID&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_idTuple</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AtomIdTuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;ID as chainCode, sequenceCode, residueType, atomName namedtuple</span>
+<span class="sd">    NB Unlike the _id and key, these do NOT have reserved characters maped to &#39;^&#39;&quot;&quot;&quot;</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+    <span class="k">return</span> <span class="n">AtomIdTuple</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">parent</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Atom name string (e.g. &#39;HA&#39;)&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;NmrAtom serial number - set at creation and unchangeable&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">atom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Atom</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom&quot;&quot;&quot;</span>
+    <span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">atom</span>
+    <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span>
+
+  <span class="nd">@atom.setter</span>
+  <span class="k">def</span> <span class="nf">atom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Atom</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">deassign</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">atom</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">isotopeCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;isotopeCode of NmrAtom. Set automatically on creation (from NmrAtom name)</span>
+<span class="sd">    and cannot be changed later&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isotopeCode</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">boundNmrAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;NmrAtom&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;NmrAtoms directly bound to this one, as calculated from assignment and</span>
+<span class="sd">    NmrAtom name matches (NOT from peak assignment)&quot;&quot;&quot;</span>
+    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">getBoundResonances</span><span class="p">()</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span>
+
+    <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span>
+    <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c"># NmrResidue is unassigned. Add ad-hoc protein interresidue bonds</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;N&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">getOffsetNmrResidue</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)):</span>
+          <span class="k">if</span> <span class="n">rx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">na</span> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="s">&#39;C&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">na</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">na</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s">&#39;C&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nextNmrResidue</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">getOffsetNmrResidue</span><span class="p">(</span><span class="mi">1</span><span class="p">)):</span>
+          <span class="k">if</span> <span class="n">rx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">na</span> <span class="o">=</span> <span class="n">rx</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="s">&#39;N&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">na</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">na</span><span class="p">)</span>
+    <span class="c">#</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">assignedPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Peak</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;All ccpn.Peaks assigned to the ccpn.NmrAtom&quot;&quot;&quot;</span>
+    <span class="n">apiResonance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">apiPeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">peakDim</span><span class="o">.</span><span class="n">peak</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiResonance</span><span class="o">.</span><span class="n">peakDimContribs</span><span class="p">]</span>
+    <span class="n">apiPeaks</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">peakDim</span><span class="o">.</span><span class="n">peak</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiResonance</span><span class="o">.</span><span class="n">peakDimContribNs</span><span class="p">])</span>
+
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">apiPeaks</span><span class="p">))</span>
+
+<div class="viewcode-block" id="NmrAtom.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.NmrAtom.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Rename object, changing id, Pid, and internal representation&quot;&quot;&quot;</span>
+    <span class="c"># NB This is a VERY special case</span>
+    <span class="c"># - API code and notifiers will take care of resetting id and Pid</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deassign</span><span class="p">()</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrAtom.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+        <span class="n">isotopeCode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isotopeCode</span>
+        <span class="n">newIsotopeCode</span> <span class="o">=</span> <span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">newIsotopeCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">isotopeCode</span> <span class="o">==</span> <span class="s">&#39;?&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">=</span> <span class="n">newIsotopeCode</span>
+          <span class="k">elif</span> <span class="n">newIsotopeCode</span> <span class="o">!=</span> <span class="n">isotopeCode</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot rename </span><span class="si">%s</span><span class="s"> type NmrAtom to </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">isotopeCode</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="c">#</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NmrAtom.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.NmrAtom.deassign">[docs]</a>  <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reset NmrAtom back to its originalName, cutting all assignment links&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;deassign&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="NmrAtom.assignTo"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.NmrAtom.assignTo">[docs]</a>  <span class="k">def</span> <span class="nf">assignTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeToExisting</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;NmrAtom&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Assign NmrAtom to naming parameters) and return the reassigned result</span>
+
+<span class="sd">    If the assignedTo NmrAtom already exists the function raises ValueError.</span>
+<span class="sd">    If mergeToExisting is True it instead merges the current NmrAtom into the target</span>
+<span class="sd">    and returns the merged target. NB Merging is NOT undoable</span>
+
+<span class="sd">    WARNING: is mergeToExisting is True, always use in the form &quot;x = x.assignTo(...)&quot;,</span>
+<span class="sd">    as the call &#39;x.assignTo(...) may cause the source x object to be deleted.</span>
+
+<span class="sd">    Passing in empty parameters (e.g. chainCode=None) leaves the current value unchanged. E.g.:</span>
+<span class="sd">    for NmrAtom NR:A.121.ALA.HA calling with sequenceCode=124 will assign to</span>
+<span class="sd">    (chainCode=&#39;A&#39;, sequenceCode=124, residueType=&#39;ALA&#39;, atomName=&#39;HA&#39;)</span>
+
+
+<span class="sd">    The function works as:</span>
+
+<span class="sd">    nmrChain = project.fetchNmrChain(shortName=chainCode)</span>
+
+<span class="sd">    nmrResidue = nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)</span>
+
+<span class="sd">    (or nmrChain.fetchNmrResidue(sequenceCode=sequenceCode) if residueType is None)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># Get parameter string for console echo - before parameters are changed</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
+      <span class="p">((</span><span class="s">&#39;chainCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+       <span class="p">(</span><span class="s">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;mergeToExisting&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+      <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">oldPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">longPid</span>
+    <span class="n">clearUndo</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="n">apiResonance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span>
+    <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="n">apiResonance</span><span class="o">.</span><span class="n">resonanceGroup</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;assignTo&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span>
+
+      <span class="c"># set missing parameters to existing values</span>
+      <span class="n">chainCode</span> <span class="o">=</span> <span class="n">chainCode</span> <span class="ow">or</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">code</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span> <span class="ow">or</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span>
+      <span class="n">residueType</span> <span class="o">=</span> <span class="n">residueType</span> <span class="ow">or</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">apiResonance</span><span class="o">.</span><span class="n">name</span>
+
+      <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrAtom id : </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span>
+                           <span class="o">%</span> <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+      <span class="n">oldNmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span>
+      <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">chainCode</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">residueType</span><span class="p">:</span>
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+        <span class="c"># result is matching NmrAtom, or (if None) self</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c"># No NmrAtom can match, result is self</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span>
+
+      <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">is</span> <span class="n">oldNmrResidue</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+          <span class="c"># NB self.name can never be returned as None</span>
+
+          <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">None</span>
+
+          <span class="k">elif</span> <span class="n">mergeToExisting</span><span class="p">:</span>
+            <span class="n">clearUndo</span> <span class="o">=</span> <span class="bp">True</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">absorbResonance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Merging (1) </span><span class="si">%s</span><span class="s"> into </span><span class="si">%s</span><span class="s">. Merging is NOT undoable.&quot;</span>
+                                        <span class="o">%</span> <span class="p">(</span><span class="n">oldPid</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">longPid</span><span class="p">))</span>
+
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;New assignment clash with existing assignment,&quot;</span>
+                             <span class="s">&quot; and merging is disallowed&quot;</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span><span class="o">.</span><span class="n">resonanceGroup</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">None</span>
+          <span class="k">elif</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">oldNmrResidue</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span><span class="o">.</span><span class="n">resonanceGroup</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c"># Necessary to avoid name clashes</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span><span class="o">.</span><span class="n">resonanceGroup</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="k">elif</span> <span class="n">mergeToExisting</span><span class="p">:</span>
+          <span class="c"># WARNING if we get here undo is no longer possible</span>
+          <span class="n">clearUndo</span> <span class="o">=</span> <span class="bp">True</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">absorbResonance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiResonance</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Merging (2) </span><span class="si">%s</span><span class="s"> into </span><span class="si">%s</span><span class="s">. Merging is NOT undoable.&quot;</span>
+                                        <span class="o">%</span> <span class="p">(</span><span class="n">oldPid</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">longPid</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;New assignment clash with existing assignment,&quot;</span>
+                           <span class="s">&quot; and merging is disallowed&quot;</span><span class="p">)</span>
+      <span class="c">#</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">clearUndo</span><span class="p">:</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+    <span class="c">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+  <span class="c"># Implementation functions</span>
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">NmrResidue</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonances</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">))</span></div>
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Atom</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrAtom</span><span class="p">:</span>
+  <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span>
+  <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">None</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Atom</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">NmrAtom</span><span class="p">):</span>
+  <span class="n">oldValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span>
+  <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="n">value</span><span class="p">:</span>
+    <span class="k">return</span>
+  <span class="k">elif</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot set Atom.nmrAtom to None&quot;</span><span class="p">)</span>
+  <span class="k">elif</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;New assignment of Atom clashes with existing assignment&quot;</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">value</span><span class="o">.</span><span class="n">atom</span> <span class="o">=</span> <span class="bp">self</span>
+<span class="n">Atom</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;NmrAtom to which Atom is assigned&quot;</span><span class="p">)</span>
+
+<span class="k">del</span> <span class="n">getter</span>
+<span class="k">del</span> <span class="n">setter</span>
+    
+<span class="k">def</span> <span class="nf">_newNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrAtom</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new ccpn.NmrAtom within ccpn.NmrResidue. If name is None, use default name</span>
+<span class="sd">  (of form e.g. &#39;H@211&#39;, &#39;N@45&#39;, ...)&quot;&quot;&quot;</span>
+  <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span>
+  <span class="n">resonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;isotopeCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+
+  <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrAtom.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopeCode</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+      <span class="n">isotopeCode</span> <span class="o">=</span> <span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s">&#39;?&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;newNmrAtom requires either name or isotopeCode as input&quot;</span><span class="p">)</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newNmrAtom&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newNmrAtom&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">newResonance</span><span class="p">(</span><span class="n">resonanceGroup</span><span class="o">=</span><span class="n">resonanceGroup</span><span class="p">,</span>
+                                                                 <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                                                 <span class="n">isotopeCode</span><span class="o">=</span><span class="n">isotopeCode</span><span class="p">))</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="fetchNmrAtom"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.fetchNmrAtom">[docs]</a><span class="k">def</span> <span class="nf">fetchNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Fetch NmrAtom with name=name, creating it if necessary&quot;&quot;&quot;</span>
+  <span class="n">resonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;fetchNmrAtom&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newNmrAtom&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">resonanceGroup</span><span class="o">.</span><span class="n">findFirstResonance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span> <span class="ow">or</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">newNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<span class="k">def</span> <span class="nf">_produceNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">atomId</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">sequenceCode</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                   <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrAtom</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;get chainCode, sequenceCode, residueType and atomName from dot-separated  atomId or Pid</span>
+<span class="sd">  or explicit parameters, and find or create an NmrAtom that matches</span>
+<span class="sd">  Empty chainCode gets NmrChain:@- ; empty sequenceCode get a new NmrResidue&quot;&quot;&quot;</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;atomId&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;chainCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">))</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;_produceNmrAtom&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newNmrAtom&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="c"># Get ID parts to use</span>
+    <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">atomId</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;_produceNmrAtom: other parameters only allowed if atomId is None&quot;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c"># Remove colon prefix, if any</span>
+        <span class="n">atomId</span> <span class="o">=</span> <span class="n">atomId</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">splitId</span><span class="p">(</span><span class="n">atomId</span><span class="p">)):</span>
+          <span class="k">if</span> <span class="n">val</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="n">params</span>
+
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;NmrAtom name must be set&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrAtom.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+
+    <span class="c"># Produce chain</span>
+    <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">=</span><span class="n">chainCode</span> <span class="ow">or</span> <span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">)</span>
+    <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">result</span>
+    
+<span class="c"># Connections to parents:</span>
+<span class="n">NmrResidue</span><span class="o">.</span><span class="n">newNmrAtom</span> <span class="o">=</span> <span class="n">_newNmrAtom</span>
+<span class="k">del</span> <span class="n">_newNmrAtom</span>
+<span class="n">NmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span> <span class="o">=</span> <span class="n">fetchNmrAtom</span>
+
+<span class="n">Project</span><span class="o">.</span><span class="n">_produceNmrAtom</span> <span class="o">=</span> <span class="n">_produceNmrAtom</span>
+
+<span class="c"># Notifiers:</span>
+<span class="n">className</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Resonance</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setImplName&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setResonanceGroup&#39;</span><span class="p">),</span>
+  <span class="p">)</span>
+<span class="p">)</span>
+<span class="k">for</span> <span class="n">clazz</span> <span class="ow">in</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">AbstractPeakDimContrib</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">getNonAbstractSubtypes</span><span class="p">():</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+  <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+    <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;NmrAtom&#39;</span><span class="p">,</span><span class="s">&#39;Peak&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;create&#39;</span><span class="p">),</span>
+      <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;NmrAtom&#39;</span><span class="p">,</span><span class="s">&#39;Peak&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;delete&#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+  <span class="p">)</span>
+
+<span class="c"># NB Atom&lt;-&gt;NmrAtom link depends solely on the NmrAtom name.</span>
+<span class="c"># So no notifiers on the link - notify on the NmrAtom rename instead.</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

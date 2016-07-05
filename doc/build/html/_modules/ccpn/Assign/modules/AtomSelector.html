@@ -1,0 +1,462 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.Assign.modules.AtomSelector &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.Assign.modules.AtomSelector</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-06-14 14:06:23 +0100 (Tue, 14 Jun 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-06-14 14:06:23 +0100 (Tue, 14 Jun 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9460 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.Assignment</span> <span class="kn">import</span> <span class="n">isInterOnlyExpt</span><span class="p">,</span> <span class="n">getNmrAtomPrediction</span><span class="p">,</span> <span class="n">CCP_CODES</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.PeakAssignment</span> <span class="kn">import</span> <span class="n">peaksAreOnLine</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Module</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButton</span> <span class="kn">import</span> <span class="n">RadioButton</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.assignment.ChemicalShift</span> <span class="kn">import</span> <span class="n">PROTEIN_ATOM_NAMES</span><span class="p">,</span> <span class="n">ALL_ATOMS_SORTED</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">spectrumLib</span>
+
+
+<div class="viewcode-block" id="AtomSelector"><a class="viewcode-back" href="../../../../ccpn/ccpn.Assign.modules.html#ccpn.Assign.modules.AtomSelector.AtomSelector">[docs]</a><span class="k">class</span> <span class="nc">AtomSelector</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Module to be used with PickAndAssignModule for prediction of nmrAtom names and assignment of nmrAtoms</span>
+<span class="sd">  to peak dimensions</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;Atom Selector&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="s">&#39;vertical&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moveLabel</span><span class="o">=</span><span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c"># self.pickAndAssignWidget.setMaximumSize(500, 300)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsole</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">pythonConsole</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsole</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">pythonConsole</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">registerNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_predictAssignments</span><span class="p">,</span> <span class="s">&#39;peaks&#39;</span><span class="p">)</span>
+    <span class="c"># self.current.registerNotify(self.predictAssignments, &#39;peaks&#39;)</span>
+    <span class="n">nmrResidueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Current NmrResidue&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">gridLine</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="c"># gridLine 0</span>
+    <span class="n">gridLine</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">molTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Molecule Type&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">molTypePulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">molTypePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s">&#39;protein&#39;</span><span class="p">,</span> <span class="s">&#39;DNA&#39;</span><span class="p">,</span> <span class="s">&#39;RNA&#39;</span><span class="p">,</span> <span class="s">&#39;carbohydrate&#39;</span><span class="p">,</span> <span class="s">&#39;other&#39;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">radioButton1</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_createBackBoneButtons</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">radioButton1</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label1</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Backbone&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;l&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">radioButton2</span> <span class="o">=</span> <span class="n">RadioButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_createSideChainButtons</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label2</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Side chain&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;l&#39;</span><span class="p">)</span>
+    <span class="c"># gridLine 1</span>
+    <span class="n">gridLine</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">nmrResidueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Current NmrResidue:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentNmrResidueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="c"># gridLine 2</span>
+    <span class="n">gridLine</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">gridLine</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">registerNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateWidget</span><span class="p">,</span> <span class="s">&#39;nmrResidues&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">closeModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="p">{}</span>
+    
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">unRegisterNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_predictAssignments</span><span class="p">,</span> <span class="s">&#39;peaks&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">unRegisterNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateWidget</span><span class="p">,</span> <span class="s">&#39;nmrResidues&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_updateWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidues</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentNmrResidueLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton1</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_createBackBoneButtons</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton2</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_createSideChainButtons</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span>
+
+
+  <span class="k">def</span> <span class="nf">_createBackBoneButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_cleanupPickAndAssignWidget</span><span class="p">()</span>
+    <span class="n">headerLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&#39;i-1&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">headerLabel</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">headerLabel2</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&#39;i&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">headerLabel3</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s">&#39;i+1&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">atoms</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="s">&#39;N&#39;</span><span class="p">,</span> <span class="s">&#39;CA&#39;</span><span class="p">,</span> <span class="s">&#39;CB&#39;</span><span class="p">,</span> <span class="s">&#39;CO&#39;</span><span class="p">,</span> <span class="s">&#39;HA&#39;</span><span class="p">,</span> <span class="s">&#39;HB&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atoms</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">button1</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">atom</span><span class="o">+</span><span class="s">&#39; [i-1]&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">ii</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pickAndAssign</span><span class="p">,</span> <span class="s">&#39;-1&#39;</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+      <span class="n">button2</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">atom</span><span class="o">+</span><span class="s">&#39; [i]&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">ii</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pickAndAssign</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+      <span class="n">button3</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">atom</span><span class="o">+</span><span class="s">&#39; [i+1]&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">ii</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pickAndAssign</span><span class="p">,</span> <span class="s">&#39;+1&#39;</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">button1</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">button2</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">button3</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">buttons</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">:</span>
+        <span class="n">button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_returnButtonsToNormal</span><span class="p">)</span>
+
+
+
+  <span class="k">def</span> <span class="nf">_createSideChainButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_cleanupPickAndAssignWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">hCheckBox</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;l&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;l&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="s">&#39;N&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;l&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">otherCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;r&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">otherLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="s">&#39;Other&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;l&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updateLayout</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_toggleBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updateLayout</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_getAtomsForButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomList</span><span class="p">,</span> <span class="n">atomName</span><span class="p">):</span>
+    <span class="p">[</span><span class="n">atomList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">atom</span><span class="p">)</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">atomList</span><span class="p">)</span> <span class="k">if</span> <span class="n">atom</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">atomName</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_updateLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="c"># group atoms in useful categories based on usage</span>
+
+    <span class="n">alphaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;alphas&#39;</span><span class="p">]]</span>
+    <span class="n">betaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;betas&#39;</span><span class="p">]]</span>
+    <span class="n">gammaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;gammas&#39;</span><span class="p">]]</span>
+    <span class="n">moreGammaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;moreGammas&#39;</span><span class="p">]]</span>
+    <span class="n">deltaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;deltas&#39;</span><span class="p">]]</span>
+    <span class="n">moreDeltaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;moreDeltas&#39;</span><span class="p">]]</span>
+    <span class="n">epsilonAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;epsilons&#39;</span><span class="p">]]</span>
+    <span class="n">moreEpsilonAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;moreEpsilons&#39;</span><span class="p">]]</span>
+    <span class="n">zetaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;zetas&#39;</span><span class="p">]]</span>
+    <span class="n">etaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;etas&#39;</span><span class="p">]]</span>
+    <span class="n">moreEtaAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ALL_ATOMS_SORTED</span><span class="p">[</span><span class="s">&#39;moreEtas&#39;</span><span class="p">]]</span>
+    <span class="n">atomButtonList</span> <span class="o">=</span> <span class="p">[</span><span class="n">alphaAtoms</span><span class="p">,</span> <span class="n">betaAtoms</span><span class="p">,</span> <span class="n">gammaAtoms</span><span class="p">,</span> <span class="n">moreGammaAtoms</span><span class="p">,</span> <span class="n">deltaAtoms</span><span class="p">,</span> <span class="n">moreDeltaAtoms</span><span class="p">,</span>
+                      <span class="n">epsilonAtoms</span><span class="p">,</span> <span class="n">moreEpsilonAtoms</span><span class="p">,</span> <span class="n">zetaAtoms</span><span class="p">,</span> <span class="n">etaAtoms</span><span class="p">,</span> <span class="n">moreEtaAtoms</span><span class="p">]</span>
+    <span class="c"># Activate button for Carbons</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">cCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAtomsForButtons</span><span class="p">(</span><span class="n">atomList</span><span class="p">,</span> <span class="s">&#39;C&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">atomList</span> <span class="ow">in</span> <span class="n">atomButtonList</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">hCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAtomsForButtons</span><span class="p">(</span><span class="n">atomList</span><span class="p">,</span> <span class="s">&#39;H&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">atomList</span> <span class="ow">in</span> <span class="n">atomButtonList</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">nCheckBox</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAtomsForButtons</span><span class="p">(</span><span class="n">atomList</span><span class="p">,</span> <span class="s">&#39;N&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">atomList</span> <span class="ow">in</span> <span class="n">atomButtonList</span><span class="p">]</span>
+
+    <span class="n">rowCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+    <span class="n">colCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">rowCount</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">colCount</span><span class="p">):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">():</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">currentNmrResidueLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">atomList</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atomButtonList</span><span class="p">):</span>
+
+          <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atomList</span><span class="p">):</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">atom</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">jj</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;t&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pickAndAssign</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">residueType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">residueAtoms</span> <span class="o">=</span> <span class="n">PROTEIN_ATOM_NAMES</span><span class="p">[</span><span class="n">residueType</span><span class="p">]</span>
+        <span class="n">residueAlphas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">alphaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueBetas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">betaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueGammas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">gammaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueMoreGammas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">moreGammaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueDeltas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">deltaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueMoreDeltas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">moreDeltaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueEpsilons</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">epsilonAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueMoreEpsilons</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">moreEpsilonAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueZetas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">zetaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueEtas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">etaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">residueMoreEtas</span> <span class="o">=</span> <span class="p">[</span><span class="n">atom</span> <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">moreEtaAtoms</span> <span class="k">if</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="p">]</span>
+        <span class="n">atomButtonList2</span> <span class="o">=</span> <span class="p">[</span><span class="n">residueAlphas</span><span class="p">,</span> <span class="n">residueBetas</span><span class="p">,</span> <span class="n">residueGammas</span><span class="p">,</span> <span class="n">residueMoreGammas</span><span class="p">,</span> <span class="n">residueDeltas</span><span class="p">,</span> <span class="n">residueMoreDeltas</span><span class="p">,</span>
+                      <span class="n">residueEpsilons</span><span class="p">,</span> <span class="n">residueMoreEpsilons</span><span class="p">,</span> <span class="n">residueZetas</span><span class="p">,</span> <span class="n">residueEtas</span><span class="p">,</span> <span class="n">residueMoreEtas</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">atomList</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atomButtonList2</span><span class="p">):</span>
+          <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">atom</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">atomList</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">atom</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">jj</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s">&#39;t&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pickAndAssign</span><span class="p">,</span> <span class="s">&#39;0&#39;</span><span class="p">,</span> <span class="n">atom</span><span class="p">))</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="n">atom</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">button</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_showMoreAtomButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">buttons</span><span class="p">,</span> <span class="n">moreButton</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">moreButton</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+      <span class="p">[</span><span class="n">button</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="p">[</span><span class="n">button</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span> <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_cleanupPickAndAssignWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()):</span>
+      <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">columnCount</span><span class="p">()):</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">itemAtPosition</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">():</span>
+            <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_pickAndAssign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">atomType</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a position either -1, 0 or +1 and an atom type, fetches an NmrAtom with name corresponding</span>
+<span class="sd">    to the atom type and the position and assigns it to correct dimension of current.peaks</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">atomType</span>
+    <span class="k">if</span> <span class="n">position</span> <span class="o">==</span> <span class="s">&#39;-1&#39;</span> <span class="ow">and</span> <span class="s">&#39;-1&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">:</span>
+      <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">previousNmrResidue</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">r</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="o">+</span><span class="s">&#39;-1&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span>
+
+    <span class="n">newNmrAtom</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="c"># Replaced  by in-command echo</span>
+    <span class="c"># self.pythonConsole.writeConsoleCommand(</span>
+    <span class="c">#   &quot;nmrAtom = nmrResidue.fetchNmrAtom(name=&#39;%s&#39;)&quot; % name, nmrResidue=r.pid</span>
+    <span class="c"># )</span>
+    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakItems</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c"># NBNB TBD FIXME consider using new _displayOrderSpectrumDimensionIndices</span>
+            <span class="c"># function to map display axes to spectrum axes</span>
+            <span class="n">axisCode</span> <span class="o">=</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">axisCodeMatch</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span>
+            <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">newNmrAtom</span><span class="p">]</span>
+            <span class="n">peak</span><span class="o">.</span><span class="n">assignDimension</span><span class="p">(</span><span class="n">axisCode</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_returnButtonsToNormal</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_returnButtonsToNormal</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns all buttons in Atom Selector to original colours and style.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s">&#39;dark&#39;</span><span class="p">:</span>
+      <span class="n">styleSheet</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getPathToImport</span><span class="p">(</span><span class="s">&#39;ccpn.ui.gui.widgets&#39;</span><span class="p">),</span>
+                                     <span class="s">&#39;DarkStyleSheet.qss&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;&#39;&#39;ModuleLabel  {</span>
+<span class="s">                                        background-color: #BEC4F3;</span>
+<span class="s">                                        color: #122043;</span>
+<span class="s">                                        border: 1px solid #00092D;</span>
+<span class="s">                                       }&#39;&#39;&#39;</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">buttons</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">:</span>
+          <span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s">&#39;light&#39;</span><span class="p">:</span>
+      <span class="n">styleSheet</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getPathToImport</span><span class="p">(</span><span class="s">&#39;ccpn.ui.gui.widgets&#39;</span><span class="p">),</span>
+                                     <span class="s">&#39;LightStyleSheet.qss&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">buttons</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">:</span>
+          <span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="n">styleSheet</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_predictAssignments</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Predicts atom type for selected peaks and highlights the relevant buttons with confidence of</span>
+<span class="sd">    that assignment prediction, green is very confident, orange is less confident.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_returnButtonsToNormal</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">or</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">buttons</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+          <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">:</span>
+            <span class="n">button</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_returnButtonsToNormal</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">peaksAreOnLine</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
+          <span class="c"># RHF 15/12/2015 bug fix. From usage elsewhere this ought to use types, not name.</span>
+          <span class="c"># NBNB TBD CHECK THIS</span>
+          <span class="c"># experiments = [peak.peakList.spectrum.experimentName for peak in peaks]</span>
+          <span class="n">types</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">)</span>
+          <span class="n">anyInterOnlyExperiments</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">isInterOnlyExpt</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">types</span><span class="p">)</span>
+
+          <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+            <span class="n">peakListViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakListView</span> <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakListViews</span> <span class="k">if</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span> <span class="o">==</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="p">]</span>
+            <span class="n">axisCodes</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">axisOrder</span> <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakListViews</span><span class="p">]</span>
+            <span class="n">mapping</span> <span class="o">=</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">_axisCodeMapIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+            <span class="n">isotopeCode</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">[</span><span class="n">mapping</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton1</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+              <span class="n">predictedAtomTypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">getNmrAtomPrediction</span><span class="p">(</span><span class="n">ccpCode</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">mapping</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">isotopeCode</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="k">for</span> <span class="n">ccpCode</span> <span class="ow">in</span> <span class="n">CCP_CODES</span><span class="p">]</span>
+              <span class="n">refinedPreds</span> <span class="o">=</span> <span class="p">[[</span><span class="nb">type</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="nb">type</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]]</span> <span class="k">for</span> <span class="nb">type</span> <span class="ow">in</span> <span class="n">predictedAtomTypes</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">type</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">]</span>
+              <span class="n">atomPredictions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+              <span class="k">for</span> <span class="n">pred</span> <span class="ow">in</span> <span class="n">refinedPreds</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pred</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">90</span><span class="p">:</span>
+                  <span class="n">atomPredictions</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pred</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+              <span class="k">for</span> <span class="n">atomPred</span> <span class="ow">in</span> <span class="n">atomPredictions</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">atomPred</span> <span class="o">==</span> <span class="s">&#39;CB&#39;</span><span class="p">:</span>
+                  <span class="c"># if(any(isInterOnlyExpt(experiment) for experiment in experiments)):</span>
+                  <span class="k">if</span> <span class="n">anyInterOnlyExperiments</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s">&#39;CB&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: green&#39;</span><span class="p">)</span>
+                  <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># self.cbButton1.setStyleSheet(&#39;background-color: orange&#39;)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s">&#39;CB&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: green&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s">&#39;CB&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: green&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">atomPred</span> <span class="o">==</span> <span class="s">&#39;CA&#39;</span><span class="p">:</span>
+                  <span class="c"># if(any(isInterOnlyExpt(experiment) for experiment in experiments)):</span>
+                  <span class="k">if</span> <span class="n">anyInterOnlyExperiments</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s">&#39;CA&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: green&#39;</span><span class="p">)</span>
+                  <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># self.caButton1.setStyleSheet(&#39;background-color: orange&#39;)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s">&#39;CA&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: green&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="s">&#39;CA&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: green&#39;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton2</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+              <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+                <span class="n">predictedAtomTypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">getNmrAtomPrediction</span><span class="p">(</span><span class="n">ccpCode</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">mapping</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">isotopeCode</span><span class="p">)</span> <span class="k">for</span> <span class="n">ccpCode</span> <span class="ow">in</span> <span class="n">CCP_CODES</span><span class="p">]</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">predictedAtomTypes</span> <span class="o">=</span> <span class="n">getNmrAtomPrediction</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="o">.</span><span class="n">title</span><span class="p">(),</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">mapping</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> <span class="n">isotopeCode</span><span class="p">)</span>
+              <span class="k">for</span> <span class="nb">type</span> <span class="ow">in</span> <span class="n">predictedAtomTypes</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">atomType</span><span class="p">,</span> <span class="n">buttons</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">buttons</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                  <span class="k">if</span> <span class="nb">type</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">atomType</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">:</span>
+                      <span class="k">if</span> <span class="nb">type</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">85</span><span class="p">:</span>
+                        <span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: green&#39;</span><span class="p">)</span>
+                      <span class="k">elif</span> <span class="mi">50</span> <span class="o">&lt;</span> <span class="nb">type</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">85</span><span class="p">:</span>
+                        <span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: orange&#39;</span><span class="p">)</span>
+                      <span class="k">if</span> <span class="nb">type</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">50</span><span class="p">:</span>
+                        <span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;background-color: red&#39;</span><span class="p">)</span></div>
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

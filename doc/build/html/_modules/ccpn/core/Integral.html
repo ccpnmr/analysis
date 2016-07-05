@@ -1,0 +1,373 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core.Integral &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core.Integral</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.IntegralList</span> <span class="kn">import</span> <span class="n">IntegralList</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">List</span>
+
+<div class="viewcode-block" id="Integral"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Integral.Integral">[docs]</a><span class="k">class</span> <span class="nc">Integral</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;n-dimensional Integral. Includes values for per-dimension values.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="c">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;IT&#39;</span>
+  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;Integral&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">IntegralList</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;integrals&#39;</span>
+  
+  <span class="c">#: List of child classes.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Qualified name of matching API class - NB shared with Peak class</span>
+  <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Peak</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+
+  <span class="c"># Notifiers are handled through the Peak class (which shares the ApiPeak wrapped object)</span>
+  <span class="n">_registerClassNotifiers</span> <span class="o">=</span> <span class="bp">False</span>
+
+  <span class="c"># CCPN properties  </span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_apiPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Peak</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; API peaks matching Integral&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;id string - serial number converted to string&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;serial number of Integral, used in Pid and to identify the Integral. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+    
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IntegralList</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;IntegralList containing Integral.&quot;&quot;&quot;</span>
+    <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peakList</span><span class="p">]</span>
+  
+  <span class="n">integralList</span> <span class="o">=</span> <span class="n">_parent</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;value of Integral&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volume</span>
+
+  <span class="nd">@value.setter</span>
+  <span class="k">def</span> <span class="nf">value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volume</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">valueError</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;value error of Integral&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volumeError</span>
+
+  <span class="nd">@valueError.setter</span>
+  <span class="k">def</span> <span class="nf">valueError</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">volumeError</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Baseplane offset used in calculating integral value&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">offset</span>
+
+  <span class="nd">@bias.setter</span>
+  <span class="k">def</span> <span class="nf">bias</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">offset</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;figureOfMerit of Integral, between 0.0 and 1.0 inclusive.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span>
+
+  <span class="nd">@figureOfMerit.setter</span>
+  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">slopes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;slope (in dimension order) used in calculating integral value</span>
+
+<span class="sd">    The slope is defined as the intensity in point i+1 minus the intensity in point i&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">slope</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()]</span>
+
+  <span class="nd">@slopes.setter</span>
+  <span class="k">def</span> <span class="nf">slopes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">peakDims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">peakDims</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">peakDims</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">slope</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The slopes value </span><span class="si">%s</span><span class="s"> does not match the dimensionality of the spectrum, </span><span class="si">%s</span><span class="s">&quot;</span>
+                       <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">peakDims</span><span class="p">))</span>
+
+
+  <span class="nd">@figureOfMerit.setter</span>
+  <span class="k">def</span> <span class="nf">figureOfMerit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">figOfMerit</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Integral text annotation&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">annotation</span>
+    
+  <span class="nd">@annotation.setter</span>
+  <span class="k">def</span> <span class="nf">annotation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">annotation</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+
+  <span class="nd">@comment.setter</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">axisCodes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Spectrum axis codes in dimension order matching position.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">limits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Integration limits in axis value (ppm), per dimension, with lowest value first</span>
+
+<span class="sd">    For Fid or sampled dimensions the individual limit values will be points&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">dataDimRefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_mainDataDimRefs</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
+      <span class="n">dataDimRef</span> <span class="o">=</span> <span class="n">dataDimRefs</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">dataDimRef</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span>
+        <span class="n">halfWidth</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">peakDim</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">halfWidth</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">valuePerPoint</span><span class="p">)</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="n">halfWidth</span><span class="p">,</span> <span class="n">value</span> <span class="o">+</span> <span class="n">halfWidth</span><span class="p">)</span>
+    <span class="c">#</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+  <span class="nd">@limits.setter</span>
+  <span class="k">def</span> <span class="nf">limits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">dataDimRefs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">integralList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_mainDataDimRefs</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()):</span>
+      <span class="n">dataDimRef</span> <span class="o">=</span> <span class="n">dataDimRefs</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+      <span class="n">limit1</span><span class="p">,</span> <span class="n">limit2</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+      <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
+        <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">elif</span> <span class="n">dataDimRef</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">limit1</span> <span class="o">+</span> <span class="n">limit2</span><span class="p">)</span>
+        <span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">limit1</span> <span class="o">-</span> <span class="n">limit2</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">peakDim</span><span class="o">.</span><span class="n">value</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">limit1</span> <span class="o">+</span> <span class="n">limit2</span><span class="p">)</span>
+        <span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">((</span><span class="n">limit1</span> <span class="o">-</span> <span class="n">limit2</span><span class="p">)</span><span class="o">/</span> <span class="n">dataDimRef</span><span class="o">.</span><span class="n">valuePerPoint</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">pointlimits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;Integration limits in points, per dimension, with lowest value first&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">():</span>
+      <span class="n">position</span> <span class="o">=</span> <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span>
+      <span class="n">halfWidth</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">halfWidth</span><span class="p">,</span> <span class="n">position</span> <span class="o">+</span> <span class="n">halfWidth</span><span class="p">)</span>
+    <span class="c">#</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+  <span class="nd">@pointlimits.setter</span>
+  <span class="k">def</span> <span class="nf">pointlimits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">peakDims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakDims</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">peakDims</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">peakDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">peakDims</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
+          <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="bp">None</span>
+          <span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">limit1</span><span class="p">,</span> <span class="n">limit2</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+          <span class="n">peakDim</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">limit1</span> <span class="o">+</span> <span class="n">limit2</span><span class="p">)</span>
+          <span class="n">peakDim</span><span class="o">.</span><span class="n">boxWidth</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">limit1</span> <span class="o">-</span> <span class="n">limit2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The slopes value </span><span class="si">%s</span><span class="s"> does not match the dimensionality of the spectrum, </span><span class="si">%s</span><span class="s">&quot;</span>
+                       <span class="o">%</span> <span class="n">value</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">peakDims</span><span class="p">))</span>
+
+  <span class="c"># Implementation functions</span>
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">IntegralList</span><span class="p">)</span><span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Nmr</span><span class="o">.</span><span class="n">Peak</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData (Peaks) for all Integral children of parent IntegralList&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeaks</span><span class="p">()</span></div>
+
+<span class="c"># Connections to parents:</span>
+
+<span class="k">def</span> <span class="nf">_newIntegral</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">IntegralList</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">valueError</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">bias</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">slopes</span><span class="p">:</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">figureOfMerit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">limits</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]]</span><span class="o">=</span><span class="p">(),</span>
+                 <span class="n">pointLimits</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span><span class="nb">float</span><span class="p">]]</span><span class="o">=</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Integral</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new ccpn.Integral within ccpn.IntegralList&quot;&quot;&quot;</span>
+
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;value&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;valueError&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;bias&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;slopes&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;figureOfMerit&#39;</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;annotation&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;limits&#39;</span><span class="p">,</span> <span class="p">()),</span> <span class="p">(</span><span class="s">&#39;pointLimits&#39;</span><span class="p">,</span> <span class="p">())</span> <span class="p">))</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newIntegral&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newIntegral&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span> <span class="c"># delay notifiers till peak is fully ready</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">apiPeakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span>
+    <span class="n">apiPeak</span> <span class="o">=</span> <span class="n">apiPeakList</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span><span class="n">volume</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="n">volumeError</span><span class="o">=</span><span class="n">valueError</span><span class="p">,</span> <span class="n">figOfMerit</span><span class="o">=</span><span class="n">figureOfMerit</span><span class="p">,</span>
+                                <span class="n">offset</span><span class="o">=</span><span class="n">bias</span><span class="p">,</span><span class="n">annotation</span><span class="o">=</span><span class="n">annotation</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">pointLimits</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">pointLimits</span> <span class="o">=</span> <span class="n">pointLimits</span>
+    <span class="k">elif</span> <span class="n">limits</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="n">limits</span>
+    <span class="k">if</span> <span class="n">slopes</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">slopes</span> <span class="o">=</span> <span class="n">slopes</span>
+
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+
+  <span class="c"># Do creation notifications</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;create&#39;</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">result</span>
+
+<span class="n">IntegralList</span><span class="o">.</span><span class="n">newIntegral</span> <span class="o">=</span> <span class="n">_newIntegral</span>
+<span class="k">del</span> <span class="n">_newIntegral</span>
+
+
+<span class="k">def</span> <span class="nf">_factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="n">Nmr</span><span class="o">.</span><span class="n">Peak</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">AbstractWrapperObject</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;create Peak or Integral from API Peak&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">dataType</span> <span class="o">==</span> <span class="s">&#39;Peak&#39;</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Peak</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
+  <span class="k">elif</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">dataType</span> <span class="o">==</span> <span class="s">&#39;Integral&#39;</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">Integral</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;API Peak object has illegal parent dataType: </span><span class="si">%s</span><span class="s">. Must be &#39;Peak&#39; or &#39;Integral&quot;</span>
+                     <span class="o">%</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">dataType</span><span class="p">)</span>
+
+
+<span class="n">Integral</span><span class="o">.</span><span class="n">_factoryFunction</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">_factoryFunction</span><span class="p">)</span>
+<span class="n">Peak</span><span class="o">.</span><span class="n">_factoryFunction</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">_factoryFunction</span><span class="p">)</span>
+
+<span class="c"># Additional Notifiers:</span>
+<span class="c"># NB API level notifiers are defined in the Peak file for API Peaks</span>
+<span class="c"># They will have the same effect for integrals</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

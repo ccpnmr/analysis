@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisMetabolomics.lib.persistence &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisMetabolomics.lib.persistence</h1><div class="highlight"><pre>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;TJ Ragan&#39;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="Borg"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.Borg">[docs]</a><span class="k">class</span> <span class="nc">Borg</span><span class="p">:</span>
+    <span class="n">_shared_state</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_shared_state</span></div>
+
+
+<div class="viewcode-block" id="MetabolomicsPersistenceDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.MetabolomicsPersistenceDict">[docs]</a><span class="k">class</span> <span class="nc">MetabolomicsPersistenceDict</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
+  <span class="k">class</span> <span class="nc">__Inner</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
+    <span class="k">pass</span>
+  <span class="n">instance</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">instance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">cls</span><span class="o">.</span><span class="n">instance</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__Inner</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">instance</span></div>
+
+
+<div class="viewcode-block" id="bruker1dDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.bruker1dDict">[docs]</a><span class="k">def</span> <span class="nf">bruker1dDict</span><span class="p">(</span><span class="n">refDF</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">SF</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">FTSIZE</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">SW_p</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">OFFSET</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="n">procs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;BYTORDP&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c"># Byte order, little (0) or big (1) endian</span>
+           <span class="s">&#39;XDIM&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c"># Block size for 2D &amp; 3D data</span>
+           <span class="s">&#39;SF&#39;</span><span class="p">:</span> <span class="n">SF</span><span class="p">,</span> <span class="c"># Spectral reference frequency (center of spectrum)</span>
+           <span class="s">&#39;FTSIZE&#39;</span><span class="p">:</span> <span class="n">FTSIZE</span><span class="p">,</span> <span class="c"># Size of FT output.  Same as SI except for strip plotting.</span>
+           <span class="s">&#39;AXNUC&#39;</span><span class="p">:</span> <span class="s">&#39;&lt;1H&gt;&#39;</span><span class="p">,</span>
+           <span class="s">&#39;WDW&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="c"># Window multiplication mode</span>
+           <span class="s">&#39;BC_mod&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="c"># Baseline correction mode (em, gm, sine, qsine, trap, user(?), sinc, qsinc, traf, trafs(JMR 71 1987, 237))</span>
+           <span class="s">&#39;LB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c"># Lorentzian broadening size (Hz)</span>
+           <span class="s">&#39;GB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c"># Gaussian broadening factor</span>
+           <span class="s">&#39;SSB&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c"># Sine bell shift pi/ssb.  =1 for sine and =2 for cosine.  values &lt;2 default to sine</span>
+           <span class="s">&#39;TM1&#39;</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">,</span> <span class="c"># End of the rising edge of trapezoidal, takes a value from 0-1, must be less than TM2</span>
+           <span class="s">&#39;TM2&#39;</span><span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span> <span class="c"># Beginings of the falling edge of trapezoidal, takes a value from 0-1, must be greater than TM1</span>
+          <span class="p">}</span>
+  <span class="n">procs</span><span class="p">[</span><span class="s">&#39;SW_p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">SW_p</span> <span class="c"># Spectral width of processed data in Hz</span>
+  <span class="n">procs</span><span class="p">[</span><span class="s">&#39;OFFSET&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OFFSET</span> <span class="c"># ppm value of left-most point in spectrum</span>
+  <span class="k">if</span> <span class="n">refDF</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">ppmMin</span><span class="p">,</span> <span class="n">ppmMax</span> <span class="o">=</span> <span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">swPpm</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">ppmMax</span><span class="p">)</span> <span class="o">-</span> <span class="nb">float</span><span class="p">(</span><span class="n">ppmMin</span><span class="p">)</span>
+    <span class="n">procs</span><span class="p">[</span><span class="s">&#39;SW_p&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">swPpm</span> <span class="o">*</span> <span class="n">procs</span><span class="p">[</span><span class="s">&#39;SF&#39;</span><span class="p">]</span>
+    <span class="n">procs</span><span class="p">[</span><span class="s">&#39;OFFSET&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ppmMax</span>
+    <span class="n">procs</span><span class="p">[</span><span class="s">&#39;FTSIZE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">procs</span><span class="p">[</span><span class="s">&#39;SI&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refDF</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">procs</span></div>
+
+
+
+<div class="viewcode-block" id="writeBruker"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.writeBruker">[docs]</a><span class="k">def</span> <span class="nf">writeBruker</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">dic</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">procDir</span> <span class="o">=</span> <span class="s">&#39;pdata/1&#39;</span>
+    <span class="n">realFileName</span> <span class="o">=</span> <span class="s">&#39;1r&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">procDir</span><span class="p">))</span>
+    <span class="k">except</span> <span class="n">FileExistsError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">specMax2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log2</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">29</span><span class="o">-</span><span class="n">specMax2</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="n">factor</span>
+    <span class="n">dic</span><span class="p">[</span><span class="s">&#39;NC_proc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">factor</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">procDir</span><span class="p">,</span> <span class="s">&#39;procs&#39;</span><span class="p">),</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dic</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s">&#39;##${}= {}</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">dic</span><span class="p">[</span><span class="n">k</span><span class="p">]))</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">procDir</span><span class="p">,</span> <span class="n">realFileName</span><span class="p">),</span> <span class="s">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s">&#39;&lt;i4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span></div>
+
+
+<div class="viewcode-block" id="spectraDicToBrukerExperiment"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.persistence.spectraDicToBrukerExperiment">[docs]</a><span class="k">def</span> <span class="nf">spectraDicToBrukerExperiment</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="n">directoryName</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">spectraDF</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectraDF</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span>
+
+    <span class="n">spectraDF</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">l</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+  <span class="n">procs</span> <span class="o">=</span> <span class="n">bruker1dDict</span><span class="p">(</span><span class="n">spectraDF</span><span class="p">,</span> <span class="n">SF</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">pcName</span> <span class="ow">in</span> <span class="n">spectraDF</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+    <span class="n">writeBruker</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directoryName</span><span class="p">,</span> <span class="n">pcName</span><span class="p">),</span> <span class="n">procs</span><span class="p">,</span> <span class="n">spectraDF</span><span class="o">.</span><span class="n">ix</span><span class="p">[</span><span class="n">pcName</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

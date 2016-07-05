@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.Colour &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.Colour</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9315 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;Color specification&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<div class="viewcode-block" id="rgbaToHex"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.rgbaToHex">[docs]</a><span class="k">def</span> <span class="nf">rgbaToHex</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="o">=</span><span class="mi">255</span><span class="p">):</span>
+  
+  <span class="k">return</span> <span class="s">&#39;#&#39;</span> <span class="o">+</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">hex</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)])</span></div>
+
+<div class="viewcode-block" id="rgbToHex"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.rgbToHex">[docs]</a><span class="k">def</span> <span class="nf">rgbToHex</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+
+  <span class="k">return</span> <span class="s">&#39;#&#39;</span> <span class="o">+</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">hex</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">)])</span></div>
+
+<div class="viewcode-block" id="hexToRgb"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.hexToRgb">[docs]</a><span class="k">def</span> <span class="nf">hexToRgb</span><span class="p">(</span><span class="nb">hex</span><span class="p">):</span>
+  <span class="nb">hex</span> <span class="o">=</span> <span class="nb">hex</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">)</span>
+  <span class="n">lv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">hex</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">hex</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span> <span class="o">+</span> <span class="n">lv</span> <span class="o">//</span> <span class="mi">3</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">lv</span><span class="p">,</span> <span class="n">lv</span> <span class="o">//</span> <span class="mi">3</span><span class="p">))</span></div>
+
+  
+
+<span class="n">colourNameToHexDict</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s">&#39;red&#39;</span><span class="p">:</span>     <span class="s">&#39;#ff0000&#39;</span><span class="p">,</span>
+  <span class="s">&#39;green&#39;</span><span class="p">:</span>   <span class="s">&#39;#00ff00&#39;</span><span class="p">,</span>
+  <span class="s">&#39;blue&#39;</span><span class="p">:</span>    <span class="s">&#39;#0000ff&#39;</span><span class="p">,</span>
+  <span class="s">&#39;yellow&#39;</span><span class="p">:</span>  <span class="s">&#39;#ffff00&#39;</span><span class="p">,</span>
+  <span class="s">&#39;magenta&#39;</span><span class="p">:</span> <span class="s">&#39;#ff00ff&#39;</span><span class="p">,</span>
+  <span class="s">&#39;cyan&#39;</span><span class="p">:</span>    <span class="s">&#39;#ffff00&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">spectrumColours</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="s">&#39;#cb1400&#39;</span><span class="p">,</span><span class="s">&#39;red&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#318290&#39;</span><span class="p">,</span><span class="s">&#39;pastel blue&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#fe6c11&#39;</span><span class="p">,</span><span class="s">&#39;orange&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#3a4e5c&#39;</span><span class="p">,</span><span class="s">&#39;dark grey&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#ecfc00&#39;</span><span class="p">,</span><span class="s">&#39;yellow&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#933355&#39;</span><span class="p">,</span><span class="s">&#39;burgundy&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#80ff00&#39;</span><span class="p">,</span><span class="s">&#39;chatreuse&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#5846d6&#39;</span><span class="p">,</span><span class="s">&#39;purple&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#df2950&#39;</span><span class="p">,</span><span class="s">&#39;pastel pink&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#097a27&#39;</span><span class="p">,</span><span class="s">&#39;pastel green&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#d231cb&#39;</span><span class="p">,</span><span class="s">&#39;pink&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#d24c23&#39;</span><span class="p">,</span><span class="s">&#39;dark orange&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#4f9caa&#39;</span><span class="p">,</span><span class="s">&#39;light pastel blue&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#ff932e&#39;</span><span class="p">,</span><span class="s">&#39;light pastel orange&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#ffff5a&#39;</span><span class="p">,</span><span class="s">&#39;light yellow&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#2d5175&#39;</span><span class="p">,</span><span class="s">&#39;mid blue&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#d8e1cf&#39;</span><span class="p">,</span><span class="s">&#39;light seashell&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#957eff&#39;</span><span class="p">,</span><span class="s">&#39;heliotrope&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#f9609c&#39;</span><span class="p">,</span><span class="s">&#39;mid pink&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#7a7a7a&#39;</span><span class="p">,</span><span class="s">&#39;mid grey&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#947676&#39;</span><span class="p">,</span><span class="s">&#39;bazaar&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#f9609c&#39;</span><span class="p">,</span><span class="s">&#39;mid pink&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#50ae56&#39;</span><span class="p">,</span><span class="s">&#39;mid green&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#ff8eff&#39;</span><span class="p">,</span><span class="s">&#39;light pink&#39;</span><span class="p">),</span>
+                                <span class="p">(</span><span class="s">&#39;#3fe945&#39;</span><span class="p">,</span><span class="s">&#39;light green&#39;</span><span class="p">)])</span>
+
+<span class="n">spectrumHexColours</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+<span class="c"># Note that Colour strings are not re-used</span>
+
+<div class="viewcode-block" id="Colour"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.Colour">[docs]</a><span class="k">class</span> <span class="nc">Colour</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; A class to make colour manipulation easier and more transparent.</span>
+<span class="sd">      Assumes that r, g, b values are 8-bit so between 0 and 255 and have optional a.</span>
+<span class="sd">      </span>
+<span class="sd">  &gt;&gt;&gt; c = Colour(&#39;magenta&#39;)</span>
+<span class="sd">  &gt;&gt;&gt; c = Colour(&#39;#ff00ff&#39;)</span>
+<span class="sd">  &gt;&gt;&gt; c = Colour((255, 0, 255))</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; value can be name or #rrggbb or #rrggbbaa or (r, g, b) or (r, g, b, a) tuple/list &quot;&quot;&quot;</span>
+    <span class="c"># print(value, &#39;color init&#39;)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;not allowed blank colour&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
+      <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="s">&#39;#&#39;</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">colourNameToHexDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        
+      <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="s">&#39;len(value) = </span><span class="si">%d</span><span class="s">, should be 7 or 9&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+      
+      <span class="n">r</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
+      <span class="n">g</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
+      <span class="n">b</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span>
+      <span class="n">a</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">9</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">9</span> <span class="k">else</span> <span class="mi">255</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">),</span> <span class="s">&#39;value must be list or tuple if it is not a string, was </span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span>
+      <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="s">&#39;value=</span><span class="si">%s</span><span class="s">, len(value) = </span><span class="si">%d</span><span class="s">, should be 3 or 4&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+      <span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">value</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">rgbaToHex</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="mi">255</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">rgbToHex</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+   
+    <span class="c">###str.__init__(self)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">=</span> <span class="n">r</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">=</span> <span class="n">g</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="n">a</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+    
+<div class="viewcode-block" id="Colour.rgba"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.Colour.rgba">[docs]</a>  <span class="k">def</span> <span class="nf">rgba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns 4-tuple of (r, g, b, a) where each one is in range 0 to 255&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="Colour.scaledRgba"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.Colour.scaledRgba">[docs]</a>  <span class="k">def</span> <span class="nf">scaledRgba</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns 4-tuple of (r, g, b, a) where each one is in range 0.0 to 1.0&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">/</span> <span class="mf">255.0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Colour.hex"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.Colour.hex">[docs]</a>  <span class="k">def</span> <span class="nf">hex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s">&#39;#&#39;</span> <span class="o">+</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">hex</span><span class="p">(</span><span class="n">x</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">r</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">g</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span><span class="p">)])</span></div>
+
+  <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__repr__</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="rgba"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.rgba">[docs]</a><span class="k">def</span> <span class="nf">rgba</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+  
+  <span class="k">return</span> <span class="n">Colour</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">rgba</span><span class="p">()</span></div>
+  
+<div class="viewcode-block" id="scaledRgba"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Colour.scaledRgba">[docs]</a><span class="k">def</span> <span class="nf">scaledRgba</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+  <span class="c"># print(value, &#39;scaledRgba&#39;)</span>
+  <span class="k">return</span> <span class="n">Colour</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">scaledRgba</span><span class="p">()</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

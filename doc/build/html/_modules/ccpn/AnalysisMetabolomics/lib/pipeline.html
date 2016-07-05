@@ -1,0 +1,203 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisMetabolomics.lib.pipeline &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisMetabolomics.lib.pipeline</h1><div class="highlight"><pre>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;TJ Ragan&#39;</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.lib</span> <span class="kn">import</span> <span class="n">centering</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.lib</span> <span class="kn">import</span> <span class="n">normalisation</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.lib</span> <span class="kn">import</span> <span class="n">scaling</span>
+
+
+<div class="viewcode-block" id="pipeline"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.pipeline.pipeline">[docs]</a><span class="k">def</span> <span class="nf">pipeline</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">commands</span><span class="p">):</span>
+  <span class="n">osn</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">oss</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">osi</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectra</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="n">osn</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">oss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">osi</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+  <span class="n">oss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">oss</span><span class="p">)</span>
+  <span class="n">osi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osi</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">commands</span><span class="p">:</span>
+    <span class="n">function</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;function&#39;</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s">&#39;method&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">functionMap</span><span class="p">[</span><span class="n">function</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="n">method</span><span class="p">]</span>
+    <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="o">**</span><span class="n">command</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">s</span><span class="p">,</span><span class="n">i</span><span class="p">))</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">)}</span></div>
+
+
+<span class="k">def</span> <span class="nf">_tsa</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">normalisation</span><span class="o">.</span><span class="n">tsa</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osi</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_pqn</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">normalisation</span><span class="o">.</span><span class="n">pqn</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osi</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_polyBaseLine</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">controlPoints</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;polybaseline&#39;</span><span class="p">,</span> <span class="n">controlPoints</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+
+<span class="k">def</span> <span class="nf">_alignSpectra</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">targetSpectrum</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Allowed values of targetSpectrum are &#39;&lt;All&gt;&#39; for median, or a spectrum pid.</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;Align Spectra&#39;</span><span class="p">,</span> <span class="n">targetSpectrum</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_whittakerBaseline</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">controlPoints</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;Whittaker Baseline Correction&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">lam</span><span class="p">,</span> <span class="n">controlPoints</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_segmentalAlign</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">regions</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;Segmental Alignment&#39;</span><span class="p">,</span> <span class="n">regions</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_alignToReference</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">referencePpm</span><span class="p">,</span> <span class="n">window</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;Align to CS Reference&#39;</span><span class="p">,</span> <span class="n">referencePpm</span><span class="p">,</span> <span class="n">window</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_whittakerSmooth</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">controlPoints</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;Whittaker Smoother&#39;</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">controlPoints</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_excludeBaselinePoints</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">baselineRegion</span><span class="p">,</span> <span class="n">baselineMultiplier</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;excludeBaselinePoints&#39;</span><span class="p">,</span> <span class="n">baselineRegion</span><span class="p">,</span> <span class="n">baselineMultiplier</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_bin</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">binWidth</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;Bin&#39;</span><span class="p">,</span> <span class="n">binWidth</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_paretoScale</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">scaling</span><span class="o">.</span><span class="n">paretoScale</span><span class="p">(</span><span class="n">osi</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_unitVarianceScale</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">scaling</span><span class="o">.</span><span class="n">unitVarianceScale</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osi</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_refPeakNormalise</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">,</span> <span class="n">peak</span><span class="p">):</span>
+  <span class="k">print</span><span class="p">(</span><span class="s">&#39;Normalise to reference peak&#39;</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span>
+
+<span class="k">def</span> <span class="nf">_meanCentre</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">centering</span><span class="o">.</span><span class="n">meanCenter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osi</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_medianCentre</span><span class="p">(</span><span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">osi</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">osn</span><span class="p">,</span> <span class="n">oss</span><span class="p">,</span> <span class="n">centering</span><span class="o">.</span><span class="n">medianCenter</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">osi</span><span class="p">))</span>
+
+<span class="n">functionMap</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s">&#39;normalise&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s">&#39;Total Area&#39;</span><span class="p">:</span> <span class="n">_tsa</span><span class="p">,</span>
+    <span class="s">&#39;PQN&#39;</span><span class="p">:</span> <span class="n">_pqn</span><span class="p">,</span>
+  <span class="p">},</span>
+  <span class="s">&#39;scale&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s">&#39;Unit Variance&#39;</span><span class="p">:</span> <span class="n">_unitVarianceScale</span><span class="p">,</span>
+    <span class="s">&#39;Pareto&#39;</span><span class="p">:</span> <span class="n">_paretoScale</span><span class="p">,</span>
+  <span class="p">},</span>
+  <span class="s">&#39;centre&#39;</span><span class="p">:</span> <span class="p">{</span>
+    <span class="s">&#39;Mean&#39;</span><span class="p">:</span> <span class="n">_meanCentre</span><span class="p">,</span>
+    <span class="s">&#39;Median&#39;</span><span class="p">:</span> <span class="n">_medianCentre</span><span class="p">,</span>
+  <span class="p">},</span>
+  <span class="s">&#39;Reference Peak&#39;</span><span class="p">:</span> <span class="n">_refPeakNormalise</span><span class="p">,</span>
+  <span class="s">&#39;polyBaseLine&#39;</span><span class="p">:</span> <span class="n">_polyBaseLine</span><span class="p">,</span>
+  <span class="s">&#39;alignSpectra&#39;</span><span class="p">:</span> <span class="n">_alignSpectra</span><span class="p">,</span>
+  <span class="s">&#39;excludeSignalFreeRegions&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+  <span class="s">&#39;whittakerBaseline&#39;</span><span class="p">:</span> <span class="n">_whittakerBaseline</span><span class="p">,</span>
+  <span class="s">&#39;segmentalAlign&#39;</span><span class="p">:</span> <span class="n">_segmentalAlign</span><span class="p">,</span>
+  <span class="s">&#39;alignToReference&#39;</span><span class="p">:</span> <span class="n">_alignToReference</span><span class="p">,</span>
+  <span class="s">&#39;whittakerSmooth&#39;</span><span class="p">:</span> <span class="n">_whittakerSmooth</span><span class="p">,</span>
+  <span class="s">&#39;excludeBaselinePoints&#39;</span><span class="p">:</span> <span class="n">_excludeBaselinePoints</span><span class="p">,</span>
+  <span class="s">&#39;bin&#39;</span><span class="p">:</span> <span class="n">_bin</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

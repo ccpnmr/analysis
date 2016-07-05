@@ -1,0 +1,732 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.core._implementation.AbstractWrapperObject &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.core._implementation.AbstractWrapperObject</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-03 16:45:36 +0100 (Sun, 03 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-03 16:45:36 +0100 (Sun, 03 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9563 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnSorting</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.memops</span> <span class="kn">import</span> <span class="n">Implementation</span> <span class="k">as</span> <span class="n">ApiImplementation</span>
+
+
+<span class="nd">@functools.total_ordering</span>
+<span class="k">class</span> <span class="nc">AbstractWrapperObject</span><span class="p">():</span>
+  <span class="sd">&quot;&quot;&quot;Abstract class containing common functionality for subclasses.</span>
+
+<span class="sd">  ADVANCED. Core programmers only.</span>
+
+
+<span class="sd">  **Rules for subclasses:**</span>
+<span class="sd">  </span>
+<span class="sd">  All collection attributes are tuples. For objects these are sorted by pid;</span>
+<span class="sd">  for simple values they are ordered. </span>
+<span class="sd">  </span>
+<span class="sd">  Non-child collection attributes must have addElement() and removeElement </span>
+<span class="sd">  functions as appropriate.</span>
+<span class="sd">  </span>
+<span class="sd">  For each child class there will be a newChild factory function, to crate</span>
+<span class="sd">  the child object. There will be a collection attribute for each child,</span>
+<span class="sd">  grandchild, and generally descendant.</span>
+<span class="sd">  </span>
+<span class="sd">  The object pid is given as NM:key1.key2.key3 ... where NM is the shortClassName,</span>
+<span class="sd">  and the combination of key1, key2, etc. forms the id, which is the keys of the parent</span>
+<span class="sd">  classes starting at the top.</span>
+<span class="sd">  The pid is the object id relative to the project; keys relative to objects lower</span>
+<span class="sd">  in the hierarchy will omit successively more keys.</span>
+
+
+<span class="sd">  **Code organisation:**</span>
+<span class="sd">  </span>
+<span class="sd">  All code related to a given class lives in the file for the class. </span>
+<span class="sd">  On importing it, it will insert relevant functions in the parent class.</span>
+<span class="sd">  All import must be through the ccpn module, where it is guaranteed that</span>
+<span class="sd">  all modules are imported in the right order. </span>
+<span class="sd">  </span>
+<span class="sd">  All actual data live</span>
+<span class="sd">  in the data layer underneath these (wrapper) classes and are derived where needed.</span>
+<span class="sd">  All data storage is done</span>
+<span class="sd">  at the lower level, not at the wrapper level, and there is no mechanism for</span>
+<span class="sd">  storing attributes that have been added at the wrapper level. Key and uniqueness</span>
+<span class="sd">  checking, type checking etc.  is also done at teh lower level.</span>
+<span class="sd">  </span>
+<span class="sd">  Initialising happens by passing in a (lower-level) NmrProject instance to the Project</span>
+<span class="sd">   __init__;</span>
+<span class="sd">  all wrapper instances are created automatically starting from there. Unless we change this,</span>
+<span class="sd">  this means we assume that all data can be found by navigating from an</span>
+<span class="sd">  NmrProject.</span>
+<span class="sd">  </span>
+<span class="sd">  New classes can be added, provided they match the requirements. All classes </span>
+<span class="sd">  must form a parent-child tree with the root at Project. All classes must</span>
+<span class="sd">  must have teh standard class-level attributes, such as  shortClassName, _childClasses,</span>
+<span class="sd">  and _pluralLinkName.</span>
+<span class="sd">  Each class must implement the properties id and _parent, and the methods </span>
+<span class="sd">  _getAllWrappedData,  and rename. Note that the</span>
+<span class="sd">  properties and the _getAllWrappedData function</span>
+<span class="sd">  must work from the underlying data, as they will be called before the pid</span>
+<span class="sd">  and object dictionary data are set up.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c">#: Short class name, for PID. Must be overridden for each subclass</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="c"># Class name - necessary since the actual objects may be of a subclass.</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;AbstractWrapperObject&#39;</span>
+
+  <span class="n">_parentClass</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="c">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;abstractWrapperClasses&#39;</span>
+
+  <span class="c">#: List of child classes. Must be overridden for each subclass.</span>
+  <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+  <span class="c"># Wrapper-level notifiers that are set up on code import and</span>
+  <span class="c"># registered afresh for every new project</span>
+  <span class="n">_coreNotifiers</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c"># Should notifiers be registered separately for this class?</span>
+  <span class="c"># Set to False if multiple wrapper classes wrap the same API class (e.g. PeakList, IntegralList;</span>
+  <span class="c"># Peak, Integral) so that API level notifiers are only registered once.</span>
+  <span class="n">_registerClassNotifiers</span> <span class="o">=</span> <span class="bp">True</span>
+
+  <span class="c"># Function to generate custom subclass instances -= overridden in some subclasses</span>
+  <span class="n">_factoryFunction</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="c"># Default values for paraeters to &#39;new&#39; function. Overridden in subclasses</span>
+  <span class="n">_defaultInitValues</span> <span class="o">=</span> <span class="bp">None</span>
+  
+  <span class="c"># Implementation methods</span>
+  
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="s">&#39;Project&#39;</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">:</span><span class="n">ApiImplementation</span><span class="o">.</span><span class="n">DataObject</span><span class="p">):</span>
+   
+    <span class="c"># NB project parameter type is Project. Set in Project.py</span>
+    
+    <span class="c"># NB wrappedData must be globally unique. CCPN objects all are, </span>
+    <span class="c"># but for non-CCPN objects this must be ensured.</span>
+    
+    <span class="c"># Check if object is already wrapped</span>
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span>
+    <span class="k">if</span> <span class="n">wrappedData</span> <span class="ow">in</span> <span class="n">data2Obj</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot create new object for underlying </span><span class="si">%s</span><span class="s">: One  already exists&quot;</span>
+                       <span class="o">%</span> <span class="n">wrappedData</span><span class="p">)</span>
+
+    <span class="c"># initialise</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="o">=</span> <span class="n">wrappedData</span>
+    <span class="n">data2Obj</span><span class="p">[</span><span class="n">wrappedData</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+      
+    <span class="c"># set _id</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="n">project</span><span class="p">:</span>
+      <span class="n">_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">_id</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">_id</span>
+    
+    <span class="c"># update pid:object mapping dictionary</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+    <span class="n">dd</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+
+  <span class="k">def</span> <span class="nf">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Truth value: true - wrapper classes are never empty&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">True</span>
+  
+  <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Ordering implementation function, necessary for making lists sortable.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="n">other</span><span class="o">.</span><span class="n">_project</span><span class="p">:</span>
+      <span class="n">className1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
+      <span class="n">className2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">className</span>
+      <span class="k">if</span> <span class="n">className1</span> <span class="o">==</span> <span class="n">className2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">CcpnSorting</span><span class="o">.</span><span class="n">stringSortKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">CcpnSorting</span><span class="o">.</span><span class="n">stringSortKey</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_id</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">className1</span> <span class="o">&lt;</span> <span class="n">className2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_project</span><span class="p">))</span>
+
+
+  <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;String representation&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s">&quot;&lt;ccpn.</span><span class="si">%s</span><span class="s">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">longPid</span>
+
+  <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span>
+
+  <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">other</span>
+
+  <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+  
+  <span class="c"># CCPN properties </span>
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Project&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The Project (root)containing the object.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">pid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Identifier for the object, unique within the project.</span>
+<span class="sd">    Set automatically from the short class name and object.id</span>
+<span class="sd">    E.g. &#39;NA:A.102.ALA.CA&#39; &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)))</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">longPid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Identifier for the object, unique within the project.</span>
+<span class="sd">    Set automatically from the full class name and object.id</span>
+<span class="sd">    E.g. &#39;NmrAtom:A.102.ALA.CA&#39; &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">Pid</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)))</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">isDeleted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Is object deleted?&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_wrappedData&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span>
+  
+  <span class="c"># CCPN abstract properties</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Object local identifier, unique for a given type with a given parent.</span>
+
+<span class="sd">    Set automatically from other (immutable) object attributes.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Code error: function not implemented&quot;</span><span class="p">)</span>
+  
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Code error: function not implemented&quot;</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Identifier for the object, used to generate the pid and longPid.</span>
+
+<span class="sd">    Generated by combining the id of the containing object,</span>
+<span class="sd">    with the value of one or more key attributes that uniquely identify the object in context.::</span>
+
+<span class="sd">      E.g. the id for an Atom, &#39;A.55.VAL.HA&#39; is generated from:</span>
+
+<span class="sd">      - &#39;A&#39; *Chain.shortName*</span>
+
+<span class="sd">      - &#39;55&#39; *Residue.sequenceCode*</span>
+
+<span class="sd">      - &#39;VAL&#39; *Residue.residueType*</span>
+
+<span class="sd">      - &#39;HA&#39; *Atom.name*&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+  
+  <span class="c"># Abstract methods</span>
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;get list of wrapped data objects for each class that is a child of parent</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">Exception</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;Code error: function not implemented&quot;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Change the object name or other key attribute(s), changing the object id, pid,</span>
+<span class="sd">       and all internal references to maintain consistency.</span>
+<span class="sd">       Some Objects (Chain, Residue, Atom) cannot be renamed&quot;&quot;&quot;</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> objects cannot be renamed&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+  
+  <span class="c"># In addition each class (except for Project) must define a  newClass method</span>
+  <span class="c"># The function (e.g. Project.newMolecule), ... must create a new child object</span>
+  <span class="c"># AND ALL UNDERLYING DATA, taking in all parameters necessary to do so. </span>
+  <span class="c"># This can be done by defining a function (not a method)</span>
+  <span class="c"># def newMolecule( self, *args, **kw):</span>
+  <span class="c"># and then doing Project.newMolecule = newMolecule</span>
+
+  <span class="c"># CCPN functions</span>
+
+
+  <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Delete object, with all contained objects and underlying data.&quot;&quot;&quot;</span>
+    
+    <span class="c"># NBNB clean-up of wrapper structure is done via notifiers.</span>
+    <span class="c"># NBNB some child classes must override this function</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pidstring</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Get an arbitrary ccpn.Object from either its pid (e.g. &#39;SP:HSQC2&#39;) or its longPid</span>
+<span class="sd">    (e.g. &#39;Spectrum:HSQC2&#39;</span>
+
+<span class="sd">    Returns None for invalid or unrecognised input strings.&quot;&quot;&quot;</span>
+
+    <span class="n">tt</span> <span class="o">=</span> <span class="n">pidstring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+      <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c">#</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+  <span class="k">def</span> <span class="nf">_getWrapperObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiObject</span><span class="p">:</span><span class="n">ApiImplementation</span><span class="o">.</span><span class="n">DataObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;get wrapper object wrapping apiObject or None&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiObject</span><span class="p">)</span>
+    
+  <span class="c"># CCPN Implementation methods</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_linkWrapperClasses</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">ancestors</span><span class="p">:</span><span class="nb">list</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">Project</span><span class="p">:</span><span class="s">&#39;Project&#39;</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Recursively set up links and functions involving children for wrapper classes</span>
+
+<span class="sd">    NB classes that have already been linked are ignored, but their children are still processed&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">Project</span><span class="p">:</span>
+      <span class="k">assert</span> <span class="n">ancestors</span><span class="p">,</span> <span class="s">&quot;Code errors, _linkWrapperClasses called with Project but no ancestors&quot;</span>
+      <span class="n">newAncestors</span> <span class="o">=</span> <span class="n">ancestors</span> <span class="o">+</span> <span class="p">[</span><span class="n">cls</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">cls</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span><span class="p">:</span>
+        <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+
+        <span class="n">classFullName</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">cls</span><span class="p">)[</span><span class="mi">7</span><span class="p">:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+
+        <span class="c"># add getCls in all ancestors</span>
+        <span class="n">funcName</span> <span class="o">=</span> <span class="s">&#39;get&#39;</span> <span class="o">+</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span>
+        <span class="c">#  NB Ancestors is never None at this point</span>
+        <span class="k">for</span> <span class="n">ancestor</span> <span class="ow">in</span> <span class="n">ancestors</span><span class="p">:</span>
+          <span class="c"># Add getDescendant function</span>
+          <span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">relativeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cls</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_getDescendant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">)</span>
+          <span class="n">func</span><span class="o">.</span><span class="n">__doc__</span><span class="o">=</span> <span class="s">&quot;Get contained </span><span class="si">%s</span><span class="s"> object by relative ID&quot;</span> <span class="o">%</span> <span class="n">classFullName</span>
+          <span class="nb">setattr</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="n">func</span><span class="p">)</span>
+
+        <span class="c"># Add descendant links</span>
+        <span class="n">linkName</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">newAncestors</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+          <span class="n">ancestor</span> <span class="o">=</span> <span class="n">newAncestors</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+          <span class="n">func</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="o">.</span><span class="n">_allDescendants</span><span class="p">,</span>
+                                            <span class="n">descendantClasses</span><span class="o">=</span><span class="n">newAncestors</span><span class="p">[</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
+          <span class="c"># func.__annotations__[&#39;return&#39;] = typing.Tuple[cls, ...]</span>
+          <span class="n">prop</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">func</span><span class="p">,</span>
+                            <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+                            <span class="p">(</span><span class="s">&quot;\- *(</span><span class="si">%s</span><span class="s">,)*  - contained </span><span class="si">%s</span><span class="s"> objects sorted by id&quot;</span> <span class="o">%</span>
+                              <span class="p">(</span><span class="n">classFullName</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+                            <span class="p">)</span>
+                          <span class="p">)</span>
+          <span class="nb">setattr</span><span class="p">(</span><span class="n">ancestor</span><span class="p">,</span> <span class="n">linkName</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+
+
+        <span class="c"># Add standard Notifiers:</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_registerClassNotifiers</span><span class="p">:</span>
+          <span class="n">className</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_apiClassQualifiedName</span>
+          <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="p">[:</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s">&#39;_newApiObject&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;cls&#39;</span><span class="p">:</span><span class="n">cls</span><span class="p">},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;__init__&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">&#39;_startDeleteCommandBlock&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;startDeleteBlock&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">&#39;_finaliseApiDelete&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;delete&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">&#39;_endDeleteCommandBlock&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;endDeleteBlock&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">&#39;_finaliseApiUnDelete&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;undelete&#39;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s">&#39;_modifiedApiObject&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span>
+        <span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># Project class. Start generation here</span>
+      <span class="n">Project</span> <span class="o">=</span> <span class="n">cls</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">_allLinkedWrapperClasses</span>
+      <span class="k">if</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&quot;DEBUG initialisation attempted more than once&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+      <span class="n">newAncestors</span> <span class="o">=</span> <span class="p">[</span><span class="n">cls</span><span class="p">]</span>
+      <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Project</span><span class="p">)</span>
+
+    <span class="c"># Fill in Project._className2Class map</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">Project</span><span class="o">.</span><span class="n">_className2Class</span>
+    <span class="n">dd</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span>
+
+    <span class="c"># recursively call next level down the tree</span>
+    <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
+      <span class="n">cc</span><span class="o">.</span><span class="n">_linkWrapperClasses</span><span class="p">(</span><span class="n">newAncestors</span><span class="p">,</span> <span class="n">Project</span><span class="o">=</span><span class="n">Project</span><span class="p">)</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_getDescendant</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span>  <span class="n">relativeId</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get descendant of class cls with relative key relativeId</span>
+<span class="sd">     Implementation function, used to generate getCls functions&quot;&quot;&quot;</span>
+
+    <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">relativeId</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span><span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="n">relativeId</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+  <span class="k">def</span> <span class="nf">_allDescendants</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">descendantClasses</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;get all descendants of a given class , following descendantClasses down the data tree</span>
+<span class="sd">    Implementation function, used to generate child and descendant links</span>
+<span class="sd">    descendantClasses is a list of classes going down from the class of self down the data tree.</span>
+<span class="sd">    E.g. if called on a chain with descendantClass == [Residue,Atom] the function returns</span>
+<span class="sd">    a sorted list of all Atoms in a Chain&quot;&quot;&quot;</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">descendantClasses</span><span class="p">:</span>
+
+      <span class="c"># function gets wrapped data for all children starting from parent</span>
+      <span class="n">func</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_getAllWrappedData</span>
+      <span class="c"># data is iterator of wrapped data for children starting from all parents</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">func</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">))</span>
+      <span class="c"># objects is all wrapper objects for next child level down</span>
+      <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;ChemicalShift&#39;</span><span class="p">,</span> <span class="s">&#39;Residue&#39;</span><span class="p">):</span>
+        <span class="c"># These cannot be correctly sorted at the API level</span>
+        <span class="n">objects</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="c">#</span>
+    <span class="k">return</span> <span class="n">objects</span>
+
+  <span class="k">def</span> <span class="nf">_initializeAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Initialize children, using existing objects in data model&quot;&quot;&quot;</span>
+
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span>
+
+    <span class="k">for</span> <span class="n">childClass</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
+      <span class="c"># recursively create children</span>
+      <span class="k">for</span> <span class="n">apiObj</span> <span class="ow">in</span> <span class="n">childClass</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiObj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">factoryFunction</span> <span class="o">=</span> <span class="n">childClass</span><span class="o">.</span><span class="n">_factoryFunction</span>
+          <span class="k">if</span> <span class="n">factoryFunction</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">childClass</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">factoryFunction</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_initializeAll</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_unwrapAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;remove wrapper from object and child objects</span>
+<span class="sd">    For special case where wrapper objects are removed without deleting wrappedData&quot;&quot;&quot;</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+    <span class="n">data2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span>
+
+    <span class="k">for</span> <span class="n">childClass</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">:</span>
+
+      <span class="c"># recursively unwrap children</span>
+      <span class="k">for</span> <span class="n">apiObj</span> <span class="ow">in</span> <span class="n">childClass</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiObj</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">obj</span><span class="o">.</span><span class="n">_unwrapAll</span><span class="p">()</span>
+          <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">][</span><span class="n">obj</span><span class="o">.</span><span class="n">_id</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">data2Obj</span><span class="p">[</span><span class="n">apiObj</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_setUniqueStringKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">:</span><span class="s">&#39;ccpn.api.memops.Implementation.DataObject&#39;</span><span class="p">,</span>
+                          <span class="n">defaultValue</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;name&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;(re)set obj.keyAttr to make it a unique key, using defaultValue if not set</span>
+<span class="sd">    NB - if called BEFORE data2obj etc. dictionaries are set&quot;&quot;&quot;</span>
+
+    <span class="n">wrappedData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span> <span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span><span class="n">keyTag</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot set unique </span><span class="si">%s</span><span class="s"> for </span><span class="si">%s</span><span class="s">: </span><span class="si">%s</span><span class="s"> object has no attribute </span><span class="si">%s</span><span class="s">&quot;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">keyTag</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">))</span>
+
+    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">wrappedData</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">:</span>
+        <span class="c"># Necessary because otherwise we likely will have notifiers - that would then break</span>
+        <span class="n">wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="c"># Set default value if present value is None</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">defaultValue</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+      <span class="c"># Set to new, unique value if present value is a duplicate</span>
+      <span class="n">apiObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">apiSibling</span> <span class="ow">in</span> <span class="n">apiObjects</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">apiSibling</span> <span class="ow">is</span> <span class="n">wrappedData</span><span class="p">:</span>
+          <span class="c"># We have reached the object itself in the list. Enough</span>
+          <span class="k">break</span>
+        <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">apiSibling</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+          <span class="c"># Object name is duplicate of earlier object name - make unique name</span>
+
+          <span class="c"># First try appending serial, if possible</span>
+          <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiObj</span><span class="p">,</span> <span class="s">&#39;serial&#39;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s</span><span class="s">-</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">apiObj</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+          <span class="k">while</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiSibling</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+          <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+          <span class="k">break</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">wrappedData</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">:</span>
+        <span class="n">wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_getDirectChildren</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get list of objects that have self as a parent&quot;&quot;&quot;</span>
+
+    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+  <span class="c"># NOtifiers and related functions:</span>
+
+  <span class="nd">@classmethod</span>
+  <span class="k">def</span> <span class="nf">_setupCoreNotifier</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
+                       <span class="n">parameterDict</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{},</span> <span class="n">onceOnly</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set up notifiers for class cls that do not depend on individual objects -</span>
+<span class="sd">    These will be registered whenever a new project is initialised.</span>
+<span class="sd">    Parameters are eventually passed to the project.registerNotifier() function</span>
+<span class="sd">    (with cls converted to cls.className). Please see the Project.registerNotifier</span>
+<span class="sd">    documentation for a precise parameter description</span>
+
+<span class="sd">    Note that these notifiers are NOT cleared once set up.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># CCPNINTERNAL - used in top level class definitions, Current (ONLY)</span>
+
+
+    <span class="c"># NB _coreNotifiers is a class attribute of AbstractWrapperObject</span>
+    <span class="c"># So all tuples are appended to the same list, living in AbstractWrapperObject</span>
+    <span class="n">cls</span><span class="o">.</span><span class="n">_coreNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">parameterDict</span><span class="p">,</span> <span class="n">onceOnly</span><span class="p">))</span>
+
+
+  <span class="k">def</span> <span class="nf">_finaliseRename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reset internal attributes and call notifiers after values determining PID have changed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># reset id</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+    <span class="n">oldId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
+    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">_id</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="k">elif</span> <span class="n">parent</span> <span class="ow">is</span> <span class="n">project</span><span class="p">:</span>
+      <span class="n">_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">_id</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%s%s%s</span><span class="s">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">_id</span>
+
+    <span class="c"># update pid:object mapping dictionary</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">dd</span><span class="p">[</span><span class="n">oldId</span><span class="p">]</span>
+    <span class="n">dd</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+  <span class="k">def</span> <span class="nf">_finaliseRelatedObjectFromRename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">,</span> <span class="n">pathToObject</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Finalise related objects after rename</span>
+<span class="sd">    Alternative to _finaliseRelatedObject for calling from rename notifier.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">pathToObject</span><span class="p">)(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
+      <span class="k">pass</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
+      <span class="n">target</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># This must be an iterable</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_finaliseRelatedObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathToObject</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Finalise &#39;action&#39; type notifiers for getattribute(pathToObject)(self)</span>
+<span class="sd">    pathToObject is a navigation path (may contain dots) and must yield an object</span>
+<span class="sd">    or an iterable of objects. Can NOT be called from a rename notifier&quot;&quot;&quot;</span>
+
+    <span class="n">target</span> <span class="o">=</span> <span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="n">pathToObject</span><span class="p">)(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">target</span><span class="p">:</span>
+      <span class="k">pass</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
+      <span class="n">target</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># This must be an iterable</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">target</span><span class="p">:</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_finaliseAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Do wrapper level finalisation, and execute all notifiers</span>
+
+<span class="sd">    action is one of: &#39;create&#39;, &#39;delete&#39;, &#39;change&#39;, &#39;rename&#39;&quot;&quot;&quot;</span>
+
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+    <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_notificationBlanking</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="n">className</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
+    <span class="n">iterator</span> <span class="o">=</span> <span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">_context2Notifiers</span><span class="o">.</span><span class="n">setdefault</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">action</span><span class="p">),</span> <span class="n">OrderedDict</span><span class="p">())</span>
+               <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="s">&#39;AbstractWrapperObject&#39;</span><span class="p">))</span>
+    <span class="n">pendingNotifications</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pendingNotifications</span>
+
+    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s">&#39;rename&#39;</span><span class="p">:</span>
+      <span class="c"># Special case</span>
+
+      <span class="n">oldPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
+
+      <span class="c"># Wrapper-level processing</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseRename</span><span class="p">()</span>
+
+      <span class="c"># Call notifiers with special signature</span>
+      <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_notificationSuspension</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">notifier</span><span class="p">,</span> <span class="n">onceOnly</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pendingNotifications</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">notifier</span><span class="p">,</span> <span class="n">onceOnly</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">notifier</span> <span class="ow">in</span> <span class="n">dd</span><span class="p">:</span>
+            <span class="n">notifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">)</span>
+
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDirectChildren</span><span class="p">():</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c"># Normal case - just call notifiers</span>
+      <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_notificationSuspension</span> <span class="ow">and</span> <span class="n">action</span> <span class="o">!=</span> <span class="s">&#39;delete&#39;</span><span class="p">:</span>
+        <span class="c"># NB Deletion notifiers must currently be executed immediately</span>
+        <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">notifier</span><span class="p">,</span> <span class="n">onceOnly</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pendingNotifications</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">notifier</span><span class="p">,</span> <span class="n">onceOnly</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dd</span> <span class="ow">in</span> <span class="n">iterator</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">notifier</span> <span class="ow">in</span> <span class="n">dd</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s">&#39;finaliseAction notifier: </span><span class="si">%s</span><span class="s">; </span><span class="si">%s</span><span class="s">; </span><span class="si">%s</span><span class="s">&#39;</span>
+                                        <span class="o">%</span> <span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">))</span>
+            <span class="n">notifier</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_startFunctionCommandBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Execute StartCommandBlock for an object creation function,</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c">#CCPNINTERNAL</span>
+
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
+
+    <span class="n">parameterString</span> <span class="o">=</span> <span class="n">coreUtil</span><span class="o">.</span><span class="n">commandParameterString</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">project</span><span class="p">:</span>
+      <span class="n">command</span> <span class="o">=</span> <span class="s">&quot;project.</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">funcName</span><span class="p">,</span> <span class="n">parameterString</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">command</span> <span class="o">=</span> <span class="s">&quot;project.getByPid(</span><span class="si">%s</span><span class="s">).</span><span class="si">%s</span><span class="s">(</span><span class="si">%s</span><span class="s">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="n">parameterString</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">parName</span><span class="p">:</span>
+      <span class="n">command</span> <span class="o">=</span> <span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">parName</span><span class="p">,</span> <span class="s">&#39; = &#39;</span><span class="p">,</span> <span class="n">command</span><span class="p">))</span>
+
+    <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_startCommandBlock</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
+
+
+<span class="n">AbstractWrapperObject</span><span class="o">.</span><span class="n">getByPid</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">AbstractWrapperObject</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

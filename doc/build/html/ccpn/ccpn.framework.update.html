@@ -1,0 +1,254 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.framework.update package &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../index.html" />
+    <link rel="up" title="ccpn.framework package" href="ccpn.framework.html" />
+    <link rel="next" title="ccpn.ui package" href="ccpn.ui.html" />
+    <link rel="prev" title="ccpn.framework.languages package" href="ccpn.framework.languages.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.ui.html" title="ccpn.ui package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.framework.languages.html" title="ccpn.framework.languages package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.framework.html" accesskey="U">ccpn.framework package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ccpn.framework.update">
+<span id="ccpn-framework-update-package"></span><h1>ccpn.framework.update package<a class="headerlink" href="#module-ccpn.framework.update" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpn.framework.update.UpdateAgent">
+<span id="ccpn-framework-update-updateagent-module"></span><h2>ccpn.framework.update.UpdateAgent module<a class="headerlink" href="#module-ccpn.framework.update.UpdateAgent" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent">
+<em class="property">class </em><code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">UpdateAgent</code><span class="sig-paren">(</span><em>version</em>, <em>showError=None</em>, <em>showInfo=None</em>, <em>askPassword=None</em>, <em>serverUser=None</em>, <em>server='http://www2.ccpn.ac.uk/'</em>, <em>serverDbRoot='ccpNmrUpdate'</em>, <em>serverDbFile='__UpdateData.db'</em>, <em>serverDownloadScript='cgi-bin/update/downloadFile'</em>, <em>serverUploadScript='cgi-bin/updateadmin/uploadFile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.addFiles">
+<code class="descname">addFiles</code><span class="sig-paren">(</span><em>filePaths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.addFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.addFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.commitChosen">
+<code class="descname">commitChosen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.commitChosen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.commitChosen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copy chosen local files to server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.commitUpdateDb">
+<code class="descname">commitUpdateDb</code><span class="sig-paren">(</span><em>serverPassword</em>, <em>updateFiles</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.commitUpdateDb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.commitUpdateDb" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.diffUpdates">
+<code class="descname">diffUpdates</code><span class="sig-paren">(</span><em>updateFiles=None</em>, <em>write=&lt;built-in method write of _io.TextIOWrapper object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.diffUpdates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.diffUpdates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.fetchUpdateDb">
+<code class="descname">fetchUpdateDb</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.fetchUpdateDb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.fetchUpdateDb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch list of updates from server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.haveWriteAccess">
+<code class="descname">haveWriteAccess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.haveWriteAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.haveWriteAccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>See if can write files to local installation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.installChosen">
+<code class="descname">installChosen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.installChosen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.installChosen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download chosen server files to local installation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.installUpdates">
+<code class="descname">installUpdates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.installUpdates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.installUpdates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.isUpdateDifferent">
+<code class="descname">isUpdateDifferent</code><span class="sig-paren">(</span><em>filePath</em>, <em>fileHashCode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.isUpdateDifferent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.isUpdateDifferent" title="Permalink to this definition">¶</a></dt>
+<dd><p>See if local file is different from server file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateAgent.resetFromServer">
+<code class="descname">resetFromServer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateAgent.resetFromServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateAgent.resetFromServer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateFile">
+<em class="property">class </em><code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">UpdateFile</code><span class="sig-paren">(</span><em>installLocation</em>, <em>serverDbRoot</em>, <em>filePath</em>, <em>fileServerTime=None</em>, <em>fileStoredAs=None</em>, <em>fileHashCode=None</em>, <em>shouldInstall=True</em>, <em>shouldCommit=False</em>, <em>isNew=False</em>, <em>serverDownloadScript=None</em>, <em>serverUploadScript=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateFile.commitUpdate">
+<code class="descname">commitUpdate</code><span class="sig-paren">(</span><em>serverUser</em>, <em>serverPassword</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateFile.commitUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateFile.commitUpdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.update.UpdateAgent.UpdateFile.installUpdate">
+<code class="descname">installUpdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#UpdateFile.installUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.UpdateFile.installUpdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.framework.update.UpdateAgent.calcHashCode">
+<code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">calcHashCode</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#calcHashCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.calcHashCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.framework.update.UpdateAgent.downloadFile">
+<code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">downloadFile</code><span class="sig-paren">(</span><em>serverScript</em>, <em>serverDbRoot</em>, <em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#downloadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.downloadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.framework.update.UpdateAgent.lastModifiedTime">
+<code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">lastModifiedTime</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#lastModifiedTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.lastModifiedTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.framework.update.UpdateAgent.uploadData">
+<code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">uploadData</code><span class="sig-paren">(</span><em>serverUser</em>, <em>serverPassword</em>, <em>serverScript</em>, <em>fileData</em>, <em>serverDbRoot</em>, <em>fileStoredAs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#uploadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.uploadData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.framework.update.UpdateAgent.uploadFile">
+<code class="descclassname">ccpn.framework.update.UpdateAgent.</code><code class="descname">uploadFile</code><span class="sig-paren">(</span><em>serverUser</em>, <em>serverPassword</em>, <em>serverScript</em>, <em>fileName</em>, <em>serverDbRoot</em>, <em>fileStoredAs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdateAgent.html#uploadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdateAgent.uploadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.framework.update.UpdatePopup">
+<span id="ccpn-framework-update-updatepopup-module"></span><h2>ccpn.framework.update.UpdatePopup module<a class="headerlink" href="#module-ccpn.framework.update.UpdatePopup" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.framework.update.UpdatePopup.UpdatePopup">
+<em class="property">class </em><code class="descclassname">ccpn.framework.update.UpdatePopup.</code><code class="descname">UpdatePopup</code><span class="sig-paren">(</span><em>parent=None</em>, <em>title='Update CCPN code'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdatePopup.html#UpdatePopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdatePopup.UpdatePopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDialog</span></code>, <a class="reference internal" href="#ccpn.framework.update.UpdateAgent.UpdateAgent" title="ccpn.framework.update.UpdateAgent.UpdateAgent"><code class="xref py py-class docutils literal"><span class="pre">ccpn.framework.update.UpdateAgent.UpdateAgent</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.framework.update.UpdatePopup.UpdatePopup.resetFromServer">
+<code class="descname">resetFromServer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/update/UpdatePopup.html#UpdatePopup.resetFromServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.update.UpdatePopup.UpdatePopup.resetFromServer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ccpn.framework.update package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpn.framework.update.UpdateAgent">ccpn.framework.update.UpdateAgent module</a></li>
+<li><a class="reference internal" href="#module-ccpn.framework.update.UpdatePopup">ccpn.framework.update.UpdatePopup module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ccpn.framework.languages.html"
+                        title="previous chapter">ccpn.framework.languages package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ccpn.ui.html"
+                        title="next chapter">ccpn.ui package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ccpn/ccpn.framework.update.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.ui.html" title="ccpn.ui package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.framework.languages.html" title="ccpn.framework.languages package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.framework.html" >ccpn.framework package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

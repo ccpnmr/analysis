@@ -1,0 +1,482 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.NEFreader.NEFreader.nef &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.NEFreader.NEFreader.nef</h1><div class="highlight"><pre>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;tjr22&#39;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">from</span> <span class="nn">.parser</span> <span class="kn">import</span> <span class="n">Lexer</span><span class="p">,</span> <span class="n">Parser</span>
+<span class="kn">from</span> <span class="nn">.writer</span> <span class="kn">import</span> <span class="n">nefToText</span>
+
+<span class="n">MAJOR_VERSION</span> <span class="o">=</span> <span class="s">&#39;0&#39;</span>
+<span class="n">MINOR_VERSION</span> <span class="o">=</span> <span class="s">&#39;8&#39;</span>
+<span class="n">PATCH_LEVEL</span> <span class="o">=</span> <span class="s">&#39;4&#39;</span>
+<span class="n">__nef_version__</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">(</span><span class="n">MAJOR_VERSION</span><span class="p">,</span> <span class="n">MINOR_VERSION</span><span class="p">)</span> <span class="p">)</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span> <span class="p">(</span><span class="n">__nef_version__</span><span class="p">,</span> <span class="n">PATCH_LEVEL</span><span class="p">)</span> <span class="p">)</span>
+
+<div class="viewcode-block" id="Nef"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef">[docs]</a><span class="k">class</span> <span class="nc">Nef</span><span class="p">(</span><span class="n">OrderedDict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An in-memory representation of the NEF format</span>
+
+<span class="sd">    Notes:</span>
+<span class="sd">    Saveframes are modeled as OrderedDict&#39;s</span>
+<span class="sd">    Loops are modeled as a size 2 list of lists (potentially to become pandas saveframes).  The</span>
+<span class="sd">    first list is a list of loop &#39;column&#39; names, and the second is a list of values.  This can then</span>
+<span class="sd">    be accessed by setting the stepsize to the length of the &#39;column&#39;.</span>
+<span class="sd">    ie: for a list of all the values in the third column do: l[1][2::len(l[0])]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">NEF_REQUIRED_SAVEFRAME_BY_FRAMECODE</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">,</span>
+                                           <span class="s">&#39;nef_molecular_system&#39;</span><span class="p">]</span>
+    <span class="n">NEF_REQUIRED_SAVEFRAME_BY_CATEGORY</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_chemical_shift_list&#39;</span><span class="p">,]</span>
+
+    <span class="n">NEF_ALL_SAVEFRAME_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                                         <span class="s">&#39;sf_framecode&#39;</span><span class="p">,]</span>
+
+    <span class="n">MD_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;sf_framecode&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;format_name&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;format_version&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;program_name&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;program_version&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;creation_date&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;uuid&#39;</span><span class="p">]</span>
+    <span class="n">MD_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;coordinate_file_name&#39;</span><span class="p">,]</span>
+    <span class="n">MD_OPTIONAL_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_related_entries&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;nef_program_script&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;nef_run_history&#39;</span><span class="p">]</span>
+    <span class="n">MD_RE_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;database_name&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;database_accession_code&#39;</span><span class="p">]</span>
+    <span class="n">MD_PS_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;program_name&#39;</span><span class="p">,]</span>
+    <span class="n">MD_RH_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;run_ordinal&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;program_name&#39;</span><span class="p">]</span>
+    <span class="n">MD_RH_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;program_version&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;script_name&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;script&#39;</span><span class="p">]</span>
+
+    <span class="n">MS_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;sf_framecode&#39;</span><span class="p">]</span>
+    <span class="n">MS_REQUIRED_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_sequence&#39;</span><span class="p">]</span>
+    <span class="n">MS_OPTIONAL_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_covalent_links&#39;</span><span class="p">]</span>
+    <span class="n">MS_NS_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;chain_code&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;sequence_code&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;residue_type&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;linking&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;residue_variant&#39;</span><span class="p">]</span>
+    <span class="n">MS_CL_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;chain_code_1&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;sequence_code_1&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;residue_type_1&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;atom_name_1&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;chain_code_2&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;sequence_code_2&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;residue_type_2&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;atom_name_2&#39;</span><span class="p">]</span>
+
+    <span class="n">CSL_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;sf_framecode&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;atom_chem_shift_units&#39;</span><span class="p">]</span>
+    <span class="n">CSL_REQUIRED_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_chemical_shift&#39;</span><span class="p">]</span>
+    <span class="n">CSL_CS_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;chain_code&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;sequence_code&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;residue_type&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;atom_name&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;value&#39;</span><span class="p">]</span>
+    <span class="n">CSL_CS_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;value_uncertainty&#39;</span><span class="p">,]</span>
+
+    <span class="n">DRL_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;sf_framecode&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;potential_type&#39;</span><span class="p">]</span>
+    <span class="n">DRL_REQUIRED_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_distance_restraint&#39;</span><span class="p">]</span>
+    <span class="n">DRL_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;restraint_origin&#39;</span><span class="p">,]</span>
+    <span class="n">DRL_DR_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ordinal&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;restraint_id&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;chain_code_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;sequence_code_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;residue_type_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;atom_name_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;chain_code_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;sequence_code_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;residue_type_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;atom_name_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;weight&#39;</span><span class="p">]</span>
+    <span class="n">DRL_DR_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;restraint_combination_id&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;target_value&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;target_value_uncertainty&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;lower_linear_limit&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;lower_limit&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;upper_limit&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;upper_linear_limit&#39;</span><span class="p">]</span>
+
+    <span class="n">DIHRL_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;sf_framecode&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;potential_type&#39;</span><span class="p">]</span>
+    <span class="n">DIHRL_REQUIRED_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_dihedral_restraint&#39;</span><span class="p">]</span>
+    <span class="n">DIHRL_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;restraint_origin&#39;</span><span class="p">,]</span>
+    <span class="n">DIHRL_DIHR_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ordinal&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;restraint_id&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;restraint_combination_id&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;chain_code_1&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;sequence_code_1&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;residue_type_1&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;atom_name_1&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;chain_code_2&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;sequence_code_2&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;residue_type_2&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;atom_name_2&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;chain_code_3&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;sequence_code_3&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;residue_type_3&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;atom_name_3&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;chain_code_4&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;sequence_code_4&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;residue_type_4&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;atom_name_4&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;weight&#39;</span><span class="p">]</span>
+    <span class="n">DIHRL_DIHR_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;target_value&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;target_value_uncertainty&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;lower_linear_limit&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;lower_limit&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;upper_limit&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;upper_linear_limit&#39;</span><span class="p">,</span>
+                                  <span class="s">&#39;name&#39;</span><span class="p">]</span>
+
+    <span class="n">RRL_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;sf_framecode&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;potential_type&#39;</span><span class="p">]</span>
+    <span class="n">RRL_REQUIRED_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_rdc_restraint&#39;</span><span class="p">]</span>
+    <span class="n">RRL_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;restraint_origin&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;tensor_magnitude&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;tensor_rhombicity&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;tensor_chain_code&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;tensor_sequence_code&#39;</span><span class="p">,</span>
+                           <span class="s">&#39;tensor_residue_type&#39;</span><span class="p">,]</span>
+    <span class="n">RRL_RR_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ordinal&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;restraint_id&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;chain_code_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;sequence_code_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;residue_type_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;atom_name_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;chain_code_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;sequence_code_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;residue_type_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;atom_name_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;weight&#39;</span><span class="p">]</span>
+    <span class="n">RRL_RR_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;restraint_combination_id&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;target_value&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;target_value_uncertainty&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;lower_linear_limit&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;lower_limit&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;upper_limit&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;upper_linear_limit&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;scale&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;distance_dependent&#39;</span><span class="p">,]</span>
+
+    <span class="n">PL_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;sf_framecode&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;num_dimensions&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;chemical_shift_list&#39;</span><span class="p">]</span>
+    <span class="n">PL_REQUIRED_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_spectrum_dimension&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;nef_spectrum_dimension_transfer&#39;</span><span class="p">,</span>
+                         <span class="s">&#39;nef_peak&#39;</span><span class="p">]</span>
+    <span class="n">PL_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;experiment_classification&#39;</span><span class="p">,</span>
+                          <span class="s">&#39;experiment_type&#39;</span><span class="p">]</span>
+    <span class="n">PL_SD_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;dimension_id&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;axis_unit&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;axis_code&#39;</span><span class="p">]</span>
+    <span class="n">PL_SD_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;spectrometer_frequency&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;spectral_width&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;value_first_point&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;folding&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;absolute_peak_positions&#39;</span><span class="p">,</span>
+                             <span class="s">&#39;is_acquisition&#39;</span><span class="p">,]</span>
+    <span class="n">PL_SDT_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;dimension_1&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;dimension_2&#39;</span><span class="p">,</span>
+                              <span class="s">&#39;transfer_type&#39;</span><span class="p">]</span>
+    <span class="n">PL_SDT_OPTIONAL_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;is_indirect&#39;</span><span class="p">,]</span>
+    <span class="n">PL_P_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;ordinal&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;peak_id&#39;</span><span class="p">]</span>
+    <span class="n">PL_P_REQUIRED_ALTERNATE_FIELDS</span> <span class="o">=</span> <span class="p">[[</span><span class="s">&#39;height&#39;</span><span class="p">,</span> <span class="s">&#39;volume&#39;</span><span class="p">],]</span>
+    <span class="n">PL_P_REQUIRED_FIELDS_PATTERN</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;position_{}&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;chain_code_{}&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;sequence_code_{}&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;residue_type_{}&#39;</span><span class="p">,</span>
+                                    <span class="s">&#39;atom_name_{}&#39;</span><span class="p">,]</span>
+    <span class="n">PL_P_OPTIONAL_ALTERNATE_FIELDS</span> <span class="o">=</span> <span class="p">{</span><span class="s">r&#39;(height)&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;{}_uncertainty&#39;</span><span class="p">,],</span>
+                                      <span class="s">r&#39;(volume)&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;{}_uncertainty&#39;</span><span class="p">,],</span>
+                                      <span class="s">r&#39;position_([0-9]+)&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s">&#39;position_uncertainty_{}&#39;</span><span class="p">,],</span>
+                                      <span class="p">}</span>
+    <span class="n">PL_P_OPTIONAL_FIELDS_PATTERN</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;position_uncertainty_{}&#39;</span><span class="p">,]</span>
+
+    <span class="n">PRLS_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sf_category&#39;</span><span class="p">,</span>
+                            <span class="s">&#39;sf_framecode&#39;</span><span class="p">]</span>
+    <span class="n">PRLS_REQUIRED_LOOPS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nef_peak_restraint_link&#39;</span><span class="p">]</span>
+    <span class="n">PRLS_PRL_REQUIRED_FIELDS</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;nmr_spectrum_id&#39;</span><span class="p">,</span>
+                                <span class="s">&#39;peak_id&#39;</span><span class="p">,</span>
+                                <span class="s">&#39;restraint_list_id&#39;</span><span class="p">,</span>
+                                <span class="s">&#39;restraint_id&#39;</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">initialize</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Nef</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_filename</span> <span class="o">=</span> <span class="n">input_filename</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">datablock</span> <span class="o">=</span> <span class="s">&#39;DEFAULT&#39;</span>
+
+        <span class="k">if</span> <span class="n">initialize</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">initialize</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="Nef.initialize"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.initialize">[docs]</a>    <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="s">&#39;&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">Nef</span><span class="o">.</span><span class="n">MD_REQUIRED_FIELDS</span><span class="p">})</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;sf_category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;nef_nmr_meta_data&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;sf_framecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;nef_nmr_meta_data&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;format_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;Nmr_Exchange_Format&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;format_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__nef_version__</span>
+        <span class="c"># for l in Nef.MD_REQUIRED_LOOPS:</span>
+        <span class="c">#     self[&#39;nef_nmr_meta_data&#39;][l] = []</span>
+
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_molecular_system&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_molecular_system&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span><span class="s">&#39;&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">Nef</span><span class="o">.</span><span class="n">MS_REQUIRED_FIELDS</span><span class="p">})</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_molecular_system&#39;</span><span class="p">][</span><span class="s">&#39;sf_category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;nef_molecular_system&#39;</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_molecular_system&#39;</span><span class="p">][</span><span class="s">&#39;sf_framecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;nef_molecular_system&#39;</span>
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">Nef</span><span class="o">.</span><span class="n">MS_REQUIRED_LOOPS</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_molecular_system&#39;</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_chemical_shift_list</span><span class="p">(</span><span class="s">&#39;nef_chemical_shift_list_1&#39;</span><span class="p">,</span> <span class="s">&#39;ppm&#39;</span><span class="p">)</span></div>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Nef.from_text"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.from_text">[docs]</a>    <span class="k">def</span> <span class="nf">from_text</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">nef</span> <span class="o">=</span> <span class="n">Nef</span><span class="p">()</span>
+
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">Lexer</span><span class="p">()</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">Parser</span><span class="p">(</span><span class="n">nef</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">strict</span> <span class="o">=</span> <span class="n">strict</span>
+
+        <span class="k">del</span> <span class="n">nef</span><span class="o">.</span><span class="n">datablock</span>
+        <span class="k">del</span> <span class="n">nef</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">nef</span><span class="p">[</span><span class="s">&#39;nef_molecular_system&#39;</span><span class="p">]</span>
+        <span class="k">del</span> <span class="n">nef</span><span class="p">[</span><span class="s">&#39;nef_chemical_shift_list_1&#39;</span><span class="p">]</span>
+
+        <span class="n">parser</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">nef</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Nef.from_file"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.from_file">[docs]</a>    <span class="k">def</span> <span class="nf">from_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">nef</span> <span class="o">=</span> <span class="n">Nef</span><span class="o">.</span><span class="n">from_text</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">nef</span></div>
+
+
+<div class="viewcode-block" id="Nef.write"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.write">[docs]</a>    <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_like</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">time</span>
+        <span class="kn">import</span> <span class="nn">random</span>
+
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;format_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__nef_version__</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;program_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;program_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;NEFreader&#39;</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;program_version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">__version__</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;creation_date&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s">&#39;%Y-%m-</span><span class="si">%d</span><span class="s">T%H:%M:</span><span class="si">%s</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;uuid&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;program_name&#39;</span><span class="p">],</span>
+                                                      <span class="bp">self</span><span class="p">[</span><span class="s">&#39;nef_nmr_meta_data&#39;</span><span class="p">][</span><span class="s">&#39;creation_date&#39;</span><span class="p">],</span>
+                                                      <span class="nb">str</span><span class="p">(</span><span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="p">))[:</span><span class="mi">7</span><span class="p">]</span>
+                                                     <span class="p">))</span>
+        <span class="n">file_like</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">nefToText</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Nef.save"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div>
+
+
+    <span class="c">### Convenience Functions ###</span>
+
+<div class="viewcode-block" id="Nef.add_saveframe"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.add_saveframe">[docs]</a>    <span class="k">def</span> <span class="nf">add_saveframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="p">,</span> <span class="n">required_fields</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">required_loops</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">required_fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="s">&#39;&#39;</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">required_fields</span><span class="p">})</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;sf_category&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">category</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;sf_framecode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">required_loops</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">required_loops</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">l</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="Nef.add_chemical_shift_list"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.add_chemical_shift_list">[docs]</a>    <span class="k">def</span> <span class="nf">add_chemical_shift_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cs_units</span><span class="o">=</span><span class="s">&#39;ppm&#39;</span><span class="p">):</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;nef_chemical_shift_list&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_saveframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+                           <span class="n">required_fields</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">CSL_REQUIRED_FIELDS</span><span class="p">,</span>
+                           <span class="n">required_loops</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">CSL_REQUIRED_LOOPS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;atom_chem_shift_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cs_units</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Nef.add_distance_restraint_list"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.add_distance_restraint_list">[docs]</a>    <span class="k">def</span> <span class="nf">add_distance_restraint_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">potential_type</span><span class="p">,</span>
+                                    <span class="n">restraint_origin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;nef_distance_restraint_list&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_saveframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+                           <span class="n">required_fields</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">DRL_REQUIRED_FIELDS</span><span class="p">,</span>
+                           <span class="n">required_loops</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">DRL_REQUIRED_LOOPS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;potential_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">potential_type</span>
+        <span class="k">if</span> <span class="n">restraint_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;restraint_origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">restraint_origin</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Nef.add_dihedral_restraint_list"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.add_dihedral_restraint_list">[docs]</a>    <span class="k">def</span> <span class="nf">add_dihedral_restraint_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">potential_type</span><span class="p">,</span>
+                                    <span class="n">restraint_origin</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;nef_dihedral_restraint_list&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_saveframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+                           <span class="n">required_fields</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">DIHRL_REQUIRED_FIELDS</span><span class="p">,</span>
+                           <span class="n">required_loops</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">DIHRL_REQUIRED_LOOPS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;potential_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">potential_type</span>
+        <span class="k">if</span> <span class="n">restraint_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;restraint_origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">restraint_origin</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Nef.add_rdc_restraint_list"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.add_rdc_restraint_list">[docs]</a>    <span class="k">def</span> <span class="nf">add_rdc_restraint_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">potential_type</span><span class="p">,</span>
+                               <span class="n">restraint_origin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tensor_magnitude</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">tensor_rhombicity</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tensor_chain_code</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                               <span class="n">tensor_sequence_code</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tensor_residue_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;nef_rdc_restraint_list&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_saveframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+                           <span class="n">required_fields</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">DIHRL_REQUIRED_FIELDS</span><span class="p">,</span>
+                           <span class="n">required_loops</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">RRL_REQUIRED_LOOPS</span><span class="p">)</span>
+        <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;potential_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">potential_type</span>
+        <span class="k">if</span> <span class="n">restraint_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;restraint_origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">restraint_origin</span>
+        <span class="k">if</span> <span class="n">tensor_magnitude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;tensor_magnitude&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor_magnitude</span>
+        <span class="k">if</span> <span class="n">tensor_rhombicity</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;tensor_rhombicity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor_rhombicity</span>
+        <span class="k">if</span> <span class="n">tensor_chain_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;tensor_chain_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor_chain_code</span>
+        <span class="k">if</span> <span class="n">tensor_sequence_code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;tensor_sequence_code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor_sequence_code</span>
+        <span class="k">if</span> <span class="n">tensor_residue_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;tensor_residue_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tensor_residue_type</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Nef.add_peak_list"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.add_peak_list">[docs]</a>    <span class="k">def</span> <span class="nf">add_peak_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">num_dimensions</span><span class="p">,</span> <span class="n">chemical_shift_list</span><span class="p">,</span>
+                      <span class="n">experiment_classification</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">experiment_type</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;nef_nmr_spectrum&#39;</span>
+        <span class="k">if</span> <span class="n">chemical_shift_list</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="n">chemical_shift_list</span><span class="p">][</span><span class="s">&#39;sf_category&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;nef_chemical_shift_list&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_saveframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+                                   <span class="n">required_fields</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">PL_REQUIRED_FIELDS</span><span class="p">,</span>
+                                   <span class="n">required_loops</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">PL_REQUIRED_LOOPS</span><span class="p">)</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;num_dimensions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_dimensions</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;chemical_shift_list&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">chemical_shift_list</span>
+                <span class="k">if</span> <span class="n">experiment_classification</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;experiment_classification&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiment_classification</span>
+                <span class="k">if</span> <span class="n">experiment_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s">&#39;experiment_type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">experiment_type</span>
+
+                <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;{} is not a nef_chemical_shift_list.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chemical_shift_list</span><span class="p">))</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;{} does not exist.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">chemical_shift_list</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Nef.add_linkage_table"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.nef.Nef.add_linkage_table">[docs]</a>    <span class="k">def</span> <span class="nf">add_linkage_table</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;nef_peak_restraint_links&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">add_saveframe</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">,</span>
+                                  <span class="n">required_fields</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">PRLS_REQUIRED_FIELDS</span><span class="p">,</span>
+                                  <span class="n">required_loops</span><span class="o">=</span><span class="n">Nef</span><span class="o">.</span><span class="n">PL_REQUIRED_LOOPS</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

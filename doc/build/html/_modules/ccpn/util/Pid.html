@@ -1,0 +1,560 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.Pid &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.Pid</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Pid (Project ID) class for within-project unique ID strings.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Version 2/3 Pid routines</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">cing</span> <span class="kn">import</span> <span class="n">__version__</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+  <span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;???&#39;</span>
+
+<span class="c"># set separators</span>
+<span class="n">PREFIXSEP</span> <span class="o">=</span> <span class="s">&#39;:&#39;</span>
+<span class="n">IDSEP</span> <span class="o">=</span> <span class="s">&#39;.&#39;</span>
+
+<span class="c"># Set translation between IDSEP and alternative character</span>
+<span class="n">altCharacter</span> <span class="o">=</span> <span class="s">&#39;^&#39;</span>
+<span class="n">remapSeparators</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="n">IDSEP</span><span class="p">,</span><span class="n">altCharacter</span><span class="p">)</span>
+<span class="n">unmapSeparators</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="n">maketrans</span><span class="p">(</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">IDSEP</span><span class="p">)</span>
+
+<div class="viewcode-block" id="createPid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.createPid">[docs]</a><span class="k">def</span> <span class="nf">createPid</span><span class="p">(</span><span class="n">head</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Pid&#39;</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;make pid from head and list of successive keys.</span>
+<span class="sd">  Head may be an existing pid, or a naked string</span>
+<span class="sd">  Keys are converted to string, and illegal characters are converted to altCharacter</span>
+<span class="sd">  The head is  not checked - it should be either a valid pid or a class code&quot;&quot;&quot;</span>
+
+  <span class="c"># map args to corrected strings</span>
+  <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">remapSeparators</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">head</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">PREFIXSEP</span><span class="p">:</span>
+      <span class="n">sep</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+  <span class="k">elif</span> <span class="n">PREFIXSEP</span> <span class="ow">in</span> <span class="n">head</span><span class="p">:</span>
+      <span class="n">sep</span> <span class="o">=</span> <span class="n">IDSEP</span>
+  <span class="k">else</span><span class="p">:</span>
+      <span class="n">sep</span> <span class="o">=</span> <span class="n">PREFIXSEP</span>
+  <span class="c">#</span>
+  <span class="k">return</span> <span class="n">Pid</span><span class="p">(</span><span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">head</span><span class="p">,</span> <span class="n">IDSEP</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">))))</span></div>
+
+<div class="viewcode-block" id="createId"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.createId">[docs]</a><span class="k">def</span> <span class="nf">createId</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;make id from list of successive keys.</span>
+<span class="sd">  Keys are converted to string, and illegal characters are converted to altCharacter&quot;&quot;&quot;</span>
+
+  <span class="c"># map args to corrected strings</span>
+  <span class="k">return</span> <span class="n">IDSEP</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">remapSeparators</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="splitId"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.splitId">[docs]</a><span class="k">def</span> <span class="nf">splitId</span><span class="p">(</span><span class="n">idString</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+  <span class="sd">&quot;&quot;&quot;Split idString into tuple of component elements,</span>
+<span class="sd">  mapping altCharacter back to separator and replacing empty strings with None&quot;&quot;&quot;</span>
+
+  <span class="c"># map args to corrected strings</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">((</span><span class="n">val</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">unmapSeparators</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">idString</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">IDSEP</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="decodePid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.decodePid">[docs]</a><span class="k">def</span> <span class="nf">decodePid</span><span class="p">(</span><span class="n">sourceObject</span><span class="p">,</span> <span class="n">thePid</span><span class="p">:</span><span class="s">&#39;Pid&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Optional[Pid]&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    try to decode thePid relative to sourceObject</span>
+<span class="sd">    return decoded pid object or None on not found or Error</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># REFACTOR. This DOES decode PID parts. TBD NBNB</span>
+
+    <span class="kn">import</span> <span class="nn">cing.Libs.io</span> <span class="kn">as</span> <span class="nn">io</span>
+
+    <span class="k">if</span> <span class="n">thePid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c"># assure a Pid object</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">thePid</span><span class="p">,</span> <span class="n">Pid</span><span class="p">):</span>
+        <span class="n">strPid</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">thePid</span><span class="p">)</span>
+
+        <span class="c"># Modified by Rasmus to match new isValid behaviour)</span>
+        <span class="c"># thePid = Pid(str(thePid))</span>
+        <span class="c"># NB Assumes that asPid wi;ll raise VALUEeRROR (as Pid does) if something goes wrong</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">thePid</span><span class="p">,</span> <span class="s">&#39;asPid&#39;</span><span class="p">):</span>
+                <span class="c"># we probably did get passed an object</span>
+                <span class="n">thePid</span> <span class="o">=</span> <span class="n">thePid</span><span class="o">.</span><span class="n">asPid</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c"># just try it as a string</span>
+                <span class="n">thePid</span> <span class="o">=</span> <span class="n">Pid</span><span class="p">(</span><span class="n">strPid</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;decodePid: pid &quot;{0}&quot; is invalid&#39;</span><span class="p">,</span> <span class="n">thePid</span><span class="p">)</span>
+
+
+        <span class="c">#end if</span>
+    <span class="c">#end if</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">thePid</span><span class="o">.</span><span class="n">isValid</span><span class="p">:</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;decodePid: pid &quot;{0}&quot; is invalid&#39;</span><span class="p">,</span> <span class="n">thePid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="c">#end if</span>
+
+    <span class="c"># check if thePid describes the source object</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sourceObject</span><span class="p">,</span><span class="s">&#39;asPid&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sourceObject</span><span class="o">.</span><span class="n">asPid</span> <span class="o">==</span> <span class="n">thePid</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">sourceObject</span>
+    <span class="c">#end if</span>
+    <span class="c"># apparently not, let try to traverse down to find the elements of thePid</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">sourceObject</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">thePid</span><span class="p">:</span>
+        <span class="c">#print( &#39;decodePid&gt;&gt;&#39;, p, object)</span>
+        <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">obj</span><span class="p">[</span><span class="n">p</span><span class="p">]</span>
+    <span class="c">#end for</span>
+    <span class="c"># found an object, check if it is the right kind</span>
+    <span class="c"># Necessary as ccpn wrapper objects use .className insteaad of .__class__.__name__</span>
+    <span class="n">objType</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">className</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;className&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="k">if</span> <span class="n">thePid</span><span class="o">.</span><span class="n">type</span> <span class="o">!=</span> <span class="n">objType</span><span class="p">:</span>
+        <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;decodePid: type &quot;{0}&quot; does not match object type &quot;{1}&quot;&#39;</span><span class="p">,</span>
+                 <span class="n">thePid</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">objType</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+    <span class="k">return</span> <span class="n">obj</span></div>
+<span class="c">#end def</span>
+
+
+<div class="viewcode-block" id="Pid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid">[docs]</a><span class="k">class</span> <span class="nc">Pid</span><span class="p">(</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Pid routines, adapted from path idea in: Python Cookbook,</span>
+<span class="sd">    A. Martelli and D. Ascher (eds), O&#39;Reilly 2002, pgs 140-142</span>
+<span class="sd">    Features:</span>
+<span class="sd">    - newpid = pid1 + id1 </span>
+<span class="sd">    - slicing to address elements of pid</span>
+<span class="sd">    - loop over elements of pid</span>
+<span class="sd">    - modify an element</span>
+<span class="sd">    - copy a pid</span>
+<span class="sd">    - incrementation and decrementation</span>
+<span class="sd">    - check validity</span>
+<span class="sd">    - return as string (convenience)</span>
+<span class="sd">    </span>
+<span class="sd">    pid = Pid.new(&#39;Residue&#39;,&#39;mol1&#39;,&#39;A&#39;, 502) # elements need not be strings; but will be converted</span>
+<span class="sd">    -&gt; Residue:mol1.A.502   (Pid instance)</span>
+
+<span class="sd">    which is equivalent to:</span>
+
+<span class="sd">    pid = Pid(&#39;Residue:mol1.A.502&#39;)</span>
+<span class="sd">    -&gt; Residue:mol1.A.502   (Pid instance)</span>
+
+<span class="sd">    Behaves as a string:</span>
+<span class="sd">    pid == &#39;Residue:mol1.A.502&#39;</span>
+<span class="sd">    -&gt; True</span>
+
+<span class="sd">    pid.str</span>
+<span class="sd">    -&gt; &#39;Residue:mol1.A.502&#39; (str instance)</span>
+
+<span class="sd">    pid.type</span>
+<span class="sd">    -&gt; &#39;Residue&#39; (str instance)</span>
+
+<span class="sd">    pid.id</span>
+<span class="sd">    -&gt; &#39;mol1.A.502&#39; (str instance)</span>
+
+<span class="sd">    len(pid)</span>
+<span class="sd">    -&gt; 3</span>
+
+<span class="sd">    pid[0]</span>
+<span class="sd">    -&gt; &#39;mol1&#39; (str instance)</span>
+
+<span class="sd">    pid[0:2]</span>
+<span class="sd">    -&gt; &#39;mol1.A&#39; (str instance)</span>
+<span class="sd">    </span>
+<span class="sd">    for id in pid:</span>
+<span class="sd">    ....print id</span>
+<span class="sd">    -&gt;</span>
+<span class="sd">    &#39;mol1&#39; (str instance)</span>
+<span class="sd">    &#39;A&#39;  (str instance)</span>
+<span class="sd">    &#39;502&#39;  (str instance)</span>
+<span class="sd">    </span>
+<span class="sd">    pid2 = pid.modify(1, &#39;B&#39;, type=&#39;Atom&#39;) + &#39;N&#39;</span>
+<span class="sd">    -&gt; Atom:mol1.B.502.N  (Pid instance)</span>
+<span class="sd">    </span>
+<span class="sd">    but also:</span>
+<span class="sd">    pid3 = Pid(&#39;Residue&#39;) + &#39;mol2&#39;</span>
+<span class="sd">    -&gt; Residue:mol2  (Pid instance)</span>
+<span class="sd">    </span>
+<span class="sd">    pid4 = pid.decrement(2,1)</span>
+<span class="sd">    -&gt; Residue:mol1.A.501  (Pid instance)</span>
+<span class="sd">    or</span>
+<span class="sd">    pid4 = pid.increment(2,-1)</span>
+<span class="sd">    NB fails on elements that cannot be converted to int&#39;s</span>
+<span class="sd">    </span>
+<span class="sd">    pid5 = pid.copy()   # equivalent to pid5 = Pid(pid.str)</span>
+<span class="sd">    -&gt; Residue:mol1.A.502  (Pid instance)</span>
+<span class="sd">    </span>
+<span class="sd">    pid==pid5</span>
+<span class="sd">    -&gt; True</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;502&#39; in pid</span>
+<span class="sd">    -&gt; True</span>
+
+<span class="sd">    502 in pid</span>
+<span class="sd">    -&gt; False    # all pid elements are strings</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c"># name mapping dictionary</span>
+    <span class="n">nameMap</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">MO</span> <span class="o">=</span> <span class="s">&#39;Molecule&#39;</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">string</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;First argument (&#39;string&#39; must be a valid pid string with at least one, non-initial PREFIXSEP</span>
+<span class="sd">        Additional arguments are converted to string with disallowed characters changed to altCharacter&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+        <span class="c"># str.__init__(self,string)</span>
+
+        <span class="c"># inlining this here is 1) faster, 2) guarantees that we never get invalid Pids.</span>
+        <span class="c"># We can then assume validity for the rest of the functions</span>
+        <span class="k">if</span> <span class="n">PREFIXSEP</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;String </span><span class="si">%s</span><span class="s"> is not a valid Pid&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="o">.</span><span class="n">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_version</span> <span class="o">=</span> <span class="s">&#39;cing:</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="n">__version__</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return type part of pid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># parts = self._split()</span>
+        <span class="c"># if len(parts) &gt; 0:</span>
+        <span class="c">#     return parts[0]</span>
+        <span class="c"># else:</span>
+        <span class="c">#     return &#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        return id part of pid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># parts = self._split()</span>
+        <span class="c"># if len(parts) &gt; 1:</span>
+        <span class="c">#     return IDSEP.join(parts[1:])</span>
+        <span class="c"># else:</span>
+        <span class="c">#     return &#39;&#39;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+    <span class="c">#end def</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+      <span class="sd">&quot;&quot;&quot;id part of pid as a tuple of fields&quot;&quot;&quot;</span>
+      <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()[</span><span class="mi">1</span><span class="p">:])</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Pid.isValid"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid.isValid">[docs]</a>    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="c"># tests here</span>
+        <span class="c"># if self.find(PREFIXSEP) &lt; 0:</span>
+        <span class="c">#     return False</span>
+        <span class="c"># parts = self._split()</span>
+        <span class="c"># if len(parts) &lt; 2:</span>
+        <span class="c">#     return False</span>
+
+        <span class="c"># Comment 1:    Do we allow multiline strings here?</span>
+
+        <span class="c"># Comment 2: When we check for validity in __init__, it will be impossible to create</span>
+        <span class="c"># invalid PIds. A static function allows yo to check for validity before creating.</span>
+        <span class="c"># Even so, is it necessary? It is no longer used above</span>
+
+         <span class="k">return</span> <span class="n">PREFIXSEP</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">PREFIXSEP</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience: return as string rather than object;</span>
+<span class="sd">        allows to do things as obj.asPid.str rather then str(obj.asPid)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c"># Removed as they cause un-string-like behaviour.</span>
+    <span class="c">#</span>
+    <span class="c"># def __add__(self, other):</span>
+    <span class="c">#     tmp = self._split() + [other]</span>
+    <span class="c">#     #print &#39;Pid.__add__&#39;, tmp</span>
+    <span class="c">#     return Pid.new(*tmp)</span>
+    <span class="c"># #end def</span>
+    <span class="c">#</span>
+    <span class="c">#</span>
+    <span class="c"># Use fields property to get list-of-fields instead</span>
+    <span class="c">#</span>
+    <span class="c"># def __len__(self):</span>
+    <span class="c">#     ll = len(self._split())-1</span>
+    <span class="c">#     if ll &lt; 0:</span>
+    <span class="c">#         ll=0</span>
+    <span class="c">#     return ll</span>
+    <span class="c"># #end def</span>
+    <span class="c">#</span>
+    <span class="c"># def __getslice__(self, start, stop):</span>
+    <span class="c">#     # NB using parts [1:] instead of modifying indices allows negative indices to work normally</span>
+    <span class="c">#     parts = self._split()[1:][start:stop]</span>
+    <span class="c">#     # if len(parts) &gt; 0:</span>
+    <span class="c">#     #     return IDSEP.join(*parts)</span>
+    <span class="c">#     # else:</span>
+    <span class="c">#     #     return &#39;&#39;</span>
+    <span class="c">#</span>
+    <span class="c">#     return IDSEP.join(parts)</span>
+    <span class="c"># #end def</span>
+    <span class="c">#</span>
+    <span class="c"># def __getitem__(self, i):</span>
+    <span class="c">#     return self._split()[i+1]</span>
+    <span class="c"># #end def</span>
+    <span class="c">#</span>
+    <span class="c"># def __iter__(self):</span>
+    <span class="c">#     for f in self._split()[1:]:</span>
+    <span class="c">#         yield f</span>
+    <span class="c">#     #end for</span>
+    <span class="c"># #end def</span>
+    <span class="c">#</span>
+    <span class="c"># Unecessary: __str__ is inherited</span>
+    <span class="c"># def __str__(self):</span>
+    <span class="c">#     return str.__str__(self)</span>
+    <span class="c"># #end def</span>
+
+    <span class="c"># I like that one. We could activate it. Rasmus</span>
+    <span class="c"># def __repr__(self):</span>
+    <span class="c">#     return &#39;Pid(%s)&#39; % str.__repr__(self)</span>
+    <span class="c"># #end def</span>
+
+    <span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a splitted pid as list or empty list on error</span>
+<span class="sd">        # &quot;&quot;&quot;</span>
+        <span class="c"># allParts = []</span>
+        <span class="c">#</span>
+        <span class="c"># parts = self.split(PREFIXSEP)</span>
+        <span class="c"># if len(parts) &gt; 0:</span>
+        <span class="c">#     allParts.append(parts[0])</span>
+        <span class="c"># if len(parts) &gt; 1:</span>
+        <span class="c">#     for p in parts[1].split(IDSEP):</span>
+        <span class="c">#         allParts.append(p)</span>
+        <span class="c"># return allParts</span>
+
+        <span class="n">parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+        <span class="k">if</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">IDSEP</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="c">#end def</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Pid.new"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid.new">[docs]</a>    <span class="k">def</span> <span class="nf">new</span><span class="p">(</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span><span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Pid&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return Pid object from arguments</span>
+<span class="sd">        Apply str() on all arguments</span>
+<span class="sd">        Have to use this as intermediate as str baseclass of Pid only accepts one argument</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># use str operator on all arguments</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">]</span>
+        <span class="c"># could implement mapping here</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">Pid</span><span class="o">.</span><span class="n">nameMap</span><span class="p">):</span>
+            <span class="c">#args = list(args) # don&#39;t know why I have to use the list operator</span>
+            <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">Pid</span><span class="o">.</span><span class="n">nameMap</span><span class="p">[</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+        <span class="c">#end if</span>
+        <span class="k">return</span> <span class="n">Pid</span><span class="p">(</span> <span class="n">Pid</span><span class="o">.</span><span class="n">_join</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="p">)</span></div>
+    <span class="c">#end def</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_join</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Join args using the rules for constructing a pid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># if len(args) &gt;= 2:</span>
+        <span class="c">#     tmp =PREFIXSEP.join( args[0:2] )</span>
+        <span class="c">#     tmp2 = [tmp] + list(args[2:]) # don&#39;t know why args is tuple and thus I have to use</span>
+        <span class="c">#                                   # the list operator to avoid TypeError:</span>
+        <span class="c">#                                   # can only concatenate list (not &quot;tuple&quot;) to list?</span>
+        <span class="c">#     return IDSEP.join(tmp2)</span>
+        <span class="c"># elif len(args) &gt;= 1:</span>
+        <span class="c">#     return args[0]</span>
+        <span class="c"># else:</span>
+        <span class="c">#     return &#39;&#39;</span>
+
+        <span class="c"># NB the behaviour if len(args) == 1 is correct (return &quot;type:&quot;)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">PREFIXSEP</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">IDSEP</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">:])))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s">&#39;&#39;</span>
+
+    <span class="c">#end def</span>
+
+<div class="viewcode-block" id="Pid.modify"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">newId</span><span class="p">:</span><span class="nb">object</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Pid&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return new pid with position index modified by newId</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># parts = self._split()</span>
+        <span class="c"># if index+1 &gt;= len(parts):</span>
+        <span class="c">#     io.error(&#39;Pid.modify: invalid index ({0})\n&#39;, index+1)</span>
+        <span class="c"># parts[index+1] = newId</span>
+        <span class="c"># if type is not None:</span>
+        <span class="c">#     parts[0] = type</span>
+        <span class="c"># return Pid.new(*parts)</span>
+
+
+        <span class="n">parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()</span>
+
+        <span class="n">idparts</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c"># NB this allows negative indices also, according to normal Python rules</span>
+            <span class="n">idparts</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">newId</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">cing.Libs.io</span> <span class="kn">as</span> <span class="nn">io</span>
+            <span class="n">io</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&#39;Pid.modify: invalid index ({0})</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="n">idparts</span>
+
+        <span class="k">if</span> <span class="nb">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">type</span>
+
+        <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">*</span><span class="n">parts</span><span class="p">)</span></div>
+
+
+    <span class="c">#end def</span>
+
+<div class="viewcode-block" id="Pid.extend"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid.extend">[docs]</a>    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span><span class="nb">object</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot;Make copy with additional fields &quot;&quot;&quot;</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()</span> <span class="o">+</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">args</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="Pid.increment"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid.increment">[docs]</a>    <span class="k">def</span> <span class="nf">increment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Pid&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return new pid with position index incremented by value</span>
+<span class="sd">        Assumes integer valued id at position index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># NBNB do you want to set value=1 as parameter, so self.increment(index) increments by 1?</span>
+
+        <span class="n">parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()</span>
+        <span class="n">parts</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">parts</span><span class="p">[</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">*</span><span class="n">parts</span><span class="p">)</span></div>
+    <span class="c">#end def</span>
+
+<div class="viewcode-block" id="Pid.decrement"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid.decrement">[docs]</a>    <span class="k">def</span> <span class="nf">decrement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Pid&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return new pid with position index decremented by value</span>
+<span class="sd">        Assumes integer valued id at position index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c"># NBNB do you want to set value=11 as parameter, so self.decrement(index) decrements by 1?</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">increment</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="o">-</span><span class="n">value</span><span class="p">)</span></div>
+    <span class="c">#end def</span>
+    
+<div class="viewcode-block" id="Pid.clone"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Pid.Pid.clone">[docs]</a>    <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;Pid&#39;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Return copy of pid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c"># Use Pid.new to pass it by any &#39;translater/checking routine&#39;</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">*</span><span class="n">parts</span><span class="p">)</span></div></div>
+    <span class="c">#end def</span>
+<span class="c">#end class</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

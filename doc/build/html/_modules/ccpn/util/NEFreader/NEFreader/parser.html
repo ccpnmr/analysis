@@ -1,0 +1,683 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.NEFreader.NEFreader.parser &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.NEFreader.NEFreader.parser</h1><div class="highlight"><pre>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">unicode_literals</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;TJ Ragan&#39;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&#39;0.1&#39;</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Lexer"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.parser.Lexer">[docs]</a><span class="k">class</span> <span class="nc">Lexer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :type chars: iterable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">chars</span> <span class="o">=</span> <span class="n">chars</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="bp">None</span>
+
+
+<div class="viewcode-block" id="Lexer.tokenize"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.parser.Lexer.tokenize">[docs]</a>    <span class="k">def</span> <span class="nf">tokenize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chars</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">chars</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">chars</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chars</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">True</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">chars</span><span class="p">:</span>
+
+            <span class="c">### Newline whitespace</span>
+            <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_newline_char</span><span class="p">()</span>
+
+            <span class="c">### Multi-line semicolon based strings</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="s">&#39;;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;semicolon comment&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_finish_semicolon_comment</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">c</span> <span class="o">==</span> <span class="s">&#39;;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">!=</span> <span class="s">&#39;semicolon comment&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_start_semicolon_comment</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;semicolon comment&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_continue_semicolon_comment</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+            <span class="c">### Comments</span>
+            <span class="k">elif</span> <span class="n">c</span> <span class="o">==</span> <span class="s">&#39;#&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_start_comment</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;comment&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_continue_comment</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+            <span class="c">### Quotes</span>
+            <span class="k">elif</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">,</span> <span class="s">&quot;&#39;&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_quote</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+            <span class="c">### Non-newline whitespace</span>
+            <span class="k">elif</span> <span class="n">c</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39; &#39;</span><span class="p">,</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_whitespace</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+            <span class="c">### Actual characters</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_actual_character</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finish_token</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span></div>
+
+    <span class="k">def</span> <span class="nf">_quote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">is</span> <span class="s">&#39;start&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_quote</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="ow">is</span> <span class="s">&#39;quoted&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_continue_quote</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_newline_char</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">!=</span> <span class="s">&#39;semicolon comment&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_uncommented_newline</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_semicolon_commented_newline</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_continue_quote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">c</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_quote_char</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;potential unquote&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_start_quote</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_quote_char</span> <span class="o">=</span> <span class="n">c</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;quoted&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_actual_character</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;start&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;in token&#39;</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;potential unquote&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;quote&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_whitespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;quoted&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_quoted_whitespace</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;potential unquote&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_potential_unquote</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unquoted_whitespace</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_unquoted_whitespace</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finish_token</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+
+
+    <span class="k">def</span> <span class="nf">_finish_token</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+
+
+    <span class="k">def</span> <span class="nf">_potential_unquote</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finish_token</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+
+
+    <span class="k">def</span> <span class="nf">_quoted_whitespace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_continue_comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_start_comment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;comment&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;#&#39;</span><span class="p">]</span>
+
+
+    <span class="k">def</span> <span class="nf">_start_semicolon_comment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;semicolon comment&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;;&#39;</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">_continue_semicolon_comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">c</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_newline</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_finish_semicolon_comment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finish_token</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+
+
+    <span class="k">def</span> <span class="nf">_semicolon_commented_newline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_uncommented_newline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;potential unquote&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_token</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finish_token</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="p">[]</span></div>
+
+
+
+
+
+<div class="viewcode-block" id="Parser"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.parser.Parser">[docs]</a><span class="k">class</span> <span class="nc">Parser</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :type target: OrderedDict or Nef</span>
+<span class="sd">        :type tokens: iterable[str]</span>
+<span class="sd">        :type strict: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span> <span class="o">=</span> <span class="n">tokens</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strict</span> <span class="o">=</span> <span class="n">strict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">no_target</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">no_target</span> <span class="o">=</span> <span class="bp">False</span>
+
+
+<div class="viewcode-block" id="Parser.read"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.parser.Parser.read">[docs]</a>    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_like</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Populate the NEF object from a file-like object</span>
+
+<span class="sd">        :param file_like:</span>
+<span class="sd">        :param strict: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tokenizer</span> <span class="o">=</span> <span class="n">Lexer</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">strict</span> <span class="o">=</span> <span class="n">strict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">tokenizer</span><span class="o">.</span><span class="n">tokenize</span><span class="p">(</span><span class="n">file_like</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span></div>
+
+
+<div class="viewcode-block" id="Parser.load"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.parser.Parser.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Open a file on disk and use it to populate the NEF object.</span>
+
+<span class="sd">        :param filename: str</span>
+<span class="sd">        :param strict: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_filename</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_filename</span> <span class="o">=</span> <span class="n">filename</span>
+
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span></div>
+
+
+<div class="viewcode-block" id="Parser.parse"><a class="viewcode-back" href="../../../../../ccpn/ccpn.util.NEFreader.NEFreader.html#ccpn.util.NEFreader.NEFreader.parser.Parser.parse">[docs]</a>    <span class="k">def</span> <span class="nf">parse</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tokens</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parse the token stream</span>
+
+<span class="sd">        :type tokens: iterable or None</span>
+<span class="sd">        :return: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">tokens</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">tokens</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tokens</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_key</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tokens</span><span class="p">):</span>
+            <span class="c">### Newlines</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="c">### Comments</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;;&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&quot;&#39;&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_quoted_data_value_token</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+            <span class="c">### Comments</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;#&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_comment_token</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+            <span class="c">### Required datablock declaration</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;data_&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_datablock_token</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="s">&#39;datablock&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_noncomment_token_outside_data_block</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="c">### Globals (Are we using these?)</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;global_&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_global_statement</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+
+            <span class="c">### Saveframes</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;save_&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_save_token</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+            <span class="c">### Loops</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;loop_&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loop_token</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;stop_&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stop_token</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+            <span class="c">### Data Names</span>
+            <span class="k">elif</span> <span class="n">t</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_name_token</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+            <span class="c">### Data Values</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_data_value_token</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">no_target</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span></div>
+
+
+
+    <span class="k">def</span> <span class="nf">_comment_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Begin line comment token</span>
+
+<span class="sd">        Extract the key information if present</span>
+
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;key:&#39;</span> <span class="ow">in</span> <span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop_key</span> <span class="o">=</span> <span class="n">t</span>
+
+
+    <span class="k">def</span> <span class="nf">_datablock_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Data block name declaration</span>
+
+<span class="sd">        Only one datablock is allowed per file</span>
+
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="s">&#39;datablock&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">datablock</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Multiple datablocks not allowed.&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_noncomment_token_outside_data_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Non-commented text found (generally before) the data block is declared</span>
+
+<span class="sd">        Other than comments, everything in the NEF must be inside the file&#39;s data block</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Token {}: NEF format requires all non-comments exist in a datablock.&#39;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">datablock</span> <span class="o">=</span> <span class="s">&#39;data_nef_default&#39;</span>
+
+
+    <span class="k">def</span> <span class="nf">_global_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&#39;Globals not allowed in NEF.&#39;</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_save_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        save_* token, marking the begining or end of a saveframe</span>
+
+<span class="sd">        Saveframes are declared with a `save_foo` token, and closed with a `save_` token.  This</span>
+<span class="sd">          method dispatches to either open or close the save frame appropriately.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s">&#39;save_&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_end_saveframe_token</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_saveframe_token</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_loop_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `loop_` token, marking the beginning of a loop</span>
+
+<span class="sd">        Loops are opened a `loop_` token.  This method opens a loop, or throws an exception if one</span>
+<span class="sd">          is already open and strict parsing is set.  If strict parsing is not set, it tries to</span>
+<span class="sd">          deal with the problem by closing and finishing the current loop and opening a new one.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;in loop&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Token {}: Nested loops are not allowed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_finish_loop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_start_loop</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_start_loop</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_stop_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `stop_` token, marking the end of a loop.</span>
+
+<span class="sd">        Loops are closed with a `stop_` token.  This method closes and finishes a loop, or throws</span>
+<span class="sd">          an exception if one isn&#39;t open and strict parsing is set.  If strict parsing is not set,</span>
+<span class="sd">          it deals with the problem by simply raises a warning.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;in loop&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finish_loop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="s">&#39;Token {}: Trying to close a loop without being in a loop.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_data_name_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `_foo` token, indicating a data name.</span>
+
+<span class="sd">        Data names are indicated by a single leading underscore.  If they occur at the beginning of</span>
+<span class="sd">          a loop, they represent the column names in that loop.  If they occur in a loop following</span>
+<span class="sd">          data values, they close the loop.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;in loop columns specification&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_name_token</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;in loop data&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finish_loop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+
+    <span class="k">def</span> <span class="nf">_quoted_data_value_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Any token starting with a single quote, double quote, or semicolon is a data value.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">quote_char</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data_value_token</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_data_value_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `foo` token, indicating a data value.</span>
+
+<span class="sd">        Data values are always associated with a data name.  Outside a loop, they are pared with the</span>
+<span class="sd">          previous data name, and inside a loop they are associated with a loop column.  The first</span>
+<span class="sd">          data name encountered in a loop marks the end of the column declarations for that loop.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;in loop columns specification&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;in loop data&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_number</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;in saveframe&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_to_saveframe</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;in loop data&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_number</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop_columns</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_number</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loop_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop_row</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_loop_row</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop_row</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop_columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_number</span><span class="p">]]</span> <span class="o">=</span> <span class="n">t</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_number</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_add_to_saveframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a data name-value pair to a saveframe.</span>
+
+<span class="sd">        Full data name tokens should have the format `saveframe_type.data_name`, and all the</span>
+<span class="sd">          saveframe_type&#39;s should match.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s">&#39;sf_category&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_check_saveframe_category</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]]</span> <span class="o">=</span> <span class="n">t</span>
+
+    <span class="k">def</span> <span class="nf">_check_saveframe_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check that the first part of the data name token matches the saveframe type.  Raise an</span>
+<span class="sd">          exception if they don&#39;t match and strict parsing is set.  If strict parsing is not set,</span>
+<span class="sd">          it simply raises a warning</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span><span class="p">][</span><span class="s">&#39;sf_category&#39;</span><span class="p">]:</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="s">&#39;Token {}: Mismatch data name type {} in saveframe {}&#39;</span> \
+                <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_end_saveframe_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `save_` token, which closes a saveframe.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">==</span> <span class="s">&#39;in saveframe&#39;</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;in loop&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finish_saveframe</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_unnamed_saveframe</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_start_saveframe_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `save_foo` token, which opens a saveframe called `foo`.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :type t: str    # Token</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s">&#39;Token {}: Nested saveframes are not allowed.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;in saveframe&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span> <span class="o">=</span> <span class="n">t</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_start_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `loop_` token, marking the beginning of a loop</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;in loop columns specification&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_row</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+
+
+    <span class="k">def</span> <span class="nf">_finish_loop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finish processing a loop.</span>
+
+<span class="sd">        Loops are a series of data names followed by data values and can be though of as a table of</span>
+<span class="sd">          data.  The number of data values should be an exact multiple of the number of data names.</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_number</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop_columns</span><span class="p">):</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="s">&#39;Token {}: Number of data values is not a multiple of number of&#39;</span>
+            <span class="n">error_message</span> <span class="o">+=</span> <span class="s">&#39; column names in loop {}&#39;</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="n">error_message</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop_row</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop_data</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;in saveframe&#39;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_columns</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop_column_number</span>
+
+
+    <span class="k">def</span> <span class="nf">_loop_column_name_token</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        data name token while specifying loop column names</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">error_message</span> <span class="o">=</span> <span class="s">&#39;Token {}: Mismatch column name {} in loop {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span>
+                                                                                  <span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span><span class="p">,</span>
+                                                                                  <span class="bp">self</span><span class="o">.</span><span class="n">_loop_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">error_message</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loop_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+
+
+    <span class="k">def</span> <span class="nf">_finish_saveframe</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        save_ tag inside saveframe</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;in loop&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finish_loop</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_saveframe_name</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state</span> <span class="o">=</span> <span class="s">&#39;start&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_unnamed_saveframe</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        save_ tag outside saveframe</span>
+
+<span class="sd">        :type i: int    # Token number</span>
+<span class="sd">        :raise Exception:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">error_message</span> <span class="o">=</span> <span class="s">&#39;Token {}: Trying to declare saveframe without a name or &#39;</span>
+        <span class="n">error_message</span> <span class="o">+=</span> <span class="s">&#39;close a saveframe without being in a saveframe.&#39;</span>
+
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">error_message</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">))</span></div>
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

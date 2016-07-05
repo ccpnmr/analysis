@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisMetabolomics.PeakAssignment &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisMetabolomics.PeakAssignment</h1><div class="highlight"><pre>
+<span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - : 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;: 7686 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+
+<span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c">#=========================================================================================</span>
+<span class="c"># Licence, Reference and Credits</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - : 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Last code modification:</span>
+<span class="c">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;: 2014-06-04 18:13:10 +0100 (Wed, 04 Jun 2014) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;: 7686 $&quot;</span>
+
+<span class="c">#=========================================================================================</span>
+<span class="c"># Start of code</span>
+<span class="c">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Module</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButton</span> <span class="kn">import</span> <span class="n">RadioButton</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiTableGenerator</span> <span class="kn">import</span> <span class="n">GuiTableGenerator</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.PeakTable</span> <span class="kn">import</span> <span class="n">PeakListSimple</span>
+
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
+
+<div class="viewcode-block" id="PeakAssignment"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.PeakAssignment">[docs]</a><span class="k">class</span> <span class="nc">PeakAssignment</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peaksLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Peaks&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assignLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Fit&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assignButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;&lt;--&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assignAndMoveButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;&lt;-- + A&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deassignLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Deassign&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deassignButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;X&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deassignAndMoveButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;X + P&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">suggestionSourceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;Suggestion Source &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">suggestionSourcePulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span> <span class="o">=</span> <span class="n">PeakListSimple</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">substanceTable</span> <span class="o">=</span> <span class="n">SubstanceTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+
+<div class="viewcode-block" id="PeakAssignment.callback"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.PeakAssignment.callback">[docs]</a>  <span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="PeakAssignment.assignPeak"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.PeakAssignment.assignPeak">[docs]</a>  <span class="k">def</span> <span class="nf">assignPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">peakObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="n">substanceObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">substanceTable</span><span class="o">.</span><span class="n">substanceTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="n">peakObject</span><span class="o">.</span><span class="n">assignDimension</span><span class="p">(</span><span class="n">axisCode</span><span class="o">=</span><span class="s">&#39;H&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="p">[</span><span class="n">substanceObject</span><span class="o">.</span><span class="n">substance</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="PeakAssignment.deassignPeak"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.PeakAssignment.deassignPeak">[docs]</a>  <span class="k">def</span> <span class="nf">deassignPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">peakObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="n">peakObject</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span> <span class="o">=</span> <span class="p">[[]]</span></div>
+
+<div class="viewcode-block" id="PeakAssignment.assignAndMove"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.PeakAssignment.assignAndMove">[docs]</a>  <span class="k">def</span> <span class="nf">assignAndMove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assignPeak</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getCurrentRow</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">currentRow</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">currentRow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getCurrentRow</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">selectRow</span><span class="p">(</span><span class="n">currentRow</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PeakAssignment.deassignAndMove"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.PeakAssignment.deassignAndMove">[docs]</a>  <span class="k">def</span> <span class="nf">deassignAndMove</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deassignPeak</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getCurrentRow</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">currentRow</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">currentRow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getCurrentRow</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">selectRow</span><span class="p">(</span><span class="n">currentRow</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="SubstanceTable"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.SubstanceTable">[docs]</a><span class="k">class</span> <span class="nc">SubstanceTable</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="n">substanceTableColumns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="s">&#39;substance&#39;</span><span class="p">,</span> <span class="s">&#39;substance&#39;</span><span class="p">),</span> <span class="n">Column</span><span class="p">(</span><span class="s">&#39;atom&#39;</span><span class="p">,</span> <span class="s">&#39;atom&#39;</span><span class="p">),</span> <span class="n">Column</span><span class="p">(</span><span class="s">&#39;cs&#39;</span><span class="p">,</span> <span class="s">&#39;cs&#39;</span><span class="p">)]</span>
+
+    <span class="n">tipTexts2</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;substance Id&#39;</span><span class="p">,</span> <span class="s">&#39;substance atom&#39;</span><span class="p">,</span> <span class="s">&#39;substance cs&#39;</span><span class="p">]</span>
+    <span class="n">substanceList</span> <span class="o">=</span> <span class="p">[</span><span class="n">Substance</span><span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">),</span> <span class="n">Substance</span><span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">),</span> <span class="n">Substance</span><span class="p">(</span><span class="s">&#39;1&#39;</span><span class="p">,</span> <span class="s">&#39;2&#39;</span><span class="p">,</span> <span class="s">&#39;3&#39;</span><span class="p">)]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">substanceLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">substanceList</span><span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">substanceTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">substanceTableColumns</span><span class="p">,</span>
+                              <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">substanceCallback</span><span class="p">,</span>
+                              <span class="n">objects</span><span class="o">=</span><span class="n">substanceList</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SubstanceTable.substanceCallback"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.SubstanceTable.substanceCallback">[docs]</a>  <span class="k">def</span> <span class="nf">substanceCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">pass</span></div></div>
+
+<div class="viewcode-block" id="Substance"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.PeakAssignment.Substance">[docs]</a><span class="k">class</span> <span class="nc">Substance</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substance</span><span class="p">,</span> <span class="n">atom</span><span class="p">,</span> <span class="n">cs</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">substance</span> <span class="o">=</span> <span class="n">substance</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">atom</span> <span class="o">=</span> <span class="n">atom</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">cs</span> <span class="o">=</span> <span class="n">cs</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

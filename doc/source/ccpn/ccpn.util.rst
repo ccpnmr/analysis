@@ -1,0 +1,204 @@
+ccpn.util package
+=================
+
+.. automodule:: ccpn.util
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+
+    ccpn.util.Bmrb
+    ccpn.util.NEFreader
+
+Submodules
+----------
+
+ccpn.util.Anchor module
+-----------------------
+
+.. automodule:: ccpn.util.Anchor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.AttrDict module
+-------------------------
+
+.. automodule:: ccpn.util.AttrDict
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Colour module
+-----------------------
+
+.. automodule:: ccpn.util.Colour
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Common module
+-----------------------
+
+.. automodule:: ccpn.util.Common
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Constants module
+--------------------------
+
+.. automodule:: ccpn.util.Constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Graph module
+----------------------
+
+.. automodule:: ccpn.util.Graph
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Hdf5 module
+---------------------
+
+.. automodule:: ccpn.util.Hdf5
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.LocalShutil module
+----------------------------
+
+.. automodule:: ccpn.util.LocalShutil
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Logging module
+------------------------
+
+.. automodule:: ccpn.util.Logging
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.OrderedSet module
+---------------------------
+
+.. automodule:: ccpn.util.OrderedSet
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Path module
+---------------------
+
+.. automodule:: ccpn.util.Path
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Phasing module
+------------------------
+
+.. automodule:: ccpn.util.Phasing
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Pid module
+--------------------
+
+.. automodule:: ccpn.util.Pid
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Register module
+-------------------------
+
+.. automodule:: ccpn.util.Register
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Sorting module
+------------------------
+
+.. automodule:: ccpn.util.Sorting
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.SphinxExtensions module
+---------------------------------
+
+.. automodule:: ccpn.util.SphinxExtensions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Tensor module
+-----------------------
+
+.. automodule:: ccpn.util.Tensor
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Ticks module
+----------------------
+
+.. automodule:: ccpn.util.Ticks
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Undo module
+---------------------
+
+.. automodule:: ccpn.util.Undo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Url module
+--------------------
+
+.. automodule:: ccpn.util.Url
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.jsonIo module
+-----------------------
+
+.. automodule:: ccpn.util.jsonIo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.recursive_import module
+---------------------------------
+
+.. automodule:: ccpn.util.recursive_import
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.updateHeader module
+-----------------------------
+
+.. automodule:: ccpn.util.updateHeader
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+

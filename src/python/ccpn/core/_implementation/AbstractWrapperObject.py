@@ -632,7 +632,7 @@ class AbstractWrapperObject():
     if self is project:
       command = "project.%s(%s)" % (funcName, parameterString)
     else:
-      command = "project.getByPid(%s).%s(%s)" % (self.pid, funcName, parameterString)
+      command = "project.getByPid('%s').%s(%s)" % (self.pid, funcName, parameterString)
 
     if parName:
       command = ''.join((parName, ' = ', command))

@@ -126,7 +126,7 @@ class Strip(AbstractWrapperObject):
     """Overrides normal delete"""
 
     # NBNB TODO - should this not be moved to the corresponding GUI class?
-    # Is there always a layout, regardless of framework?
+    # Is there always a layout, regardless of application?
 
     # NB - echoing should be done normally, through the delete command
 
@@ -200,7 +200,7 @@ class Strip(AbstractWrapperObject):
     # NB - no exho blocking below, as none of the layout stuff is modeled (?)
 
     # NBNB TODO - should the stuff below not be moved to the corresponding GUI class?
-    # Is there always a layout, regardless of framework?
+    # Is there always a layout, regardless of application?
     
     # management of Qt layout
     # TBD: need to soup up below with extra loop when have tiles

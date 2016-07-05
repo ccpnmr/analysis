@@ -27,8 +27,8 @@ class ScreeningSettings(CcpnModule):
 
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
-    self.framework = self.mainWindow.framework
-    self.generalPreferences = self.framework.preferences.general
+    self.application = self.mainWindow.application
+    self.generalPreferences = self.application.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
 
     self.mainFrame = QtGui.QFrame()

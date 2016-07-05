@@ -29,8 +29,8 @@ class ShowScreeningHits(CcpnModule):
 
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
-    self.framework = self.mainWindow.framework
-    self.preferences = self.framework.preferences
+    self.application = self.mainWindow.framework
+    self.preferences = self.application.preferences
     self.generalPreferences = self.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
     self.moduleArea = self.mainWindow.moduleArea

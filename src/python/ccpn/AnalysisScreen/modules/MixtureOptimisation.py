@@ -114,7 +114,7 @@ class MixtureOptimisation(CcpnModule):
 
     self.project = project
     self.mainWindow = parent
-    self.framework = self.mainWindow.framework
+    self.application = self.mainWindow.application
     self.mixtureAnalysisModule = mixtureAnalysisModule
     self.minimalDistance = minimalDistance
 

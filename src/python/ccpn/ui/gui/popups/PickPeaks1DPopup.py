@@ -132,7 +132,7 @@ class PickPeak1DPopup(QtGui.QDialog):
     super(PickPeak1DPopup, self).__init__(parent)
     self.project = project
     self.mainWindow = parent
-    self.framework = self.mainWindow.framework
+    self.application = self.mainWindow.application
     self._setMainLayout()
     self._setTabs()
     self._setWidgets()

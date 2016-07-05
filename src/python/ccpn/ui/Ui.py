@@ -1,4 +1,4 @@
-"""Default framework no-user-interface UI implementation
+"""Default application no-user-interface UI implementation
 """
 
 #=========================================================================================
@@ -37,11 +37,10 @@ class Ui:
   # Factory functions for UI-specific instantiation of wrapped graphics classes
   _factoryFunctions = {}
 
-  def __init__(self, framework):
+  def __init__(self, application):
 
-    self.framework = framework
+    self.application = application
 
-    self.application = None
     self.mainWindow = None
 
   def addMenu(self, name, position=None):
@@ -69,7 +68,7 @@ class Ui:
     """Start the program execution"""
 
     # self._checkRegistered()
-    # Register.updateServer(Register.loadDict(), self.framework.applicationVersion)
+    # Register.updateServer(Register.loadDict(), self.application.applicationVersion)
 
     sys.stderr.write('==> %s interface is ready\n' % self.__class__.__name__)
 
@@ -87,8 +86,8 @@ class Ui:
         sys.stderr.write('\n### INVALID REGISTRATION, terminating\n')
         sys.exit(1)
     sys.stderr.write('==> Registered to: %s (%s)\n' %
-                     (self.framework._registrationDict.get('name'),
-                      self.framework._registrationDict.get('organisation')))
+                     (self.application._registrationDict.get('name'),
+                      self.application._registrationDict.get('organisation')))
 
 
   def echoCommands(self, commands:typing.List[str]):
@@ -96,7 +95,7 @@ class Ui:
     Overwritten in subclasses to handle e.g. console putput
     """
 
-    logger = self.framework.project._logger
+    logger = self.application.project._logger
 
     for command in commands:
       logger.info(command)
@@ -113,7 +112,7 @@ class NoUi(Ui):
     """Display registration popup"""
 
     sys.stderr.write('\n### Please register, using another application\n')
-    # popup = RegisterPopup(version=self.framework.applicationVersion, modal=True)
+    # popup = RegisterPopup(version=self.application.applicationVersion, modal=True)
     # popup.show()
     # popup.raise_()
     # popup.exec_()
@@ -121,10 +120,10 @@ class NoUi(Ui):
 
 class TestUi(NoUi):
 
-  def __init__(self, framework):
+  def __init__(self, application):
 
-    Ui.__init__(self, framework)
-    framework._consoleOutput = []
+    Ui.__init__(self, application)
+    application._consoleOutput = []
 
 
   def echoCommands(self, commands:typing.List[str]):
@@ -132,9 +131,9 @@ class TestUi(NoUi):
     and store them in internal list for perusal
     """
 
-    self.framework._consoleOutput.extend(commands)
+    self.application._consoleOutput.extend(commands)
 
-    logger = self.framework.project._logger
+    logger = self.application.project._logger
 
     for command in commands:
       logger.info(command)

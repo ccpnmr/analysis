@@ -31,7 +31,7 @@ class Base(CoreBase):
 
     # TODO: Change this to get the gui from somewhere else
     self.gui = appBase.ui
-    self.framework = self.gui.framework
+    self.application = self.gui.application
 
     CoreBase.__init__(self, *args, **kw)
     

@@ -36,8 +36,8 @@ class MixtureAnalysis(CcpnModule):
     self.project = project
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
-    self.framework = self.mainWindow.framework
-    self.preferences = self.framework.preferences
+    self.application = self.mainWindow.application
+    self.preferences = self.application.preferences
     self.generalPreferences = self.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
 

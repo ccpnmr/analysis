@@ -88,9 +88,9 @@ class SubmitMacroPopup(QtGui.QDialog):
       return
 
   def _submitMacro(self):
-    
-    framework = self.parent.framework
-    logger = framework.project._logger
+
+    application = self.parent.application
+    logger = application.project._logger
     
     filePath = self.pathEntry.get()
     if not filePath or not os.path.exists(filePath) or not os.path.isfile(filePath):
@@ -112,7 +112,7 @@ class SubmitMacroPopup(QtGui.QDialog):
     description = description.strip()
     
     data = {}
-    data['version'] = framework.applicationVersion
+    data['version'] = application.applicationVersion
     data['keywords'] = keywords
     data['description'] = description
     

@@ -222,7 +222,7 @@ class Framework:
     self.project = project
     self.ui.initialize(self._mainWindow)
 
-    # Get the mainWindow out of the framework once it's been transferred to ui
+    # Get the mainWindow out of the application top level once it's been transferred to ui
     del self._mainWindow
 
 
@@ -518,7 +518,7 @@ class Framework:
     If we’re using the PyQt GUI, we can get the Qt action representing Item B2 somewhere in our code
     (for example, to change the checked status,) via:
 
-        action = framework.ui.mainWindow.getMenuAction(‘Test->Submenu B->Item B2’)
+        action = application.ui.mainWindow.getMenuAction(‘Test->Submenu B->Item B2’)
         action.setChecked(True)
 
     '''

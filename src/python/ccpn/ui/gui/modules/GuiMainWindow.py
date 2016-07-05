@@ -77,7 +77,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     GuiWindow.__init__(self)
     # self._appBase._mainWindow = self
-    self.framework._mainWindow = self
+    self.application._mainWindow = self
     self.recordingMacro = False
     self._setupWindow()
     self._setupMenus()
@@ -211,7 +211,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     """
 
     self._menuBar = MenuBar(self)
-    for m in self.framework._menuSpec:
+    for m in self.application._menuSpec:
       self._createMenu(m)
     self.setMenuBar(self._menuBar)
     self._menuBar.setNativeMenuBar(False)
@@ -351,7 +351,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
       if projectDir:
-        self.framework.loadProject(projectDir)
+        self.application.loadProject(projectDir)
 
 
   def showPeakPickPopup(self):
@@ -384,16 +384,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Populates recent projects menu with 10 most recently loaded projects
     specified in the preferences file.
     """
-    recentFileLocations = uniquify(self.framework.preferences.recentFiles)
+    recentFileLocations = uniquify(self.application.preferences.recentFiles)
     recentFileMenu = self.getMenuAction('Project->Open Recent')
     recentFileMenu.clear()
     for recentFile in recentFileLocations:
       recentFileMenu.addAction(Action(recentFileMenu, text=recentFile, translate=False,
-                                      callback=partial(self.framework.loadProject,
+                                      callback=partial(self.application.loadProject,
                                                        path=recentFile)))
     recentFileMenu.addSeparator()
     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
-                                    callback=self.framework.clearRecentProjects))
+                                    callback=self.application.clearRecentProjects))
 
 
 
@@ -588,7 +588,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     TODO: make sure that running a macro adds it to the prefs and calls this function
     """
 
-    recentMacros = uniquify(self.framework.preferences.recentMacros)
+    recentMacros = uniquify(self.application.preferences.recentMacros)
     recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
     recentMacrosMenu.clear()
     for recentMacro in recentMacros:
@@ -596,7 +596,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       recentMacrosMenu.addAction(action)
     recentMacrosMenu.addSeparator()
     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
-                                      callback=self.framework.clearRecentMacros))
+                                      callback=self.application.clearRecentMacros))
 
 
   def defineUserShortcuts(self):
@@ -717,7 +717,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     apiProject = self._project._wrappedData.root
     if hasattr(apiProject, '_temporaryDirectory'):
       # self.saveProjectAs()
-      # Replaced by equivalent framework function
+      # Replaced by equivalent application function
       self._appBase.saveProjectAs()
     else:
       self._appBase.saveProject()
@@ -726,7 +726,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   # def saveProjectAs(self):
   #   """Opens save Project as dialog box and saves project with name specified in the file dialog."""
   #   # Imported here to avoid risk of circular imports.
-  #   from ccpn.framework import Framework
+  #   from ccpn.application import Framework
   #   # TODO try to refactor this
   #   newPath = Framework.getSaveDirectory()
   #   if newPath:

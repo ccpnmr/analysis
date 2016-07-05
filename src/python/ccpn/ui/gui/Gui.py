@@ -44,9 +44,9 @@ class Gui(Ui):
   # Factory functions for UI-specific instantiation of wrapped graphics classes
   _factoryFunctions = {}
   
-  def __init__(self, framework):
+  def __init__(self, application):
     
-    Ui.__init__(self, framework)
+    Ui.__init__(self, application)
 
     self._initQtApp()
 
@@ -54,10 +54,10 @@ class Gui(Ui):
   def _initQtApp(self):
     # On the Mac (at least) it does not matter what you set the applicationName to be,
     # it will come out as the executable you are running (e.g. "python3")
-    self.application = Application(self.framework.applicationName,
-                                   self.framework.applicationVersion,
+    self.qtApp = Application(self.application.applicationName,
+                                   self.application.applicationVersion,
                                    organizationName='CCPN', organizationDomain='ccpn.ac.uk')
-    self.application.setStyleSheet(self.framework.styleSheet)
+    self.qtApp.setStyleSheet(self.application.styleSheet)
 
 
   def initialize(self, mainWindow):
@@ -66,9 +66,9 @@ class Gui(Ui):
     # Set up mainWindow
     self.mainWindow = self._setupMainWindow(mainWindow)
 
-    self.framework.initGraphics()
+    self.application.initGraphics()
 
-    project = self.framework.project
+    project = self.application.project
 
     # Wrapper Notifiers
     from ccpn.ui.gui.modules import GuiStrip
@@ -127,34 +127,34 @@ class Gui(Ui):
 
     # show splash screen
     splash = SplashScreen()
-    self.application.processEvents()  # needed directly after splashScreen show to show something
+    self.qtApp.processEvents()  # needed directly after splashScreen show to show something
 
     sys.stderr.write('==> Gui interface is ready\n' )
 
     splash.finish(self.mainWindow)
 
 
-    self.application.start()
+    self.qtApp.start()
 
   def _showRegisterPopup(self):
     """Display registration popup"""
 
-    popup = RegisterPopup(version=self.framework.applicationVersion, modal=True)
+    popup = RegisterPopup(version=self.application.applicationVersion, modal=True)
     popup.show()
     popup.raise_()
     popup.exec_()
-    self.application.processEvents()
+    self.qtApp.processEvents()
 
   def _setupMainWindow(self, mainWindow):
     # Set up mainWindow
 
-    project = self.framework.project
+    project = self.application.project
 
-    # mainWindow = self.framework.mainWindow
+    # mainWindow = self.application.mainWindow
     mainWindow.sideBar.setProject(project)
     mainWindow.sideBar.fillSideBar(project)
     mainWindow.raise_()
-    mainWindow.namespace['current'] = self.framework.current
+    mainWindow.namespace['current'] = self.application.current
 
     return mainWindow
 
@@ -164,8 +164,8 @@ class Gui(Ui):
     and store them in internal list for perusal
     """
 
-    console = self.framework.ui.mainWindow.pythonConsole
-    logger = self.framework.project._logger
+    console = self.application.ui.mainWindow.pythonConsole
+    logger = self.application.project._logger
 
     for command in commands:
       console._write(command + '\n')

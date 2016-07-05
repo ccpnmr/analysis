@@ -38,8 +38,8 @@ class SamplePropertiesPopup(QtGui.QDialog):
 
     if len(self.project.windows) > 0:
       self.mainWindow = self.project.windows[0]
-    self.framework = self.mainWindow.framework
-    self.generalPreferences = self.framework.preferences.general
+    self.application = self.mainWindow.application
+    self.generalPreferences = self.application.preferences.general
     self.colourScheme = self.generalPreferences.colourScheme
 
   def _setMainLayout(self):

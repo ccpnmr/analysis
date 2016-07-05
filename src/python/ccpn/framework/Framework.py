@@ -38,7 +38,7 @@ from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 
-from ccpn.framework.lib import SvnRevision
+from ccpn.core.lib import Version
 
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
@@ -134,8 +134,7 @@ def getFramework(projectPath=None, **kw):
 
 class Framework:
   """
-  The Framework class is the base class for all applications
-  It's currently broken, so don't use this if you want your application to actually work!
+  The Framework class is the base class for all applications.
   """
 
 
@@ -144,7 +143,7 @@ class Framework:
     self.args = args
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
-    self.revision = SvnRevision.revision()
+    self.revision = Version.revision()
 
     printCreditsText(sys.stderr, applicationName, applicationVersion)
 

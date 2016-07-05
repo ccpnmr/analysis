@@ -80,13 +80,3 @@ class Screen(Framework):
     # self.pythonConsole.writeConsoleCommand("application.showScreeningHits()")
     # self.project._logger.info("application.showScreeningHits()")
     #########################################    End setup Menus      #############################################
-if __name__ == '__main__':
-
-  # argument parser
-  parser = defineProgramArguments()
-
-  # add any additional commandline argument here
-  commandLineArguments = parser.parse_args()
-
-  program = Screen(applicationName, applicationVersion, commandLineArguments)
-  program.start()

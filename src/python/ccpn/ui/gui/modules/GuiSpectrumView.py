@@ -77,7 +77,13 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
   def boundingRect(self):  # seems necessary to have
 
     return QtCore.QRectF(-1000, -1000, 1000, 1000)  # TBD: remove hardwiring
-    
+
+  # override of Qt setVisible
+  def setVisible(self, visible):
+    QtGui.QGraphicsItem.setVisible(self, visible)
+    for peakListView in self.peakListViews:
+      peakListView.setVisible(visible)
+
   """
   def setDimMapping(self, dimMapping=None):
     

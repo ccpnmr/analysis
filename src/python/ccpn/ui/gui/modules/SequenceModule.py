@@ -32,7 +32,7 @@ class SequenceModule(CcpnModule):
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
     self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 10px;}
-                          QScrollArea QScrollBar::vertical{max-width:10px;}
+                          QScrollArea QScrollBar::vertical{max-width:0px;}
                       """)
     self.residueCount = 0
     self.layout.addWidget(self.scrollArea)

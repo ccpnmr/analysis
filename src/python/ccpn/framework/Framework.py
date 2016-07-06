@@ -330,8 +330,14 @@ class Framework:
     """Set up graphics system after loading"""
     from ccpn.ui.gui.lib.Window import MODULE_DICT
     from ccpn.ui.gui.modules import GuiStrip
-    # Initialise strips
+
     project = self.project
+
+    # Initialise displays
+    for spectrumDisplay in project.windows[0].spectrumDisplays: # there is exactly one window
+      spectrumDisplay._resetRemoveStripAction()
+
+    # Initialise strips
     for strip in project.strips:
       GuiStrip._setupGuiStrip(project, strip._wrappedData)
 

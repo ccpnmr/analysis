@@ -741,8 +741,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       NB notifier is executed after deletion is final but before the wrapper is updated.
       len() > 1 check is correct also for delete
     """
-    spectrumDisplay = self.spectrumDisplay
-    spectrumDisplay.removeStripAction.setEnabled(len(spectrumDisplay.strips) > 1)
+    self.spectrumDisplay._resetRemoveStripAction()
 
 
 # Notifiers:

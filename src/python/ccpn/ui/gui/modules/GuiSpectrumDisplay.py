@@ -190,8 +190,14 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
 
 
   def removeStrip(self):
-    self.orderedStrips[-1]._unregisterStrip()
-    self.orderedStrips[-1].delete()
+    # changed 6 Jul 2016
+    #self.orderedStrips[-1]._unregisterStrip()
+    #self.orderedStrips[-1].delete()
+    if len(self.orderedStrips) > 1:
+      strip = self._appBase.current.strip
+      if strip:
+        strip._unregisterStrip()
+        strip.delete()
 
   def duplicateStrip(self):
     """
@@ -268,6 +274,18 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
         if inactivePeakItems:
           inactivePeakItems.add(peakItem)
 
+  def _resetRemoveStripAction(self):
+    """
+    # CCPN INTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,
+    and from Framework to set up initial state
+    """
+    strips = set(self._appBase.current.strips)
+    if not strips.intersection(self.strips) or len(self.strips) == 1:
+      # no strip in display is in current.strips, or only 1 strip in display, so disable removeStrip button
+      enabled = False
+    else:
+      enabled = True
+    self.removeStripAction.setEnabled(enabled)
 
 def _deletedPeak(peak:Peak):
   """Function for notifiers.

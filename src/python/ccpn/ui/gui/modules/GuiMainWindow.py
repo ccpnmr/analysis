@@ -85,6 +85,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.closeEvent = self._closeEvent
     self.connect(self, QtCore.SIGNAL('triggered()'), self._closeEvent)
 
+    # do not need an unRegisterNotify because those removed when mainWindow / project destroyed
+    self._appBase.current.registerNotify(self._resetRemoveStripAction, 'strips')
+
     self.feedbackPopup = None
     self.updatePopup = None
     self.backupPopup = None
@@ -750,3 +753,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if not path:
         return
       spectrumDisplay.printToFile(path)
+
+  def _resetRemoveStripAction(self, strips):
+    for spectrumDisplay in self.spectrumDisplays:
+      spectrumDisplay._resetRemoveStripAction()

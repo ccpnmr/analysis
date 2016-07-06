@@ -33,3 +33,20 @@ class Frame(CoreFrame, GuiBase):
     CoreFrame.__init__(self, parent)
     GuiBase.__init__(self, **kw)
 
+
+  def _widthsChangedEnough(self, r1, r2, tol=1e-5):
+    r1 = sorted(r1)
+    r2 = sorted(r2)
+    minDiff = abs(r1[0] - r2[0])
+    maxDiff = abs(r1[1] - r2[1])
+    return (minDiff > tol) or (maxDiff > tol)
+
+
+  def updateY(self, strip):
+    yRange = list(strip.viewBox.viewRange()[1])
+    for s in strip.guiSpectrumDisplay.strips:
+      sYRange = list(s.viewBox.viewRange()[1])
+      if self._widthsChangedEnough(sYRange, yRange):
+        s.viewBox.setYRange(*yRange, padding=0)
+
+

@@ -42,24 +42,24 @@ from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Ruler as ApiRuler
 from ccpn.ui.gui.widgets.AxisTextItem import AxisTextItem
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 
-def _sufficientlyDifferentWidth(region1, region2):
-  
-  w1 = abs(region1[1] - region1[0])
-  w2 = abs(region2[1] - region2[0])
-  d = abs(w1 - w2)
-  
-  return d > 1.0e-5 * max(w1, w2)
-    
-def _scaleRegion(otherPreviousRegion, region, previousRegion):
-
-  otherPreviousRegionWidth = abs(otherPreviousRegion[1] - otherPreviousRegion[0])
-  regionWidth = abs(region[1] - region[0])
-  previousRegionWidth = abs(previousRegion[1] - previousRegion[0])
-  
-  otherRegionWidth = otherPreviousRegionWidth * regionWidth / previousRegionWidth
-  otherRegionPosition = 0.5 * (otherPreviousRegion[1] + otherPreviousRegion[0])
-  
-  return (otherRegionPosition - 0.5*otherRegionWidth, otherRegionPosition + 0.5*otherRegionWidth)
+# def _sufficientlyDifferentWidth(region1, region2):
+#
+#   w1 = abs(region1[1] - region1[0])
+#   w2 = abs(region2[1] - region2[0])
+#   d = abs(w1 - w2)
+#
+#   return d > 1.0e-5 * max(w1, w2)
+#
+# def _scaleRegion(otherPreviousRegion, region, previousRegion):
+#
+#   otherPreviousRegionWidth = abs(otherPreviousRegion[1] - otherPreviousRegion[0])
+#   regionWidth = abs(region[1] - region[0])
+#   previousRegionWidth = abs(previousRegion[1] - previousRegion[0])
+#
+#   otherRegionWidth = otherPreviousRegionWidth * regionWidth / previousRegionWidth
+#   otherRegionPosition = 0.5 * (otherPreviousRegion[1] + otherPreviousRegion[0])
+#
+#   return (otherRegionPosition - 0.5*otherRegionWidth, otherRegionPosition + 0.5*otherRegionWidth)
   
 class GuiStrip(Widget): # DropBase needs to be first, else the drop events are not processed
 
@@ -352,53 +352,55 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # and there can be different viewBoxes with the same axis
 
     assert viewBox is self.viewBox, 'viewBox = %s, self.viewBox = %s' % (viewBox, self.viewBox)
-    
-    if self.beingUpdated:
-      return
-    
-    self.beingUpdated = True
-    
-    try:
-      
-      xPreviousRegion = self.xPreviousRegion
-      yPreviousRegion = self.yPreviousRegion
-      xRegion, yRegion = viewBox.viewRange()
-    
-      xIsChanged = _sufficientlyDifferentWidth(xRegion, xPreviousRegion) if xPreviousRegion else True
-      yIsChanged = _sufficientlyDifferentWidth(yRegion, yPreviousRegion) if yPreviousRegion else True
-      
-      spectrumDisplay = self.guiSpectrumDisplay
-      if xIsChanged and yIsChanged and spectrumDisplay.stripDirection is not None:
-        for otherStrip in spectrumDisplay.strips:
-          if otherStrip is self:
-            continue
-          otherStrip.beingUpdated = True
-          if spectrumDisplay.stripDirection == 'Y':
-            # x axis needs updating, y axis happens automatically below
-            xOtherRegion = _scaleRegion(otherStrip.xPreviousRegion, yRegion, yPreviousRegion)
-            otherStrip.viewBox.setXRange(*xOtherRegion)
-            otherStrip.viewBox.setYRange(*yRegion)
-            otherStrip.orderedAxes[0].region = otherStrip.xPreviousRegion = xOtherRegion
-            otherStrip.yPreviousRegion = yRegion
-          else: # spectrumDisplay.stripDirection == 'X'
-            # y axis needs updating, x axis happens automatically below
-            yOtherRegion = _scaleRegion(otherStrip.yPreviousRegion, xRegion, xPreviousRegion)
-            otherStrip.viewBox.setYRange(*yOtherRegion)
-            otherStrip.viewBox.setXRange(*xRegion)
-            otherStrip.orderedAxes[1].region = otherStrip.yPreviousRegion = yOtherRegion
-            otherStrip.xPreviousRegion = xRegion
-    
-      self.orderedAxes[0].region = self.xPreviousRegion = xRegion
-      self.orderedAxes[1].region = self.yPreviousRegion = yRegion
-              
-    finally:
-      
-      self.beingUpdated = False
-      if xIsChanged and yIsChanged and spectrumDisplay.stripDirection is not None:
-        for otherStrip in self.guiSpectrumDisplay.strips:
-          if otherStrip is self:
-            continue
-          otherStrip.beingUpdated = False
+    #
+    # print('*', viewBox)
+    # if self.beingUpdated:
+    #   return
+    # self.beingUpdated = True
+    #
+    # try:
+    #   print('**', viewBox)
+    #   xPreviousRegion = self.xPreviousRegion
+    #   yPreviousRegion = self.yPreviousRegion
+    #   xRegion, yRegion = viewBox.viewRange()
+    #   print('***', xPreviousRegion, xRegion, yPreviousRegion, yRegion)
+    #   xIsChanged = _sufficientlyDifferentWidth(xRegion, xPreviousRegion) if xPreviousRegion else True
+    #   yIsChanged = _sufficientlyDifferentWidth(yRegion, yPreviousRegion) if yPreviousRegion else True
+    #
+    #   spectrumDisplay = self.guiSpectrumDisplay
+    #   if xIsChanged and yIsChanged and spectrumDisplay.stripDirection is not None:
+    #     for otherStrip in spectrumDisplay.strips:
+    #       if otherStrip is self:
+    #         continue
+    #       otherStrip.beingUpdated = True
+    #       if spectrumDisplay.stripDirection == 'Y':
+    #         # x axis needs updating, y axis happens automatically below
+    #         xOtherRegion = _scaleRegion(otherStrip.xPreviousRegion, yRegion, yPreviousRegion)
+    #         otherStrip.viewBox.setXRange(*xOtherRegion)
+    #         otherStrip.viewBox.setYRange(*yRegion)
+    #         otherStrip.orderedAxes[0].region = otherStrip.xPreviousRegion = xOtherRegion
+    #         otherStrip.yPreviousRegion = yRegion
+    #       else: # spectrumDisplay.stripDirection == 'X'
+    #         # y axis needs updating, x axis happens automatically below
+    #         yOtherRegion = _scaleRegion(otherStrip.yPreviousRegion, xRegion, xPreviousRegion)
+    #         otherStrip.viewBox.setYRange(*yOtherRegion)
+    #         otherStrip.viewBox.setXRange(*xRegion)
+    #         otherStrip.orderedAxes[1].region = otherStrip.yPreviousRegion = yOtherRegion
+    #         otherStrip.xPreviousRegion = xRegion
+    #
+    #   self.orderedAxes[0].region = self.xPreviousRegion = xRegion
+    #   self.orderedAxes[1].region = self.yPreviousRegion = yRegion
+    #
+    # finally:
+    #
+    #   self.beingUpdated = False
+    #   if xIsChanged and yIsChanged and spectrumDisplay.stripDirection is not None:
+    #     for otherStrip in self.guiSpectrumDisplay.strips:
+    #       if otherStrip is self:
+    #         continue
+    #       otherStrip.beingUpdated = False
+    self._parent.stripFrame.updateY(self)
+    pass
 
   #
   # def _axisRegionUpdated(self, apiAxis):

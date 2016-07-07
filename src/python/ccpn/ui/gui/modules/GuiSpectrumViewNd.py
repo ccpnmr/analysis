@@ -105,6 +105,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     #self.contourDisplayIndexDict = {} # (xDim, yDim) -> level -> display list index
 
+    # have to setup border item before superclass constructor called because latter calls
+    # setVisible and that in turn expects there to be a border item
+    self._setupBorderItem()
+
     GuiSpectrumView.__init__(self)
 
     self.setZValue(-1)  # this is so that the contours are drawn on the bottom
@@ -124,8 +128,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self._addSpectrumItem(self.strip)
 
     self._setupTrace()
-    
-    self._setupBorderItem()
 
   # override of Qt setVisible
   def setVisible(self, visible):
@@ -152,8 +154,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.borderItem = QtGui.QGraphicsRectItem(rect)
     self.borderItem.setPen(pg.functions.mkPen(colour[:3], width=1, style=QtCore.Qt.DotLine))
     self.strip.viewBox.addItem(self.borderItem)
-    
-    self.borderItem.setVisible(not self._appBase.preferences.general.spectrumBorderHidden)
+
+    # when below is called, self._appBase is not yet set up so use self._project._appBase
+    self.borderItem.setVisible(not self._project._appBase.preferences.general.spectrumBorderHidden)
         
   def _setBorderItemHidden(self, checked):
     """

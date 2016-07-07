@@ -51,8 +51,15 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     
     QtGui.QGraphicsItem.__init__(self, scene=self.strip.plotWidget.scene())
     GuiBase.__init__(self, self._project._appBase)
-    
+
     self._apiDataSource = self._wrappedData.spectrumView.dataSource
+
+    action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
+    if action and not action.isChecked():
+      self.setVisible(False)
+      # below does not work so looks like we have a Qt / data model visibility sync issue
+      #self._wrappedData.spectrumView.displayPositiveContours = self._wrappedData.spectrumView.displayNegativeContours = False
+
     ##self.spectrum = self._parent # Is this necessary?
     
     ###self.setDimMapping(dimMapping)

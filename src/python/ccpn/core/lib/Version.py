@@ -24,6 +24,6 @@ __version__ = "$Revision$"
 
 # Constants used in automatic documentation and elsewhere
 revision = int(__version__.split()[1])
-applicationVersion = '3.0a3'
+applicationVersion = '3.0.a3'
 authors = __credits__
 projectName = 'CCPN'

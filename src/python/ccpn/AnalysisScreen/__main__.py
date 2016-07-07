@@ -13,6 +13,6 @@ if __name__ == '__main__':
   # add any additional commandline argument here
   commandLineArguments = parser.parse_args()
 
-  application = Application('Screen', '3.0.a1', commandLineArguments)
+  application = Application('AnalysisScreen', '3.0.a1', commandLineArguments)
   application.start()
 

@@ -2,7 +2,7 @@ __author__ = 'TJ'
 
 from ccpn.core.lib.Version import applicationVersion
 from ccpn.framework.Framework import defineProgramArguments
-from ccpn.AnalysisScreen.Screen import Screen as Application
+from ccpn.AnalysisScreen.AnalysisScreen import Screen as Application
 
 
 if __name__ == '__main__':
@@ -13,6 +13,6 @@ if __name__ == '__main__':
   # add any additional commandline argument here
   commandLineArguments = parser.parse_args()
 
-  application = Application('Screen', applicationVersion, commandLineArguments)
+  application = Application('Screen', '3.0.a1', commandLineArguments)
   application.start()
 

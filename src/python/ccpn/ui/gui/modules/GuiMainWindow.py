@@ -29,31 +29,21 @@ from functools import partial
 
 from PyQt4 import QtGui, QtCore
 
-from ccpn.Assign.modules.AtomSelector import AtomSelector
-# from ccpn.Assign.modules.BackboneAssignmentModule import BackboneAssignmentModule
-# from ccpn.Assign.modules.PickAndAssignModule import PickAndAssignModule
-from ccpn.Assign.modules.SequenceGraph import SequenceGraph
+from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
 
 from ccpn.core.PeakList import PeakList
-# from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
-# from ccpn.Screen.modules.ScreeningSettings import ScreeningSettings
-# from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
-# from ccpn.Screen.popups.SampleSetupPopup import SamplePopup
-from ccpn.core.lib.Version import revision
+
 from ccpn.framework.update.UpdatePopup import UpdatePopup
 from ccpn.ui.gui.modules.DataPlottingModule import DataPlottingModule
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
-# from ccpn.ui.gui.modules.PeakAssigner import PeakAssigner
 from ccpn.ui.gui.modules.PeakTable import PeakTable
 from ccpn.ui.gui.modules.SequenceModule import SequenceModule
 from ccpn.ui.gui.popups.BackupPopup import BackupPopup
-from ccpn.ui.gui.popups.ExperimentTypePopup import ExperimentTypePopup
 from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
 from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
-# from ccpn.ui.gui.popups.SetupNmrResiduesPopup import SetupNmrResiduesPopup
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView

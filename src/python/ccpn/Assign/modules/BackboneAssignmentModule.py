@@ -111,13 +111,15 @@ class BackboneAssignmentModule(CcpnModule):
     Initiates assignment procedure when triggered by selection of an NmrResidue from the nmrResidueTable
     inside the module.
     """
+
     print(nmrResidue, nmrResidue.sequenceCode, 'nmrResidue')
     self._setupShiftDicts()
-    if hasattr(self, 'assigner'):
-      self.assigner.clearAllItems()
+
     # self.navigateTo(nmrResidue, row, col)
     self.current.nmrChain = nmrResidue.nmrChain
-    self.assigner.nmrChainPulldown.select(self.current.nmrChain.pid)
+    if hasattr(self, 'assigner'):
+      self.assigner.clearAllItems()
+      self.assigner.nmrChainPulldown.select(self.current.nmrChain.pid)
     if self.current.nmrChain.isConnected:
       print(self.current.nmrChain.mainNmrResidues, 'chainResidues')
       if nmrResidue.sequenceCode.endswith('-1'):

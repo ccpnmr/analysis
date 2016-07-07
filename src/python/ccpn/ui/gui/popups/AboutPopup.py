@@ -35,9 +35,9 @@ class AboutPopup(QtGui.QDialog, Base):
     super(AboutPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     splashPng = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                             'ccpnmr-splash-screen.jpg')
+                             'ccpnmr-splash-screen.png')
     splashPix = QtGui.QPixmap(splashPng)
     self.setFixedSize(671, 659)
     self.label = Label(self, grid=(0, 0), gridSpan=(10, 12))
     self.label.setPixmap(splashPix)
-    self.buttonList = ButtonList(self, ['OK'], [self.accept], grid=(9, 10), gridSpan=(1, 1))
+    self.buttonList = ButtonList(self, ['Close'], [self.accept], grid=(9, 10), gridSpan=(1, 1))

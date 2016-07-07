@@ -33,7 +33,7 @@ class SplashScreen(QtGui.QSplashScreen):
   def __init__(self, dummy=None, wait=1):
 
     splashImagePath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                                        'ccpnmr-splash-screen.jpg')
+                                                        'splash-screen.png')
     #print(splashImagePath)
     pixmap = QtGui.QPixmap(splashImagePath)
     #super(QtGui.QSplashScreen, self).__init__(pixmap, QtCore.Qt.WindowStaysOnTopHint)
@@ -48,9 +48,9 @@ class SplashScreen(QtGui.QSplashScreen):
       self.w.show()
 
     self.wait = wait
-
-  def info(self, text):
-    self.showMessage(text, color=QtCore.Qt.white, alignment = QtCore.Qt.AlignBottom)
+  #
+  # def info(self, text):
+  #   self.showMessage(text, color=QtCore.Qt.white, alignment = QtCore.Qt.AlignBottom)
 
   def close(self):
     import time

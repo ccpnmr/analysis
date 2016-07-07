@@ -130,7 +130,7 @@ class Gui(Ui):
     self.qtApp.processEvents()  # needed directly after splashScreen show to show something
 
     sys.stderr.write('==> Gui interface is ready\n' )
-
+    splash.close()
     splash.finish(self.mainWindow)
 
 

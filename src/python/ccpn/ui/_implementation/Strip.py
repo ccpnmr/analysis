@@ -190,6 +190,17 @@ class Strip(AbstractWrapperObject):
     if currentIndex == newIndex:
       return
 
+    stripCount = self.spectrumDisplay.stripCount
+
+    if newIndex and newIndex >= stripCount:
+      # Put strip at the right, which means newIndex should be None
+      if newIndex > stripCount:
+        # warning
+        self._project._logger.warning(
+          "Attempt to copy strip to position %s in display with only %s strips"
+          % (newIndex, stripCount))
+      newIndex = None
+
     self._startFunctionCommandBlock('moveTo', newIndex)
     try:
       # management of API objects
@@ -197,7 +208,7 @@ class Strip(AbstractWrapperObject):
     finally:
       self._project._appBase._endCommandBlock()
 
-    # NB - no exho blocking below, as none of the layout stuff is modeled (?)
+    # NB - no echo blocking below, as none of the layout stuff is modeled (?)
 
     # NBNB TODO - should the stuff below not be moved to the corresponding GUI class?
     # Is there always a layout, regardless of application?
@@ -353,6 +364,16 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
   """Make copy of strip in self, at position newIndex - or rightmost"""
 
   strip = self.getByPid(strip) if isinstance(strip, str) else strip
+
+  stripCount = self.stripCount
+  if newIndex and newIndex >= len(stripCount):
+    # Put strip at the right, which means newIndex should be None
+    if newIndex > stripCount:
+      # warning
+      self._project._logger.warning(
+        "Attempt to copy strip to position %s in display with only %s strips"
+        % (newIndex, stripCount))
+    newIndex = None
 
   self._startFunctionCommandBlock('copyStrip', strip, values=locals(), defaults={'newIndex':None},
                                   parName='newStrip')

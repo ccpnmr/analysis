@@ -192,14 +192,14 @@ class Strip(AbstractWrapperObject):
 
     stripCount = self.spectrumDisplay.stripCount
 
-    if newIndex and newIndex >= stripCount:
-      # Put strip at the right, which means newIndex should be None
+    if newIndex >= stripCount:
+      # Put strip at the right, which means newIndex should be stripCount - 1
       if newIndex > stripCount:
         # warning
         self._project._logger.warning(
           "Attempt to copy strip to position %s in display with only %s strips"
           % (newIndex, stripCount))
-      newIndex = None
+      newIndex = stripCount - 1
 
     self._startFunctionCommandBlock('moveTo', newIndex)
     try:

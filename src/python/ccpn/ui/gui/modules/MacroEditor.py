@@ -84,15 +84,17 @@ class MacroEditor(DropBase, CcpnModule):
     contents of the macro file into the textbox.
     """
     macroPath = self.preferences.general.macroPath
-    filePath = FileDialog(self, text='Open Macro', fileMode=1, acceptMode=0, directory=macroPath,
+    dialog = FileDialog(self, text='Open Macro', fileMode=1, acceptMode=0, directory=macroPath,
                           preferences=self.preferences.general)
 
-    with open(filePath, 'r') as f:
-      for line in f.readlines():
-        self.textBox.insertPlainText(line)
-      self.macroFile = f
+    filePath = dialog.selectedFile()
+    if filePath:
+      with open(filePath, 'r') as f:
+        for line in f.readlines():
+          self.textBox.insertPlainText(line)
+        self.macroFile = f
 
-    self.lineEdit1.setText(filePath)
+      self.lineEdit1.setText(filePath)
 
   def _startMacroRecord(self):
     """

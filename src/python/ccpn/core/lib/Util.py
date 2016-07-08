@@ -44,7 +44,7 @@ AtomIdTuple = collections.namedtuple('AtomIdTuple', ['chainCode', 'sequenceCode'
                                                      'residueType', 'atomName', ])
 
 
-def expandDollarFilePath(dataLocationStore:'DataLocationStore', filePath:str) -> str:
+def expandDollarFilePath(project:'Project', filePath:str) -> str:
   """Expand paths that start with $REPOSITORY to full path
 
   NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore"""
@@ -60,9 +60,10 @@ def expandDollarFilePath(dataLocationStore:'DataLocationStore', filePath:str) ->
     # Nothing to expand
     return filePath
 
+  dataLocationStore = project._wrappedData.root.findFirstDataLocationStore(name='standard')
+
   if dataLocationStore is None:
-    # No DataLocationStore to work with
-    return
+    raise TypeError("Coding error - standard DataLocationStore has not been set")
 
   for prefix,dataUrlName in stdRepositoryNames.items():
     if filePath.startswith(prefix):

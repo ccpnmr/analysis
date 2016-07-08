@@ -253,16 +253,14 @@ class GeneralTab(QtGui.QWidget, Base):
       filePath = self.pathData.text()
 
       # Convert from custom repository names to full names
-      apiDataSource = self.spectrum._apiDataSource
-      apiDataLocationStore = apiDataSource.root.findFirstDataLocationStore(name='standard')
-      if apiDataLocationStore is not None:
-        filePath = ccpnUtil.expandDollarFilePath(apiDataLocationStore, filePath)
+      filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, filePath)
 
       if os.path.exists(filePath):
         self.spectrum.filePath = filePath
         self._writeLoggingMessage("spectrum.filePath = '%s'" % filePath)
         self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % filePath,
                                                spectrum=self.spectrum)
+        apiDataSource = self.spectrum._apiDataSource
         apiDataStore = apiDataSource.dataStore
         if apiDataStore.dataLocationStore.name == 'standard':
           dataUrlName = apiDataStore.dataUrl.name

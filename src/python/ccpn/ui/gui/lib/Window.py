@@ -90,6 +90,24 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
         pass
 
 
+# def _centreAxis(axis, atomPositions):
+#   if spectrumLib.name2IsotopeCode(axis.code) == '13C' or spectrumLib.name2IsotopeCode(axis.code) == '15N':
+#         adjustment = 5
+#   else:
+#     adjustment = 0.25
+#
+#   minimum = min(list(sorted([a.value for a in atomPositions[ii]]))) - adjustment
+#   maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
+#   if len(atomPositions) > 1:
+#     axis.position = (maximum+minimum)/2
+#     axis.width = maximum-minimum
+#     print(axis.position, axis.width)
+#   else:
+#     axis.position = atomPositions[0].value
+#     axis.width = adjustment*2
+
+
+
 def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
                          selectedDisplays:typing.List[GuiSpectrumDisplay]=None,
                          strip:'GuiStrip'=None,  markPositions:bool=False):
@@ -123,15 +141,21 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
       for guiStrip in display.strips:
         for ii, axis in enumerate(guiStrip.orderedAxes[:2]):
           if len(atomPositions2[ii]) > 0:
-            if len(atomPositions2[ii]) == 1:
-              for atomPosition in atomPositions2[ii]:
-                axis.position = atomPosition.value
-            else:
-              atomPositionValues = [a.value for a in atomPositions2[ii]]
-              width = max(atomPositionValues) - min(atomPositionValues)
-              position = min(atomPositionValues) + (width/2)
-              axis.position = position
-              axis.width = width
+            # _centreAxis(axis, atomPositions2[ii])
+              if spectrumLib.name2IsotopeCode(axis.code) == '13C':# or spectrumLib.name2IsotopeCode(axis.code) == '15N':
+                adjustment = 5
+              else:
+                adjustment = 0.25
+
+              minimum = min(list(sorted([a.value for a in atomPositions2[ii]]))) - adjustment
+              maximum = max(list(sorted([a.value for a in atomPositions2[ii]]))) + adjustment
+              if len(atomPositions2[ii]) > 1:
+                axis.position = (maximum+minimum)/2
+                axis.width = maximum-minimum
+                # print(axis.position, axis.width)
+              else:
+                axis.position = atomPositions2[ii][0].value
+                axis.width = adjustment*2
 
         if markPositions:
           markPositionsInStrips(project, guiStrip, guiStrip.orderedAxes[:2], atomPositions2)
@@ -148,20 +172,28 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
     atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
     for ii, axis in enumerate(strip.orderedAxes):
       if len(atomPositions[ii]) > 0:
-        if len(atomPositions[ii]) == 1:
-          for atomPosition in atomPositions[ii]:
-            axis.position = atomPosition.value
+        if spectrumLib.name2IsotopeCode(axis.code) == '13C':# or spectrumLib.name2IsotopeCode(axis.code) == '15N':
+          adjustment = 5
         else:
-          atomPositionValues = [a.value for a in atomPositions[ii]]
-          width = max(atomPositionValues) - min(atomPositionValues)
-          position = min(atomPositionValues) + (width/2)
-          axis.position = position
-          axis.width = width
+          adjustment = 0.25
+        minimum = min(list(sorted([a.value for a in atomPositions[ii]]))) - adjustment
+        maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
+        # print(nmrResidue, list(sorted([a.value for a in atomPositions[ii]])))
+        if len(atomPositions[ii]) > 1:
+          axis.position = (maximum+minimum)/2
+          axis.width = maximum-minimum
+          # print(axis.position, axis.width)
+        else:
+          axis.position = atomPositions[ii][0].value
+          axis.width = adjustment*2
+          # print(nmrResidue, list(sorted([a.value for a in atomPositions[ii]])))
+          # print(strip, axis.position, axis.width)
+        #   axis.width = width
     if markPositions:
       markPositionsInStrips(project, strip, strip.orderedAxes, atomPositions)
 
 
-def markPositionsInStrips(project, strip, axes, atomPositions):
+def markPositionsInStrips(project, strip:'GuiStrip', axes, atomPositions, centre=False):
     if project._appBase.ui.mainWindow is not None:
       mainWindow = project._appBase.ui.mainWindow
     else:
@@ -188,6 +220,22 @@ def markPositionsInStrips(project, strip, axes, atomPositions):
             strip.yAxisAtomLabels.append(textItem)
         else:
           task.newMark('white', [atomPosition.value], [axis.code])
+      # _centreAxis(axis, atomPositions[ii])
+      if centre:
+        if spectrumLib.name2IsotopeCode(axis.code) == '13C' or spectrumLib.name2IsotopeCode(axis.code) == '15N':
+          adjustment = 5
+        else:
+          adjustment = 0.25
+
+        minimum = min(list(sorted([a.value for a in atomPositions[ii]]))) - adjustment
+        maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
+        if len(atomPositions[ii]) > 1:
+          axis.position = (maximum+minimum)/2
+          axis.width = maximum-minimum
+        else:
+          axis.position = atomPositions[ii][0].value
+          axis.width = adjustment*2
+
 
 
 

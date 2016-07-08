@@ -1046,7 +1046,7 @@ class Framework:
     """
     Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.
     """
-    from ccpn.Assign.modules.SequenceGraph import SequenceGraph
+    from ccpn.AnalysisAssign.modules.SequenceGraph import SequenceGraph
 
     if hasattr(self, 'assigner'):
       return
@@ -1065,7 +1065,7 @@ class Framework:
 
   def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
     """Displays Atom Selector."""
-    from ccpn.Assign.modules.AtomSelector import AtomSelector
+    from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
     self.atomSelector = AtomSelector(parent=self.ui.mainWindow, project=self.project)
     self.ui.mainWindow.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showAtomSelector()")

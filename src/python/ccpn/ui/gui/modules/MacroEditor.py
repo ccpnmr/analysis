@@ -67,16 +67,14 @@ class MacroEditor(DropBase, CcpnModule):
     macroPath = self.preferences.general.macroPath
     # colourScheme = self.preferences.general.colourScheme
     newText = self.textBox.toPlainText()
-    filePath = FileDialog(self, text='Save Macro As...', acceptMode=1, fileMode=0, preferences=self.preferences.general,
-                           directory=macroPath, selectedFilter='*.py')
+    dialog = FileDialog(self, text='Save Macro As...', acceptMode=1, fileMode=0, preferences=self.preferences.general,
+                        directory=macroPath, filter='*.py')
 
-    if not filePath:
-      return
-
-    with open(filePath, 'w') as f:
-      f.write(newText)
-      f.close()
-
+    filePath = dialog.selectedFile()
+    if filePath:
+      with open(filePath, 'w') as f:
+        f.write(newText)
+        f.close()
 
   def _openMacroFile(self):
     """

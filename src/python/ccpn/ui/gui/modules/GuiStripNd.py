@@ -91,7 +91,7 @@ class GuiStripNd(GuiStrip):
     Creates and returns the Nd context menu
     """
     self.contextMenu = Menu('', self, isFloatWidget=True)
-    self.toolbarAction = self.contextMenu.addItem("Toolbar", callback=self.guiSpectrumDisplay.spectrumUtilToolBar.toggleToolbar, checkable=True)
+    self.toolbarAction = self.contextMenu.addItem("Toolbar", callback=self.guiSpectrumDisplay._toggleToolbar, checkable=True)
     self.crossHairAction = self.contextMenu.addItem("Crosshair", callback=self._toggleCrossHair, checkable=True)
     self.hTraceAction = self.contextMenu.addItem("H Trace", checked=False, checkable=True)
     self.vTraceAction = self.contextMenu.addItem("V Trace", checked=False, checkable=True)

@@ -161,6 +161,19 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
          
     self._updatePhasing()
 
+  def _toggleToolbar(self):
+    """
+    Toggle the toolbar; update the context menus of all strips
+    """
+    if self.spectrumUtilToolBar.hidden:
+      self.spectrumUtilToolBar.showToolbar()
+      for strip in self.strips:
+        strip.toolbarAction.setChecked(True)
+    else:
+      self.spectrumUtilToolBar.hideToolbar()
+      for strip in self.strips:
+        strip.toolbarAction.setChecked(False)
+
   def _closeModule(self):
     """
     Closes spectrum display and deletes it from the project.

@@ -48,7 +48,7 @@ SCRIPT_URL = 'http://www2.ccpn.ac.uk/cgi-bin/macros/submitMacro.py'
 class SubmitMacroPopup(QtGui.QDialog):
 
   # parent mandatory and that needs to have attributes _appBase and colourScheme
-  def __init__(self, parent, title='SubmitMacro Form'):
+  def __init__(self, parent, title='Submit Macro Form'):
     QtGui.QDialog.__init__(self, parent=parent)
     self.setWindowTitle(title)
 
@@ -79,7 +79,7 @@ class SubmitMacroPopup(QtGui.QDialog):
   def _selectMacro(self):
     
     dialog = FileDialog(parent=self.parent(), fileMode=FileDialog.ExistingFile, text='Select Macro',
-                        preferences=self.parent().framework.preferences.general)
+                        preferences=self.parent().application.preferences.general)
     paths = dialog.selectedFiles()
     if paths:
       path = paths[0]

@@ -918,7 +918,7 @@ class Framework:
     Displays Peak Picking Popup.
     """
     from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-    popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project)
+    popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
     popup.exec_()
 
   def showIntegrationModule(self, position:str='bottom', relativeTo:CcpnModule=None):

@@ -36,13 +36,15 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 
 class PeakFindPopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, project=None, **kw):
+  def __init__(self, parent=None, project=None, current=None, **kw):
     super(PeakFindPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.project = project
     self.peakListLabel = Label(self, text="PeakList: ", grid=(0, 0))
     self.peakListPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1, 4), hAlign='l', callback=self._selectPeakList)
     self.peakListPulldown.setData([peakList.pid for peakList in project.peakLists])
+    if current is not None and current.strip is not None and len(current.strip.spectra)>0:
+      self.peakListPulldown.select(current.strip.spectra[0].peakLists[0].pid)
     self.peakList = project.getByPid(self.peakListPulldown.currentText())
     self.checkBoxWidget = QtGui.QWidget()
     layout = QtGui.QGridLayout()

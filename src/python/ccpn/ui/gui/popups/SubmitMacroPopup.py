@@ -80,12 +80,9 @@ class SubmitMacroPopup(QtGui.QDialog):
     
     dialog = FileDialog(parent=self.parent(), fileMode=FileDialog.ExistingFile, text='Select Macro',
                         preferences=self.parent().application.preferences.general)
-    paths = dialog.selectedFiles()
-    if paths:
-      path = paths[0]
+    path = dialog.selectedFile()
+    if path:
       self.pathEntry.set(path)
-    else:
-      return
 
   def _submitMacro(self):
 

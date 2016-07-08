@@ -613,7 +613,7 @@ class Framework:
                ))
 
     ms.append(('Help',      [
-      ("Command...", self.showCommandHelp, [('shortcut', 'ss')]),
+      ("Command...", self.showCommandHelp),
       ("Tutorials",([
         # Submenu
         ("Beginners Tutorial", self.showBeginnersTutorial),

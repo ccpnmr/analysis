@@ -46,15 +46,13 @@ _currentExtraFields = ['regions', 'positions']
 _fields = [x._pluralLinkName for x in _currentClasses] + _currentExtraFields
 
 def noCap(string):
-  """
-  return de-capitalised string
-  """
+  """return de-capitalised string"""
   if len(string) <= 0: return string
   return string[0].lower() + string[1:]
 
 # Definitions of the attributes of the Current object
 _fieldDefinitions = [
-  # field name,                           attribute name,     description
+  # attribute name,                      storage name,        description
   (noCap(Integral.className),            '_integral',        'last selected integral'),
   (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
 

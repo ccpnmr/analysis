@@ -2,11 +2,9 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Simon P Skinner & Geerten W Vuister"
-__license__ = ("CCPN license. See www.ccpn.ac.uk/license "
-              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
-__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
-                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+__credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
+__license__   = "CCPN license. See www.ccpn.ac.uk/license"
+__reference__ = "Skinner et al, J. Biomol. NMR, 2016, submitted"
 
 #=========================================================================================
 # Last code modification:
@@ -66,11 +64,17 @@ def printCreditsText(fp, programName, version):
   lines = []
   lines.append("%s, version: %s" % (programName, version))
   lines.append("")
-  lines.append(__copyright__[0:__copyright__.index('-')] + '- 2016')
-  lines.append(__license__)
-  lines.append("Not to be distributed without prior consent!")
+  lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
+  lines.append("%s. Not to be distributed without prior consent!" % __license__)
   lines.append("")
-  lines.append("Written by: %s" % __credits__)
+  lines.append("Written by:   %s" % __credits__)
+  lines.append("")
+  lines.append("Please cite:  %s" % __reference__)
+  lines.append("")
+  lines.append("DISCLAIMER:   This program is offered 'as-is'. Under no circumstances will the authors, CCPN,")
+  lines.append("              the Department of Molecular and Cell Biology, or the University of Leicester be")
+  lines.append("              liable of any damage, loss of data, loss of revenue or any other undesired")
+  lines.append("              consequences originating from the usage of this software.")
 
   # print with aligning '|'s
   maxlen = max(map(len,lines))

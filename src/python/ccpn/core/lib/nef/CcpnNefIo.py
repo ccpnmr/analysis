@@ -4,6 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from pandas.io.gbq import _Dataset
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -22,339 +24,867 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-# CCPN-NEF mapping:
-#
-# Eventually this should probably be moved to the NEF specification files.
-# Pending agreement on how io integrate it there, we leave it here:
-#
-# The data structure is made of nested orderedDicts:
-# {savefremeName:{loopName:{itemName:ccpnAttributeExpression}}}
-# Order is the recommended writing order.
-# loopName is NOne for items directly inside teh saveFrame.
-# The ccpnAttributeExpression is a string with dots that gives you the relevant attribute
-# starting form he object matching the saveeframe or loop row, as passed to operator.attrgetter.
-# Where this is not possible, the expression is left as None.
-# FOr 'list' attributes, such as Peak.position, the mapping isi given only of position_1
-# and is left as None for the rest.
-# The code must determine how many of the attributes (up to e.g. Peak.position_15) to include
-
 import random
 from collections import OrderedDict as OD
+from functools import partial
 from operator import attrgetter
 from typing import List, Union, Optional, Sequence
 
-from ccpn.core.lib import Version
-
-from ccpn.core.lib.nef import Specification
-from ccpn.core.lib.nef import StarIo
+from ccpn.core._implementation import Io as coreIo
+from ccpn.core.lib import Pid
+from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
 from ccpn.util import Common as commonUtil
+from . import Specification
+from . import StarIo
 
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
 
-# Saveframe map for generic restraint - later modified for the official versions
-_RestraintListMap = OD((
-  ('potential_type','potentialType'),
-  ('origin', 'origin'),
-  ('tensor_magnitude', None),
-  ('tensor_rhombicity', None),
-  ('tensor_chain_code', 'tensorChainCode'),
-  ('tensor_sequence_code', 'tensorSequenceCode'),
-  ('tensor_residue_type', 'tensorResidueType'),
-  ('ccpn_serial', 'serial'),
-  ('ccpn_name', 'name'),
-  ('ccpn_restraint_type', 'restraintType'),
-  ('ccpn_restraint_item_length', 'restraintItemLength'),
-  ('ccpn_unit', 'unit'),
-  ('ccpn_measurement_type', 'measurementType'),
-  ('ccpn_comment', 'comment'),
-  ('ccpn_tensor_isotropic_value', None),
-))
 
-# Restraint loop columns for generic restraint - abridged for the official versions
-_RestraintColumns = OD((                   # Matching class: RestraintContribution
-  ('ordinal', None), ('restraint_id', 'restraint.serial'),
-  ('restraint_combination_id', 'combinationId'),
-  ('chain_code_1', None), ('sequence_code_1', None), ('residue_type_1', None), ('atom_name_1',None),
-  ('chain_code_2', None), ('sequence_code_2', None), ('residue_type_2', None), ('atom_name_2',None),
-  ('chain_code_3', None), ('sequence_code_3', None), ('residue_type_3', None), ('atom_name_3',None),
-  ('chain_code_4', None), ('sequence_code_4', None), ('residue_type_4', None), ('atom_name_4',None),
-  ('weight', 'weight'), ('target_value', 'targetValue'), ('target_value_uncertainty', 'error'),
-  ('lower_linear_limit', 'additionalLowerLimit'), ('lower_limit', 'lowerLimit'),
-  ('upper_limit', 'upperLimit'), ('upper_linear_limit', 'additionalUpperLimit'),
-  ('scale', 'scale'), ('distance_dependent', 'isDistanceDependent'),
-  ('name', None),
-  ('ccpn_vector_length', 'restraint.vectorLength'),
-  ('ccpn_figure_of_merit', 'restraint.figureOfMerit')
-))
 
-# NEF supported restraint list maps:
+#  - saveframe category names in writing order
+saveFrameOrder = [
+  'nef_nmr_meta_data',
+  'nef_molecular_system',
+  'nef_chemical_shift_list',
+  'nef_distance_restraint_list',
+  'nef_dihedral_restraint_list',
+  'nef_rdc_restraint_list',
+  'nef_nmr_spectrum',
+  'nef_peak_restraint_links',
+  'ccpn_spectrum_group',
+  'ccpn_sample',
+  'ccpn_substance',
+  'ccpn_assignments',
+  'ccpn_dataset',
+  'ccpn_restraint_list',
+  'ccpn_notes',
+]
 
-_removeCcpnItems = ('ccpn_restraint_type', 'ccpn_restraint_item_length', 'ccpn_measurement_type')
-_removeRdcColumns = ('ccpn_vector_length', )
-_removeDihedralColumns = ('name', )
 
-# Distance restraint list Map
-_DistanceRestraintListMap = OD(tt for tt in _RestraintListMap.items()
-                               if not 'tensor' in tt[0] and tt[0] not in _removeCcpnItems)
-columns = OD(tt for tt in _RestraintColumns.items()
-             if tt[0][-2:] not in ('_3', '_4')
-             and tt[0] not in (_removeRdcColumns + _removeDihedralColumns))
-_DistanceRestraintListMap['nef_distance_restraint'] = columns
+# NEf to CCPN tag mapping (and tag order)
+#
+# Contents are:
+# Nef2CcpnMap = {saveframe_or_loop_category:contents}
+# contents = {tag:ccpn_tag_or_None}
+# loopMap = {tag:ccpn_tag}
+#
+# Loops are entered as saveFrame contents with their category as tag and 'ccpn_tag' None
+# and at the top level under their category name
+# This relies on loop categories being unique, both at teh top level, and among the item
+# names within a saveframe
 
-# Dihedral restraint list Map
-_DihedralRestraintListMap = OD(tt for tt in _RestraintListMap.items()
-                               if not 'tensor' in tt[0])
-for tag in _removeCcpnItems:
-  del _DihedralRestraintListMap[tag]
-columns = OD(tt for tt in _RestraintColumns.items() if tt[0] not in _removeRdcColumns)
-_DihedralRestraintListMap['nef_dihedral_restraint'] = columns
+# Sentinel value - MUST evaluate as False
+_isALoop = ()
+nef2CcpnMap = {
+  'nef_nmr_meta_data':OD((
+    ('format_name',None),
+    ('format_version',None),
+    ('program_name',None),
+    ('program_version',None),
+    ('creation_date',None),
+    ('uuid',None),
+    ('coordinate_file_name',None),
+    ('ccpn_dataset_name','name'),
+    ('ccpn_dataset_comment',None),
+    ('nef_related_entries',_isALoop),
+    ('nef_program_script',_isALoop),
+    ('nef_run_history',_isALoop),
+  )),
+  'nef_related_entries':OD((
+    ('database_name',None),
+    ('database_accession_code',None),
+  )),
+  'nef_program_script':OD((
+    ('program_name',None),
+    ('script_name',None),
+    ('script',None),
+  )),
+  'nef_run_history':OD((
+    ('run_ordinal','serial'),
+    ('program_name','programName'),
+    ('program_version','programVersion'),
+    ('script_name','scriptName'),
+    ('script','script'),
+    ('ccpn_input_uuid','inputDataUuid'),
+    ('ccpn_output_uuid','outputDataUuid'),
+  )),
 
-# Rdc restraint list Map
-_RdcRestraintListMap = _RestraintListMap.copy()
-for tag in _removeCcpnItems:
-  del _RdcRestraintListMap[tag]
-columns = OD(tt for tt in _RestraintColumns.items() if tt[0][-2:] not in ('_3', '_4')
-             and tt[0] not in _removeDihedralColumns)
-_RdcRestraintListMap['nef_rdc_restraint'] = columns
+  'nef_molecular_system':OD((
+    ('nef_sequence',_isALoop),
+    ('nef_covalent_links',_isALoop),
+  )),
+  'nef_sequence':OD((
+    ('chain_code','chain.shortName'),
+    ('sequence_code','sequenceCode'),
+    ('residue_type','residueType'),
+    ('linking','linking'),
+    ('residue_variant','residueVariant'),
+    ('ccpn_comment','comment'),
+    ('ccpn_chain_role','chain.role'),
+    ('ccpn_compound_name','chain.compoundName'),
+    ('ccpn_chain_comment','chain.comment'),
+  )),
+  'nef_covalent_links':OD((
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_type_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_type_2',None),
+    ('atom_name_2',None),
+  )),
 
-_RestraintListMap['ccpn_restraint'] = _RestraintColumns
+  'nef_chemical_shift_list':OD((
+    ('name', None),
+    ('atom_chemical_shift_units','unit'),
+    ('ccpn_serial','serial'),
+    ('ccpn_autoUpdate','autoUpdate'),
+    ('ccpn_isSimulated','isSimulated'),
+    ('ccpn_comment','comment'),
+    ('nef_chemical_shift',_isALoop),
+  )),
+  'nef_chemical_shift':OD((
+    ('chain_code',None),
+    ('sequence_code',None),
+    ('residue_type',None),
+    ('atom_name',None),
+    ('value','value'),
+    ('value_uncertainty','valueError'),
+    ('ccpn_figure_of_merit','figureOfMerit'),
+    ('ccpn_comment','comment'),
+  )),
+
+  'nef_distance_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('origin','origin'),
+    ('ccpn_serial','serial'),
+    ('ccpn_name','name'),
+    ('ccpn_unit','unit'),
+    ('ccpn_comment','comment'),
+    ('nef_distance_restraint',_isALoop),
+  )),
+  'nef_distance_restraint':OD((
+    ('ordinal',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_type_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_type_2',None),
+    ('atom_name_2',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('scale','scale'),
+    ('distance_dependent','isDistanceDependent'),
+    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
+  )),
+
+  'nef_dihedral_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('origin','origin'),
+    ('ccpn_serial','serial'),
+    ('ccpn_name','name'),
+    ('ccpn_unit','unit'),
+    ('ccpn_comment','comment'),
+    ('nef_dihedral_restraint',_isALoop),
+  )),
+  'nef_dihedral_restraint':OD((
+    ('ordinal',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_type_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_type_2',None),
+    ('atom_name_2',None),
+    ('chain_code_3',None),
+    ('sequence_code_3',None),
+    ('residue_type_3',None),
+    ('atom_name_3',None),
+    ('chain_code_4',None),
+    ('sequence_code_4',None),
+    ('residue_type_4',None),
+    ('atom_name_4',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('scale','scale'),
+    ('distance_dependent','isDistanceDependent'),
+    ('name',None),
+    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
+  )),
+
+  'nef_rdc_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('origin','origin'),
+    ('tensor_magnitude',None),
+    ('tensor_rhombicity',None),
+    ('tensor_chain_code','tensorChainCode'),
+    ('tensor_sequence_code','tensorSequenceCode'),
+    ('tensor_residue_type','tensorResidueType'),
+    ('ccpn_serial','serial'),
+    ('ccpn_name','name'),
+    ('ccpn_unit','unit'),
+    ('ccpn_comment','comment'),
+    ('ccpn_tensor_isotropic_value',None),
+    ('nef_rdc_restraint',_isALoop),
+  )),
+  'nef_rdc_restraint':OD((
+    ('ordinal',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_type_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_type_2',None),
+    ('atom_name_2',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('scale','scale'),
+    ('distance_dependent','isDistanceDependent'),
+    ('ccpn_vector_length','restraint.vectorLength'),
+    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
+  )),
+
+  'nef_nmr_spectrum':OD((
+    ('num_dimensions','spectrum.dimensionCount'),
+    ('chemical_shift_list',None),
+    ('experiment_classification','spectrum.experimentType'),
+    ('experiment_type','spectrum.experimentName'),
+    ('ccpn_peaklist_serial','serial'),
+    ('ccpn_peaklist_comment','comment'),
+    ('ccpn_peaklist_name','title'),
+    ('ccpn_peaklist_is_simulated','isSimulated'),
+    ('ccpn_spectrum_name','spectrum.name'),
+    ('ccpn_complete_spectrum_data',None),
+    ('nef_spectrum_dimension',_isALoop),
+    ('nef_spectrum_dimension_transfer',_isALoop),
+    ('nef_peak',_isALoop),
+    ('ccpn_spectrum_hit',_isALoop),
+  )),
+  'nef_spectrum_dimension':OD((
+    ('dimension_id',None),
+    ('axis_unit',None),
+    ('axis_code',None),
+    ('spectrometer_frequency',None),
+    ('spectral_width',None),
+    ('value_first_point',None),
+    ('folding',None),
+    ('absolute_peak_positions',None),
+    ('is_acquisition',None),
+  )),
+  'nef_spectrum_dimension_transfer':OD((
+    ('dimension_1',None),
+    ('dimension_2',None),
+    ('transfer_type',None),
+    ('is_indirect',None),
+  )),
+  'nef_peak':OD((
+    ('ordinal',None),
+    ('peak_id','serial'),
+    ('volume','volume'),
+    ('volume_uncertainty','volumeError'),
+    ('height','height'),
+    ('height_uncertainty','heightError'),
+    ('position_1',None),
+    ('position_uncertainty_1',None),
+    ('position_2',None),
+    ('position_uncertainty_2',None),
+    ('position_3',None),
+    ('position_uncertainty_3',None),
+    ('position_4',None),
+    ('position_uncertainty_4',None),
+    ('position_5',None),
+    ('position_uncertainty_5',None),
+    ('position_6',None),
+    ('position_uncertainty_6',None),
+    ('position_7',None),
+    ('position_uncertainty_7',None),
+    ('position_8',None),
+    ('position_uncertainty_8',None),
+    ('position_9',None),
+    ('position_uncertainty_9',None),
+    ('position_10',None),
+    ('position_uncertainty_10',None),
+    ('position_11',None),
+    ('position_uncertainty_11',None),
+    ('position_12',None),
+    ('position_uncertainty_12',None),
+    ('position_13',None),
+    ('position_uncertainty_13',None),
+    ('position_14',None),
+    ('position_uncertainty_14',None),
+    ('position_15',None),
+    ('position_uncertainty_15',None),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_type_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_type_2',None),
+    ('atom_name_2',None),
+    ('chain_code_3',None),
+    ('sequence_code_3',None),
+    ('residue_type_3',None),
+    ('atom_name_3',None),
+    ('chain_code_4',None),
+    ('sequence_code_4',None),
+    ('residue_type_4',None),
+    ('atom_name_4',None),
+    ('chain_code_5',None),
+    ('sequence_code_5',None),
+    ('residue_type_5',None),
+    ('atom_name_5',None),
+    ('chain_code_6',None),
+    ('sequence_code_6',None),
+    ('residue_type_6',None),
+    ('atom_name_6',None),
+    ('chain_code_7',None),
+    ('sequence_code_7',None),
+    ('residue_type_7',None),
+    ('atom_name_7',None),
+    ('chain_code_8',None),
+    ('sequence_code_8',None),
+    ('residue_type_8',None),
+    ('atom_name_8',None),
+    ('chain_code_9',None),
+    ('sequence_code_9',None),
+    ('residue_type_9',None),
+    ('atom_name_9',None),
+    ('chain_code_10',None),
+    ('sequence_code_10',None),
+    ('residue_type_10',None),
+    ('atom_name_10',None),
+    ('chain_code_11',None),
+    ('sequence_code_11',None),
+    ('residue_type_11',None),
+    ('atom_name_11',None),
+    ('chain_code_12',None),
+    ('sequence_code_12',None),
+    ('residue_type_12',None),
+    ('atom_name_12',None),
+    ('chain_code_13',None),
+    ('sequence_code_13',None),
+    ('residue_type_13',None),
+    ('atom_name_13',None),
+    ('chain_code_14',None),
+    ('sequence_code_14',None),
+    ('residue_type_14',None),
+    ('atom_name_14',None),
+    ('chain_code_15',None),
+    ('sequence_code_15',None),
+    ('residue_type_15',None),
+    ('atom_name_15',None),
+  )),
+  'ccpn_spectrum_hit':OD((
+    ('ccpn_substance_name','substanceName'),
+    ('ccpn_pseudo_dimension_number','pseudoDimensionNumber'),
+    ('ccpn_point_number','pointNumber'),
+    ('ccpn_figure_of_merit','figureOfMerit'),
+    ('ccpn_merit_code','meritCode'),
+    ('ccpn_normalised_change','normalisedChange'),
+    ('ccpn_is_confirmed_','isConfirmed'),
+    ('ccpn_concentration','concentration'),
+    ('ccpn_','concentrationError'),
+    ('ccpn_concentration_uncertainty','concentrationUnit'),
+    ('ccpn_comment','comment'),
+  )),
+
+  'nef_peak_restraint_links':OD((
+    ('nef_peak_restraint_link',_isALoop),
+  )),
+  'nef_peak_restraint_link':OD((
+    ('nmr_spectrum_id',None),
+    ('peak_id',None),
+    ('restraint_list_id',None),
+    ('restraint_id',None),
+  )),
+
+  'ccpn_spectrum_group':OD((
+  )),
+
+  'ccpn_sample':OD((
+    ('name','name'),
+    ('pH','ph'),
+    ('ionic_strength','ionicStrength'),
+    ('amount','amount'),
+    ('amount_unit','amountUnit'),
+    ('is_hazardous','isHazardous'),
+    ('is_virtual','isVirtual'),
+    ('creation_date','creationDate'),
+    ('batch_identifier','batchIdentifier'),
+    ('plate_identifier','plateIdentifier'),
+    ('row_number','rowNumber'),
+    ('column_number','columnNumber'),
+    ('comment','comment'),
+    ('ccpn_sample_component',_isALoop),
+  )),
+  'ccpn_sample_component':OD((
+    ('name','name'),
+    ('labeling','labeling'),
+    ('role','role'),
+    ('concentration','concentration'),
+    ('concentration_error','concentrationError'),
+    ('concentration_unit','concentrationUnit'),
+    ('purity','purity'),
+    ('comment','comment'),
+  )),
+
+  'ccpn_substance':OD((
+    ('name','name'),
+    ('labeling','labeling'),
+    ('substance_type','substanceType'),
+    ('user_code','userCode'),
+    ('smiles','smiles'),
+    ('inchi','inChi'),
+    ('cas_number','casNumber'),
+    ('empirical_formula','empiricalFormula'),
+    ('sequence_string','sequenceString'),
+    ('molecular_mass','molecularMass'),
+    ('atom_count','atomCount'),
+    ('bond_count','bondCount'),
+    ('ring_count','ringCount'),
+    ('h_bond_donor_count','hBondDonorCount'),
+    ('h_bond_acceptor_count','hBondAcceptorCount'),
+    ('polar_surface_area','polarSurfaceArea'),
+    ('log_partition_coefficient','logPartitionCoefficient'),
+    ('comment','comment'),
+    ('ccpn_substance_synonym',_isALoop),
+  )),
+  'ccpn_substance_synonym':OD((
+    ('synonym',None),
+  )),
+
+  'ccpn_assignments':OD((
+  )),
+
+  'ccpn_dataset':OD((
+  )),
+
+  'ccpn_integral_list':OD((
+  )),
+
+  'ccpn_restraint_list':OD((
+    ('potential_type','potentialType'),
+    ('origin','origin'),
+    ('tensor_magnitude',None),
+    ('tensor_rhombicity',None),
+    ('tensor_chain_code','tensorChainCode'),
+    ('tensor_sequence_code','tensorSequenceCode'),
+    ('tensor_residue_type','tensorResidueType'),
+    ('ccpn_serial','serial'),
+    ('ccpn_name','name'),
+    ('ccpn_restraint_type','restraintType'),
+    ('ccpn_restraint_item_length','restraintItemLength'),
+    ('ccpn_unit','unit'),
+    ('ccpn_measurement_type','measurementType'),
+    ('ccpn_comment','comment'),
+    ('ccpn_tensor_isotropic_value',None),
+  )),
+  'ccpn_restraint':OD((
+    ('ordinal',None),
+    ('restraint_id','restraint.serial'),
+    ('restraint_combination_id','combinationId'),
+    ('chain_code_1',None),
+    ('sequence_code_1',None),
+    ('residue_type_1',None),
+    ('atom_name_1',None),
+    ('chain_code_2',None),
+    ('sequence_code_2',None),
+    ('residue_type_2',None),
+    ('atom_name_2',None),
+    ('chain_code_3',None),
+    ('sequence_code_3',None),
+    ('residue_type_3',None),
+    ('atom_name_3',None),
+    ('chain_code_4',None),
+    ('sequence_code_4',None),
+    ('residue_type_4',None),
+    ('atom_name_4',None),
+    ('weight','weight'),
+    ('target_value','targetValue'),
+    ('target_value_uncertainty','error'),
+    ('lower_linear_limit','additionalLowerLimit'),
+    ('lower_limit','lowerLimit'),
+    ('upper_limit','upperLimit'),
+    ('upper_linear_limit','additionalUpperLimit'),
+    ('scale','scale'),
+    ('distance_dependent','isDistanceDependent'),
+    ('name',None),
+    ('ccpn_vector_length','restraint.vectorLength'),
+    ('ccpn_figure_of_merit','restraint.figureOfMerit'),
+  )),
+
+  'ccpn_notes':OD((
+    ('ccpn_note',_isALoop),
+  )),
+  'ccpn_note':OD((
+    ('serial','serial'),
+    ('name','name'),
+    ('created','created'),
+    ('last_modified','lastModified'),
+    ('text','text'),
+  )),
+
+}
+
+# Validity check
+if sorted(nef2CcpnMap.keys()) != sorted(saveFrameOrder):
+  raise TypeError("Coding Error - saveFrameOrder does not match nef2CcpnMap:\n%s\n%s\n"
+                  % (sorted(saveFrameOrder), sorted(nef2CcpnMap.keys())))
+
+# Add loop dictionaries to nef2CcpnMap:
+for category in saveFrameOrder:
+  for tag, val in nef2CcpnMap[category]:
+    if isinstance(val, OD):
+      nef2CcpnMap[tag] = val
+
+
+# # CCPN-NEF mapping:
+# #
+# # Eventually this should probably be moved to the NEF specification files.
+# # Pending agreement on how io integrate it there, we leave it here:
+# #
+# # The data structure is made of nested orderedDicts:
+# # {savefremeName:{loopName:{itemName:ccpnAttributeExpression}}}
+# # Order is the recommended writing order.
+# # loopName is NOne for items directly inside teh saveFrame.
+# # The ccpnAttributeExpression is a string with dots that gives you the relevant attribute
+# # starting form he object matching the saveeframe or loop row, as passed to operator.attrgetter.
+# # Where this is not possible, the expression is left as None.
+# # FOr 'list' attributes, such as Peak.position, the mapping isi given only of position_1
+# # and is left as None for the rest.
+# # The code must determine how many of the attributes (up to e.g. Peak.position_15) to include
+#
+#
+# # Saveframe map for generic restraint - later modified for the official versions
+# _RestraintListMap = OD((
+#   ('potential_type','potentialType'),
+#   ('origin', 'origin'),
+#   ('tensor_magnitude', None),
+#   ('tensor_rhombicity', None),
+#   ('tensor_chain_code', 'tensorChainCode'),
+#   ('tensor_sequence_code', 'tensorSequenceCode'),
+#   ('tensor_residue_type', 'tensorResidueType'),
+#   ('ccpn_serial', 'serial'),
+#   ('ccpn_name', 'name'),
+#   ('ccpn_restraint_type', 'restraintType'),
+#   ('ccpn_restraint_item_length', 'restraintItemLength'),
+#   ('ccpn_unit', 'unit'),
+#   ('ccpn_measurement_type', 'measurementType'),
+#   ('ccpn_comment', 'comment'),
+#   ('ccpn_tensor_isotropic_value', None),
+# ))
+#
+# # Restraint loop columns for generic restraint - abridged for the official versions
+# _RestraintColumns = OD((                   # Matching class: RestraintContribution
+#   ('ordinal', None), ('restraint_id', 'restraint.serial'),
+#   ('restraint_combination_id', 'combinationId'),
+#   ('chain_code_1', None), ('sequence_code_1', None), ('residue_type_1', None), ('atom_name_1',None),
+#   ('chain_code_2', None), ('sequence_code_2', None), ('residue_type_2', None), ('atom_name_2',None),
+#   ('chain_code_3', None), ('sequence_code_3', None), ('residue_type_3', None), ('atom_name_3',None),
+#   ('chain_code_4', None), ('sequence_code_4', None), ('residue_type_4', None), ('atom_name_4',None),
+#   ('weight', 'weight'), ('target_value', 'targetValue'), ('target_value_uncertainty', 'error'),
+#   ('lower_linear_limit', 'additionalLowerLimit'), ('lower_limit', 'lowerLimit'),
+#   ('upper_limit', 'upperLimit'), ('upper_linear_limit', 'additionalUpperLimit'),
+#   ('scale', 'scale'), ('distance_dependent', 'isDistanceDependent'),
+#   ('name', None),
+#   ('ccpn_vector_length', 'restraint.vectorLength'),
+#   ('ccpn_figure_of_merit', 'restraint.figureOfMerit')
+# ))
+
+# # NEF supported restraint list maps:
+#
+# _removeCcpnItems = ('ccpn_restraint_type', 'ccpn_restraint_item_length', 'ccpn_measurement_type')
+# _removeRdcColumns = ('ccpn_vector_length', )
+# _removeDihedralColumns = ('name', )
+#
+# # Distance restraint list Map
+# _DistanceRestraintListMap = OD(tt for tt in _RestraintListMap.items()
+#                                if not 'tensor' in tt[0] and tt[0] not in _removeCcpnItems)
+# columns = OD(tt for tt in _RestraintColumns.items()
+#              if tt[0][-2:] not in ('_3', '_4')
+#              and tt[0] not in (_removeRdcColumns + _removeDihedralColumns))
+# _DistanceRestraintListMap['nef_distance_restraint'] = columns
+#
+# # Dihedral restraint list Map
+# _DihedralRestraintListMap = OD(tt for tt in _RestraintListMap.items()
+#                                if not 'tensor' in tt[0])
+# for tag in _removeCcpnItems:
+#   del _DihedralRestraintListMap[tag]
+# columns = OD(tt for tt in _RestraintColumns.items() if tt[0] not in _removeRdcColumns)
+# _DihedralRestraintListMap['nef_dihedral_restraint'] = columns
+#
+# # Rdc restraint list Map
+# _RdcRestraintListMap = _RestraintListMap.copy()
+# for tag in _removeCcpnItems:
+#   del _RdcRestraintListMap[tag]
+# columns = OD(tt for tt in _RestraintColumns.items() if tt[0][-2:] not in ('_3', '_4')
+#              and tt[0] not in _removeDihedralColumns)
+# _RdcRestraintListMap['nef_rdc_restraint'] = columns
+#
+# _RestraintListMap['ccpn_restraint'] = _RestraintColumns
 
 
 def convert2NefString(project):
   """Convert project ot NEF string"""
-  converter = CcpnNefIo(project)
+  converter = CcpnNefWriter(project)
   dataBlock = converter.exportProject()
   return dataBlock.toString()
 
-class CcpnNefIo:
+class CcpnNefWriter:
   """CCPN NEF reader/writer"""
 
-  # Saveframes in output order with contained items and loops
-  # End-of-line comments show the CCPN object(s) providing the data
-  # String item values is a navigation expression to get item value from top l;evel object
-  # List item values is the list of columns for a loop.
-  Nef2CcpnMap = OD((
-
-    ('nef_nmr_meta_data', OD((                   # Singleton Metadata - from Project or DataSet
-      ('format_name', None),
-      ('format_version', None),
-      ('program_name', None),
-      ('program_version', None),
-      ('creation_date', None),
-      ('uuid', None),
-      ('coordinate_file_name', None),
-      ('ccpn_dataset_name', 'name'),
-      ('ccpn_dataset_comment', None),
-      ('nef_related_entries', OD((                         # No Matching class
-        ('database_name', None), ('database_accession_code', None),
-      ))),
-      ('nef_program_script', OD((                          # No Matching class
-        ('program_name', None), ('script_name', None), ('script', None),
-      ))),
-      ('nef_run_history', OD((                             # Matching class: CalculationStep
-        ('run_ordinal', 'serial'), ('program_name', 'programName'),
-        ('program_version', 'programVersion'),
-        ('script_name', 'scriptName'), ('script', 'script'),
-        ('ccpn_input_uuid', 'inputDataUuid'), ('ccpn_output_uuid', 'outputDataUuid'),
-      ))),
-    ))),
-
-    ('nef_molecular_system', OD((                # Singleton (Chains)
-      ('nef_sequence', OD((                               # Matching class: Residue
-        ('chain_code', 'chain.shortName'), ('sequence_code', 'sequenceCode'),
-        ('residue_type', 'residueType'),
-        ('linking', 'linking'), ('residue_variant', 'residueVariant'),
-       ))),
-
-      # NBNB REDO - (we no longer have Bonds
-
-      ('nef_covalent_links', OD((               # Matching class : Bond
-        ('chain_code_1', None), ('sequence_code_1', None),
-        ('residue_type_1', None), ('atom_name_1', None),
-        ('chain_code_2', None), ('sequence_code_2', None),
-        ('residue_type_2', None), ('atom_name_2', None),
-        ('ccpn_bond_type', 'bondType'),
-      ))),
-    ))),
-
-    ('nef_chemical_shift_list', OD((             # Matching class: ChemicalShiftList
-      ('atom_chemical_shift_units', 'unit'),
-      ('ccpn_serial', 'serial'),
-      ('ccpn_name', 'name'),
-      ('ccpn_autoUpdate', 'autoUpdate'),
-      ('ccpn_isSimulated', 'isSimulated'),
-      ('ccpn_comment', 'comment'),
-      ('nef_chemical_shift', OD((                # Matching class: ChemicalShift
-        ('chain_code', None), ('sequence_code', None), ('residue_type', None), ('atom_name', None),
-        ('value', 'value'), ('value_uncertainty', 'valueError'),
-        ('ccpn_figure_of_merit', 'figureOfMerit'), ('ccpn_comment', 'comment'),
-      ))),
-    ))),
-
-    ('nef_distance_restraint_list', _DistanceRestraintListMap),     # Matching class: RestraintList
-
-    ('nef_dihedral_restraint_list', _DihedralRestraintListMap),     # Matching class: RestraintList
-
-    ('nef_rdc_restraint_list', _RdcRestraintListMap),               # Matching class: RestraintList
-
-    # NBNB TBD Add SpectrumReference, ccpn-specific parameters for Spectrum
-
-    ('nef_nmr_spectrum', OD((                    # Matching class: PeakList
-      ('num_dimensions', 'spectrum.dimensionCount'),
-      ('chemical_shift_list', None),
-      ('experiment_classification', 'spectrum.experimentType'),
-      ('experiment_type', 'spectrum.experimentName'),
-      ('ccpn_peaklist_serial', 'serial'),
-      ('ccpn_peaklist_comment', 'comment'),
-      ('ccpn_peaklist_name', 'name'),
-      ('ccpn_peaklist_is_simulated', 'isSimulated'),
-      ('ccpn_spectrum_name', 'spectrum.name'),
-      ('ccpn_complete_spectrum_data', None),
-      ('nef_spectrum_dimension', OD((            # No Matching class
-        ('dimension_id', None), ('axis_unit', None), ('axis_code', None),
-        ('spectrometer_frequency', None), ('spectral_width', None), ('value_first_point', None),
-        ('folding', None), ('absolute_peak_positions', None), ('is_acquisition', None),
-      ))),
-      ('nef_spectrum_dimension_transfer', OD((   # No Matching class
-        ('dimension_1', None), ('dimension_2', None), ('transfer_type', None), ('is_indirect',None),
-      ))),
-      ('nef_peak', OD((                          # Matching class: Peak
-        ('ordinal', None),
-        ('peak_id', 'serial'),
-        ('volume', 'volume'),
-        ('volume_uncertainty', 'volumeError'),
-        ('height', 'height'),
-        ('height_uncertainty', 'heightError'),
-        ('position_1', None), ('position_uncertainty_1', None),
-        ('position_2', None), ('position_uncertainty_2', None),
-        ('position_3', None), ('position_uncertainty_3', None),
-        ('position_4', None), ('position_uncertainty_4', None),
-        ('position_5', None), ('position_uncertainty_5', None),
-        ('position_6', None), ('position_uncertainty_6', None),
-        ('position_7', None), ('position_uncertainty_7', None),
-        ('position_8', None), ('position_uncertainty_8', None),
-        ('position_9', None), ('position_uncertainty_9', None),
-        ('position_10', None), ('position_uncertainty_10', None),
-        ('position_11', None), ('position_uncertainty_11', None),
-        ('position_12', None), ('position_uncertainty_12', None),
-        ('position_13', None), ('position_uncertainty_13', None),
-        ('position_14', None), ('position_uncertainty_14', None),
-        ('position_15', None), ('position_uncertainty_15', None),
-        ('chain_code_1', None), ('sequence_code_1', None), ('residue_type_1', None),
-        ('atom_name_1', None),
-        ('chain_code_2', None), ('sequence_code_2', None), ('residue_type_2', None),
-        ('atom_name_2', None),
-        ('chain_code_3', None), ('sequence_code_3', None), ('residue_type_3', None),
-        ('atom_name_3', None),
-        ('chain_code_4', None), ('sequence_code_4', None), ('residue_type_4', None),
-        ('atom_name_4', None),
-        ('chain_code_5', None), ('sequence_code_5', None), ('residue_type_5', None),
-        ('atom_name_5', None),
-        ('chain_code_6', None), ('sequence_code_6', None), ('residue_type_6', None),
-        ('atom_name_6', None),
-        ('chain_code_7', None), ('sequence_code_7', None), ('residue_type_7', None),
-        ('atom_name_7', None),
-        ('chain_code_8', None), ('sequence_code_8', None), ('residue_type_8', None),
-        ('atom_name_8', None),
-        ('chain_code_9', None), ('sequence_code_9', None), ('residue_type_9', None),
-        ('atom_name_9', None),
-        ('chain_code_10', None), ('sequence_code_10', None), ('residue_type_10', None),
-        ('atom_name_10', None),
-        ('chain_code_11', None), ('sequence_code_11', None), ('residue_type_11', None),
-        ('atom_name_11', None),
-        ('chain_code_12', None), ('sequence_code_12', None), ('residue_type_12', None),
-        ('atom_name_12', None),
-        ('chain_code_13', None), ('sequence_code_13', None), ('residue_type_13', None),
-        ('atom_name_13', None),
-        ('chain_code_14', None), ('sequence_code_14', None), ('residue_type_14', None),
-        ('atom_name_14', None),
-        ('chain_code_15', None), ('sequence_code_15', None), ('residue_type_15', None),
-        ('atom_name_15', None),
-      ))),
-      ('ccpn_spectrum_hit', OD((
-        ('ccpn_substance_name', 'substanceName'),
-        ('ccpn_pseudo_dimension_number', 'pseudoDimensionNumber'),
-        ('ccpn_point_number', 'pointNumber'),
-        ('ccpn_figure_of_merit', 'figureOfMerit'),
-        ('ccpn_merit_code', 'meritCode'),
-        ('ccpn_normalised_change', 'normalisedChange'),
-        ('ccpn_is_confirmed_', 'isConfirmed'),
-        ('ccpn_concentration', 'concentration'),
-        ('ccpn_', 'concentrationError'),
-        ('ccpn_concentration_uncertainty', 'concentrationUnit'),
-        ('ccpn_comment', 'comment'),
-      ))),
-    ))),
-
-    # NB Must be calculated after all PeakLists and RestraintLists:
-    ('nef_peak_restraint_links', OD((          # Singleton (RestraintsLists, PeakLists)
-      ('nef_peak_restraint_link', OD((
-        ('nmr_spectrum_id', None), ('peak_id', None), ('restraint_list_id', None),
-        ('restraint_id', None),
-      ))),
-    ))),
-
-    ('ccpn_spectrum_group', OD()),               # SpectrumGroup
-
-    ('ccpn_sample', OD((                         # Matching class: Sample
-      ('name', 'name'),
-      ('pH', 'ph'),
-      ('ionic_strength', 'ionicStrength'),
-      ('amount', 'amount'),
-      ('amount_unit', 'amountUnit'),
-      ('is_hazardous', 'isHazardous'),
-      ('is_virtual', 'isVirtual'),
-      ('creation_date', 'creationDate'),
-      ('batch_identifier', 'batchIdentifier'),
-      ('plate_identifier', 'plateIdentifier'),
-      ('row_number', 'rowNumber'),
-      ('column_number', 'columnNumber'),
-      ('comment', 'comment'),
-      ('ccpn_sample_component', OD((
-        ('name', 'name'), ('labeling', 'labeling'), ('role', 'role'),
-        ('concentration', 'concentration'),
-        ('concentration_error', 'concentrationError'), ('concentration_unit', 'concentrationUnit'),
-        ('purity', 'purity'), ('comment', 'comment'),
-      ))),
-    ))),
-
-    ('ccpn_substance', OD((                      # Matching class: Substance
-      ('name', 'name'),
-      ('labeling', 'labeling'),
-      ('substance_type', 'substanceType'),
-      ('user_code', 'userCode'),
-      ('smiles', 'smiles'),
-      ('inchi', 'inChi'),
-      ('cas_number', 'casNumber'),
-      ('empirical_formula', 'empiricalFormula'),
-      ('sequence_string', 'sequenceString'),
-      ('molecular_mass', 'molecularMass'),
-      ('atom_count', 'atomCount'),
-      ('bond_count', 'bondCount'),
-      ('ring_count', 'ringCount'),
-      ('h_bond_donor_count', 'hBondDonorCount'),
-      ('h_bond_acceptor_count', 'hBondAcceptorCount'),
-      ('polar_surface_area', 'polarSurfaceArea'),
-      ('log_partition_coefficient', 'logPartitionCoefficient'),
-      ('comment', 'comment'),
-      ('ccpn_substance_synonyms', OD((
-        ('synonym', None),
-      ))),
-    ))),
-
-    ('ccpn_assignments', OD()),                  # Singleton (NmrChains)
-    ('ccpn_dataset', OD()),                      # DataSet
-
-    ('ccpn_restraint_list', _RestraintListMap),  # Matching class: RestraintList
-
-    ('ccpn_notes', OD((                          # Singleton (Notes)
-      ('ccpn_note', OD((
-        ('serial', 'serial'), ('name', 'name'), ('created', 'created'),
-        ('last_modified', 'lastModified'), ('text', 'text'),
-      ))),
-    ))),
-  ))
+  # # Saveframes in output order with contained items and loops
+  # # End-of-line comments show the CCPN object(s) providing the data
+  # # String item values is a navigation expression to get item value from top l;evel object
+  # # List item values is the list of columns for a loop.
+  # Nef2CcpnMap = OD((
+  #
+  #   ('nef_nmr_meta_data', OD((                   # Singleton Metadata - from Project or DataSet
+  #     ('format_name', None),
+  #     ('format_version', None),
+  #     ('program_name', None),
+  #     ('program_version', None),
+  #     ('creation_date', None),
+  #     ('uuid', None),
+  #     ('coordinate_file_name', None),
+  #     ('ccpn_dataset_name', 'name'),
+  #     ('ccpn_dataset_comment', None),
+  #     ('nef_related_entries', OD((                         # No Matching class
+  #       ('database_name', None), ('database_accession_code', None),
+  #     ))),
+  #     ('nef_program_script', OD((                          # No Matching class
+  #       ('program_name', None), ('script_name', None), ('script', None),
+  #     ))),
+  #     ('nef_run_history', OD((                             # Matching class: CalculationStep
+  #       ('run_ordinal', 'serial'), ('program_name', 'programName'),
+  #       ('program_version', 'programVersion'),
+  #       ('script_name', 'scriptName'), ('script', 'script'),
+  #       ('ccpn_input_uuid', 'inputDataUuid'), ('ccpn_output_uuid', 'outputDataUuid'),
+  #     ))),
+  #   ))),
+  #
+  #   ('nef_molecular_system', OD((                # Singleton (Chains)
+  #     ('nef_sequence', OD((                               # Matching class: Residue
+  #       ('chain_code', 'chain.shortName'), ('sequence_code', 'sequenceCode'),
+  #       ('residue_type', 'residueType'),
+  #       ('linking', 'linking'), ('residue_variant', 'residueVariant'),
+  #      ))),
+  #
+  #     # NBNB REDO - (we no longer have Bonds
+  #
+  #     ('nef_covalent_links', OD((               # Matching class : Bond
+  #       ('chain_code_1', None), ('sequence_code_1', None),
+  #       ('residue_type_1', None), ('atom_name_1', None),
+  #       ('chain_code_2', None), ('sequence_code_2', None),
+  #       ('residue_type_2', None), ('atom_name_2', None),
+  #     ))),
+  #   ))),
+  #
+  #   ('nef_chemical_shift_list', OD((             # Matching class: ChemicalShiftList
+  #     ('atom_chemical_shift_units', 'unit'),
+  #     ('ccpn_serial', 'serial'),
+  #     ('ccpn_name', 'name'),
+  #     ('ccpn_autoUpdate', 'autoUpdate'),
+  #     ('ccpn_isSimulated', 'isSimulated'),
+  #     ('ccpn_comment', 'comment'),
+  #     ('nef_chemical_shift', OD((                # Matching class: ChemicalShift
+  #       ('chain_code', None), ('sequence_code', None), ('residue_type', None), ('atom_name', None),
+  #       ('value', 'value'), ('value_uncertainty', 'valueError'),
+  #       ('ccpn_figure_of_merit', 'figureOfMerit'), ('ccpn_comment', 'comment'),
+  #     ))),
+  #   ))),
+  #
+  #   ('nef_distance_restraint_list', _DistanceRestraintListMap),     # Matching class: RestraintList
+  #
+  #   ('nef_dihedral_restraint_list', _DihedralRestraintListMap),     # Matching class: RestraintList
+  #
+  #   ('nef_rdc_restraint_list', _RdcRestraintListMap),               # Matching class: RestraintList
+  #
+  #   # NBNB TBD Add SpectrumReference, ccpn-specific parameters for Spectrum
+  #
+  #   ('nef_nmr_spectrum', OD((                    # Matching class: PeakList
+  #     ('num_dimensions', 'spectrum.dimensionCount'),
+  #     ('chemical_shift_list', None),
+  #     ('experiment_classification', 'spectrum.experimentType'),
+  #     ('experiment_type', 'spectrum.experimentName'),
+  #     ('ccpn_peaklist_serial', 'serial'),
+  #     ('ccpn_peaklist_comment', 'comment'),
+  #     ('ccpn_peaklist_name', 'title'),
+  #     ('ccpn_peaklist_is_simulated', 'isSimulated'),
+  #     ('ccpn_spectrum_name', 'spectrum.name'),
+  #     ('ccpn_complete_spectrum_data', None),
+  #     ('nef_spectrum_dimension', OD((            # No Matching class
+  #       ('dimension_id', None), ('axis_unit', None), ('axis_code', None),
+  #       ('spectrometer_frequency', None), ('spectral_width', None), ('value_first_point', None),
+  #       ('folding', None), ('absolute_peak_positions', None), ('is_acquisition', None),
+  #     ))),
+  #     ('nef_spectrum_dimension_transfer', OD((   # No Matching class
+  #       ('dimension_1', None), ('dimension_2', None), ('transfer_type', None), ('is_indirect',None),
+  #     ))),
+  #     ('nef_peak', OD((                          # Matching class: Peak
+  #       ('ordinal', None),
+  #       ('peak_id', 'serial'),
+  #       ('volume', 'volume'),
+  #       ('volume_uncertainty', 'volumeError'),
+  #       ('height', 'height'),
+  #       ('height_uncertainty', 'heightError'),
+  #       ('position_1', None), ('position_uncertainty_1', None),
+  #       ('position_2', None), ('position_uncertainty_2', None),
+  #       ('position_3', None), ('position_uncertainty_3', None),
+  #       ('position_4', None), ('position_uncertainty_4', None),
+  #       ('position_5', None), ('position_uncertainty_5', None),
+  #       ('position_6', None), ('position_uncertainty_6', None),
+  #       ('position_7', None), ('position_uncertainty_7', None),
+  #       ('position_8', None), ('position_uncertainty_8', None),
+  #       ('position_9', None), ('position_uncertainty_9', None),
+  #       ('position_10', None), ('position_uncertainty_10', None),
+  #       ('position_11', None), ('position_uncertainty_11', None),
+  #       ('position_12', None), ('position_uncertainty_12', None),
+  #       ('position_13', None), ('position_uncertainty_13', None),
+  #       ('position_14', None), ('position_uncertainty_14', None),
+  #       ('position_15', None), ('position_uncertainty_15', None),
+  #       ('chain_code_1', None), ('sequence_code_1', None), ('residue_type_1', None),
+  #       ('atom_name_1', None),
+  #       ('chain_code_2', None), ('sequence_code_2', None), ('residue_type_2', None),
+  #       ('atom_name_2', None),
+  #       ('chain_code_3', None), ('sequence_code_3', None), ('residue_type_3', None),
+  #       ('atom_name_3', None),
+  #       ('chain_code_4', None), ('sequence_code_4', None), ('residue_type_4', None),
+  #       ('atom_name_4', None),
+  #       ('chain_code_5', None), ('sequence_code_5', None), ('residue_type_5', None),
+  #       ('atom_name_5', None),
+  #       ('chain_code_6', None), ('sequence_code_6', None), ('residue_type_6', None),
+  #       ('atom_name_6', None),
+  #       ('chain_code_7', None), ('sequence_code_7', None), ('residue_type_7', None),
+  #       ('atom_name_7', None),
+  #       ('chain_code_8', None), ('sequence_code_8', None), ('residue_type_8', None),
+  #       ('atom_name_8', None),
+  #       ('chain_code_9', None), ('sequence_code_9', None), ('residue_type_9', None),
+  #       ('atom_name_9', None),
+  #       ('chain_code_10', None), ('sequence_code_10', None), ('residue_type_10', None),
+  #       ('atom_name_10', None),
+  #       ('chain_code_11', None), ('sequence_code_11', None), ('residue_type_11', None),
+  #       ('atom_name_11', None),
+  #       ('chain_code_12', None), ('sequence_code_12', None), ('residue_type_12', None),
+  #       ('atom_name_12', None),
+  #       ('chain_code_13', None), ('sequence_code_13', None), ('residue_type_13', None),
+  #       ('atom_name_13', None),
+  #       ('chain_code_14', None), ('sequence_code_14', None), ('residue_type_14', None),
+  #       ('atom_name_14', None),
+  #       ('chain_code_15', None), ('sequence_code_15', None), ('residue_type_15', None),
+  #       ('atom_name_15', None),
+  #     ))),
+  #     ('ccpn_spectrum_hit', OD((
+  #       ('ccpn_substance_name', 'substanceName'),
+  #       ('ccpn_pseudo_dimension_number', 'pseudoDimensionNumber'),
+  #       ('ccpn_point_number', 'pointNumber'),
+  #       ('ccpn_figure_of_merit', 'figureOfMerit'),
+  #       ('ccpn_merit_code', 'meritCode'),
+  #       ('ccpn_normalised_change', 'normalisedChange'),
+  #       ('ccpn_is_confirmed_', 'isConfirmed'),
+  #       ('ccpn_concentration', 'concentration'),
+  #       ('ccpn_', 'concentrationError'),
+  #       ('ccpn_concentration_uncertainty', 'concentrationUnit'),
+  #       ('ccpn_comment', 'comment'),
+  #     ))),
+  #   ))),
+  #
+  #   # NB Must be calculated after all PeakLists and RestraintLists:
+  #   ('nef_peak_restraint_links', OD((          # Singleton (RestraintsLists, PeakLists)
+  #     ('nef_peak_restraint_link', OD((
+  #       ('nmr_spectrum_id', None), ('peak_id', None), ('restraint_list_id', None),
+  #       ('restraint_id', None),
+  #     ))),
+  #   ))),
+  #
+  #   ('ccpn_spectrum_group', OD()),               # SpectrumGroup
+  #
+  #   ('ccpn_sample', OD((                         # Matching class: Sample
+  #     ('name', 'name'),
+  #     ('pH', 'ph'),
+  #     ('ionic_strength', 'ionicStrength'),
+  #     ('amount', 'amount'),
+  #     ('amount_unit', 'amountUnit'),
+  #     ('is_hazardous', 'isHazardous'),
+  #     ('is_virtual', 'isVirtual'),
+  #     ('creation_date', 'creationDate'),
+  #     ('batch_identifier', 'batchIdentifier'),
+  #     ('plate_identifier', 'plateIdentifier'),
+  #     ('row_number', 'rowNumber'),
+  #     ('column_number', 'columnNumber'),
+  #     ('comment', 'comment'),
+  #     ('ccpn_sample_component', OD((
+  #       ('name', 'name'), ('labeling', 'labeling'), ('role', 'role'),
+  #       ('concentration', 'concentration'),
+  #       ('concentration_error', 'concentrationError'), ('concentration_unit', 'concentrationUnit'),
+  #       ('purity', 'purity'), ('comment', 'comment'),
+  #     ))),
+  #   ))),
+  #
+  #   ('ccpn_substance', OD((                      # Matching class: Substance
+  #     ('name', 'name'),
+  #     ('labeling', 'labeling'),
+  #     ('substance_type', 'substanceType'),
+  #     ('user_code', 'userCode'),
+  #     ('smiles', 'smiles'),
+  #     ('inchi', 'inChi'),
+  #     ('cas_number', 'casNumber'),
+  #     ('empirical_formula', 'empiricalFormula'),
+  #     ('sequence_string', 'sequenceString'),
+  #     ('molecular_mass', 'molecularMass'),
+  #     ('atom_count', 'atomCount'),
+  #     ('bond_count', 'bondCount'),
+  #     ('ring_count', 'ringCount'),
+  #     ('h_bond_donor_count', 'hBondDonorCount'),
+  #     ('h_bond_acceptor_count', 'hBondAcceptorCount'),
+  #     ('polar_surface_area', 'polarSurfaceArea'),
+  #     ('log_partition_coefficient', 'logPartitionCoefficient'),
+  #     ('comment', 'comment'),
+  #     ('ccpn_substance_synonyms', OD((
+  #       ('synonym', None),
+  #     ))),
+  #   ))),
+  #
+  #   ('ccpn_assignments', OD()),                  # Singleton (NmrChains)
+  #   ('ccpn_dataset', OD()),                      # DataSet
+  #
+  #   ('ccpn_restraint_list', _RestraintListMap),  # Matching class: RestraintList
+  #
+  #   ('ccpn_notes', OD((                          # Singleton (Notes)
+  #     ('ccpn_note', OD((
+  #       ('serial', 'serial'), ('name', 'name'), ('created', 'created'),
+  #       ('last_modified', 'lastModified'), ('text', 'text'),
+  #     ))),
+  #   ))),
+  # ))
 
   def __init__(self, project:'ccpn.Project', specificationFile=None, mode='strict',
                programName=None, programVersion=None):
@@ -366,11 +896,8 @@ class CcpnNefIo:
       # NBNB TBD reconsider whether we want the spec summary or something else
       self.specification = Specification.getCcpnSpecification(specificationFile)
 
-    programName = programName or project.programName
-    if programVersion is None:
-      self.programVersion = ('%s-%s' % (Version.applicationVersion, Version.revision)
-                             if project._appBase is None else project._appBase.applicationVersion)
-
+    self.programName = programName or project._appBase.applicationName
+    self.programVersion = programVersion or project._appBase.applicationVersion
     self.ccpn2SaveFrameName = {}
 
 
@@ -461,7 +988,7 @@ class CcpnNefIo:
                           coordinateFileName:str=None) -> StarIo.NmrSaveFrame:
     """make NEF metadata saveframe from Project"""
 
-    # NB No attributes cna be set form map here, so we do nto try
+    # NB No attributes can be set from map here, so we do not try
 
     category = 'nef_nmr_meta_data'
     result = self._newNefSaveFrame(headObject, category, category)
@@ -512,33 +1039,28 @@ class CcpnNefIo:
 
     category = 'nef_molecular_system'
     if chains:
-      result = self._newNefSaveFrame(chains[0].project, category, category)
+      project = chains[0].project
+      result = self._newNefSaveFrame(project, category, category)
 
       loopName = 'nef_sequence'
       loop = result[loopName]
 
       for chain in chains:
         for residue in chain.residues:
-          rowdata = self._loopRowData(category, loopName, residue)
+          rowdata = self._loopRowData(loopName, residue)
           loop.newRow(rowdata)
 
       loop = result['nef_covalent_links']
-      bonds = chains[0].project.bonds
+      columns = ('chain_code_1', 'sequence_code_1', 'residue_type_1', 'atom_name_1',
+                 'chain_code_2', 'sequence_code_2', 'residue_type_2', 'atom_name_2'
+                 )
 
-      # NBNB REDO - we no longer have bonds
+      boundAtomPairs = extraBoundAtomPairs(project, selectSequential=False)
 
-      if bonds:
-        columns = ['chain_code_1', 'sequence_code_1', 'residue_type_1', 'atom_name_1',
-                   'chain_code_2', 'sequence_code_2', 'residue_type_2', 'atom_name_2',
-                   'ccpn_bond_type']
-        for bond in bonds:
-          atoms = bond.atoms
-          if all(atom.residue.chain in chains for atom in atoms):
-            # Bond is between selected chains - add it to the loop
-            data = list(atoms[0]._idTuple)
-            data.extend(atoms[1]._idTuple)
-            data.append(bond.bondType)
-            loop.newRow(dict(zip(columns, data)))
+      if boundAtomPairs:
+        for atom1, atom2 in boundAtomPairs:
+          if atom1.residue.chain in chains and atom2.residue.chain:
+            loop.newRow(dict(zip(columns, (atom1._idTuple + atom2._idTuple))))
       else:
         del result['nef_covalent_links']
       #
@@ -562,7 +1084,7 @@ class CcpnNefIo:
     atomCols = ['chain_code', 'sequence_code', 'residue_type', 'atom_name',]
     # NB We cannot use nmrAtom.id.split('.'), since the id has reserved characters remapped
     for shift in chemicalShiftList.chemicalShifts:
-      rowdata = self._loopRowData(category, loopName, shift)
+      rowdata = self._loopRowData(loopName, shift)
       rowdata.update(zip(atomCols, shift.nmrAtom._idTuple))
       loop.newRow(rowdata)
     #
@@ -612,7 +1134,7 @@ class CcpnNefIo:
 
     ordinal = 0
     for contribution in restraintList.restraintContributions:
-      rowdata = self._loopRowData(category, loopName, contribution)
+      rowdata = self._loopRowData(loopName, contribution)
       for item in contribution.restraintItems:
         row = loop.newRow(rowdata)
         ordinal += 1
@@ -725,7 +1247,7 @@ class CcpnNefIo:
 
     ordinal = 0
     for peak in peakList.peaks:
-      rowdata = self._loopRowData(category, loopName, peak)
+      rowdata = self._loopRowData(loopName, peak)
 
       assignments = peak.assignedNmrAtoms
       if assignments:
@@ -739,7 +1261,7 @@ class CcpnNefIo:
           row._set('position_uncertainty', peak.positionError)
 
           # Add the assignments
-          ll =list(zip(x.id.split('.') if x else [None, None, None, None] for x in tt))
+          ll =list(zip(*(x.id.split('.') if x else [None, None, None, None] for x in tt)))
           row._set('chain_code', ll[0])
           row._set('sequence_code', ll[1])
           row._set('residue_type', ll[2])
@@ -759,7 +1281,7 @@ class CcpnNefIo:
       loopName = 'ccpn_spectrum_hit'
       loop = result[loopName]
       for spectrumHit in spectrum.spectrumHits:
-        loop.newRow(self._loopRowData(category, loopName, spectrumHit))
+        loop.newRow(self._loopRowData(loopName, spectrumHit))
     else:
       del result['ccpn_spectrum_hit']
 
@@ -811,7 +1333,7 @@ class CcpnNefIo:
     loopName = 'ccpn_sample_component'
     loop = result[loopName]
     for sampleComponent in sample.sampleComponents:
-      loop.newRow(self._loopRowData(category, loopName, sampleComponent))
+      loop.newRow(self._loopRowData(loopName, sampleComponent))
     #
     return result
 
@@ -842,7 +1364,7 @@ class CcpnNefIo:
       loopName = 'ccpn_note'
       loop = result[loopName]
       for note in sorted(notes):
-        loop.newRow(self._loopRowData(category, loopName, note))
+        loop.newRow(self._loopRowData(loopName, note))
     else:
       result = None
     #
@@ -858,7 +1380,7 @@ class CcpnNefIo:
         ll.append(saveframe)
     #
     result = []
-    for tag in self.Nef2CcpnMap.keys():
+    for tag in nef2CcpnMap.keys():
       if tag in dd:
         ll = dd.pop(tag)
         result.extend(ll)
@@ -867,13 +1389,12 @@ class CcpnNefIo:
     #
     return result
 
-  def _loopRowData(self, category:str, loopName:str,
-                   wrapperObj:'ccpn.AbstractWrapperObject') -> dict:
+  def _loopRowData(self, loopName:str, wrapperObj:'ccpn.AbstractWrapperObject') -> dict:
     """Fill in a loop row data dictionary from master mapping and wrapperObj.
     Unmapped data to be added afterwards"""
 
     rowdata = {}
-    for neftag,attrstring in self.Nef2CcpnMap[category][loopName].items():
+    for neftag,attrstring in nef2CcpnMap[loopName].items():
       if attrstring is not None:
         rowdata[neftag] = attrgetter(attrstring)(wrapperObj)
     return rowdata
@@ -885,15 +1406,18 @@ class CcpnNefIo:
     fill in loop data
     """
 
-    # Set up frame
+    name = StarIo.string2FramecodeString(name)
     if name != category:
       name = '%s_%s' % (category, name)
+
+
+    # Set up frame
     result = StarIo.NmrSaveFrame(name=name, category=category)
     result.addItem('sf_category', category)
     result.addItem('sf_framecode', name)
 
     # Add data
-    frameMap = self.Nef2CcpnMap[category]
+    frameMap = nef2CcpnMap[category]
     for tag,itemvalue in frameMap.items():
       if itemvalue is None:
         result.addItem(tag, None)
@@ -907,10 +1431,337 @@ class CcpnNefIo:
     return result
 
 
+class CcpnNefReader:
+
+  # Importer functions - used for converting saveframes and loops
+  importers = {}
+
+  def __init__(self, specificationFile=None, mode='standard'):
+
+    self.mode=mode
+    self.saveFrameName = None
+    self.warnings = []
+    self.errors = []
+
+    # Map for resolving crosslinks in NEF file
+    self.frameCode2Object = {}
+
+
+  def loadFile(self, path:str, project=None):
+    """Load NEF file at path into project"""
+
+    if project is not None:
+      raise NotImplementedError("Loading NEF files into existing projects not implemented yet")
+
+    # TODO Add error handling
+    # TODO Add provision for out-of-order files (we assume correct order, e.g. for crosslinks)
+
+    nmrDataExtent = StarIo.parseNefFile(path)
+    dataBlocks = list(nmrDataExtent.values)
+    dataBlock = dataBlocks[0]
+    if project is None:
+      project = self.project = coreIo.newProject(dataBlock.name)
+
+    for saveFrameName, saveFrame in dataBlock.items():
+      # TODO NBNB this assumes we get them in the right order. Reconsider later
+
+      self.saveFrameName = saveFrameName
+
+      sf_category = saveFrame.get('sf_category')
+      importer = self.importers.get(sf_category)
+      # NB - newObject may be project, for some saveframes.
+      importer(project, saveFrame)
+
+      # Handle unmapped elements
+      extraTags = [x for x in saveFrame
+                   if x not in nef2CcpnMap[sf_category]
+                   and x not in ('sf_category', 'sf_framecode')]
+      if extraTags:
+        print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
+        # TODO put here function that stashes data in object, or something
+        # ues newObject here
+
+
+  def load_nef_nmr_meta_data(self, project, saveFrame):
+    """load nef_nmr_meta_data saveFrame"""
+
+    return project
+
+    # TODO - store data in this saveframe
+    # for now we store none of this, as the storage slots are in DataSet, not Project
+    # Maybe for another load function?
+  #
+  importers['nef_nmr_meta_data'] = load_nef_nmr_meta_data
+
+
+  def load_nef_molecular_system(self, project, saveFrame):
+    """load nef_molecular_system saveFrame"""
+    mapping = nef2CcpnMap['nef_molecular_system']
+    for tag, ccpnTag in mapping.items():
+      if ccpnTag == _isALoop:
+        loop = saveFrame.get(ccpnTag)
+        if loop:
+          importer = self.importers[ccpnTag]
+          importer(self, project, loop)
+    #
+    return project
+  #
+  importers['nef_molecular_system'] = load_nef_molecular_system
+
+
+  def load_nef_sequence(self, project, loop):
+    """Load nef_sequence loop"""
+
+    chainData = {}
+    for row in loop.data:
+      chainCode = row['chain_code']
+      ll = chainData.setdefault(chainCode, [])
+      ll.append(row)
+
+    defaultChainCode = 'A'
+    if None in chainData:
+      # Replace chainCode None with actual chainCode
+      while defaultChainCode in chainData:
+        defaultChainCode = commonUtil.incrementName(defaultChainCode)
+      chainData[defaultChainCode] = chainData.pop(None)
+
+
+    sequence2Chain = {}
+    tags =('sequence_code', 'residue_type', 'linking', 'residue_variant')
+    for chainCode, rows in sorted(chainData.items()):
+      compoundName = rows[0].get('ccpn_compound_name')
+      role = rows[0].get('ccpn_chain_role')
+      comment = rows[0].get('ccpn_chain_comment')
+      sequence = tuple(tuple(row.get(tag) for tag in tags) for row in rows)
+      lastChain = sequence2Chain.get(sequence)
+      if lastChain is None:
+        newSubstance = project.fetchNefSubstance(sequence=rows, compoundName=compoundName)
+        newChain = newSubstance.createChainFromSubstance(shortName=chainCode, role=role,
+                                                         comment=comment)
+        sequence2Chain[sequence] = newChain
+      else:
+        newChain = lastChain.substance.createChainFromSubstance(shortName=chainCode,
+                                                                role=role, comment=comment)
+  #
+  # 'nef_sequence':OD((
+  #   ('chain_code','chain.shortName'),
+  #   ('sequence_code','sequenceCode'),
+  #   ('residue_type','residueType'),
+  #   ('linking','linking'),
+  #   ('residue_variant','residueVariant'),
+  #   ('ccpn_comment','comment'),
+  #   ('ccpn_chain_role','chain.role'),
+  #   ('ccpn_compound_name','chain.compoundName'),
+  #   ('ccpn_chain_comment','chain.comment'),
+  # )),
+  # 'nef_covalent_links':OD((
+  #   ('chain_code_1',None),
+  #   ('sequence_code_1',None),
+  #   ('residue_type_1',None),
+  #   ('atom_name_1',None),
+  #   ('chain_code_2',None),
+  #   ('sequence_code_2',None),
+  #   ('residue_type_2',None),
+  #   ('atom_name_2',None),
+  # )),
+
+
+  def _defaultSaveFrameLoader(self, parent, saveFrame, creatorFuncName):
+    """load standard saveFrame"""
+
+    # Get ccpn-to-nef mappping for saveframe
+    category = saveFrame['sf_category']
+    framecode = saveFrame['sf_framecode']
+    mapping = nef2CcpnMap[category]
+
+    parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
+
+    # Get name from frameCode, if the mapping has one
+    # A bit of a hack,this, but it should work for
+    # 1) unique saveframes, where the frameCOde is the same s the category (no-op)
+    # 2) saveframes where there is a 'name' attribute set from the frameCode
+    name = framecode[len(category) + 1:]
+    if name and 'name' in mapping and mapping['name'] is None:
+      parameters['name'] = name
+
+    # Make main object
+    result = getattr(parent, creatorFuncName)(**parameters)
+
+    # Load loops, with object as parent
+    for loopName in loopNames:
+      loop = saveFrame.get(loopName)
+      if loop:
+        importer = self.importers[loopName]
+        importer(self, result, loop)
+    #
+    return result
+  #
+
+  importers['nef_chemical_shift_list'] = partial(_defaultSaveFrameLoader,
+                                                 creatorFuncName='newChemicalShiftList')
+
+  def load_nef_chemical_shift(self, parent, loop):
+    """load nef_chemical_shift loop"""
+
+    # TODO NBNB add mechanism for loading all NmrResidues with reserved names first,
+    # to ensure the can be set to the correct serial whenever possible
+
+    creatorFunc = parent.newChemicalShift
+
+    mapping = nef2CcpnMap[loop.name]
+    map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    for row in loop.data:
+      parameters = self._parametersFromLoopRow(row, map2)
+      nmrResidue = self.produceNmrResidue(chainCode=row.get('chain_code'),
+                                          sequenceCode=row.get('sequence_code'),
+                                          residueType=row.get('residue_type'))
+      nmrAtom = self.produceNmrAtom(nmrResidue, row.get('atom_name'))
+
+      parameters['nmrAtom'] = nmrAtom
+      creatorFunc(**parameters)
+  #
+  importers['nef_chemical_shift'] = load_nef_chemical_shift
+
+
+# saveFrameOrder = [
+#   DONE 'nef_nmr_meta_data',
+#   'nef_molecular_system',
+#   DONE 'nef_chemical_shift_list',
+#   'nef_distance_restraint_list',
+#   'nef_dihedral_restraint_list',
+#   'nef_rdc_restraint_list',
+#   'nef_nmr_spectrum',
+#   'nef_peak_restraint_links',
+#   'ccpn_spectrum_group',
+#   'ccpn_sample',
+#   'ccpn_substance',
+#   'ccpn_assignments',
+#   'ccpn_dataset',
+#   'ccpn_restraint_list',
+#   'ccpn_notes',
+# ]
+
+  def _parametersFromSaveFrame(self, saveFrame, mapping):
+
+    # Get attributes that have a simple tag mapping, and make a separate loop list
+    parameters = {}
+    loopNames = []
+    for tag, ccpnTag in mapping.items():
+      if ccpnTag == _isALoop:
+        loopNames.append(tag)
+      elif ccpnTag and '.' not in ccpnTag:
+        val = saveFrame.get(tag)
+        if val is not None:
+          #necessary as tags like ccpn_serial should NOT be set if absent of None
+          parameters[ccpnTag] = val
+    #
+    return parameters, loopNames
+
+  def warning(self, message):
+    template = "WARNING in saveFrame%s\n%s"
+    self.warnings.append(template % (self.saveFrameName, message))
+
+  def _parametersFromLoopRow(self, row, mapping):
+    parameters = {}
+    for tag, ccpnTag in mapping.items():
+      val = row.get(tag)
+      if val is not None:
+        parameters[ccpnTag] = val
+    #
+    return parameters
+  def produceNmrChain(self, chainCode:str):
+    """Get NmrResidue, correcting for possible errors"""
+    newChainCode = chainCode
+    while True:
+      try:
+        nmrChain = self.project.fetchNmrChain(newChainCode)
+        break
+      except ValueError:
+        newChainCode = '`%s`' % newChainCode
+        self.warning("New NmrChain:%s name caused an error.  Renamed %s"
+                     % (chainCode, newChainCode))
+    #
+    return nmrChain
+
+  def produceNmrResidue(self, chainCode:str, sequenceCode:str, residueType:str=None):
+    """Get NmrResidue, correcting for possible errors"""
+
+    nmrChain = self.produceNmrChain(chainCode)
+
+    rt = residueType or ''
+    cc = nmrChain.shortName
+    newSequenceCode = sequenceCode
+    while True:
+      try:
+        nmrResidue = self.project.fetchNmrResidue(newSequenceCode, residueType)
+        break
+      except ValueError:
+        newSequenceCode = '`%s`' % newSequenceCode
+        self.warning("New NmrResidue:%s.%s.%s name caused an error.  Renamed %s.%s.%s"
+                     % (cc, sequenceCode, rt, cc, newSequenceCode, cc))
+    #
+    return nmrResidue
+
+  def produceNmrAtom(self, nmrResidue, name):
+    """Get NmrAtom from NmrResidue and name, correcting for possible errors"""
+
+    newName = name
+    while True:
+      try:
+        nmrAtom = nmrResidue.fetchNmrAtom(newName)
+        break
+      except ValueError:
+        newName = '`%s`' % newName
+        self.warning("New NmrAtom:%s.%s name caused an error.  Renamed %s.%s"
+                     % (nmrResidue._id, name, nmrResidue._id, newName))
+    #
+    return nmrAtom
+
+
+
+
+  ####################################################################################
+  #
+  ###    NEF reader code:
+  #
+  ####################################################################################
+
+
+
+def _printOutMappingDict(mappingDict):
+  """Utility - print uot mapping dict for eciting and copying"""
+  saveframeOrder = []
+  print("# NEf to CCPN tag mapping (and tag order)")
+  print("{\n")
+  for category, od in mappingDict.items():
+    saveframeOrder.append(category)
+    print("  %s:OD((" % repr(category))
+    for tag, val in od.items():
+      if isinstance(val,str) or val is None:
+        print("    (%s,%s)," % (repr(tag), repr(val)))
+      else:
+        # This must be a loop OD
+        print("    (%s,OD((" % repr(tag))
+        for tag2, val2 in val.items():
+          print("      (%s,%s)," % (repr(tag2), repr(val2)))
+        print("    ))),")
+    print("  )),\n")
+  print("}\n")
+
+  print ("#SaveFrameOrder\n[")
+  for tag in saveframeOrder:
+    print ("  %s," %repr(tag))
+  print ("]\n")
+
+
 if __name__ == '__main__':
   import sys
   from ccpn.framework import Framework
   path = sys.argv[1]
   # project = core.loadProject(path)
   project = Framework.getFramework(projectPath=path).project
-  print(convert2NefString(project))
+  if path.endswith('/'):
+    path = path[:-1]
+  outPath = path + '.nef'
+  print ('@~@~ writing to ', outPath)
+  open(outPath, 'w').write(convert2NefString(project))

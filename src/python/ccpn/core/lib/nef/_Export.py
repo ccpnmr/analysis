@@ -32,9 +32,9 @@ import sys
 from typing import Sequence
 
 from ccpn.core.lib import CcpnSorting
-from ccpn.core.lib import Restraint as restraintLib
+from ccpn.core.lib import RestraintLib
 from ccpn.util import Path
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpn.util.Bmrb import bmrb
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 from ccpnmodel.ccpncore.memops import Version
@@ -523,7 +523,7 @@ def createRestraintListFrame(restraintList):
         ordinal += 1
         ll = [ordinal] + row1 + row2 + row3
         if restraintType == 'Dihedral':
-          ll.append(restraintLib.dihedralName(project, restraintItem))
+          ll.append(RestraintLib.dihedralName(project, restraintItem))
         loop.addData(ll)
   #
   return saveframe

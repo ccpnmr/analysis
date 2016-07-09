@@ -24,8 +24,8 @@ __version__ = "$Revision$"
 
 import sys
 
-from ccpn.core.lib.nef import GenericStarParser
-from ccpn.core.lib.nef import StarIo
+from . import GenericStarParser
+from . import StarIo
 
 
 def getCcpnSpecification(filePath) -> StarIo.NmrDataBlock:
@@ -40,7 +40,7 @@ class CifDicConverter:
   """Converts mmcif .dic file, with program-specific additions datablocks
   into a single NEF data structure, containing:
 
-  1) a nef_speification sveframe, containing a dictionary)history loop and a
+  1) a nef_specification saveframe, containing a dictionary_history loop and a
   item_type_list loop
 
   2) A saveframe for each saveframe_dategory in the specification. Each saveframe contains
@@ -72,8 +72,8 @@ class CifDicConverter:
          _nef_item.example_2
          _nef_item.description
 
-         The loop_category defiens which loop the item belongs to
-         (if empty it belongs directly inside teh saveframe)
+         The loop_category defines which loop the item belongs to
+         (if empty it belongs directly inside the saveframe)
       """
 
   def __init__(self, inputText, skipExamples=True, additionalBlocks=()):

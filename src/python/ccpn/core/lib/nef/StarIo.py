@@ -36,8 +36,58 @@ __version__ = "$Revision$"
 
 import keyword
 import os
+import typing
 
 from . import GenericStarParser
+
+# # Translations from internal values to framecode-compatible strings
+# replacementCharacter = '`'
+# _translationDict = {
+#   '#':'?', '"':'?', "'":'?'
+# }
+# for indx in range(128):
+#   char = chr(indx)
+#   if char.isspace:
+#     # replace space characters with '_'
+#     _translationDict[char] = '_'
+#   elif not char.isprintable():
+#     _translationDict[char] = '?'
+# for index in range(128,256):
+#   _translationDict[chr(indx)] =
+# strToFramecode = str.maketrans(_translationDict)
+
+# Make to-=ascii mapping at byte level'
+# Space and unprintable characters map to '_'
+# Characters outside the ascii range and #'" map to '?'
+#
+# NBNB this could be done better (more readable) with custom mappings
+#
+_replaceSpaceWithByte = ord('_')
+_replaceWithByte = ord('?')
+_b2 = bytearray(range(256))
+for ii in range(128):
+  _char = chr(ii)
+  if _char.isspace():
+    _b2[ii] = _replaceSpaceWithByte
+  elif not _char.isprintable():
+    _b2[ii] = _replaceSpaceWithByte
+for _char in ('#', '"', "'"):
+  _b2[ord(_char)] = _replaceWithByte
+for ii in range(128,256):
+  _b2[ii] = _replaceWithByte
+latin_1_to_framecode_translator = bytes.maketrans(bytearray(range(256)), _b2)
+
+
+def string2FramecodeString(text):
+
+  # Get 8-bit bytes, replacing values >255 with ord('?')
+  bts = text.encode('latin_1', 'replace')
+
+  # Translate bytes, using preset translator
+  bts2 = bts.translate(latin_1_to_framecode_translator)
+
+  # convert back to string - all bytes are ascii, so no errors can occur
+  return str(bts2.decode('ascii'))
 
 
 def parseNmrStar(text:str, mode='standard'):
@@ -130,6 +180,7 @@ class NmrDataBlock(GenericStarParser.DataBlock):
 
   def newSaveFrame(self, name:str, category:str) -> NmrSaveFrame:
     """Make new NmrSaveFrame and add it to the DataBlock"""
+    name = string2FramecodeString(name)
     saveFrame = NmrSaveFrame(name, category=category)
     self.addItem(name, saveFrame)
     saveFrame.addItem('sf_category', category)
@@ -228,7 +279,7 @@ class _StarDataConverter:
     # get NmrDataBlock name
     name = dataBlock.name
     if name.startswith('data_'):
-      name = name[5:]
+      name = name[5:] or '__MissingDataBlockName'
     elif name == 'global_':
       name = 'global'
 
@@ -424,13 +475,15 @@ class _StarDataConverter:
         # SaveFrame reference
         value = value[1:]
       else:
-        if not tag.startswith('sequence_code'):
-          # special case: sequence_code is string even if often (mostly) matching int
+        if not tag[-5:] in ('_code', '_name'):
+          # HACK - tags ending in '_code' or '_name' are assumed to be string type
+          # This takes care of e.g. 'sequence_code'
+          # that often might evaluate to a number otherwise
           try:
-            value = float(value)
+            value = int(value)
           except ValueError:
             try:
-              value = int(value)
+              value = float(value)
             except ValueError:
               pass
     #
@@ -445,3 +498,86 @@ class _StarDataConverter:
   def raiseValidationError(self, msg):
     raise StarValidationError(self._errorMessage(msg))
 
+
+def splitNefSequence(rows:typing.Sequence[dict]) -> typing.List[typing.List[dict]]:
+  """Split a sequence of nef_sequence dicts assumed to belong to the same chain
+  into a list of lists of sequentially linked stretches following the NEF rules
+
+  Note that missing linkings are treated as 'middle' and missing start/end tags
+  are ignored, with the first/last residue treated, effectively, as linking 'break'
+
+  Only unknown linking values and incorrect pairs of 'cyclic' tags raise an error"""
+
+  result = []
+  stretch = []
+  inCyclic = False
+  for row in rows:
+    linking = row.get('linking')
+
+    if inCyclic and linking not in ('middle', 'cyclic', None):
+      raise ValueError(
+          "Sequence contains 'cyclic' residue(s) that do not form a closed, cyclic molecule"
+        )
+
+    if linking == 'cyclic':
+      if inCyclic:
+        # End of cycle
+        inCyclic = False
+        stretch.append(row)
+        result.append(stretch)
+        stretch = []
+      else:
+        #start of cycle
+        inCyclic = True
+        if stretch:
+          result.append(stretch)
+        stretch = [row]
+
+    elif linking in ('single', 'nonlinear', 'dummy'):
+      # Always isolated. And last stretch, add new one, and prepare for the next one
+      if stretch:
+        result.append(stretch)
+      result.append([row])
+      stretch = []
+
+    elif linking == 'start':
+      # Start new stretch
+      if stretch:
+        result.append(stretch)
+      stretch = [row]
+
+    elif linking == 'end':
+      # End stretch
+      stretch.append(row)
+      result.append(stretch)
+      stretch = []
+
+    elif linking in ('middle', None):
+      # Continuation (we treat None as 'middle' as the most pragmatic approach
+      # Validation of the NEF standard must be done elsewhere
+      stretch.append(row)
+
+    elif linking == 'break':
+      if stretch:
+        # inside stretch - end it
+        stretch.append(row)
+        result.append(stretch)
+        stretch = []
+      else:
+        # Start of stretch - put row on
+        stretch.append(row)
+
+
+    else:
+      raise ValueError("Illegal value of nef_sequence.linking: %s" % linking)
+
+  if stretch:
+    # Add final stretch if still open
+    result.append(stretch)
+
+  if inCyclic:
+      raise ValueError(
+          "Sequence contains 'cyclic' residue that is not terminated by matching 'cyclic residue"
+        )
+  #
+  return result

@@ -34,25 +34,3 @@ class ToolBar(QtGui.QToolBar, Base):
   def __init__(self, parent, **kw):
     QtGui.QToolBar.__init__(self, parent)
     Base.__init__(self, **kw)
-    self.hidden = False
-
-  def hideToolbar(self):
-    """Hide the toolbar; need a different function as hide()/show() are inherent and seem not
-       to be able to use as QtGui.QToolBar.hide(self)
-    """
-    self.hide()
-    self.hidden = True
-
-  def showToolbar(self):
-    """Show the toolbar; need a different function as hide()/show() are inherent and seem not
-       to be able to use as QtGui.QToolBar.show(self)
-    """
-    self.show()
-    self.hidden = False
-
-  def toggleToolbar(self):
-    "Toogle the toolbar"
-    if self.hidden:
-      self.showToolbar()
-    else:
-      self.hideToolbar()

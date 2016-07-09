@@ -66,9 +66,9 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # grid=(0, 2), gridSpan=(1, 1))
     self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
     if self._appBase.preferences.general.toolbarHidden is True:
-      self.spectrumUtilToolBar.hideToolbar()
+      self.spectrumUtilToolBar.hide()
     else:
-      self.spectrumUtilToolBar.showToolbar()
+      self.spectrumUtilToolBar.show()
     # toolBarColour = QtGui.QColor(214,215,213)
     self.positionBox = Label(self.module)
     self.module.addWidget(self.positionBox, 0, 3)
@@ -161,16 +161,17 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
          
     self._updatePhasing()
 
-  def _toggleToolbar(self):
+  def toggleToolbar(self):
     """
-    Toggle the toolbar; update the context menus of all strips
+    Toggle the toolbar
     """
-    if self.spectrumUtilToolBar.hidden:
-      self.spectrumUtilToolBar.showToolbar()
+    # toggling the toolbar, but we need to update the checkboxes of all strips as well.
+    if not self.spectrumUtilToolBar.isVisible():
+      self.spectrumUtilToolBar.show()
       for strip in self.strips:
         strip.toolbarAction.setChecked(True)
     else:
-      self.spectrumUtilToolBar.hideToolbar()
+      self.spectrumUtilToolBar.hide()
       for strip in self.strips:
         strip.toolbarAction.setChecked(False)
 
@@ -186,7 +187,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
       mainWindow.addBlankDisplay()
     # self.module.close()
     self.delete()
-
 
   def _fillToolBar(self):
     """

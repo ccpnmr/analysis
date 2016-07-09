@@ -23,4 +23,5 @@ __version__ = ": 7686 $"
 #=========================================================================================
 
 if current.strip is not None:
-  current.strip.spectrumDisplay.spectrumUtilToolBar.toggleToolbar()
+#  current.strip.spectrumDisplay.spectrumUtilToolBar.toggleToolbar()
+  current.strip.spectrumDisplay.toggleToolbar()

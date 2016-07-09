@@ -10,6 +10,9 @@ from qtconsole.inprocess import QtInProcessKernelManager
 
 class IpythonConsole(Widget, Base):
 
+    font = 'Monaco'
+    fontSize = 12
+
     def __init__(self, parent=None, namespace=None, mainWindow=None, historyFile=None, **kw):
 
         Widget.__init__(self)
@@ -22,7 +25,7 @@ class IpythonConsole(Widget, Base):
 
         self.mainWindow = mainWindow
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
-        self.ipythonWidget._set_font(QtGui.QFont('Lucida Grande', 12))
+        self.ipythonWidget._set_font(QtGui.QFont(IpythonConsole.font, IpythonConsole.fontSize))
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
         consoleLayout = QtGui.QGridLayout()
@@ -31,7 +34,7 @@ class IpythonConsole(Widget, Base):
 
         self.textEditor = TextEditor(self)
         self.textEditor.setReadOnly(True)
-        self.textEditor.setFont(QtGui.QFont('Lucida Grande', 12))
+        self.textEditor.setFont(QtGui.QFont(IpythonConsole.font, IpythonConsole.fontSize))
         self.textEditor.setTextColor(QtGui.QColor('black'))
         kc.start_channels()
         self.layout().setSpacing(1)

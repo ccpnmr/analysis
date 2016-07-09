@@ -45,7 +45,54 @@ _currentExtraFields = ['regions', 'positions']
 # for every 'xyz' in fields
 _fields = [x._pluralLinkName for x in _currentClasses] + _currentExtraFields
 
+def noCap(string):
+  """
+  return de-capitalised string
+  """
+  if len(string) <= 0: return string
+  return string[0].lower() + string[1:]
+
+# Definitions of the attributes of the Current object
+_fieldDefinitions = [
+  # field name,                           attribute name,     description
+  (noCap(Integral.className),            '_integral',        'last selected integral'),
+  (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
+
+  (noCap(NmrAtom.className),             '_nmrAtom',         'last selected nmrAtom'),
+  (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
+
+  (noCap(NmrChain.className),            '_nmrChain',        'last selected nmrChain'),
+  (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
+
+  (noCap(NmrResidue.className),          '_nmrResidue',      'last selected nmrResidue'),
+  (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
+
+  ('regions',                            '_regions',         'last selected region'),
+
+  (noCap(Peak.className),                '_peak',            'last selected peak'),
+  (noCap(Peak._pluralLinkName),          '_peaks',           'all selected peaks'),
+
+  ('positions',                          '_positions',       'last cursor position'),
+
+  (noCap(Spectrum.className),            '_spectrum',        'current spectrum'), # broken
+  (noCap(Spectrum._pluralLinkName),      '_spectra',         'list with all spectra present in a module'), # (broken)
+
+  (noCap(SpectrumDisplay.className),     '_spectrumDisplay', 'current spectrumDisplay'), # (broken)
+
+  (noCap(SpectrumGroup.className),       '_spectrumGroup',   'current spectrum'), # broken
+  (noCap(SpectrumGroup._pluralLinkName), '_spectrumGroups',  'list with all spectra present in a module'), # (broken)
+
+  (noCap(Strip.className),               '_strip',           'selected strip'),
+  (noCap(Strip._pluralLinkName),         '_strips',          'lists with all strips'),
+]
+
+
 class Current:
+  # create the doc-string dynamically from definitions above;
+  # cannot do newlines as Python console falls over when quering using the current? syntax (too many newlines?)
+  __doc__ = \
+  """The current object gives access to the collection of active or selected objects and values.
+Currently implemented:\n""" + '; '.join(('%s (%s)' % (f,v) for f,t,v in _fieldDefinitions))
 
   def __init__(self, project):
     # initialise non-=auto fields

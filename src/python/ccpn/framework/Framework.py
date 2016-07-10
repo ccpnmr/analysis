@@ -634,8 +634,9 @@ class Framework:
       (),
       ("About CcpNmr V3...", self.showAboutPopup),
       ("About CCPN...", self.showAboutCcpnPopup),
+      ("Show License...", self.showCcpnLicense),
       (),
-      ("Inspect Code...", self.showCodeInspectionPopup),
+      ("Inspect Code...", self.showCodeInspectionPopup,[('enabled', False)]),
       ("Check for Updates...", self.showUpdatePopup),
       (),
       ("Submit Feedback...", self.showFeedbackPopup),
@@ -1187,19 +1188,29 @@ class Framework:
                                   'This function has not been implemented in the current version',
                                   colourScheme=self.ui.mainWindow.colourScheme)
 
-  def showBeginnersTutorial(self):
-    path = os.path.join(Path.getTopDirectory(), 'tutorials', 'BeginnersTutorial.pdf')
+  def _systemOpen(self, path):
+    "Open path on system"
     if 'linux' in sys.platform.lower():
       os.system("xdg-open %s" % path)
     else:
       os.system('open %s' % path)
 
+  def _showHtml(self, title, path):
+    "Displays html files in program QT viewer"
+    from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
+
+    newModule = CcpnModule(title)
+    view = CcpnWebView(path)
+    newModule.addWidget(view)
+    self.ui.mainWindow.moduleArea.addModule(newModule)
+
+  def showBeginnersTutorial(self):
+    from ccpn.framework.PathsAndUrls import beginnersTutorialPath
+    self._systemOpen(beginnersTutorialPath)
+
   def showBackboneTutorial(self):
-    path = os.path.join(Path.getTopDirectory(), 'tutorials', 'BackboneAssignmentTutorial.pdf')
-    if 'linux' in sys.platform.lower():
-      os.system("xdg-open %s" % path)
-    else:
-      os.system('open %s' % path)
+    from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
+    self._systemOpen(backboneAssignmentTutorialPath)
 
   def _showApiDocumentation(self):
     """Displays API documentation in a module."""
@@ -1207,24 +1218,21 @@ class Framework:
 
   def showWrapperDocumentation(self):
     """Displays CCPN wrapper documentation in a module."""
-    self._showDocumentation("CCPN Documentation", 'build', 'html', 'index.html')
+    from ccpn.framework.PathsAndUrls import documentationUrl
+    self._showHtml("CCPN Documentation", documentationUrl)
 
   def _showDocumentation(self, title, *args):
     from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
 
-    newModule = CcpnModule("API Documentation")
+    newModule = CcpnModule(title)
     path = os.path.join(Path.getTopDirectory(), 'doc', *args)
     view = CcpnWebView(path)
     newModule.addWidget(view)
     self.ui.mainWindow.moduleArea.addModule(newModule)
 
   def showShortcuts(self):
-    path = os.path.join(Path.getTopDirectory(), 'doc', 'static', 'AnalysisShortcuts.pdf')
-    if 'linux' in sys.platform.lower():
-      os.system("xdg-open %s" % path)
-    else:
-      os.system('open %s' % path)
-
+    from ccpn.framework.PathsAndUrls import shortcutsPath
+    self._systemOpen(shortcutsPath)
 
   def showAboutPopup(self):
     from ccpn.ui.gui.popups.AboutPopup import AboutPopup
@@ -1233,8 +1241,14 @@ class Framework:
     popup.raise_()
 
   def showAboutCcpnPopup(self):
+    from ccpn.framework.PathsAndUrls import ccpnUrl
     import webbrowser
-    webbrowser.open('http://www.ccpn.ac.uk')
+    webbrowser.open(ccpnUrl)
+
+  def showCcpnLicense(self):
+    from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
+    import webbrowser
+    webbrowser.open(ccpnLicenceUrl)
 
   def showCodeInspectionPopup(self):
     info = MessageDialog.showInfo('Not implemented yet!',

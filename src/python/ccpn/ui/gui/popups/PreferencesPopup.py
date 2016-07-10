@@ -105,10 +105,6 @@ class PreferencesPopup(QtGui.QDialog):
     self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'spectrumBorderHidden'))
     row += 1
 
-    self.licenceLabel = Label(self, text='Licence', grid=(row, 0))
-    self.licenceButton = Button(self, text='Show', grid=(row, 1), gridSpan=(1, 1), callback=self._showLicenceInfo)
-    row += 1
-
     buttonBox = Button(self, grid=(row, 1), text='Save', callback=self.accept)
     row += 1
 
@@ -188,9 +184,6 @@ class PreferencesPopup(QtGui.QDialog):
   def _toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)
 
-  def _showLicenceInfo(self):
-    import webbrowser
-    webbrowser.open('http://www.ccpn.ac.uk/industry/licencefees')
 
 
 

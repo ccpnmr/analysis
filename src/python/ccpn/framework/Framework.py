@@ -540,8 +540,8 @@ class Framework:
       ("Open...", self.openProject, [('shortcut', 'po')]),
       ("Open Recent", ()),
 
-      ("Load Spectrum", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
-      ("Load Data", self.loadData, [('shortcut', 'ld')]),
+#      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
+      ("Load Data...", self.loadData, [('shortcut', 'ld')]),
       (),
       ("Save", self.saveProject, [('shortcut', 'ps')]),
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
@@ -549,17 +549,19 @@ class Framework:
       ("Undo", self.undo, [('shortcut', QKeySequence("Ctrl+z"))]),
       ("Redo", self.redo, [('shortcut', QKeySequence("Ctrl+y"))]),
       (),
-      ("Summary", self.displayProjectSummary),
-      ("Archive", self.archiveProject, [('enabled', False)]),
+      ("Summary", self.displayProjectSummary, [('enabled', False)]),
+      ("Archive", self.archiveProject, [('enabled', True)]),
       ("Backup...", self.showBackupPopup, [('enabled', False)]),
       (),
-      ("Preferences", self.showApplicationPreferences),
+      ("Preferences...", self.showApplicationPreferences),
       (),
       ("Close Program", self._closeEvent, [('shortcut', 'qt')]),
     ]
                ))
 
     ms.append(('Spectrum',  [
+      ("Load Spectrum...", lambda: self.loadData(text='Load Spectrum'), [('shortcut', 'ls')]),
+      (),
       ("Spectrum Groups...", self.showSpectrumGroupsPopup, [('shortcut', 'ss')]),
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
@@ -568,7 +570,6 @@ class Framework:
                                                    ('enabled', False)]),
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
-      ("Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
     ]
                ))
 
@@ -578,7 +579,7 @@ class Framework:
                                                     ('checkable', True),
                                                     ('checked', False)
                                                     ]),
-      ("Inspect...", self.inspectMolecule),
+      ("Inspect...", self.inspectMolecule, [('enabled', False)]),
       (),
       ("Reference Chemical Shifts", self.showRefChemicalShifts,[('shortcut', 'rc')]),
     ]
@@ -594,9 +595,12 @@ class Framework:
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
       (),
-      ("Console", self.toggleConsole, [('shortcut', 'py'),
-                                       ('checkable', True),
-                                       ('checked', False)])
+      ("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
+      ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
+      (),
+      ("Python Console", self.toggleConsole, [('shortcut', 'py'),
+                                              ('checkable', True),
+                                              ('checked', False)])
     ]
                ))
 
@@ -607,7 +611,9 @@ class Framework:
       (),
       ("Record Macro...", self.startMacroRecord),
       ("Run...", self.runMacro, [('shortcut', 'rm')]),
-      ("Run Recent", ())
+      ("Run Recent", ()),
+      (),
+      ("Define Shortcut...", self.defineShortcut, [('enabled', False)])
     ]
                ))
 
@@ -617,7 +623,7 @@ class Framework:
                ))
 
     ms.append(('Help',      [
-      ("Command...", self.showCommandHelp),
+      ("Command...", self.showCommandHelp, [('enabled', False)]),
       ("Tutorials",([
         # Submenu
         ("Beginners Tutorial", self.showBeginnersTutorial),
@@ -631,6 +637,7 @@ class Framework:
       (),
       ("Inspect Code...", self.showCodeInspectionPopup),
       ("Check for Updates...", self.showUpdatePopup),
+      (),
       ("Submit Feedback...", self.showFeedbackPopup),
       ("Submit Macro...", self.showSubmitMacroPopup)
     ]
@@ -937,10 +944,6 @@ class Framework:
       self.ui.mainWindow.blankDisplay.setParent(None)
       self.ui.mainWindow.blankDisplay = None
 
-  def togglePhaseConsole(self):
-    self.ui.mainWindow.togglePhaseConsole(self.ui.mainWindow)
-
-
   ###################################################################################################################
   ## MENU callbacks:  Molecule
   ###################################################################################################################
@@ -1076,6 +1079,13 @@ class Framework:
     self.project._logger.info("application.showAtomSelector()")
     return self.atomSelector
 
+  def toggleToolbar(self):
+    if self.current.strip is not None:
+      self.current.strip.spectrumDisplay.toggleToolbar()
+
+  def togglePhaseConsole(self):
+    if self.current.strip is not None:
+      self.current.strip.spectrumDisplay.togglePhaseConsole()
 
   def toggleConsole(self):
     """
@@ -1160,6 +1170,10 @@ class Framework:
     # self._fillRecentMacrosMenu()
     self.ui.mainWindow.pythonConsole._runMacro(macroFile)
 
+  def defineShortcut(self):
+    info = MessageDialog.showInfo('Not implemented yet',
+                                  'This function has not been implemented in the current version',
+                                  colourScheme=self.ui.mainWindow.colourScheme)
 
 
   ###################################################################################################################

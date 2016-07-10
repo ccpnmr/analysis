@@ -58,9 +58,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
 
     self._fillToolBar()
     self.setAcceptDrops(True)
-    if self._appBase.preferences.general.toolbarHidden:
-      GuiSpectrumDisplay._hideUtilToolBar(self)
-
 
   def addStrip(self) -> 'GuiStripNd':
     """
@@ -75,7 +72,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         "strip.clone()", strip=self.strips[0].clone())
     self.project._logger.info("strip = project.getByPid('%s')\nstrip.clone()" % self.strips[0].pid)
     return newStrip
-
 
   def showSpinSystemLabel(self):
     """NBNB do we still need this?"""
@@ -117,7 +113,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     restoreZoomIcon = Icon('icons/zoom-restore')
     restoreZoomAction.setIcon(restoreZoomIcon)
     restoreZoomAction.setToolTip('Restore Zoom')
-
 
   def raiseContourBase(self):
     """
@@ -165,7 +160,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.project._logger.info("spectrum.positiveContourBase = %s" % spectrum.positiveContourBase)
         self.project._logger.info("spectrum.negativeContourBase = %s" % spectrum.negativeContourBase)
 
-
   def addContourLevel(self):
     """
     Increases number of contours by 1 for all spectra visible in the display.
@@ -187,7 +181,6 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
         self.project._logger.info("spectrum = project.getByPid(%s)" % spectrum.pid)
         self.project._logger.info("spectrum.positiveContourCount = %s" % spectrum.positiveContourCount)
         self.project._logger.info("spectrum.negativeContourCount = %s" % spectrum.negativeContourCount)
-
 
   def removeContourLevel(self):
     """

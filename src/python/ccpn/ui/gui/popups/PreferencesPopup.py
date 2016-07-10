@@ -90,9 +90,14 @@ class PreferencesPopup(QtGui.QDialog):
     self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
     row += 1
 
-    self.autoSaveLayoutLabel = Label(self, text="Hide ToolBar(s): ", grid=(row, 0))
-    self.autoSaveLayoutBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.toolbarHidden)
-    self.autoSaveLayoutBox.toggled.connect(partial(self._toggleGeneralOptions, 'toolbarHidden'))
+    self.autoSaveLayoutLabel = Label(self, text="Show ToolBar(s): ", grid=(row, 0))
+    self.autoSaveLayoutBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.showToolbar)
+    self.autoSaveLayoutBox.toggled.connect(partial(self._toggleGeneralOptions, 'showToolbar'))
+    row += 1
+
+    self.spectrumBorderLabel = Label(self, text="Show Spectrum Border: ", grid=(row, 0))
+    self.spectrumBorderBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.showSpectrumBorder)
+    self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
     row += 1
 
     self.useNativeLabel = Label(self, text="Use Native File Dialogs: ", grid=(row, 0))
@@ -100,9 +105,9 @@ class PreferencesPopup(QtGui.QDialog):
     self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNative'))
     row += 1
 
-    self.spectrumBorderLabel = Label(self, text="Hide Spectrum Border: ", grid=(row, 0))
-    self.spectrumBorderBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.spectrumBorderHidden)
-    self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'spectrumBorderHidden'))
+    self.useNativeLabel = Label(self, text="Use Native Web Browser: ", grid=(row, 0))
+    self.useNativeBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.useNativeWebbrowser)
+    self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
     row += 1
 
     buttonBox = Button(self, grid=(row, 1), text='Save', callback=self.accept)
@@ -176,7 +181,7 @@ class PreferencesPopup(QtGui.QDialog):
       else:
         for strip in self.project.strips:
           strip.guiSpectrumDisplay.spectrumUtilToolBar.show()
-    elif preference == 'spectrumBorderHidden':
+    elif preference == 'showSpectrumBorder':
       for strip in self.project.strips:
         for spectrumView in strip.spectrumViews:
           spectrumView._setBorderItemHidden(checked)

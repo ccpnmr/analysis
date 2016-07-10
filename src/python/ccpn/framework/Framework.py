@@ -630,10 +630,10 @@ class Framework:
         ("Backbone Tutorial", self.showBackboneTutorial)
       ])),
       ("Show Shortcuts", self.showShortcuts),
-      ("Show CcpNmr V3 Documentation", self.showWrapperDocumentation),
+      ("Show CcpNmr V3 Documentation", self.showVersion3Documentation),
       (),
       ("About CcpNmr V3...", self.showAboutPopup),
-      ("About CCPN...", self.showAboutCcpnPopup),
+      ("About CCPN...", self.showAboutCcpn),
       ("Show License...", self.showCcpnLicense),
       (),
       ("Inspect Code...", self.showCodeInspectionPopup,[('enabled', False)]),
@@ -1195,14 +1195,17 @@ class Framework:
     else:
       os.system('open %s' % path)
 
-  def _showHtml(self, title, path):
-    "Displays html files in program QT viewer"
-    from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
+  def _showHtmlFile(self, title, path):
+    "Displays html files in program QT viewer or using native webbrowser depending on useNativeWebbrowser option"
 
-    newModule = CcpnModule(title)
-    view = CcpnWebView(path)
-    newModule.addWidget(view)
-    self.ui.mainWindow.moduleArea.addModule(newModule)
+    if self.preferences.general.useNativeWebbrowser:
+      self._systemOpen(path)
+    else:
+      from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
+      newModule = CcpnModule(title)
+      view = CcpnWebView(path)
+      newModule.addWidget(view)
+      self.ui.mainWindow.moduleArea.addModule(newModule)
 
   def showBeginnersTutorial(self):
     from ccpn.framework.PathsAndUrls import beginnersTutorialPath
@@ -1212,23 +1215,10 @@ class Framework:
     from ccpn.framework.PathsAndUrls import backboneAssignmentTutorialPath
     self._systemOpen(backboneAssignmentTutorialPath)
 
-  def _showApiDocumentation(self):
-    """Displays API documentation in a module."""
-    self._showDocumentation("API Documentation", 'apidoc', 'api.html')
-
-  def showWrapperDocumentation(self):
+  def showVersion3Documentation(self):
     """Displays CCPN wrapper documentation in a module."""
-    from ccpn.framework.PathsAndUrls import documentationUrl
-    self._showHtml("CCPN Documentation", documentationUrl)
-
-  def _showDocumentation(self, title, *args):
-    from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-
-    newModule = CcpnModule(title)
-    path = os.path.join(Path.getTopDirectory(), 'doc', *args)
-    view = CcpnWebView(path)
-    newModule.addWidget(view)
-    self.ui.mainWindow.moduleArea.addModule(newModule)
+    from ccpn.framework.PathsAndUrls import documentationPath
+    self._showHtmlFile("Analysis Version-3 Documentation", documentationPath)
 
   def showShortcuts(self):
     from ccpn.framework.PathsAndUrls import shortcutsPath
@@ -1240,7 +1230,7 @@ class Framework:
     popup.exec_()
     popup.raise_()
 
-  def showAboutCcpnPopup(self):
+  def showAboutCcpn(self):
     from ccpn.framework.PathsAndUrls import ccpnUrl
     import webbrowser
     webbrowser.open(ccpnUrl)
@@ -1338,12 +1328,11 @@ def getSaveDirectory():
 
 ########
 
-def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None,
-                   userPreferencesPath=None):
+def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
   def _readPreferencesFile(preferencesPath):
     fp = open(preferencesPath)
-    preferences = json.load(fp, object_hook=AttrDict) ##TBD find a better way ?!?
+    preferences = json.load(fp, object_hook=AttrDict) #TODO find a better way ?!?
     fp.close()
     return preferences
 
@@ -1362,12 +1351,15 @@ def getPreferences(skipUserPreferences=False, defaultPreferencesPath=None,
         d[k] = u[k]
     return d
 
-  preferencesPath = (defaultPreferencesPath if defaultPreferencesPath else
-                     os.path.join(Path.getTopDirectory(), 'config', 'defaultv3settings.json'))
+  # read the default settings
+  from ccpn.framework.PathsAndUrls import defaultPreferencesPath
+  preferencesPath = (defaultPath if defaultPath else defaultPreferencesPath)
   preferences = _readPreferencesFile(preferencesPath)
 
+  # read user settings and update if not skipped
   if not skipUserPreferences:
-    preferencesPath = userPreferencesPath if userPreferencesPath else os.path.expanduser('~/.ccpn/v3settings.json')
+    from ccpn.framework.PathsAndUrls import userPreferencesPath
+    preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
     if os.path.exists(preferencesPath):
       _updateDict(preferences, _readPreferencesFile(preferencesPath))
 

@@ -59,26 +59,29 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # self.spectrumToolBar.setFixedWidth(screenWidth*0.5)
     self.resize(self.sizeHint())
 
-
+    # Toolbar
     self.spectrumUtilToolBar = ToolBar(self.module)#, grid=(0, 2), gridSpan=(1, 2))
     # self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)
     self.spectrumUtilToolBar.setFixedHeight(self.spectrumToolBar.height())
     # grid=(0, 2), gridSpan=(1, 1))
     self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
-    if self._appBase.preferences.general.toolbarHidden is True:
-      self.spectrumUtilToolBar.hide()
+    if self._appBase.preferences.general.showToolbar:
+      self.showToolbar()
     else:
-      self.spectrumUtilToolBar.show()
+      self.hideToolbar()
     # toolBarColour = QtGui.QColor(214,215,213)
+
+    # position box
     self.positionBox = Label(self.module)
     self.module.addWidget(self.positionBox, 0, 3)
+
+    # scroll area
     self.scrollArea = ScrollArea(self.module, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
     self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
     self.stripFrame.guiSpectrumDisplay = self
     self.stripFrame.setAcceptDrops(True)
     self.scrollArea.setWidget(self.stripFrame)
-
     
     self.setEnabled(True)
 
@@ -148,8 +151,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
       strip._changedPhasingDirection()
     
   def togglePhaseConsole(self):
-    """
-    Toggles whether phasing console is displayed.
+    """Toggles whether phasing console is displayed.
     """
     isVisible = not self.phasingFrame.isVisible()
     self.phasingFrame.setVisible(isVisible)
@@ -158,22 +160,28 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
         strip.turnOnPhasing()
       else:
         strip.turnOffPhasing()
-         
     self._updatePhasing()
 
+  def showToolbar(self):
+    """show the toolbar"""
+    # showing the toolbar, but we need to update the checkboxes of all strips as well.
+    self.spectrumUtilToolBar.show()
+    for strip in self.strips:
+      strip.toolbarAction.setChecked(True)
+
+  def hideToolbar(self):
+    """hide the toolbar"""
+    # hiding the toolbar, but we need to update the checkboxes of all strips as well.
+    self.spectrumUtilToolBar.hide()
+    for strip in self.strips:
+      strip.toolbarAction.setChecked(False)
+
   def toggleToolbar(self):
-    """
-    Toggle the toolbar
-    """
-    # toggling the toolbar, but we need to update the checkboxes of all strips as well.
+    """Toggle the toolbar """
     if not self.spectrumUtilToolBar.isVisible():
-      self.spectrumUtilToolBar.show()
-      for strip in self.strips:
-        strip.toolbarAction.setChecked(True)
+      self.showToolbar()
     else:
-      self.spectrumUtilToolBar.hide()
-      for strip in self.strips:
-        strip.toolbarAction.setChecked(False)
+      self.hideToolbar()
 
   def _closeModule(self):
     """
@@ -217,14 +225,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     Creates a new strip identical to the last one created and adds it to right of the display.
     """
     newStrip = self.strips[-1].clone()
-
-  def _hideUtilToolBar(self):
-    """
-    # CCPN INTERNAL - called in __init__ of GuiStripDisplayNd.
-    Hides the spectrum utility toolbar
-    """
-    self.spectrumUtilToolBar.hide()
-
 
   def resetYZooms(self):
     """Zooms Y axis of current strip to show entire region"""

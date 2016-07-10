@@ -30,10 +30,12 @@ ccpnUrl        = 'http://www.ccpn.ac.uk'
 ccpnLicenceUrl = 'http://www.ccpn.ac.uk/licence'
 
 # CCPN code
-ccpnCodePath = Path.getTopDirectory()
+ccpnCodePath                    = Path.getTopDirectory()
+defaultPreferencesPath          = os.path.join(ccpnCodePath, 'config', 'defaultv3settings.json')
+userPreferencesPath             = '~/.ccpn/v3settings.json'
 
 # Program tutorials and documentation
-shortcutsPath                  = os.path.join(ccpnCodePath, 'doc', 'static', 'AnalysisShortcuts.pdf')
-beginnersTutorialPath          = os.path.join(ccpnCodePath, 'tutorials', 'BeginnersTutorial.pdf')
-backboneAssignmentTutorialPath = os.path.join(ccpnCodePath, 'tutorials', 'BackboneAssignmentTutorial.pdf')
-documentationUrl               = os.path.join(ccpnCodePath, 'doc', 'build', 'html', 'index.html')
+shortcutsPath                   = os.path.join(ccpnCodePath, 'doc', 'static', 'AnalysisShortcuts.pdf')
+beginnersTutorialPath           = os.path.join(ccpnCodePath, 'tutorials', 'BeginnersTutorial.pdf')
+backboneAssignmentTutorialPath  = os.path.join(ccpnCodePath, 'tutorials', 'BackboneAssignmentTutorial.pdf')
+documentationPath               = os.path.join(ccpnCodePath, 'doc', 'build', 'html', 'index.html')

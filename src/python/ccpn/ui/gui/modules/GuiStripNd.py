@@ -176,7 +176,7 @@ class GuiStripNd(GuiStrip):
     zoomYArray = ([min(yArray), max(yArray)])
     self.zoomToRegion(zoomXArray, zoomYArray)
     self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
-    self.logger.info("strip = project.getByPid('%s')\nstrip.resetZoom()" % self.pid)
+    self.logger.info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
     return zoomXArray, zoomYArray
 
 
@@ -284,7 +284,7 @@ class GuiStripNd(GuiStrip):
     elif position is not None: # should always be the case
       zAxis.position = position
       self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
-      self.logger.info("strip = project.getByPid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
+      self.logger.info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
       #planeLabel.setValue(zAxis.position)
 
       # else:
@@ -298,27 +298,27 @@ class GuiStripNd(GuiStrip):
     planeLabel = self.planeToolbar.planeLabels[n]
     zAxis.width = value * planeLabel.singleStep()
 
-  def _nextZPlane(self, n:int=0):
+  def nextZPlane(self, n:int=0):
     """
     Increases z ppm position by one plane
     """
     self.changeZPlane(n, planeCount=-1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.nextZPlane()", strip=self)
-    self.logger.info("strip = project.getByPid('%s')\nstrip.nextZPlane()" % self.pid)
+    self.logger.info("strip = application.getByGid('%s')\nstrip.nextZPlane()" % self.pid)
 
-  def _prevZPlane(self, n:int=0):
+  def prevZPlane(self, n:int=0):
     """
     Decreases z ppm position by one plane
     """
     self.changeZPlane(n, planeCount=1) # -1 because ppm units are backwards
     self.pythonConsole.writeConsoleCommand("strip.prevZPlane()", strip=self)
-    self.logger.info("strip = project.getByPid('%s')\nstrip.prevZPlane()" % self.pid)
+    self.logger.info("strip = application.getByGid('%s')\nstrip.prevZPlane()" % self.pid)
 
   def _addPlaneToolbar(self):
     """
     Adds the plane toolbar to the strip.
     """
-    callbacks = [self._prevZPlane, self._nextZPlane, self._setZPlanePosition, self._changePlaneCount]
+    callbacks = [self.prevZPlane, self.nextZPlane, self._setZPlanePosition, self._changePlaneCount]
 
     self.planeToolbar = PlaneToolbar(self, grid=(1, self.guiSpectrumDisplay.orderedStrips.index(self)),
                                      hAlign='center', vAlign='c', callbacks=callbacks)

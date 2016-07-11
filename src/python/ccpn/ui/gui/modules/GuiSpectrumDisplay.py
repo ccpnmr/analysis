@@ -66,9 +66,9 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # grid=(0, 2), gridSpan=(1, 1))
     self.module.addWidget(self.spectrumUtilToolBar, 0, 2)
     if self._appBase.preferences.general.showToolbar:
-      self.showToolbar()
+      self.spectrumUtilToolBar.show()
     else:
-      self.hideToolbar()
+      self.spectrumUtilToolBar.hide()
     # toolBarColour = QtGui.QColor(214,215,213)
 
     # position box

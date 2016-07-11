@@ -94,8 +94,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
       # negative only
       doPos=False
     # Checking the third box turns the others off and sets both. Hence default
-    peakList.pickPeaksNd(positions, apiSpectrumView.spectrumView.orderedDataDims,
-                        doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
+    peakList.pickPeaksNd(positions, doPos=doPos, doNeg=doNeg, fitMethod='gaussian')
 
     for strip in self.project.strips:
       strip.showPeaks(peakList)

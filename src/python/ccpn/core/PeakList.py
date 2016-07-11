@@ -150,7 +150,7 @@ class PeakList(AbstractWrapperObject):
 
   # Library functions
 
-  def pickPeaksNd(self, positions:Sequence[float]=None, dataDims:Sequence['DataDim']=None,
+  def pickPeaksNd(self, positions:Sequence[float]=None,
                   doPos:bool=True, doNeg:bool=True,
                   fitMethod:str='gaussian', excludedRegions=None,
                   excludedDiagonalDims=None, excludedDiagonalTransform=None):
@@ -176,7 +176,7 @@ class PeakList(AbstractWrapperObject):
 
     startPoint = []
     endPoint = []
-
+    dataDims = self.spectrum._apiDataSource.sortedDataDims()
     spectrum = self.spectrum
     for ii, dataDim in enumerate(dataDims):
       # -1 below because points start at 1 in data model

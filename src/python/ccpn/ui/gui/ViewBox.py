@@ -254,22 +254,13 @@ class ViewBox(pg.ViewBox):
 
           if spectrumView.spectrum.dimensionCount > 1:
             a = sorted(map(list, zip(*selectedRegion)))
-            selectedRegion = [sorted(x) for x in (list(a))]
+            selectedRegion = [tuple(sorted(x)) for x in (list(a))]
             apiSpectrumView = spectrumView._wrappedData
-            newPeaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
+            newPeaks = peakList.pickPeaksNd(selectedRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod='gaussian')
 
-            # replaced by in-function echoing
-            # console.writeConsoleCommand(
-            #   "peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
-            #     selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
-            #     apiSpectrumView.spectrumView.displayNegativeContours
-            #   ), peakList=peakList
-            # )
-
-            # print(list(map(list, zip(*a))))
             self.current.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
             self.current.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
                                        selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,

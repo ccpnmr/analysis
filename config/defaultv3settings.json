@@ -13,9 +13,7 @@
         "doubleCrossHair": true,
         "useNative": false,
         "useNativeWebbrowser": false,
-        "toolbarHidden": false,
         "showToolbar": true,
-        "spectrumBorderHidden": false,
         "showSpectrumBorder": true,
         "autoBackupEnabled": false,
         "autoBackupFrequency": 30

@@ -90,21 +90,20 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
         pass
 
 
-# def _centreAxis(axis, atomPositions):
-#   if spectrumLib.name2IsotopeCode(axis.code) == '13C' or spectrumLib.name2IsotopeCode(axis.code) == '15N':
-#         adjustment = 5
-#   else:
-#     adjustment = 0.25
-#
-#   minimum = min(list(sorted([a.value for a in atomPositions[ii]]))) - adjustment
-#   maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
-#   if len(atomPositions) > 1:
-#     axis.position = (maximum+minimum)/2
-#     axis.width = maximum-minimum
-#     print(axis.position, axis.width)
-#   else:
-#     axis.position = atomPositions[0].value
-#     axis.width = adjustment*2
+def centreAxis(axis, atomPositions):
+  if spectrumLib.name2IsotopeCode(axis.code) == '13C' or spectrumLib.name2IsotopeCode(axis.code) == '15N':
+    adjustment = 5
+  else:
+    adjustment = 0.25
+
+  minimum = min(list(sorted([a.value for a in atomPositions]))) - adjustment
+  maximum = max(list(sorted([a.value for a in atomPositions]))) + adjustment
+  if len(atomPositions) > 1:
+    axis.position = (maximum+minimum)/2
+    axis.width = maximum-minimum
+  else:
+    axis.position = atomPositions[0].value
+    axis.width = adjustment*2
 
 
 
@@ -177,17 +176,12 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
           adjustment = 0.25
         minimum = min(list(sorted([a.value for a in atomPositions[ii]]))) - adjustment
         maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
-        # print(nmrResidue, list(sorted([a.value for a in atomPositions[ii]])))
         if len(atomPositions[ii]) > 1:
-          print(minimum, maximum, strip)
           axis.position = (maximum+minimum)/2
           axis.width = maximum-minimum
-          print(axis.position, axis.width, strip)
         else:
           axis.position = atomPositions[ii][0].value
           axis.width = adjustment*2
-          # print(nmrResidue, list(sorted([a.value for a in atomPositions[ii]])))
-          # print(strip, axis.position, axis.width)
         #   axis.width = width
     if markPositions:
       markPositionsInStrips(project, strip, strip.orderedAxes, atomPositions)

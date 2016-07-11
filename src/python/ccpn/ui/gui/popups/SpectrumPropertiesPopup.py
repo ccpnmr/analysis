@@ -45,26 +45,33 @@ from ccpn.util.Colour import spectrumColours
 SPECTRA = ['1H', 'STD', 'Relaxation Filtered', 'Water LOGSY']
 
 class SpectrumPropertiesPopup(QtGui.QDialog, Base):
+  # The values on the 'General' and 'Dimensions' tabs are queued as partial functions when set.
+  # The apply button then steps through each tab, and calls each function in the _changes dictionary
+  # in order to set the parameters.
+
+
   def __init__(self, spectrum, parent=None, **kw):
 
     super(SpectrumPropertiesPopup, self).__init__(parent)
     layout = QtGui.QGridLayout()
     self.setLayout(layout)
-    tabWidget = QtGui.QTabWidget()
+    self.tabWidget = QtGui.QTabWidget()
     # tabWidget.setSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
     if spectrum.dimensionCount == 1:
-      tabWidget.addTab(GeneralTab(spectrum), "General")
-      tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
+      self.tabWidget.addTab(GeneralTab(spectrum), "General")
+      self.tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
 
     else:
-      tabWidget.addTab(GeneralTab(spectrum), "General")
-      tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
-      tabWidget.addTab(ContoursTab(spectrum), "Contours")
+      self.tabWidget.addTab(GeneralTab(spectrum), "General")
+      self.tabWidget.addTab(DimensionsTab(spectrum, spectrum.dimensionCount), "Dimensions")
+      self.tabWidget.addTab(ContoursTab(spectrum), "Contours")
 
 
-    self.layout().addWidget(tabWidget, 0, 0, 2, 2)
-    buttonBox = Button(self, grid=(2, 1), callback=self.accept, text='Close',
-                           vPolicy='fixed')
+    self.layout().addWidget(self.tabWidget, 0, 0, 2, 4)
+    Button(self, grid=(2, 1), callback=self.reject, text='Cancel',vPolicy='fixed')
+    self.applyButton = Button(self, grid=(2, 2), callback=self.apply, text='Apply', vPolicy='fixed')
+    # self.applyButton.setEnabled(False)
+    Button(self, grid=(2, 3), callback=self.accept, text='Ok', vPolicy='fixed')
     if sys.platform.lower() == 'linux':
       if spectrum.project._appBase.preferences.general.colourScheme == 'dark':
         self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff; padding:4px;}")
@@ -75,6 +82,52 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
     if event.key() == QtCore.Qt.Key_Enter:
       pass
 
+  def accept(self):
+    self.apply()
+    super().accept()
+
+  def apply(self):
+    self.setFocus()  # So editingFinished callbacks fire
+    tabs = self.tabWidget.findChildren(QtGui.QStackedWidget)[0].children()
+    tabs = [t for t in tabs if not isinstance(t, QtGui.QStackedLayout)]
+    for t in tabs:
+      try:
+        changes = t._changes
+        self._applyChanges(changes)
+      except AttributeError:
+        pass
+
+  def _applyChanges(self, changes):
+    for v in changes.values():
+      v()
+
+
+class FilePathValidator(QtGui.QValidator):
+
+  def __init__(self, spectrum, parent=None, validationType='exists'):
+    QtGui.QValidator.__init__(self, parent=parent)
+    self.spectrum = spectrum
+    self.validationType = validationType
+
+
+  def validate(self, p_str, p_int):
+    if self.validationType != 'exists':
+      raise NotImplemented('FilePathValidation only checks that the path exists')
+    filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, p_str)
+
+    if os.path.exists(filePath):
+      try:
+        self.parent().setStyleSheet('background-color: #f7ffff')
+      except: pass
+      state = QtGui.QValidator.Acceptable
+    else:
+      try:
+        self.parent().setStyleSheet('background-color: #f7ffff')
+      except: pass
+      self.parent().setStyleSheet('background-color: #f7ffbe') # TODO: use a yellow in our colour scheme
+      state = QtGui.QValidator.Intermediate
+    return state, p_str, p_int
+
 
 
 class GeneralTab(QtGui.QWidget, Base):
@@ -82,15 +135,17 @@ class GeneralTab(QtGui.QWidget, Base):
     super(GeneralTab, self).__init__(parent)
     self.item = item
     self.spectrum = spectrum
+    self._changes = dict()
 
     self.experimentTypes = spectrum._project._experimentTypeMap
     nameLabel = Label(self, text="Spectrum name ", grid=(1, 0))
     self.nameData = LineEdit(self, vAlign='t', grid=(1, 1))
     self.nameData.setText(spectrum.name)
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
-    self.nameData.editingFinished.connect(self._changeSpectrumName)
+    self.nameData.editingFinished.connect(self._queueSpectrumNameChange)
     pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
     self.pathData = LineEdit(self, vAlign='t', grid=(2, 1))
+    self.pathData.setValidator(FilePathValidator(parent=self.pathData, spectrum=self.spectrum))
     self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
     if self.spectrum.project._appBase.ui.mainWindow is not None:
       mainWindow = self.spectrum.project._appBase.ui.mainWindow
@@ -114,11 +169,11 @@ class GeneralTab(QtGui.QWidget, Base):
         self.pathData.setText(apiDataStore.fullPath)
     else:
       self.pathData.setText(apiDataStore.fullPath)
-    self.pathData.editingFinished.connect(self._setSpectrumPath)
+    self.pathData.editingFinished.connect(self._queueSetSpectrumPath)
     chemicalShiftListLabel = Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
     self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(3, 1), texts=[csList.pid
-                                                for csList in spectrum.project.chemicalShiftLists]
-                                                +['<New>'], callback=self._setChemicalShiftList)
+                                                                                        for csList in spectrum.project.chemicalShiftLists]
+                                                                                       +['<New>'], callback=self._queueChemicalShiftListChange)
     pidLabel = Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
     pidData = Label(self, text=spectrum.pid, vAlign='t', grid=(5, 1))
     if spectrum.dimensionCount == 1:
@@ -131,7 +186,7 @@ class GeneralTab(QtGui.QWidget, Base):
       self.colourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.sliceColour))
       self.colourBox.currentIndexChanged.connect(partial(self._changedColourComboIndex, spectrum))
       colourButton = Button(self, vAlign='t', hAlign='l', grid=(6, 2), hPolicy='fixed',
-                            callback=partial(self._changeSpectrumColour, spectrum), icon='icons/colours')
+                            callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
       spectrumTypeLabel = Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
       spectrumType = PulldownList(self, vAlign='t', grid=(7, 1))
       spectrumType.addItems(SPECTRA)
@@ -139,7 +194,7 @@ class GeneralTab(QtGui.QWidget, Base):
       spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
-      self.spectrumScalingData.editingFinished.connect(self._setSpectrumScale)
+      self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)
 
       recordingDataLabel = Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(10, 0))
       noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(11, 0))
@@ -163,12 +218,12 @@ class GeneralTab(QtGui.QWidget, Base):
       text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
-      self.spectrumType.currentIndexChanged.connect(self._changeSpectrumType)
+      self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
       self.spectrumType.setMinimumWidth(self.pathData.width()*1.95)
       self.spectrumType.setFixedHeight(25)
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', grid=(8, 1))
-      self.spectrumScalingData.editingFinished.connect(self._setSpectrumScale)
+      self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)
       noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(9, 0))
       noiseLevelData = LineEdit(self, vAlign='t', grid=(9, 1))
 
@@ -184,43 +239,60 @@ class GeneralTab(QtGui.QWidget, Base):
     self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
     self.logger.info(command)
 
-  def _changeSpectrumName(self):
+
+  def _queueSpectrumNameChange(self):
     if self.nameData.isModified():
-      self.spectrum.rename(self.nameData.text())
-      self._writeLoggingMessage("spectrum.rename('%s')" % self.nameData.text())
-      # Echo now done automatically
-      # self.pythonConsole.writeConsoleCommand("spectrum.rename('%s')" % self.nameData.text(), spectrum=self.spectrum)
+      self._changes['spectrumName'] = partial(self._changeSpectrumName, self.nameData.text())
+
+  def _changeSpectrumName(self, name):
+    self.spectrum.rename(name)
+    self._writeLoggingMessage("spectrum.rename('%s')" % self.nameData.text())
 
 
-  def _setSpectrumScale(self):
-    self.spectrum.scale = float(self.spectrumScalingData.text())
+  def _queueSpectrumScaleChange(self):
+    self._changes['spectrumScale'] = partial(self._setSpectrumScale, float(self.spectrumScalingData.text()))
+
+  def _setSpectrumScale(self, scale):
+    self.spectrum.scale = scale
     self._writeLoggingMessage("spectrum.scale = %s" % self.spectrumScalingData.text())
     self.pythonConsole.writeConsoleCommand("spectrum.scale = %s" % self.spectrumScalingData.text(), spectrum=self.spectrum)
 
 
-  def _setChemicalShiftList(self, item):
+  def _queueChemicalShiftListChange(self, item):
     if item == '<New>':
-      newChemicalShiftList = self.spectrum.project.newChemicalShiftList()
-      insertionIndex = len(self.chemicalShiftListPulldown.texts)-1
-      self.chemicalShiftListPulldown.texts.insert(insertionIndex, newChemicalShiftList.pid)
-      self.chemicalShiftListPulldown.setData(self.chemicalShiftListPulldown.texts)
-      self.chemicalShiftListPulldown.setCurrentIndex(insertionIndex)
-      self.spectrum.chemicalShiftList = newChemicalShiftList
-      self._writeLoggingMessage("""newChemicalShiftList = project.newChemicalShiftList()\n
-                                  spectrum.chemicalShiftList = newChemicalShiftList""")
-      self.pythonConsole.writeConsoleCommand('spectrum.chemicalShiftList = chemicalShiftList', chemicalShiftList=newChemicalShiftList, spectrum=self.spectrum)
-      self.logger.info('spectrum.chemicalShiftList = chemicalShiftList')
+      listLen = len(self.chemicalShiftListPulldown.texts)
+      self._changes['chemicalShiftList'] = partial(self._setNewChemicalShiftList, listLen)
     else:
-      self.spectrum.chemicalShiftList = self.spectrum.project.getByPid(item)
-      self.pythonConsole.writeConsoleCommand('spectrum.newChemicalShiftList = chemicalShiftList', chemicalShiftList=self.spectrum.chemicalShiftList, spectrum=self.spectrum)
-      self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')\n
+      self._changes['chemicalShiftList'] = partial(self._setChemicalShiftList, item)
+
+  def _setNewChemicalShiftList(self, listLen):
+    newChemicalShiftList = self.spectrum.project.newChemicalShiftList()
+    insertionIndex = listLen - 1
+    self.chemicalShiftListPulldown.texts.insert(insertionIndex, newChemicalShiftList.pid)
+    self.chemicalShiftListPulldown.setData(self.chemicalShiftListPulldown.texts)
+    self.chemicalShiftListPulldown.setCurrentIndex(insertionIndex)
+    self.spectrum.chemicalShiftList = newChemicalShiftList
+    self._writeLoggingMessage("""newChemicalShiftList = project.newChemicalShiftList()\n
+                                spectrum.chemicalShiftList = newChemicalShiftList""")
+    self.pythonConsole.writeConsoleCommand('spectrum.chemicalShiftList = chemicalShiftList', chemicalShiftList=newChemicalShiftList, spectrum=self.spectrum)
+    self.logger.info('spectrum.chemicalShiftList = chemicalShiftList')
+
+  def _setChemicalShiftList(self, item):
+    self.spectrum.chemicalShiftList = self.spectrum.project.getByPid(item)
+    self.pythonConsole.writeConsoleCommand('spectrum.newChemicalShiftList = chemicalShiftList', chemicalShiftList=self.spectrum.chemicalShiftList, spectrum=self.spectrum)
+    self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')\n
                                   spectrum.chemicalShiftList = chemicalShiftList""")
 
-  def _changeSpectrumType(self, value):
+
+  def _queueSetSpectrumType(self, value):
+    self._changes['spectrumType'] = partial(self._setSpectrumType, value)
+
+  def _setSpectrumType(self, value):
     expType = self.experimentTypes[self.spectrum.dimensionCount].get(self.atomCodes).get(self.spectrumType.currentText())
     self.spectrum.experimentType = expType
     self.pythonConsole.writeConsoleCommand('spectrum.experimentType = experimentType', experimentType=expType, spectrum=self.spectrum)
     self._writeLoggingMessage("spectrum.experimentType = '%s'" % expType)
+
 
   def _getSpectrumFile(self):
     if os.path.exists('/'.join(self.pathData.text().split('/')[:-1])):
@@ -248,7 +320,8 @@ class GeneralTab(QtGui.QWidget, Base):
         else:
           self.pathData.setText(apiDataStore.fullPath)
 
-  def _setSpectrumPath(self):
+
+  def _queueSetSpectrumPath(self):
     if self.pathData.isModified():
       filePath = self.pathData.text()
 
@@ -256,30 +329,43 @@ class GeneralTab(QtGui.QWidget, Base):
       filePath = ccpnUtil.expandDollarFilePath(self.spectrum._project, filePath)
 
       if os.path.exists(filePath):
-        self.spectrum.filePath = filePath
-        self._writeLoggingMessage("spectrum.filePath = '%s'" % filePath)
-        self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % filePath,
-                                               spectrum=self.spectrum)
-        apiDataSource = self.spectrum._apiDataSource
-        apiDataStore = apiDataSource.dataStore
-        if apiDataStore.dataLocationStore.name == 'standard':
-          dataUrlName = apiDataStore.dataUrl.name
-          if dataUrlName == 'insideData':
-            self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
-          elif dataUrlName == 'alongsideData':
-            self.pathData.setText('$ALONGSIDE/%s' % apiDataStore.path)
-          elif dataUrlName == 'remoteData':
-            self.pathData.setText('$DATA/%s' % apiDataStore.path)
-          else:
-            self.pathData.setText(apiDataStore.fullPath)
+        self._changes['spectrumFilePath'] = partial(self._setSpectrumFilePath, filePath)
       else:
         self.logger.error('Cannot set spectrum path to %s. Path does not exist' % self.pathData.text())
-        return
+
+  def _setSpectrumFilePath(self, filePath):
+    self.spectrum.filePath = filePath
+    self._writeLoggingMessage("spectrum.filePath = '%s'" % filePath)
+    self.pythonConsole.writeConsoleCommand("spectrum.filePath('%s')" % filePath,
+                                           spectrum=self.spectrum)
+
+    # TODO: Find a way to convert to the shortened path without setting the value in the model,
+    #       then move this back to _setSpectrumPath
+    apiDataSource = self.spectrum._apiDataSource
+    apiDataStore = apiDataSource.dataStore
+
+    if apiDataStore.dataLocationStore.name != 'standard':
+      raise NotImplemented('Non-standard API data store locations are invalid.')
+
+    dataUrlName = apiDataStore.dataUrl.name
+    apiPathName = apiDataStore.path
+    if dataUrlName == 'insideData':
+      shortenedPath = '$INSIDE/{}'.format(apiPathName)
+    elif dataUrlName == 'alongsideData':
+      shortenedPath = '$ALONGSIDE/{}'.format(apiPathName)
+    elif dataUrlName == 'remoteData':
+      shortenedPath = '$DATA/{}'.format(apiPathName)
+    else:
+      shortenedPath = apiDataStore.fullPath
+    self.pathData.setText(shortenedPath)
 
 
-  def _changeSpectrumColour(self, spectrum):
+  def _queueSetSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
+    self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
+
+  def _setSpectrumColour(self, spectrum, newColour):
     spectrum._apiDataSource.setSliceColour(newColour.name())
     self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour.name())
     self.pythonConsole.writeConsoleCommand("spectrum.sliceColour = '%s'" % newColour.name(), spectrum=self.spectrum)
@@ -291,6 +377,7 @@ class GeneralTab(QtGui.QWidget, Base):
     spectrumColours[newColour.name()] = 'Colour %s' % newIndex
     self.colourBox.setCurrentIndex(int(newIndex)-1)
 
+  # TODO: 1D Only.  Fix this when fixing 1D!
   def _changedColourComboIndex(self, spectrum, value):
     spectrum.sliceColour = list(spectrumColours.keys())[value]
     pix = QtGui.QPixmap(60, 10)
@@ -304,48 +391,59 @@ class DimensionsTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, dimensions, parent=None):
     super(DimensionsTab, self).__init__(parent)
     self.spectrum = spectrum
+    self._changes = dict()
+
     if self.spectrum.project._appBase.ui.mainWindow is not None:
       mainWindow = self.spectrum.project._appBase.ui.mainWindow
     else:
       mainWindow = self.spectrum.project._appBase._mainWindow
+
     self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
-    dimensionalityLabel = Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t',)
+
+    Label(self, text="Dimension ", grid=(1, 0), hAlign='l', vAlign='t',)
+
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
     for i in range(dimensions):
       dimLabel = Label(self, text='%s' % str(i+1), grid =(1, i+1), vAlign='t', hAlign='l')
+
     for i in range(dimensions):
-      axisLabel = Label(self, text="Axis Code ", grid=(2, 0), vAlign='t', hAlign='l')
-      axisLabelData = Label(self, text=str(spectrum.axisCodes[i]), grid=(2, i+1),  hAlign='l', vAlign='t',)
-      pointsLabel = Label(self, text="Point Counts ", grid=(3, 0), vAlign='t', hAlign='l')
-      pointsData = Label(self, text=str(spectrum.pointCounts[i]), grid=(3, i+1), vAlign='t', hAlign='l')
-      axisTypeLabel = Label(self, text="Dimension Type ", grid=(4, 0), vAlign='t', hAlign='l')
-      axisTypeData = Label(self, text=spectrum.dimensionTypes[i], grid=(4, i+1), vAlign='t', hAlign='l')
-      spectralWidthLabel = Label(self, text="Spectrum Width (ppm) ", grid=(5, 0), vAlign='t', hAlign='l')
-      spectralWidthData = Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(5, i+1), vAlign='t', hAlign='l')
-      spectralWidthHzLabel = Label(self, text="Spectral Width (Hz) ", grid=(6, 0), vAlign='t', hAlign='l')
-      spectralWidthHzData = Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(6, i+1), vAlign='t', hAlign='l')
-      spectralReferencingLabel = Label(self, text="Referencing (ppm) ", grid=(7, 0), vAlign='t', hAlign='l')
+      Label(self, text="Axis Code ", grid=(2, 0), vAlign='t', hAlign='l')
+      Label(self, text=str(spectrum.axisCodes[i]), grid=(2, i+1),  hAlign='l', vAlign='t',)
+      Label(self, text="Point Counts ", grid=(3, 0), vAlign='t', hAlign='l')
+      Label(self, text=str(spectrum.pointCounts[i]), grid=(3, i+1), vAlign='t', hAlign='l')
+      Label(self, text="Dimension Type ", grid=(4, 0), vAlign='t', hAlign='l')
+      Label(self, text=spectrum.dimensionTypes[i], grid=(4, i+1), vAlign='t', hAlign='l')
+      Label(self, text="Spectrum Width (ppm) ", grid=(5, 0), vAlign='t', hAlign='l')
+      Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(5, i+1), vAlign='t', hAlign='l')
+      Label(self, text="Spectral Width (Hz) ", grid=(6, 0), vAlign='t', hAlign='l')
+      Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(6, i+1), vAlign='t', hAlign='l')
+
+      Label(self, text="Referencing (ppm) ", grid=(7, 0), vAlign='t', hAlign='l')
       spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referenceValues[i]), grid=(7, i+1), vAlign='t', hAlign='l')
-      spectralReferencingData.textChanged.connect(partial(self._setDimensionReferencing, spectrum, i))
-      spectralPointReferencingLabel = Label(self, text="Referencing (points)", grid=(8, 0), vAlign='t', hAlign='l')
-      spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referencePoints[i]), grid=(8, i+1), vAlign='t', hAlign='l')
-      spectralReferencingData.textChanged.connect(partial(self._setPointDimensionReferencing, spectrum, i))
-      # spectralReferencingData.setMaximumWidth(100)
-      spectralAssignmentToleranceLabel = Label(self, text="Assignment Tolerance ", grid=(9, 0),  hAlign='l')
+      spectralReferencingData.editingFinished.connect(partial(self._queueSetDimensionReferencing,
+                                                              spectralReferencingData.text, i))
 
-      spectralAssignmentToleranceData = LineEdit(self, grid=(9, i+1),  hAlign='l')
-      # spectralAssignmentToleranceData.setMaximumWidth(100)
+      Label(self, text="Referencing (points)", grid=(8, 0), vAlign='t', hAlign='l')
+      spectralReferencingDataPoints = LineEdit(self, text=str("%.3f" % spectrum.referencePoints[i]), grid=(8, i+1), vAlign='t', hAlign='l')
+      spectralReferencingDataPoints.editingFinished.connect(partial(self._queueSetPointDimensionReferencing,
+                                                                    spectralReferencingDataPoints.text, i))
 
+      Label(self, text="Assignment Tolerance ", grid=(9, 0),  hAlign='l')
+      spectralAssignmentToleranceData = LineEdit(self, grid=(9, i+1), hAlign='l')
+      spectralAssignmentToleranceData.editingFinished.connect(partial(self._queueSetAssignmentTolerances,
+                                                                      spectralAssignmentToleranceData.text, i))
       if spectrum.assignmentTolerances[i] is not None:
         spectralAssignmentToleranceData.setText(str("%.3f" % spectrum.assignmentTolerances[i]))
-      spectralAssignmentToleranceData.textChanged.connect(partial(self._setAssignmentTolerances, spectrum, i))
-      # spectralShiftWeightingLabel = Label(self, text=DIMENSIONS[i]+"-Shift Weighting", grid=(j+8, 0))
-      # spectralShiftWeightingData = LineEdit(self, grid=(j+8, 1))
 
   def _writeLoggingMessage(self, command):
     self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
     self.logger.info(command)
+
+
+  def _queueSetAssignmentTolerances(self, valueGetter, dim):
+    self._changes['assignmentTolerances{}'.format(dim)] = partial(self._setAssignmentTolerances,
+                                                                  self.spectrum, dim, valueGetter())
 
   def _setAssignmentTolerances(self, spectrum, dim, value):
     assignmentTolerances = list(spectrum.assignmentTolerances)
@@ -355,12 +453,21 @@ class DimensionsTab(QtGui.QWidget, Base):
     self._writeLoggingMessage("spectrum.assignmentTolerances = {0}".format(assignmentTolerances))
 
 
+  def _queueSetDimensionReferencing(self, valueGetter, dim):
+    self._changes['dimensionReferencing{}'.format(dim)] = partial(self._setDimensionReferencing,
+                                                                  self.spectrum, dim, valueGetter())
+
   def _setDimensionReferencing(self, spectrum, dim, value):
     spectrumReferencing = list(spectrum.referenceValues)
     spectrumReferencing[dim] = float(value)
     spectrum.referenceValues = spectrumReferencing
     self.pythonConsole.writeConsoleCommand("spectrum.referenceValues = {0}".format(spectrumReferencing), spectrum=spectrum)
     self._writeLoggingMessage("spectrum.referenceValues = {0}".format(spectrumReferencing))
+
+
+  def _queueSetPointDimensionReferencing(self, valueGetter, dim):
+    self._changes['dimensionReferencingPoint{}'.format(dim)] = partial(self._setPointDimensionReferencing,
+                                                                  self.spectrum, dim, valueGetter())
 
   def _setPointDimensionReferencing(self, spectrum, dim, value):
     spectrumReferencing = list(spectrum.referencePoints)
@@ -468,6 +575,8 @@ class ContoursTab(QtGui.QWidget, Base):
     self.negativeColourButton = Button(self, grid=(10, 2), icon='icons/colours', hPolicy='fixed',
                                        vAlign='t', hAlign='l')
     self.negativeColourButton.clicked.connect(partial(self._changeNegSpectrumColour, spectrum))
+
+    Label(self, text="Note: Changes on this tab are applied immediately.", grid=(11, 0), vAlign='b', hAlign='l')
 
 
   def _writeLoggingMessage(self, command):

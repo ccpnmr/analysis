@@ -44,6 +44,10 @@ class PeakTable(CcpnModule):
   def __init__(self, project, selectedList=None):
     CcpnModule.__init__(self, name='Peak List')
 
+    if not project.peakLists:
+      project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
+      return
+
     self.peakList = PeakListSimple(self, project, selectedList=selectedList)
     self.layout.addWidget(self.peakList)
     self.current = project._appBase.current
@@ -66,8 +70,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
   def __init__(self, parent=None, project=None,  callback=None, selectedList=None, **kw):
 
-    if not project.peakLists:
-      peakLists = []
       
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -77,8 +79,10 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     # self.label.show()
     self.project = project
     self.sampledDims = {}
-    if selectedList is None:
+    if not selectedList and project.peakLists:
       self.selectedList = self.project.peakLists[0]
+    elif not selectedList:
+      self.peakLists = []
     else:
       self.selectedList = selectedList
     self.peakLists = project.peakLists

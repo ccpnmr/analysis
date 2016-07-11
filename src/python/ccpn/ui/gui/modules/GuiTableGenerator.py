@@ -23,6 +23,9 @@ class GuiTableGenerator(QtGui.QWidget, Base):
         self.objectList = objectLists[0]
       else:
         self.objectList = None
+        return
+
+
       self.getColumnsFunction = getColumnsFunction
       self.unitPulldown = unitPulldown
       self._getColumns(columns, tipTexts)
@@ -30,6 +33,7 @@ class GuiTableGenerator(QtGui.QWidget, Base):
       self.table = ObjectTable(self, self._getColumns(columns, tipTexts), [], actionCallback=actionCallback,
                                multiSelect=multiSelect, selectionCallback=selectionCallback,
                                grid=(0, 0), gridSpan=(1, 5))
+
 
       if selector is not None:
         self._updateContents()

@@ -1044,7 +1044,10 @@ class Framework:
     Displays Peak table on left of main window with specified list selected.
     """
     from ccpn.ui.gui.modules.PeakTable import PeakTable
-
+    if not self.project.peakLists:
+      self.project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
+      MessageDialog.showWarning('Project has no peaklists.', 'Peak table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      return
     peakList = PeakTable(self.project, selectedList=selectedList)
     self.ui.mainWindow.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")

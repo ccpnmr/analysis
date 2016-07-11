@@ -171,6 +171,10 @@ class Gui(Ui):
       console._write(command + '\n')
       logger.info(command)
 
+
+  def getByGid(self, gid):
+    return self.application.project.getByPid(gid)
+
 ########################################################
 #
 #  Wrapper notifier functions

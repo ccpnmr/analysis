@@ -400,6 +400,11 @@ class Framework:
   def getByPid(self, pid):
     return self.project.getByPid(pid)
 
+
+  def getByGid(self, gid):
+    return self.ui.getByGid(gid)
+
+
   def _startCommandBlock(self, command:str, **objectParameters):
     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
 

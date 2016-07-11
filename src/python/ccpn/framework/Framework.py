@@ -1033,6 +1033,7 @@ class Framework:
     if not self.project.chemicalShiftLists:
       self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
       MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      return
     from ccpn.ui.gui.modules.ChemicalShiftTable import NmrAtomShiftTable as Table
     chemicalShiftTable = Table(chemicalShiftLists=self.project.chemicalShiftLists)
     self.ui.mainWindow.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)
@@ -1056,8 +1057,8 @@ class Framework:
     """
     from ccpn.ui.gui.modules.PeakTable import PeakTable
     if not self.project.peakLists:
-      self.project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
-      MessageDialog.showWarning('Project has no peaklists.', 'Peak table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      self.project._logger.warn('Project has no Peak Lists. Peak table cannot be displayed')
+      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
       return
     peakList = PeakTable(self.project, selectedList=selectedList)
     self.ui.mainWindow.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)

@@ -66,7 +66,7 @@ class ViewBox(pg.ViewBox):
     Raise the context menu
     """
     from functools import partial
-    from ccpn.ui.gui.lib.Window import navigateToPeakPosition
+    from ccpn.ui.gui.lib.Window import navigateToPeakPosition, navigateToPosition
     position = event.screenPos()
     self.menu.navigateToMenu.clear()
     if self.current.peak:
@@ -74,6 +74,12 @@ class ViewBox(pg.ViewBox):
         if len(list(set(spectrumDisplay.strips[0].axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
           self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPeakPosition, self.current.project,
                                                                         self.current.peak, [spectrumDisplay.pid]))
+    else:
+      for spectrumDisplay in self.current.project.spectrumDisplays:
+        axisCodes = self.current.strip.axisCodes
+        if len(list(set(spectrumDisplay.strips[0].axisCodes) & set(self.current.strip.axisCodes))) <= 2:
+          self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPosition, self.current.project, self.current.positions,
+                                                                        axisCodes, [spectrumDisplay.pid]))
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
 
   def _getMenu(self):
@@ -95,6 +101,9 @@ class ViewBox(pg.ViewBox):
 
     """
     self.current.strip = self.parentObject().parent
+    xPosition = self.mapSceneToView(event.pos()).x()
+    yPosition = self.mapSceneToView(event.pos()).y()
+    self.current.positions = [xPosition, yPosition]
 
     if event.button() == QtCore.Qt.LeftButton:
     #
@@ -117,9 +126,9 @@ class ViewBox(pg.ViewBox):
       else:
         # Left button either Ctrl or no modifier
         event.accept()
-        xPosition = self.mapSceneToView(event.pos()).x()
-        yPosition = self.mapSceneToView(event.pos()).y()
-        self.current.positions = [xPosition, yPosition]
+        # xPosition = self.mapSceneToView(event.pos()).x()
+        # yPosition = self.mapSceneToView(event.pos()).y()
+        # self.current.positions = [xPosition, yPosition]
 
         xPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(self.peakWidthPixels, 0)).x() - self.mapSceneToView(QtCore.QPoint(0, 0)).x())
         yPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(0, self.peakWidthPixels)).y() - self.mapSceneToView(QtCore.QPoint(0, 0)).y())

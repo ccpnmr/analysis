@@ -53,6 +53,40 @@ LINE_COLOURS = {
   'NH': '#FFFF00',
 }
 
+
+def navigateToPosition(project:Project, position=None, axisCodes=None,
+   selectedDisplays:typing.List[GuiSpectrumDisplay]=None, strip:'GuiStrip'=None,  markPositions:bool=False):
+  """
+  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
+  to the positions specified by the peak.
+  """
+
+  if selectedDisplays is None:
+    selectedDisplays = [display.pid for display in project.spectrumDisplays]
+
+
+  for displayPid in selectedDisplays:
+    display = project.getByPid(displayPid)
+    axisPositions = dict(zip(axisCodes, list(position)))
+    if project._appBase.ui.mainWindow is not None:
+      mainWindow = project._appBase.ui.mainWindow
+    else:
+      mainWindow = project._appBase._mainWindow
+    task = mainWindow.task
+    # mark = task.newMark('white', position, axisCodes)
+
+    # if not strip:
+    # for strip in display.strips:
+    for axis in display.strips[0].orderedAxes:
+      try:
+        axisCodeMatch = spectrumLib.axisCodeMatch(axis.code, axisCodes)
+        if axisCodeMatch is not None:
+          axis.position = axisPositions[axisCodeMatch]
+          mark = task.newMark('white', [axis.position], [axisCodeMatch])
+      except TypeError:
+        pass
+
+
 def navigateToPeakPosition(project:Project, peak:Peak=None,
    selectedDisplays:typing.List[GuiSpectrumDisplay]=None, strip:'GuiStrip'=None,  markPositions:bool=False):
   """

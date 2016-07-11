@@ -880,7 +880,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # wDim = dataDims[3].dim - 1
       # wDataDim = dataDims[3]
       # wPosition, width, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency, dataDim = self._getSpectrumViewParams(3)
-      valuePerPoint, zTotalPointCount, minAliasedFrequency, maxAliasedFrequency, wDataDim = self._getSpectrumViewParams(3)
+      valuePerPoint, wTotalPointCount, minAliasedFrequency, maxAliasedFrequency, wDataDim = self._getSpectrumViewParams(3)
       wPosition = orderedAxes[3].position
       width =  orderedAxes[3].width
         

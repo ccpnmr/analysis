@@ -1022,6 +1022,9 @@ class Framework:
     """
     Displays Chemical Shift table.
     """
+    if not self.project.chemicalShiftLists:
+      self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
+      MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
     from ccpn.ui.gui.modules.ChemicalShiftTable import NmrAtomShiftTable as Table
     chemicalShiftTable = Table(chemicalShiftLists=self.project.chemicalShiftLists)
     self.ui.mainWindow.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)

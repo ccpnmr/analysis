@@ -152,7 +152,6 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
               if len(atomPositions2[ii]) > 1:
                 axis.position = (maximum+minimum)/2
                 axis.width = maximum-minimum
-                # print(axis.position, axis.width)
               else:
                 axis.position = atomPositions2[ii][0].value
                 axis.width = adjustment*2
@@ -180,9 +179,10 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
         maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
         # print(nmrResidue, list(sorted([a.value for a in atomPositions[ii]])))
         if len(atomPositions[ii]) > 1:
+          print(minimum, maximum, strip)
           axis.position = (maximum+minimum)/2
           axis.width = maximum-minimum
-          # print(axis.position, axis.width)
+          print(axis.position, axis.width, strip)
         else:
           axis.position = atomPositions[ii][0].value
           axis.width = adjustment*2

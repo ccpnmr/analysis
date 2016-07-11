@@ -80,8 +80,9 @@ class PeakFindPopup(QtGui.QDialog, Base):
   def _pickPeaks(self):
     peakList = self.peakList
     apiSpectrumView = peakList.spectrum.spectrumViews[0]._wrappedData
-    positions = [[spinBox.value() for spinBox in self.minPositionBoxes],
-                 [spinBox.value() for spinBox in self.maxPositionBoxes]]
+    positions = [[x.value(), y.value()] for x,y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
+    # positions = [[spinBox.value() for spinBox in self.minPositionBoxes],
+    #              [spinBox.value() for spinBox in self.maxPositionBoxes]]
 
 
     doPos=True

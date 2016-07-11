@@ -170,41 +170,43 @@ class PeakList(AbstractWrapperObject):
 
 
     self._startFunctionCommandBlock('pickPeaksNd', values=locals(), defaults=defaults)
-    try:
+    # try:
+    if len(positions[0]) != self.spectrum.dimensionCount:
+      positions = list(sorted(map(list, zip(*positions))))
 
-      startPoint = []
-      endPoint = []
+    startPoint = []
+    endPoint = []
 
-      spectrum = self.spectrum
-      for ii, dataDim in enumerate(dataDims):
-        # -1 below because points start at 1 in data model
-        position0 = dataDim.primaryDataDimRef.valueToPoint(positions[0][ii]) - 1
-        position1 = dataDim.primaryDataDimRef.valueToPoint(positions[1][ii]) - 1
-        position0, position1 = min(position0, position1), max(position0, position1)
-        # want integer grid points above position0 and below position1
-        # add 1 to position0 because above
-        # add 1 to position1 because doing start <= x < end not <= end
-        # yes, this negates -1 above but they are for different reasons
-        position0 = int(position0+1)
-        position1 = int(position1+1)
-        startPoint.append((dataDim.dim, position0))
-        endPoint.append((dataDim.dim, position1))
+    spectrum = self.spectrum
+    for ii, dataDim in enumerate(dataDims):
+      # -1 below because points start at 1 in data model
+      position0 = dataDim.primaryDataDimRef.valueToPoint(positions[0][ii]) - 1
+      position1 = dataDim.primaryDataDimRef.valueToPoint(positions[1][ii]) - 1
+      position0, position1 = min(position0, position1), max(position0, position1)
+      # want integer grid points above position0 and below position1
+      # add 1 to position0 because above
+      # add 1 to position1 because doing start <= x < end not <= end
+      # yes, this negates -1 above but they are for different reasons
+      position0 = int(position0+1)
+      position1 = int(position1+1)
+      startPoint.append((dataDim.dim, position0))
+      endPoint.append((dataDim.dim, position1))
 
-      startPoints = [point[1] for point in sorted(startPoint)]
-      endPoints = [point[1] for point in sorted(endPoint)]
-      # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
+    startPoints = [point[1] for point in sorted(startPoint)]
+    endPoints = [point[1] for point in sorted(endPoint)]
+    # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
 
-      posLevel = spectrum.positiveContourBase if doPos else None
-      negLevel = spectrum.negativeContourBase if doNeg else None
+    posLevel = spectrum.positiveContourBase if doPos else None
+    negLevel = spectrum.negativeContourBase if doNeg else None
 
-      apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
-                     posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod, excludedRegions=excludedRegions,
-                     excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
+    apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
+                   posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod, excludedRegions=excludedRegions,
+                   excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
 
-      data2ObjDict = self._project._data2Obj
+    data2ObjDict = self._project._data2Obj
 
-    finally:
-      self._project._appBase._endCommandBlock()
+    # finally:
+    #   self._project._appBase._endCommandBlock()
 
     return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
 

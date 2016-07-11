@@ -253,7 +253,8 @@ class ViewBox(pg.ViewBox):
           console = mainWindow.pythonConsole
 
           if spectrumView.spectrum.dimensionCount > 1:
-
+            a = sorted(map(list, zip(*selectedRegion)))
+            selectedRegion = [sorted(x) for x in (list(a))]
             apiSpectrumView = spectrumView._wrappedData
             newPeaks = peakList.pickPeaksNd(selectedRegion, apiSpectrumView.spectrumView.orderedDataDims,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
@@ -267,6 +268,8 @@ class ViewBox(pg.ViewBox):
             #     apiSpectrumView.spectrumView.displayNegativeContours
             #   ), peakList=peakList
             # )
+
+            # print(list(map(list, zip(*a))))
             self.current.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
             self.current.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
                                        selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,

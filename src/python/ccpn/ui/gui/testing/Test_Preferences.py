@@ -32,22 +32,20 @@ def test_get_preferences():
 
 def test_get_preferences_default():
 
-  defaultPreferencesPath = os.path.join(os.path.dirname(__file__), 'defaultv3settingsTest.json')
-  preferences = Framework.getPreferences(defaultPreferencesPath=defaultPreferencesPath)
-
+  defaultPath = os.path.join(os.path.dirname(__file__), 'defaultv3settingsTest.json')
+  preferences = Framework.getPreferences(defaultPath=defaultPath)
   print(preferences)
 
 def test_get_preferences_user():
 
-  userPreferencesPath = os.path.join(os.path.dirname(__file__), 'userv3settingsTest.json')
-  preferences = Framework.getPreferences(userPreferencesPath=userPreferencesPath)
+  userPath = os.path.join(os.path.dirname(__file__), 'userv3settingsTest.json')
+  preferences = Framework.getPreferences(userPath=userPath)
   print(preferences)
 
 def test_get_preferences_default_user():
 
-  defaultPreferencesPath = os.path.join(os.path.dirname(__file__), 'defaultv3settingsTest.json')
-  userPreferencesPath = os.path.join(os.path.dirname(__file__), 'userv3settingsTest.json')
-  preferences = Framework.getPreferences(defaultPreferencesPath=defaultPreferencesPath,
-                               userPreferencesPath=userPreferencesPath)
+  defaultPath = os.path.join(os.path.dirname(__file__), 'defaultv3settingsTest.json')
+  userPath = os.path.join(os.path.dirname(__file__), 'userv3settingsTest.json')
+  preferences = Framework.getPreferences(defaultPath=defaultPath, userPath=userPath)
   print(preferences)
 

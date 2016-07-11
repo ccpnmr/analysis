@@ -381,6 +381,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       project._logger.error("Double-click activation not implemented for Pid %s, object %s"
                             % (dataPid, obj))
 
+
   def _fillRecentProjectsMenu(self):
     """
     Populates recent projects menu with 10 most recently loaded projects
@@ -390,13 +391,30 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     recentFileMenu = self.getMenuAction('Project->Open Recent')
     recentFileMenu.clear()
     for recentFile in recentFileLocations:
-      recentFileMenu.addAction(Action(recentFileMenu, text=recentFile, translate=False,
-                                      callback=partial(self.application.loadProject,
-                                                       path=recentFile)))
+     action = Action(self, text=recentFile, translate=False,
+                     callback=partial(self.application.loadProject, path=recentFile))
+     recentFileMenu.addAction(action)
     recentFileMenu.addSeparator()
     recentFileMenu.addAction(Action(recentFileMenu, text='Clear',
                                     callback=self.application.clearRecentProjects))
 
+
+  def _fillRecentMacrosMenu(self):
+    """
+    Populates recent macros menu with last ten macros ran.
+    TODO: make sure that running a macro adds it to the prefs and calls this function
+    """
+
+    recentMacros = uniquify(self.application.preferences.recentMacros)
+    recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
+    recentMacrosMenu.clear()
+    for recentMacro in recentMacros:
+      action = Action(self, text=recentMacro, translate=False,
+                      callback=partial(self.runMacro, macroFile=recentMacro))
+      recentMacrosMenu.addAction(action)
+    recentMacrosMenu.addSeparator()
+    recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
+                                      callback=self.application.clearRecentMacros))
 
 
   def saveBackup(self):
@@ -582,23 +600,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.macroEditor = MacroEditor(self.moduleArea, self, "Macro Editor", showRecordButtons=True)
     self.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
-
-
-  def _fillRecentMacrosMenu(self):
-    """
-    Populates recent macros menu with last ten macros ran.
-    TODO: make sure that running a macro adds it to the prefs and calls this function
-    """
-
-    recentMacros = uniquify(self.application.preferences.recentMacros)
-    recentMacrosMenu = self.getMenuAction('Macro->Run Recent')
-    recentMacrosMenu.clear()
-    for recentMacro in recentMacros:
-      action = Action(self, text=recentMacro, callback=partial(self.runMacro, macroFile=recentMacro))
-      recentMacrosMenu.addAction(action)
-    recentMacrosMenu.addSeparator()
-    recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
-                                      callback=self.application.clearRecentMacros))
 
 
   def defineUserShortcuts(self):

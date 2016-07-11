@@ -536,6 +536,9 @@ class Framework:
         action = application.ui.mainWindow.getMenuAction(‘Test->Submenu B->Item B2’)
         action.setChecked(True)
 
+    To see how to add items dynamically, see clearRecentProjects in this class and
+    _fillRecentProjectsMenu in GuiMainWindow
+
     '''
     self._menuSpec = ms = []
     # TODO: remove QKeySequence

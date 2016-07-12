@@ -219,7 +219,7 @@ class Strip(AbstractWrapperObject):
     layout = spectrumDisplay.stripFrame.layout()
     if not layout: # should always exist but play safe:
       return
-      
+
     for r in range(layout.rowCount()):
       items = []
       if spectrumDisplay.stripDirection == 'Y':
@@ -228,9 +228,9 @@ class Strip(AbstractWrapperObject):
             item = layout.itemAtPosition(r, n)
             items.append(item)
             layout.removeItem(item)
-          items = [items[-1]] + items[:-1]
+          items = items[1:] + [items[0]]
           for m, item in enumerate(items):
-            layout.addItem(item, r, m+newIndex, )
+            layout.addItem(item, r, m+currentIndex, )
         else:
           for n in range(newIndex, currentIndex+1):
             item = layout.itemAtPosition(r, n)
@@ -239,7 +239,6 @@ class Strip(AbstractWrapperObject):
           items = [items[-1]] + items[:-1]
           for m, item in enumerate(items):
             layout.addItem(item, r, m+newIndex, )
-
 
       elif spectrumDisplay.stripDirection == 'X':
         if currentIndex < newIndex:

@@ -286,19 +286,19 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   #   self.moduleArea.addModule(newModule, position=position, relativeTo=relativeTo)
 
 
-  # def addBlankDisplay(self, position='right', relativeTo=None):
-  #   if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
-  #     blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
-  #     if blankDisplay.isVisible():
-  #       return
-  #     else:
-  #       self.moduleArea.moveModule(blankDisplay, position, None)
-  #   else:
-  #     self.blankDisplay = GuiBlankDisplay(self.moduleArea)
-  #     self.moduleArea.addModule(self.blankDisplay, position, None)
-  #
-  #   self.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
-  #   self._project._logger.info("application.addBlankDisplay()")
+  def addBlankDisplay(self, position='right', relativeTo=None):
+    if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
+      blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
+      if blankDisplay.isVisible():
+        return
+      else:
+        self.moduleArea.moveModule(blankDisplay, position, None)
+    else:
+      self.blankDisplay = GuiBlankDisplay(self.moduleArea)
+      self.moduleArea.addModule(self.blankDisplay, position, None)
+
+    self.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
+    self._project._logger.info("application.addBlankDisplay()")
 
   # def showSequenceModule(self, position='top', relativeTo=None):
   #   """

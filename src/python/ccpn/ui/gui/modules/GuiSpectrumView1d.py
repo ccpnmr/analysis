@@ -77,7 +77,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
     # self.strip.viewBox.autoRange()
     # self.strip.zoomYAll()
 
-  def turnOnPhasing(self):
+  def _turnOnPhasing(self):
 
     
     phasingFrame = self.strip.spectrumDisplay.phasingFrame
@@ -87,7 +87,7 @@ class GuiSpectrumView1d(GuiSpectrumView):
       else:
         self._newPhasingTrace()
         
-  def turnOffPhasing(self):
+  def _turnOffPhasing(self):
 
     if self.hPhaseTrace:
       self.hPhaseTrace.setVisible(False)

@@ -84,7 +84,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     self.posDisplayLists = []
     self.negDisplayLists = []
 
-    self.traceScale = 1.0e-7 # TBD: need a better way of setting this
+    self._traceScale = 1.0e-7 # TBD: need a better way of setting this
             
     self.okDataFile = True  # used to keep track of warning message that data file does not exist
     
@@ -383,7 +383,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     pixelViewBox0 = plotItem.getAxis('bottom').height()
     pixelViewBox1 = pixelViewBox0 + viewBox.height()
     # - sign below because ppm scale is backwards
-    v = positionPixel[1] - self.traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
+    v = positionPixel[1] - self._traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % xNumPoints] for p in range(xMinFrequency, xMaxFrequency+1)])
   
     hTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
     hTrace.setData(x, v)
@@ -414,7 +414,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     pixelViewBox1 = pixelViewBox0 + viewBox.width()
     # no - sign below because ppm scale is backwards and pixel y scale is also backwards
     # (assuming that we want positive signal to point towards the right)
-    v = positionPixel[0] + self.traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency+1)])
+    v = positionPixel[0] + self._traceScale * (pixelViewBox1-pixelViewBox0) * numpy.array([data[p % yNumPoints] for p in range(yMinFrequency, yMaxFrequency+1)])
     
     vTrace.setPen({'color': self._getColour('sliceColour', '#aaaaaa')})
     vTrace.setData(v, y)
@@ -438,6 +438,20 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self._updateVTraceData(point, yDataDim, yMinFrequency, yMaxFrequency, yNumPoints, positionPixel, self.vTrace)
     else:
       self.vTrace.setData([], [])
+
+    self.strip.plotWidget.plotItem.update()
+
+  @property
+  def traceScale(self) -> float:
+    """Scale for trace in this spectrumView"""
+    return self._traceScale
+
+  @traceScale.setter
+  def traceScale(self, value):
+    """Setter for scale for trace in this spectrumView"""
+    self._traceScale = value
+    self.strip._updateTraces()
+    self._updatePhasing()
 
   ###def connectStrip(self, strip):
   ###  item = self.spectrumItems[strip]
@@ -993,5 +1007,3 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency)-1)))
 
     return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
-
-  

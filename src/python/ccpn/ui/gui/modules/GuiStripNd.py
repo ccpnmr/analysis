@@ -188,10 +188,11 @@ class GuiStripNd(GuiStrip):
 
   def _updateTraces(self):
 
-    updateHTrace = self.hTraceAction.isChecked()
-    updateVTrace = self.vTraceAction.isChecked()
-    for spectrumView in self.spectrumViews:
-      spectrumView._updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
+    if self.mousePosition:
+      updateHTrace = self.hTraceAction.isChecked()
+      updateVTrace = self.vTraceAction.isChecked()
+      for spectrumView in self.spectrumViews:
+        spectrumView._updateTrace(self.mousePosition, self.mousePixel, updateHTrace, updateVTrace)
 
   def toggleHorizontalTrace(self):
     """

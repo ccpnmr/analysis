@@ -400,7 +400,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     #         continue
     #       otherStrip.beingUpdated = False
     self._parent.stripFrame.updateY(self)
-    pass
+    self._updatePhasing()
+
 
   #
   # def _axisRegionUpdated(self, apiAxis):

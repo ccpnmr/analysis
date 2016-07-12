@@ -6,10 +6,12 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+
 
 TYPECOMPONENT =  ['Select', 'Compound', 'Solvent', 'Buffer', 'Target', 'Inhibitor ', 'Other']
 C_COMPONENT_UNIT = ['Select', 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g']
-
+Labeling = ['None','Type_New', '15N', '15N,13C', '15N,13C,2H', 'ILV','ILVA','ILVAT', 'SAIL', '1,3-13C- and 2-13C-Glycerol']
 
 
 class EditSampleComponentPopup(QtGui.QDialog):
@@ -33,11 +35,13 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.setWindowTitle("Sample Component Properties")
     self.mainLayout.setContentsMargins(15, 20, 25, 10) #L,T,R,B
     self.setFixedWidth(400)
-    self.setFixedHeight(250)
+    self.setFixedHeight(300)
 
   def _getWidgetsToSet(self):
 
     return  (
+            self._initialOpitionWidgets,
+            self._setSubstanceWidgets,
             self.componentNameEditWidget,
             self.componentNameWidget,
             self.setLabelingWidget,
@@ -69,51 +73,76 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.currentLabelingLabel.hide()
       self.showCurrentLabeling.hide()
     else:
+      self.setFixedHeight(250)
+      self.spacerLabel.hide()
+      self.selectInitialRadioButtons.hide()
+      self.substanceLabel.hide()
+      self.substancePulldownList.hide()
       self.sampleComponentNewNameLabel.hide()
       self.nameComponentLineEdit.hide()
       self.sampleComponentLabelingLabel.hide()
-      self.labelingLineEdit.hide()
+      self.labelingPulldownList.hide()
 
   def _getAllWidgets(self):
     '''
     All widgets are ordered in the way they will be added to the layout EG:
     1)Label1 -> grid 0,0  ---- 2)LineEdit1 --> grid 0,1
     In this list are excluded the 'Cancel, Apply, Ok Buttons' '''
-    return (
+    return (self.spacerLabel, self.selectInitialRadioButtons,
+            self.substanceLabel, self.substancePulldownList,
             self.sampleComponentNewNameLabel, self.nameComponentLineEdit,
             self.sampleComponentNameLabel, self.sampleComponentShowName,
-            self.sampleComponentLabelingLabel, self.labelingLineEdit,
+            self.sampleComponentLabelingLabel, self.labelingPulldownList,
             self.currentLabelingLabel, self.showCurrentLabeling,
             self.typeLabel, self.typePulldownList,
             self.concentrationUnitLabel, self.concentrationUnitPulldownList,
             self.concentrationLabel, self.concentrationLineEdit,
             self.labelcomment, self.commentLineEdit
            )
+  def _initialOpitionWidgets(self):
+    self.spacerLabel = Label(self, text="")
+    self.selectInitialRadioButtons = RadioButtons(self, texts=['New', 'From Substances'],
+                                                       selectedInd=1,
+                                                       callback=self._initialOptionsCallBack,
+                                                       direction='h',
+                                                       tipTexts=None)
+
+  def _setSubstanceWidgets(self):
+    self.substanceLabel = Label(self, text="Current Substances")
+    self.substancePulldownList = PulldownList(self)
+    self.substancePulldownList.setFixedWidth(210)
+    if self.newSampleComponentToCreate:
+      self._fillsubstancePulldownList()
+      self.substancePulldownList.activated[str].connect(self._fillInfoFromSubstance)
 
   def componentNameEditWidget(self):
-    self.sampleComponentNewNameLabel = Label(self, text="New Name^ ")
+    self.sampleComponentNewNameLabel = Label(self, text="Name")
     self.nameComponentLineEdit = LineEdit(self)
     self.nameComponentLineEdit.editingFinished.connect(self._updateButtons)
+    self.nameComponentLineEdit.setReadOnly(False)
 
   def componentNameWidget(self):
-    self.sampleComponentNameLabel = Label(self, text="Name ")
+    self.sampleComponentNameLabel = Label(self, text="Name")
     self.sampleComponentShowName = Label(self, text="")
     if self.sampleComponent:
       self.sampleComponentShowName.setText(self.sampleComponent.name)
 
   def setLabelingWidget(self):
-    self.sampleComponentLabelingLabel = Label(self, text="Labeling^ ")
-    self.labelingLineEdit = LineEdit(self)
-    self.labelingLineEdit.editingFinished.connect(self._updateButtons)
+    self.sampleComponentLabelingLabel = Label(self, text="Labeling")
+    self.labelingPulldownList = PulldownList(self)
+    self.labelingPulldownList.setFixedWidth(210)
+    self.labelingPulldownList.setData(Labeling)
+    self.labelingPulldownList.setEnabled(False)
+    self.labelingPulldownList.activated[str].connect(self._labelingSpecialCases)
 
   def currentLabelingWidget(self):
-    self.currentLabelingLabel = Label(self, text="Labeling ")
+    self.currentLabelingLabel = Label(self, text="Labeling")
     self.showCurrentLabeling = Label(self, text="")
     if self.sampleComponent:
       self.showCurrentLabeling.setText(self.sampleComponent.labeling)
 
   def componentRoleWidget(self):
-    self.typeLabel = Label(self,text="Role ")
+    self.typeLabel = Label(self,text="Role")
     self.typePulldownList = PulldownList(self)
     self.typePulldownList.setFixedWidth(210)
     self.typePulldownList.setData(TYPECOMPONENT)
@@ -121,7 +150,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.typePulldownList.set(str(self.sampleComponent.role))
 
   def concentrationUnitWidget(self):
-    self.concentrationUnitLabel = Label(self, text="Concentration Unit ")
+    self.concentrationUnitLabel = Label(self, text="Concentration Unit")
     self.concentrationUnitPulldownList = PulldownList(self)
     self.concentrationUnitPulldownList.setFixedWidth(210)
     self.concentrationUnitPulldownList.setData(C_COMPONENT_UNIT)
@@ -129,7 +158,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.concentrationUnitPulldownList.set(str(self.sampleComponent.concentrationUnit))
 
   def concentrationWidget(self):
-    self.concentrationLabel = Label(self, text="Concentration ")
+    self.concentrationLabel = Label(self, text="Concentration")
     self.concentrationLineEdit = LineEdit(self)
     self.concentrationLineEdit.editingFinished.connect(self._getConcentrationValue)
     if self.sampleComponent:
@@ -153,6 +182,44 @@ class EditSampleComponentPopup(QtGui.QDialog):
             self._concentrationUnitChanged: str(self.concentrationUnitPulldownList.get()),
             self._commentChanged: str(self.commentLineEdit.text())
             }
+
+  def _initialOptionsCallBack(self):
+    selected = self.selectInitialRadioButtons.get()
+
+    if selected == 'From Substances':
+      self.substanceLabel.show()
+      self.substancePulldownList.show()
+    else:
+      self.substanceLabel.hide()
+      self.substancePulldownList.hide()
+      self.nameComponentLineEdit.setText('')
+      self.nameComponentLineEdit.setReadOnly(False)
+      self.labelingPulldownList.setEnabled(True)
+      self.labelingPulldownList.set('None')
+      self.substancePulldownList.set('Select an option')
+
+  def _fillsubstancePulldownList(self):
+    if len(self.project.substances)>0:
+      substancePulldownData = ['Select an option']
+      for substance in self.project.substances:
+        substancePulldownData.append(str(substance.id))
+      self.substancePulldownList.setData(substancePulldownData)
+
+  def _fillInfoFromSubstance(self, selected):
+    if selected != 'Select an option':
+      substance = self.project.getByPid('SU:'+selected)
+      self.nameComponentLineEdit.setText(str(substance.name))
+      self.labelingPulldownList.set(str(substance.labeling))
+      self.nameComponentLineEdit.setReadOnly(True)
+      self.labelingPulldownList.setEnabled(False)
+      self._updateButtons()
+
+  def _labelingSpecialCases(self,selected ):
+    if selected == 'Type_New':
+      self.labelingPulldownList.setEditable(True)
+
+    else:
+      self.labelingPulldownList.setEditable(False)
 
   def _getConcentrationValue(self):
 
@@ -183,17 +250,15 @@ class EditSampleComponentPopup(QtGui.QDialog):
   def _createNewComponent(self):
     if not self.sampleComponent:
       self.sampleComponent =  self.sample.newSampleComponent(
-        name=str(self.nameComponentLineEdit.text()), labeling=self.labelingLineEdit.text())
+        name=str(self.nameComponentLineEdit.text()), labeling=str(self.labelingPulldownList.currentText()))
 
   def _updateButtons(self):
-    checkMissingValues = [self.nameComponentLineEdit.text(),  self.labelingLineEdit.text()]
-    for isNotMissingValue in checkMissingValues:
-      if isNotMissingValue:
-        self.buttons.buttons[1].setEnabled(True)
-        self.buttons.buttons[2].setEnabled(True)
-      else:
-        self.buttons.buttons[1].setEnabled(False)
-        self.buttons.buttons[2].setEnabled(False)
+    if self.nameComponentLineEdit.text():
+      self.buttons.buttons[1].setEnabled(True)
+      self.buttons.buttons[2].setEnabled(True)
+    else:
+      self.buttons.buttons[1].setEnabled(False)
+      self.buttons.buttons[2].setEnabled(False)
 
   def _applyChanges(self):
     if self.newSampleComponentToCreate :

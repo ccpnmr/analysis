@@ -122,7 +122,7 @@ class SampleComponent(AbstractWrapperObject):
 
   @property
   def concentrationUnit(self) -> str:
-    """Unit of SampleComponent.concentration, one of: %s """ % Constants.concentrationUnits
+    """Unit of SampleComponent.concentration, one of: 'Molar', 'g/L', 'L/L', 'mol/mol', 'g/g' """
 
     result =  self._wrappedData.concentrationUnit
     if result not in Constants.concentrationUnits:

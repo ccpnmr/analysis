@@ -21,8 +21,6 @@ class CcpnModuleArea(ModuleArea):
      when re-add a new module it makes sure there is a container available.
     """
 
-
-
     if module is None:
       module = CcpnModule(name='New Module',**kwds)
 

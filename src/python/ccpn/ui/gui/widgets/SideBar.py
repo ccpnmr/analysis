@@ -35,7 +35,7 @@ from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
 from ccpn.ui.gui.popups.SamplePropertiesPopup import SamplePropertiesPopup
-from ccpn.ui.gui.popups.SamplePropertiesPopup import EditSampleComponentPopup
+from ccpn.ui.gui.popups.SampleComponentPropertiesPopup import EditSampleComponentPopup
 from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
@@ -496,7 +496,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         getattr(itemParent, ff)(restraintType)
         return
       elif itemParent.shortClassName == 'SA':
-        popup = EditSampleComponentPopup(project=self.project, sample=itemParent)
+        popup = EditSampleComponentPopup(project=self.project, sample=itemParent, newSampleComponent=True)
         popup.exec_()
         popup.raise_()
         return

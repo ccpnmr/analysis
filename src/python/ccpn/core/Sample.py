@@ -107,7 +107,7 @@ class Sample(AbstractWrapperObject):
 
   @property
   def amountUnit(self) -> str:
-    """amountUnit for sample, one of %s""" % Constants.amountUnits
+    """amountUnit for sample, one of : 'L', 'g', 'mole' """
     result =  self._wrappedData.amountUnit
     if result not in Constants.amountUnits:
       self._project._logger.warning(

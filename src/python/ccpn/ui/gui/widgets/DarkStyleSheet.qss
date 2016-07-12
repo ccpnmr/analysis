@@ -34,7 +34,9 @@ DoubleSpinbox {
 DoubleSpinbox::hover {
               background-color: #e4e15b;
               }
-
+RadioButton {
+              color: #f7ffff;
+              }
 Spinbox {
               background-color: #f7ffff;
               color: #122043;

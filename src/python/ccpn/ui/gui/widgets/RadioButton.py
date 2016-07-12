@@ -16,8 +16,8 @@ class RadioButton(QtGui.QRadioButton, Base):
     Base.__init__(self,  **kw)
     if textColor:
       self.setStyleSheet('QRadioButton {color: %s; font-size: 12pt;}' % textColor)
-    # if textSize :
-    #   self.setStyleSheet('QRadioButton {font-size: %s;}' % textSize)
+    if textSize :
+      self.setStyleSheet('QRadioButton {font-size: %s;}' % textSize)
     if callback:
       self.setCallback(callback)
 

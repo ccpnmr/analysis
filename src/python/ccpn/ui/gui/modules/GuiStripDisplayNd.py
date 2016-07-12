@@ -70,7 +70,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
       mainWindow = self._appBase._mainWindow
     mainWindow.pythonConsole.writeConsoleCommand(
         "strip.clone()", strip=self.strips[0].clone())
-    self.project._logger.info("strip = project.getByPid('%s')\nstrip.clone()" % self.strips[0].pid)
+    self.project._logger.info("strip = ui.getByGid('%s')\nstrip.clone()" % self.strips[0].pid)
     return newStrip
 
   def showSpinSystemLabel(self):

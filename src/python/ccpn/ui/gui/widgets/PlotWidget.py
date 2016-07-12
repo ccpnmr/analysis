@@ -89,7 +89,7 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       mainWindow.pythonConsole.writeConsoleCommand(
         "module.displaySpectrum(spectrum)", module=displayPid, spectrum=ss
       )
-      self._appBase.project._logger.info("module = project.getByPid(%s)" % displayPid)
+      self._appBase.project._logger.info("module = ui.getByGid(%s)" % displayPid)
       self._appBase.project._logger.info("module.displaySpectrum(spectrum)")
 
   def processSpectrumGroups(self, pids:Sequence[str], event:QtGui.QMouseEvent):

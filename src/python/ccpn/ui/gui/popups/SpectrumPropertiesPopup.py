@@ -587,25 +587,25 @@ class ContoursTab(QtGui.QWidget, Base):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayPositiveContours = True
-        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
+        self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayPositiveContours = True")
 
     else:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayPositiveContours = False
-        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
+        self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayPositiveContours = False")
 
   def displayNegativeContours(self, state):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayNegativeContours = True
-        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
+        self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayNegativeContours = True")
     else:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayNegativeContours = False
-        self.logger.info("spectrumView = project.getByPid('%s')" % spectrumView.pid)
+        self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayNegativeContours = False")
 
 

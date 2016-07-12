@@ -186,7 +186,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                       'project': self.application.project,
                       'loadProject': self.application.loadProject,
                       'newProject': self.application.newProject,
-                      'loadData': self.application.loadData,
                      }
     self.pythonConsole = IpythonConsole(self, self.namespace, mainWindow=self)
 

@@ -664,16 +664,16 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   #   self.feedbackPopup.raise_()
 
 
-  # def runMacro(self, macroFile:str=None):
-  #   """
-  #   Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
-  #   runs the selected macro.
-  #   """
-  #   if macroFile is None:
-  #     macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
-  #   self._appBase.preferences.recentMacros.append(macroFile)
-  #   self._fillRecentMacrosMenu()
-  #   self.pythonConsole._runMacro(macroFile)
+  def runMacro(self, macroFile:str=None):
+    """
+    Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
+    runs the selected macro.
+    """
+    if macroFile is None:
+      macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
+    self.application.preferences.recentMacros.append(macroFile)
+    self._fillRecentMacrosMenu()
+    self.pythonConsole._runMacro(macroFile)
 
 
   # def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):

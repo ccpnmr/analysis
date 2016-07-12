@@ -40,11 +40,12 @@ class UpdatePopup(QtGui.QDialog, UpdateAgent):
     row += 1
 
 
-    texts = ('Refresh Updates Information', 'Download and Install Updates')
-    callbacks = (self.resetFromServer, self.installUpdates)
+    texts = ('Refresh Updates Information', 'Download and Install Updates', 'Close')
+    callbacks = (self.resetFromServer, self.installUpdates, self.hide)
     tipTexts = ('Refresh the updates information by querying server and comparing with what is installed locally',
-                'Install the updates from the server')
-    icons = ('icons/null.png', 'icons/dialog-ok-apply.png')
+                'Install the updates from the server',
+                'Close update dialog')
+    icons = ('icons/null.png', 'icons/dialog-apply.png', 'icons/window-close.png')
     buttonList = ButtonList(frame, texts=texts, tipTexts=tipTexts, callbacks=callbacks, icons=icons, grid=(row,0), gridSpan=(1,2))
     row += 1
 

@@ -577,7 +577,8 @@ class Framework:
       ("Integration", self.showIntegrationModule, [('shortcut', 'it'),
                                                    ('enabled', False)]),
       (),
-      ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
+      ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj'),
+                                                        ('enabled', False)]),
     ]
                ))
 
@@ -603,8 +604,9 @@ class Framework:
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
       (),
-      ("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
-      ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
+      ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
+                   ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
+                  )),
       (),
       ("Python Console", self.toggleConsole, [('shortcut', 'py'),
                                               ('checkable', True),
@@ -645,6 +647,7 @@ class Framework:
       ("Show License...", self.showCcpnLicense),
       (),
       ("Inspect Code...", self.showCodeInspectionPopup,[('enabled', False)]),
+      ("Show Issues...", self.showIssuesList),
       ("Check for Updates...", self.showUpdatePopup),
       (),
       ("Submit Feedback...", self.showFeedbackPopup),
@@ -1259,6 +1262,12 @@ class Framework:
     info = MessageDialog.showInfo('Not implemented yet!',
                                   'This function has not been implemented in the current version',
                                   colourScheme=self.ui.mainWindow.colourScheme)
+
+  def showIssuesList(self):
+    from ccpn.framework.PathsAndUrls import ccpnIssuesUrl
+    import webbrowser
+    webbrowser.open(ccpnIssuesUrl)
+
 
   def showUpdatePopup(self):
     from ccpn.framework.update.UpdatePopup import UpdatePopup

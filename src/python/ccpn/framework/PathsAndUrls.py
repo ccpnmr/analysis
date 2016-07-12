@@ -28,6 +28,7 @@ from ccpn.util import Path
 # CCPN Urls
 ccpnUrl        = 'http://www.ccpn.ac.uk'
 ccpnLicenceUrl = 'http://www.ccpn.ac.uk/licence'
+ccpnIssuesUrl = 'https://sourceforge.net/p/ccpn/bugs/'
 
 # CCPN code
 ccpnCodePath                    = Path.getTopDirectory()

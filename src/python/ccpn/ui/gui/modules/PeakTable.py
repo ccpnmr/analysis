@@ -135,6 +135,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
       self.peakListPulldown.setCurrentIndex(selectedList)
 
     self.__registerNotifiers()
+    self.closeModule = self._closeModule
 
   def getExtraColumns(self, peakList):
 
@@ -186,7 +187,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists, onceOnly=True)
 
 
-  def __del__(self):
+  def _closeModule(self):
     self.project.unRegisterNotifier('Peak', 'create', self._refreshPeakTable)
     self.project.unRegisterNotifier('Peak', 'modify', self._refreshPeakTable)
     self.project.unRegisterNotifier('Peak', 'rename', self._refreshPeakTable)
@@ -195,6 +196,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'delete', self._updatePeakLists)
+    self.close()
 
 
   def _updatePeakLists(self, value):
@@ -258,6 +260,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
 
   def _refreshTable(self, item=None):
+    # TODO: filter calls to only update if changes to the currently displayed peaklist
     self.peakTable.updateTable()
 
 

@@ -117,14 +117,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.widget3.layout().addWidget(self.subtractPeakListsButton, 0, 0)
     self.widget3.layout().addWidget(self.deletePeakButton, 0, 1)
     self.layout().addWidget(self.widget3, 0, 6, 1, 2)
-    #
-    # columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
-    #            ('Volume', lambda pk: self._getPeakVolume(pk))]
-    #
-    # tipTexts=['Peak serial number',
-    #           'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
-    #           'Integral of spectrum intensity around peak location, according to chosen volume method',
-    #           'Textual notes about the peak']
 
     self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=callback, selectionCallback=self._selectPeak,
                                        getColumnsFunction=self.getExtraColumns, selector=self.peakListPulldown,
@@ -251,7 +243,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     if peaks and peaks[-1] in peakList.peaks:
       self.peakTable.table.selectObject(peaks[-1])
 
-  def _getPeakHeight(self, peak:Peak):
+  def _getPeakHeight(self, peak: Peak):
     """
     Returns the height of the specified peak.
     """

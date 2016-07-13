@@ -77,7 +77,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.plotWidget = PlotWidget(self.stripFrame, appBase=self._parent._appBase,
                                  useOpenGL=useOpenGL, strip=self)
               # dropCallback=self.dropCallback, useOpenGL=useOpenGL)#, gridSpan=(1, 1))
-    newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
+    # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
     self.stripFrame.layout().addWidget(self.plotWidget, 0,
                                        self.guiSpectrumDisplay.orderedStrips.index(self))
     self.colourScheme = self._parent._appBase.preferences.general.colourScheme

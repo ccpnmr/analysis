@@ -51,17 +51,14 @@ class PeakFindPopup(QtGui.QDialog, Base):
     self.checkBoxWidget.setLayout(layout)
     self.layout().addWidget(self.checkBoxWidget, 1, 0, 1, 4)
     self.checkBox1 = RadioButton(self)
-    # self.checkBox1.toggled.connect(self.controlCheckBoxes)
     self.checkBoxWidget.layout().addWidget(self.checkBox1, 0, 0)
     self.checkBox1Label = Label(self, 'Positive only')
     self.checkBoxWidget.layout().addWidget(self.checkBox1Label, 0, 1)
     self.checkBox2 = RadioButton(self)
-    # self.checkBox2.toggled.connect(self.controlCheckBoxes)
     self.checkBoxWidget.layout().addWidget(self.checkBox2, 0, 2)
     self.checkBox2Label = Label(self, 'Negative only')
     self.checkBoxWidget.layout().addWidget(self.checkBox2Label, 0, 3)
     self.checkBox3 = RadioButton(self)
-    # self.checkBox3.toggled.connect(self.controlCheckBoxes)
     self.checkBoxWidget.layout().addWidget(self.checkBox3, 0, 4)
     self.checkBox3Label = Label(self, 'Both')
     self.checkBoxWidget.layout().addWidget(self.checkBox3Label, 0, 5)
@@ -79,10 +76,7 @@ class PeakFindPopup(QtGui.QDialog, Base):
 
   def _pickPeaks(self):
     peakList = self.peakList
-    apiSpectrumView = peakList.spectrum.spectrumViews[0]._wrappedData
     positions = [[x.value(), y.value()] for x,y in zip(self.minPositionBoxes, self.maxPositionBoxes)]
-    # positions = [[spinBox.value() for spinBox in self.minPositionBoxes],
-    #              [spinBox.value() for spinBox in self.maxPositionBoxes]]
 
 
     doPos=True

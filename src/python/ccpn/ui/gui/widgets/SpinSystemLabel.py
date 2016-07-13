@@ -82,31 +82,37 @@ class SpinSystemLabel(DropBase, Label):
 
       else:
         self.strip.guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
-        if direction == '-1':
-
+        try:
           nr2 = project.getByPid('NR:%s' % nmrResidue)
-          nr1.connectPrevious(nr2)
-          current.strip = self.strip.guiSpectrumDisplay.strips[-1]
-          current.nmrResidue = nr2.offsetNmrResidues[0]
-          current.nmrChain = nr2.nmrChain
-        else:
-          nr2 = project.getByPid('NR:%s' % nmrResidue)
-          nr1.connectNext(nr2)
-          current.strip = self.strip.guiSpectrumDisplay.strips[sinkIndex]
-          current.nmrResidue = nr2
-          current.nmrChain = nr2.nmrChain
+          if nr1 and nr2:
+            if direction == '-1':
+              nr1.connectPrevious(nr2)
+              current.strip = self.strip.guiSpectrumDisplay.strips[-1]
+              current.nmrResidue = nr2.offsetNmrResidues[0]
+              current.nmrChain = nr2.nmrChain
+            else:
+              nr1.connectNext(nr2)
+              current.strip = self.strip.guiSpectrumDisplay.strips[sinkIndex]
+              current.nmrResidue = nr2
+              current.nmrChain = nr2.nmrChain
 
-        # TODO: Change this to a try-except block
-        if hasattr(self.application, 'backboneModule'):
-          self.application.backboneModule._navigateTo(current.nmrResidue, strip=current.strip)
-          current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
+            # try:
+            if hasattr(self.application, 'backboneModule'):
+              self.application.backboneModule._navigateTo(current.nmrResidue, strip=current.strip)
+              current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
+            # except AttributeError:
+            #   project._logger.warn('Backbone module is not active')
+        except AtrributeError:
+          project._logger.warn('Cannot connect non-existent Nmr Residues')
+
+
 
 
 def _renameNmrResidueForGraphics(nmrResidue:NmrResidue, oldPid:str):
   """Effect rename for NmrResidue
 
   For notifiers
-  #CCONINTERNAL"""
+  #CCPN INTERNAL"""
   oldId = oldPid.split(Pid.PREFIXSEP, 1)[-1]
   for strip in nmrResidue.project.strips:
     if strip.planeToolbar.spinSystemLabel.text() == oldId:

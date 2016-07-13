@@ -40,8 +40,11 @@ class SequenceModule(CcpnModule):
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
     self.chainLabels = []
     self.widgetHeight = 0
-    for chain in project.chains:
-      self._addChainLabel(chain)
+    if not project.chains:
+      self._addChainLabel(placeholder=True)
+    else:
+      for chain in project.chains:
+        self._addChainLabel(chain)
 
     self.setFixedHeight(2*self.widgetHeight)
     self.scrollContents.setFixedHeight(2*self.widgetHeight)
@@ -66,17 +69,17 @@ class SequenceModule(CcpnModule):
     for residue in residues:
       guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
       guiResidues.append(guiResidue)
-      guiResidue.setHtml('<div style="color: %s;text-align: center;">' % colour+
+      guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' % colour+
                            residue.shortName+'</div>')
 
 
 
 
-  def _addChainLabel(self, chain:Chain):
+  def _addChainLabel(self, chain:Chain=None, placeholder=False):
     """
     Creates and adds a GuiChainLabel to the sequence module.
     """
-    chainLabel = GuiChainLabel(self, self.project, self.scrollArea.scene, chain, position=[0, self.widgetHeight])
+    chainLabel = GuiChainLabel(self, self.project, self.scrollArea.scene, position=[0, self.widgetHeight], chain=chain, placeholder=placeholder)
     self.scrollArea.scene.addItem(chainLabel)
     self.chainLabels.append(chainLabel)
     self.widgetHeight += (0.8*(chainLabel.boundingRect().height()))
@@ -84,13 +87,18 @@ class SequenceModule(CcpnModule):
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
 
-  def __init__(self, parent, project, scene, chain, position):
+  def __init__(self, parent, project, scene, position, chain, placeholder=None):
     QtGui.QGraphicsTextItem.__init__(self)
+
+
     self.chain = chain
     self.setPos(QtCore.QPointF(position[0], position[1]))
-    self.text = chain.compoundName
+    if placeholder:
+      self.text = 'No Chains in Project!'
+    else:
+      self.text = chain.compoundName
     self.parent = parent
-    self.setHtml('<div style=><strong>'+chain.compoundName+': </strong></div>')
+    self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
     self.setFont(Font(size=20, bold=True))
     if project._appBase.preferences.general.colourScheme == 'dark':
       colour = '#bec4f3'
@@ -99,11 +107,12 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     self.setDefaultTextColor(QtGui.QColor(colour))
     self.residueDict = {}
     i = 0
-    for residue in chain.residues:
-      newResidue = GuiChainResidue(self, project, residue, scene, self.boundingRect().width(), i, position[1])
-      scene.addItem(newResidue)
-      self.residueDict[residue.sequenceCode] = newResidue
-      i += 1
+    if chain:
+      for residue in chain.residues:
+        newResidue = GuiChainResidue(self, project, residue, scene, self.boundingRect().width(), i, position[1])
+        scene.addItem(newResidue)
+        self.residueDict[residue.sequenceCode] = newResidue
+        i += 1
 
 class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
@@ -115,7 +124,9 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     DropBase.__init__(self, project._appBase)
     self.setPlainText(residue.shortName)
     position = labelPosition+(20*index)
-    self.setFont(Font(size=GuiChainResidue.fontSize, normal=True))
+    font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
+    font.setStyleHint(QtGui.QFont.Monospace)
+    self.setFont(font)
     if project._appBase.preferences.general.colourScheme == 'dark':
       self.colour1 = '#bec4f3'
       self.colour2 = '#f7ffff'

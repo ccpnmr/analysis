@@ -212,7 +212,7 @@ class Strip(AbstractWrapperObject):
 
     # NBNB TODO - should the stuff below not be moved to the corresponding GUI class?
     # Is there always a layout, regardless of application?
-    
+
     # management of Qt layout
     # TBD: need to soup up below with extra loop when have tiles
     spectrumDisplay = self.spectrumDisplay
@@ -365,7 +365,7 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
   strip = self.getByPid(strip) if isinstance(strip, str) else strip
 
   stripCount = self.stripCount
-  if newIndex and newIndex >= len(stripCount):
+  if newIndex and newIndex >= stripCount:
     # Put strip at the right, which means newIndex should be None
     if newIndex > stripCount:
       # warning

@@ -306,9 +306,9 @@ class Peak(AbstractWrapperObject):
   def addAssignment(self, value:Sequence[Union[str, 'NmrAtom']]):
     """Add a peak assignment - a list of one NmrAtom or Pid for each dimension"""
 
-    if len(value) != self._wrappedData.peakList.numDim:
+    if len(value) != self.peakList.spectrum.dimensionCount:
       raise ValueError("Length of assignment value %s does not match peak dimensionality %s "
-      % (value, self._wrappedData.peakList.numDim))
+      % (value, self.peakList.spectrum.dimensionCount))
 
     # Convert to tuple and check for non-existing pids
     ll = []

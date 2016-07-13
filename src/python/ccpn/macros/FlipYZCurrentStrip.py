@@ -33,6 +33,6 @@ else:
     axisOrder.extend(current.strip.axisOrder[3:])
 
   spectra = current.strip.spectra
-  newDisplay = application.createSpectrumDisplay(spectra[0], axisOrder=axisOrder)
+  newDisplay = mainWindow.createSpectrumDisplay(spectra[0], axisOrder=axisOrder)
   for spectrum in spectra:
     newDisplay.displaySpectrum(spectrum)

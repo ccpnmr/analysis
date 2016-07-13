@@ -21,8 +21,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
-
 
 from PyQt4 import QtGui, QtCore
 
@@ -48,7 +46,7 @@ class GuiStrip1d(GuiStrip):
     self.gridShown = True
     self.crossHairShown = True
     self.autoIntegration = True
-    # self.viewBox.menu = self.get1dContextMenu()
+    self.viewBox.menu = self._get1dContextMenu()
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0
     self.peakItems = {}
@@ -66,29 +64,30 @@ class GuiStrip1d(GuiStrip):
     Creates and returns the 1d context menu
     """
 
-    self.contextMenu = Menu(self, isFloatWidget=True)
+    self.contextMenu = Menu('', self, isFloatWidget=True)
     self.contextMenu.addItem("Auto Scale", callback=self.resetYZoom)
     self.contextMenu.addSeparator()
     self.contextMenu.addItem("Full", callback=self.resetXZoom)
-    self.contextMenu.addItem("Zoom", callback=self.raiseZoomPopup)
-    self.contextMenu.addItem("Store Zoom", callback=self.storeZoom)
-    self.contextMenu.addItem("Restore Zoom", callback=self.restoreZoom)
+    self.contextMenu.addItem("Zoom", callback=self.showZoomPopup)
+    self.contextMenu.addItem("Store Zoom", callback=self._storeZoom)
+    self.contextMenu.addItem("Restore Zoom", callback=self._restoreZoom)
     self.contextMenu.addSeparator()
-    self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self.toggleCrossHair,
+    self.crossHairAction = QtGui.QAction("Crosshair", self, triggered=self._toggleCrossHair,
                                          checkable=True)
     if self.crossHairShown:
       self.crossHairAction.setChecked(True)
     else:
       self.crossHairAction.setChecked(False)
-    self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
+    self.contextMenu.addAction(self.crossHairAction)
     self.gridAction = QtGui.QAction("Grid", self, triggered=self.toggleGrid, checkable=True)
     if self.gridShown:
       self.gridAction.setChecked(True)
     else:
       self.gridAction.setChecked(False)
-    self.contextMenu.addAction(self.gridAction, isFloatWidget=True)
+    self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
     # self.contextMenu.addItem("Print", callback=self.raisePrintMenu)
+    self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
     return self.contextMenu
 
   def resetYZoom(self):

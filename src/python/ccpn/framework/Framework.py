@@ -46,6 +46,7 @@ from ccpn.framework.Current import Current
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
 # from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.lib.Window import MODULE_DICT
 
@@ -698,8 +699,6 @@ class Framework:
        Load project from path
        If not path then opens a file dialog box and loads project from selected file.
     """
-    from ccpn.ui.gui.widgets.FileDialog import FileDialog
-
     if self.project is not None:
       self._closeProject()
 
@@ -736,8 +735,6 @@ class Framework:
     """
     Opens a file dialog box and loads data from selected file.
     """
-    from ccpn.ui.gui.widgets.FileDialog import FileDialog
-
     if text is None:
       text = 'Load Data'
     if paths is None:
@@ -1127,14 +1124,14 @@ class Framework:
   ###################################################################################################################
 
   def showParassignSetup(self):
-    try:
+    # try:
       from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
       self.ps = ParassignSetup(project=self.project)
       newModule = CcpnModule(name='PARAssign Setup')
       newModule.addWidget(self.ps)
       self.ui.mainWindow.moduleArea.addModule(newModule)
-    except ImportError:
-      print('PARAssign cannot be found')
+    # except ImportError:
+    #   print('PARAssign cannot be found')
 
 
 
@@ -1178,16 +1175,20 @@ class Framework:
                                   'This function has not been implemented in the current version',
                                   colourScheme=self.ui.mainWindow.colourScheme)
 
-  def runMacro(self, macroFile: str = None):
+  def runMacro(self, macroFile:str=None):
     """
     Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
     runs the selected macro.
     """
     if macroFile is None:
-      macroFile = QtGui.QFileDialog.getOpenFileName(self.ui.mainWindow, "Run Macro", self.preferences.general.macroPath)
-    self.preferences.recentMacros.append(macroFile)
+      macroDialog = FileDialog(parent=self.ui.mainWindow, text="Run Macro",
+                             preferences=self.preferences.general, fileMode=0,
+                             directory=self.preferences.general.macroPath)
+
+    if not macroDialog.selectedFile() in self.preferences.recentMacros:
+      self.preferences.recentMacros.append(macroDialog.selectedFile())
     # self._fillRecentMacrosMenu()
-    self.ui.mainWindow.pythonConsole._runMacro(macroFile)
+    self.ui.mainWindow.pythonConsole._runMacro(macroDialog.selectedFile())
 
   def defineShortcut(self):
     info = MessageDialog.showInfo('Not implemented yet',
@@ -1317,25 +1318,9 @@ class Framework:
 def getSaveDirectory():
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
   preferences = getPreferences()
-  dialog = QtGui.QFileDialog(caption='Save Project As...')
-  dialog.setFileMode(QtGui.QFileDialog.AnyFile)
-  dialog.setAcceptMode(1)
-  if preferences.general.colourScheme == 'dark':
-    dialog.setStyleSheet("""
-                        QFileDialog QWidget {
-                                            background-color: #2a3358;
-                                            color: #f7ffff;
-                                            }
-                        """)
-  elif preferences.general.colourScheme == 'light':
-    dialog.setStyleSheet("QFileDialog QWidget {color: #464e76; }")
+  dialog = FileDialog(parent=None, fileMode=FileDialog.AnyFile, text='Save Project As...', preferences=preferences.general)
 
-  if not dialog.exec_():
-    return ''
-  fileNames = dialog.selectedFiles()
-  if not fileNames:
-    return ''
-  newPath = fileNames[0]
+  newPath = dialog.selectedFiles()
   if newPath:
     newPath = apiIo.addCcpnDirectorySuffix(newPath)
     if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):

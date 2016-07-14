@@ -73,15 +73,8 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.currentLabelingLabel.hide()
       self.showCurrentLabeling.hide()
     else:
-      self.setFixedHeight(250)
-      self.spacerLabel.hide()
-      self.selectInitialRadioButtons.hide()
-      self.substanceLabel.hide()
-      self.substancePulldownList.hide()
-      self.sampleComponentNewNameLabel.hide()
-      self.nameComponentLineEdit.hide()
-      self.sampleComponentLabelingLabel.hide()
-      self.labelingPulldownList.hide()
+      self._editorOptionWidgets()
+
 
   def _getAllWidgets(self):
     '''
@@ -120,6 +113,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.nameComponentLineEdit = LineEdit(self)
     self.nameComponentLineEdit.editingFinished.connect(self._updateButtons)
     self.nameComponentLineEdit.setReadOnly(False)
+    self.nameComponentLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
 
   def componentNameWidget(self):
     self.sampleComponentNameLabel = Label(self, text="Name")
@@ -161,17 +155,20 @@ class EditSampleComponentPopup(QtGui.QDialog):
     self.concentrationLabel = Label(self, text="Concentration")
     self.concentrationLineEdit = LineEdit(self)
     self.concentrationLineEdit.editingFinished.connect(self._getConcentrationValue)
+    self.concentrationLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sampleComponent:
       self.concentrationLineEdit.setText(str(self.sampleComponent.concentration))
 
   def _commentWidget(self):
     self.labelcomment = Label(self,text="Comment")
     self.commentLineEdit = LineEdit(self)
+    self.commentLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sampleComponent:
       self.commentLineEdit.setText(self.sampleComponent.comment)
 
   def _setPerformButtonWidgets(self):
-    self.buttons = ButtonList(self, callbacks=[self.reject, self._applyChanges, self._okButton], texts=['Cancel', 'Apply', 'Ok'])
+    tipTexts = ['','Click to apply changes. Name and Labeling cannot be changed once a new sample component is created','Click to apply and close']
+    self.buttons = ButtonList(self, callbacks=[self.reject, self._applyChanges, self._okButton], texts=['Cancel', 'Apply', 'Ok'], tipTexts = tipTexts)
 
   ######### Widget Callbacks #########
 
@@ -197,6 +194,17 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.labelingPulldownList.setEnabled(True)
       self.labelingPulldownList.set('None')
       self.substancePulldownList.set('Select an option')
+
+  def _editorOptionWidgets(self):
+    self.setFixedHeight(250)
+    self.spacerLabel.hide()
+    self.selectInitialRadioButtons.hide()
+    self.substanceLabel.hide()
+    self.substancePulldownList.hide()
+    self.sampleComponentNewNameLabel.hide()
+    self.nameComponentLineEdit.hide()
+    self.sampleComponentLabelingLabel.hide()
+    self.labelingPulldownList.hide()
 
   def _fillsubstancePulldownList(self):
     if len(self.project.substances)>0:
@@ -261,10 +269,13 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.buttons.buttons[2].setEnabled(False)
 
   def _applyChanges(self):
-    if self.newSampleComponentToCreate :
+    if self.newSampleComponentToCreate:
       self._createNewComponent()
     for property, value in self._getCallBacksDict().items():
       property(value)
+    self.nameComponentLineEdit.setReadOnly(True)
+    self.labelingPulldownList.setEnabled(False)
+
 
   def _okButton(self):
     self._applyChanges()

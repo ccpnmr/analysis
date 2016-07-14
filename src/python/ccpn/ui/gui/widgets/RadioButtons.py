@@ -11,14 +11,14 @@ from ccpn.ui.gui.widgets.RadioButton import RadioButton
 CHECKED = QtCore.Qt.Checked
 UNCHECKED = QtCore.Qt.Unchecked
 
-class RadioButtons(QtGui.QWidget):
+class RadioButtons(QtGui.QWidget, Base):
 
   def __init__(self, parent, texts=None, selectedInd=None,
                callback=None, direction='h', tipTexts=None,  **kw):
 
 
     QtGui.QWidget.__init__(self, parent)
-    # Base.__init__(self, **kw)
+    Base.__init__(self, **kw)
 
     if texts is None:
       texts = []
@@ -78,3 +78,16 @@ class RadioButtons(QtGui.QWidget):
     if self.callback and ind >= 0:
       button = self.buttonGroup.buttons()[ind]
       self.callback()
+
+
+if __name__ == '__main__':
+  from ccpn.ui.gui.widgets.Application import TestApplication
+  from ccpn.ui.gui.widgets.BasePopup import BasePopup
+  app = TestApplication()
+  popup = BasePopup(title='Test radioButtons')
+  popup.setSize(250, 50)
+  radioButtons = RadioButtons(parent=popup, texts=['Test1','Test2','Test3'], selectedInd=1,
+               callback=None, grid=(0, 0))
+  radioButtons.radioButtons[0].setEnabled(False)
+
+  app.start()

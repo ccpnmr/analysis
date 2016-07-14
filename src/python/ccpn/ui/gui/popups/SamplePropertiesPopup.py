@@ -90,14 +90,15 @@ class SamplePropertiesPopup(QtGui.QDialog):
            )
 
   def _setSampleNameWidgets(self):
-    self.sampleNameLabel = Label(self, text="Name ")
+    self.sampleNameLabel = Label(self, text="Name")
     self.sampleNameLineEdit = LineEdit(self)
     # self.sampleNameLineEdit.setFixedWidth(203)
     self.sampleNameLineEdit.setFixedHeight(25)
+    self.sampleNameLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     self.sampleNameLineEdit.setText(self.sample.name)
 
   def _setsampleStateWidgets(self):
-    self.sampleStateLabel = Label(self, text="State ")
+    self.sampleStateLabel = Label(self, text="State")
     self.sampleStatePulldownList = PulldownList(self)
     self.sampleStatePulldownList.addItems(SAMPLE_STATES)
     self.sampleStatePulldownList.setMinimumWidth(50)
@@ -119,13 +120,15 @@ class SamplePropertiesPopup(QtGui.QDialog):
     self.sampleAmountLineEdit = LineEdit(self)
     # self.sampleAmountLineEdit.setFixedWidth(203)
     self.sampleAmountLineEdit.setFixedHeight(25)
+    self.sampleAmountLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sample.amount is not None:
       self.sampleAmountLineEdit.setText(str(self.sample.amount))
 
   def _setsampleIonicStrengthWidgets(self):
-    self.ionicStrengthLabel = Label(self, text='ionic Strength')
+    self.ionicStrengthLabel = Label(self, text='ionic Strengt')
     self.ionicStrengthLineEdit = LineEdit(self)
     self.ionicStrengthLineEdit.setFixedHeight(25)
+    self.ionicStrengthLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sample.ionicStrength is not None:
       self.ionicStrengthLineEdit.setText(str(self.sample.ionicStrength))
 
@@ -140,7 +143,7 @@ class SamplePropertiesPopup(QtGui.QDialog):
       self.samplepHDoubleSpinbox.setValue(self.sample.pH)
 
   def _setSampleDateWidgets(self):
-    self.sampleDate = Label(self, text="Sample Creation Date ")
+    self.sampleDate = Label(self, text="Sample Creation Date")
     self.sampleDateWidget = DateTime(self)
     # self.sampleDateWidget.setFixedWidth(203)
     self.sampleDateWidget.setFixedHeight(25)
@@ -149,40 +152,45 @@ class SamplePropertiesPopup(QtGui.QDialog):
       self.sampleDateWidget.setDate(setToday)
 
   def _setBatchIdentifierWidgets(self):
-    self.sampleBatchIdentifierLabel = Label(self, text="Sample Batch Identifier ")
+    self.sampleBatchIdentifierLabel = Label(self, text="Sample Batch Identifier")
     self.batchIdentifierLineEdit = LineEdit(self)
     # self.plateIdentifierLineEdit.setFixedWidth(203)
     self.batchIdentifierLineEdit.setFixedHeight(25)
+    self.batchIdentifierLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if hasattr(self.sample, 'batchIdentifier'):
       self.batchIdentifierLineEdit.setText(str(self.sample.batchIdentifier))
 
   def _setPlateIdentifierWidgets(self):
-    self.samplePlateIdentifierLabel = Label(self, text="Sample Plate Identifier ")
+    self.samplePlateIdentifierLabel = Label(self, text="Sample Plate Identifier")
     self.plateIdentifierLineEdit = LineEdit(self)
     # self.plateIdentifierLineEdit.setFixedWidth(203)
     self.plateIdentifierLineEdit.setFixedHeight(25)
+    self.plateIdentifierLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sample.plateIdentifier is not None:
       self.plateIdentifierLineEdit.setText(str(self.sample.plateIdentifier))
 
   def _setSampleRowNumberWidgets(self):
-    self.samplerowNumberLabel = Label(self, text="Sample Row Number ")
+    self.samplerowNumberLabel = Label(self, text="Sample Row Number")
     self.rowNumberLineEdit = LineEdit(self)
     # self.rowNumberLineEdit.setFixedWidth(203)
     self.rowNumberLineEdit.setFixedHeight(25)
+    self.rowNumberLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sample.rowNumber is not None:
       self.rowNumberLineEdit.setText(str(self.sample.rowNumber))
 
   def _setSampleColumnNumberWidgets(self):
-    self.sampleColumnNumberLabel = Label(self, text="Sample Column Number ")
+    self.sampleColumnNumberLabel = Label(self, text="Sample Column Number")
     self.columnNumberLineEdit = LineEdit(self)
     # self.columnNumberLineEdit.setFixedWidth(203)
     self.columnNumberLineEdit.setFixedHeight(25)
+    self.columnNumberLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     if self.sample.columnNumber is not None:
       self.columnNumberLineEdit.setText(str(self.sample.columnNumber))
 
   def _setSampleCommentWidgets(self):
-    self.sampleCommentLabel = Label(self, text="Comment ")
-    self.commentTextEditor = LineEdit(self, )
+    self.sampleCommentLabel = Label(self, text="Comment")
+    self.commentTextEditor = LineEdit(self)
+    self.commentTextEditor.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
     # self.commentTextEditor.setFixedWidth(215)
     self.commentTextEditor.setFixedHeight(25)
     self.commentTextEditor.setText(self.sample.comment)

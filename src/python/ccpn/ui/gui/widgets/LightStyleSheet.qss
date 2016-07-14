@@ -42,6 +42,15 @@ Spinbox::hover {
               background-color: #fdfdfc;
               }
 
+RadioButton {
+              color: #555d85;
+			  font-weight: bold
+              }
+
+RadioButton::disabled {
+                      color: #a19373
+                      }
+
 PulldownList {
           background-color: #FFFDD1;
           border: 1px solid #EDC151;

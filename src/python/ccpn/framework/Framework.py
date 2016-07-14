@@ -961,7 +961,7 @@ class Framework:
 
   def showSpectrumGroupsPopup(self):
     from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
-    SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project).exec_()
+    SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project, editorMode=True).exec_()
 
   def showProjectionPopup(self):
     pass

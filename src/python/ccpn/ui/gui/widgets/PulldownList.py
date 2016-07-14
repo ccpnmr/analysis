@@ -111,25 +111,25 @@ class PulldownList(QtGui.QComboBox, Base):
 
   def getSelected(self):
   
-    print("ccpn.ui.gui.widgets.PulldownList.getSelected is depecated use; .currentData()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getSelected is depecated use; .currentData()")
 
     return self.currentData()
 
   def getObject(self):
     
-    print("ccpn.ui.gui.widgets.PulldownList.getObject is depecated use; .currentObject()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getObject is depecated use; .currentObject()")
     
     return self.currentObject()
 
   def getText(self):
     
-    print("ccpn.ui.gui.widgets.PulldownList.getText is depecated use; .currentText()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getText is depecated use; .currentText()")
    
     return self.currentText()
 
   def getSelectedIndex(self):
     
-    print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is depecated use; .currentIndex()")
+    # print("ccpn.ui.gui.widgets.PulldownList.getSelectedIndex is depecated use; .currentIndex()")
 
     return self.currentIndex()
 

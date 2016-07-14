@@ -21,6 +21,13 @@ class RadioButton(QtGui.QRadioButton, Base):
     if callback:
       self.setCallback(callback)
 
+    self.setStyleSheet('''
+    RadioButton::disabled {
+
+                            color: ##7f88ac;
+                            }
+                            ''')
+
   def get(self):
 
     return self.text()
@@ -40,3 +47,6 @@ class RadioButton(QtGui.QRadioButton, Base):
     if callback:
       self.connect(self, QtCore.SIGNAL('clicked()'), callback)
       # self.clicked.connect doesn't work with lambda, yet...
+
+
+

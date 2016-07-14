@@ -1,3 +1,5 @@
+CallTipWidget {color: #bec4f3;}
+
 QColorDialog {
     background-color: #2a3358;
 }
@@ -130,7 +132,9 @@ QDialog QPushButton::hover {
                           background-color: #BDBC5A;
                           padding: 2px;
                           }
-
+QDialog QPushButton::disabled {
+                               color: #898FBB;
+                              }
 
 QDialog QToolButton  {
 					background-color: #f7ffff;

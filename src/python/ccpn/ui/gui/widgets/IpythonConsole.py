@@ -25,7 +25,8 @@ class IpythonConsole(Widget, Base):
 
         self.mainWindow = mainWindow
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
-        self.ipythonWidget._set_font(QtGui.QFont(IpythonConsole.font, IpythonConsole.fontSize))
+        self.setStyleSheet(self.mainWindow.styleSheet())
+        self.ipythonWidget._set_font(QtGui.QFont(self.font, self.fontSize))
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
         consoleLayout = QtGui.QGridLayout()

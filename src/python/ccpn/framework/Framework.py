@@ -725,11 +725,12 @@ class Framework:
 
       if subType == ioFormats.CCPN:
         project = coreIo.loadProject(path)
-        self._initialiseProject(project)
       elif subType == ioFormats.NEF:
         project = self.nefReader.loadNewProject(path)
 
       project._resetUndo(debug=_DEBUG)
+      self._initialiseProject(project)
+
 
       return project
 

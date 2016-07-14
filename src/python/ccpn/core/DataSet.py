@@ -26,9 +26,11 @@ import datetime
 from typing import Sequence, Optional
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
+from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
 from ccpnmodel.ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
+from ccpn.core.lib import Pid
 
 
 class DataSet(AbstractWrapperObject):
@@ -144,14 +146,14 @@ class DataSet(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.sortedNmrConstraintStores()
 
-  def _fetchFixedResonance(self, assignment:Sequence[str]) -> ApiFixedResonance:
-    """Fetch FixedResonance matching assignment tuple, creating anew if needed."""
+  def _fetchFixedResonance(self, assignment:str) -> ApiFixedResonance:
+    """Fetch FixedResonance matching assignment string, creating anew if needed."""
 
     apiNmrConstraintStore = self._wrappedData
 
-    tt = assignment
+    tt = [x or None for x in Pid.splitId(assignment)]
     if len(tt) != 4:
-      raise ValueError("assignment %s must have four fields" % tt)
+      raise ValueError("assignment %s must have four dot-separated fields" % tt)
 
     dd = {
       'chainCode':tt[0],
@@ -162,7 +164,7 @@ class DataSet(AbstractWrapperObject):
     result = apiNmrConstraintStore.findFirstFixedResonance(**dd)
 
     if result is None:
-      dd['isotopeCode'] = name2IsotopeCode(tt[3])
+      dd['isotopeCode'] = name2IsotopeCode(tt[3]) or '?'
       result = apiNmrConstraintStore.newFixedResonance(**dd)
     #
     return result
@@ -170,17 +172,19 @@ class DataSet(AbstractWrapperObject):
 
 def _newDataSet(self:Project, title:str=None, programName:str=None, programVersion:str=None,
                 dataPath:str=None, creationDate:datetime.datetime=None, uuid:str=None,
-                comment:str=None) -> DataSet:
+                comment:str=None, serial:int=None) -> DataSet:
   """Create new ccpn.DataSet"""
 
   defaults = collections.OrderedDict((('title', None), ('programName', None),
                                      ('programVersion', None), ('dataPath', None),
-                                     ('creationDate', None), ('uuid', None), ('comment', None))
+                                     ('creationDate', None), ('uuid', None), ('comment', None),
+                                      ('serial',None))
   )
   
   nmrProject = self._wrappedData
   self._startFunctionCommandBlock('newDataSet', values=locals(), defaults=defaults,
                                   parName='newDataSet')
+  result = None
   try:
     newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
                                                                      name=title,
@@ -190,9 +194,13 @@ def _newDataSet(self:Project, title:str=None, programName:str=None, programVersi
                                                                      creationDate=creationDate,
                                                                      uuid=uuid,
                                                                      details=comment)
+    result = self._data2Obj.get(newApiNmrConstraintStore)
+    if serial is not None:
+      modelUtil.resetSerial(newApiNmrConstraintStore, serial, 'nmrConstraintStores')
+      result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
-  return self._data2Obj.get(newApiNmrConstraintStore)
+  return result
     
     
 # Connections to parents:

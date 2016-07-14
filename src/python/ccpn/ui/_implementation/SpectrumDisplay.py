@@ -32,7 +32,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.ui._implementation.Task import Task
 from ccpn.ui._implementation.Window import Window
 from ccpn.util import Common as commonUtil
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay

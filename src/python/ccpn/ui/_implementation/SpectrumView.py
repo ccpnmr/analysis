@@ -28,8 +28,8 @@ from typing import Tuple
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpn.ui._implementation.Strip import Strip
-from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
 

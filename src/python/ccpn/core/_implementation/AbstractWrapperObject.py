@@ -30,7 +30,7 @@ from collections import OrderedDict
 from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Util as coreUtil
 from ccpn.util import Common as commonUtil
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.memops import Implementation as ApiImplementation
 
 
@@ -288,7 +288,7 @@ class AbstractWrapperObject():
 
     Returns None for invalid or unrecognised input strings."""
 
-    tt = pidstring.split(Pid.PREFIXSEP,1)
+    tt = pidstring.split(Pid.PREFIXSEP, 1)
     if len(tt) == 2:
       if tt[0] in ('GM', 'Mark', 'GA', 'Axis', 'GM', 'Module', 'GS', 'Strip',
                    'GL', 'PeakListView', 'GD', 'SpectrumDisplay', 'GW', 'Window',
@@ -387,7 +387,7 @@ class AbstractWrapperObject():
         if self is self._project:
             key = relativeId
         else:
-            key = '%s%s%s' % (self._id,Pid.IDSEP, relativeId)
+            key = '%s%s%s' % (self._id, Pid.IDSEP, relativeId)
         return dd.get(key)
     else:
       return None
@@ -527,7 +527,7 @@ class AbstractWrapperObject():
 
 
   def _finaliseRename(self):
-    """Reset internal attributes and call notifiers after values determining PID have changed
+    """Reset internal attributes after values determining PID have changed
     """
 
     # reset id

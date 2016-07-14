@@ -261,17 +261,17 @@ class Undo(deque):
       undoCall = redoCall = None
       for n in range(self.nextIndex-1,undoTo,-1):
         undoCall, redoCall = self[n]
-        if self._debug:
-          print ("undoing", undoCall)
+        # if self._debug:
+        #   print ("undoing", undoCall)
 
         undoCall()
       self.nextIndex = undoTo + 1
     except Exception as e:
       from ccpn.util.Logging import getLogger
       getLogger().warning ("Error while undoing (%s). Undo stack is cleared." % e)
-      # if self._debug:
-      #   print ("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
-      #   raise
+      if self._debug:
+        print ("UNDO DEBUG: error in undo. Last undo function was:", undoCall)
+        raise
       self.clear()
     finally:
       # Added by Rasmus March 2015. Surely we need to reset self._blocked?

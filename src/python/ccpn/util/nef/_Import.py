@@ -32,7 +32,7 @@ import os
 import sys
 
 # from ccpn.util import Common as commonUtil
-from ccpn.core.lib.nef import _Export
+from . import _Export
 from ccpn.util.Bmrb import bmrb
 
 def bmrbEntry2Data1(entry:bmrb.entry)-> dict:

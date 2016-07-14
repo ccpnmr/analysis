@@ -150,9 +150,6 @@ def _calculateSingleCompoundScore(compoundA, mixture, minimalOverlap):
       scoring = len(overlaped) / len(compoundA[1])
       print(scoring, compound[0])
 
-
-print('____________')
-
 def findBestMixtures(mixturesSteps):
   bestMixturesStep = list(mixturesSteps.items())
   if len(bestMixturesStep) > 0:

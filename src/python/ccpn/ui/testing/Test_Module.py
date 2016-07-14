@@ -33,7 +33,7 @@ class ModuleTest(WrapperTesting):
   # Path of project to load (None for new project
   projectPath = None
 
-  def test_creation(self):
+  def test_creation_1(self):
     project = self.project
     undo = self.project._undo
     undo.newWaypoint()
@@ -50,8 +50,6 @@ class ModuleTest(WrapperTesting):
     undo.undo()
     undo.undo()
     undo.undo()
-    undo.undo()
-    undo.redo()
     undo.redo()
     undo.redo()
     undo.redo()
@@ -66,6 +64,21 @@ class ModuleTest(WrapperTesting):
     self.assertEquals(module3.window.pid, 'GW:W2')
     self.assertEquals(module4.window.pid, 'GW:Main')
     self.assertEquals(module3.comment, 'really?')
+
+  def test_creation_2(self):
+    # This is known to fail.
+    # There is a bug in undo/redo for additional windows and tasks
+    # Since code does not (and probably never will) use additional windows or tasks
+    # this is left for now.
+    project = self.project
+    undo = self.project._undo
+    undo.newWaypoint()
+    task2 = project.newTask('TestTask')
+    window2 = project.newWindow(title='W2')
+    undo.undo()
+    undo.undo()
+    undo.redo()
+    undo.redo()
 
 
 class ParameterTest(WrapperTesting):

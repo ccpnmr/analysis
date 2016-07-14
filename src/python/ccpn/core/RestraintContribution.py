@@ -21,14 +21,14 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple
 import collections
+from typing import Sequence, Tuple
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Restraint import Restraint
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import CcpnSorting
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
 
 
@@ -203,7 +203,7 @@ class RestraintContribution(AbstractWrapperObject):
     return tuple(sorted(result, key=sortkey))
 
   @restraintItems.setter
-  def restraintItems(self, value:Sequence):
+  def restraintItems(self, value:Sequence[Sequence[str]]):
 
     itemLength = self._wrappedData.constraint.parentList.itemLength
 
@@ -222,7 +222,7 @@ class RestraintContribution(AbstractWrapperObject):
       for ll in value:
         # make new items
         apiContribution.newSingleAtomItem(
-          resonance=fetchFixedResonance(Pid.splitId(ll[0])))
+          resonance=fetchFixedResonance(ll[0]))
     else:
       if itemLength == 4:
         func = apiContribution.newFourAtomItem
@@ -230,8 +230,52 @@ class RestraintContribution(AbstractWrapperObject):
         func = apiContribution.newAtomPairItem
       for ll in value:
         # make new items
-        func(resonances=tuple(fetchFixedResonance(Pid.splitId(x)) for x in ll))
-    
+        func(resonances=tuple(fetchFixedResonance(x) for x in ll))
+
+  def addRestraintItem(self, restraintItem:Sequence[str]):
+    """Add a restraint item, given as aa tuple of atomId (NOT Pid).
+    Example value: ('A.127.ALA.HA','A.130.SER.H')"""
+
+    itemLength = self._wrappedData.constraint.parentList.itemLength
+    if len(restraintItem) != itemLength:
+      raise ValueError("RestraintItem must have length %s: %s" % (itemLength, restraintItem))
+
+    apiContribution = self._wrappedData
+
+    fetchFixedResonance = self._parent._parent._parent._fetchFixedResonance
+    if itemLength == 1:
+      # make new item
+      resonance = fetchFixedResonance(restraintItem[0])
+      if apiContribution.findFirstItem(resonance=resonance) is None:
+        apiContribution.newSingleAtomItem(
+          resonance=fetchFixedResonance(restraintItem[0])
+        )
+      else:
+        raise ValueError("Cannot add RestraintItem due to clash with pre-existing item: %s"
+                         % restraintItem)
+
+    elif itemLength == 4:
+      resonances = tuple(fetchFixedResonance(x) for x in restraintItem)
+      if apiContribution.findFirstItem(resonances=resonances) is None:
+        apiContribution.newFourAtomItem(
+          resonances=resonances
+        )
+      else:
+        raise ValueError("Cannot add RestraintItem due to clash with pre-existing item: %s"
+                         % restraintItem)
+    else:
+      # Assume length 2
+      resonances = tuple(fetchFixedResonance(x) for x in restraintItem)
+      if apiContribution.findFirstItem(resonances=resonances) is None:
+        apiContribution.newAtomPairItem(
+          resonances=resonances
+        )
+      else:
+        raise ValueError("Cannot add RestraintItem due to clash with pre-existing item: %s"
+                         % restraintItem)
+    #
+    return self._project._data2Obj[apiContribution]
+
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Restraint)-> list:
@@ -242,7 +286,7 @@ class RestraintContribution(AbstractWrapperObject):
 def _newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
                     weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                    scale:float=1.0, isDistanceDependent:bool=None,
+                    scale:float=1.0, isDistanceDependent:bool=None, combinationId:int=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
   """Create new ccpn.RestraintContribution within ccpn.Restraint"""
 
@@ -256,7 +300,7 @@ def _newRestraintContribution(self:Restraint, targetValue:float=None, error:floa
     )
   )
 
-  func = self._wrappedData.constraint.newGenericContribution
+  func = self._wrappedData.newGenericContribution
   self._startFunctionCommandBlock('newRestraintContribution', values=locals(), defaults=defaults,
                                   parName='newRestraintContribution')
   self._project.blankNotification() # delay notifiers till object is fully ready
@@ -273,6 +317,8 @@ def _newRestraintContribution(self:Restraint, targetValue:float=None, error:floa
 
   # Do creation notifications
   result._finaliseAction('create')
+  #
+  return result
 
 Restraint.newRestraintContribution = _newRestraintContribution
 del _newRestraintContribution

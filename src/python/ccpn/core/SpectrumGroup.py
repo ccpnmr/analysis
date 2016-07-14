@@ -22,15 +22,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from typing import Tuple
-import collections
-from ccpn.util import Pid
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpnmodel.ccpncore.lib import Util as coreUtil
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumGroup as ApiSpectrumGroup
+from ccpnmodel.ccpncore.lib import Util as coreUtil
 
 
 class SpectrumGroup(AbstractWrapperObject):

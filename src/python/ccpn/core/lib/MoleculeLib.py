@@ -23,10 +23,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import typing
-from ccpn.core import Chain
+from ccpn.core.Atom import Atom
+from ccpn.core.Chain import Chain
+from ccpn.core.Project import Project
 
 
-def duplicateAtomBonds(chainMap:typing.Dict[Chain.Chain,Chain.Chain]):
+def duplicateAtomBonds(chainMap:typing.Dict[Chain,Chain]):
   """Duplicate atom-atom bonds within source chains to target chains,
   skipping those that already exist.
 
@@ -67,3 +69,43 @@ def duplicateAtomBonds(chainMap:typing.Dict[Chain.Chain,Chain.Chain]):
       if gBond is None:
         # There is no bond in 'other' that matches the bond. Make it
         apiMolSystem.newGenericBond(atoms=fs, bondType=bondType)
+
+def extraBoundAtomPairs(project:Project, selectSequential:bool=None) -> typing.List[typing.Tuple[Atom, Atom]]:
+  """Get pairs of bound Atoms whose bonds are NOT defined through the residue topology.
+  The result and each individualnatom pair are both sorted
+
+  Returns sequential bond pairs if selectSequential is True,
+  non-sequential bond pairs if selectSequential is False,
+  and both if selectSequential is None
+
+  NBNB until further notice sequential bonds are detected for amino acids only!"""
+
+  result = []
+
+  # TODO NBNB extend to non-protein atoms. This is a HACK!!
+  lastAtomNames = ['C']
+  firstAtomNames = ['N']
+
+  getData2Obj = project._data2Obj.get
+
+  apiAtomPairs = [tuple(x.atoms) for x in project._wrappedData.molSystem.genericBonds]
+  atomPairs = [tuple(getData2Obj(y) for y in x) for x in apiAtomPairs]
+
+  for atom1, atom2 in atomPairs:
+
+    atomName1 = atom1.name
+    atomName2 = atom2.name
+    if (atomName1 in lastAtomNames and atomName2 in firstAtomNames and
+        atom1.residue.nextResidue is atom2.residue):
+      isSequential = True
+    elif (atomName2 in lastAtomNames and atomName1 in firstAtomNames and
+        atom2.residue.nextResidue is atom1.residue):
+      isSequential = True
+    else:
+      isSequential = False
+
+    if selectSequential is None or bool(selectSequential ) == isSequential:
+      result.append(tuple(sorted((atom1, atom2))))
+  #
+  result.sort()
+  return result

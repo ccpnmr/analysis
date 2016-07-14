@@ -27,7 +27,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core.PseudoDimension import PseudoDimension
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import SpectrumHit as ApiSpectrumHit
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpn.util import Constants
 
 

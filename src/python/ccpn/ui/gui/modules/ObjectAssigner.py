@@ -4,7 +4,7 @@ from functools import partial
 
 from PyQt4 import QtGui
 
-from ccpn.core.lib.Assignment import CCP_CODES, ATOM_NAMES
+from ccpn.core.lib.AssignmentLib import CCP_CODES, ATOM_NAMES
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget

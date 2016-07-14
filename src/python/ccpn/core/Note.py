@@ -22,11 +22,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import collections
-from ccpn.util import Pid
-from ccpnmodel.ccpncore.lib import Constants as coreConstants
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+
 from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Note as ApiNote
+from ccpnmodel.ccpncore.lib import Constants as coreConstants
 
 
 class Note(AbstractWrapperObject):
@@ -58,7 +59,7 @@ class Note(AbstractWrapperObject):
   def _key(self) -> str:
     """Residue local ID"""
     return Pid.IDSEP.join((str(self._wrappedData.serial),
-                          self._wrappedData.name.translate(Pid.remapSeparators)))
+                           self._wrappedData.name.translate(Pid.remapSeparators)))
 
   @property
   def serial(self) -> int:

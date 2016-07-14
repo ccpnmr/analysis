@@ -32,7 +32,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 
 from ccpnmodel.ccpncore.lib.Io import Formats
 
@@ -241,11 +241,11 @@ class Spectrum(AbstractWrapperObject):
   @property
   def experimentName(self) -> str:
     """Common experiment type descriptor (May not be unique)."""
-    refExperiment = self._wrappedData.experiment.refExperiment
-    if refExperiment is None:
-      return None
-    else:
-      return refExperiment.synonym
+    return self._wrappedData.experiment.name
+
+  @experimentName.setter
+  def experimentName(self, value):
+    self._wrappedData.experiment.name = value
 
   @property
   def filePath(self) -> str:
@@ -610,7 +610,11 @@ class Spectrum(AbstractWrapperObject):
 
   @foldingModes.setter
   def foldingModes(self, value):
-    dd = {'circular':False, 'mirror':True, None:None}
+
+    # TODO FOr nef we should support both True, False, and None
+    # That requires an API change
+
+    dd = {'circular':False, 'mirror':True, None:False}
     self._setExpDimRefAttribute('isFolded', [dd[x] for x in value])
 
   @property
@@ -932,10 +936,13 @@ def _newSpectrum(self:Project, name:str) -> Spectrum:
   """Creation of new ccpn.Spectrum NOT IMPLEMENTED.
   Use ccpn.Project.loadData or ccpn.Project.createDummySpectrum instead"""
 
-  raise NotImplementedError("Not implemented. Use loadSpectrum function instead")
+  raise NotImplementedError("Not implemented. Use loadSpectrum instead")
+
 
 def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
   """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
+
+  # TODO - change so isotopeCodes can be passed in instead of axisCodes
 
   if name:
     if Pid.altCharacter in name:

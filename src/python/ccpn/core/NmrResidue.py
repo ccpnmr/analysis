@@ -25,12 +25,13 @@ import collections
 from typing import Tuple, Optional
 from typing import Union
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import CcpnSorting
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
+from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib import Constants
 
@@ -826,21 +827,68 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
   defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None),
                                      ('comment', None)))
 
+  apiNmrChain = self._wrappedData
+  nmrProject = apiNmrChain.nmrProject
+  dd = {'name':residueType, 'details':comment,
+        'residueType':residueType,'directNmrChain':apiNmrChain}
+
   self._startFunctionCommandBlock('newNmrResidue', values=locals(), defaults=defaults,
                                   parName='newNmrResidue')
   self._project.blankNotification() # delay notifiers till NmrResidue is fully ready
   try:
-    sequenceCode = str(sequenceCode) if sequenceCode else None
 
-    for ss in (sequenceCode, residueType):
-      if ss and Pid.altCharacter in ss:
-        raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
-                         (Pid.altCharacter, sequenceCode, residueType))
+    # Convert value to string, and check
+    if isinstance(sequenceCode, int):
+      sequenceCode = str(sequenceCode)
+    elif sequenceCode is not None and not isinstance(sequenceCode, str):
+      raise ValueError("Invalid sequenceCode %s must be int, str, or None" % repr(sequenceCode))
 
-    apiNmrChain = self._wrappedData
-    nmrProject = apiNmrChain.nmrProject
-    obj = nmrProject.newResonanceGroup(sequenceCode=sequenceCode, name=residueType, details=comment,
-                                       residueType=residueType, directNmrChain=apiNmrChain)
+    serial = None
+    if sequenceCode:
+
+      # Check the sequenceCode is not taken already
+      previous = None
+      if Pid.IDSEP in sequenceCode:
+        # sequenceCode contains '.' - check against remapped sequenceCode
+        sq = sequenceCode.translate(Pid.remapSeparators)
+        for nr in self.project.nmrResidues:
+          if nr.sequenceCode == sq:
+            previous = nr
+            break
+      else:
+        # No '.' - can check in API directly (faster)
+        obj0 = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+        if obj0 is not None:
+          previous = self._project._data2Obj[obj0]
+      if previous is not None:
+        raise ValueError("Existing %s clashes with id %s.%s.%s" %
+                         (previous.longPid, self.shortName, sequenceCode,residueType or ''))
+
+      # Handle reserved names
+      if sequenceCode[0] == '@':
+        try:
+          serial = int(sequenceCode[1:])
+        except ValueError:
+          # the rest of the name is not an int. We are OK
+          pass
+        if serial is not None and serial > 0:
+          # this is a reserved name
+          if nmrProject.findFirstResonanceGroup(serial=serial) is None:
+            # The implied serial is free - we can set it
+            sequenceCode = None
+          else:
+            # Name clashes with existing NmrResidue
+            raise ValueError("Cannot create NmrResidue with reserved name %s" % sequenceCode)
+
+    else:
+      # Just create new ResonanceGroup with default-type name
+      sequenceCode = None
+
+    # Create ResonanceGroup
+    dd['sequenceCode'] = sequenceCode
+    obj = nmrProject.newResonanceGroup(**dd)
+    if serial is not None:
+      modelUtil.resetSerial(obj, serial, 'resonanceGroups')
 
     if residueType is not None:
       # get chem comp ID strings from residue type
@@ -854,6 +902,9 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
   result = self._project._data2Obj.get(obj)
 
   # Do creation notifications
+  if serial is not None:
+    result._finaliseAction('rename')
+    # If we have reset serial above this is needed
   result._finaliseAction('create')
 
   return result
@@ -862,29 +913,25 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
 def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
                      residueType:str=None) -> NmrResidue:
   """Fetch NmrResidue with residueType=residueType, creating it if necessary"""
-  values = {}
-  if residueType:
-    values['residueType'] = residueType
-  self._startFunctionCommandBlock('fetchNmrResidue', sequenceCode, values=values,
+
+  defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None)))
+
+  self._startFunctionCommandBlock('fetchNmrResidue', values=locals(),
                                   parName='newNmrResidue')
   try:
-    if sequenceCode is not None:
-      sequenceCode = str(sequenceCode) or None
-    apiResonanceGroup = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
-    if apiResonanceGroup:
-      if residueType is not None and residueType != apiResonanceGroup.residueType:
-        raise ValueError("%s has residue type %s, not %s" % (sequenceCode,
-                                                             apiResonanceGroup.residueType,
-                                                             residueType))
-      else:
-        result = self._project._data2Obj.get(apiResonanceGroup)
+    if sequenceCode is None:
+      result = self.newNmrResidue(sequenceCode=None, residueType=residueType)
     else:
-      for ss in (sequenceCode, residueType):
-        if ss and Pid.altCharacter in ss:
-          raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s" %
-                           (Pid.altCharacter, sequenceCode, residueType))
-
-      result = self.newNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
+      sq = str(sequenceCode)
+      apiResonanceGroup = self._wrappedData.findFirstResonanceGroup(sequenceCode=sq)
+      if apiResonanceGroup:
+        result = self._project._data2Obj.get(apiResonanceGroup)
+        if residueType is not None and residueType != apiResonanceGroup.residueType:
+          raise ValueError(
+            "Existing %s does not match residue type %s" % (result.longPid, repr(residueType))
+          )
+      else:
+        result = self.newNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
   finally:
     self._project._appBase._endCommandBlock()
   #

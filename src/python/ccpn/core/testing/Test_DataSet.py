@@ -202,14 +202,14 @@ class DataTest(WrapperTesting):
       undo = self.project._undo
       undo.newWaypoint()
       data1.setParameter('tensor', Tensor._fromDict({'orientationMatrix':numpy.identity(3),
-                                     'isotropic':2.1, 'axial':-3, 'rhombic':0.9}))
+                                     'isotropic':2.1, 'axial':-3.0, 'rhombic':0.9}))
       undo.undo()
       undo.redo()
       tensor = data1.parameters['tensor']
       self.assertTrue(isinstance(tensor, Tensor))
-      self.assertEquals(tensor.isotropic, 2.1)
-      self.assertEquals(tensor.axial, -3)
-      self.assertEquals(tensor.rhombic, 0.9)
+      self.assertAlmostEquals(tensor.isotropic, 2.1)
+      self.assertAlmostEquals(tensor.axial, -3.0)
+      self.assertAlmostEquals(tensor.rhombic, 0.9)
 
 
 

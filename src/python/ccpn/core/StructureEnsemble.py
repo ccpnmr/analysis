@@ -22,15 +22,15 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple, Sequence, Optional
 import collections
+from typing import Tuple, Sequence, Optional
 
 import numpy
-from ccpn.util import Pid
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble

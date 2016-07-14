@@ -3,8 +3,8 @@ __author__ = 'simon1'
 from PyQt4 import QtGui
 
 from ccpn.core.Chain import Chain
-from ccpn.core.lib.Assignment import CCP_CODES, ATOM_NAMES
-from ccpn.core.lib.Assignment import getNmrResiduePrediction, getNmrAtomPrediction
+from ccpn.core.lib.AssignmentLib import CCP_CODES, ATOM_NAMES
+from ccpn.core.lib.AssignmentLib import getNmrResiduePrediction, getNmrAtomPrediction
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label

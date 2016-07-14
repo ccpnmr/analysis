@@ -445,21 +445,29 @@ class Loop:
     #
     row[self.columns[index]] = value
 
-  def addColumn(self, value:str):
+  def addColumn(self, value:str, extendData=False):
     columns = self._columns
     if value in columns:
       raise ValueError("%s: duplicate column name: %s" % (self, value))
     elif self.data:
-      raise ValueError("%s: Cannot add columns when loop contains data" % self)
+      if extendData:
+        for row in self.data:
+          row[value] = None
+      else:
+        raise ValueError("%s: Cannot add columns when loop contains data" % self)
     else:
       columns.append(value)
 
-  def removeColumn(self, value:str):
+  def removeColumn(self, value:str, removeData=False):
     columns = self._columns
     if value not in columns:
       raise ValueError("%s: column named %s does not exist" % (self, value))
     elif self.data:
-      raise ValueError("%s: Cannot remove columns when loop contains data" % self)
+      if removeData:
+        for row in self.data:
+          del row[value]
+      else:
+        raise ValueError("%s: Cannot remove columns when loop contains data" % self)
     else:
       columns.remove(value)
 

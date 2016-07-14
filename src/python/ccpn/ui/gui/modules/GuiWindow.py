@@ -33,7 +33,7 @@ from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 # from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
 
-from ccpn.core.lib.Assignment import propagateAssignments
+from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 import typing
 from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition

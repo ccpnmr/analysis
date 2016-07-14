@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import collections
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 import typing
 
 def pid2PluralName(pid:str) -> str:

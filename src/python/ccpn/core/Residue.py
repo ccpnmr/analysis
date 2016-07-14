@@ -22,10 +22,9 @@ __version__ = "$Revision$"
 #=========================================================================================
 from typing import Optional
 
-from ccpn.util import Pid
-
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Chain import Chain
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 
 

@@ -28,7 +28,7 @@ from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpn.util import Constants
 from ccpn.util.Constants import DEFAULT_LABELING
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample

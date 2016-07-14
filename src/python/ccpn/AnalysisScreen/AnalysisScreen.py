@@ -41,7 +41,7 @@ class Screen(Framework):
     Displays Sample creation popup.
     """
 
-    from ccpn.Screen.popups.MixtureGenerationPopup import MixtureGenerationPopup
+    from ccpn.AnalysisScreen.popups.MixtureGenerationPopup import MixtureGenerationPopup
     popup = MixtureGenerationPopup(self.ui.mainWindow,  project=self.project)
     popup.exec_()
     popup.raise_()
@@ -52,21 +52,21 @@ class Screen(Framework):
     """
     Displays Sample Analysis Module
     """
-    from ccpn.Screen.modules.MixtureAnalysis import MixtureAnalysis
+    from ccpn.AnalysisScreen.modules.MixtureAnalysis import MixtureAnalysis
     showSa = MixtureAnalysis(self.ui.mainWindow,  project=self.project)
     self.ui.mainWindow.moduleArea.addModule(showSa, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showSampleAnalysis()")
     # self.project._logger.info("application.showSampleAnalysis()")
 
   def showScreeningSetup(self, position='bottom', relativeTo=None):
-    from ccpn.Screen.modules.ScreeningSettings import ScreeningSettings
+    from ccpn.AnalysisScreen.modules.ScreeningSettings import ScreeningSettings
     showSc = ScreeningSettings(self.ui.mainWindow,  project=self.project)
     self.ui.mainWindow.moduleArea.addModule(showSc, position=position)
     # self.pythonConsole.writeConsoleCommand("application.showScreeningSetup()")
     # self.project._logger.info("application.showScreeningSetup()")
 
   def showHitAnalysisModule(self, position='top', relativeTo= None):
-    from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
+    from ccpn.AnalysisScreen.modules.ShowScreeningHits import ShowScreeningHits
     self.showScreeningHits = ShowScreeningHits(self.ui.mainWindow,  project=self.project)
     self.ui.mainWindow.moduleArea.addModule(self.showScreeningHits, position, None)
     # spectrumDisplay = self.createSpectrumDisplay(self.project.spectra[0])

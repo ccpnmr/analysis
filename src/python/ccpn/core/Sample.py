@@ -30,7 +30,7 @@ from ccpn.core.Spectrum import Spectrum
 from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.util import Common as commonUtil
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpn.util import Constants
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr

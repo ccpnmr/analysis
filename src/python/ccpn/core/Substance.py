@@ -24,12 +24,13 @@ __version__ = "$Revision$"
 from collections import OrderedDict
 from typing import Tuple, Optional, Sequence
 
+from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
 from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpn.util.Constants import DEFAULT_LABELING
 from ccpnmodel.ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -544,6 +545,33 @@ def _newSubstance(self:Project, name:str, labeling:str=None, substanceType:str='
 Project.newSubstance = _newSubstance
 del _newSubstance
 
+def _fetchNefSubstance(self:Project, sequence:Sequence[dict], name:str=None):
+  """Fetch Substance that matches sequence of NEF rows and/or name"""
+
+  defaults = {'name':None}
+
+  # TODO add sequence matching and name matching to avoid unnecessary duplicates
+  apiNmrProject = self._wrappedData
+
+  self._startFunctionCommandBlock('fetchNefSubstance', values=locals(), defaults=defaults,
+                                  parName='newSubstance')
+  try:
+
+    name = name or 'Molecule_1'
+    while apiNmrProject.root.findFirstMolecule(name=name) is not None:
+      name = commonUtil.incrementName(name)
+
+    apiMolecule =  MoleculeModify.createMoleculeFromNef(apiNmrProject.root, name, sequence)
+
+    result = self._data2Obj[
+      apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
+    ]
+  finally:
+    self._project._appBase._endCommandBlock()
+    self._project.unblankNotification()
+
+Project.fetchNefSubstance = _fetchNefSubstance
+del _fetchNefSubstance
 
 def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labeling:str=None,
               userCode:str=None, smiles:str=None, synonyms:Sequence[str]=(),comment:str=None,

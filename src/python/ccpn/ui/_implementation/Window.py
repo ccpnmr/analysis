@@ -21,13 +21,14 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from typing import Sequence
 import collections
+from typing import Sequence
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
-from ccpn.util import Pid
+
 
 class Window(AbstractWrapperObject):
   """UI window, corresponds to OS window"""

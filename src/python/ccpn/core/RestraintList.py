@@ -26,7 +26,7 @@ import collections
 # from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.util.Tensor import Tensor
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -197,6 +197,21 @@ class RestraintList(AbstractWrapperObject):
       self._wrappedData.tensorIsotropicValue= value.isotropic
       self._wrappedData.tensorMagnitude= value.axial
       self._wrappedData.tensorRhombicity= value.rhombic
+
+  @property
+  def tensorMagnitude(self) -> float:
+    """tensor Magnitude of orientation tensor. """
+    return self._wrappedData.tensorMagnitude
+
+  @property
+  def tensorRhombicity(self) -> float:
+    """tensor Rhombicity of orientation tensor. U"""
+    return self._wrappedData.tensorRhombicity
+
+  @property
+  def tensorIsotropicValue(self) -> float:
+    """tensor IsotropicValue of orientation tensor."""
+    return self._wrappedData.tensorIsotropicValue
 
   @property
   def tensorChainCode(self) -> float:

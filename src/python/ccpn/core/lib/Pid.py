@@ -37,6 +37,7 @@ IDSEP = '.'
 
 # Set translation between IDSEP and alternative character
 altCharacter = '^'
+backupAltCharacter = '`'
 remapSeparators = str.maketrans(IDSEP,altCharacter)
 unmapSeparators = str.maketrans(altCharacter, IDSEP)
 
@@ -140,15 +141,24 @@ def decodePid(sourceObject, thePid:'Pid') -> 'Optional[Pid]':
 class Pid(str):
     """Pid routines, adapted from path idea in: Python Cookbook,
     A. Martelli and D. Ascher (eds), O'Reilly 2002, pgs 140-142
-    Features:
-    - newpid = pid1 + id1 
-    - slicing to address elements of pid
-    - loop over elements of pid
-    - modify an element
-    - copy a pid
-    - incrementation and decrementation
-    - check validity
-    - return as string (convenience)
+
+    A Pid is a string with extra functionality.
+    It consists of a non-empty type substring separated by a mandatory ':' character
+    from an optional id substring, consisting of field substrings separated by dots.
+    The isValid function checks for validity
+
+    The type, id, and list of fields are available as properties.
+
+    New Pids can be created by pid.clone, by pid.extend (which creates a new Pid with
+    additional fields) and by Pid.new, which combines a type and a list of fields into a new
+    Pid, converting the values to string as necessary.
+
+    Pids can also be created by modifying individual fields relative to a source pid.
+    pid.modify(index, value) will set the value of the field at index,
+    whereas pid.increment(index, value) (resp. decrement) will convert the field at
+    index to an integer (where possible) and increment (decrement) it by 'value'.
+
+    Examples:
     
     pid = Pid.new('Residue','mol1','A', 502) # elements need not be strings; but will be converted
     -> Residue:mol1.A.502   (Pid instance)
@@ -170,28 +180,12 @@ class Pid(str):
 
     pid.id
     -> 'mol1.A.502' (str instance)
-
-    len(pid)
-    -> 3
-
-    pid[0]
-    -> 'mol1' (str instance)
-
-    pid[0:2]
-    -> 'mol1.A' (str instance)
     
-    for id in pid:
-    ....print id
-    ->
-    'mol1' (str instance)
-    'A'  (str instance)
-    '502'  (str instance)
-    
-    pid2 = pid.modify(1, 'B', type='Atom') + 'N'
-    -> Atom:mol1.B.502.N  (Pid instance)
+    pid2 = pid.modify(1, 'B', type='Atom')
+    -> Atom:mol1.B.502  (Pid instance)
     
     but also:
-    pid3 = Pid('Residue') + 'mol2'
+    pid3 = Pid('Residue').extend('mol2')
     -> Residue:mol2  (Pid instance)
     
     pid4 = pid.decrement(2,1)
@@ -200,16 +194,16 @@ class Pid(str):
     pid4 = pid.increment(2,-1)
     NB fails on elements that cannot be converted to int's
     
-    pid5 = pid.copy()   # equivalent to pid5 = Pid(pid.str)
+    pid5 = pid.clone()   # equivalent to pid5 = Pid(pid)
     -> Residue:mol1.A.502  (Pid instance)
     
     pid==pid5
     -> True
     
-    '502' in pid
+    '502' in pid.fields
     -> True
 
-    502 in pid
+    502 in pid.fields
     -> False    # all pid elements are strings
     """
     

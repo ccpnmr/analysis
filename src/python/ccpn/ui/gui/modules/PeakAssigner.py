@@ -25,7 +25,7 @@ import typing
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
-from ccpn.core.lib.Assignment import ATOM_NAMES
+from ccpn.core.lib.AssignmentLib import ATOM_NAMES
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak

@@ -10,8 +10,8 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 # from ccpn.ui.gui.popups.SampleSetupPopup import ExcludeRegions
 from collections import OrderedDict
-from ccpn.Screen.lib.SimulatedAnnealing import  iterateAnnealing,  scoreMixture, showScoresPerMixture
-from ccpn.Screen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
+from ccpn.AnalysisScreen.lib.SimulatedAnnealing import  iterateAnnealing,  scoreMixture, showScoresPerMixture
+from ccpn.AnalysisScreen.lib.MixturesGeneration import _getMixturesFromVirtualSamples, _createSamples
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 
 

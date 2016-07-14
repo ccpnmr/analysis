@@ -25,10 +25,12 @@ from functools import partial
 
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+from ccpnmodel.ccpncore.lib.Io import Formats as ioFormats
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
+from ccpn.core.lib import CcpnNefIo
 from ccpn.core.lib.Version import applicationVersion
 from ccpn.core.PeakList import PeakList
 
@@ -109,6 +111,7 @@ def defineProgramArguments():
 
   return parser
 
+
 class Arguments:
   """Class for setting FrameWork input arguments directly"""
   language = defaultLanguage
@@ -136,12 +139,10 @@ def getFramework(projectPath=None, **kw):
   return result
 
 
-
 class Framework:
   """
   The Framework class is the base class for all applications.
   """
-
 
   def __init__(self, applicationName, applicationVersion, args):
 
@@ -169,6 +170,9 @@ class Framework:
 
     # Blocking level for command echo and logging
     self._echoBlocking = 0
+
+    # NEF reader
+    self.nefReader = CcpnNefIo.CcpnNefReader(self)
 
     # NBNB TODO The following block should maybe be moved into _getUi
     self._getUserPrefs()
@@ -225,10 +229,14 @@ class Framework:
     self.applyPreferences(project)
 
     self.project = project
-    self.ui.initialize(self._mainWindow)
+    if hasattr(self, '_mainWindow'):
+      self.ui.initialize(self._mainWindow)
 
-    # Get the mainWindow out of the application top level once it's been transferred to ui
-    del self._mainWindow
+      # Get the mainWindow out of the application top level once it's been transferred to ui
+      del self._mainWindow
+    else:
+      # The NoUi version has no mainWindow
+      self.ui.initialize(None)
 
 
   def _getUI(self):
@@ -699,8 +707,6 @@ class Framework:
        Load project from path
        If not path then opens a file dialog box and loads project from selected file.
     """
-    if self.project is not None:
-      self._closeProject()
 
     if not path:
       dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project', preferences=self.preferences.general)
@@ -711,14 +717,27 @@ class Framework:
     if not path:
       return
 
-    sys.stderr.write('==> Loading "%s" project\n' % path)
-    project = coreIo.loadProject(path)
+    dataType, subType, usePath = ioFormats.analyseUrl(path)
+    if dataType == 'Project' and subType in (ioFormats.CCPN, ioFormats.NEF):
 
-    self._initialiseProject(project)
+      if self.project is not None:
+        self._closeProject()
 
-    project._resetUndo(debug=_DEBUG)
+      sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
 
-    return project
+      if subType == ioFormats.CCPN:
+        project = coreIo.loadProject(path)
+        self._initialiseProject(project)
+      elif subType == ioFormats.NEF:
+        project = self.nefReader.loadNewProject(path)
+
+      project._resetUndo(debug=_DEBUG)
+
+      return project
+
+    else:
+      sys.stderr.write('==> Could not recognise "%s" as a project\n' % path)
+
 
 
   def clearRecentProjects(self):

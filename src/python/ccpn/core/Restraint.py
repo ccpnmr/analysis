@@ -28,6 +28,7 @@ from ccpn.core.Project import Project
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Peak import Peak
 from ccpnmodel.ccpncore.api.ccp.nmr import NmrConstraint
+from ccpnmodel.ccpncore.lib import Util as modelUtil
 
 class Restraint(AbstractWrapperObject):
   """Restraint. The type is defined in the containing RestraintList.
@@ -246,35 +247,42 @@ del getter
 del setter
 
 # Connections to parents:
-def _newRestraint(self:RestraintList,comment:str=None,
-                         peaks:Sequence=()) -> Restraint:
+def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None,
+                  peaks:Sequence=(), vectorLength:float=None, serial:int=None) -> Restraint:
   """Create new ccpn.Restraint within ccpn.RestraintList.
 
-  Note that you just create at least one RestraintContribution afterwards in order to have valid
-  data. Use the simpler createSimpleRestraint instead, unless you have specific reasons for
-  needing newRestraint"""
+  ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
+  have valid data. Use the simpler createSimpleRestraint instead, unless you have specific
+  reasons for needing newRestraint"""
   # Default values for 'new' function, as used for echoing to console
-  values = collections.OrderedDict()
-  if comment:
-    values['comment'] = comment
+
+  defaults = collections.OrderedDict(
+    (
+      ('figureOfMerit',None), ('comment',None), ('peaks',()), ('vectorLength',None),
+      ('serial',None),
+    )
+  )
   if peaks:
     getByPid = self._project.getByPid
     peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
-    values['peaks'] = [x.pid for x in peaks]
-  apiConstraintList = self._wrappedData
-  creator = apiConstraintList.getattr("new%sConstraint" % self.restraintType)
 
-  self._startFunctionCommandBlock('newRestraint', values=values, parName='newRestraint')
+  self._startFunctionCommandBlock('newRestraint', values=locals(), defaults=defaults,
+                                  parName='newRestraint')
   self._project.blankNotification() # delay notifiers till Restraint is fully ready
   try:
-    obj = creator(details=comment)
+    dd = {'figureOfMerit':figureOfMerit, 'vectorLength':vectorLength, 'details':comment,
+          'peaks':peaks}
+    obj = self._wrappedData.newGenericConstraint(**dd)
+    if serial is not None:
+      modelUtil.resetSerial(obj, serial, 'constraints')
     result = self._project._data2Obj.get(obj)
-    result.peaks = peaks
   finally:
     self._project.unblankNotification()
     self._project._appBase._endCommandBlock()
 
   # Do creation notifications
+  if serial is not None:
+    result._finaliseAction('rename')
   result._finaliseAction('create')
   #
   return result

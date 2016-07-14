@@ -28,7 +28,7 @@ import operator
 from collections import OrderedDict
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpn.util import Undo
 from ccpn.util import Logging
 
@@ -305,7 +305,7 @@ class Project(AbstractWrapperObject):
   #               changeDataLocations=True, changeBackup=True)
 
 
-  def deleteObjects(self, *objects:typing.Sequence[typing.Union[Pid.Pid,AbstractWrapperObject]]):
+  def deleteObjects(self, *objects:typing.Sequence[typing.Union[Pid.Pid, AbstractWrapperObject]]):
     """Delete one or more objects, given as either objects or Pids"""
 
     getByPid = self.getByPid

@@ -167,19 +167,14 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.pid, 'NA:@2.@1..Arbitrary^Name')
     self.assertEqual(a.isotopeCode, '?')
 
-  # NBNB LOOK AT ME! This now fails - hatted names cannot be set or created
-  # @unittest.expectedFailure
   def test_CreateNmrAtomWithArbitraryHattedName(self):
-    with self.assertRaises(ValueError):
-      a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
-    # self.assertEqual(a.pid, 'NA:@2.@1..Arbitrary^Name')
-    # self.assertEqual(a.isotopeCode, 'unknown')
+    a = self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
+    self.assertEqual(a.pid, 'NA:@2.@1..Arbitrary^Name')
+    self.assertEqual(a.isotopeCode, '?')
 
-  # NBNB now obsolete
-  # @unittest.expectedFailure
-  # def test_CreateNmrAtomWithArbitraryDottedAndHattedNamesCollide(self):
-  #   self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
-  #   self.assertRaises(Exception, self.nmrResidue.newNmrAtom, name='Arbitrary.Name')
+  def test_CreateNmrAtomWithArbitraryDottedAndHattedNamesCollide(self):
+    self.nmrResidue.newNmrAtom(name='Arbitrary^Name')
+    self.assertRaises(Exception, self.nmrResidue.newNmrAtom, name='Arbitrary.Name')
 
   def test_CreateNmrAtomWithArbitraryNameAndArbitraryIsotopeCode(self):
     a = self.nmrResidue.newNmrAtom(name='Arbitrary', isotopeCode='Arbitrary_Isotope')
@@ -203,7 +198,7 @@ class TestNmrAtomCreation(WrapperTesting):
 
   def test_CreateTwoNmrAtomsWithSameName(self):
     self.nmrResidue.newNmrAtom(name='H')
-    self.assertRaises(ApiError, self.nmrResidue.newNmrAtom, name='H')
+    self.assertRaises(ValueError, self.nmrResidue.newNmrAtom, name='H')
 
   def test_CreateNmrAtomByFetchingFromResidue(self):
     self.assertEqual(self.nmrResidue.nmrAtoms, [])

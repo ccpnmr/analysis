@@ -27,11 +27,10 @@ import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
-# from ccpn.core.SampleComponent import SampleComponent
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from typing import Tuple, Optional, Union, Sequence
 
 
@@ -126,7 +125,7 @@ class Chain(AbstractWrapperObject):
     """Make copy of chain."""
 
     # Imported here to avoid circular imports
-    from ccpn.core.lib import Molecule as MoleculeLib
+    from ccpn.core.lib import MoleculeLib
 
     apiMolSystem = self._project._wrappedData.molSystem
 
@@ -166,10 +165,13 @@ class Chain(AbstractWrapperObject):
 
   def rename(self, value:str):
     """Rename Chain, changing its Id and Pid"""
-    if not value:
+    if value:
+      previous = self._project.getChain(value.translate(Pid.remapSeparators))
+      if previous not in (None, self):
+        raise ValueError("%s already exists" % previous.longPid)
+    else:
       raise ValueError("Chain name must be set")
-    elif Pid.altCharacter in value:
-      raise ValueError("Character %s not allowed in Chain.shortName" % Pid.altCharacter)
+
     self._startFunctionCommandBlock('rename', value)
     try:
       self._apiChain.renameChain(value)
@@ -214,11 +216,12 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   )
 
   apiMolSystem = self._wrappedData.molSystem
-  if shortName is None:
+  if not shortName:
     shortName = apiMolSystem.nextChainCode()
 
-  if Pid.altCharacter in shortName:
-    raise ValueError("Character %s not allowed in ccpn.Chain.shortName" % Pid.altCharacter)
+  previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
+  if previous is not None:
+    raise ValueError("%s already exists" % previous.longPid)
 
   apiRefComponentStore = self._apiNmrProject.sampleStore.refSampleComponentStore
   if compoundName is None:
@@ -229,9 +232,6 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
     raise ValueError(
       "Substance named %s already exists. Try Substance.createChain function instead?"
       % compoundName)
-
-  if apiMolSystem.findFirstChain(code=shortName) is not None:
-    raise ValueError("Chain names %s already exists" % shortName)
 
   self._startFunctionCommandBlock('createChain', sequence, values=locals(), defaults=defaults,
                                   parName='newChain')
@@ -249,6 +249,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
     self._project._appBase._endCommandBlock()
   return self._project._data2Obj[newApiChain]
 Project.createChain = _createChain
+del _createChain
 
 
 def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
@@ -267,8 +268,9 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
   if shortName is None:
     shortName = apiMolSystem.nextChainCode()
 
-  if Pid.altCharacter in shortName:
-    raise ValueError("Character %s not allowed in ccpn.Chain.shortName" % Pid.altCharacter)
+  previous = self._project.getChain(shortName.translate(Pid.remapSeparators))
+  if previous is not None:
+    raise ValueError("%s already exists" % previous.longPid)
 
   self._startFunctionCommandBlock('createChainFromSubstance', values=locals(), defaults=defaults,
                                   parName='newChain')

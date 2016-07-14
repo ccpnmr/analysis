@@ -31,8 +31,8 @@ from ccpn.core.Atom import Atom
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
+from ccpn.core.lib.Pid import Pid
 from ccpn.util.Constants import DEFAULT_LABELING
-from ccpn.util.Pid import Pid
 from ccpnmodel.ccpncore.lib.molecule import Labeling
 
 

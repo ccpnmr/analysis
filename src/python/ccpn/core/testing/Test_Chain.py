@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import collections
-from ccpn.core.lib.Molecule import duplicateAtomBonds
+from ccpn.core.lib.MoleculeLib import duplicateAtomBonds
 
 boundAtomsTestData = collections.OrderedDict((
   ('A.1.CYS.C',['CA', 'O', 'A.2.ASP.N']),

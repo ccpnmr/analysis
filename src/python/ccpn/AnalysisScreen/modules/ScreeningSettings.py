@@ -4,7 +4,7 @@ from collections import OrderedDict
 
 from PyQt4 import QtCore, QtGui
 
-from ccpn.Screen.modules import ScreeningPipeline as sp
+from ccpn.AnalysisScreen.modules import ScreeningPipeline as sp
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Module import CcpnModule

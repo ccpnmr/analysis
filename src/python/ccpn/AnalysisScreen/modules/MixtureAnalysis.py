@@ -4,10 +4,10 @@ import math
 from functools import partial
 
 from PyQt4 import QtCore, QtGui
-from ccpn.Screen.modules.MixtureOptimisation import MixtureOptimisation
+from ccpn.AnalysisScreen.modules.MixtureOptimisation import MixtureOptimisation
 from numpy import array, amin, average
-from ccpn.Screen.lib.MixturesGeneration import getCompounds, _createSamples
-from ccpn.Screen.lib.SimulatedAnnealing import randomDictMixtures,  getMixtureInfo , calculateOverlapCount,scoreMixture
+from ccpn.AnalysisScreen.lib.MixturesGeneration import getCompounds, _createSamples
+from ccpn.AnalysisScreen.lib.SimulatedAnnealing import randomDictMixtures,  getMixtureInfo , calculateOverlapCount,scoreMixture
 from ccpn.ui.gui.widgets.Menu import Menu
 from ccpn.ui.gui.lib.Window import navigateToPeakPosition
 from ccpn.ui.gui.widgets.Button import Button

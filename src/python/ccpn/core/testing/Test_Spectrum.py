@@ -129,5 +129,5 @@ class DummySpectrumTest(WrapperTesting):
     self.assertEqual(spectrum.experimentType, None)
     self.assertEqual(spectrum.dimensionCount, 3)
     self.assertEqual(spectrum.axisCodes, axisCodes)
-    self.assertEqual(spectrum.referencePoints, (0.,0.,0.))
+    self.assertEqual(spectrum.referencePoints, (1.,1.,1.))
     self.assertEqual(spectrum.referenceValues, (236., 11.8, 236.))

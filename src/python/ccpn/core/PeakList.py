@@ -31,6 +31,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
+from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
@@ -394,19 +395,27 @@ class PeakList(AbstractWrapperObject):
 # Connections to parents:
 
 def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
-             isSimulated:bool=False) -> PeakList:
+             isSimulated:bool=False, serial:int=None) -> PeakList:
   """Create new empty ccpn.PeakList within ccpn.Spectrum"""
 
-  defaults = collections.OrderedDict((('title', None), ('comment', None), ('isSimulated', False)))
+  defaults = collections.OrderedDict((('title', None), ('comment', None), ('isSimulated', False),
+                                      ('serial', None)))
 
   apiDataSource = self._wrappedData
   self._startFunctionCommandBlock('newPeakList', values=locals(), defaults=defaults,
                                   parName='newPeakList')
+  result = None
   try:
     obj = apiDataSource.newPeakList(name=title, details=comment, isSimulated=isSimulated)
+    result = self._project._data2Obj.get(obj)
+    if serial is not None:
+      modelUtil.resetSerial(obj, serial, 'peakLists')
+      result._finaliseAction('rename')
+
   finally:
     self._project._appBase._endCommandBlock()
-  return self._project._data2Obj.get(obj)
+  #
+  return result
 
 Spectrum.newPeakList = _newPeakList
 del _newPeakList

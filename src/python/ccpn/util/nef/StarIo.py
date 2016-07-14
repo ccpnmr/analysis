@@ -558,6 +558,11 @@ def splitNefSequence(rows:typing.Sequence[dict]) -> typing.List[typing.List[dict
       stretch.append(row)
 
     elif linking == 'break':
+
+      # TODO NBNB This follows NEF spec as of July 2016 - which is rather confused
+      # Propose change so that 'break' signals a chain break AFTER that residue,
+      # and is ONLY used if there is a break between two 'middle' residues.
+
       if stretch:
         # inside stretch - end it
         stretch.append(row)

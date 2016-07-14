@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 from typing import Optional
 import collections
 from ccpnmodel.ccpncore.lib import Util as coreUtil
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Data as ApiData
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import Parameter as ApiParameter
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -61,7 +61,8 @@ class Data(AbstractWrapperObject):
   @property
   def _key(self) -> str:
     """id string - name"""
-    return self._wrappedData.name
+    # return self._wrappedData.name
+    return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
   def name(self) -> str:

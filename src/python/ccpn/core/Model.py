@@ -31,7 +31,7 @@ from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
 
 
-# from ccpn.util import Pid
+# from ccpn.core.lib import Pid
 
 
 class Model(AbstractWrapperObject):

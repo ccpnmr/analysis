@@ -27,7 +27,7 @@ import collections
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.Window import Window
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import GuiTask as ApiGuiTask
 
 

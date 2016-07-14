@@ -1,6 +1,6 @@
 __author__ = 'simon1'
 
-from ccpn.core.lib.Assignment import getNmrAtomPrediction, CCP_CODES
+from ccpn.core.lib.AssignmentLib import getNmrAtomPrediction, CCP_CODES
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 

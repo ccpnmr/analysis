@@ -21,19 +21,20 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import operator
 import collections
+import operator
 from typing import Union, Tuple
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Atom import Atom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
-from ccpn.util import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
+from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 
 
@@ -337,22 +338,46 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
 
   defaults = collections.OrderedDict((('name', None), ('isotopeCode', None)))
 
-  if name:
-    if Pid.altCharacter in name:
-      raise ValueError("Character %s not allowed in ccpn.NmrAtom.name" % Pid.altCharacter)
 
+  # Set isotopeCode if empty
   if not isotopeCode:
     if name:
       isotopeCode = name2IsotopeCode(name) or '?'
     else:
-      raise ValueError("newNmrAtom requires either name or isotopeCode as input")
+      isotopeCode = '?'
+
+  # Deal with reserved names
+  serial = None
+  if name:
+    # Check for name clashes
+    previous = self.getNmrAtom(name.translate(Pid.remapSeparators))
+    if previous is not None:
+      raise ValueError("%s already exists" % previous.longPid)
+
+    # Deal with reserved names
+    index = name.find('@')
+    if index >= 0:
+      try:
+        serial = int(name[index+1:])
+        obj = nmrProject.findFirstResonance(serial=serial)
+      except ValueError:
+        obj = None
+      if obj is not None:
+        previous = self._project._data2Obj[obj]
+        raise ValueError("Cannot create NmrAtom:%s.%s - reserved atom name clashes with %s"
+                         % (self._id, name, previous.longPid))
+
+  dd = {'resonanceGroup':resonanceGroup, 'isotopeCode':isotopeCode, 'name':name}
 
   self._startFunctionCommandBlock('newNmrAtom', values=locals(), defaults=defaults,
                                   parName='newNmrAtom')
+  result = None
   try:
-    result = self._project._data2Obj.get(nmrProject.newResonance(resonanceGroup=resonanceGroup,
-                                                                 name=name,
-                                                                 isotopeCode=isotopeCode))
+    obj = nmrProject.newResonance(**dd)
+    result = self._project._data2Obj.get(obj)
+    if serial is not None:
+      modelUtil.resetSerial(obj, serial, 'resonances')
+      result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
   #
@@ -392,7 +417,7 @@ def _produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
         raise ValueError("_produceNmrAtom: other parameters only allowed if atomId is None")
       else:
         # Remove colon prefix, if any
-        atomId = atomId.split(Pid.PREFIXSEP,1)[-1]
+        atomId = atomId.split(Pid.PREFIXSEP, 1)[-1]
         for ii,val in enumerate(Pid.splitId(atomId)):
           if val:
             params[ii] = val

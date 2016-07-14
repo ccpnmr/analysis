@@ -5,7 +5,7 @@ import math
 from collections import defaultdict
 from itertools import chain, combinations
 from collections import OrderedDict
-from ccpn.Screen.lib.SimulatedAnnealing import randomDictMixtures, iterateAnnealing, getOverlappedCount , scoreMixture, calculateOverlapCount
+from ccpn.AnalysisScreen.lib.SimulatedAnnealing import randomDictMixtures, iterateAnnealing, getOverlappedCount , scoreMixture, calculateOverlapCount
 
 
 def _initialiseMixtures(params):

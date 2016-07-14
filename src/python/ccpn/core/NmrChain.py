@@ -21,15 +21,17 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import typing
 import collections
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
+import typing
+
 from ccpn.core.Chain import Chain
+from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
-from ccpn.util import Pid
-from ccpnmodel.ccpncore.lib import Constants
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import NmrChain as ApiNmrChain
+from ccpnmodel.ccpncore.lib import Util as modelUtil
+from ccpnmodel.ccpncore.lib import Constants
 
 
 class NmrChain(AbstractWrapperObject):
@@ -84,6 +86,11 @@ class NmrChain(AbstractWrapperObject):
   def _parent(self) -> Project:
     """Parent (containing) object."""
     return self._project
+
+  @property
+  def serial(self) -> int:
+    """NmrChain serial number - set at creation and unchangeable"""
+    return self._wrappedData.serial
   
   @property
   def isConnected(self) -> bool:
@@ -218,7 +225,7 @@ del getter
 del setter
 
 def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label:str='?',
-                 comment:str=None) -> NmrChain:
+                comment:str=None) -> NmrChain:
   """Create new ccpn.NmrChain. Set isConnected=True to get connected NmrChain.
 
   :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
@@ -230,40 +237,60 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
                                      ('label', '?'), ('comment', None)))
 
   nmrProject = self._apiNmrProject
+  serial = None
 
   if shortName:
-    if Pid.altCharacter in shortName:
-      raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
+    previous = self.getNmrChain(shortName.translate(Pid.remapSeparators))
+    if previous is not None:
+      raise ValueError("%s already exists" % previous.longPid)
+    if shortName[0] in '#@':
+      try:
+        serial = int(shortName[1:])
+      except ValueError:
+        # the rest of the name is not an int. We are OK
+        pass
+      if serial is not None and serial > 0:
+        # this is a reserved name - try to set it with serial
+        if nmrProject.findFirstNmrChain(serial=serial) is None:
+          # We are setting a shortName that matches the passed-in serial. OK.
+          # Set isConnected to match - this overrides the isConnected parameter.
+          isConnected = (shortName[0] == '#')
+          shortName = None
+        else:
+          raise ValueError("Cannot create NmrChain with reserved name %s" % shortName)
+  else:
+    shortName = None
 
-
+  dd = {'code':shortName, 'isConnected':isConnected, 'label':label, 'details':comment}
   self._startFunctionCommandBlock('newNmrChain', values=locals(), defaults=defaults,
                                   parName='newNmrChain')
+  result = None
   try:
-    newApiNmrChain = nmrProject.newNmrChain(code=shortName, isConnected=isConnected, label=label,
-                                            details=comment)
+    newApiNmrChain = nmrProject.newNmrChain(**dd)
+    result = self._data2Obj.get(newApiNmrChain)
+    if serial is not None:
+      modelUtil.resetSerial(newApiNmrChain, serial, 'nmrChains')
+      result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
   
-  return self._data2Obj.get(newApiNmrChain)
+  return result
   
 def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   """Fetch chain with given shortName; If none exists call newNmrChain to make one first
+
+  If shortName is None returns a new NmrChain with name staritng with '@'
   """
-
-  if shortName and Pid.altCharacter in shortName:
-    raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
-
   self._startFunctionCommandBlock('fetchNmrChain', shortName, parName='newNmrChain')
   try:
-    nmrProject = self._apiNmrProject
-    apiNmrChain = nmrProject.findFirstNmrChain(code=shortName)
-    if apiNmrChain is None:
-      if shortName and shortName[0] in '@#' and shortName[1:].isdigit():
-        raise ValueError("Cannot create new NmrChain with reserved name %s" % shortName)
-      else:
-        result = self._project.newNmrChain(shortName=shortName)
+    if not shortName:
+      result = self.newNmrChain()
     else:
-      result = self._data2Obj.get(apiNmrChain)
+      apiNmrChain = self._apiNmrProject.findFirstNmrChain(code=shortName)
+      if apiNmrChain is None:
+        result = self.newNmrChain(shortName=shortName)
+      else:
+        result = self._data2Obj.get(apiNmrChain)
   finally:
     self._project._appBase._endCommandBlock()
   return result

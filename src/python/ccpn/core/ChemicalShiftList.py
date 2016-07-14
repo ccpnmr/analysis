@@ -21,15 +21,18 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-import operator
 import collections
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+import operator
+from typing import Tuple, Sequence, List
+
+from ccpn.util import Common as commonUtil
+from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
-from ccpn.core.PeakList import PeakList
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.lib import Pid
+from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
-from ccpn.util import Pid
-from typing import Tuple, Sequence, List
 
 
 class ChemicalShiftList(AbstractWrapperObject):
@@ -88,8 +91,12 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   @property
   def unit(self) -> str:
-    """Measurement unit of ChemicalShiftList. By definition must always be 'ppm'"""
-    return 'ppm'
+    """Measurement unit of ChemicalShiftList. Should always be 'ppm'"""
+    return self._wrappedData.unit
+
+  @unit.setter
+  def unit(self, value:str):
+    self._wrappedData.unit = value
 
   @property
   def autoUpdate(self) -> bool:
@@ -133,18 +140,19 @@ class ChemicalShiftList(AbstractWrapperObject):
   # Implementation functions
   def rename(self, value:str):
     """Rename ChemicalShiftList, changing Id and Pid of ChemicalShiftList"""
-    if not value:
-      raise ValueError("ChemicalShiftList name must be set")
+    if value:
+      previous = self._project.getChemicalShiftList(value.translate(Pid.remapSeparators))
+      if previous not in (None, self):
+        raise ValueError("%s already exists" % previous.longPid)
 
-    elif Pid.altCharacter in value:
-      raise ValueError("Character %s not allowed in ccpn.ChemicalShiftList.name" % Pid.altCharacter)
-
-    else:
       self._startFunctionCommandBlock('rename', value)
       try:
         self._wrappedData.name = value
       finally:
         self._project._appBase._endCommandBlock()
+
+    else:
+      raise ValueError("ChemicalShiftList name must be set")
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> List[Nmr.ShiftList]:
@@ -172,24 +180,37 @@ PeakList.chemicalShiftList = property(getter, setter, None,
 del getter
 del setter
 
-def _newChemicalShiftList(self:Project, name:str=None,
-                          isSimulated:bool=False, comment:str=None) -> ChemicalShiftList:
+def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm', autoUpdate:bool=True,
+                          isSimulated:bool=False, serial:int=None, comment:str=None) -> ChemicalShiftList:
   """Create new ccpn.ChemicalShiftList"""
 
-  defaults = collections.OrderedDict((('name', None), ('isSimulated', False),
-                                     ('comment', None)))
+  defaults = collections.OrderedDict((('name', None), ('unit', 'ppm'), ('autoUpdate', True),
+                                      ('isSimulated', False), ('serial', None), ('comment', None)))
 
-  if name and Pid.altCharacter in name:
-    raise ValueError("Character %s not allowed in ccpn.ChemicalShiftList.name" % Pid.altCharacter)
+  apiNmrProject = self._wrappedData
+  if name:
+    previous = self.getChemicalShiftList(name.translate(Pid.remapSeparators))
+    if previous is not None:
+      raise ValueError("%s already exists" % previous.longPid)
+  else:
+    name = 'Shift_2'
+    while apiNmrProject.findFirstMeasurementList(className='ShiftList', name=name):
+      name = commonUtil.incrementName(name)
 
   self._startFunctionCommandBlock('newChemicalShiftList', values=locals(), defaults=defaults,
                                   parName='newChemicalShiftList')
+  dd = {'name':name, 'unit':unit, 'autoUpdate':autoUpdate, 'isSimulated':isSimulated,
+        'details':comment}
+  result = None
   try:
-    obj = self._wrappedData.newShiftList(name=name, isSimulated=isSimulated,
-                                         details=comment)
+    obj = self._wrappedData.newShiftList(**dd)
+    result = self._data2Obj.get(obj)
+    if serial is not None:
+      modelUtil.resetSerial(obj, serial, 'shiftLists')
+      result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
-  return self._data2Obj.get(obj)
+  return result
 
 Project.newChemicalShiftList = _newChemicalShiftList
 del _newChemicalShiftList

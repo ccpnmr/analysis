@@ -3,7 +3,7 @@ __author__ = 'simon1'
 from ccpn.core.Project import Project
 from ccpn.core.NmrResidue import NmrResidue
 
-from ccpn.util import Pid
+from ccpn.core.lib import Pid
 
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 # from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip

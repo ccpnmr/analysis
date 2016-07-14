@@ -243,6 +243,7 @@ class NotificationTest(WrapperTesting):
     project._undo.undo()
     project._undo.redo()
 
+    # NBNB This currently fails, because we have temporarily disabled notification suspension
     self.assertEqual(ll, [])
     project.resumeNotification()
     self.assertEqual(ll, ['deletex',  'createx'])
@@ -299,9 +300,9 @@ class NotificationTest(WrapperTesting):
     self.assertEqual(peakList.pid, 'PL:HF-copy.1')
     self.assertEqual(peak1.pid, 'PK:HF-copy.1.1')
     self.assertEqual(peak1.position, (1.0,2.0))
-    self.assertEqual(spectrum.referencePoints, (0.0,0.0))
+    self.assertEqual(spectrum.referencePoints, (1.0,1.0))
     spectrum.referencePoints = (11.,11.)
-    self.assertEqual(peak1.position, (12.0,13.0))
+    self.assertEqual(peak1.position, (11.0,12.0))
     spectrum.delete()
 
     self.assertEqual(ll[:-3],['newSpectrum', 'newSpectrum2', 'newPeakList', 'newPeak',

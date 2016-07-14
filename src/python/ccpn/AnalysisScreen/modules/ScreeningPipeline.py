@@ -1,9 +1,9 @@
 __author__ = 'luca'
 
 
-from ccpn.Screen.lib.Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
+from ccpn.AnalysisScreen.lib.Screening import writeBruker, createStdDifferenceSpectrum, matchedPosition
 
-from ccpn.Screen.modules.ShowScreeningHits import ShowScreeningHits
+from ccpn.AnalysisScreen.modules.ShowScreeningHits import ShowScreeningHits
 
 import decimal
 from functools import partial

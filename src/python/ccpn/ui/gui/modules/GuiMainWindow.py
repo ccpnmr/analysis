@@ -499,7 +499,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       prefFile = open(prefPath, 'w+')
       json.dump(self._appBase.preferences, prefFile, sort_keys=True, indent=4, separators=(',', ': '))
       prefFile.close()
-      self.saveProject()
+      self._appBase.saveProject()
       # Close and clean up project
       self._appBase._closeProject()
       QtGui.QApplication.quit()

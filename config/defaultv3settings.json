@@ -16,7 +16,8 @@
         "showToolbar": true,
         "showSpectrumBorder": true,
         "autoBackupEnabled": false,
-        "autoBackupFrequency": 30
+        "autoBackupFrequency": 30,
+        "stripRegionPadding": 0.0
     },
     "recentMacros": [
 

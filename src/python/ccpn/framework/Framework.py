@@ -49,8 +49,8 @@ from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-# from ccpn.ui.gui.widgets.Action import Action
 from ccpn.ui.gui.lib.Window import MODULE_DICT
+from ccpn.util.Common import uniquify
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QKeySequence
@@ -739,7 +739,6 @@ class Framework:
       sys.stderr.write('==> Could not recognise "%s" as a project\n' % path)
 
 
-
   def clearRecentProjects(self):
     self.preferences.recentFiles = []
     self.ui.mainWindow._fillRecentProjectsMenu()
@@ -781,7 +780,7 @@ class Framework:
       # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
     self.ui.mainWindow._updateWindowTitle()
-    self.ui.mainWindow._updateRecentFiles()  # TODO: move the non-graphical part of this here
+    self._updateRecentFiles()
 
     layout = self.ui.mainWindow.moduleArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
@@ -799,6 +798,26 @@ class Framework:
 
     return successful
 
+
+  def _updateRecentFiles(self, oldPath=None):
+    project = self.project
+    path = project.path
+    recentFiles = self.preferences.recentFiles
+    mainWindow = self.ui.mainWindow or self._mainWindow
+
+    if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
+      if path in recentFiles:
+        recentFiles.remove(path)
+      elif oldPath in recentFiles:
+        recentFiles.remove(oldPath)
+      elif len(recentFiles) >= 10:
+        recentFiles.pop()
+      recentFiles.insert(0, path)
+    recentFiles = uniquify(recentFiles)
+    mainWindow._fillRecentProjectsMenu()
+    self.preferences.recentFiles = recentFiles
+
+
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
     oldPath = self.project.path
@@ -814,7 +833,7 @@ class Framework:
       successful = False
       self.project._logger.info("Project not saved - no valid destination selected")
 
-    self.ui.mainWindow._updateRecentFiles(oldPath=oldPath)  # TODO: move the non-graphical part of this here
+    self._updateRecentFiles(oldPath=oldPath)
 
     return successful
 

@@ -28,7 +28,8 @@ import sys
 
 class FileDialog(QtGui.QFileDialog):
 
-  def __init__(self, parent=None, fileMode=0, text=None, acceptMode=0, preferences=None, **kw):
+  def __init__(self, parent=None, fileMode=QtGui.QFileDialog.AnyFile, text=None,
+               acceptMode=QtGui.QFileDialog.AcceptOpen, preferences=None, **kw):
 
     QtGui.QFileDialog.__init__(self, parent, caption=text, **kw)
 

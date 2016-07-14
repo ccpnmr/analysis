@@ -709,13 +709,11 @@ class Framework:
     """
 
     if not path:
-      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project', preferences=self.preferences.general)
-      paths = dialog.selectedFiles()
-      if paths:
-        path = paths[0]
-
-    if not path:
-      return
+      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.Directory, text='Load Project',
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
+      path = dialog.selectedFile()
+      if not path:
+        return
 
     dataType, subType, usePath = ioFormats.analyseUrl(path)
     if dataType == 'Project' and subType in (ioFormats.CCPN, ioFormats.NEF):
@@ -755,15 +753,15 @@ class Framework:
     """
     if text is None:
       text = 'Load Data'
+
     if paths is None:
-      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=0, text=text, preferences=self.preferences.general)
-      paths = dialog.selectedFiles()[0]
+      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text=text,
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general)
+      path = dialog.selectedFile()
+      if not path:
+        return
+      paths = [path]
 
-    # NBNB TBD I assume here that path is either a string or a list lf string paths.
-    # NBNB FIXME if incorrect
-
-    if not paths:
-      return
     elif isinstance(paths, str):
       paths = [paths]
 
@@ -821,7 +819,7 @@ class Framework:
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
     oldPath = self.project.path
-    newPath = getSaveDirectory()
+    newPath = getSaveDirectory(self.preferences.general)
     if newPath:
       # Next line unnecessary, but does not hurt
       newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
@@ -1223,14 +1221,17 @@ class Framework:
     runs the selected macro.
     """
     if macroFile is None:
-      macroDialog = FileDialog(parent=self.ui.mainWindow, text="Run Macro",
-                             preferences=self.preferences.general, fileMode=0,
-                             directory=self.preferences.general.macroPath)
+      dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Run Macro",
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                          directory=self.preferences.general.macroPath, filter='*.py')
+      macroFile = dialog.selectedFile()
+      if not macroFile:
+        return
 
-    if not macroDialog.selectedFile() in self.preferences.recentMacros:
-      self.preferences.recentMacros.append(macroDialog.selectedFile())
+    if not macroFile in self.preferences.recentMacros:
+      self.preferences.recentMacros.append(macroFile)
     # self._fillRecentMacrosMenu()
-    self.ui.mainWindow.pythonConsole._runMacro(macroDialog.selectedFile())
+    self.ui.mainWindow.pythonConsole._runMacro(macroFile)
 
   def defineShortcut(self):
     info = MessageDialog.showInfo('Not implemented yet',
@@ -1350,19 +1351,21 @@ class Framework:
     if not spectrumDisplay and self.spectrumDisplays:
       spectrumDisplay = self.spectrumDisplays[0]
     if spectrumDisplay:
-      path = QtGui.QFileDialog.getSaveFileName(self, caption='Print to File', filter='SVG (*.svg)')
+      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text='Print to File',
+                          acceptMode=FileDialog.AcceptSave, preferences=self.preferences.general, filter='SVG (*.svg)')
+      path = dialog.selectedFile()
       if not path:
         return
       spectrumDisplay.printToFile(path)
 
-
-
-def getSaveDirectory():
+def getSaveDirectory(preferences=None):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""
-  preferences = getPreferences()
-  dialog = FileDialog(parent=None, fileMode=FileDialog.AnyFile, text='Save Project As...', preferences=preferences.general)
 
-  newPath = dialog.selectedFiles()
+  dialog = FileDialog(fileMode=FileDialog.AnyFile, text='Save Project As',
+                      acceptMode=FileDialog.AcceptSave, preferences=preferences)
+  newPath = dialog.selectedFile()
+  if not newPath:
+    return
   if newPath:
     newPath = apiIo.addCcpnDirectorySuffix(newPath)
     if os.path.exists(newPath) and (os.path.isfile(newPath) or os.listdir(newPath)):
@@ -1370,12 +1373,11 @@ def getSaveDirectory():
       # the Qt dialog stupidly insists a directory exists before you can select it
       # so if it exists but is empty then don't bother asking the question
       title = 'Overwrite path'
-      msg ='Path "%s" already exists, continue?' % newPath
-      if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.general.colourScheme):
+      msg = 'Path "%s" already exists, continue?' % newPath
+      if not MessageDialog.showYesNo(title, msg, colourScheme=preferences.colourScheme):
         newPath = ''
 
-  return newPath
-
+    return newPath
 
 ########
 

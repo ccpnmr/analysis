@@ -104,7 +104,8 @@ class GuiStrip1d(GuiStrip):
     """
     x2 = self.viewBox.childrenBoundingRect().left()
     x1 = x2 + self.viewBox.childrenBoundingRect().width()
-    self.viewBox.setXRange(x2, x1)
+    padding = self._appBase.preferences.general.stripRegionPadding
+    self.viewBox.setXRange(x2, x1, padding=padding)
 
   # def showPeaks(self, peakList:PeakList, peaks=None):
   #   """

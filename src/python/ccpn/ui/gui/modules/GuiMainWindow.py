@@ -355,9 +355,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     result = self._queryCloseProject(title='Open Project', phrase='open another')
     if result:
       if projectDir is None:
-        dialog = FileDialog(self, fileMode=2, text="Open Project", acceptMode=0, preferences=self._appBase.preferences.general)
+        dialog = FileDialog(self, fileMode=FileDialog.Directory, text="Open Project",
+                            acceptMode=FileDialog.AcceptOpen, preferences=self._appBase.preferences.general)
         projectDir = dialog.selectedFile()
-
 
       if projectDir:
         self.application.loadProject(projectDir)
@@ -675,16 +675,25 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   #   self.feedbackPopup.raise_()
 
 
+  # the below is in Framework (slightly different implementation) so presumably does not belong here???
   def runMacro(self, macroFile:str=None):
     """
     Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
     runs the selected macro.
     """
     if macroFile is None:
-      macroFile = QtGui.QFileDialog.getOpenFileName(self, "Run Macro", self._appBase.preferences.general.macroPath)
-    self.application.preferences.recentMacros.append(macroFile)
-    self._fillRecentMacrosMenu()
-    self.pythonConsole._runMacro(macroFile)
+      dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
+                          acceptMode=FileDialog.AcceptOpen, preferences=self._appBase.preferences.general)
+      if os.path.exists(self._appBase.preferences.general.macroPath):
+        dialog.setDirectory(self._appBase.preferences.general.macroPath)
+      macroFile = dialog.selectedFile()
+      if not macroFile:
+        return
+
+    if os.path.exists(macroFile):
+      self.application.preferences.recentMacros.append(macroFile)
+      self._fillRecentMacrosMenu()
+      self.pythonConsole._runMacro(macroFile)
 
 
   # def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):

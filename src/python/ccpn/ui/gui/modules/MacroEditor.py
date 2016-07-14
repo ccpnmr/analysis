@@ -67,9 +67,9 @@ class MacroEditor(DropBase, CcpnModule):
     macroPath = self.preferences.general.macroPath
     # colourScheme = self.preferences.general.colourScheme
     newText = self.textBox.toPlainText()
-    dialog = FileDialog(self, text='Save Macro As...', acceptMode=1, fileMode=0, preferences=self.preferences.general,
+    dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
+                        acceptMode=FileDialog.AcceptSave, preferences=self.preferences.general,
                         directory=macroPath, filter='*.py')
-
     filePath = dialog.selectedFile()
     if filePath:
       with open(filePath, 'w') as f:
@@ -82,8 +82,9 @@ class MacroEditor(DropBase, CcpnModule):
     contents of the macro file into the textbox.
     """
     macroPath = self.preferences.general.macroPath
-    dialog = FileDialog(self, text='Open Macro', fileMode=1, acceptMode=0, directory=macroPath,
-                          preferences=self.preferences.general)
+    dialog = FileDialog(self, text='Open Macro', fileMode=FileDialog.ExistingFile,
+                        acceptMode=FileDialog.AcceptOpen, directory=macroPath,
+                        preferences=self.preferences.general, filter='*.py')
 
     filePath = dialog.selectedFile()
     if filePath:

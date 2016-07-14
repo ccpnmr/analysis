@@ -110,6 +110,12 @@ class PreferencesPopup(QtGui.QDialog):
     self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
     row += 1
 
+    self.regionPaddingLabel = Label(self, text="Region Percent Padding", grid=(row, 0))
+    self.regionPaddingData = LineEdit(self, grid=(row, 1))
+    self.regionPaddingData.setText('%.0f' % (100*self.preferences.general.stripRegionPadding))
+    self.regionPaddingData.editingFinished.connect(self._setRegionPadding)
+    row += 1
+
     buttonBox = Button(self, grid=(row, 1), text='Save', callback=self.accept)
     row += 1
 
@@ -185,7 +191,14 @@ class PreferencesPopup(QtGui.QDialog):
       for strip in self.project.strips:
         for spectrumView in strip.spectrumViews:
           spectrumView._setBorderItemHidden(checked)
-        
+
+  def _setRegionPadding(self):
+    try:
+      padding = 0.01*float(self.regionPaddingData.text())
+    except:
+      return
+    self.preferences.general.stripRegionPadding = padding
+
   def _toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)
 

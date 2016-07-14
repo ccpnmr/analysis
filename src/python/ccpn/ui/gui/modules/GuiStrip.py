@@ -646,20 +646,23 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     """
     Zooms strip to the specified region
     """
-    self.viewBox.setXRange(*xRegion)
-    self.viewBox.setYRange(*yRegion)
+    padding = self._appBase.preferences.general.stripRegionPadding
+    self.viewBox.setXRange(*xRegion, padding=padding)
+    self.viewBox.setYRange(*yRegion, padding=padding)
 
   def zoomX(self, x1:float, x2:float):
     """
     Zooms x axis of strip to the specified region
     """
-    self.viewBox.setXRange(x1, x2)
+    padding = self._appBase.preferences.general.stripRegionPadding
+    self.viewBox.setXRange(x1, x2, padding=padding)
 
   def zoomY(self, y1:float, y2:float):
     """
     Zooms y axis of strip to the specified region
     """
-    self.viewBox.setYRange(y1, y2)
+    padding = self._appBase.preferences.general.stripRegionPadding
+    self.viewBox.setYRange(y1, y2, padding=padding)
 
   def resetZoom(self):
     """
@@ -713,8 +716,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     """
     if len(self.storedZooms) != 0:
       restoredZoom = self.storedZooms.pop()
-      self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1])
-      self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1])
+      padding = self._appBase.preferences.general.stripRegionPadding
+      self.plotWidget.setXRange(restoredZoom[0][0], restoredZoom[0][1], padding=padding)
+      self.plotWidget.setYRange(restoredZoom[1][0], restoredZoom[1][1], padding=padding)
     else:
       self.resetZoom()
 
@@ -763,10 +767,12 @@ def _axisRegionChanged(axis:'Axis'):
     try:
       if index == 0:
         # X axis
-        strip.viewBox.setXRange(*region)
+        padding = strip._appBase.preferences.general.stripRegionPadding
+        strip.viewBox.setXRange(*region, padding=padding)
       elif index == 1:
         # Y axis
-        strip.viewBox.setYRange(*region)
+        padding = strip._appBase.preferences.general.stripRegionPadding
+        strip.viewBox.setYRange(*region, padding=padding)
       else:
         # One of the Z axes
         for spectrumView in strip.spectrumViews:
@@ -845,9 +851,10 @@ def _setupGuiStrip(project:Project, apiStrip):
 
   orderedAxes = strip.orderedAxes
   axisOrder = strip.axisOrder
+  padding = strip._appBase.preferences.general.stripRegionPadding
 
-  strip.viewBox.setXRange(*orderedAxes[0].region)
-  strip.viewBox.setYRange(*orderedAxes[1].region)
+  strip.viewBox.setXRange(*orderedAxes[0].region, padding=padding)
+  strip.viewBox.setYRange(*orderedAxes[1].region, padding=padding)
   strip.xAxisTextItem = AxisTextItem(strip.plotWidget, orientation='top',
                                     axisCode=axisOrder[0])
   strip.yAxisTextItem = AxisTextItem(strip.plotWidget, orientation='left',

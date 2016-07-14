@@ -30,6 +30,7 @@ from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
 from ccpn.core.PeakList import PeakList
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
+from ccpnmodel.ccpncore.lib import Util as modelUtil
 from typing import Optional, Tuple, Union, Sequence
 
 class Peak(AbstractWrapperObject):
@@ -365,7 +366,8 @@ class Peak(AbstractWrapperObject):
 def _newPeak(self:PeakList,height:float=None, volume:float=None,
              heightError:float=None, volumeError:float=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
-            position:Sequence[float]=(), pointPosition:Sequence[float]=()) -> Peak:
+            position:Sequence[float]=(), positionError:Sequence[float]=(),
+            pointPosition:Sequence[float]=(), serial:int=None) -> Peak:
   """Create new ccpn.Peak within ccpn.peakList
 
   NB you must create the peak before you can assign it. The assignment attributes are:
@@ -377,7 +379,7 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
   defaults = collections.OrderedDict(
     (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),
      ('figureOfMerit', 1.0), ('annotation', None), ('comment', None), ('position', ()),
-     ('pointPosition', ())
+      ('positionError', ()),('pointPosition', ()), ('serial', None),
     )
   )
 
@@ -391,7 +393,8 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
     apiPeak = apiPeakList.newPeak(height=height, volume=volume,
                                   heightError=heightError, volumeError=volumeError,
                                   figOfMerit=figureOfMerit, annotation=annotation, details=comment)
-
+    if serial is not None:
+      modelUtil.resetSerial(apiPeak, serial, 'peaks')
     # set peak position
     # NBNB TBD currently unused parameters could be added, and will have to come in here as well
     apiPeakDims = apiPeak.sortedPeakDims()
@@ -401,6 +404,9 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
     elif pointPosition:
       for ii,peakDim in enumerate(apiPeakDims):
         peakDim.position = pointPosition[ii]
+    if positionError:
+      for ii,peakDim in enumerate(apiPeakDims):
+        peakDim.valueError = positionError[ii]
 
   finally:
     self._project._appBase._endCommandBlock()
@@ -416,6 +422,8 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
   result = self._project._data2Obj.get(apiPeak)
 
   # DO creation notifications
+  if serial is not None:
+    result._finaliseAction('rename')
   result._finaliseAction('create')
 
   return result

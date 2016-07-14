@@ -781,6 +781,7 @@ class Framework:
       # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
     self.ui.mainWindow._updateWindowTitle()
+    self.ui.mainWindow._updateRecentFiles()  # TODO: move the non-graphical part of this here
 
     layout = self.ui.mainWindow.moduleArea.saveState()
     layoutPath = os.path.join(self.project.path, 'layouts')
@@ -800,6 +801,7 @@ class Framework:
 
   def saveProjectAs(self):
     """Opens save Project as dialog box and saves project to path specified in the file dialog."""
+    oldPath = self.project.path
     newPath = getSaveDirectory()
     if newPath:
       # Next line unnecessary, but does not hurt
@@ -811,7 +813,9 @@ class Framework:
     else:
       successful = False
       self.project._logger.info("Project not saved - no valid destination selected")
-    #
+
+    self.ui.mainWindow._updateRecentFiles(oldPath=oldPath)  # TODO: move the non-graphical part of this here
+
     return successful
 
     # NBNB TODO Consider appropriate failure handling. Is this OK?

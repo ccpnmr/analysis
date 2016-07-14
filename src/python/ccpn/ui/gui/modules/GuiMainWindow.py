@@ -103,16 +103,28 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
     self.pythonConsole.writeConsoleCommand(msg2)
 
-    # if not isNew:
-    recentFiles = self._appBase.preferences.recentFiles
-    if len(recentFiles) >= 10:
-      recentFiles.pop()
-    recentFiles.insert(0, path)
     self.colourScheme = self._appBase.preferences.general.colourScheme
-    recentFiles = uniquify(recentFiles)
-    self._appBase.preferences.recentFiles = recentFiles
+    self._updateRecentFiles()
     self.pythonConsole.setProject(project)
     self._updateWindowTitle()
+
+
+  def _updateRecentFiles(self, oldPath=None):
+    project = self._project
+    path = project.path
+    recentFiles = self._appBase.preferences.recentFiles
+    if not hasattr(project._wrappedData.root, '_temporaryDirectory'):
+      if path in recentFiles:
+        recentFiles.remove(path)
+      elif oldPath in recentFiles:
+        recentFiles.remove(oldPath)
+      elif len(recentFiles) >= 10:
+        recentFiles.pop()
+      recentFiles.insert(0, path)
+    recentFiles = uniquify(recentFiles)
+    self._fillRecentProjectsMenu()
+    self._appBase.preferences.recentFiles = recentFiles
+
 
   def _updateWindowTitle(self):
     """

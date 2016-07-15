@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 import ast
 import hashlib
 import os
+import sys
 import uuid
 
 from ccpn.util import Logging
@@ -47,28 +48,28 @@ def loadDict():
 
   registrationDict = {}
   try:
-    # if os.path.exists(path) and os.path.isfile(path):
-    # exists call is reduncant with isfile call
     if os.path.isfile(path):
-      data = fp = open(path)
-      data = fp.read()
-      fp.close()
-      registrationDict = ast.literal_eval(data)
-  except:
-    pass
+      with open(path) as fp:
+        data = fp.read()
+        registrationDict = ast.literal_eval(data)
+  except Exception as e:
+    sys.stderr.write('Error loading registration: %s\n' % e)
 
   return registrationDict
 
 def saveDict(registrationDict):
 
   path = _registrationPath()
+  directory = os.path.dirname(path)
 
   try:
-    fp = open(path, 'w')
-    fp.write(str(registrationDict))
-    fp.close()
-  except:
-    pass
+    if not os.path.exists(directory):
+      os.makedirs(directory)
+
+    with open(path, 'w') as fp:
+      fp.write(str(registrationDict))
+  except Exception as e:
+    sys.stderr.write('Error saving registration: %s\n' % e)
 
 def getHashCode(registrationDict):
   

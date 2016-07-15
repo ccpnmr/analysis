@@ -225,7 +225,7 @@ class SpectrumGroupEditor(QtGui.QDialog):
         self.spectrumGroupListWidgetRight.setAcceptDrops(False)
         self._initialLabelListWidgetRight()
 
-      elif selected == 'All Spectra':
+      elif selected == 'Available Spectra':
         self.spectrumGroupListWidgetRight.clear()
         self._populateListWidgetRight(self._getAllSpectra())
         self.spectrumGroupListWidgetRight.setAcceptDrops(True)
@@ -250,7 +250,7 @@ class SpectrumGroupEditor(QtGui.QDialog):
     return self.leftPullDownSelectionData
 
   def _getRightPullDownSelectionData(self):
-    self.rightPullDownSelectionData = [' ', 'All Spectra']
+    self.rightPullDownSelectionData = [' ', 'Available Spectra']
     for spectrumGroup in self.project.spectrumGroups:
       if spectrumGroup.pid != self.leftPullDownSelection.getText(): # self.spectrumGroup:
         self.rightPullDownSelectionData.append(str(spectrumGroup.pid))
@@ -262,7 +262,16 @@ class SpectrumGroupEditor(QtGui.QDialog):
     return self.rightPullDownSelectionData
 
   def _getAllSpectra(self):
-    return self.project.spectra
+
+    if self.spectrumGroup:
+      allSpectra = [sp for sp in self.project.spectra]
+      spectrumGroupSpectra = self.spectrumGroup.spectra
+      for spectrumSG in spectrumGroupSpectra:
+        if spectrumSG in allSpectra:
+          allSpectra.remove(spectrumSG)
+      return allSpectra
+    else:
+      return self.project.spectra
 
   def _changeLeftSpectrumGroupName(self):
     if self.leftSpectrumGroupLineEdit.isModified():
@@ -345,7 +354,7 @@ class SpectrumGroupEditor(QtGui.QDialog):
     if self.rightPullDownSelection.getText() == ' ':
       # don't do changes to spectra
       return
-    if self.rightPullDownSelection.getText() == 'All Spectra':
+    if self.rightPullDownSelection.getText() == 'Available Spectra':
       # don't do changes to spectra
       return
 
@@ -394,7 +403,7 @@ class SpectrumGroupEditor(QtGui.QDialog):
       self.leftSpectrumGroupsLabel.hide()
       self.leftPullDownSelection.hide()
       if len(self.project.spectra)>0:
-        self.rightPullDownSelection.select('All Spectra')
+        self.rightPullDownSelection.select('Available Spectra')
         self._populateListWidgetRight(self.project.spectra)
 
 

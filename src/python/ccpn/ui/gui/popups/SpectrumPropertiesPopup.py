@@ -363,6 +363,12 @@ class GeneralTab(QtGui.QWidget, Base):
   def _queueSetSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
+    pix = QtGui.QPixmap(QtCore.QSize(20, 20))
+    pix.fill(QtGui.QColor(newColour))
+    newIndex = str(len(spectrumColours.items())+1)
+    self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
+    spectrumColours[newColour.name()] = 'Colour %s' % newIndex
+    self.colourBox.setCurrentIndex(int(newIndex)-1)
     self._changes['spectrumColour'] = partial(self._setSpectrumColour, spectrum, newColour)
 
   def _setSpectrumColour(self, spectrum, newColour):
@@ -370,12 +376,7 @@ class GeneralTab(QtGui.QWidget, Base):
     self._writeLoggingMessage("spectrum.sliceColour = '%s'" % newColour.name())
     self.pythonConsole.writeConsoleCommand("spectrum.sliceColour = '%s'" % newColour.name(), spectrum=self.spectrum)
     spectrum.guiSpectrumView.plot.setPen(spectrum._apiDataSource.sliceColour)
-    pix = QtGui.QPixmap(QtCore.QSize(20, 20))
-    pix.fill(QtGui.QColor(newColour))
-    newIndex = str(len(spectrumColours.items())+1)
-    self.colourBox.addItem(icon=QtGui.QIcon(pix), text='Colour %s' % newIndex)
-    spectrumColours[newColour.name()] = 'Colour %s' % newIndex
-    self.colourBox.setCurrentIndex(int(newIndex)-1)
+
 
   # TODO: 1D Only.  Fix this when fixing 1D!
   def _changedColourComboIndex(self, spectrum, value):

@@ -175,9 +175,8 @@ class PeakList(AbstractWrapperObject):
     self._project.blankNotification()
     undo.increaseBlocking()
     try:
-      if len(positions[0]) != self.spectrum.dimensionCount:
-        positions = list(sorted(map(list, zip(*positions))))
-
+      # if len(positions[0]) != self.spectrum.dimensionCount:
+      positions = list(sorted(map(list, zip(*positions))))
       startPoint = []
       endPoint = []
       dataDims = self.spectrum._apiDataSource.sortedDataDims()

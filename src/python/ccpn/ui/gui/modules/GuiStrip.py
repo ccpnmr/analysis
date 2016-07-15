@@ -100,7 +100,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.xAxisAtomLabels = []
     self.yAxisAtomLabels = []
 
-
+    self._appBase.project.registerNotifier('Peak', 'create', self._updateDisplayedPeaks)
 
 
     #self.xAxis = Axis(self.plotWidget, orientation='top', #pen=self.foreground,
@@ -117,7 +117,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     self.gridShown = True
 
 
-    self.viewBox.sigClicked.connect(self._mouseClicked)
+    # self.viewBox.sigClicked.connect(self._mouseClicked)
     self.grid = CcpnGridItem(self.gridColour)
     self.plotWidget.addItem(self.grid)
     self.setMinimumWidth(200)
@@ -157,8 +157,12 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # Notifiers.registerNotify(self.rulerDeleted, 'ccpnmr.gui.Task.Ruler', 'delete')
 
 
+  def _updateDisplayedPeaks(self, peak):
+    self.showPeaks(peak.peakList)
+
   def _unregisterStrip(self):
     self.current.unRegisterNotify(self._highlightCurrentStrip, 'strips')
+    self._appBase.project.unRegisterNotifier('Peak', 'create', self._updateDisplayedPeaks)
 
   def _highlightCurrentStrip(self, strips=None):
 
@@ -588,8 +592,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       for apiRuler in apiMark.rulers:
         self._rulerCreated(apiRuler)
         
-  def _mouseClicked(self, event):
-    print(event)
+  # def _mouseClicked(self, event):
+  #   print(event)
 
 
   # def setStripToCurrent(self):

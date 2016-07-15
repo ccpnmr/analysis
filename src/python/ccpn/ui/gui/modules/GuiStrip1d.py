@@ -22,21 +22,13 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui
 
-from ccpn.core.Project import Project
 from ccpn.core.PeakList import PeakList
 
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
-
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
-
-from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.util.Colour import spectrumColours
 from ccpn.ui.gui.widgets.Menu import Menu
-# from ccpn.util import Logging
 
-from ccpn.ui.gui.modules.spectrumItems.GuiPeakListView import Peak1d, GuiPeakListView
 class GuiStrip1d(GuiStrip):
 
   def __init__(self):

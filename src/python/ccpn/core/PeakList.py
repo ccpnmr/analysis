@@ -386,8 +386,7 @@ class PeakList(AbstractWrapperObject):
         selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 
     regionToPick = list(zip(*selectedRegion))
-    peaks = self.pickPeaksNd(regionToPick, self.spectrum._wrappedData.sortedDataDims(), doPos=doPos,
-                             doNeg=doNeg)
+    peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg)
     return peaks
 
 

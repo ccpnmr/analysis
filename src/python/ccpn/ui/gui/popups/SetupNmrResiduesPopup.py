@@ -57,25 +57,27 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
 
 
   def _setupNmrResidues(self):
-    peakList = self.project.getByPid(self.peakListPulldown.currentText())
-    nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
-    keepAssignments = self.assignmentCheckBox.checkState()
-    isotopeCodes = peakList.spectrum.isotopeCodes
-    axisCodes = peakList.spectrum.axisCodes
-    if (isotopeCodes.count('1H') == 1 and isotopeCodes.count('15N') == 1):
-      ndim = isotopeCodes.index('15N')
-      hdim = isotopeCodes.index('1H')
-      for peak in peakList.peaks:
-        if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms):
-          r = nmrChain.newNmrResidue()
-          a = r.fetchNmrAtom(name='N')
-          a2 = r.fetchNmrAtom(name='H')
-          peak.assignDimension(axisCode=axisCodes[ndim], value=a)
-          peak.assignDimension(axisCode=axisCodes[hdim], value=a2)
-    else:
-      self.project._logger.warning('''Incompatible peak list selected. Only experiments with one 1H dimension
-      and one 15N dimension can be used.''')
-      return
-
-
-    self.accept()
+    self.project._startFunctionCommandBlock('_setupNmrResidues')
+    try:
+      peakList = self.project.getByPid(self.peakListPulldown.currentText())
+      nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
+      keepAssignments = self.assignmentCheckBox.checkState()
+      isotopeCodes = peakList.spectrum.isotopeCodes
+      axisCodes = peakList.spectrum.axisCodes
+      if (isotopeCodes.count('1H') == 1 and isotopeCodes.count('15N') == 1):
+        ndim = isotopeCodes.index('15N')
+        hdim = isotopeCodes.index('1H')
+        for peak in peakList.peaks:
+          if not keepAssignments or not any(len(dimensionNmrAtoms) > 0 for dimensionNmrAtoms in peak.dimensionNmrAtoms):
+            r = nmrChain.newNmrResidue()
+            a = r.fetchNmrAtom(name='N')
+            a2 = r.fetchNmrAtom(name='H')
+            peak.assignDimension(axisCode=axisCodes[ndim], value=a)
+            peak.assignDimension(axisCode=axisCodes[hdim], value=a2)
+      else:
+        self.project._logger.warning('''Incompatible peak list selected. Only experiments with one 1H dimension
+        and one 15N dimension can be used.''')
+        return
+    finally:
+      self.accept()
+      self.project._appBase._endCommandBlock()

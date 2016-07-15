@@ -95,7 +95,7 @@ class ViewBox(pg.ViewBox):
     click events.
 
     Left click selects peaks in a spectrum display.
-    Cmd-Shift+Left click picks a peak at the cursor position.
+    Control(Cmd)-Shift+Left click picks a peak at the cursor position.
     Right click raises the context menu.
 
 
@@ -218,8 +218,8 @@ class ViewBox(pg.ViewBox):
     drag events.
 
     Left drag pans the spectrum.
-    Control+left drag picks peaks in an area specified by the mouse.
-    Shift+left drag selects peaks in an area specified by the mouse.
+    Control(Cmd)+left drag selects peaks in an area specified by the mouse.
+    Control(Cmd)-shift+left drag selects peaks in an area specified by the mouse.
     Shift+right drag/middle drag draws a zooming box and zooms the viewbox.
     """
 

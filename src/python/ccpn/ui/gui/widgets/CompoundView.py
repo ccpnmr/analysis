@@ -1276,7 +1276,7 @@ class AtomLabel(QtGui.QGraphicsItem):
       if self.hover:
         painter.setPen(Qt.white)
       elif not isinstance(self.compoundView, QtGui.QGraphicsItem):
-        if self.compoundView.setAtomColorWhite:
+        if hasattr(self.compoundView, 'setAtomColorWhite'):
           painter.setPen(Qt.white)
         else:
           painter.setPen(Qt.black)

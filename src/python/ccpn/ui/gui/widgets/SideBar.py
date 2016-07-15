@@ -388,7 +388,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'SU':
-      popup = SubstancePropertiesPopup(substance=obj)
+      popup = SubstancePropertiesPopup(substance=obj, project=self.project)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NC':
@@ -472,7 +472,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         popup.raise_()
         return
       elif item.parent().text(0) == 'Substances':
-        popup = SubstancePropertiesPopup(project=self.project)
+        popup = SubstancePropertiesPopup(project=self.project, newSubstance = True)
         popup.exec_()
         popup.raise_()
         return

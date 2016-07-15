@@ -769,11 +769,10 @@ class Framework:
 
     self.ui.mainWindow.processDropData(paths, dataType='urls')
 
-  def saveProject(self, newPath=None, createFallback=True) -> bool:
+  def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
     # TODO: convert this to a save and call self.project.save()
-    pass
-    successful = self.project.save(newPath=newPath, createFallback=createFallback)
+    successful = self.project.save(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
     if not successful:
       sys.stderr.write('==> Project save failed\n')
 

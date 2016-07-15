@@ -58,6 +58,14 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       self.setViewport(QtOpenGL.QGLWidget())
       self.setViewportUpdateMode(QtGui.QGraphicsView.FullViewportUpdate)
 
+
+  def __getattr__(self, attr):
+    """Wrap pyqtgraph PlotWidget __getattr__, which raises wrong error and so makes hasattr fail."""
+    try:
+      return super().__getattr__(attr)
+    except NameError:
+      raise AttributeError(attr)
+
   def addItem(self, item:QtGui.QGraphicsObject):
     """
     Adds specified graphics object to the Graphics Scene of the PlotWidget.

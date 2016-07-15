@@ -43,11 +43,15 @@ class FileDialog(QtGui.QFileDialog):
       (1, 1): 'getSaveFileName',
       (1, 2): 'getSaveFileName',
       (1, 3): 'getSaveFileName',
+      (self.AcceptSave, self.AnyFile): 'getOpenFileName',
+      (self.AcceptSave, self.ExistingFile): 'getSaveFileName',
+      (self.AcceptSave, self.Directory): 'getSaveFileName',
+      (self.AcceptSave, self.ExistingFiles): 'getSaveFileName',
     }
 
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
-
+    self.useNative = preferences.useNative
     if preferences:
 
       if preferences.colourScheme == 'dark':
@@ -70,8 +74,10 @@ class FileDialog(QtGui.QFileDialog):
   # overrides Qt function, which does not pay any attention to whether Cancel button selected
   def selectedFiles(self):
 
-    if self.result:
+    if self.result and not self.useNative:
       return QtGui.QFileDialog.selectedFiles(self)
+    elif self.result and self.useNative:
+      return [self.result]
     else:
       return []
 

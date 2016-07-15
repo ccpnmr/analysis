@@ -636,10 +636,11 @@ class Framework:
     ]
                ))
 
-    ms.append(('Plugins',   [
-      ("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1')]),
-    ]
-               ))
+    # ms.append(('Plugins',   [
+    #   ("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1')]),
+    # ]
+    #            ))
+    ms.append(('Plugins',   self.getPluginMenuItems()))
 
     ms.append(('Help',      [
       ("Command...", self.showCommandHelp, [('enabled', False)]),
@@ -1163,6 +1164,19 @@ class Framework:
   ##################################################################################################################
   ## MENU callbacks:  Plugins
   ###################################################################################################################
+
+  def getPluginMenuItems(self):
+    # TODO: move instantiation to plugin.  This is a HACK for now!!!
+    menuItems = []
+
+    try:
+      from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
+      menuItems = [("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1')])]
+    except ImportError:
+      menuItems = [("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1'),
+                                                                 ('enabled', False)])]
+
+    return menuItems
 
   def showParassignSetup(self):
     # try:

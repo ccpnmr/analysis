@@ -170,7 +170,10 @@ class PeakList(AbstractWrapperObject):
 
 
 
+    undo = self._project._undo
     self._startFunctionCommandBlock('pickPeaksNd', values=locals(), defaults=defaults)
+    self._project.blankNotification()
+    undo.increaseBlocking()
     try:
       if len(positions[0]) != self.spectrum.dimensionCount:
         positions = list(sorted(map(list, zip(*positions))))
@@ -208,8 +211,14 @@ class PeakList(AbstractWrapperObject):
 
     finally:
       self._project._appBase._endCommandBlock()
+      self._project.unblankNotification()
+      undo.decreaseBlocking()
 
-    return [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
+    result = [data2ObjDict[apiPeak] for apiPeak in apiPeaks]
+    for peak in result:
+      peak._finaliseAction('create')
+
+    return result
 
   # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
   def pickPeaks1d(self, data1d, dataRange, intensityRange=None, size:int=3, mode:str='wrap') -> List['Peak']:

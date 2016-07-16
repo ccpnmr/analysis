@@ -100,7 +100,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   @property
   def autoUpdate(self) -> bool:
-    """Automatically update Chemical Shifts from assigned peak - yes/no??"""
+    """Automatically update Chemical Shifts from assigned peaks - True/False"""
     return self._wrappedData.autoUpdate
 
   @autoUpdate.setter

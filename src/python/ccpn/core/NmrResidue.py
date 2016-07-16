@@ -34,6 +34,7 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.lib import Constants
+#from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
 
 
 class NmrResidue(AbstractWrapperObject):
@@ -893,6 +894,7 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
     if residueType is not None:
       # get chem comp ID strings from residue type
       tt = self._project._residueName2chemCompId.get(residueType)
+      #tt = MoleculeQuery.fetchStdResNameMap(self._wrappedData.root).get(residueType)
       if tt is not None:
         obj.molType, obj.ccpCode = tt
   finally:

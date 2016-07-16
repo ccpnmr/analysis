@@ -373,6 +373,7 @@ class Project(AbstractWrapperObject):
       self._logger.info("Added undoPoint")
 
 
+  # Should be removed:
   @property
   def  _residueName2chemCompId(self) -> dict:
     """dict of {residueName:(molType,ccpCode)}"""
@@ -386,6 +387,11 @@ class Project(AbstractWrapperObject):
 
     NB The OrderedDicts are ordered ad-hoc, with the most common experiments (hopefully) first
     """
+
+    # NB This is a hack, in order to rename experiments that we care particularly about
+    # This should disappear under refactoring
+    from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
+
     result = self._implExperimentTypeMap
     if result is None:
       result = OrderedDict()
@@ -401,7 +407,9 @@ class Project(AbstractWrapperObject):
         dd1[nucleusCodes] = dd2
         for refExperiment in refExperiments:
           name = refExperiment.name
-          dd2[refExperiment.synonym or name] = name
+          key = refExperiment.synonym or name
+          key = priorityNameRemapping.get(key, key)
+          dd2[key] = name
 
       self._implExperimentTypeMap = result
     #

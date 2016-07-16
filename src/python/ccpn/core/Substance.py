@@ -569,6 +569,8 @@ def _fetchNefSubstance(self:Project, sequence:Sequence[dict], name:str=None):
   finally:
     self._project._appBase._endCommandBlock()
     self._project.unblankNotification()
+  #
+  return result
 
 Project.fetchNefSubstance = _fetchNefSubstance
 del _fetchNefSubstance

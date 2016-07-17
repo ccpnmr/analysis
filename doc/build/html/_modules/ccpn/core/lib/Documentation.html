@@ -47,32 +47,32 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.lib.Documentation</h1><div class="highlight"><pre>
-<span class="sd">&quot;&quot;&quot;Generation of Sphinx automatic documentation</span>
+<span></span><span class="sd">&quot;&quot;&quot;Generation of Sphinx automatic documentation</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Luca G Mureddu, Simon P Skinner &amp; Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Luca G Mureddu, Simon P Skinner &amp; Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 <span class="sd">&quot;&quot;&quot;Scrips to (re)create project sphinx documentation&quot;&quot;&quot;</span>
 
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;rhf22&#39;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;rhf22&#39;</span>
 
 <span class="kn">import</span> <span class="nn">typing</span>
 
@@ -86,8 +86,8 @@
 <span class="n">joinPath</span> <span class="o">=</span> <span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span>
 
 
-<span class="c"># Relative path to documentation directory</span>
-<span class="n">documentationPath</span> <span class="o">=</span> <span class="s">&#39;doc&#39;</span>
+<span class="c1"># Relative path to documentation directory</span>
+<span class="n">documentationPath</span> <span class="o">=</span> <span class="s1">&#39;doc&#39;</span>
 
 <div class="viewcode-block" id="refreshSphinxDocumentation"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Documentation.refreshSphinxDocumentation">[docs]</a><span class="k">def</span> <span class="nf">refreshSphinxDocumentation</span><span class="p">():</span>
   <span class="sd">&quot;&quot;&quot;(Re)create sphinx documentation. Locations are hardwired&quot;&quot;&quot;</span>
@@ -96,60 +96,58 @@
   <span class="n">topDirectory</span> <span class="o">=</span> <span class="n">corePath</span><span class="o">.</span><span class="n">getTopDirectory</span><span class="p">()</span>
   <span class="n">docDirectory</span> <span class="o">=</span> <span class="n">joinPath</span><span class="p">(</span><span class="n">topDirectory</span><span class="p">,</span> <span class="n">documentationPath</span><span class="p">)</span>
 
-  <span class="c"># Remove sphinx-apidoc files</span>
+  <span class="c1"># Remove sphinx-apidoc files</span>
   <span class="n">outputDirs</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;ccpn&#39;</span><span class="p">,):</span>
-  <span class="c"># for ss in (&#39;ccpn&#39;, &#39;ccpnmodel&#39;):</span>
-    <span class="n">inDirectory</span> <span class="o">=</span> <span class="n">joinPath</span><span class="p">(</span><span class="n">docDirectory</span><span class="p">,</span> <span class="s">&#39;source&#39;</span><span class="p">,</span> <span class="n">ss</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,):</span>
+  <span class="c1"># for ss in (&#39;ccpn&#39;, &#39;ccpnmodel&#39;):</span>
+    <span class="n">inDirectory</span> <span class="o">=</span> <span class="n">joinPath</span><span class="p">(</span><span class="n">docDirectory</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="n">ss</span><span class="p">)</span>
     <span class="n">outputDirs</span><span class="p">[</span><span class="n">ss</span><span class="p">]</span> <span class="o">=</span> <span class="n">inDirectory</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">inDirectory</span><span class="p">):</span>
-      <span class="k">print</span> <span class="p">(</span><span class="s">&quot;Removing </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">inDirectory</span><span class="p">)</span>
+      <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Removing </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">inDirectory</span><span class="p">)</span>
       <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">inDirectory</span><span class="p">)</span>
       <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">inDirectory</span><span class="p">)</span>
 
-  <span class="c"># clean builds</span>
-  <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s">&#39;make&#39;</span><span class="p">,</span> <span class="s">&#39;-C&#39;</span><span class="p">,</span> <span class="n">docDirectory</span><span class="p">,</span> <span class="s">&#39;clean&#39;</span><span class="p">])</span>
+  <span class="c1"># clean builds</span>
+  <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s1">&#39;make&#39;</span><span class="p">,</span> <span class="s1">&#39;-C&#39;</span><span class="p">,</span> <span class="n">docDirectory</span><span class="p">,</span> <span class="s1">&#39;clean&#39;</span><span class="p">])</span>
 
-  <span class="c"># Recreate apidoc</span>
-  <span class="n">precommand</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;sphinx-apidoc&#39;</span><span class="p">]</span>
-  <span class="c"># documentation target - filled in below</span>
-  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s">&#39;-o&#39;</span><span class="p">,</span> <span class="s">&#39;output TBD&#39;</span><span class="p">))</span>
-  <span class="c"># PUt module documentation before submodule documentation:</span>
-  <span class="n">precommand</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;--module-first&#39;</span><span class="p">)</span>
-  <span class="c"># Project name header:</span>
-  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s">&#39;-A&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">authors</span><span class="p">))</span>
-  <span class="c"># Project name header:</span>
-  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s">&#39;-V&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">))</span>
-  <span class="c"># Project name header:</span>
-  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s">&#39;-R&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">revision</span><span class="p">))</span>
+  <span class="c1"># Recreate apidoc</span>
+  <span class="n">precommand</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;sphinx-apidoc&#39;</span><span class="p">]</span>
+  <span class="c1"># documentation target - filled in below</span>
+  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;output TBD&#39;</span><span class="p">))</span>
+  <span class="c1"># PUt module documentation before submodule documentation:</span>
+  <span class="n">precommand</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;--module-first&#39;</span><span class="p">)</span>
+  <span class="c1"># Project name header:</span>
+  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s1">&#39;-A&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">authors</span><span class="p">))</span>
+  <span class="c1"># Project name header:</span>
+  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s1">&#39;-V&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">))</span>
+  <span class="c1"># Project name header:</span>
+  <span class="n">precommand</span><span class="o">.</span><span class="n">extend</span><span class="p">((</span><span class="s1">&#39;-R&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">revision</span><span class="p">))</span>
 
-  <span class="c"># Generate documentation - ccpn:</span>
-  <span class="n">module</span> <span class="o">=</span> <span class="s">&#39;ccpn&#39;</span>
+  <span class="c1"># Generate documentation - ccpn:</span>
+  <span class="n">module</span> <span class="o">=</span> <span class="s1">&#39;ccpn&#39;</span>
   <span class="n">target</span> <span class="o">=</span> <span class="n">joinPath</span><span class="p">(</span><span class="n">pythonDirectory</span><span class="p">,</span> <span class="n">module</span><span class="p">)</span>
-  <span class="n">skipDirs</span> <span class="o">=</span> <span class="n">getNamedSubdirectories</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s">&#39;testing&#39;</span><span class="p">)</span>
-  <span class="n">command</span> <span class="o">=</span> <span class="n">precommand</span> <span class="o">+</span> <span class="p">[</span><span class="s">&#39;-H&#39;</span><span class="p">,</span><span class="s">&#39;CCPN&#39;</span><span class="p">,</span> <span class="n">target</span><span class="p">]</span> <span class="o">+</span> <span class="n">skipDirs</span>
-  <span class="c"># Additional directories to skip</span>
-  <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">joinPath</span><span class="p">(</span><span class="n">pythonDirectory</span><span class="p">,</span> <span class="s">&#39;ccpn/macros&#39;</span><span class="p">))</span>
+  <span class="n">skipDirs</span> <span class="o">=</span> <span class="n">getNamedSubdirectories</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s1">&#39;testing&#39;</span><span class="p">)</span>
+  <span class="n">command</span> <span class="o">=</span> <span class="n">precommand</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;-H&#39;</span><span class="p">,</span><span class="s1">&#39;CCPN&#39;</span><span class="p">,</span> <span class="n">target</span><span class="p">]</span> <span class="o">+</span> <span class="n">skipDirs</span>
+  <span class="c1"># Additional directories to skip</span>
+  <span class="n">command</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">joinPath</span><span class="p">(</span><span class="n">pythonDirectory</span><span class="p">,</span> <span class="s1">&#39;ccpn/macros&#39;</span><span class="p">))</span>
   <span class="n">command</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">outputDirs</span><span class="p">[</span><span class="n">module</span><span class="p">]</span>
-  <span class="c"># print (&#39;\n\n@~@~&#39;, command)</span>
   <span class="n">apidoc</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
 
 
-  <span class="c"># # Generate documentation - ccpn:</span>
-  <span class="c"># module = &#39;ccpnmodel&#39;</span>
-  <span class="c"># target = joinPath(pythonDirectory, module)</span>
-  <span class="c"># skipDirs = getNamedSubdirectories(target, (&#39;testing&#39;, &#39;v_&#39;))</span>
-  <span class="c"># command = precommand + [&#39;-H&#39;, &#39;CCPN storage implementation&#39;, target] + skipDirs</span>
-  <span class="c"># # Additional directories to skip</span>
-  <span class="c"># command.append(joinPath(pythonDirectory, &#39;ccpnmodel/ccpncore/memops&#39;))</span>
-  <span class="c"># command.append(joinPath(pythonDirectory, &#39;ccpnmodel/ccpncore/xml&#39;))</span>
-  <span class="c"># command[2] = outputDirs[module]</span>
-  <span class="c"># # print (&#39;\n\n@~@~&#39;, command)</span>
-  <span class="c"># apidoc.main(command)</span>
+  <span class="c1"># # Generate documentation - ccpn:</span>
+  <span class="c1"># module = &#39;ccpnmodel&#39;</span>
+  <span class="c1"># target = joinPath(pythonDirectory, module)</span>
+  <span class="c1"># skipDirs = getNamedSubdirectories(target, (&#39;testing&#39;, &#39;v_&#39;))</span>
+  <span class="c1"># command = precommand + [&#39;-H&#39;, &#39;CCPN storage implementation&#39;, target] + skipDirs</span>
+  <span class="c1"># # Additional directories to skip</span>
+  <span class="c1"># command.append(joinPath(pythonDirectory, &#39;ccpnmodel/ccpncore/memops&#39;))</span>
+  <span class="c1"># command.append(joinPath(pythonDirectory, &#39;ccpnmodel/ccpncore/xml&#39;))</span>
+  <span class="c1"># command[2] = outputDirs[module]</span>
+  <span class="c1"># apidoc.main(command)</span>
 
 
-  <span class="c"># rebuild docs</span>
-  <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s">&#39;make&#39;</span><span class="p">,</span> <span class="s">&#39;-C&#39;</span><span class="p">,</span> <span class="n">docDirectory</span><span class="p">,</span> <span class="s">&#39;html&#39;</span><span class="p">])</span></div>
+  <span class="c1"># rebuild docs</span>
+  <span class="n">subprocess</span><span class="o">.</span><span class="n">call</span><span class="p">([</span><span class="s1">&#39;make&#39;</span><span class="p">,</span> <span class="s1">&#39;-C&#39;</span><span class="p">,</span> <span class="n">docDirectory</span><span class="p">,</span> <span class="s1">&#39;html&#39;</span><span class="p">])</span></div>
 
 <div class="viewcode-block" id="getNamedSubdirectories"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Documentation.getNamedSubdirectories">[docs]</a><span class="k">def</span> <span class="nf">getNamedSubdirectories</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">prefixes</span><span class="o">=</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
   <span class="sd">&quot;&quot;&quot;Get a list of all subdirectories of path whose basename starts with one of the prefixes</span>
@@ -166,10 +164,10 @@
       <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">ss</span><span class="p">):</span>
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
         <span class="k">del</span> <span class="n">dirs</span><span class="p">[:]</span>
-  <span class="c">#</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
   <span class="n">refreshSphinxDocumentation</span><span class="p">()</span>
 </pre></div>
 

@@ -47,62 +47,61 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.SpectrumGroup</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
-<span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">DataSource</span> <span class="k">as</span> <span class="n">ApiDataSource</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">SpectrumGroup</span> <span class="k">as</span> <span class="n">ApiSpectrumGroup</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
 
 
 <div class="viewcode-block" id="SpectrumGroup"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.SpectrumGroup">[docs]</a><span class="k">class</span> <span class="nc">SpectrumGroup</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Group of spectra - used for organising spectra.&quot;&quot;&quot;</span>
   
-  <span class="c">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;SG&#39;</span>
-  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;SpectrumGroup&#39;</span>
+  <span class="c1">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SG&#39;</span>
+  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;SpectrumGroup&#39;</span>
 
   <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
 
-  <span class="c">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;spectrumGroups&#39;</span>
+  <span class="c1">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;spectrumGroups&#39;</span>
   
-  <span class="c">#: List of child classes.</span>
+  <span class="c1">#: List of child classes.</span>
   <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c"># Qualified name of matching API class</span>
+  <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiSpectrumGroup</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
   
 
-  <span class="c"># CCPN properties  </span>
+  <span class="c1"># CCPN properties  </span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiSpectrumGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiSpectrumGroup</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; CCPN Project SpectrumGroup&quot;&quot;&quot;</span>
@@ -136,24 +135,24 @@
     <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">dataSources</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
 
-  <span class="c"># Implementation functions</span>
+  <span class="c1"># Implementation functions</span>
 <div class="viewcode-block" id="SpectrumGroup.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.SpectrumGroup.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Rename SpectrumGroup, changing its Id and Pid&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Rename SpectrumGroup, changing its name and Pid&quot;&quot;&quot;</span>
     <span class="n">oldName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
     <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
 
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;SpectrumGroup name must be set&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;SpectrumGroup name must be set&quot;</span><span class="p">)</span>
       <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.SpectrumGroup.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.SpectrumGroup.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">coreUtil</span><span class="o">.</span><span class="n">_resetParentLink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s">&#39;spectrumGroups&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;name&#39;</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;change&#39;</span><span class="p">)</span>
+        <span class="n">coreUtil</span><span class="o">.</span><span class="n">_resetParentLink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s1">&#39;spectrumGroups&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
     <span class="k">finally</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -162,7 +161,7 @@
 
     <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">oldName</span><span class="p">,),</span><span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">,))</span></div>
 
-  <span class="c"># Implementation functions</span>
+  <span class="c1"># Implementation functions</span>
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData for all SpectrumGroups linked to NmrProject&quot;&quot;&quot;</span>
@@ -173,17 +172,17 @@
   <span class="sd">&quot;&quot;&quot;Create new SpectrumGroup&quot;&quot;&quot;</span>
 
   <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.SpectrumGroup.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.SpectrumGroup.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
 
   <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
     <span class="n">getByPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getByPid</span>
     <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">getByPid</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">]</span>
-    <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;spectra&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">)}</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;spectra&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">)}</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newSpectrumGroup&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newSpectrumGroup&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newSpectrumGroup&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSpectrumGroup&#39;</span><span class="p">)</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">result</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
@@ -193,40 +192,40 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
 
-  <span class="c"># DO creation notifications</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;create&#39;</span><span class="p">)</span>
+  <span class="c1"># DO creation notifications</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">)</span>
   <span class="k">return</span> <span class="n">result</span>
     
-<span class="c"># Connections to parents:</span>
+<span class="c1"># Connections to parents:</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">newSpectrumGroup</span> <span class="o">=</span> <span class="n">_newSpectrumGroup</span>
 <span class="k">del</span> <span class="n">_newSpectrumGroup</span>
 
 
-<span class="c"># reverse link Spectrum.spectrumGroups</span>
+<span class="c1"># reverse link Spectrum.spectrumGroups</span>
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SpectrumGroup</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
   <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
   <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedSpectrumGroups</span><span class="p">())</span>
 <span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
-<span class="c">#</span>
+<span class="c1">#</span>
 <span class="n">Spectrum</span><span class="o">.</span><span class="n">spectrumGroups</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-                                   <span class="s">&quot;SpectrumGroups that contain Spectrum&quot;</span><span class="p">)</span>
+                                   <span class="s2">&quot;SpectrumGroups that contain Spectrum&quot;</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">getter</span>
 <span class="k">del</span> <span class="n">setter</span>
 
-<span class="c"># Extra Notifiers to notify changes in Spectrum-SpectrumGroup link</span>
+<span class="c1"># Extra Notifiers to notify changes in Spectrum-SpectrumGroup link</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">ApiSpectrumGroup</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;addDataSource&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;removeDataSource&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setDataSources&#39;</span><span class="p">),</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;addDataSource&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;removeDataSource&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;setDataSources&#39;</span><span class="p">),</span>
   <span class="p">)</span>
 <span class="p">)</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">ApiDataSource</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;addSpectrumGroup&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;removeSpectrumGroup&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setSpectrumGroups&#39;</span><span class="p">),</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;addSpectrumGroup&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;removeSpectrumGroup&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;setSpectrumGroups&#39;</span><span class="p">),</span>
   <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>

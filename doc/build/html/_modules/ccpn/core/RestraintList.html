@@ -47,103 +47,106 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.RestraintList</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="c"># from ccpn.util import Common as commonUtil</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">coreConstants</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Tensor</span> <span class="kn">import</span> <span class="n">Tensor</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">AbstractConstraintList</span> <span class="k">as</span> <span class="n">ApiAbstractConstraintList</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">DataSet</span>
-
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">coreConstants</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">modelUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint</span> <span class="kn">import</span> <span class="n">AbstractConstraintList</span> <span class="k">as</span> <span class="n">ApiAbstractConstraintList</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Tensor</span> <span class="kn">import</span> <span class="n">Tensor</span>
 
 <div class="viewcode-block" id="RestraintList"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.RestraintList">[docs]</a><span class="k">class</span> <span class="nc">RestraintList</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot; RestraintList - A container for restraints, with type determined by the restraintType</span>
-<span class="sd">  attribute. Typical examples are Distance and Dihedral restraints, but can also be used to store</span>
+  <span class="sd">&quot;&quot;&quot; An object containing Restraints. Note: the object is not a (subtype of a) Python list.</span>
+<span class="sd">  To access all rRstraint objects, use RestraintList.restraints.</span>
+
+<span class="sd">  RThe type of restraint is determined by the restraintType attribute.</span>
+<span class="sd">  Typical examples are Distance, Dihedral and Rdc restraints, but can also be used to store</span>
 <span class="sd">  measurements or derived values (Rdc, J coupling, T1, T2, Chemical Shift, ...)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
   
-  <span class="c">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;RL&#39;</span>
-  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;RestraintList&#39;</span>
+  <span class="c1">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;RL&#39;</span>
+  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;RestraintList&#39;</span>
 
   <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">DataSet</span>
 
-  <span class="c">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;restraintLists&#39;</span>
+  <span class="c1">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;restraintLists&#39;</span>
 
-  <span class="c">#: List of child classes.</span>
+  <span class="c1">#: List of child classes.</span>
   <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c"># Qualified name of matching API class</span>
+  <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiAbstractConstraintList</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="c"># # Number of atoms in a Restraint item, by restraint type</span>
-  <span class="c"># _restraintType2Length = {</span>
-  <span class="c">#   &#39;Distance&#39;:2,</span>
-  <span class="c">#   &#39;Dihedral&#39;:4,</span>
-  <span class="c">#   &#39;Rdc&#39;:2,</span>
-  <span class="c">#   &#39;HBond&#39;:2,</span>
-  <span class="c">#   &#39;JCoupling&#39;:2,</span>
-  <span class="c">#   &#39;Csa&#39;:1,</span>
-  <span class="c">#   &#39;ChemicalShift&#39;:1,</span>
-  <span class="c"># }</span>
+  <span class="c1"># # Number of atoms in a Restraint item, by restraint type</span>
+  <span class="c1"># _restraintType2Length = {</span>
+  <span class="c1">#   &#39;Distance&#39;:2,</span>
+  <span class="c1">#   &#39;Dihedral&#39;:4,</span>
+  <span class="c1">#   &#39;Rdc&#39;:2,</span>
+  <span class="c1">#   &#39;HBond&#39;:2,</span>
+  <span class="c1">#   &#39;JCoupling&#39;:2,</span>
+  <span class="c1">#   &#39;Csa&#39;:1,</span>
+  <span class="c1">#   &#39;ChemicalShift&#39;:1,</span>
+  <span class="c1"># }</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">):</span>
 
-    <span class="c"># NB The name will only be unique within the DataSet, which could cause</span>
-    <span class="c"># problems if anyone was silly enough to write out restraintLists from</span>
-    <span class="c"># different DataSets to the same NEF file.</span>
+    <span class="c1"># NB The name will only be unique within the DataSet.</span>
+    <span class="c1"># NEF I/O therefore adds a prefix to distinguish the DataSet</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="o">=</span> <span class="n">wrappedData</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="n">defaultName</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">s</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span>
-                   <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraintType</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">))</span>
+
+    <span class="n">namePrefix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraintType</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;-&#39;</span>
+    <span class="n">defaultName</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">namePrefix</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setUniqueStringKey</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">defaultName</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">wrappedData</span><span class="p">)</span>
 
-  <span class="c"># Special error-raising functions for people who think RestraintList is a list</span>
+  <span class="c1"># Special error-raising functions for people who think RestraintList is a list</span>
   <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;&#39;RestraintList object is not iterable&quot;</span>
-                    <span class="s">&quot; - for a list of restraints use RestraintList.restraints&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;RestraintList object is not iterable&quot;</span>
+                    <span class="s2">&quot; - for a list of restraints use RestraintList.restraints&quot;</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;&#39;RestraintList object does not support indexing&quot;</span>
-                    <span class="s">&quot; - for a list of restraints use RestraintList.restraints&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;RestraintList object does not support indexing&quot;</span>
+                    <span class="s2">&quot; - for a list of restraints use RestraintList.restraints&quot;</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;&#39;RestraintList object has no length&quot;</span>
-                    <span class="s">&quot; - for a list of restraints use RestraintList.restraints&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;RestraintList object has no length&quot;</span>
+                    <span class="s2">&quot; - for a list of restraints use RestraintList.restraints&quot;</span><span class="p">)</span>
 
 
-  <span class="c"># CCPN properties</span>
+  <span class="c1"># CCPN properties</span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiRestraintList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiAbstractConstraintList</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; CCPN ConstraintList matching RestraintList&quot;&quot;&quot;</span>
@@ -174,7 +177,7 @@
     
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataSet</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;DataSet containing ccpn.RestraintList.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;DataSet containing RestraintList.&quot;&quot;&quot;</span>
     <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrConstraintStore</span><span class="p">]</span>
   
   <span class="n">dataSet</span> <span class="o">=</span> <span class="n">_parent</span>
@@ -248,6 +251,21 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">tensorRhombicity</span><span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">rhombic</span>
 
   <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">tensorMagnitude</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;tensor Magnitude of orientation tensor. &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">tensorMagnitude</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">tensorRhombicity</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;tensor Rhombicity of orientation tensor. U&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">tensorRhombicity</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">tensorIsotropicValue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;tensor IsotropicValue of orientation tensor.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">tensorIsotropicValue</span>
+
+  <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">tensorChainCode</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;tensorChainCode of orientation tensor. Used to identify tensor in coordinate files&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">tensorChainCode</span>
@@ -274,17 +292,17 @@
   <span class="k">def</span> <span class="nf">tensorResidueType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">tensorResidueType</span> <span class="o">=</span> <span class="n">value</span>
     
-  <span class="c"># Implementation functions</span>
+  <span class="c1"># Implementation functions</span>
 <div class="viewcode-block" id="RestraintList.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.RestraintList.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;rename RestraintList, changing Id and Pid&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;rename RestraintList, changing its name and Pid.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;RestraintList name must be set&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;RestraintList name must be set&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.RestraintList.name:&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.RestraintList.name:&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">value</span>
       <span class="k">finally</span><span class="p">:</span>
@@ -293,36 +311,38 @@
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">DataSet</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData - all ConstraintList children of parent NmrConstraintStore&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraintLists</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s">&#39;name&#39;</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraintLists</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span></div>
 
-<span class="c"># Connections to parents:</span>
+<span class="c1"># Connections to parents:</span>
 <span class="k">def</span> <span class="nf">_newRestraintList</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">DataSet</span><span class="p">,</span> <span class="n">restraintType</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">origin</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">potentialType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;unknown&#39;</span><span class="p">,</span>
+                      <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">unit</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">potentialType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">,</span>
                       <span class="n">tensorMagnitude</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">tensorRhombicity</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                       <span class="n">tensorIsotropicValue</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">tensorChainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">tensorSequenceCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tensorResidueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintList</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new ccpn.RestraintList of type restraintType within ccpn.DataSet&quot;&quot;&quot;</span>
+                      <span class="n">tensorSequenceCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tensorResidueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                      <span class="n">serial</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintList</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Create new RestraintList of type restraintType within DataSet&quot;&quot;&quot;</span>
 
 
 
-  <span class="c"># Default values for &#39;new&#39; function, as used for echoing to console</span>
+  <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-    <span class="p">((</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;origin&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-     <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;unit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;potentialType&#39;</span><span class="p">,</span> <span class="s">&#39;unknown&#39;</span><span class="p">),</span>
-     <span class="p">(</span><span class="s">&#39;tensorMagnitude&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;tensorRhombicity&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;tensorIsotropicValue&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
-     <span class="p">(</span><span class="s">&#39;tensorChainCode&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;tensorSequenceCode&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;tensorResidueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+    <span class="p">((</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;origin&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;potentialType&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;tensorMagnitude&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorRhombicity&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorIsotropicValue&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;tensorChainCode&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorSequenceCode&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorResidueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
     <span class="p">)</span>
   <span class="p">)</span>
 
   <span class="k">if</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.RestraintList.name:&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.RestraintList.name:&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
 
   <span class="n">itemLength</span> <span class="o">=</span> <span class="n">coreConstants</span><span class="o">.</span><span class="n">constraintListType2ItemLength</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">restraintType</span><span class="p">)</span>
   <span class="k">if</span> <span class="n">itemLength</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;restraintType </span><span class="si">%s</span><span class="s"> not recognised&quot;</span> <span class="o">%</span> <span class="n">restraintType</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;restraintType </span><span class="si">%s</span><span class="s2"> not recognised&quot;</span> <span class="o">%</span> <span class="n">restraintType</span><span class="p">)</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newRestraintList&#39;</span><span class="p">,</span> <span class="n">restraintType</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
-                                  <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newRestraintList&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newRestraintList&#39;</span><span class="p">,</span> <span class="n">restraintType</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+                                  <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newRestraintList&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newGenericConstraintList</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
                                                      <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
@@ -335,19 +355,27 @@
                                                      <span class="n">tensorChainCode</span><span class="o">=</span><span class="n">tensorChainCode</span><span class="p">,</span>
                                                      <span class="n">tensorSequenceCode</span><span class="o">=</span><span class="n">tensorSequenceCode</span><span class="p">,</span>
                                                      <span class="n">tensorResidueType</span><span class="o">=</span><span class="n">tensorResidueType</span> <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;constraintLists&#39;</span><span class="p">)</span>
+      <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Could not reset serial of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping original value&quot;</span>
+                                     <span class="o">%</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">serial</span><span class="p">))</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-  <span class="c">#</span>
-  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span>
 
 <span class="n">DataSet</span><span class="o">.</span><span class="n">newRestraintList</span> <span class="o">=</span> <span class="n">_newRestraintList</span>
 <span class="k">del</span> <span class="n">_newRestraintList</span>
 
-<span class="c"># Notifiers:</span>
+<span class="c1"># Notifiers:</span>
 <span class="k">for</span> <span class="n">clazz</span> <span class="ow">in</span> <span class="n">ApiAbstractConstraintList</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">getNonAbstractSubtypes</span><span class="p">():</span>
   <span class="n">className</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
   <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-    <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setName&#39;</span><span class="p">),</span>
+    <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;setName&#39;</span><span class="p">),</span>
     <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>

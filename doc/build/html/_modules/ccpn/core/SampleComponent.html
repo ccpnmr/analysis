@@ -47,28 +47,28 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.SampleComponent</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
@@ -77,7 +77,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.SpectrumHit</span> <span class="kn">import</span> <span class="n">SpectrumHit</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">DEFAULT_LABELING</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.lims.Sample</span> <span class="kn">import</span> <span class="n">Sample</span> <span class="k">as</span> <span class="n">ApiSample</span>
@@ -88,23 +88,23 @@
 <div class="viewcode-block" id="SampleComponent"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Sample.SampleComponent">[docs]</a><span class="k">class</span> <span class="nc">SampleComponent</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Sample Component - material making up sample.&quot;&quot;&quot;</span>
   
-  <span class="c">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;SC&#39;</span>
-  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;SampleComponent&#39;</span>
+  <span class="c1">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SC&#39;</span>
+  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;SampleComponent&#39;</span>
 
   <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Sample</span>
 
-  <span class="c">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;sampleComponents&#39;</span>
+  <span class="c1">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;sampleComponents&#39;</span>
   
-  <span class="c">#: List of child classes.</span>
+  <span class="c1">#: List of child classes.</span>
   <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c"># Qualified name of matching API class</span>
+  <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiSampleComponent</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="c"># CCPN properties  </span>
+  <span class="c1"># CCPN properties  </span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiSampleComponent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiSampleComponent</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; API sampleComponent matching SampleComponent&quot;&quot;&quot;</span>
@@ -118,7 +118,7 @@
     <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span>
     <span class="n">labeling</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">labeling</span>
     <span class="k">if</span> <span class="n">labeling</span> <span class="o">==</span> <span class="n">DEFAULT_LABELING</span><span class="p">:</span>
-      <span class="n">labeling</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+      <span class="n">labeling</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
     <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">)</span>
 
   <span class="nd">@property</span>
@@ -132,7 +132,7 @@
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">labeling</span>
     <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="n">DEFAULT_LABELING</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
     
   <span class="nd">@property</span>
@@ -171,21 +171,21 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">concentrationUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Unit of SampleComponent.concentration, one of: %s &quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span>
+    <span class="sd">&quot;&quot;&quot;Unit of SampleComponent.concentration, one of: &#39;Molar&#39;, &#39;g/L&#39;, &#39;L/L&#39;, &#39;mol/mol&#39;, &#39;g/g&#39; &quot;&quot;&quot;</span>
 
     <span class="n">result</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">concentrationUnit</span>
     <span class="k">if</span> <span class="n">result</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s">&quot;Unsupported stored value </span><span class="si">%s</span><span class="s"> for SampleComponent.concentrationUnit&quot;</span>
+        <span class="s2">&quot;Unsupported stored value </span><span class="si">%s</span><span class="s2"> for SampleComponent.concentrationUnit&quot;</span>
         <span class="o">%</span> <span class="n">result</span><span class="p">)</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
   <span class="nd">@concentrationUnit.setter</span>
   <span class="k">def</span> <span class="nf">concentrationUnit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-        <span class="s">&quot;Setting unsupported value </span><span class="si">%s</span><span class="s"> for SampleComponent.concentrationUnit.&quot;</span>
+        <span class="s2">&quot;Setting unsupported value </span><span class="si">%s</span><span class="s2"> for SampleComponent.concentrationUnit.&quot;</span>
         <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">concentrationUnit</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -209,12 +209,12 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">spectrumHits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SpectrumHit</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;ccpn.SpectrumHits found for ccpn.SampleComponent&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;ccpn.SpectrumHits found for SampleComponent&quot;&quot;&quot;</span>
     <span class="n">ff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiSampleComponent</span><span class="o">.</span><span class="n">sortedSpectrumHits</span><span class="p">())</span>
 
     
-  <span class="c"># Implementation functions</span>
+  <span class="c1"># Implementation functions</span>
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Sample</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData (SampleComponent) for all SampleComponent children of parent Sample&quot;&quot;&quot;</span>
@@ -224,46 +224,46 @@
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">SpectrumHit</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleComponent</span><span class="p">:</span>
   <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiSpectrumHit</span><span class="o">.</span><span class="n">sampleComponent</span><span class="p">)</span>
 <span class="n">SpectrumHit</span><span class="o">.</span><span class="n">sampleComponent</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-                              <span class="s">&quot;ccpn.SampleComponent in which ccpn.SpectrumHit is found&quot;</span><span class="p">)</span>
+                              <span class="s2">&quot;ccpn.SampleComponent in which ccpn.SpectrumHit is found&quot;</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">getter</span>
 
-<span class="c"># Connections to parents:</span>
+<span class="c1"># Connections to parents:</span>
 
 <span class="k">def</span> <span class="nf">_newSampleComponent</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Sample</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">concentration</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">concentrationError</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">concentrationUnit</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">purity</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleComponent</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new ccpn.SampleComponent within ccpn.Sample</span>
+  <span class="sd">&quot;&quot;&quot;Create new SampleComponent within Sample</span>
 
 <span class="sd">  Automatically creates the corresponding Substance if the name is not already taken</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="c"># Default values for &#39;new&#39; function, as used for echoing to console</span>
+  <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-    <span class="p">((</span><span class="s">&#39;name&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;labeling&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-     <span class="p">(</span><span class="s">&#39;concentration&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;concentrationError&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;concentrationUnit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-     <span class="p">(</span><span class="s">&#39;purity&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+    <span class="p">((</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;labeling&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;concentration&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;concentrationError&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;concentrationUnit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;purity&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
      <span class="p">)</span>
   <span class="p">)</span>
 
   <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.SampleComponent id: </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.SampleComponent id: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
                        <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">))</span>
 
 
   <span class="k">if</span> <span class="n">concentrationUnit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-      <span class="s">&quot;Unsupported value </span><span class="si">%s</span><span class="s"> for SampleComponent.concentrationUnit&quot;</span>
+      <span class="s2">&quot;Unsupported value </span><span class="si">%s</span><span class="s2"> for SampleComponent.concentrationUnit&quot;</span>
       <span class="o">%</span> <span class="n">concentrationUnit</span><span class="p">)</span>
 
   <span class="n">apiSample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newSampleComponent&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newSampleComponent&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newSampleComponent&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSampleComponent&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">labeling</span><span class="p">)</span>
-    <span class="c"># NB - using substance._wrappedData.labeling because we need the API labeling value,</span>
-    <span class="c"># which is different for the default case</span>
+    <span class="c1"># NB - using substance._wrappedData.labeling because we need the API labeling value,</span>
+    <span class="c1"># which is different for the default case</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="n">apiSample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">substance</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">labeling</span><span class="p">,</span>
                                        <span class="n">concentration</span><span class="o">=</span><span class="n">concentration</span><span class="p">,</span>
                                        <span class="n">concentrationError</span><span class="o">=</span><span class="n">concentrationError</span><span class="p">,</span>
@@ -276,19 +276,19 @@
 <span class="n">Sample</span><span class="o">.</span><span class="n">newSampleComponent</span> <span class="o">=</span> <span class="n">_newSampleComponent</span>
 <span class="k">del</span> <span class="n">_newSampleComponent</span>
 
-<span class="c"># Notifiers - to notify SampleComponent - SpectrumHit link:</span>
+<span class="c1"># Notifiers - to notify SampleComponent - SpectrumHit link:</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">Experiment</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-  <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setSample&#39;</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;setSample&#39;</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">ApiSample</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span>
-     <span class="s">&#39;addNmrExperiment&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span>
-     <span class="s">&#39;removeNmrExperiment&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span>
-     <span class="s">&#39;setNmrExperiments&#39;</span><span class="p">),</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span>
+     <span class="s1">&#39;addNmrExperiment&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span>
+     <span class="s1">&#39;removeNmrExperiment&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;SampleComponent&#39;</span><span class="p">,</span><span class="s1">&#39;SpectrumHit&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span>
+     <span class="s1">&#39;setNmrExperiments&#39;</span><span class="p">),</span>
   <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>

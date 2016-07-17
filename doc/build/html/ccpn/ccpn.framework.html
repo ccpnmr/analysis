@@ -68,7 +68,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ccpn.framework.languages.html#module-ccpn.framework.languages.Dutch">ccpn.framework.languages.Dutch module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.framework.languages.html#module-ccpn.framework.languages.French">ccpn.framework.languages.French module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.framework.languages.html#module-ccpn.framework.languages.Italiano">ccpn.framework.languages.Italiano module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.framework.languages.html#module-ccpn.framework.languages.rude">ccpn.framework.languages.rude module</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="ccpn.framework.update.html">ccpn.framework.update package</a><ul>
@@ -89,11 +88,10 @@
 <dt id="ccpn.framework.Current.Current">
 <em class="property">class </em><code class="descclassname">ccpn.framework.Current.</code><code class="descname">Current</code><span class="sig-paren">(</span><em>project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Current.html#Current"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Current.Current" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.addIntegral">
-<code class="descname">addIntegral</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addIntegral" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
+<p>The current object gives access to the collection of active or selected objects and values.</p>
+<p>Currently implemented:
+nmrAtom (last selected nmrAtom); nmrAtoms (all selected nmrAtoms); nmrChain (last selected nmrChain); nmrChains (all selected nmrChains); nmrResidue (last selected nmrResidue); nmrResidues (all selected nmrResidues); peak (last selected peak); peaks (all selected peaks); position (last cursor position); positions (last cursor positions); cursorPosition (last cursor position - (posX,posY) tuple); spectrumGroup (current spectrum); strip (selected strip)</p>
+<p>Use print(current) to get a list of attribute, value pairs</p>
 <dl class="method">
 <dt id="ccpn.framework.Current.Current.addNmratom">
 <code class="descname">addNmratom</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addNmratom" title="Permalink to this definition">¶</a></dt>
@@ -117,36 +115,6 @@
 <dl class="method">
 <dt id="ccpn.framework.Current.Current.addPosition">
 <code class="descname">addPosition</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addPosition" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.addRegion">
-<code class="descname">addRegion</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addRegion" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.addSpectrum">
-<code class="descname">addSpectrum</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addSpectrum" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.addSpectrumdisplay">
-<code class="descname">addSpectrumdisplay</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addSpectrumdisplay" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.addSpectrumgroup">
-<code class="descname">addSpectrumgroup</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addSpectrumgroup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.addStrip">
-<code class="descname">addStrip</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addStrip" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.clearIntegrals">
-<code class="descname">clearIntegrals</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearIntegrals" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -174,144 +142,93 @@
 <code class="descname">clearPositions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearPositions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.clearRegions">
-<code class="descname">clearRegions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearRegions" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.clearSpectra">
-<code class="descname">clearSpectra</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearSpectra" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.clearSpectrumdisplays">
-<code class="descname">clearSpectrumdisplays</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearSpectrumdisplays" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.clearSpectrumgroups">
-<code class="descname">clearSpectrumgroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearSpectrumgroups" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.clearStrips">
-<code class="descname">clearStrips</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearStrips" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 <dl class="attribute">
-<dt id="ccpn.framework.Current.Current.integral">
-<code class="descname">integral</code><a class="headerlink" href="#ccpn.framework.Current.Current.integral" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current integral</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.integrals">
-<code class="descname">integrals</code><a class="headerlink" href="#ccpn.framework.Current.Current.integrals" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current integrals</p>
+<dt id="ccpn.framework.Current.Current.cursorPosition">
+<code class="descname">cursorPosition</code><a class="headerlink" href="#ccpn.framework.Current.Current.cursorPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current cursorPosition</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.nmrAtom">
 <code class="descname">nmrAtom</code><a class="headerlink" href="#ccpn.framework.Current.Current.nmrAtom" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current nmrAtom</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.nmrAtoms">
 <code class="descname">nmrAtoms</code><a class="headerlink" href="#ccpn.framework.Current.Current.nmrAtoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current nmrAtoms</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.nmrChain">
 <code class="descname">nmrChain</code><a class="headerlink" href="#ccpn.framework.Current.Current.nmrChain" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current nmrChain</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.nmrChains">
 <code class="descname">nmrChains</code><a class="headerlink" href="#ccpn.framework.Current.Current.nmrChains" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current nmrChains</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.nmrResidue">
 <code class="descname">nmrResidue</code><a class="headerlink" href="#ccpn.framework.Current.Current.nmrResidue" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current nmrResidue</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.nmrResidues">
 <code class="descname">nmrResidues</code><a class="headerlink" href="#ccpn.framework.Current.Current.nmrResidues" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current nmrResidues</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.peak">
 <code class="descname">peak</code><a class="headerlink" href="#ccpn.framework.Current.Current.peak" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current peak</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.peaks">
 <code class="descname">peaks</code><a class="headerlink" href="#ccpn.framework.Current.Current.peaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current peaks</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.position">
 <code class="descname">position</code><a class="headerlink" href="#ccpn.framework.Current.Current.position" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current position</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.positions">
 <code class="descname">positions</code><a class="headerlink" href="#ccpn.framework.Current.Current.positions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current positions</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.project">
 <code class="descname">project</code><a class="headerlink" href="#ccpn.framework.Current.Current.project" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em> - 
+<dd><p>- <em>None</em>, <em>immutable</em> - 
 Project attached to current</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.region">
-<code class="descname">region</code><a class="headerlink" href="#ccpn.framework.Current.Current.region" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current region</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.regions">
-<code class="descname">regions</code><a class="headerlink" href="#ccpn.framework.Current.Current.regions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current regions</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.framework.Current.Current.registerNotify">
 <code class="descname">registerNotify</code><span class="sig-paren">(</span><em>notify</em>, <em>field</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Current.html#Current.registerNotify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Current.Current.registerNotify" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.removeIntegral">
-<code class="descname">removeIntegral</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeIntegral" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -339,85 +256,18 @@ Current regions</p>
 <code class="descname">removePosition</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removePosition" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.removeRegion">
-<code class="descname">removeRegion</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeRegion" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.removeSpectrum">
-<code class="descname">removeSpectrum</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeSpectrum" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.removeSpectrumdisplay">
-<code class="descname">removeSpectrumdisplay</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeSpectrumdisplay" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.removeSpectrumgroup">
-<code class="descname">removeSpectrumgroup</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeSpectrumgroup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Current.Current.removeStrip">
-<code class="descname">removeStrip</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeStrip" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.spectra">
-<code class="descname">spectra</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectra" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current spectra</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.spectrum">
-<code class="descname">spectrum</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrum" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current spectrum</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.spectrumDisplay">
-<code class="descname">spectrumDisplay</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrumDisplay" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current spectrumDisplay</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.spectrumDisplays">
-<code class="descname">spectrumDisplays</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrumDisplays" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current spectrumDisplays</p>
-</dd></dl>
-
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.spectrumGroup">
 <code class="descname">spectrumGroup</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrumGroup" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current spectrumGroup</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.spectrumGroups">
-<code class="descname">spectrumGroups</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrumGroups" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current spectrumGroups</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.strip">
 <code class="descname">strip</code><a class="headerlink" href="#ccpn.framework.Current.Current.strip" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
+<dd><p>- <em>None</em>, <em>mutable</em> - 
 Current strip</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.framework.Current.Current.strips">
-<code class="descname">strips</code><a class="headerlink" href="#ccpn.framework.Current.Current.strips" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em>, <em>settable</em> - 
-Current strips</p>
 </dd></dl>
 
 <dl class="method">
@@ -426,6 +276,12 @@ Current strips</p>
 <dd><p>Remove &#8216;current&#8217; notifier</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.framework.Current.noCap">
+<code class="descclassname">ccpn.framework.Current.</code><code class="descname">noCap</code><span class="sig-paren">(</span><em>string</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Current.html#noCap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Current.noCap" title="Permalink to this definition">¶</a></dt>
+<dd><p>return de-capitalised string</p>
 </dd></dl>
 
 </div>
@@ -467,8 +323,7 @@ Current strips</p>
 <dt id="ccpn.framework.Framework.Framework">
 <em class="property">class </em><code class="descclassname">ccpn.framework.Framework.</code><code class="descname">Framework</code><span class="sig-paren">(</span><em>applicationName</em>, <em>applicationVersion</em>, <em>args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>The Framework class is the base class for all applications
-It&#8217;s currently broken, so don&#8217;t use this if you want your application to actually work!</p>
+<p>The Framework class is the base class for all applications.</p>
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.addApplicationMenuSpec">
 <code class="descname">addApplicationMenuSpec</code><span class="sig-paren">(</span><em>spec</em>, <em>position=3</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.addApplicationMenuSpec"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.addApplicationMenuSpec" title="Permalink to this definition">¶</a></dt>
@@ -512,6 +367,11 @@ It&#8217;s currently broken, so don&#8217;t use this if you want your applicatio
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Framework.Framework.defineShortcut">
+<code class="descname">defineShortcut</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.defineShortcut"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.defineShortcut" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Framework.Framework.defineUserShortcuts">
 <code class="descname">defineUserShortcuts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.defineUserShortcuts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.defineUserShortcuts" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -522,8 +382,18 @@ It&#8217;s currently broken, so don&#8217;t use this if you want your applicatio
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Framework.Framework.getByGid">
+<code class="descname">getByGid</code><span class="sig-paren">(</span><em>gid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.getByGid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.getByGid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Framework.Framework.getByPid">
 <code class="descname">getByPid</code><span class="sig-paren">(</span><em>pid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.getByPid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.getByPid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Framework.Framework.getPluginMenuItems">
+<code class="descname">getPluginMenuItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.getPluginMenuItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.getPluginMenuItems" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -617,7 +487,7 @@ runs the selected macro.</p>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.saveProject">
-<code class="descname">saveProject</code><span class="sig-paren">(</span><em>newPath=None</em>, <em>createFallback=True</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.saveProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.saveProject" title="Permalink to this definition">¶</a></dt>
+<code class="descname">saveProject</code><span class="sig-paren">(</span><em>newPath=None</em>, <em>createFallback=True</em>, <em>overwriteExisting=True</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.saveProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.saveProject" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save project to newPath and return True if successful</p>
 </dd></dl>
 
@@ -713,13 +583,15 @@ Item C is disabled by default and has a shortcut of ‘ic’</p>
 <p>If we’re using the PyQt GUI, we can get the Qt action representing Item B2 somewhere in our code
 (for example, to change the checked status,) via:</p>
 <blockquote>
-<div>action = framework.ui.mainWindow.getMenuAction(‘Test-&gt;Submenu B-&gt;Item B2’)
+<div>action = application.ui.mainWindow.getMenuAction(‘Test-&gt;Submenu B-&gt;Item B2’)
 action.setChecked(True)</div></blockquote>
+<p>To see how to add items dynamically, see clearRecentProjects in this class and
+_fillRecentProjectsMenu in GuiMainWindow</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.framework.Framework.Framework.showAboutCcpnPopup">
-<code class="descname">showAboutCcpnPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showAboutCcpnPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showAboutCcpnPopup" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.framework.Framework.Framework.showAboutCcpn">
+<code class="descname">showAboutCcpn</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showAboutCcpn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showAboutCcpn" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -755,6 +627,11 @@ action.setChecked(True)</div></blockquote>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Framework.Framework.showCcpnLicense">
+<code class="descname">showCcpnLicense</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showCcpnLicense"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showCcpnLicense" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showChemicalShiftTable">
 <code class="descname">showChemicalShiftTable</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showChemicalShiftTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showChemicalShiftTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays Chemical Shift table.</p>
@@ -784,6 +661,11 @@ action.setChecked(True)</div></blockquote>
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showIntegrationModule">
 <code class="descname">showIntegrationModule</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showIntegrationModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showIntegrationModule" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Framework.Framework.showIssuesList">
+<code class="descname">showIssuesList</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showIssuesList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showIssuesList" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -865,8 +747,8 @@ action.setChecked(True)</div></blockquote>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="ccpn.framework.Framework.Framework.showWrapperDocumentation">
-<code class="descname">showWrapperDocumentation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showWrapperDocumentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showWrapperDocumentation" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.framework.Framework.Framework.showVersion3Documentation">
+<code class="descname">showVersion3Documentation</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showVersion3Documentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showVersion3Documentation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays CCPN wrapper documentation in a module.</p>
 </dd></dl>
 
@@ -900,6 +782,11 @@ action.setChecked(True)</div></blockquote>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Framework.Framework.toggleToolbar">
+<code class="descname">toggleToolbar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.toggleToolbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.toggleToolbar" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Framework.Framework.undo">
 <code class="descname">undo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.undo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -920,12 +807,12 @@ return argparse instance</p>
 
 <dl class="function">
 <dt id="ccpn.framework.Framework.getPreferences">
-<code class="descclassname">ccpn.framework.Framework.</code><code class="descname">getPreferences</code><span class="sig-paren">(</span><em>skipUserPreferences=False</em>, <em>defaultPreferencesPath=None</em>, <em>userPreferencesPath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#getPreferences"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.getPreferences" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.framework.Framework.</code><code class="descname">getPreferences</code><span class="sig-paren">(</span><em>skipUserPreferences=False</em>, <em>defaultPath=None</em>, <em>userPath=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#getPreferences"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.getPreferences" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="ccpn.framework.Framework.getSaveDirectory">
-<code class="descclassname">ccpn.framework.Framework.</code><code class="descname">getSaveDirectory</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#getSaveDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.getSaveDirectory" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.framework.Framework.</code><code class="descname">getSaveDirectory</code><span class="sig-paren">(</span><em>preferences=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#getSaveDirectory"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.getSaveDirectory" title="Permalink to this definition">¶</a></dt>
 <dd><p>Opens save Project as dialog box and gets directory specified in the file dialog.</p>
 </dd></dl>
 
@@ -935,6 +822,10 @@ return argparse instance</p>
 <dd><p>Initial text to terminal</p>
 </dd></dl>
 
+</div>
+<div class="section" id="module-ccpn.framework.PathsAndUrls">
+<span id="ccpn-framework-pathsandurls-module"></span><h2>ccpn.framework.PathsAndUrls module<a class="headerlink" href="#module-ccpn.framework.PathsAndUrls" title="Permalink to this headline">¶</a></h2>
+<p>This file contains path definitions and Url definitions</p>
 </div>
 <div class="section" id="module-ccpn.framework.Translation">
 <span id="ccpn-framework-translation-module"></span><h2>ccpn.framework.Translation module<a class="headerlink" href="#module-ccpn.framework.Translation" title="Permalink to this headline">¶</a></h2>
@@ -969,6 +860,7 @@ translator.setDebug(True)</p>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
 <li><a class="reference internal" href="#module-ccpn.framework.Current">ccpn.framework.Current module</a></li>
 <li><a class="reference internal" href="#module-ccpn.framework.Framework">ccpn.framework.Framework module</a></li>
+<li><a class="reference internal" href="#module-ccpn.framework.PathsAndUrls">ccpn.framework.PathsAndUrls module</a></li>
 <li><a class="reference internal" href="#module-ccpn.framework.Translation">ccpn.framework.Translation module</a></li>
 </ul>
 </li>

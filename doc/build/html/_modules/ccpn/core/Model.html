@@ -47,28 +47,28 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.Model</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
@@ -80,33 +80,30 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">Model</span> <span class="k">as</span> <span class="n">ApiModel</span>
 
 
-<span class="c"># from ccpn.util import Pid</span>
-
-
 <div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; ccpn.Model - Structural Model, or one member of the structure ensemble.&quot;&quot;&quot;</span>
   
-  <span class="c">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;MD&#39;</span>
+  <span class="c1">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;MD&#39;</span>
 
-  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;Model&#39;</span>
+  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Model&#39;</span>
 
   <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">StructureEnsemble</span>
 
-  <span class="c">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;models&#39;</span>
+  <span class="c1">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;models&#39;</span>
 
-  <span class="c">#: List of child classes.</span>
+  <span class="c1">#: List of child classes.</span>
   <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c"># Qualified name of matching API class</span>
+  <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiModel</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="c"># CCPN properties</span>
+  <span class="c1"># CCPN properties</span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiModel</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; API Model matching ccpn.Model&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; API Model matching Model&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
   <span class="nd">@property</span>
@@ -121,14 +118,14 @@
     
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructureEnsemble</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;ccpn.StructureEnsemble containing ccpn.Model.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;StructureEnsemble containing Model.&quot;&quot;&quot;</span>
     <span class="k">return</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">structureEnsemble</span><span class="p">]</span>
   
   <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="n">_parent</span>
   
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">title</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;title of Model&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;title of Model (not used in PID).&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
 
   <span class="nd">@title.setter</span>
@@ -183,11 +180,11 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">atomNameData</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;atomCount length numpy array of model-specific atom names.&quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
 
   <span class="nd">@atomNameData.setter</span>
   <span class="k">def</span> <span class="nf">atomNameData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
 
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">StructureEnsemble</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
@@ -203,40 +200,40 @@
 <span class="sd">  CoordinateData can be a numpy.ndarray of the right shape,</span>
 <span class="sd">  or any nested list or tuple representation that contains the right number of elements&quot;&quot;&quot;</span>
 
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;title&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                      <span class="p">(</span><span class="s">&#39;coordinateData&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                      <span class="p">(</span><span class="s">&#39;bFactorData&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                      <span class="p">(</span><span class="s">&#39;occupancyData&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                      <span class="p">(</span><span class="s1">&#39;coordinateData&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                      <span class="p">(</span><span class="s1">&#39;bFactorData&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                      <span class="p">(</span><span class="s1">&#39;occupancyData&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
                                       <span class="p">)</span>
                                      <span class="p">)</span>
 
   <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newModel&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newModel&#39;</span><span class="p">)</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span> <span class="c"># delay notifiers till model is fully ready</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newModel&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newModel&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span> <span class="c1"># delay notifiers till model is fully ready</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">coordinateData</span><span class="p">:</span>
       <span class="n">atomCount</span> <span class="o">=</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">nAtoms</span>
-      <span class="c"># Sanity check - filter out (most?) wrongly shaped arrays</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">coordinateData</span><span class="p">,</span> <span class="s">&#39;shape&#39;</span><span class="p">):</span>
+      <span class="c1"># Sanity check - filter out (most?) wrongly shaped arrays</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">coordinateData</span><span class="p">,</span> <span class="s1">&#39;shape&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">coordinateData</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">atomCount</span><span class="p">,</span><span class="mi">3</span><span class="p">):</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;numpy.ndarray input not of correct shape (</span><span class="si">%s</span><span class="s">,3)&quot;</span> <span class="o">%</span> <span class="n">atomCount</span><span class="p">)</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;numpy.ndarray input not of correct shape (</span><span class="si">%s</span><span class="s2">,3)&quot;</span> <span class="o">%</span> <span class="n">atomCount</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinateData</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">atomCount</span><span class="p">,</span> <span class="mi">3</span><span class="o">*</span><span class="n">atomCount</span><span class="p">):</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;nested sequence input does not match </span><span class="si">%s</span><span class="s">*3 array&quot;</span> <span class="o">%</span> <span class="n">atomCount</span><span class="p">)</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;nested sequence input does not match </span><span class="si">%s</span><span class="s2">*3 array&quot;</span> <span class="o">%</span> <span class="n">atomCount</span><span class="p">)</span>
 
       <span class="n">coordinateData</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">flattenIfNumpy</span><span class="p">(</span><span class="n">coordinateData</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="p">(</span><span class="n">atomCount</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
 
     <span class="n">newApiModel</span> <span class="o">=</span> <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">newModel</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">coordinateData</span><span class="p">:</span>
-      <span class="n">newApiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s">&#39;coordinates&#39;</span><span class="p">,</span> <span class="n">coordinateData</span><span class="p">)</span>
+      <span class="n">newApiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s1">&#39;coordinates&#39;</span><span class="p">,</span> <span class="n">coordinateData</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">occupancyData</span><span class="p">:</span>
-      <span class="n">newApiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s">&#39;occupancies&#39;</span><span class="p">,</span> <span class="n">occupancyData</span><span class="p">)</span>
+      <span class="n">newApiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s1">&#39;occupancies&#39;</span><span class="p">,</span> <span class="n">occupancyData</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">bFactorData</span><span class="p">:</span>
-      <span class="n">newApiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s">&#39;bFactors&#39;</span><span class="p">,</span> <span class="n">bFactorData</span><span class="p">)</span>
-    <span class="c"># remove cached matrices, which are now out of date:</span>
-    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;_coordinateData&#39;</span><span class="p">,</span> <span class="s">&#39;_occupancyData&#39;</span><span class="p">,</span> <span class="s">&#39;_bFactorData&#39;</span><span class="p">):</span>
+      <span class="n">newApiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s1">&#39;bFactors&#39;</span><span class="p">,</span> <span class="n">bFactorData</span><span class="p">)</span>
+    <span class="c1"># remove cached matrices, which are now out of date:</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;_coordinateData&#39;</span><span class="p">,</span> <span class="s1">&#39;_occupancyData&#39;</span><span class="p">,</span> <span class="s1">&#39;_bFactorData&#39;</span><span class="p">):</span>
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
         <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
@@ -245,25 +242,25 @@
 
   <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiModel</span><span class="p">)</span>
 
-  <span class="c"># Do creation notifications</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;create&#39;</span><span class="p">)</span>
-  <span class="c">#</span>
+  <span class="c1"># Do creation notifications</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">)</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="c"># Connections to parents:</span>
+<span class="c1"># Connections to parents:</span>
 <span class="n">StructureEnsemble</span><span class="o">.</span><span class="n">newModel</span> <span class="o">=</span> <span class="n">_newModel</span>
 <span class="k">del</span> <span class="n">_newModel</span>
 
-<span class="c"># Notifiers:</span>
+<span class="c1"># Notifiers:</span>
 
-<span class="c"># Must be done with API notifiers as it rewuires a predelete notifier.</span>
+<span class="c1"># Must be done with API notifiers as it rewuires a predelete notifier.</span>
 <span class="k">def</span> <span class="nf">_flushCachedData</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">apiModel</span><span class="p">:</span><span class="n">ApiModel</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Flush cached data to ensure up-to-date data are saved&quot;&quot;&quot;</span>
   <span class="n">structureEnsemble</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiModel</span><span class="p">]</span><span class="o">.</span><span class="n">structureEnsemble</span>
   <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">_flushCachedData</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-  <span class="p">(</span><span class="s">&#39;_flushCachedData&#39;</span><span class="p">,</span> <span class="p">{},</span>  <span class="n">ApiModel</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s">&#39;preDelete&#39;</span><span class="p">),</span>
+  <span class="p">(</span><span class="s1">&#39;_flushCachedData&#39;</span><span class="p">,</span> <span class="p">{},</span>  <span class="n">ApiModel</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="s1">&#39;preDelete&#39;</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 

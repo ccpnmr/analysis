@@ -47,34 +47,34 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.lib.Util</h1><div class="highlight"><pre>
-<span class="sd">&quot;&quot;&quot;CCPN-level utility code independent of model content</span>
+<span></span><span class="sd">&quot;&quot;&quot;CCPN-level utility code independent of model content</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Path</span> <span class="kn">import</span> <span class="n">joinPath</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-06-14 14:06:23 +0100 (Tue, 14 Jun 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-06-14 14:06:23 +0100 (Tue, 14 Jun 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9460 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 
 <div class="viewcode-block" id="pid2PluralName"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.pid2PluralName">[docs]</a><span class="k">def</span> <span class="nf">pid2PluralName</span><span class="p">(</span><span class="n">pid</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -88,37 +88,38 @@
   <span class="k">else</span><span class="p">:</span>
     <span class="k">return</span> <span class="n">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span></div>
 
-<span class="c"># Atom ID</span>
-<span class="n">AtomIdTuple</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s">&#39;AtomIdTuple&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s">&#39;chainCode&#39;</span><span class="p">,</span> <span class="s">&#39;sequenceCode&#39;</span><span class="p">,</span>
-                                                     <span class="s">&#39;residueType&#39;</span><span class="p">,</span> <span class="s">&#39;atomName&#39;</span><span class="p">,</span> <span class="p">])</span>
+<span class="c1"># Atom ID</span>
+<span class="n">AtomIdTuple</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;AtomIdTuple&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="s1">&#39;sequenceCode&#39;</span><span class="p">,</span>
+                                                     <span class="s1">&#39;residueType&#39;</span><span class="p">,</span> <span class="s1">&#39;atomName&#39;</span><span class="p">,</span> <span class="p">])</span>
 
 
-<div class="viewcode-block" id="expandDollarFilePath"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.expandDollarFilePath">[docs]</a><span class="k">def</span> <span class="nf">expandDollarFilePath</span><span class="p">(</span><span class="n">dataLocationStore</span><span class="p">:</span><span class="s">&#39;DataLocationStore&#39;</span><span class="p">,</span> <span class="n">filePath</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<div class="viewcode-block" id="expandDollarFilePath"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.expandDollarFilePath">[docs]</a><span class="k">def</span> <span class="nf">expandDollarFilePath</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="s1">&#39;Project&#39;</span><span class="p">,</span> <span class="n">filePath</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Expand paths that start with $REPOSITORY to full path</span>
 
 <span class="sd">  NBNB Should be moved to ccpnmodel.ccpncore.lib.ccp.general.DataLocation.DataLocationstore&quot;&quot;&quot;</span>
 
-  <span class="c"># Convert from custom repository names to full names</span>
+  <span class="c1"># Convert from custom repository names to full names</span>
   <span class="n">stdRepositoryNames</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">&#39;$INSIDE/&#39;</span><span class="p">:</span><span class="s">&#39;insideData&#39;</span><span class="p">,</span>
-    <span class="s">&#39;$ALONGSIDE/&#39;</span><span class="p">:</span><span class="s">&#39;alongsideData&#39;</span><span class="p">,</span>
-    <span class="s">&#39;$DATA/&#39;</span><span class="p">:</span><span class="s">&#39;remoteData&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$INSIDE/&#39;</span><span class="p">:</span><span class="s1">&#39;insideData&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$ALONGSIDE/&#39;</span><span class="p">:</span><span class="s1">&#39;alongsideData&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;$DATA/&#39;</span><span class="p">:</span><span class="s1">&#39;remoteData&#39;</span><span class="p">,</span>
   <span class="p">}</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">filePath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;$&#39;</span><span class="p">):</span>
-    <span class="c"># Nothing to expand</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">filePath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">):</span>
+    <span class="c1"># Nothing to expand</span>
     <span class="k">return</span> <span class="n">filePath</span>
 
+  <span class="n">dataLocationStore</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstDataLocationStore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span>
+
   <span class="k">if</span> <span class="n">dataLocationStore</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="c"># No DataLocationStore to work with</span>
-    <span class="k">return</span>
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Coding error - standard DataLocationStore has not been set&quot;</span><span class="p">)</span>
 
   <span class="k">for</span> <span class="n">prefix</span><span class="p">,</span><span class="n">dataUrlName</span> <span class="ow">in</span> <span class="n">stdRepositoryNames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
       <span class="n">dataUrl</span> <span class="o">=</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">dataUrlName</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">dataUrl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">joinPath</span><span class="p">(</span><span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">filePath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):])</span>
-  <span class="c">#</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="n">filePath</span></div>
 
 
@@ -166,15 +167,15 @@
         <span class="k">if</span> <span class="n">val</span> <span class="o">!=</span> <span class="n">default</span><span class="p">:</span>
           <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">pid</span>
-          <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
+          <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
           <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">pid</span>
-        <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;</span><span class="si">%s</span><span class="s">=</span><span class="si">%s</span><span class="s">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
-  <span class="c">#</span>
-  <span class="k">return</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
+        <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">val</span><span class="p">)))</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span></div>
 </pre></div>
 
           </div>

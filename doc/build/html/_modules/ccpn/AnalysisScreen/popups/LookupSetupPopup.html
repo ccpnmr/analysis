@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisScreen.popups.LookupSetupPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisScreen.popups.LookupSetupPopup</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Slider</span> <span class="kn">import</span> <span class="n">Slider</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
+
+
+<div class="viewcode-block" id="LookupSetupPopup"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.LookupSetupPopup.LookupSetupPopup">[docs]</a><span class="k">class</span> <span class="nc">LookupSetupPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">LookupSetupPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">colourScheme</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setWidgets</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Lookup Setup&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">300</span><span class="p">,</span> <span class="mi">400</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_setWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># self.lineInfo = Label(self, &#39;Reference Path&#39;)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setPathDetectorWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setButtons</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="LookupSetupPopup.setPathDetectorWidget"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.LookupSetupPopup.LookupSetupPopup.setPathDetectorWidget">[docs]</a>  <span class="k">def</span> <span class="nf">setPathDetectorWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pathDetectorWidget</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rightMouseCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pathDetectorWidget</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pathDetectorWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathDetectorWidget</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;dropped&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPathFromDrop</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pathDetectorWidget</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LookupSetupPopup.setButtons"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.LookupSetupPopup.LookupSetupPopup.setButtons">[docs]</a>  <span class="k">def</span> <span class="nf">setButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">performButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Clear&#39;</span><span class="p">,</span><span class="s1">&#39;Export&#39;</span><span class="p">,</span> <span class="s1">&#39;Confirm&#39;</span><span class="p">],</span>
+                                           <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clearList</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exportPathsToXlsx</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
+                                           <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">performButtons</span><span class="p">)</span></div>
+
+
+  <span class="k">def</span> <span class="nf">_getPathFromDrop</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pathsList</span><span class="p">):</span>
+    <span class="c1"># return pathsList</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">populatePathWidget</span><span class="p">(</span><span class="n">pathsList</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LookupSetupPopup.populatePathWidget"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.LookupSetupPopup.LookupSetupPopup.populatePathWidget">[docs]</a>  <span class="k">def</span> <span class="nf">populatePathWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+      <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+      <span class="n">item</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pathDetectorWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_clearList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pathDetectorWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_exportPathsToXlsx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Export a simple xlxs with reference Path &#39;&#39;&#39;</span>
+    <span class="n">dataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createDataFrame</span><span class="p">()</span>
+
+    <span class="n">fType</span> <span class="o">=</span> <span class="s1">&#39;XLS (*.xls)&#39;</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span>
+    <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">fType</span><span class="p">)</span>
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Reference&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createDataFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">({</span>
+                   <span class="s1">&#39;SpectrumPath&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;groupName&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;expType&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;id&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;comments&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;substanceSmiles&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;stereoInfo&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;molecularMass&#39;</span><span class="p">:</span> <span class="p">[],</span>
+                   <span class="s1">&#39;substanceEmpiricalFormula&#39;</span><span class="p">:</span> <span class="p">[]</span>
+                    <span class="p">},</span>
+                   <span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

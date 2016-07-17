@@ -41,12 +41,4 @@ ccpn.framework.languages.Italiano module
     :undoc-members:
     :show-inheritance:
 
-ccpn.framework.languages.rude module
-------------------------------------
-
-.. automodule:: ccpn.framework.languages.rude
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 

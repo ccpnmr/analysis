@@ -47,29 +47,29 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.Ticks</h1><div class="highlight"><pre>
-<span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9315 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9315 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 <span class="sd">&quot;&quot;&quot;Ticks-related utilities</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -137,10 +137,10 @@
   <span class="k">if</span> <span class="n">dd</span> <span class="o">&gt;=</span> <span class="mi">1000</span><span class="p">:</span>
     <span class="n">nn</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">A</span><span class="o">*</span><span class="n">dd</span><span class="p">)</span><span class="o">/</span><span class="n">log</span><span class="p">(</span><span class="mi">10</span><span class="p">)))</span>
     <span class="n">numberDecimals</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">nn</span><span class="o">-</span><span class="n">n</span><span class="p">)</span>
-    <span class="n">majorFormat</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">.</span><span class="si">%d</span><span class="s">e&#39;</span> <span class="o">%</span> <span class="n">numberDecimals</span>
+    <span class="n">majorFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">.</span><span class="si">%d</span><span class="s1">e&#39;</span> <span class="o">%</span> <span class="n">numberDecimals</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">numberDecimals</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">minDecimalPlaces</span><span class="p">,</span> <span class="o">-</span><span class="n">n</span><span class="p">)</span>
-    <span class="n">majorFormat</span> <span class="o">=</span> <span class="s">&#39;</span><span class="si">%%</span><span class="s">.</span><span class="si">%d</span><span class="s">f&#39;</span> <span class="o">%</span> <span class="n">numberDecimals</span>
+    <span class="n">majorFormat</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">.</span><span class="si">%d</span><span class="s1">f&#39;</span> <span class="o">%</span> <span class="n">numberDecimals</span>
 
   <span class="n">d</span> <span class="o">=</span> <span class="n">deltaMinor</span> <span class="o">=</span> <span class="n">deltaMajor</span>
   <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -158,7 +158,7 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">d</span> <span class="o">=</span> <span class="n">d</span> <span class="o">/</span> <span class="mi">2</span>
 
-  <span class="n">minorTicks</span> <span class="o">=</span> <span class="n">_calcTicks</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">deltaMinor</span><span class="p">)</span>  <span class="c"># this includes majorTicks (so could remove those)</span>
+  <span class="n">minorTicks</span> <span class="o">=</span> <span class="n">_calcTicks</span><span class="p">(</span><span class="n">s0</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">deltaMinor</span><span class="p">)</span>  <span class="c1"># this includes majorTicks (so could remove those)</span>
   
   <span class="k">return</span> <span class="n">majorTicks</span><span class="p">,</span> <span class="n">minorTicks</span><span class="p">,</span> <span class="n">majorFormat</span></div>
 

@@ -47,63 +47,63 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.updateHeader</h1><div class="highlight"><pre>
-<span class="c">#  NBNB TBD FIXME. OBSOLETE. moved. remove</span>
+<span></span><span class="c1">#  NBNB TBD FIXME. OBSOLETE. moved. remove</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="n">moduleDoc</span> <span class="o">=</span> <span class="s">&#39;&#39;&#39;&quot;&quot;&quot;Module Documentation here</span>
+<span class="n">moduleDoc</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;&quot;&quot;&quot;Module Documentation here</span>
 
-<span class="s">&quot;&quot;&quot;</span>
-<span class="s">&#39;&#39;&#39;</span>
+<span class="s1">&quot;&quot;&quot;</span>
+<span class="s1">&#39;&#39;&#39;</span>
 
-<span class="n">template</span><span class="o">=</span><span class="s">&#39;&#39;&#39;#=========================================================================================</span>
-<span class="s"># Licence, Reference and Credits</span>
-<span class="s">#=========================================================================================</span>
-<span class="s">__copyright__ = &quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="s">__credits__ = &quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="s">__license__ = (&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-<span class="s">              &quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;)</span>
-<span class="s">__reference__ = (&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-<span class="s">                &quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;)</span>
+<span class="n">template</span><span class="o">=</span><span class="s1">&#39;&#39;&#39;#=========================================================================================</span>
+<span class="s1"># Licence, Reference and Credits</span>
+<span class="s1">#=========================================================================================</span>
+<span class="s1">__copyright__ = &quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="s1">__credits__ = &quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="s1">__license__ = (&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+<span class="s1">              &quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;)</span>
+<span class="s1">__reference__ = (&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+<span class="s1">                &quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;)</span>
 
-<span class="s">#=========================================================================================</span>
-<span class="s"># Last code modification:</span>
-<span class="s">#=========================================================================================</span>
-<span class="s">__author__ = &quot;$Author: rhfogh $&quot;</span>
-<span class="s">__date__ = &quot;$Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="s">__version__ = &quot;$Revision: 9320 $&quot;</span>
+<span class="s1">#=========================================================================================</span>
+<span class="s1"># Last code modification:</span>
+<span class="s1">#=========================================================================================</span>
+<span class="s1">__author__ = &quot;$Author: rhfogh $&quot;</span>
+<span class="s1">__date__ = &quot;$Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="s1">__version__ = &quot;$Revision: 9320 $&quot;</span>
 
-<span class="s">#=========================================================================================</span>
-<span class="s"># Start of code</span>
-<span class="s">#=========================================================================================</span>
-<span class="s">&#39;&#39;&#39;</span>
+<span class="s1">#=========================================================================================</span>
+<span class="s1"># Start of code</span>
+<span class="s1">#=========================================================================================</span>
+<span class="s1">&#39;&#39;&#39;</span>
 
-<span class="n">excludeFiles</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;__init__.py&#39;</span><span class="p">}</span>
-<span class="n">excludeDirs</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;api&#39;</span><span class="p">,</span> <span class="s">&#39;apiDoc&#39;</span><span class="p">,</span> <span class="s">&#39;xml&#39;</span><span class="p">}</span>
-<span class="n">suffixMatch</span> <span class="o">=</span> <span class="s">&#39;.py&#39;</span>
+<span class="n">excludeFiles</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;__init__.py&#39;</span><span class="p">}</span>
+<span class="n">excludeDirs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;api&#39;</span><span class="p">,</span> <span class="s1">&#39;apiDoc&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">}</span>
+<span class="n">suffixMatch</span> <span class="o">=</span> <span class="s1">&#39;.py&#39;</span>
 
 <span class="n">startMatchCount</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="n">endMatchCount</span> <span class="o">=</span> <span class="mi">3</span>
 
-<span class="n">templateLines</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-<span class="n">startMatch</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">templateLines</span><span class="p">[:</span><span class="n">startMatchCount</span><span class="p">])</span>
-<span class="n">endMatch</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">templateLines</span><span class="p">[</span><span class="o">-</span><span class="n">endMatchCount</span><span class="p">:])</span>
+<span class="n">templateLines</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">startMatch</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">templateLines</span><span class="p">[:</span><span class="n">startMatchCount</span><span class="p">])</span>
+<span class="n">endMatch</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">templateLines</span><span class="p">[</span><span class="o">-</span><span class="n">endMatchCount</span><span class="p">:])</span>
 
 <span class="n">curDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
 <span class="n">thisFile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">curDir</span><span class="p">,</span> <span class="n">__file__</span><span class="p">)</span>
 
 <div class="viewcode-block" id="updateFile"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.updateHeader.updateFile">[docs]</a><span class="k">def</span> <span class="nf">updateFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
 
-  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s">&#39;rU&#39;</span><span class="p">)</span>
+  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
   <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
   <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
   <span class="n">n1</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">startMatch</span><span class="p">)</span>
   <span class="n">n2</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">endMatch</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">n1</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n2</span> <span class="o">&gt;</span> <span class="n">n1</span><span class="p">:</span> <span class="c"># have a match</span>
+  <span class="k">if</span> <span class="n">n1</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">n2</span> <span class="o">&gt;</span> <span class="n">n1</span><span class="p">:</span> <span class="c1"># have a match</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[:</span><span class="n">n1</span><span class="p">]</span> <span class="o">+</span> <span class="n">template</span> <span class="o">+</span> <span class="n">data</span><span class="p">[</span><span class="n">n2</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">endMatch</span><span class="p">):]</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">moduleDoc</span> <span class="o">+</span> <span class="n">template</span> <span class="o">+</span> <span class="n">data</span>
-  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s">&#39;w&#39;</span><span class="p">)</span>
+  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
   <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
   <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
@@ -119,7 +119,7 @@
       <span class="k">if</span> <span class="n">relFile</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">excludeDirs</span><span class="p">:</span>
         <span class="n">visitDirectory</span><span class="p">(</span><span class="n">absFile</span><span class="p">)</span></div>
       
-<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
 
   <span class="n">visitDirectory</span><span class="p">(</span><span class="n">curDir</span><span class="p">)</span>
 </pre></div>

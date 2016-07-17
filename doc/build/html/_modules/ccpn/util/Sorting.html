@@ -47,31 +47,31 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.Sorting</h1><div class="highlight"><pre>
+<span></span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># FUnctions for sorting and comparison.</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># FUnctions for sorting and comparison.</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9315 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9315 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1"># NBNB TBD 1) Add SMALLEST and LARGEST sorting sentinels</span>
 
-<span class="c"># NBNB TBD 1) Add SMALLEST and LARGEST sorting sentinels</span>
-
-<span class="c"># NBNB TBD 2) Support circular data structures by making circular keys for them</span>
+<span class="c1"># NBNB TBD 2) Support circular data structures by making circular keys for them</span>
 
 
 <span class="kn">import</span> <span class="nn">math</span>
@@ -79,21 +79,21 @@
 <span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
-<span class="n">NEGINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;-Infinity&#39;</span><span class="p">)</span>
-<span class="n">POSINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;Infinity&#39;</span><span class="p">)</span>
-<span class="n">NUMERICSPLIT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s">&quot;([ ]*[+-]?\d+)&quot;</span><span class="p">)</span>
+<span class="n">NEGINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-Infinity&#39;</span><span class="p">)</span>
+<span class="n">POSINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Infinity&#39;</span><span class="p">)</span>
+<span class="n">NUMERICSPLIT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;([ ]*[+-]?\d+)&quot;</span><span class="p">)</span>
 
 <span class="n">sortOrder</span> <span class="o">=</span> <span class="p">[</span>
-  <span class="s">&#39;None&#39;</span><span class="p">,</span>
-  <span class="s">&#39;bool&#39;</span><span class="p">,</span>
-  <span class="s">&#39;NaN&#39;</span><span class="p">,</span>
-  <span class="s">&#39;Real&#39;</span><span class="p">,</span>
-  <span class="s">&#39;str&#39;</span><span class="p">,</span>
-  <span class="s">&#39;dict&#39;</span><span class="p">,</span>
-  <span class="s">&#39;list&#39;</span><span class="p">,</span>
-  <span class="s">&#39;tuple&#39;</span><span class="p">,</span>
-  <span class="s">&#39;ordered&#39;</span><span class="p">,</span>
-  <span class="s">&#39;unordered&#39;</span>
+  <span class="s1">&#39;None&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;bool&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;NaN&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Real&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;str&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;dict&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;list&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;tuple&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;ordered&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;unordered&#39;</span>
 <span class="p">]</span>
 <span class="n">_sortOrderDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sortOrder</span><span class="p">))</span>
 
@@ -103,7 +103,7 @@
 <span class="sd">  Can be overridden for custom grouping and keys&quot;&quot;&quot;</span>
   <span class="n">cls</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__class__</span>
   <span class="n">ordering</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="c">#</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="p">(</span><span class="n">ordering</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">cls</span><span class="p">),</span> <span class="n">key</span><span class="p">)</span>
 
 
@@ -112,10 +112,10 @@
 <span class="sd">  Uses class name, then class id, then __name__ and len() ( where available), then defaults to id()&quot;&quot;&quot;</span>
   <span class="n">cls</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__class__</span>
   <span class="n">ordering</span> <span class="o">=</span> <span class="mi">0</span>
-  <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__name__</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s">&#39;__name__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
-  <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s">&#39;__len__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__name__</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;__name__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span>
+  <span class="n">length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;__len__&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="mi">0</span>
   <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">ordering</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">cls</span><span class="p">),</span> <span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-  <span class="c">#</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="n">key</span>
 
 
@@ -144,22 +144,22 @@
   <span class="n">matches</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">NUMERICSPLIT</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
   <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">),</span> <span class="mi">2</span><span class="p">):</span>
     <span class="n">matches</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="n">ii</span><span class="p">]),</span> <span class="n">matches</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
-  <span class="c">#</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">_floatStringKey</span><span class="p">(</span><span class="n">key</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Get key if string evaluates to a float, empty tuple otherwise&quot;&quot;&quot;</span>
   <span class="k">try</span><span class="p">:</span>
-    <span class="c"># first strings that evaluate to floats</span>
+    <span class="c1"># first strings that evaluate to floats</span>
     <span class="n">floatkey</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">floatkey</span><span class="p">):</span>
-      <span class="c"># Put NaN before -Infinity</span>
-      <span class="k">return</span> <span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,(</span><span class="n">NEGINFINITY</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">),</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+      <span class="c1"># Put NaN before -Infinity</span>
+      <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,(</span><span class="n">NEGINFINITY</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="p">(</span><span class="s">&#39;&#39;</span><span class="p">,(</span><span class="n">floatkey</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,(</span><span class="n">floatkey</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
   <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-    <span class="c"># String did not evaluate to float - return empty tuple</span>
+    <span class="c1"># String did not evaluate to float - return empty tuple</span>
     <span class="k">return</span> <span class="p">()</span>
 
 <div class="viewcode-block" id="universalSortKey"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Sorting.universalSortKey">[docs]</a><span class="k">def</span> <span class="nf">universalSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">_stringOrderingHook</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">_orderedKeyHook</span><span class="o">=</span><span class="n">_orderedKey</span><span class="p">,</span>
@@ -189,76 +189,76 @@
 <span class="sd">  but does not define an ordering (as for sets), but it will sort these correctly by class.&quot;&quot;&quot;</span>
 
   <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s">&#39;_stringOrderingHook&#39;</span><span class="p">:</span><span class="n">_stringOrderingHook</span><span class="p">,</span>
-    <span class="s">&#39;_orderedKeyHook&#39;</span><span class="p">:</span><span class="n">_orderedKeyHook</span><span class="p">,</span>
-    <span class="s">&#39;_unorderedKeyHook&#39;</span><span class="p">:</span><span class="n">_unorderedKeyHook</span><span class="p">,</span>
+    <span class="s1">&#39;_stringOrderingHook&#39;</span><span class="p">:</span><span class="n">_stringOrderingHook</span><span class="p">,</span>
+    <span class="s1">&#39;_orderedKeyHook&#39;</span><span class="p">:</span><span class="n">_orderedKeyHook</span><span class="p">,</span>
+    <span class="s1">&#39;_unorderedKeyHook&#39;</span><span class="p">:</span><span class="n">_unorderedKeyHook</span><span class="p">,</span>
   <span class="p">}</span>
 
   <span class="k">if</span> <span class="n">key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;None&#39;</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
-    <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;bool&#39;</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;bool&#39;</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">Real</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;NaN&#39;</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;NaN&#39;</span>
       <span class="n">key</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;Real&#39;</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;Real&#39;</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;str&#39;</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;str&#39;</span>
     <span class="k">if</span> <span class="n">_stringOrderingHook</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">key</span> <span class="o">=</span> <span class="n">_stringOrderingHook</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-    <span class="c"># Not identical to the Python 2 behaviour</span>
-    <span class="c"># Compares by keys, then by values. Unordered dicts are sorted first.</span>
+    <span class="c1"># Not identical to the Python 2 behaviour</span>
+    <span class="c1"># Compares by keys, then by values. Unordered dicts are sorted first.</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">universalSortKey</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">**</span><span class="n">params</span><span class="p">),</span>
                     <span class="n">universalSortKey</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">**</span><span class="n">params</span><span class="p">))</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">key</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
         <span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-      <span class="c"># key = tuple(tt[0] for tt in items), tuple(tt[1] for tt in items))</span>
+      <span class="c1"># key = tuple(tt[0] for tt in items), tuple(tt[1] for tt in items))</span>
       <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">items</span><span class="p">))</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;dict&#39;</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;dict&#39;</span>
     <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
-      <span class="c"># Should be RecursionError from version 3.5 onwards</span>
-      <span class="c"># We have infinite recursion - default to generic object key</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;unordered&#39;</span>
+      <span class="c1"># Should be RecursionError from version 3.5 onwards</span>
+      <span class="c1"># We have infinite recursion - default to generic object key</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;unordered&#39;</span>
       <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">universalSortKey</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">key</span><span class="p">)</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;list&#39;</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;list&#39;</span>
     <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
-      <span class="c"># Should be RecursionError from version 3.5</span>
-      <span class="c"># We have infinite recursion - default to generic object key</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;unordered&#39;</span>
+      <span class="c1"># Should be RecursionError from version 3.5</span>
+      <span class="c1"># We have infinite recursion - default to generic object key</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;unordered&#39;</span>
       <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">universalSortKey</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">key</span><span class="p">)</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;tuple&#39;</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;tuple&#39;</span>
     <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
-      <span class="c"># Should be RecursionError from version 3.5 onwards</span>
-      <span class="c"># We have infinite recursion - default to generic object key</span>
-      <span class="c"># This should never happen for tuples, but better be safe.</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;unordered&#39;</span>
+      <span class="c1"># Should be RecursionError from version 3.5 onwards</span>
+      <span class="c1"># We have infinite recursion - default to generic object key</span>
+      <span class="c1"># This should never happen for tuples, but better be safe.</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;unordered&#39;</span>
       <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
   <span class="k">else</span><span class="p">:</span>
 
-    <span class="c"># Check for orderable types</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s">&#39;__lt__&#39;</span><span class="p">):</span>
+    <span class="c1"># Check for orderable types</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;__lt__&#39;</span><span class="p">):</span>
       <span class="k">try</span><span class="p">:</span>
-        <span class="c"># This should filter out most objects that abuse the comparison operators, like numpy,</span>
-        <span class="c"># pandas, SQL Alchemy, or sets.</span>
-        <span class="c"># Regrettably there is no way to know that a comparison operator that returns a Boolean</span>
-        <span class="c"># actually implements an ordering relation.</span>
+        <span class="c1"># This should filter out most objects that abuse the comparison operators, like numpy,</span>
+        <span class="c1"># pandas, SQL Alchemy, or sets.</span>
+        <span class="c1"># Regrettably there is no way to know that a comparison operator that returns a Boolean</span>
+        <span class="c1"># actually implements an ordering relation.</span>
         <span class="n">isOrderable</span> <span class="o">=</span> <span class="p">(((</span><span class="n">key</span> <span class="o">==</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">)</span> <span class="ow">and</span> <span class="p">((</span><span class="n">key</span> <span class="o">&gt;</span> <span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">)</span>
                        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)))</span>
       <span class="k">except</span><span class="p">:</span>
@@ -268,13 +268,13 @@
 
     <span class="n">cls</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__class__</span>
     <span class="k">if</span> <span class="n">isOrderable</span><span class="p">:</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;ordered&#39;</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;ordered&#39;</span>
       <span class="n">key</span> <span class="o">=</span> <span class="n">_orderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">category</span> <span class="o">=</span> <span class="s">&#39;unordered&#39;</span>
+      <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;unordered&#39;</span>
       <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-  <span class="c">#</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="p">(</span><span class="n">_sortOrderDict</span><span class="p">[</span><span class="n">category</span><span class="p">],</span> <span class="n">key</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="universalNaturalSortKey"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Sorting.universalNaturalSortKey">[docs]</a><span class="k">def</span> <span class="nf">universalNaturalSortKey</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>

@@ -47,40 +47,39 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.Chain</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
-<span class="c"># from ccpn.core.SampleComponent import SampleComponent</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolSystem</span> <span class="kn">import</span> <span class="n">Chain</span> <span class="k">as</span> <span class="n">ApiChain</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule</span> <span class="kn">import</span> <span class="n">Molecule</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.lims</span> <span class="kn">import</span> <span class="n">Sample</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Sequence</span>
 
 
@@ -88,24 +87,24 @@
 <div class="viewcode-block" id="Chain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Chain.Chain">[docs]</a><span class="k">class</span> <span class="nc">Chain</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Molecular Chain.&quot;&quot;&quot;</span>
   
-  <span class="c">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;MC&#39;</span>
-  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;Chain&#39;</span>
+  <span class="c1">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;MC&#39;</span>
+  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;Chain&#39;</span>
 
   <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
 
-  <span class="c">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;chains&#39;</span>
+  <span class="c1">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;chains&#39;</span>
   
-  <span class="c">#: List of child classes.</span>
+  <span class="c1">#: List of child classes.</span>
   <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c"># Qualified name of matching API class</span>
+  <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiChain</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
   
 
-  <span class="c"># CCPN properties  </span>
+  <span class="c1"># CCPN properties  </span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiChain</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiChain</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; CCPN chain matching Chain&quot;&quot;&quot;</span>
@@ -142,13 +141,13 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">isCyclic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Is this a cyclic polymer?&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">isCyclic</span>
+  <span class="k">def</span> <span class="nf">isCyclic</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;True if this is a cyclic polymer.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">isStdCyclic</span>
   
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Free-form text comment.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
     
   <span class="nd">@comment.setter</span>
@@ -157,25 +156,25 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">substance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Substance</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;ccpn.Substance with sequence matching to ccpn.Chain</span>
+    <span class="sd">&quot;&quot;&quot;Substance with sequence matching to Chain</span>
 
 <span class="sd">    If there are multiple matches, select labeling==&#39;std&#39;</span>
 <span class="sd">    or, failing that, the first found (sorting alphabetically on labeling)&quot;&quot;&quot;</span>
     <span class="n">compoundName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundName</span>
     <span class="n">substances</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">compoundName</span><span class="p">]</span>
 
-    <span class="c"># Select &#39;std&#39; labeling if present</span>
+    <span class="c1"># Select &#39;std&#39; labeling if present</span>
     <span class="n">substances</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">substances</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">labeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">]</span> <span class="ow">or</span> <span class="n">substances</span>
 
     <span class="k">return</span> <span class="n">substances</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">substances</span> <span class="k">else</span> <span class="bp">None</span>
 
 
-  <span class="c"># CCPN functions</span>
+  <span class="c1"># CCPN functions</span>
 <div class="viewcode-block" id="Chain.clone"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Chain.Chain.clone">[docs]</a>  <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Make copy of chain.&quot;&quot;&quot;</span>
 
-    <span class="c"># Imported here to avoid circular imports</span>
-    <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Molecule</span> <span class="k">as</span> <span class="n">MoleculeLib</span>
+    <span class="c1"># Imported here to avoid circular imports</span>
+    <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">MoleculeLib</span>
 
     <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span>
 
@@ -183,47 +182,50 @@
       <span class="n">shortName</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">nextChainCode</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">findFirstChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Project already has one Chain with shortName </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">shortName</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Project already has one Chain with shortName </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">shortName</span><span class="p">)</span>
     
     <span class="n">ccpnChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;molecule&#39;</span><span class="p">,</span> <span class="s">&#39;role&#39;</span><span class="p">,</span> <span class="s">&#39;magnEquivalenceCode&#39;</span><span class="p">,</span> <span class="s">&#39;physicalState&#39;</span><span class="p">,</span> 
-            <span class="s">&#39;conformationalIsomer&#39;</span><span class="p">,</span> <span class="s">&#39;chemExchangeState&#39;</span><span class="p">,</span> <span class="s">&#39;details&#39;</span><span class="p">]</span>
+    <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;molecule&#39;</span><span class="p">,</span> <span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="s1">&#39;magnEquivalenceCode&#39;</span><span class="p">,</span> <span class="s1">&#39;physicalState&#39;</span><span class="p">,</span> 
+            <span class="s1">&#39;conformationalIsomer&#39;</span><span class="p">,</span> <span class="s1">&#39;chemExchangeState&#39;</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">]</span>
     <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="n">tag</span><span class="p">:</span><span class="nb">getattr</span><span class="p">(</span><span class="n">ccpnChain</span><span class="p">,</span><span class="n">tag</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">}</span>
-    <span class="n">params</span><span class="p">[</span><span class="s">&#39;code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shortName</span>
-    <span class="n">params</span><span class="p">[</span><span class="s">&#39;pdbOneLetterCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shortName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;clone&#39;</span><span class="p">,</span> <span class="n">shortName</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newChain&#39;</span><span class="p">)</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;code&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shortName</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;pdbOneLetterCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">shortName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;clone&#39;</span><span class="p">,</span> <span class="n">shortName</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChain&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">newCcpnChain</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">newChain</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newCcpnChain</span><span class="p">]</span>
       <span class="n">MoleculeLib</span><span class="o">.</span><span class="n">duplicateAtomBonds</span><span class="p">({</span><span class="bp">self</span><span class="p">:</span><span class="n">result</span><span class="p">})</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
                                   
 
   <span class="k">def</span> <span class="nf">_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Finalize chain so that it can no longer be modified, and add missing data.&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;_lock&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;_lock&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molecule</span><span class="o">.</span><span class="n">isFinalised</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
 
 
-  <span class="c"># Implementation functions</span>
+  <span class="c1"># Implementation functions</span>
 
 <div class="viewcode-block" id="Chain.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Chain.Chain.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Rename Chain, changing its Id and Pid&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Chain name must be set&quot;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in Chain.shortName&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;Rename Chain, changing its shortName and Pid.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+      <span class="k">if</span> <span class="n">previous</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chain name must be set&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_apiChain</span><span class="o">.</span><span class="n">renameChain</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;change&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
@@ -239,7 +241,7 @@
 
 
 
-<span class="k">def</span> <span class="nf">_createChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">compoundName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s">&#39;Molecule_1&#39;</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_createChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">compoundName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;Molecule_1&#39;</span><span class="p">,</span>
               <span class="n">startNumber</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
               <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chain</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Create new chain from sequence of residue codes</span>
@@ -257,17 +259,18 @@
 <span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-    <span class="p">((</span><span class="s">&#39;compoundName&#39;</span><span class="p">,</span> <span class="s">&#39;Molecule_1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;startNumber&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;molType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;isCyclic&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span>
-     <span class="p">(</span><span class="s">&#39;shortName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+    <span class="p">((</span><span class="s1">&#39;compoundName&#39;</span><span class="p">,</span> <span class="s1">&#39;Molecule_1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;startNumber&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;molType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;isCyclic&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;shortName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
     <span class="p">)</span>
   <span class="p">)</span>
 
   <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span>
-  <span class="k">if</span> <span class="n">shortName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">shortName</span><span class="p">:</span>
     <span class="n">shortName</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">nextChainCode</span><span class="p">()</span>
 
-  <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">shortName</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.Chain.shortName&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+  <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+  <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
   <span class="n">apiRefComponentStore</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">sampleStore</span><span class="o">.</span><span class="n">refSampleComponentStore</span>
   <span class="k">if</span> <span class="n">compoundName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -276,14 +279,11 @@
     <span class="n">name</span> <span class="o">=</span> <span class="n">compoundName</span>
   <span class="k">else</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-      <span class="s">&quot;Substance named </span><span class="si">%s</span><span class="s"> already exists. Try Substance.createChain function instead?&quot;</span>
+      <span class="s2">&quot;Substance named </span><span class="si">%s</span><span class="s2"> already exists. Try Substance.createChain function instead?&quot;</span>
       <span class="o">%</span> <span class="n">compoundName</span><span class="p">)</span>
 
-  <span class="k">if</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">findFirstChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Chain names </span><span class="si">%s</span><span class="s"> already exists&quot;</span> <span class="o">%</span> <span class="n">shortName</span><span class="p">)</span>
-
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;createChain&#39;</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newChain&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;createChain&#39;</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChain&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPolymerSubstance</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                                             <span class="n">startNumber</span><span class="o">=</span><span class="n">startNumber</span><span class="p">,</span> <span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span>
@@ -291,40 +291,42 @@
 
     <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">substance</span><span class="o">.</span><span class="n">_apiSubstance</span><span class="o">.</span><span class="n">molecule</span>
     <span class="n">apiMolecule</span><span class="o">.</span><span class="n">isFinalised</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="c"># fetch to ensure creation of Substance</span>
+    <span class="c1"># fetch to ensure creation of Substance</span>
     <span class="n">newApiChain</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">newChain</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="n">apiMolecule</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span>
                                         <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
   <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newApiChain</span><span class="p">]</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">createChain</span> <span class="o">=</span> <span class="n">_createChain</span>
+<span class="k">del</span> <span class="n">_createChain</span>
 
 
 <span class="k">def</span> <span class="nf">_createChainFromSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Substance</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                              <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chain</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new ccpn.Chain that matches ccpn.Substance&quot;&quot;&quot;</span>
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;shortName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+  <span class="sd">&quot;&quot;&quot;Create new Chain that matches Substance&quot;&quot;&quot;</span>
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;shortName&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
 
-  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">substanceType</span> <span class="o">!=</span> <span class="s">&#39;Molecule&#39;</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Only Molecule Substances can be used to create chains&quot;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">substanceType</span> <span class="o">!=</span> <span class="s1">&#39;Molecule&#39;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Only Molecule Substances can be used to create chains&quot;</span><span class="p">)</span>
 
   <span class="n">apiMolecule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiSubstance</span><span class="o">.</span><span class="n">molecule</span>
   <span class="k">if</span> <span class="n">apiMolecule</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;API MolComponent must have attached ApiMolecule in order to create chains&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;API MolComponent must have attached ApiMolecule in order to create chains&quot;</span><span class="p">)</span>
 
   <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">molSystem</span>
   <span class="k">if</span> <span class="n">shortName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">shortName</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">nextChainCode</span><span class="p">()</span>
 
-  <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">shortName</span><span class="p">:</span>
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.Chain.shortName&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
+  <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+  <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> already exists&quot;</span> <span class="o">%</span> <span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;createChainFromSubstance&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newChain&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;createChain&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChain&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">newApiChain</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">newChain</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="n">apiMolecule</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span>
                                          <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newApiChain</span><span class="p">]</span>
   <span class="k">finally</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
@@ -337,7 +339,7 @@
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Substance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Chain</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 
   <span class="n">apiSubstance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiSubstance</span>
-  <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">apiSubstance</span><span class="o">.</span><span class="n">molecule</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiSubstance</span><span class="p">,</span> <span class="s">&#39;molecule&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
+  <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">apiSubstance</span><span class="o">.</span><span class="n">molecule</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiSubstance</span><span class="p">,</span> <span class="s1">&#39;molecule&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
   <span class="k">if</span> <span class="n">apiMolecule</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="k">return</span> <span class="p">()</span>
   <span class="k">else</span><span class="p">:</span>
@@ -346,33 +348,33 @@
                  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">sortedChains</span><span class="p">()</span>
                  <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">molecule</span> <span class="ow">is</span> <span class="n">apiMolecule</span><span class="p">)</span>
 <span class="n">Substance</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-  <span class="s">&quot;ccpn.Chains that correspond to the sequence of ccpn.Substance (if defined)&quot;</span>
+  <span class="s2">&quot;ccpn.Chains that correspond to the sequence of ccpn.Substance (if defined)&quot;</span>
 <span class="p">)</span>
 
 <span class="k">del</span> <span class="n">getter</span>
 
-<span class="c"># Clean-up</span>
+<span class="c1"># Clean-up</span>
     
-<span class="n">Chain</span><span class="o">.</span><span class="n">clone</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Chain</span>
+<span class="n">Chain</span><span class="o">.</span><span class="n">clone</span><span class="o">.</span><span class="n">__annotations__</span><span class="p">[</span><span class="s1">&#39;return&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Chain</span>
 
-<span class="c"># Connections to parents:</span>
-<span class="c"># No &#39;new&#39; function - chains are made elsewhere</span>
+<span class="c1"># Connections to parents:</span>
+<span class="c1"># No &#39;new&#39; function - chains are made elsewhere</span>
 
 
-<span class="c"># Notifiers:</span>
-<span class="c"># Crosslinks: substance</span>
+<span class="c1"># Notifiers:</span>
+<span class="c1"># Crosslinks: substance</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">Molecule</span><span class="o">.</span><span class="n">Molecule</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Chain&#39;</span><span class="p">,</span><span class="s">&#39;Substance&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;create&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Chain&#39;</span><span class="p">,</span><span class="s">&#39;Substance&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;delete&#39;</span><span class="p">),</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Chain&#39;</span><span class="p">,</span><span class="s1">&#39;Substance&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Chain&#39;</span><span class="p">,</span><span class="s1">&#39;Substance&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">),</span>
   <span class="p">)</span>
 <span class="p">)</span>
-<span class="c"># Crosslinks: sampleComponent</span>
+<span class="c1"># Crosslinks: sampleComponent</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">Sample</span><span class="o">.</span><span class="n">SampleComponent</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Chain&#39;</span><span class="p">,</span><span class="s">&#39;SampleComponent&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;addChainCode&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Chain&#39;</span><span class="p">,</span><span class="s">&#39;SampleComponent&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;removeChainCode&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s">&#39;classNames&#39;</span><span class="p">:(</span><span class="s">&#39;Chain&#39;</span><span class="p">,</span><span class="s">&#39;SampleComponent&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setChainCodes&#39;</span><span class="p">),</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Chain&#39;</span><span class="p">,</span><span class="s1">&#39;SampleComponent&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;addChainCode&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Chain&#39;</span><span class="p">,</span><span class="s1">&#39;SampleComponent&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;removeChainCode&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_modifiedLink&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;classNames&#39;</span><span class="p">:(</span><span class="s1">&#39;Chain&#39;</span><span class="p">,</span><span class="s1">&#39;SampleComponent&#39;</span><span class="p">)},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;setChainCodes&#39;</span><span class="p">),</span>
   <span class="p">)</span>
 <span class="p">)</span>
 </pre></div>

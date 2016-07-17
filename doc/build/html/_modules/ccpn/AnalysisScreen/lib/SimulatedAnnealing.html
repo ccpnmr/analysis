@@ -1,0 +1,405 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisScreen.lib.SimulatedAnnealing &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisScreen.lib.SimulatedAnnealing</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="c1"># from matplotlib import pyplot as plt</span>
+
+
+<span class="n">mix1</span> <span class="o">=</span> <span class="p">{}</span>
+
+
+<span class="c1"># peaksDistance = 0.01</span>
+
+<span class="c1"># Macro to get compounds and pickLists</span>
+<span class="c1"># compounds = []</span>
+<span class="c1"># for peakList in project.peakLists:</span>
+<span class="c1">#   name, space, value = str(peakList.id).partition(&#39;-&#39;)</span>
+<span class="c1">#   compound = [name, [peak.position[0] for peak in peakList.peaks]]</span>
+<span class="c1">#   compounds.append(compound)</span>
+<span class="c1"># print(compounds)</span>
+
+<span class="n">maxSteps</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">refineMaxSteps</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">startTemp</span> <span class="o">=</span> <span class="mf">1000.0</span>
+<span class="n">refineStartTemp</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="n">finalTemp</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+
+<span class="n">cooling</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+<span class="n">refineCooling</span> <span class="o">=</span> <span class="s1">&#39;linear&#39;</span>
+<span class="n">scoreScale</span> <span class="o">=</span> <span class="mi">1000</span>
+<span class="n">iterations</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="c1"># self.nMixturesToMix = 2 not in use now, by default is two</span>
+
+<div class="viewcode-block" id="generatePeakPositions"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.generatePeakPositions">[docs]</a><span class="k">def</span> <span class="nf">generatePeakPositions</span><span class="p">(</span><span class="n">numberOfPeaks</span><span class="p">,</span> <span class="n">ppmStart</span><span class="p">,</span> <span class="n">ppmEnd</span><span class="p">):</span>
+  <span class="n">peakPositions</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numberOfPeaks</span><span class="p">):</span>
+    <span class="n">peakPositions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">ppmStart</span><span class="p">,</span> <span class="n">ppmEnd</span><span class="p">))</span>
+  <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">peakPositions</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="randomDictMixtures"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.randomDictMixtures">[docs]</a><span class="k">def</span> <span class="nf">randomDictMixtures</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">compounds</span><span class="p">,</span> <span class="n">nMixtures</span><span class="p">):</span>
+  <span class="n">mixturesDict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">n</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">mixtures</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">compounds</span><span class="p">),</span><span class="mi">0</span><span class="p">,[]</span>
+  <span class="n">compounds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">compounds</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nMixtures</span><span class="p">):</span>
+      <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">b</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span><span class="o">+</span><span class="n">k</span><span class="p">)</span><span class="o">//</span><span class="n">nMixtures</span>
+      <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="n">compounds</span><span class="p">[</span><span class="n">a</span><span class="p">:</span><span class="n">b</span><span class="p">]</span>
+      <span class="n">mixturesDict</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
+  <span class="k">return</span> <span class="n">mixturesDict</span></div>
+
+<span class="c1"># print(randomDictMixtures(&#39;Mixture&#39;, compounds, 18))</span>
+<span class="c1">#</span>
+<div class="viewcode-block" id="generateSimpleCompounds"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.generateSimpleCompounds">[docs]</a><span class="k">def</span> <span class="nf">generateSimpleCompounds</span><span class="p">(</span><span class="n">numb</span><span class="p">,</span> <span class="n">numberOfPeaks</span><span class="p">,</span> <span class="n">ppmStart</span><span class="p">,</span> <span class="n">ppmEnd</span><span class="p">):</span>
+  <span class="n">compounds</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numb</span><span class="p">):</span>
+    <span class="n">compound</span> <span class="o">=</span> <span class="n">generatePeakPositions</span><span class="p">(</span><span class="n">numberOfPeaks</span><span class="p">,</span> <span class="n">ppmStart</span><span class="p">,</span> <span class="n">ppmEnd</span><span class="p">)</span>
+    <span class="n">compounds</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">compound</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">compounds</span></div>
+
+
+<div class="viewcode-block" id="scoreCompound"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreCompound">[docs]</a><span class="k">def</span> <span class="nf">scoreCompound</span><span class="p">(</span><span class="n">compoundA</span><span class="p">,</span> <span class="n">compoundB</span><span class="p">,</span> <span class="n">minDist</span><span class="p">,</span> <span class="n">scalingFactor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+  <span class="n">overlapCount</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">for</span> <span class="n">shiftA</span> <span class="ow">in</span> <span class="n">compoundA</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">shiftB</span> <span class="ow">in</span> <span class="n">compoundB</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">shiftA</span> <span class="o">-</span> <span class="n">shiftB</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">minDist</span><span class="p">:</span>
+        <span class="n">overlapCount</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">continue</span>
+  <span class="k">return</span> <span class="p">(</span><span class="n">scalingFactor</span> <span class="o">*</span> <span class="p">(</span><span class="n">overlapCount</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">compoundA</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="scoreMixture"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.scoreMixture">[docs]</a><span class="k">def</span> <span class="nf">scoreMixture</span><span class="p">(</span><span class="n">mixture</span><span class="p">,</span> <span class="n">minDist</span><span class="p">):</span>
+  <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">for</span> <span class="n">compoundA</span> <span class="ow">in</span> <span class="n">mixture</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">compoundB</span>  <span class="ow">in</span> <span class="n">mixture</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">compoundA</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">compoundB</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">score</span> <span class="o">+=</span> <span class="n">scoreCompound</span><span class="p">(</span><span class="n">compoundA</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">compoundB</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">minDist</span><span class="o">=</span><span class="n">minDist</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">score</span></div>
+
+<div class="viewcode-block" id="calculateTotalScore"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore">[docs]</a><span class="k">def</span> <span class="nf">calculateTotalScore</span><span class="p">(</span><span class="n">mixturesDict</span><span class="p">,</span> <span class="n">peaksDistance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+  <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">for</span> <span class="n">mixture</span> <span class="ow">in</span> <span class="n">mixturesDict</span><span class="p">:</span>
+    <span class="n">score</span> <span class="o">+=</span> <span class="n">scoreMixture</span><span class="p">(</span><span class="n">mixturesDict</span><span class="p">[</span><span class="n">mixture</span><span class="p">],</span> <span class="n">peaksDistance</span><span class="p">)</span>
+  <span class="k">return</span> <span class="p">(</span><span class="n">score</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getAllOverlappedPositions"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getAllOverlappedPositions">[docs]</a><span class="k">def</span> <span class="nf">getAllOverlappedPositions</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span> <span class="n">minDist</span><span class="p">):</span>
+
+  <span class="k">for</span> <span class="n">mixtureName</span><span class="p">,</span> <span class="n">compounds</span> <span class="ow">in</span> <span class="n">mixtures</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">compounds</span><span class="p">:</span>
+      <span class="n">compoundName</span><span class="p">,</span> <span class="n">compoundPeakList</span> <span class="o">=</span> <span class="n">compound</span>
+      <span class="n">compoundsToCompare</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">compounds</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">compoundName</span><span class="p">]</span>
+      <span class="n">overlaped</span> <span class="o">=</span> <span class="n">calculateOverlapCount</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">,</span> <span class="n">compoundsToCompare</span><span class="p">,</span> <span class="n">minDist</span> <span class="p">)</span>
+
+
+      <span class="k">if</span> <span class="n">overlaped</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">compoundName</span><span class="p">,</span> <span class="s1">&#39;No Overlapped peaks found&#39;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overlaped</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">compoundName</span><span class="p">,</span> <span class="s1">&#39; --&gt; Counts&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">overlaped</span><span class="p">))),</span> <span class="s1">&#39; --&gt; Overlapped positions:&#39;</span><span class="p">,</span> <span class="n">overlaped</span><span class="p">,</span> <span class="s1">&#39;score: --&gt;&#39;</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">mixtureName</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;====================&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getOverlappedCount"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getOverlappedCount">[docs]</a><span class="k">def</span> <span class="nf">getOverlappedCount</span><span class="p">(</span><span class="n">mixtureCompounds</span><span class="p">,</span> <span class="n">minDist</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+    <span class="n">totalOverlapped</span>  <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">mixtureCompounds</span><span class="p">:</span>
+      <span class="n">compoundName</span><span class="p">,</span> <span class="n">compoundPeakList</span> <span class="o">=</span> <span class="n">compound</span>
+      <span class="n">compoundsToCompare</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">mixtureCompounds</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">compoundName</span><span class="p">]</span>
+      <span class="n">overlaped</span> <span class="o">=</span> <span class="n">calculateOverlapCount</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">,</span> <span class="n">compoundsToCompare</span><span class="p">,</span> <span class="n">minDist</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">overlaped</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">compoundName</span><span class="p">,</span> <span class="s1">&#39;No Overlapped peaks found&#39;</span><span class="p">)</span>
+        <span class="k">continue</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">compoundName</span><span class="p">,</span> <span class="s1">&#39; --&gt; Counts&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">overlaped</span><span class="p">))))</span>
+        <span class="n">totalOverlapped</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">overlaped</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">totalOverlapped</span></div>
+
+<div class="viewcode-block" id="getMixtureInfo"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getMixtureInfo">[docs]</a><span class="k">def</span> <span class="nf">getMixtureInfo</span><span class="p">(</span><span class="n">mixture</span><span class="p">,</span> <span class="n">minDist</span><span class="p">):</span>
+
+  <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">mixture</span><span class="p">:</span>
+    <span class="n">compoundName</span><span class="p">,</span> <span class="n">compoundPeakList</span> <span class="o">=</span> <span class="n">compound</span>
+    <span class="n">compoundsToCompare</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">mixture</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">compoundName</span><span class="p">]</span>
+    <span class="n">overlaped</span> <span class="o">=</span> <span class="n">calculateOverlapCount</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">,</span> <span class="n">compoundsToCompare</span><span class="p">,</span> <span class="n">minDist</span> <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">overlaped</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">compoundName</span><span class="p">,</span> <span class="s1">&#39;No Overlapped peaks found&#39;</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overlaped</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">)</span>
+
+      <span class="k">print</span><span class="p">(</span><span class="n">compoundName</span><span class="p">,</span> <span class="s1">&#39; --&gt; Counts&#39;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">overlaped</span><span class="p">))),</span> <span class="s1">&#39; --&gt; Overlapped positions:&#39;</span><span class="p">,</span> <span class="n">overlaped</span><span class="p">,</span> <span class="s1">&#39;score: --&gt;&#39;</span><span class="p">,</span> <span class="n">score</span><span class="p">)</span>
+
+  <span class="k">print</span><span class="p">(</span><span class="s1">&#39;====================&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="calculateOverlapCount"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateOverlapCount">[docs]</a><span class="k">def</span> <span class="nf">calculateOverlapCount</span><span class="p">(</span><span class="n">compoundA</span><span class="p">,</span> <span class="n">mixture</span><span class="p">,</span> <span class="n">minimalOverlap</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">mixture</span><span class="p">:</span>
+    <span class="n">overlaped</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakA</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">compound</span> <span class="k">for</span> <span class="n">peakA</span> <span class="ow">in</span> <span class="n">compoundA</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">peak</span> <span class="o">-</span> <span class="n">peakA</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">minimalOverlap</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">overlaped</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">overlaped</span></div>
+
+<span class="k">def</span> <span class="nf">_calculateSingleCompoundScore</span><span class="p">(</span><span class="n">compoundA</span><span class="p">,</span> <span class="n">mixture</span><span class="p">,</span> <span class="n">minimalOverlap</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">mix</span><span class="p">,</span> <span class="n">compounds</span> <span class="ow">in</span> <span class="n">mixture</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">mix</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">compounds</span><span class="p">:</span>
+      <span class="n">overlaped</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakA</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">compound</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">peakA</span> <span class="ow">in</span> <span class="n">compoundA</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">peak</span> <span class="o">-</span> <span class="n">peakA</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mf">0.01</span><span class="p">]</span>
+
+      <span class="n">scoring</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overlaped</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">compoundA</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">scoring</span><span class="p">,</span> <span class="n">compound</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<div class="viewcode-block" id="findBestMixtures"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.findBestMixtures">[docs]</a><span class="k">def</span> <span class="nf">findBestMixtures</span><span class="p">(</span><span class="n">mixturesSteps</span><span class="p">):</span>
+  <span class="n">bestMixturesStep</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mixturesSteps</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bestMixturesStep</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="n">bestMixtures</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">bestMixturesStep</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">bestMixtures</span></div>
+
+<div class="viewcode-block" id="mixTwoMixturesDict"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.mixTwoMixturesDict">[docs]</a><span class="k">def</span> <span class="nf">mixTwoMixturesDict</span><span class="p">(</span><span class="n">mixtures</span><span class="p">):</span>
+  <span class="n">mixturesList</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mixtures</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+  <span class="c1"># To use random.sample needs to be a List</span>
+  <span class="n">sampledMixtures</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">mixturesList</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+  <span class="n">mixturesToMix</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">sampledMixtures</span><span class="p">)</span>
+
+  <span class="n">swaps</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mixture</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">mixturesToMix</span><span class="o">.</span><span class="n">values</span><span class="p">())):</span>
+
+    <span class="n">randInt</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">((</span><span class="n">mixture</span><span class="p">)[</span><span class="n">i</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+
+    <span class="n">pick</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">mixturesToMix</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">i</span><span class="p">][</span><span class="n">randInt</span><span class="p">]</span>
+    <span class="nb">list</span><span class="p">(</span><span class="n">mixturesToMix</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pick</span><span class="p">)</span>
+    <span class="n">swaps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pick</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">mixture</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">mixturesToMix</span><span class="o">.</span><span class="n">values</span><span class="p">())):</span>
+    <span class="n">pick</span> <span class="o">=</span> <span class="n">swaps</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="nb">list</span><span class="p">(</span><span class="n">mixturesToMix</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pick</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">sampledMixtures</span><span class="p">:</span>
+    <span class="n">mixturesList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+  <span class="n">mixedMixtures</span> <span class="o">=</span> <span class="n">mixturesList</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">mixturesToMix</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+  <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">mixedMixtures</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="linearCooling"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.linearCooling">[docs]</a><span class="k">def</span> <span class="nf">linearCooling</span><span class="p">(</span><span class="n">startTemp</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span> <span class="n">finalTemp</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">maxSteps</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+  <span class="c1"># print(&#39;starting Linear Cooling&#39;)</span>
+  <span class="n">tempsteps</span> <span class="o">=</span> <span class="p">(</span><span class="n">startTemp</span> <span class="o">-</span> <span class="n">finalTemp</span><span class="p">)</span> <span class="o">/</span> <span class="n">maxSteps</span>  <span class="c1"># 1)</span>
+  <span class="n">temp</span> <span class="o">=</span> <span class="n">startTemp</span>
+  <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="k">yield</span> <span class="n">temp</span>
+    <span class="n">temp</span> <span class="o">-=</span> <span class="n">tempsteps</span></div>
+
+<div class="viewcode-block" id="exponentialCooling"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.exponentialCooling">[docs]</a><span class="k">def</span> <span class="nf">exponentialCooling</span><span class="p">(</span><span class="n">startTemp</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span> <span class="n">finalTemp</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">maxSteps</span> <span class="o">=</span> <span class="mi">100</span><span class="p">):</span>
+  <span class="n">alphaTemp</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">((</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">finalTemp</span> <span class="o">/</span> <span class="n">startTemp</span><span class="p">))</span> <span class="o">/</span> <span class="n">maxSteps</span><span class="p">)</span>
+  <span class="n">temp</span> <span class="o">=</span> <span class="n">startTemp</span>
+  <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+    <span class="k">yield</span> <span class="n">temp</span>
+    <span class="n">temp</span> <span class="o">*=</span>  <span class="n">alphaTemp</span></div>
+
+<div class="viewcode-block" id="runCooling"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.runCooling">[docs]</a><span class="k">def</span> <span class="nf">runCooling</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">startTemp</span><span class="o">=</span><span class="mf">1000.0</span><span class="p">,</span> <span class="n">finalTemp</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">maxSteps</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;exponential&#39;</span><span class="p">:</span>
+    <span class="n">coolingSchedule</span> <span class="o">=</span> <span class="n">exponentialCooling</span><span class="p">(</span><span class="n">startTemp</span><span class="p">,</span> <span class="n">finalTemp</span><span class="p">,</span> <span class="n">maxSteps</span><span class="p">)</span>
+  <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;Linear&#39;</span><span class="p">:</span>
+    <span class="n">coolingSchedule</span> <span class="o">=</span> <span class="n">linearCooling</span><span class="p">(</span><span class="n">startTemp</span><span class="p">,</span> <span class="n">finalTemp</span><span class="p">,</span> <span class="n">maxSteps</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Cooling type not implemented yet, Used linear instead&#39;</span><span class="p">)</span>
+    <span class="n">coolingSchedule</span> <span class="o">=</span> <span class="n">linearCooling</span><span class="p">()</span>
+  <span class="k">return</span> <span class="n">coolingSchedule</span></div>
+
+<div class="viewcode-block" id="getProbability"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getProbability">[docs]</a><span class="k">def</span> <span class="nf">getProbability</span><span class="p">(</span><span class="n">scoreDiff</span><span class="p">,</span> <span class="n">currentTemp</span><span class="p">,</span> <span class="n">tempK</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">currentTemp</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">return</span> <span class="mi">0</span>
+  <span class="n">k</span> <span class="o">=</span> <span class="n">tempK</span>
+  <span class="n">probabilty</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">scoreDiff</span><span class="p">)</span><span class="o">*</span><span class="n">k</span> <span class="o">/</span> <span class="p">(</span> <span class="n">currentTemp</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">probabilty</span></div>
+
+<span class="c1"># def test():</span>
+<span class="c1">#   x = range(1000)</span>
+<span class="c1">#   y = [getProbability( 0.5, x) for x in x]</span>
+<span class="c1">#   # plt.plot(x,y)</span>
+<span class="c1">#   # plt.ylim(ymax=1)</span>
+<span class="c1">#   # plt.show()</span>
+
+<div class="viewcode-block" id="annealMixtures"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealMixtures">[docs]</a><span class="k">def</span> <span class="nf">annealMixtures</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span> <span class="n">coolingMethod</span><span class="o">=</span><span class="s1">&#39;Linear&#39;</span><span class="p">,</span> <span class="n">startTemp</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">finalTemp</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+                   <span class="n">maxSteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tempK</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">minDistance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+  <span class="n">mixturesSteps</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">coolingSchedule</span> <span class="o">=</span> <span class="n">runCooling</span><span class="p">(</span><span class="n">coolingMethod</span><span class="p">,</span> <span class="n">startTemp</span><span class="p">,</span> <span class="n">finalTemp</span><span class="p">,</span> <span class="n">maxSteps</span><span class="p">)</span>
+  <span class="n">currScore</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">)</span>
+  <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">step</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">for</span> <span class="n">currentTemp</span> <span class="ow">in</span> <span class="n">coolingSchedule</span><span class="p">:</span>
+    <span class="n">newMixtures</span> <span class="o">=</span> <span class="n">mixTwoMixturesDict</span><span class="p">(</span><span class="n">mixtures</span><span class="p">)</span>
+    <span class="n">copyNewMixtures</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">newMixtures</span><span class="p">)</span>
+    <span class="n">newScore</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">newMixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">)</span>
+    <span class="n">scoreDiff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">newScore</span> <span class="o">-</span> <span class="n">currScore</span><span class="p">)</span>
+    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newScore</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">newScore</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">copyNewMixtures</span>
+
+    <span class="k">elif</span> <span class="n">newScore</span> <span class="o">&lt;=</span> <span class="n">currScore</span><span class="p">:</span>
+      <span class="n">mixtures</span> <span class="o">=</span> <span class="n">newMixtures</span>
+      <span class="n">currScore</span> <span class="o">=</span> <span class="n">newScore</span>
+      <span class="n">mixturesSteps</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">newScore</span><span class="p">:</span> <span class="n">copyNewMixtures</span><span class="p">})</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">probability</span> <span class="o">=</span> <span class="n">getProbability</span><span class="p">(</span><span class="n">scoreDiff</span><span class="p">,</span><span class="n">currentTemp</span><span class="p">,</span> <span class="n">tempK</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">probability</span><span class="p">:</span>
+        <span class="n">mixtures</span> <span class="o">=</span> <span class="n">newMixtures</span>
+        <span class="n">currScore</span> <span class="o">=</span> <span class="n">newScore</span>
+        <span class="n">mixturesSteps</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">newScore</span><span class="p">:</span> <span class="n">copyNewMixtures</span><span class="p">})</span>
+    <span class="n">step</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># print(&#39;STEP:&#39;,step)</span>
+    <span class="k">if</span> <span class="n">step</span> <span class="o">&gt;</span> <span class="n">maxSteps</span><span class="p">:</span>
+      <span class="k">break</span>
+
+  <span class="n">bestMixtures</span> <span class="o">=</span> <span class="n">findBestMixtures</span><span class="p">(</span><span class="n">mixturesSteps</span><span class="p">)</span>
+  <span class="k">return</span>  <span class="n">bestMixtures</span></div>
+
+<div class="viewcode-block" id="iterateAnnealing"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing">[docs]</a><span class="k">def</span> <span class="nf">iterateAnnealing</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span> <span class="n">startTemp</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">finalTemp</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">maxSteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">tempK</span><span class="o">=</span><span class="mi">200</span><span class="p">,</span> <span class="n">coolingMethod</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span>
+                     <span class="n">nIterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">minDistance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">):</span>
+  <span class="n">bestIteration</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1">#score:mixture</span>
+  <span class="n">startingScore</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
+  <span class="n">copyMixtures</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">mixtures</span><span class="p">)</span>
+  <span class="k">print</span><span class="p">(</span><span class="s1">&#39;startingScore&#39;</span><span class="p">,</span><span class="n">startingScore</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">startingScore</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="c1"># showScoresPerMixture(mixtures,minDistance)</span>
+    <span class="k">return</span> <span class="n">mixtures</span>
+  <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="k">while</span>  <span class="n">i</span> <span class="o">&lt;=</span> <span class="n">nIterations</span><span class="p">:</span>
+    <span class="n">newMixtures</span> <span class="o">=</span> <span class="n">annealMixtures</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span><span class="n">coolingMethod</span><span class="o">=</span><span class="n">coolingMethod</span><span class="p">,</span> <span class="n">startTemp</span><span class="o">=</span><span class="n">startTemp</span><span class="p">,</span> <span class="n">finalTemp</span><span class="o">=</span><span class="n">finalTemp</span><span class="p">,</span>
+                                 <span class="n">maxSteps</span><span class="o">=</span><span class="n">maxSteps</span><span class="p">,</span> <span class="n">tempK</span><span class="o">=</span><span class="n">tempK</span><span class="p">,</span> <span class="n">minDistance</span><span class="o">=</span><span class="n">minDistance</span><span class="p">)</span>
+    <span class="n">copyNewMixtures</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">newMixtures</span><span class="p">)</span>
+    <span class="n">currScore</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">newMixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">currScore</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="c1"># showScoresPerMixture(copyNewMixtures,minDistance)</span>
+      <span class="k">return</span> <span class="n">copyNewMixtures</span>
+    <span class="k">if</span> <span class="n">currScore</span> <span class="o">&lt;=</span> <span class="n">startingScore</span><span class="p">:</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">currScore</span><span class="p">,</span> <span class="s1">&#39;Step Score&#39;</span><span class="p">)</span>
+      <span class="n">bestIteration</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">currScore</span><span class="p">:</span> <span class="n">copyNewMixtures</span><span class="p">})</span>
+      <span class="n">startingScore</span> <span class="o">=</span> <span class="n">currScore</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+  <span class="c1"># print(&#39;Best bestIteration&#39;, bestIteration)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">bestMixtures</span> <span class="o">=</span> <span class="n">findBestMixtures</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">bestMixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">),</span> <span class="s1">&#39;Best Score&#39;</span><span class="p">)</span>
+    <span class="c1"># showScoresPerMixture(bestMixtures,minDistance)</span>
+    <span class="k">return</span> <span class="n">bestMixtures</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No Better Iteration found, original mixtures are returned&#39;</span><span class="p">)</span>
+    <span class="n">sc</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">copyMixtures</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;startingScore&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">copyMixtures</span></div>
+
+
+<div class="viewcode-block" id="showScoresPerMixture"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.showScoresPerMixture">[docs]</a><span class="k">def</span> <span class="nf">showScoresPerMixture</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">):</span>
+  <span class="n">scoring</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">mixtureName</span><span class="p">,</span> <span class="n">mixCompounds</span> <span class="ow">in</span> <span class="n">mixtures</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">scoring</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">mixtureName</span><span class="p">)</span><span class="o">+</span> <span class="s1">&#39;  score: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">scoreMixture</span><span class="p">(</span><span class="n">mixCompounds</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)))</span>
+  <span class="k">return</span> <span class="n">scoring</span></div>
+
+    <span class="c1"># overlappedPositions = [posA for posB in spectrumBpositions for posA in compounds if abs(posA - posB) &lt; 0.01]</span>
+
+<div class="viewcode-block" id="greedyMixtures"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.greedyMixtures">[docs]</a><span class="k">def</span> <span class="nf">greedyMixtures</span><span class="p">(</span><span class="n">compounds</span><span class="p">,</span> <span class="n">maxSize</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">,</span> <span class="n">maxPeaksOverlapped</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="n">mixtures</span> <span class="o">=</span> <span class="p">[[]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">compounds</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">compounds</span><span class="p">:</span>
+    <span class="n">compoundMixtured</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">mixtureCount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">compoundMixtured</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mixtures</span><span class="p">[</span><span class="n">mixtureCount</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">maxSize</span><span class="p">:</span>
+        <span class="n">mixtureScore</span> <span class="o">=</span> <span class="n">scoreMixture</span><span class="p">(</span><span class="n">mixtures</span><span class="p">[</span><span class="n">mixtureCount</span><span class="p">],</span> <span class="n">minDistance</span><span class="p">)</span>
+        <span class="n">trialMixture</span> <span class="o">=</span> <span class="n">mixtures</span><span class="p">[</span><span class="n">mixtureCount</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">compound</span><span class="p">,</span> <span class="p">]</span>
+        <span class="k">if</span> <span class="n">scoreMixture</span><span class="p">(</span><span class="n">trialMixture</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span> <span class="o">==</span> <span class="n">mixtureScore</span><span class="p">:</span>
+          <span class="n">mixtures</span><span class="p">[</span><span class="n">mixtureCount</span><span class="p">]</span> <span class="o">=</span> <span class="n">trialMixture</span>
+          <span class="n">compoundMixtured</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">mixtureCount</span> <span class="o">+=</span> <span class="mi">1</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">mixture</span> <span class="k">for</span> <span class="n">mixture</span> <span class="ow">in</span> <span class="n">mixtures</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mixture</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

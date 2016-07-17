@@ -1,0 +1,503 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisScreen.popups.MixtureGenerationPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisScreen.popups.MixtureGenerationPopup</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;luca&#39;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.modules.MixtureAnalysis</span> <span class="kn">import</span> <span class="n">MixtureAnalysis</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.modules.MixtureOptimisation</span> <span class="kn">import</span> <span class="n">SimulatedAnnealingWidgets</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.modules.ScreeningPipeline</span> <span class="kn">import</span> <span class="n">ExcludeRegions</span>
+<span class="c1"># from ccpn.AnalysisScreen.lib.MixtureGeneration import setupSamples</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.MixturesGeneration</span> <span class="kn">import</span> <span class="n">_initialiseMixtures</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Slider</span> <span class="kn">import</span> <span class="n">SliderSpinBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<div class="viewcode-block" id="MixtureGenerationPopup"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.MixtureGenerationPopup.MixtureGenerationPopup">[docs]</a><span class="k">class</span> <span class="nc">MixtureGenerationPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MixtureGenerationPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">colourScheme</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/applications-system&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">excludedRegionsWidgets</span> <span class="o">=</span> <span class="n">ExcludeRegions</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">simulatedAnnealingParams</span> <span class="o">=</span> <span class="p">[</span><span class="n">OrderedDict</span><span class="p">([(</span><span class="s1">&#39;initialTemp&#39;</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;finalTemp&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;max steps&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+                                    <span class="p">(</span><span class="s1">&#39;temp constant&#39;</span><span class="p">,</span> <span class="mi">50</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cooling method&#39;</span><span class="p">,</span> <span class="s1">&#39;Linear&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;iteration&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setTabs</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setcalculateButtons</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToMainLayout</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createWidgetsGeneralTab</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createWidgetsTabPickPeaksSetup</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_populatePullDownSelection</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setPerformButtonStatus</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Mixture Generation Setup&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">600</span><span class="p">,</span> <span class="mi">500</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setTabs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetupLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetup</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetupLayout</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetupLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetup</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetupLayout</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetup</span><span class="p">,</span> <span class="s1">&#39;General Setup&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetup</span><span class="p">,</span> <span class="s1">&#39;Pick Peaks Setup&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_setcalculateButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Perform&#39;</span><span class="p">],</span>
+                                       <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_genereteMixture</span><span class="p">],</span>
+                                       <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
+                                       <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addWidgetsToMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createWidgetsGeneralTab</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Simulated Annealing&#39;</span><span class="p">]</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select number of Mixtures&#39;</span><span class="p">,</span><span class="s1">&#39;Select number of components&#39;</span><span class="p">]</span>
+
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethodLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Calculation method&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethod</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span> <span class="n">methods</span><span class="p">,</span>
+                                               <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                               <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSAoptionWidgets</span><span class="p">,</span>
+                                               <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+                                               <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;SA settings&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_showSAsettings</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span><span class="o">.</span><span class="n">setFixedSize</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select mode&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modeRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span>
+                                               <span class="n">selectedInd</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                               <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_modeSelection</span><span class="p">,</span>
+                                               <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+                                               <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select number&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberSlider</span> <span class="o">=</span> <span class="n">SliderSpinBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">startVal</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">endVal</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">bigStep</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">distanceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Minimal distance between peaks&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setRange</span><span class="p">(</span><span class="mf">0.00</span><span class="p">,</span> <span class="mf">0.20</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">setSuffix</span><span class="p">(</span><span class="s2">&quot; ppm&quot;</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select spectra to mix&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">replaceLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Replace current mixtures&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">replaceRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                              <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Yes&#39;</span><span class="p">,</span> <span class="s1">&#39;No&#39;</span><span class="p">],</span>
+                                              <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                              <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                              <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+                                              <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+
+    <span class="n">widgetsGeneralTab</span> <span class="o">=</span>  <span class="p">(</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethodLabel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">calculationMethod</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">modeLabel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">modeRadioButtons</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">numberLabel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">numberSlider</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">distanceLabel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">replaceLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">replaceRadioButtons</span>
+                         <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToTabLayout</span><span class="p">(</span><span class="n">widgetsGeneralTab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabGeneralSetupLayout</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createWidgetsTabPickPeaksSetup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="c1"># 1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Peak Picking&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Automatic&#39;</span><span class="p">,</span> <span class="s1">&#39;Already picked&#39;</span><span class="p">],</span>
+                                                <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pickPeakCallBack</span><span class="p">,</span>
+                                                <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                                <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+                                                <span class="p">)</span>
+
+    <span class="c1">#2</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noiseLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select noise level&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelRadioButtons</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                                 <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Estimated&#39;</span><span class="p">,</span> <span class="s1">&#39;Manual&#39;</span><span class="p">],</span>
+                                                 <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                                 <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_noiseLevelCallBack</span><span class="p">,</span>
+                                                 <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                                 <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;v&#39;</span><span class="p">,</span>
+                                                 <span class="p">)</span>
+    <span class="c1"># 3</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select noise level threshold&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span><span class="o">.</span><span class="n">setMaximum</span><span class="p">(</span><span class="mf">100000.00</span><span class="p">)</span>
+
+    <span class="c1"># 4</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select filter size&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterSpinbox</span> <span class="o">=</span> <span class="n">Spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterSpinbox</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterSpinboxWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterSpinbox</span><span class="o">.</span><span class="n">frameGeometry</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+
+
+    <span class="c1"># 5</span>
+    <span class="n">modes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;wrap&#39;</span><span class="p">,</span> <span class="s1">&#39;reflect&#39;</span><span class="p">,</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span> <span class="s1">&#39;nearest&#39;</span><span class="p">,</span> <span class="s1">&#39;mirror&#39;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterMode</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Select Maximum Filter Mode&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterModePulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">modes</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterModePulldownList</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">50</span><span class="p">)</span>
+
+    <span class="n">widgetsGeneralTab</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksRadioButtons</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">noiseLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelRadioButtons</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">filterLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterSpinbox</span><span class="p">,</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterMode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterModePulldownList</span>
+                         <span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToTabLayout</span><span class="p">(</span><span class="n">widgetsGeneralTab</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetupLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPickPeaksSetupLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excludedRegionsWidgets</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">11</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_hideWidgets</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span><span class="p">])</span>
+
+  <span class="k">def</span> <span class="nf">_addWidgetsToTabLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">,</span> <span class="n">layout</span><span class="p">):</span>
+      <span class="n">count</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">widgets</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">positions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)]</span>
+      <span class="k">for</span> <span class="n">position</span><span class="p">,</span> <span class="n">widget</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positions</span><span class="p">,</span> <span class="n">widgets</span><span class="p">):</span>
+        <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="o">=</span> <span class="n">position</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_showSAoptionWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculationMethod</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Simulated Annealing&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsLabel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">saSettingsButton</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_modeSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modeRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">callbacks</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeLabelNumberMixtures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_showNComponents</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">selection</span><span class="p">,</span> <span class="n">callback</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modeRadioButtons</span><span class="o">.</span><span class="n">texts</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">selection</span><span class="p">):</span>
+        <span class="n">callback</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_pickPeakCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">widgets</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noiseLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelRadioButtons</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">filterLabel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterSpinbox</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterMode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterModePulldownList</span><span class="p">,</span>
+               <span class="bp">self</span><span class="o">.</span><span class="n">excludedRegionsWidgets</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;Automatic&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelRadioButtons</span><span class="o">.</span><span class="n">radioButtons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_showWidgets</span><span class="p">(</span><span class="n">widgets</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_hideWidgets</span><span class="p">(</span><span class="n">widgets</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_noiseLevelCallBack</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;Estimated&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_hideWidgets</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_showWidgets</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">noiseThresholdLabel</span><span class="p">])</span>
+
+
+  <span class="k">def</span> <span class="nf">_changeLabelNumberMixtures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Select N of Mixtures&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_showNComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">numberLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;Select N of Components&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_hideWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">:[]):</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">widgets</span><span class="p">:</span>
+      <span class="n">widget</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_showWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widgets</span><span class="p">:[]):</span>
+    <span class="k">for</span> <span class="n">widget</span> <span class="ow">in</span> <span class="n">widgets</span><span class="p">:</span>
+      <span class="n">widget</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_populatePullDownSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select An Option&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;All Spectra&#39;</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
+         <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s1">&#39;SG:H&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;SG:H&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setPerformButtonStatus</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getPullDownSelectionSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;All Spectra&#39;</span><span class="p">:</span>
+      <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span>
+      <span class="k">return</span> <span class="n">spectra</span>
+    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;Select An Option&#39;</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+     <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span><span class="o">.</span><span class="n">spectra</span>
+     <span class="k">return</span> <span class="n">spectra</span>
+
+  <span class="k">def</span> <span class="nf">_deleteMixtures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">mixtures</span> <span class="o">=</span> <span class="n">MixtureAnalysis</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mixtures</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">mixture</span> <span class="ow">in</span> <span class="n">mixtures</span><span class="p">:</span>
+        <span class="n">mixture</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="k">if</span> <span class="s1">&#39;MIXTURE ANALYSIS&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="s1">&#39;MIXTURE ANALYSIS&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_showSAsettings</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saPopup</span> <span class="o">=</span> <span class="n">SAsettingPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulatedAnnealingParams</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saPopup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">saPopup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_getAllParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">calculationMethod</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculationMethod</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+    <span class="n">simulatedAnnealingParm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulatedAnnealingParams</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">mode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modeRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+    <span class="n">number</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberSlider</span><span class="o">.</span><span class="n">getValue</span><span class="p">()</span>
+    <span class="n">minimalDistance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+    <span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPullDownSelectionSpectra</span><span class="p">()</span>
+    <span class="n">replace</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">replaceRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+    <span class="n">peakPicking</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+    <span class="n">noiseLevel</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelRadioButtons</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+    <span class="n">threshold</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">noiseLevelSpinbox</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+    <span class="nb">filter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterSpinbox</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+    <span class="n">filterMode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">maximumFilterModePulldownList</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+    <span class="n">ignoredRegions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">excludedRegionsWidgets</span><span class="o">.</span><span class="n">_getExcludedRegions</span><span class="p">()</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span>
+                        <span class="p">(</span><span class="s1">&#39;calculationMethod&#39;</span><span class="p">,</span> <span class="n">calculationMethod</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;simulatedAnnealingParm&#39;</span><span class="p">,</span> <span class="n">simulatedAnnealingParm</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="n">mode</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;number&#39;</span><span class="p">,</span> <span class="n">number</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;minimalDistance&#39;</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;spectra&#39;</span><span class="p">,</span> <span class="n">spectra</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;replace&#39;</span><span class="p">,</span> <span class="n">replace</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;peakPicking&#39;</span><span class="p">,</span> <span class="n">peakPicking</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;noiseLevel&#39;</span><span class="p">,</span> <span class="n">noiseLevel</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;threshold&#39;</span><span class="p">,</span> <span class="n">threshold</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;filter&#39;</span><span class="p">,</span> <span class="nb">filter</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;filterMode&#39;</span><span class="p">,</span> <span class="n">filterMode</span><span class="p">),</span>
+                        <span class="p">(</span><span class="s1">&#39;ignoredRegions&#39;</span><span class="p">,</span> <span class="n">ignoredRegions</span><span class="p">)</span>
+                        <span class="p">))</span>
+    <span class="k">return</span> <span class="n">params</span>
+
+
+  <span class="k">def</span> <span class="nf">_genereteMixture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;This function gets all the setting given by the user and runs the mixture generation algorithms&#39;&#39;&#39;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getAllParameters</span><span class="p">()</span>
+    <span class="n">_initialiseMixtures</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_openMixtureAnalysisModule</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_setPerformButtonStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Activetes the perform button if spectra are selected  &#39;&#39;&#39;</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraPullDown</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;Select An Option&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_openMixtureAnalysisModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;   &#39;&#39;&#39;</span>
+    <span class="n">mixtureAnalysis</span> <span class="o">=</span> <span class="n">MixtureAnalysis</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ppmDistance</span><span class="o">.</span><span class="n">value</span><span class="p">(),</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">mixtureAnalysisModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">mixtureAnalysis</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+
+    <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">createSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">setWhatsThis</span><span class="p">(</span><span class="s1">&#39;MixtureDisplay&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">neighbor</span><span class="o">=</span><span class="n">mixtureAnalysisModule</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">guiWindow</span><span class="o">.</span><span class="n">deleteBlankDisplay</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">viewBox</span><span class="o">.</span><span class="n">autoRange</span><span class="p">()</span>
+
+    <span class="n">currentDisplayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">currentDisplayed</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">spectrumView</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
+
+
+
+<div class="viewcode-block" id="SAsettingPopup"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.popups.html#ccpn.AnalysisScreen.popups.MixtureGenerationPopup.SAsettingPopup">[docs]</a><span class="k">class</span> <span class="nc">SAsettingPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>   <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SAsettingPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="n">i</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="p">,</span> <span class="n">it</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">simulatedAnnealingWidgets</span> <span class="o">=</span> <span class="n">SimulatedAnnealingWidgets</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">s</span><span class="p">,</span><span class="n">k</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">it</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setWidgets</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addWidgetsToMainLayout</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="s2">&quot;Simulated Annealing Setup&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="mi">150</span><span class="p">,</span> <span class="mi">300</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">okCancelButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                       <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span> <span class="s1">&#39;Ok&#39;</span><span class="p">],</span>
+                                       <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">reject</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_okButton</span><span class="p">],</span>
+                                       <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
+                                       <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addWidgetsToMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">simulatedAnnealingWidgets</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">okCancelButtons</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_okButton</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulatedAnnealingWidgets</span><span class="o">.</span><span class="n">_getParam</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">simulatedAnnealingParams</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
+
+
+
+    <span class="c1"># DARK</span>
+    <span class="c1"># QDialog</span>
+    <span class="c1"># QPushButton:!enabled</span>
+    <span class="c1"># {</span>
+    <span class="c1">#   color:  # 122043;</span>
+    <span class="c1">#     background - color:  # 7F7F7F;</span>
+    <span class="c1"># padding: 2</span>
+    <span class="c1"># px;</span>
+    <span class="c1"># }</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

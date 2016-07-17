@@ -47,28 +47,28 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.Tensor</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9561 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
 
@@ -78,7 +78,7 @@
 <div class="viewcode-block" id="Tensor"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Tensor.Tensor">[docs]</a><span class="k">class</span> <span class="nc">Tensor</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Rank 2 tensor value.</span>
 
-<span class="sd">  Unlike most other ccpn classes Tensor is NOT linked to a ccpn.Project and does not have a pid&quot;&quot;&quot;</span>
+<span class="sd">  Unlike most other ccpn classes Tensor is NOT linked to a Project and does not have a pid&quot;&quot;&quot;</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xx</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">yy</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">zz</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                <span class="n">isotropic</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">axial</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">rhombic</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
@@ -87,7 +87,7 @@
     <span class="k">if</span> <span class="nb">any</span> <span class="p">((</span><span class="n">isotropic</span><span class="p">,</span> <span class="n">axial</span><span class="p">,</span> <span class="n">rhombic</span><span class="p">)):</span>
       <span class="k">if</span> <span class="nb">any</span><span class="p">((</span><span class="n">xx</span><span class="p">,</span> <span class="n">yy</span><span class="p">,</span> <span class="n">zz</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-          <span class="s">&quot;Creating a Tensor you must give values for xx,yy,zz OR isotropic,axial,rhombic&quot;</span><span class="p">)</span>
+          <span class="s2">&quot;Creating a Tensor you must give values for xx,yy,zz OR isotropic,axial,rhombic&quot;</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">tmpval</span> <span class="o">=</span> <span class="n">isotropic</span> <span class="o">-</span> <span class="n">axial</span> <span class="o">/</span> <span class="mf">3.0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_xx</span> <span class="o">=</span> <span class="n">tmpval</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">rhombic</span>
@@ -102,28 +102,28 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_orientationMatrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">mm</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orientationMatrix</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
-      <span class="c"># NBNB TBD we also need to check that mm.transpose() == mm.inverse()</span>
+      <span class="c1"># NBNB TBD we also need to check that mm.transpose() == mm.inverse()</span>
       <span class="k">if</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">isClose</span><span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">det</span><span class="p">(</span><span class="n">mm</span><span class="p">),</span> <span class="mf">1.0</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_orientationMatrix</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">orientationMatrix</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span> <span class="p">(</span><span class="s">&quot;Invalid data for orientation matrix: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">orientationMatrix</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span> <span class="p">(</span><span class="s2">&quot;Invalid data for orientation matrix: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">orientationMatrix</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_toDict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;return dict representation of tensor - for use in persistence&quot;&quot;&quot;</span>
     <span class="n">om</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_orientationMatrix</span>
     <span class="k">if</span> <span class="n">om</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">om</span> <span class="o">=</span> <span class="n">om</span><span class="o">.</span><span class="n">toList</span><span class="p">()</span>
-    <span class="c">#</span>
-    <span class="k">return</span> <span class="p">{</span><span class="s">&#39;xx&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_xx</span><span class="p">,</span> <span class="s">&#39;yy&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_yy</span><span class="p">,</span> <span class="s">&#39;zz&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_zz</span><span class="p">,</span> <span class="s">&#39;orientationMatrix&#39;</span><span class="p">:</span><span class="n">om</span><span class="p">}</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;xx&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_xx</span><span class="p">,</span> <span class="s1">&#39;yy&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_yy</span><span class="p">,</span> <span class="s1">&#39;zz&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">_zz</span><span class="p">,</span> <span class="s1">&#39;orientationMatrix&#39;</span><span class="p">:</span><span class="n">om</span><span class="p">}</span>
 
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_fromDict</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">dd</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Create Tensor from dict representation - for use in persistence&quot;&quot;&quot;</span>
     <span class="n">dd</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">om</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;orientationMatrix&#39;</span><span class="p">)</span>
+    <span class="n">om</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;orientationMatrix&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">om</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">dd</span><span class="p">[</span><span class="s">&#39;orientationMatrix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">om</span><span class="p">)</span>
-    <span class="c">#</span>
+      <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;orientationMatrix&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">om</span><span class="p">)</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">cls</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
 
   <span class="nd">@property</span>

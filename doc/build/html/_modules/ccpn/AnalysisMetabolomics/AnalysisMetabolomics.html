@@ -47,10 +47,8 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.AnalysisMetabolomics.AnalysisMetabolomics</h1><div class="highlight"><pre>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;TJ&#39;</span>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;TJ&#39;</span>
 
-<span class="c"># from ccpn.framework.lib.SvnRevision import applicationVersion</span>
-<span class="c"># from ccpn.framework.Framework import defineProgramArguments, Framework</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">Framework</span>
 
 
@@ -59,43 +57,34 @@
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">):</span>
     <span class="n">Framework</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">commandLineArguments</span><span class="p">)</span>
 
+
 <div class="viewcode-block" id="Metabolomics.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.setupMenus">[docs]</a>  <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span> <span class="bp">self</span> <span class="p">):</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">setupMenus</span><span class="p">(</span> <span class="p">)</span>
-    <span class="n">menuSpec</span> <span class="o">=</span> <span class="p">(</span><span class="s">&#39;Metabolomics&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s">&quot;Decomposition (PCA)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showDecompositionModule</span><span class="p">),</span>
-                                 <span class="p">(</span><span class="s">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPipeline</span><span class="p">,)</span>
+    <span class="n">menuSpec</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Metabolomics&#39;</span><span class="p">,</span> <span class="p">[(</span><span class="s2">&quot;Decomposition (PCA)&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showDecompositionModule</span><span class="p">),</span>
+                                 <span class="p">(</span><span class="s2">&quot;Pipeline&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showPipeline</span><span class="p">,)</span>
                                  <span class="p">])</span>
-
-
     <span class="bp">self</span><span class="o">.</span><span class="n">addApplicationMenuSpec</span><span class="p">(</span><span class="n">menuSpec</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Metabolomics.showDecompositionModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showDecompositionModule">[docs]</a>  <span class="k">def</span> <span class="nf">showDecompositionModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.Decomposition</span> <span class="kn">import</span> <span class="n">Decomposition</span>
     <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.ui.gui.modules.DecompositionModule</span> <span class="kn">import</span> <span class="n">DecompositionModule</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span> <span class="o">=</span> <span class="n">Decomposition</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span> <span class="o">=</span> <span class="n">DecompositionModule</span><span class="p">(</span><span class="n">framework</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span> <span class="o">=</span> <span class="n">Decomposition</span><span class="p">(</span><span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span> <span class="o">=</span> <span class="n">DecompositionModule</span><span class="p">(</span><span class="n">application</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span>
                                                       <span class="n">interactor</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="p">,</span>
                                                       <span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">decomposition</span><span class="o">.</span><span class="n">presenter</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">decompositionModule</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Metabolomics.showPipeline"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showPipeline">[docs]</a>  <span class="k">def</span> <span class="nf">showPipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Metabolomics.showPipeline"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisMetabolomics.html#ccpn.AnalysisMetabolomics.AnalysisMetabolomics.Metabolomics.showPipeline">[docs]</a>  <span class="k">def</span> <span class="nf">showPipeline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ccpn.AnalysisMetabolomics.MetabolomicsPipeline</span> <span class="kn">import</span> <span class="n">MetabolomicsModule</span>
     <span class="n">pipelineModule</span> <span class="o">=</span> <span class="n">MetabolomicsModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">pipelineModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s">&quot;application.showMetabolomicsPipeline()&quot;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;application.showMetabolomicsPipeline()&quot;</span><span class="p">)</span></div></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showMetabolomicsPipeline()&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showMetabolomicsPipeline()&quot;</span><span class="p">)</span></div></div>
 
-<span class="c"># if __name__ == &#39;__main__&#39;:</span>
-<span class="c">#</span>
-<span class="c">#   # argument parser</span>
-<span class="c">#   parser = defineProgramArguments()</span>
-<span class="c">#</span>
-<span class="c">#   # add any additional commandline argument here</span>
-<span class="c">#   commandLineArguments = parser.parse_args()</span>
-<span class="c">#</span>
-<span class="c">#   program = Metabolomics(applicationName, applicationVersion, commandLineArguments)</span>
-<span class="c">#   program.start()</span>
 </pre></div>
 
           </div>

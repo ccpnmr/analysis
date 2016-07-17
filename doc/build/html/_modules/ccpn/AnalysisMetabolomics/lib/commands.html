@@ -47,30 +47,30 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.AnalysisMetabolomics.lib.commands</h1><div class="highlight"><pre>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
 <div class="viewcode-block" id="Command"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.commands.Command">[docs]</a><span class="k">class</span> <span class="nc">Command</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
 
   <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">methodSpec</span><span class="p">,</span> <span class="n">how</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
 
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&#39;add&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">reverseSelectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtract</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&#39;subtract&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;subtract&#39;</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">subtract</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">reverseSelectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">add</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&#39;multiply&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;multiply&#39;</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">reverseSelectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span>
-    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s">&#39;divide&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;divide&#39;</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">selectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">divide</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">reverseSelectedMath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiply</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">how</span> <span class="o">=</span> <span class="n">how</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">methodSpec</span> <span class="o">=</span> <span class="n">methodSpec</span>
 
-    <span class="k">if</span> <span class="n">how</span> <span class="o">==</span> <span class="s">&#39;by spectrum&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">how</span> <span class="o">==</span> <span class="s1">&#39;by spectrum&#39;</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">methodSpec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">methodSpec</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
 
 <div class="viewcode-block" id="Command.add"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisMetabolomics.lib.html#ccpn.AnalysisMetabolomics.lib.commands.Command.add">[docs]</a>  <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetSpec</span><span class="p">):</span>

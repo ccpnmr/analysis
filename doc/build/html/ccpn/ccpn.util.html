@@ -68,22 +68,6 @@
 <li class="toctree-l2"><a class="reference internal" href="ccpn.util.Bmrb.html#module-ccpn.util.Bmrb.testNef">ccpn.util.Bmrb.testNef module</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="ccpn.util.NEFreader.html">ccpn.util.NEFreader package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.util.NEFreader.html#subpackages">Subpackages</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="ccpn.util.NEFreader.NEFreader.html">ccpn.util.NEFreader.NEFreader package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="ccpn.util.NEFreader.NEFreader.html#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ccpn.util.NEFreader.NEFreader.html#module-ccpn.util.NEFreader.NEFreader.nef">ccpn.util.NEFreader.NEFreader.nef module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ccpn.util.NEFreader.NEFreader.html#module-ccpn.util.NEFreader.NEFreader.parser">ccpn.util.NEFreader.NEFreader.parser module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ccpn.util.NEFreader.NEFreader.html#module-ccpn.util.NEFreader.NEFreader.validator">ccpn.util.NEFreader.NEFreader.validator module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ccpn.util.NEFreader.NEFreader.html#module-ccpn.util.NEFreader.NEFreader.writer">ccpn.util.NEFreader.NEFreader.writer module</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.util.NEFreader.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.util.NEFreader.html#module-ccpn.util.NEFreader.setup">ccpn.util.NEFreader.setup module</a></li>
-</ul>
-</li>
 </ul>
 </div>
 </div>
@@ -117,8 +101,8 @@ location of the repository.</p>
 <dt>A class to make colour manipulation easier and more transparent.</dt>
 <dd>Assumes that r, g, b values are 8-bit so between 0 and 255 and have optional a.</dd>
 </dl>
-<div class="highlight-default"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="s">&#39;magenta&#39;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="s">&#39;#ff00ff&#39;</span><span class="p">)</span>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="s1">&#39;magenta&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">(</span><span class="s1">&#39;#ff00ff&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">Colour</span><span class="p">((</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">255</span><span class="p">))</span>
 </pre></div>
 </div>
@@ -482,180 +466,6 @@ If no suitable location is found, superdirectory is returned as None</p>
 <dd></dd></dl>
 
 </div>
-<div class="section" id="ccpn-util-pid-module">
-<h2>ccpn.util.Pid module<a class="headerlink" href="#ccpn-util-pid-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.util.Pid"></span><p>Pid (Project ID) class for within-project unique ID strings.</p>
-<dl class="class">
-<dt id="ccpn.util.Pid.Pid">
-<em class="property">class </em><code class="descclassname">ccpn.util.Pid.</code><code class="descname">Pid</code><span class="sig-paren">(</span><em>string: str</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="#ccpn.util.Pid.Pid.str" title="ccpn.util.Pid.Pid.str"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a></p>
-<p>Pid routines, adapted from path idea in: Python Cookbook,
-A. Martelli and D. Ascher (eds), O&#8217;Reilly 2002, pgs 140-142
-Features:
-- newpid = pid1 + id1 
-- slicing to address elements of pid
-- loop over elements of pid
-- modify an element
-- copy a pid
-- incrementation and decrementation
-- check validity
-- return as string (convenience)</p>
-<p>pid = Pid.new(&#8216;Residue&#8217;,&#8217;mol1&#8217;,&#8217;A&#8217;, 502) # elements need not be strings; but will be converted
--&gt; Residue:mol1.A.502   (Pid instance)</p>
-<p>which is equivalent to:</p>
-<p>pid = Pid(&#8216;Residue:mol1.A.502&#8217;)
--&gt; Residue:mol1.A.502   (Pid instance)</p>
-<p>Behaves as a string:
-pid == &#8216;Residue:mol1.A.502&#8217;
--&gt; True</p>
-<p>pid.str
--&gt; &#8216;Residue:mol1.A.502&#8217; (str instance)</p>
-<p>pid.type
--&gt; &#8216;Residue&#8217; (str instance)</p>
-<p>pid.id
--&gt; &#8216;mol1.A.502&#8217; (str instance)</p>
-<p>len(pid)
--&gt; 3</p>
-<p>pid[0]
--&gt; &#8216;mol1&#8217; (str instance)</p>
-<p>pid[0:2]
--&gt; &#8216;mol1.A&#8217; (str instance)</p>
-<p>for id in pid:
-....print id
--&gt;
-&#8216;mol1&#8217; (str instance)
-&#8216;A&#8217;  (str instance)
-&#8216;502&#8217;  (str instance)</p>
-<p>pid2 = pid.modify(1, &#8216;B&#8217;, type=&#8217;Atom&#8217;) + &#8216;N&#8217;
--&gt; Atom:mol1.B.502.N  (Pid instance)</p>
-<p>but also:
-pid3 = Pid(&#8216;Residue&#8217;) + &#8216;mol2&#8217;
--&gt; Residue:mol2  (Pid instance)</p>
-<p>pid4 = pid.decrement(2,1)
--&gt; Residue:mol1.A.501  (Pid instance)
-or
-pid4 = pid.increment(2,-1)
-NB fails on elements that cannot be converted to int&#8217;s</p>
-<p>pid5 = pid.copy()   # equivalent to pid5 = Pid(pid.str)
--&gt; Residue:mol1.A.502  (Pid instance)</p>
-<p>pid==pid5
--&gt; True</p>
-<p>&#8216;502&#8217; in pid
--&gt; True</p>
-<p>502 in pid
--&gt; False    # all pid elements are strings</p>
-<dl class="method">
-<dt id="ccpn.util.Pid.Pid.clone">
-<code class="descname">clone</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; ccpn.util.Pid.Pid<a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid.clone" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return copy of pid</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.util.Pid.Pid.decrement">
-<code class="descname">decrement</code><span class="sig-paren">(</span><em>index: int</em>, <em>value: int</em><span class="sig-paren">)</span> &rarr; ccpn.util.Pid.Pid<a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid.decrement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid.decrement" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return new pid with position index decremented by value
-Assumes integer valued id at position index</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.util.Pid.Pid.extend">
-<code class="descname">extend</code><span class="sig-paren">(</span><em>*args: object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid.extend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid.extend" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make copy with additional fields</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.util.Pid.Pid.fields">
-<code class="descname">fields</code><a class="headerlink" href="#ccpn.util.Pid.Pid.fields" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>Tuple[str, ...]</em> - 
-id part of pid as a tuple of fields</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.util.Pid.Pid.id">
-<code class="descname">id</code><a class="headerlink" href="#ccpn.util.Pid.Pid.id" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em> - 
-return id part of pid</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.util.Pid.Pid.increment">
-<code class="descname">increment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid.increment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid.increment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return new pid with position index incremented by value
-Assumes integer valued id at position index</p>
-</dd></dl>
-
-<dl class="staticmethod">
-<dt id="ccpn.util.Pid.Pid.isValid">
-<em class="property">static </em><code class="descname">isValid</code><span class="sig-paren">(</span><em>text: str</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid.isValid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid.isValid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.util.Pid.Pid.modify">
-<code class="descname">modify</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid.modify" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return new pid with position index modified by newId</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.util.Pid.Pid.nameMap">
-<code class="descname">nameMap</code><em class="property"> = {'MO': 'Molecule'}</em><a class="headerlink" href="#ccpn.util.Pid.Pid.nameMap" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="staticmethod">
-<dt id="ccpn.util.Pid.Pid.new">
-<em class="property">static </em><code class="descname">new</code><span class="sig-paren">(</span><em>*args: object</em><span class="sig-paren">)</span> &rarr; ccpn.util.Pid.Pid<a class="reference internal" href="../_modules/ccpn/util/Pid.html#Pid.new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.Pid.new" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return Pid object from arguments
-Apply str() on all arguments
-Have to use this as intermediate as str baseclass of Pid only accepts one argument</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.util.Pid.Pid.str">
-<code class="descname">str</code><a class="headerlink" href="#ccpn.util.Pid.Pid.str" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em> - 
-Convenience: return as string rather than object;
-allows to do things as obj.asPid.str rather then str(obj.asPid)</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.util.Pid.Pid.type">
-<code class="descname">type</code><a class="headerlink" href="#ccpn.util.Pid.Pid.type" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em> - 
-return type part of pid</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.util.Pid.createId">
-<code class="descclassname">ccpn.util.Pid.</code><code class="descname">createId</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Pid.html#createId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.createId" title="Permalink to this definition">¶</a></dt>
-<dd><p>make id from list of successive keys.
-Keys are converted to string, and illegal characters are converted to altCharacter</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.util.Pid.createPid">
-<code class="descclassname">ccpn.util.Pid.</code><code class="descname">createPid</code><span class="sig-paren">(</span><em>head: str</em>, <em>*args: str</em><span class="sig-paren">)</span> &rarr; ccpn.util.Pid.Pid<a class="reference internal" href="../_modules/ccpn/util/Pid.html#createPid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.createPid" title="Permalink to this definition">¶</a></dt>
-<dd><p>make pid from head and list of successive keys.
-Head may be an existing pid, or a naked string
-Keys are converted to string, and illegal characters are converted to altCharacter
-The head is  not checked - it should be either a valid pid or a class code</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.util.Pid.decodePid">
-<code class="descclassname">ccpn.util.Pid.</code><code class="descname">decodePid</code><span class="sig-paren">(</span><em>sourceObject</em>, <em>thePid: ccpn.util.Pid.Pid</em><span class="sig-paren">)</span> &rarr; ccpn.util.Pid.Pid=None<a class="reference internal" href="../_modules/ccpn/util/Pid.html#decodePid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.decodePid" title="Permalink to this definition">¶</a></dt>
-<dd><p>try to decode thePid relative to sourceObject
-return decoded pid object or None on not found or Error</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.util.Pid.splitId">
-<code class="descclassname">ccpn.util.Pid.</code><code class="descname">splitId</code><span class="sig-paren">(</span><em>idString</em><span class="sig-paren">)</span> &rarr; List[str=None]<a class="reference internal" href="../_modules/ccpn/util/Pid.html#splitId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Pid.splitId" title="Permalink to this definition">¶</a></dt>
-<dd><p>Split idString into tuple of component elements,
-mapping altCharacter back to separator and replacing empty strings with None</p>
-</dd></dl>
-
-</div>
 <div class="section" id="module-ccpn.util.Register">
 <span id="ccpn-util-register-module"></span><h2>ccpn.util.Register module<a class="headerlink" href="#module-ccpn.util.Register" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
@@ -761,25 +571,25 @@ If <em>what</em> is a sequence of strings, only docstrings of a type in <em>what
 <em class="property">class </em><code class="descclassname">ccpn.util.Tensor.</code><code class="descname">Tensor</code><span class="sig-paren">(</span><em>xx: float = 0.0</em>, <em>yy: float = 0.0</em>, <em>zz: float = 0.0</em>, <em>isotropic: float = 0.0</em>, <em>axial: float = 0.0</em>, <em>rhombic: float = 0.0</em>, <em>orientationMatrix=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Tensor.html#Tensor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Tensor.Tensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Rank 2 tensor value.</p>
-<p>Unlike most other ccpn classes Tensor is NOT linked to a ccpn.Project and does not have a pid</p>
+<p>Unlike most other ccpn classes Tensor is NOT linked to a Project and does not have a pid</p>
 <dl class="attribute">
 <dt id="ccpn.util.Tensor.Tensor.axial">
 <code class="descname">axial</code><a class="headerlink" href="#ccpn.util.Tensor.Tensor.axial" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>float</em> - 
+<dd><p>- <em>float</em>, <em>immutable</em> - 
 axial component of tensor (along z axis)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.Tensor.Tensor.isotropic">
 <code class="descname">isotropic</code><a class="headerlink" href="#ccpn.util.Tensor.Tensor.isotropic" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>float</em> - 
+<dd><p>- <em>float</em>, <em>immutable</em> - 
 isotropic component of tensor</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.Tensor.Tensor.orientationMatrix">
 <code class="descname">orientationMatrix</code><a class="headerlink" href="#ccpn.util.Tensor.Tensor.orientationMatrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>&lt;built-in function array&gt;</em> - 
+<dd><p>- <em>&lt;built-in function array&gt;</em>, <em>immutable</em> - 
 3,3 numpy array containing orientation matrix of tensor.
 NBNB TBD agree on a sign convention and modify documentation to suit</p>
 </dd></dl>
@@ -787,28 +597,28 @@ NBNB TBD agree on a sign convention and modify documentation to suit</p>
 <dl class="attribute">
 <dt id="ccpn.util.Tensor.Tensor.rhombic">
 <code class="descname">rhombic</code><a class="headerlink" href="#ccpn.util.Tensor.Tensor.rhombic" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>float</em> - 
+<dd><p>- <em>float</em>, <em>immutable</em> - 
 rhombic component of tensor</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.Tensor.Tensor.xx">
 <code class="descname">xx</code><a class="headerlink" href="#ccpn.util.Tensor.Tensor.xx" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>float</em> - 
+<dd><p>- <em>float</em>, <em>immutable</em> - 
 xx component of tensor</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.Tensor.Tensor.yy">
 <code class="descname">yy</code><a class="headerlink" href="#ccpn.util.Tensor.Tensor.yy" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>float</em> - 
+<dd><p>- <em>float</em>, <em>immutable</em> - 
 yy component of tensor</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.util.Tensor.Tensor.zz">
 <code class="descname">zz</code><a class="headerlink" href="#ccpn.util.Tensor.Tensor.zz" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>float</em> - 
+<dd><p>- <em>float</em>, <em>immutable</em> - 
 zz component of tensor</p>
 </dd></dl>
 
@@ -838,7 +648,7 @@ consist of multiple individual undo operations.</p>
 <dl class="attribute">
 <dt id="ccpn.util.Undo.Undo.blocking">
 <code class="descname">blocking</code><a class="headerlink" href="#ccpn.util.Undo.Undo.blocking" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>None</em> - 
+<dd><p>- <em>None</em>, <em>immutable</em> - 
 Undo blocking. If true (non-zero) undo setting is blocked.
 Allows multiple external functions to set blocking without trampling each other</p>
 <p>Modify with increaseBlocking/decreaseBlocking only</p>
@@ -847,13 +657,13 @@ Allows multiple external functions to set blocking without trampling each other<
 <dl class="method">
 <dt id="ccpn.util.Undo.Undo.canRedo">
 <code class="descname">canRedo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo.canRedo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo.canRedo" title="Permalink to this definition">¶</a></dt>
-<dd><p>can a redo operation be performed</p>
+<dd><p>True if a redo operation can be performed</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.util.Undo.Undo.canUndo">
 <code class="descname">canUndo</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/util/Undo.html#Undo.canUndo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Undo.Undo.canUndo" title="Permalink to this definition">¶</a></dt>
-<dd><p>Can an undo operation be performed?</p>
+<dd><p>True if an undo operation can be performed?</p>
 </dd></dl>
 
 <dl class="method">
@@ -1044,7 +854,6 @@ topDirectory must be (intended to be) on the Python path</p>
 <li><a class="reference internal" href="#module-ccpn.util.OrderedSet">ccpn.util.OrderedSet module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Path">ccpn.util.Path module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Phasing">ccpn.util.Phasing module</a></li>
-<li><a class="reference internal" href="#ccpn-util-pid-module">ccpn.util.Pid module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Register">ccpn.util.Register module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Sorting">ccpn.util.Sorting module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.SphinxExtensions">ccpn.util.SphinxExtensions module</a></li>

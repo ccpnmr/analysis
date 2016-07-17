@@ -47,74 +47,74 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.StructureEnsemble</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">Atom</span> <span class="k">as</span> <span class="n">ApiCoordAtom</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">StructureEnsemble</span> <span class="k">as</span> <span class="n">ApiStructureEnsemble</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">spectrumLib</span>
 
-<span class="n">NaN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s">&#39;NaN&#39;</span><span class="p">)</span>
+<span class="n">NaN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
 
-<span class="n">_DATA_ARRAY_TAGS</span> <span class="o">=</span><span class="p">(</span><span class="s">&#39;coordinateData&#39;</span><span class="p">,</span> <span class="s">&#39;occupancyData&#39;</span><span class="p">,</span> <span class="s">&#39;bFactorData&#39;</span><span class="p">)</span>
-<span class="c"># NBNB atomNameData not yet implemented</span>
-<span class="c"># _DATA_ARRAY_TAGS =(&#39;coordinateData&#39;, &#39;occupancyData&#39;, &#39;bFactorData&#39;, &#39;atomNameData&#39;)</span>
+<span class="n">_DATA_ARRAY_TAGS</span> <span class="o">=</span><span class="p">(</span><span class="s1">&#39;coordinateData&#39;</span><span class="p">,</span> <span class="s1">&#39;occupancyData&#39;</span><span class="p">,</span> <span class="s1">&#39;bFactorData&#39;</span><span class="p">)</span>
+<span class="c1"># NBNB atomNameData not yet implemented</span>
+<span class="c1"># _DATA_ARRAY_TAGS =(&#39;coordinateData&#39;, &#39;occupancyData&#39;, &#39;bFactorData&#39;, &#39;atomNameData&#39;)</span>
 
 <div class="viewcode-block" id="StructureEnsemble"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.StructureEnsemble">[docs]</a><span class="k">class</span> <span class="nc">StructureEnsemble</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Ensemble of coordinate structures.&quot;&quot;&quot;</span>
   
-  <span class="c">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;SE&#39;</span>
-  <span class="c"># Attribute is necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;StructureEnsemble&#39;</span>
+  <span class="c1">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SE&#39;</span>
+  <span class="c1"># Attribute is necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;StructureEnsemble&#39;</span>
 
   <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">Project</span>
 
-  <span class="c">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;structureEnsembles&#39;</span>
+  <span class="c1">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;structureEnsembles&#39;</span>
   
-  <span class="c">#: List of child classes.</span>
+  <span class="c1">#: List of child classes.</span>
   <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c"># Qualified name of matching API class</span>
+  <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiStructureEnsemble</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
   
 
-  <span class="c"># CCPN properties  </span>
+  <span class="c1"># CCPN properties  </span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiStructureEnsemble</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot; CCPN api StructureEnsemble matching ccpn.StructureEnsemble&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot; CCPN api StructureEnsemble matching StructureEnsemble&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     
   <span class="nd">@property</span>
@@ -136,38 +136,38 @@
   <span class="k">def</span> <span class="nf">atomIds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Tuple of atom id (&#39;chainCode.sequenceCode.residueType.atomName&#39; for atoms making up</span>
 <span class="sd">    structure ensemble</span>
-<span class="sd">    The atom IDs and their order is the same for all ccpn.Models in the ensemble.&quot;&quot;&quot;</span>
+<span class="sd">    The atom IDs and their order is the same for all Models in the ensemble.&quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">residue</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">orderedAtoms</span><span class="p">:</span>
       <span class="n">rr</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
       <span class="k">if</span> <span class="n">rr</span> <span class="o">!=</span> <span class="n">residue</span><span class="p">:</span>
-        <span class="c"># Done this way to save on function calls, as atoms are grouped by residue</span>
+        <span class="c1"># Done this way to save on function calls, as atoms are grouped by residue</span>
         <span class="n">residue</span> <span class="o">=</span> <span class="n">rr</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">code</span>
         <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">seqCode</span><span class="p">)</span> <span class="o">+</span> <span class="n">residue</span><span class="o">.</span><span class="n">seqInsertCode</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">residueType</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">code3Letter</span>
       <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">residueIds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Tuple of atom id (&#39;chainCode.sequenceCode.residueType&#39; for residues making up</span>
 <span class="sd">    structure ensemble</span>
-<span class="sd">    The residue IDs and their order is the same for all ccpn.Models in the ensemble.&quot;&quot;&quot;</span>
+<span class="sd">    The residue IDs and their order is the same for all Models in the ensemble.&quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">residue</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">orderedAtoms</span><span class="p">:</span>
       <span class="n">rr</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
       <span class="k">if</span> <span class="n">rr</span> <span class="o">!=</span> <span class="n">residue</span><span class="p">:</span>
-        <span class="c"># Done this way to save on function calls, as atoms are grouped by residue</span>
+        <span class="c1"># Done this way to save on function calls, as atoms are grouped by residue</span>
         <span class="n">residue</span> <span class="o">=</span> <span class="n">rr</span>
         <span class="n">code</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">code</span>
         <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">seqCode</span><span class="p">)</span> <span class="o">+</span> <span class="n">residue</span><span class="o">.</span><span class="n">seqInsertCode</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">residueType</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">code3Letter</span>
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">))</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
   <span class="nd">@property</span>
@@ -176,16 +176,16 @@
 <span class="sd">    NB the coordinateData array is a cached copy.</span>
 <span class="sd">    It can be  modified, but modifications will be kept in cache till the attribute is</span>
 <span class="sd">    set or the project is saved.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_coordinateData&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_coordinateData&#39;</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinateData</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;coordinates&#39;</span><span class="p">)</span>
+      <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;coordinates&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">apiDataMatrix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">None</span>
       <span class="n">data</span> <span class="o">=</span> <span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">data</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">None</span>
-      <span class="c"># We have the data. make cached copy, and return it</span>
+      <span class="c1"># We have the data. make cached copy, and return it</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinateData</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">NaN</span><span class="p">)</span>
       <span class="n">result</span><span class="o">.</span><span class="n">flat</span> <span class="o">=</span> <span class="n">data</span>
       <span class="k">return</span> <span class="n">result</span>
@@ -197,16 +197,16 @@
     <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">models</span><span class="p">),</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">nAtoms</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">flattenIfNumpy</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">))</span>
 
-    <span class="c"># Set cached copy to value. NB this is the original, NOT a copy</span>
+    <span class="c1"># Set cached copy to value. NB this is the original, NOT a copy</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_coordinateData</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coordinateData</span>
 
-    <span class="c"># Set underlying data values to match</span>
-    <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;coordinates&#39;</span><span class="p">)</span>
+    <span class="c1"># Set underlying data values to match</span>
+    <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;coordinates&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiDataMatrix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">newDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;coordinates&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+      <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">newDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;coordinates&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(),</span> <span class="n">data</span><span class="p">)</span>
 
@@ -216,16 +216,16 @@
 <span class="sd">    NB the occupancyData array is a cached copy.</span>
 <span class="sd">    It can be  modified, but modifications will be kept in cache till the attribute is</span>
 <span class="sd">    set or the project is saved.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_occupancyData&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_occupancyData&#39;</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occupancyData</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;occupancies&#39;</span><span class="p">)</span>
+      <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;occupancies&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">apiDataMatrix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">None</span>
       <span class="n">data</span> <span class="o">=</span> <span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">data</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">None</span>
-      <span class="c"># We have the data. make cached copy, and return it</span>
+      <span class="c1"># We have the data. make cached copy, and return it</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occupancyData</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">NaN</span><span class="p">)</span>
       <span class="n">result</span><span class="o">.</span><span class="n">flat</span> <span class="o">=</span> <span class="n">data</span>
       <span class="k">return</span> <span class="n">result</span>
@@ -236,16 +236,16 @@
     <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">models</span><span class="p">),</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">nAtoms</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">flattenIfNumpy</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">))</span>
 
-    <span class="c"># Set cached copy to value. NB this is the original, NOT a copy</span>
+    <span class="c1"># Set cached copy to value. NB this is the original, NOT a copy</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_occupancyData</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_occupancyData</span>
 
-    <span class="c"># Set underlying data values to match</span>
-    <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;occupancies&#39;</span><span class="p">)</span>
+    <span class="c1"># Set underlying data values to match</span>
+    <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;occupancies&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiDataMatrix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">newDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;occupancies&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+      <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">newDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;occupancies&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(),</span> <span class="n">data</span><span class="p">)</span>
 
@@ -255,16 +255,16 @@
 <span class="sd">    NB the occupancyData array is a cached copy.</span>
 <span class="sd">    It can be modified, but modifications will be kept in cache till the attribute is</span>
 <span class="sd">    set or the project is saved.&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s">&#39;_bFactorData&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_bFactorData&#39;</span><span class="p">):</span>
       <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bFactorData</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;bFactors&#39;</span><span class="p">)</span>
+      <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bFactors&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">apiDataMatrix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">None</span>
       <span class="n">data</span> <span class="o">=</span> <span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">data</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">None</span>
-      <span class="c"># We have the data. make cached copy, and return it</span>
+      <span class="c1"># We have the data. make cached copy, and return it</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bFactorData</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">NaN</span><span class="p">)</span>
       <span class="n">result</span><span class="o">.</span><span class="n">flat</span> <span class="o">=</span> <span class="n">data</span>
       <span class="k">return</span> <span class="n">result</span>
@@ -275,16 +275,16 @@
     <span class="n">shape</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">models</span><span class="p">),</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">nAtoms</span><span class="p">)</span>
     <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">flattenIfNumpy</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">))</span>
 
-    <span class="c"># Set cached copy to value. NB this is the original, NOT a copy</span>
+    <span class="c1"># Set cached copy to value. NB this is the original, NOT a copy</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_bFactorData</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bFactorData</span>
 
-    <span class="c"># Set underlying data values to match</span>
-    <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;bFactors&#39;</span><span class="p">)</span>
+    <span class="c1"># Set underlying data values to match</span>
+    <span class="n">apiDataMatrix</span> <span class="o">=</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">findFirstDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bFactors&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiDataMatrix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">newDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s">&#39;bFactors&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
+      <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">newDataMatrix</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;bFactors&#39;</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="n">shape</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">apiDataMatrix</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="p">(),</span> <span class="n">data</span><span class="p">)</span>
 
@@ -295,11 +295,11 @@
 <span class="sd">    NB the atomNameData array is a cached copy.</span>
 <span class="sd">    It can be modified, but modifications will be kept in cache till the attribute is</span>
 <span class="sd">    set or the project is saved.&quot;&quot;&quot;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
 
   <span class="nd">@atomNameData.setter</span>
   <span class="k">def</span> <span class="nf">atomNameData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;atomNameData not implemented yet&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="StructureEnsemble.getAtomCoordinates"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.StructureEnsemble.getAtomCoordinates">[docs]</a>  <span class="k">def</span> <span class="nf">getAtomCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomId</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;get nModels * 3 array of coordinates for atom atomId&quot;&quot;&quot;</span>
@@ -313,7 +313,7 @@
     <span class="sd">&quot;&quot;&quot;set nModels * 3 array of coordinates for atom atomId&quot;&quot;&quot;</span>
     <span class="n">apiCoordAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomId2CoordAtom</span><span class="p">(</span><span class="n">atomId</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiCoordAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">coordinateData</span><span class="p">[:,</span><span class="n">apiCoordAtom</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -329,7 +329,7 @@
     <span class="sd">&quot;&quot;&quot;set nModels array of occupancies for atom atomId&quot;&quot;&quot;</span>
     <span class="n">apiCoordAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomId2CoordAtom</span><span class="p">(</span><span class="n">atomId</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiCoordAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">occupancyData</span><span class="p">[:,</span><span class="n">apiCoordAtom</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -345,7 +345,7 @@
     <span class="sd">&quot;&quot;&quot;set nModels array of bFactors for atom atomId&quot;&quot;&quot;</span>
     <span class="n">apiCoordAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomId2CoordAtom</span><span class="p">(</span><span class="n">atomId</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiCoordAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">bFactorData</span><span class="p">[:,</span><span class="n">apiCoordAtom</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -361,7 +361,7 @@
     <span class="sd">&quot;&quot;&quot;set nModels array of specific atom names for atom atomId&quot;&quot;&quot;</span>
     <span class="n">apiCoordAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomId2CoordAtom</span><span class="p">(</span><span class="n">atomId</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiCoordAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">atomNameData</span><span class="p">[:,</span><span class="n">apiCoordAtom</span><span class="o">.</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
@@ -380,16 +380,16 @@
 
     <span class="n">apiEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span>
     <span class="k">if</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">dataMatrices</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;You cannot add atoms when StructureEnsemble contains data&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot add atoms when StructureEnsemble contains data&quot;</span><span class="p">)</span>
 
     <span class="n">apiChain</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">_apiChain</span>
     <span class="n">code</span> <span class="o">=</span> <span class="n">apiChain</span><span class="o">.</span><span class="n">code</span>
     <span class="k">if</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">findFirstCoordChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Chain &#39;</span><span class="si">%s</span><span class="s">&#39; already present in StructureEnsemble&quot;</span> <span class="o">%</span> <span class="n">code</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chain &#39;</span><span class="si">%s</span><span class="s2">&#39; already present in StructureEnsemble&quot;</span> <span class="o">%</span> <span class="n">code</span><span class="p">)</span>
 
     <span class="n">apiCoordChain</span> <span class="o">=</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">newCoordChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
-      <span class="c"># We loop over wrapper chains to get the correct sorted order.</span>
+      <span class="c1"># We loop over wrapper chains to get the correct sorted order.</span>
       <span class="n">apiResidue</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">_wrappedData</span>
       <span class="n">coordResidue</span> <span class="o">=</span> <span class="n">apiCoordChain</span><span class="o">.</span><span class="n">newResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">apiResidue</span><span class="o">.</span><span class="n">seqCode</span><span class="p">,</span>
                                             <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">apiResidue</span><span class="o">.</span><span class="n">seqInsertCode</span><span class="p">,</span>
@@ -404,9 +404,9 @@
 
     <span class="n">apiEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span>
     <span class="k">if</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">dataMatrices</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">override</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;You cannot add atom Ids when StructureEnsemble contains data&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You cannot add atom Ids when StructureEnsemble contains data&quot;</span><span class="p">)</span>
 
-    <span class="c"># Set up map of existing coordResidues</span>
+    <span class="c1"># Set up map of existing coordResidues</span>
     <span class="n">coordResidues</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">coordChain</span> <span class="ow">in</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">coordChains</span><span class="p">:</span>
       <span class="n">code</span> <span class="o">=</span> <span class="n">coordChain</span><span class="o">.</span><span class="n">code</span>
@@ -414,34 +414,34 @@
         <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">coordResidue</span><span class="o">.</span><span class="n">seqCode</span><span class="p">)</span> <span class="o">+</span> <span class="n">coordResidue</span><span class="o">.</span><span class="n">seqInsertCode</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
         <span class="n">coordResidues</span><span class="p">[(</span><span class="n">code</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">)]</span> <span class="o">=</span> <span class="n">coordResidue</span>
 
-    <span class="c"># process atomIds</span>
+    <span class="c1"># process atomIds</span>
     <span class="k">for</span> <span class="n">atomId</span> <span class="ow">in</span> <span class="n">atomIds</span><span class="p">:</span>
-      <span class="c"># idTuple = tuple(Pid.splitId(atomId))</span>
+      <span class="c1"># idTuple = tuple(Pid.splitId(atomId))</span>
       <span class="n">code</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">splitId</span><span class="p">(</span><span class="n">atomId</span><span class="p">))</span>
       <span class="n">coordResidue</span> <span class="o">=</span> <span class="n">coordResidues</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="n">code</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">))</span>
       <span class="k">if</span> <span class="n">coordResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">coordChain</span> <span class="o">=</span> <span class="p">(</span><span class="n">apiEnsemble</span><span class="o">.</span><span class="n">findFirstCoordChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">)</span> <span class="ow">or</span>
                       <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">newChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">code</span><span class="p">))</span>
 
-        <span class="c"># split sequenceCode in seqCode and seqInsertCode</span>
+        <span class="c1"># split sequenceCode in seqCode and seqInsertCode</span>
         <span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">seqCode</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> contains an invalid sequenceCode&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> contains an invalid sequenceCode&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="n">coordResidue</span> <span class="o">=</span> <span class="n">coordChain</span><span class="o">.</span><span class="n">newResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">seqInsertCode</span> <span class="ow">or</span> <span class="s">&#39; &#39;</span><span class="p">,</span>
+          <span class="n">coordResidue</span> <span class="o">=</span> <span class="n">coordChain</span><span class="o">.</span><span class="n">newResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">seqInsertCode</span> <span class="ow">or</span> <span class="s1">&#39; &#39;</span><span class="p">,</span>
                                                <span class="n">code3Letter</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
           <span class="n">coordResidues</span><span class="p">[(</span><span class="n">code</span><span class="p">,</span><span class="n">sequenceCode</span><span class="p">)]</span> <span class="o">=</span> <span class="n">coordResidue</span>
 
       <span class="k">elif</span> <span class="n">coordResidue</span><span class="o">.</span><span class="n">code3Letter</span> <span class="o">!=</span> <span class="n">residueType</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> residueType does not match sequenceCode in StructureEnsemble&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> residueType does not match sequenceCode in StructureEnsemble&quot;</span>
                          <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">coordResidue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">elementName</span> <span class="o">=</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s">&#39;Unknown&#39;</span>
+        <span class="n">elementName</span> <span class="o">=</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;Unknown&#39;</span>
         <span class="n">coordResidue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">elementName</span><span class="o">=</span><span class="n">elementName</span><span class="p">)</span>
 
       <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> matches pre-existing atom in StructureEnsemble&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> matches pre-existing atom in StructureEnsemble&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="StructureEnsemble.replaceAtomIds"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.StructureEnsemble.replaceAtomIds">[docs]</a>  <span class="k">def</span> <span class="nf">replaceAtomIds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomIds</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
@@ -450,7 +450,7 @@
 
     <span class="n">oldAtomIds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">atomIds</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">oldAtomIds</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomIds</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;The number of new atomIds must be the same as the number they replace&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;The number of new atomIds must be the same as the number they replace&quot;</span><span class="p">)</span>
 
     <span class="n">apiStructureEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="n">memopsRoot</span> <span class="o">=</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">root</span>
@@ -460,7 +460,7 @@
       <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">apiAtom</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">orderedAtoms</span><span class="p">):</span>
-        <span class="c"># Done this way to speed up deletion</span>
+        <span class="c1"># Done this way to speed up deletion</span>
         <span class="n">apiAtom</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
       <span class="k">for</span> <span class="n">apiChain</span> <span class="ow">in</span> <span class="n">apiStructureEnsemble</span><span class="o">.</span><span class="n">coordChains</span><span class="p">:</span>
         <span class="n">apiChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
@@ -479,21 +479,21 @@
     <span class="k">for</span> <span class="n">atomId</span> <span class="ow">in</span> <span class="n">atomIds</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">removeAtomId</span><span class="p">(</span><span class="n">atomId</span><span class="p">)</span></div>
 
-    <span class="c"># NBNB TBD Maybe add undo code</span>
+    <span class="c1"># NBNB TBD Maybe add undo code</span>
 
 <div class="viewcode-block" id="StructureEnsemble.removeAtomId"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.StructureEnsemble.removeAtomId">[docs]</a>  <span class="k">def</span> <span class="nf">removeAtomId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atomId</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove atom with atomId, adjusting data matrices to fit&quot;&quot;&quot;</span>
     <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atomId2CoordAtom</span><span class="p">(</span><span class="n">atomId</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Atom with atomId </span><span class="si">%s</span><span class="s"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atom with atomId </span><span class="si">%s</span><span class="s2"> not found&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
 
-    <span class="c"># get data arrays before we starts messing with the internals</span>
+    <span class="c1"># get data arrays before we starts messing with the internals</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_DATA_ARRAY_TAGS</span><span class="p">:</span>
       <span class="n">data</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
-    <span class="c"># apiOrderedAtoms = apiAtom.topObject.__dict__[&#39;orderedAtoms&#39;]</span>
+    <span class="c1"># apiOrderedAtoms = apiAtom.topObject.__dict__[&#39;orderedAtoms&#39;]</span>
 
-    <span class="c"># Make new atom record and rearrange to fit</span>
+    <span class="c1"># Make new atom record and rearrange to fit</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">root</span>
     <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="n">undo</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
@@ -502,15 +502,15 @@
     <span class="n">undoData</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">try</span><span class="p">:</span>
 
-      <span class="c"># # change atoms</span>
+      <span class="c1"># # change atoms</span>
       <span class="n">index</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">index</span>
       <span class="n">apiAtom</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
-      <span class="c"># reset data arrays</span>
+      <span class="c1"># reset data arrays</span>
       <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_DATA_ARRAY_TAGS</span><span class="p">:</span>
         <span class="n">xx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-        <span class="c"># if xx:</span>
-        <span class="c"># numpy is DISGUSTING!!</span>
+        <span class="c1"># if xx:</span>
+        <span class="c1"># numpy is DISGUSTING!!</span>
         <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">xx</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
           <span class="n">undoData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">xx</span><span class="p">[:,</span><span class="n">apiAtom</span><span class="o">.</span><span class="n">index</span><span class="p">]</span>
           <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
@@ -520,7 +520,7 @@
         <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
       <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span></div>
 
-    <span class="c"># NBNB TBD add undo code</span>
+    <span class="c1"># NBNB TBD add undo code</span>
 
 <div class="viewcode-block" id="StructureEnsemble.addAtomId"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.StructureEnsemble.addAtomId">[docs]</a>  <span class="k">def</span> <span class="nf">addAtomId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">atomId</span><span class="p">,</span> <span class="n">coordinateData</span><span class="p">:</span><span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">occupancyData</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
               <span class="n">bFactorData</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">atomNameData</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -528,23 +528,23 @@
 <span class="sd">    (if any) otherwise at the end of the atomId list.</span>
 <span class="sd">    Data matrices are filled with NaN or with the atom Name (for atomNameData)&quot;&quot;&quot;</span>
 
-    <span class="c"># parse atomId</span>
+    <span class="c1"># parse atomId</span>
     <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">splitId</span><span class="p">(</span><span class="n">atomId</span><span class="p">))</span>
     <span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
-    <span class="n">seqInsertCode</span> <span class="o">=</span> <span class="n">seqInsertCode</span> <span class="ow">or</span> <span class="s">&#39; &#39;</span>
+    <span class="n">seqInsertCode</span> <span class="o">=</span> <span class="n">seqInsertCode</span> <span class="ow">or</span> <span class="s1">&#39; &#39;</span>
     <span class="k">if</span> <span class="n">seqCode</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> contains an invalid sequenceCode&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> contains an invalid sequenceCode&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
 
-    <span class="c"># get data arrays before we starts messing with the internals</span>
+    <span class="c1"># get data arrays before we starts messing with the internals</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_DATA_ARRAY_TAGS</span><span class="p">:</span>
       <span class="n">data</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
 
     <span class="n">apiEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span>
-    <span class="n">apiOrderedAtoms</span> <span class="o">=</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;orderedAtoms&#39;</span><span class="p">]</span>
+    <span class="n">apiOrderedAtoms</span> <span class="o">=</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;orderedAtoms&#39;</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">apiOrderedAtoms</span><span class="p">:</span>
-      <span class="c"># Get insertion data</span>
+      <span class="c1"># Get insertion data</span>
       <span class="n">useChain</span> <span class="o">=</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">findFirstCoordChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">chainCode</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">useChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">nextAtomIndex</span> <span class="o">=</span> <span class="n">apiOrderedAtoms</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span>
@@ -559,16 +559,16 @@
           <span class="k">else</span><span class="p">:</span>
             <span class="n">nextAtomIndex</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">useResidue</span><span class="o">.</span><span class="n">code3Letter</span> <span class="o">!=</span> <span class="n">residueType</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;New residue type of </span><span class="si">%s</span><span class="s"> incompatible with previous assignment </span><span class="si">%s%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New residue type of </span><span class="si">%s</span><span class="s2"> incompatible with previous assignment </span><span class="si">%s%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span>
           <span class="o">%</span> <span class="p">(</span><span class="n">residueType</span><span class="p">,</span> <span class="n">useResidue</span><span class="o">.</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">useResidue</span><span class="o">.</span><span class="n">seqInsertCode</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
              <span class="n">useResidue</span><span class="o">.</span><span class="n">code3Letter</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="k">if</span> <span class="n">useResidue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">nextAtomIndex</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">index</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">useResidue</span><span class="o">.</span><span class="n">atoms</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
           <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Atom </span><span class="si">%s</span><span class="s"> already in StructureEnsemble)&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atom </span><span class="si">%s</span><span class="s2"> already in StructureEnsemble)&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
 
-      <span class="c"># Make new atom record and rearrange to fit</span>
+      <span class="c1"># Make new atom record and rearrange to fit</span>
       <span class="n">root</span> <span class="o">=</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">root</span>
       <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">True</span>
       <span class="n">undo</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
@@ -581,15 +581,15 @@
           <span class="n">useResidue</span> <span class="o">=</span> <span class="n">useChain</span><span class="o">.</span><span class="n">newResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">seqInsertCode</span><span class="p">,</span>
                                            <span class="n">code3Letter</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
         <span class="n">newAtom</span> <span class="o">=</span> <span class="n">useResidue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                     <span class="n">elementName</span><span class="o">=</span><span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s">&#39;Unknown&#39;</span><span class="p">)</span>
+                                     <span class="n">elementName</span><span class="o">=</span><span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">)</span>
 
-        <span class="c"># reset data arrays</span>
+        <span class="c1"># reset data arrays</span>
         <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_DATA_ARRAY_TAGS</span><span class="p">:</span>
           <span class="n">xx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-          <span class="c"># if xx:</span>
-          <span class="c"># numpy is DISGUSTING!!</span>
+          <span class="c1"># if xx:</span>
+          <span class="c1"># numpy is DISGUSTING!!</span>
           <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">xx</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;atomNameData&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;atomNameData&#39;</span><span class="p">:</span>
               <span class="n">default</span> <span class="o">=</span> <span class="n">name</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">default</span> <span class="o">=</span> <span class="n">NaN</span>
@@ -597,34 +597,34 @@
             <span class="n">vv</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">nextAtomIndex</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
             <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">vv</span><span class="p">)</span>
 
-        <span class="c"># Move atom to preferred location</span>
+        <span class="c1"># Move atom to preferred location</span>
         <span class="k">if</span> <span class="n">nextAtomIndex</span> <span class="o">&lt;</span> <span class="n">apiOrderedAtoms</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
           <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">apiOrderedAtoms</span><span class="p">[</span><span class="n">nextAtomIndex</span><span class="p">:]:</span>
-            <span class="n">atom</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;index&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">atom</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
           <span class="n">apiOrderedAtoms</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">nextAtomIndex</span><span class="p">,</span> <span class="n">newAtom</span><span class="p">)</span>
-          <span class="n">newAtom</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextAtomIndex</span>
+          <span class="n">newAtom</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nextAtomIndex</span>
           <span class="k">del</span> <span class="n">apiOrderedAtoms</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
       <span class="k">finally</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
           <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
         <span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span>
 
-        <span class="c"># NBNB TBD Add undo registration here</span>
+        <span class="c1"># NBNB TBD Add undo registration here</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="c"># Empty atomIds - just add</span>
+      <span class="c1"># Empty atomIds - just add</span>
       <span class="n">nextAtomIndex</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">addAtomIds</span><span class="p">((</span><span class="n">atomId</span><span class="p">,),</span> <span class="n">override</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-      <span class="c"># reset data arrays</span>
+      <span class="c1"># reset data arrays</span>
       <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_DATA_ARRAY_TAGS</span><span class="p">:</span>
         <span class="n">xx</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-        <span class="c"># if xx:</span>
-        <span class="c"># numpy is DISGUSTING!!</span>
+        <span class="c1"># if xx:</span>
+        <span class="c1"># numpy is DISGUSTING!!</span>
         <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">xx</span><span class="o">.</span><span class="n">size</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s">&#39;atomNameData&#39;</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;atomNameData&#39;</span><span class="p">:</span>
             <span class="n">default</span> <span class="o">=</span> <span class="n">name</span>
           <span class="k">else</span><span class="p">:</span>
-            <span class="n">default</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s">&#39;NaN&#39;</span><span class="p">)</span>
+            <span class="n">default</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
           <span class="n">values</span> <span class="o">=</span> <span class="nb">locals</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="ow">or</span> <span class="n">default</span>
           <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span></div>
 
@@ -634,12 +634,12 @@
     <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span> <span class="n">name</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">splitId</span><span class="p">(</span><span class="n">atomId</span><span class="p">))</span>
     <span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">seqCode</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;atomId </span><span class="si">%s</span><span class="s"> contains an invalid sequenceCode&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;atomId </span><span class="si">%s</span><span class="s2"> contains an invalid sequenceCode&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
     <span class="n">apiEnsemble</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiStructureEnsemble</span>
     <span class="n">apiCoordChain</span> <span class="o">=</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">findFirstCoordChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">chainCode</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiCoordChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="bp">None</span>
-    <span class="n">apiCoordResidue</span> <span class="o">=</span> <span class="n">apiCoordChain</span><span class="o">.</span><span class="n">findFirstResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">seqInsertCode</span> <span class="ow">or</span> <span class="s">&#39; &#39;</span><span class="p">)</span>
+    <span class="n">apiCoordResidue</span> <span class="o">=</span> <span class="n">apiCoordChain</span><span class="o">.</span><span class="n">findFirstResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">seqInsertCode</span> <span class="ow">or</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">apiCoordResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="bp">None</span>
     <span class="k">return</span> <span class="n">apiCoordResidue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
@@ -647,28 +647,28 @@
   <span class="k">def</span> <span class="nf">_flushCachedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Flush cached data to ensure up-to-date data are saved&quot;&quot;&quot;</span>
 
-    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s">&#39;coordinateData&#39;</span><span class="p">,</span> <span class="s">&#39;occupancyData&#39;</span><span class="p">,</span> <span class="s">&#39;bFactorData&#39;</span><span class="p">):</span>
-      <span class="n">_tag</span> <span class="o">=</span> <span class="s">&#39;_&#39;</span> <span class="o">+</span> <span class="n">tag</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;coordinateData&#39;</span><span class="p">,</span> <span class="s1">&#39;occupancyData&#39;</span><span class="p">,</span> <span class="s1">&#39;bFactorData&#39;</span><span class="p">):</span>
+      <span class="n">_tag</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">tag</span>
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_tag</span><span class="p">):</span>
-        <span class="c"># Save cached data back to underlying storage</span>
+        <span class="c1"># Save cached data back to underlying storage</span>
         <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_tag</span><span class="p">))</span>
         <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_tag</span><span class="p">)</span>
 
 
-  <span class="c"># Implementation functions</span>
+  <span class="c1"># Implementation functions</span>
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData for all NmrConstraintStores linked to NmrProject&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">sortedStructureEnsembles</span><span class="p">()</span></div>
 
 <span class="k">def</span> <span class="nf">_newStructureEnsemble</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">ensembleId</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StructureEnsemble</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new, empty ccpn.StructureEnsemble&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Create new, empty StructureEnsemble&quot;&quot;&quot;</span>
 
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;ensembleId&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;ensembleId&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
   
   <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newStructureEnsemble&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newStructureEnsemble&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newStructureEnsemble&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newStructureEnsemble&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">ensembleId</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">structureEnsembles</span>
@@ -679,11 +679,11 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiStructureEnsemble</span><span class="p">)</span>
     
     
-<span class="c"># Connections to parents:</span>
+<span class="c1"># Connections to parents:</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">newStructureEnsemble</span> <span class="o">=</span> <span class="n">_newStructureEnsemble</span>
 <span class="k">del</span> <span class="n">_newStructureEnsemble</span>
 
-<span class="c"># Notifiers:</span>
+<span class="c1"># Notifiers:</span>
 </pre></div>
 
           </div>

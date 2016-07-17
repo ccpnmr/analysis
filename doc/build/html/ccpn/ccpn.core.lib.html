@@ -61,58 +61,58 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-ccpn.core.lib.Assignment">
-<span id="ccpn-core-lib-assignment-module"></span><h2>ccpn.core.lib.Assignment module<a class="headerlink" href="#module-ccpn.core.lib.Assignment" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ccpn.core.lib.AssignmentLib">
+<span id="ccpn-core-lib-assignmentlib-module"></span><h2>ccpn.core.lib.AssignmentLib module<a class="headerlink" href="#module-ccpn.core.lib.AssignmentLib" title="Permalink to this headline">¶</a></h2>
 <p>Library functions for (semi)automatic assignment routines</p>
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.assignAlphas">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">assignAlphas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue, peaks: List[ccpn.core.Peak.Peak]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#assignAlphas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.assignAlphas" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.assignAlphas">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">assignAlphas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue, peaks: List[ccpn.core.Peak.Peak]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#assignAlphas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.assignAlphas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assigns CA and CA-1 NmrAtoms to dimensions of specified peaks.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.assignBetas">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">assignBetas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue, peaks: List[ccpn.core.Peak.Peak]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#assignBetas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.assignBetas" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.assignBetas">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">assignBetas</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue, peaks: List[ccpn.core.Peak.Peak]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#assignBetas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.assignBetas" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assigns CB and CB-1 NmrAtoms to dimensions of specified peaks.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.copyAssignments">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">copyAssignments</code><span class="sig-paren">(</span><em>referencePeakList: ccpn.core.PeakList.PeakList</em>, <em>matchPeakList: ccpn.core.PeakList.PeakList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#copyAssignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.copyAssignments" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.copyAssignments">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">copyAssignments</code><span class="sig-paren">(</span><em>referencePeakList: ccpn.core.PeakList.PeakList</em>, <em>matchPeakList: ccpn.core.PeakList.PeakList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#copyAssignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.copyAssignments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a reference peakList and assigns NmrAtoms to dimensions
 of a match peakList based on matching axis codes.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.getNmrAtomPrediction">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">getNmrAtomPrediction</code><span class="sig-paren">(</span><em>ccpCode: str</em>, <em>value: float</em>, <em>isotopeCode: str</em>, <em>strict: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#getNmrAtomPrediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.getNmrAtomPrediction" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.getNmrAtomPrediction">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">getNmrAtomPrediction</code><span class="sig-paren">(</span><em>ccpCode: str</em>, <em>value: float</em>, <em>isotopeCode: str</em>, <em>strict: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#getNmrAtomPrediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.getNmrAtomPrediction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes a ccpCode, a chemical shift value and an isotope code and returns a dictionary of
 atom type predictions to confidence values..</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.getNmrResiduePrediction">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">getNmrResiduePrediction</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>chemicalShiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em>, <em>prior: float = 0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#getNmrResiduePrediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.getNmrResiduePrediction" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.getNmrResiduePrediction">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">getNmrResiduePrediction</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>chemicalShiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em>, <em>prior: float = 0.05</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#getNmrResiduePrediction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.getNmrResiduePrediction" title="Permalink to this definition">¶</a></dt>
 <dd><p>Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
 confidence levels for that NmrResidue.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.getSpinSystemsLocation">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">getSpinSystemsLocation</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project, nmrResidues: List[ccpn.core.NmrResidue.NmrResidue], chain: ccpn.core.Chain.Chain, chemicalShiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#getSpinSystemsLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.getSpinSystemsLocation" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.getSpinSystemsLocation">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">getSpinSystemsLocation</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project, nmrResidues: List[ccpn.core.NmrResidue.NmrResidue], chain: ccpn.core.Chain.Chain, chemicalShiftList: ccpn.core.ChemicalShiftList.ChemicalShiftList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#getSpinSystemsLocation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.getSpinSystemsLocation" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines location of a set of NmrResidues in the specified chain using residue type
 predictions.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.isInterOnlyExpt">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">isInterOnlyExpt</code><span class="sig-paren">(</span><em>experimentType: str</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#isInterOnlyExpt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.isInterOnlyExpt" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.isInterOnlyExpt">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">isInterOnlyExpt</code><span class="sig-paren">(</span><em>experimentType: str</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#isInterOnlyExpt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.isInterOnlyExpt" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines if the specified experiment is an inter-residual only experiment</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.nmrAtomPairsByDimensionTransfer">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">nmrAtomPairsByDimensionTransfer</code><span class="sig-paren">(</span><em>peakLists: Sequence[ccpn.core.PeakList.PeakList]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#nmrAtomPairsByDimensionTransfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.nmrAtomPairsByDimensionTransfer" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.nmrAtomPairsByDimensionTransfer">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">nmrAtomPairsByDimensionTransfer</code><span class="sig-paren">(</span><em>peakLists: Sequence[ccpn.core.PeakList.PeakList]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#nmrAtomPairsByDimensionTransfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.nmrAtomPairsByDimensionTransfer" title="Permalink to this definition">¶</a></dt>
 <dd><p>From one or more peakLists belonging to the same spectrum,
 get a dictionary of magnetisationTransferTuple (See Spectrum.magnetisationTransfers
 for documentation) to a set of NmrAtom pairs tha are coupled by the magnetisation transfer.
@@ -122,10 +122,303 @@ they are in the dimension order.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Assignment.propagateAssignments">
-<code class="descclassname">ccpn.core.lib.Assignment.</code><code class="descname">propagateAssignments</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak] = None</em>, <em>referencePeak: ccpn.core.Peak.Peak = None</em>, <em>current: object = None</em>, <em>tolerances: List[float] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Assignment.html#propagateAssignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Assignment.propagateAssignments" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.AssignmentLib.propagateAssignments">
+<code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">propagateAssignments</code><span class="sig-paren">(</span><em>peaks: List[ccpn.core.Peak.Peak] = None</em>, <em>referencePeak: ccpn.core.Peak.Peak = None</em>, <em>current: object = None</em>, <em>tolerances: List[float] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#propagateAssignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.propagateAssignments" title="Permalink to this definition">¶</a></dt>
 <dd><p>Propagates dimensionNmrAtoms for each dimension of the specified peaks to dimensions of other
 peaks.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="ccpn-core-lib-ccpnnefio-module">
+<h2>ccpn.core.lib.CcpnNefIo module<a class="headerlink" href="#ccpn-core-lib-ccpnnefio-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.lib.CcpnNefIo"></span><p>Code for CCPN-specific NEF I/O</p>
+<dl class="class">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader">
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.CcpnNefIo.</code><code class="descname">CcpnNefReader</code><span class="sig-paren">(</span><em>application</em>, <em>specificationFile=None</em>, <em>mode='standard'</em>, <em>testing=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.adjustAxisCodes">
+<code class="descname">adjustAxisCodes</code><span class="sig-paren">(</span><em>spectrum</em>, <em>dimensionData</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.adjustAxisCodes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.adjustAxisCodes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.fetchDataSet">
+<code class="descname">fetchDataSet</code><span class="sig-paren">(</span><em>serial=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.fetchDataSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.fetchDataSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch DataSet with given serial.
+If input is None, use self.defaultDataSetSerial
+If that too is None, create a new DataSet and use its serial as the default</p>
+<p>NB when reading, all DataSets with known serials should be instantiated BEFORE calling
+with input None</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.getNefData">
+<code class="descname">getNefData</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.getNefData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.getNefData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get NEF data structure from file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.importNewProject">
+<code class="descname">importNewProject</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>dataBlock: ccpn.util.nef.StarIo.NmrDataBlock</em>, <em>projectIsEmpty=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.importNewProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importNewProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Import entire project from dataBlock into empty Project</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers">
+<code class="descname">importers</code><em class="property"> = {'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fd1160f0488&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fd1160f0400&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x7fd1160f09d8&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x7fd1160f07b8&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x7fd1160f0378&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x7fd1160f0840&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x7fd1160f0ae8&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fd1160f0400&gt;, 'ccpn_integral_list': &lt;function CcpnNefReader.load_ccpn_integral_list at 0x7fd1160f0b70&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fd1160f0488&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fd1160f0488&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x7fd1160f0bf8&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x7fd1160f0268&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x7fd1160f0158&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x7fd1160f0730&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x7fd1160f01e0&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7fd1160f0488&gt;, 'ccpn_assignments': &lt;function CcpnNefReader.load_ccpn_assignments at 0x7fd1160f0a60&gt;, 'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x7fd1160f00d0&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fd1160f0400&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x7fd1160f0510&gt;, 'nef_spectrum_dimension_transfer': &lt;function CcpnNefReader.load_nef_spectrum_dimension_transfer at 0x7fd1160f0598&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x7fd1160f02f0&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7fd1160f0400&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x7fd1160f08c8&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x7fd1160f0950&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_assignments">
+<code class="descname">load_ccpn_assignments</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_ccpn_assignments"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_assignments" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_dataset">
+<code class="descname">load_ccpn_dataset</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_ccpn_dataset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_dataset" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_integral_list">
+<code class="descname">load_ccpn_integral_list</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_ccpn_integral_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_integral_list" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_notes">
+<code class="descname">load_ccpn_notes</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_ccpn_notes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_notes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_sample">
+<code class="descname">load_ccpn_sample</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_ccpn_sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_sample" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_spectrum_group">
+<code class="descname">load_ccpn_spectrum_group</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_ccpn_spectrum_group"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_spectrum_group" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_substance">
+<code class="descname">load_ccpn_substance</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_ccpn_substance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_ccpn_substance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_chemical_shift">
+<code class="descname">load_nef_chemical_shift</code><span class="sig-paren">(</span><em>parent</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_chemical_shift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_chemical_shift" title="Permalink to this definition">¶</a></dt>
+<dd><p>load nef_chemical_shift loop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_chemical_shift_list">
+<code class="descname">load_nef_chemical_shift_list</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_chemical_shift_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_chemical_shift_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>load nef_chemical_shift_list saveFrame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_covalent_links">
+<code class="descname">load_nef_covalent_links</code><span class="sig-paren">(</span><em>project</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_covalent_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_covalent_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load nef_sequence loop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_molecular_system">
+<code class="descname">load_nef_molecular_system</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_molecular_system"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_molecular_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>load nef_molecular_system saveFrame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_nmr_meta_data">
+<code class="descname">load_nef_nmr_meta_data</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_nmr_meta_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_nmr_meta_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>load nef_nmr_meta_data saveFrame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_nmr_spectrum">
+<code class="descname">load_nef_nmr_spectrum</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_nmr_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_nmr_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_peak">
+<code class="descname">load_nef_peak</code><span class="sig-paren">(</span><em>peakList</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_peak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_peak" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serves to load nef_peak loop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_peak_restraint_link">
+<code class="descname">load_nef_peak_restraint_link</code><span class="sig-paren">(</span><em>project</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_peak_restraint_link"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_peak_restraint_link" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load nef_peak_restraint_link loop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_peak_restraint_links">
+<code class="descname">load_nef_peak_restraint_links</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_peak_restraint_links"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_peak_restraint_links" title="Permalink to this definition">¶</a></dt>
+<dd><p>load nef_peak_restraint_links saveFrame</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_restraint">
+<code class="descname">load_nef_restraint</code><span class="sig-paren">(</span><em>restraintList</em>, <em>loop</em>, <em>itemLength=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_restraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_restraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serves to load nef_distance_restraint, nef_dihedral_restraint,
+nef_rdc_restraint and ccpn_restraint loops</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_restraint_list">
+<code class="descname">load_nef_restraint_list</code><span class="sig-paren">(</span><em>project</em>, <em>saveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_restraint_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_restraint_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serves to load nef_distance_restraint_list, nef_dihedral_restraint_list,
+nef_rdc_restraint_list and ccpn_restraint_list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_sequence">
+<code class="descname">load_nef_sequence</code><span class="sig-paren">(</span><em>project</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_sequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_sequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load nef_sequence loop</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_spectrum_dimension_transfer">
+<code class="descname">load_nef_spectrum_dimension_transfer</code><span class="sig-paren">(</span><em>spectrum</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.load_nef_spectrum_dimension_transfer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_spectrum_dimension_transfer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrAtom">
+<code class="descname">produceNmrAtom</code><span class="sig-paren">(</span><em>nmrResidue</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.produceNmrAtom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrAtom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get NmrAtom from NmrResidue and name, correcting for possible errors</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrChain">
+<code class="descname">produceNmrChain</code><span class="sig-paren">(</span><em>chainCode: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.produceNmrChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrChain" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get NmrChain, correcting for possible errors</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrResidue">
+<code class="descname">produceNmrResidue</code><span class="sig-paren">(</span><em>chainCode: str = None</em>, <em>sequenceCode: str = None</em>, <em>residueType: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.produceNmrResidue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrResidue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get NmrResidue, correcting for possible errors</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.read_nef_spectrum_dimension">
+<code class="descname">read_nef_spectrum_dimension</code><span class="sig-paren">(</span><em>project</em>, <em>loop</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.read_nef_spectrum_dimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.read_nef_spectrum_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read nef_spectrum_dimension loop and convert data to a dictionary
+of ccpnTag:[per-dimension-value]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.updateMetaData">
+<code class="descname">updateMetaData</code><span class="sig-paren">(</span><em>metaDataFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.updateMetaData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.updateMetaData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add meta information to main data set. Must be done at end of read</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.warning">
+<code class="descname">warning</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.warning"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.warning" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter">
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.CcpnNefIo.</code><code class="descname">CcpnNefWriter</code><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>CCPN NEF reader/writer</p>
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.chains2Nef">
+<code class="descname">chains2Nef</code><span class="sig-paren">(</span><em>chains: List[ccpn.Chain]</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrSaveFrame<a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.chains2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.chains2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert selected Chains to CCPN NEF saveframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.chemicalShiftList2Nef">
+<code class="descname">chemicalShiftList2Nef</code><span class="sig-paren">(</span><em>chemicalShiftList</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrSaveFrame<a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.chemicalShiftList2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.chemicalShiftList2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert ChemicalShiftList to CCPN NEF saveframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportDataSet">
+<code class="descname">exportDataSet</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.exportDataSet"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportDataSet" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get dataSet and all objects linked to therein as NEF object tree for export</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportProject">
+<code class="descname">exportProject</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataBlock<a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.exportProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.exportProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get project and all contents as NEF object tree for export</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.makeNefMetaData">
+<code class="descname">makeNefMetaData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.makeNefMetaData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.makeNefMetaData" title="Permalink to this definition">¶</a></dt>
+<dd><p>make NEF metadata saveframe from Project</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.notes2Nef">
+<code class="descname">notes2Nef</code><span class="sig-paren">(</span><em>notes: List[ccpn.Note]</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrSaveFrame<a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.notes2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.notes2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Notes to CCPN NEF saveframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.peakList2Nef">
+<code class="descname">peakList2Nef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.peakList2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.peakList2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert PeakList to CCPN NEF saveframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.peakRestraintLinks2Nef">
+<code class="descname">peakRestraintLinks2Nef</code><span class="sig-paren">(</span><em>restraintLists: Sequence[ccpn.RestraintList], peakLists: Sequence[ccpn.PeakList]</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrSaveFrame<a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.peakRestraintLinks2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.peakRestraintLinks2Nef" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.restraintList2Nef">
+<code class="descname">restraintList2Nef</code><span class="sig-paren">(</span><em>restraintList</em>, <em>singleDataSet=False</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrSaveFrame<a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.restraintList2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.restraintList2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert RestraintList to CCPN NEF saveframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.sample2Nef">
+<code class="descname">sample2Nef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.sample2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.sample2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Sample to CCPN NEF saveframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.spectrum2Nef">
+<code class="descname">spectrum2Nef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.spectrum2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.spectrum2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert spectrum to NEF saveframes - one per peaklist</p>
+<p>Will crate a peakList if none are present</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.CcpnNefIo.CcpnNefWriter.substance2Nef">
+<code class="descname">substance2Nef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefWriter.substance2Nef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.substance2Nef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert Substance to CCPN NEF saveframe</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.CcpnNefIo.convert2NefString">
+<code class="descclassname">ccpn.core.lib.CcpnNefIo.</code><code class="descname">convert2NefString</code><span class="sig-paren">(</span><em>project</em>, <em>skipPrefixes=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#convert2NefString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.convert2NefString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert project to NEF string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.CcpnNefIo.produceSpectrum">
+<code class="descclassname">ccpn.core.lib.CcpnNefIo.</code><code class="descname">produceSpectrum</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>spectrumName: str</em>, <em>spectrumParameters: dict</em>, <em>dimensionData: dict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#produceSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.produceSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get or create spectrum using dictionaries of attributes, such as read in from NEF.</p>
+<p>:param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum</p>
+<p>:params Dictionary of keyword:list parameters, with per-dimension parameters.
+Either &#8216;axisCodes&#8217; or &#8216;isotopeCodes&#8217; must be present and fully populated.
+A number of other dimensionData are
+treated specially (see below)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.CcpnNefIo.saveNefProject">
+<code class="descclassname">ccpn.core.lib.CcpnNefIo.</code><code class="descname">saveNefProject</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>path: str</em>, <em>overwriteExisting: bool = False</em>, <em>skipPrefixes=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#saveNefProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.saveNefProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save project NEF file to path</p>
 </dd></dl>
 
 </div>
@@ -181,57 +474,268 @@ CCPN WrapperObjects sorted together</p>
 </dd></dl>
 
 </div>
-<div class="section" id="ccpn-core-lib-labeling-module">
-<h2>ccpn.core.lib.Labeling module<a class="headerlink" href="#ccpn-core-lib-labeling-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.lib.Labeling"></span><p>Labeling scheme handling.</p>
+<div class="section" id="ccpn-core-lib-labelinglib-module">
+<h2>ccpn.core.lib.LabelingLib module<a class="headerlink" href="#ccpn-core-lib-labelinglib-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.lib.LabelingLib"></span><p>Labeling scheme handling.</p>
 <p>WARNING not tested since V3 upgrade</p>
 <dl class="function">
-<dt id="ccpn.core.lib.Labeling.atomLabelingFractions">
-<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">atomLabelingFractions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#atomLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.atomLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.LabelingLib.atomLabelingFractions">
+<code class="descclassname">ccpn.core.lib.LabelingLib.</code><code class="descname">atomLabelingFractions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/LabelingLib.html#atomLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.LabelingLib.atomLabelingFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get {isotopeCode:labelingFraction} in given sample for atom/nmrAtom or ID string</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Labeling.atomPairLabelingFractions">
-<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">atomPairLabelingFractions</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project, atomPair: Sequence[T_co], labeling: str</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#atomPairLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.atomPairLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.LabelingLib.atomPairLabelingFractions">
+<code class="descclassname">ccpn.core.lib.LabelingLib.</code><code class="descname">atomPairLabelingFractions</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project, atomPair: Sequence[T_co], labeling: str</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/LabelingLib.html#atomPairLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.LabelingLib.atomPairLabelingFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get {(isotopeCode1,isotopeCode2):labelingFraction with given labeling for atom pair
 each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Labeling.sampleLabelingFractions">
-<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">sampleLabelingFractions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#sampleLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.sampleLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.LabelingLib.sampleLabelingFractions">
+<code class="descclassname">ccpn.core.lib.LabelingLib.</code><code class="descname">sampleLabelingFractions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/LabelingLib.html#sampleLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.LabelingLib.sampleLabelingFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get {isotopeCode:labelingFraction} with given labeling for atom/nmrAtom or ID string</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="ccpn.core.lib.Labeling.samplePairLabelingFractions">
-<code class="descclassname">ccpn.core.lib.Labeling.</code><code class="descname">samplePairLabelingFractions</code><span class="sig-paren">(</span><em>sample: ccpn.core.Sample.Sample, atomPair: Sequence[T_co]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/Labeling.html#samplePairLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Labeling.samplePairLabelingFractions" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.LabelingLib.samplePairLabelingFractions">
+<code class="descclassname">ccpn.core.lib.LabelingLib.</code><code class="descname">samplePairLabelingFractions</code><span class="sig-paren">(</span><em>sample: ccpn.core.Sample.Sample, atomPair: Sequence[T_co]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/LabelingLib.html#samplePairLabelingFractions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.LabelingLib.samplePairLabelingFractions" title="Permalink to this definition">¶</a></dt>
 <dd><p>get {(isotopeCode1,isotopeCode2):labelingFraction in given sample for atom pair
 each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.core.lib.Molecule">
-<span id="ccpn-core-lib-molecule-module"></span><h2>ccpn.core.lib.Molecule module<a class="headerlink" href="#module-ccpn.core.lib.Molecule" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-ccpn.core.lib.MoleculeLib">
+<span id="ccpn-core-lib-moleculelib-module"></span><h2>ccpn.core.lib.MoleculeLib module<a class="headerlink" href="#module-ccpn.core.lib.MoleculeLib" title="Permalink to this headline">¶</a></h2>
 <p>Library functions for Molecule-related data</p>
 <dl class="function">
-<dt id="ccpn.core.lib.Molecule.duplicateAtomBonds">
-<code class="descclassname">ccpn.core.lib.Molecule.</code><code class="descname">duplicateAtomBonds</code><span class="sig-paren">(</span><em>chainMap: Dict[ccpn.core.Chain.Chain, ccpn.core.Chain.Chain]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Molecule.html#duplicateAtomBonds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Molecule.duplicateAtomBonds" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.MoleculeLib.duplicateAtomBonds">
+<code class="descclassname">ccpn.core.lib.MoleculeLib.</code><code class="descname">duplicateAtomBonds</code><span class="sig-paren">(</span><em>chainMap: Dict[ccpn.core.Chain.Chain, ccpn.core.Chain.Chain]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/MoleculeLib.html#duplicateAtomBonds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.MoleculeLib.duplicateAtomBonds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Duplicate atom-atom bonds within source chains to target chains,
 skipping those that already exist.</p>
 <p>Input is a map from source chains to corresponding trget chains.</p>
 <p>Atoms are mapped on matching Pids (with different chain codes</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="ccpn.core.lib.MoleculeLib.extraBoundAtomPairs">
+<code class="descclassname">ccpn.core.lib.MoleculeLib.</code><code class="descname">extraBoundAtomPairs</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>selectSequential: bool = None</em><span class="sig-paren">)</span> &rarr; List[Tuple[ccpn.core.Atom.Atom, ccpn.core.Atom.Atom]]<a class="reference internal" href="../_modules/ccpn/core/lib/MoleculeLib.html#extraBoundAtomPairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.MoleculeLib.extraBoundAtomPairs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get pairs of bound Atoms whose bonds are NOT defined through the residue topology.
+The result and each individualnatom pair are both sorted</p>
+<p>Returns sequential bond pairs if selectSequential is True,
+non-sequential bond pairs if selectSequential is False,
+and both if selectSequential is None</p>
+<p>NBNB until further notice sequential bonds are detected for amino acids only!</p>
+</dd></dl>
+
 </div>
-<div class="section" id="module-ccpn.core.lib.Restraint">
-<span id="ccpn-core-lib-restraint-module"></span><h2>ccpn.core.lib.Restraint module<a class="headerlink" href="#module-ccpn.core.lib.Restraint" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="ccpn-core-lib-pid-module">
+<h2>ccpn.core.lib.Pid module<a class="headerlink" href="#ccpn-core-lib-pid-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.lib.Pid"></span><p>Pid (Project ID) class for within-project unique ID strings.</p>
+<dl class="class">
+<dt id="ccpn.core.lib.Pid.Pid">
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.Pid.</code><code class="descname">Pid</code><span class="sig-paren">(</span><em>string: str</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><code class="xref py py-class docutils literal"><span class="pre">str</span></code></a></p>
+<p>Pid routines, adapted from path idea in: Python Cookbook,
+A. Martelli and D. Ascher (eds), O&#8217;Reilly 2002, pgs 140-142</p>
+<p>A Pid is a string with extra functionality.
+It consists of a non-empty type substring separated by a mandatory &#8216;:&#8217; character
+from an optional id substring, consisting of field substrings separated by dots.
+The isValid function checks for validity</p>
+<p>The type, id, and list of fields are available as properties.</p>
+<p>New Pids can be created by pid.clone, by pid.extend (which creates a new Pid with
+additional fields) and by Pid.new, which combines a type and a list of fields into a new
+Pid, converting the values to string as necessary.</p>
+<p>Pids can also be created by modifying individual fields relative to a source pid.
+pid.modify(index, value) will set the value of the field at index,
+whereas pid.increment(index, value) (resp. decrement) will convert the field at
+index to an integer (where possible) and increment (decrement) it by &#8216;value&#8217;.</p>
+<p>Examples:</p>
+<p>pid = Pid.new(&#8216;Residue&#8217;,&#8217;mol1&#8217;,&#8217;A&#8217;, 502) # elements need not be strings; but will be converted
+-&gt; Residue:mol1.A.502   (Pid instance)</p>
+<p>which is equivalent to:</p>
+<p>pid = Pid(&#8216;Residue:mol1.A.502&#8217;)
+-&gt; Residue:mol1.A.502   (Pid instance)</p>
+<p>Behaves as a string:
+pid == &#8216;Residue:mol1.A.502&#8217;
+-&gt; True</p>
+<p>pid.str
+-&gt; &#8216;Residue:mol1.A.502&#8217; (str instance)</p>
+<p>pid.type
+-&gt; &#8216;Residue&#8217; (str instance)</p>
+<p>pid.id
+-&gt; &#8216;mol1.A.502&#8217; (str instance)</p>
+<p>pid2 = pid.modify(1, &#8216;B&#8217;, type=&#8217;Atom&#8217;)
+-&gt; Atom:mol1.B.502  (Pid instance)</p>
+<p>but also:
+pid3 = Pid(&#8216;Residue&#8217;).extend(&#8216;mol2&#8217;)
+-&gt; Residue:mol2  (Pid instance)</p>
+<p>pid4 = pid.decrement(2,1)
+-&gt; Residue:mol1.A.501  (Pid instance)
+or
+pid4 = pid.increment(2,-1)
+NB fails on elements that cannot be converted to int&#8217;s</p>
+<p>pid5 = pid.clone()   # equivalent to pid5 = Pid(pid)
+-&gt; Residue:mol1.A.502  (Pid instance)</p>
+<p>pid==pid5
+-&gt; True</p>
+<p>&#8216;502&#8217; in pid.fields
+-&gt; True</p>
+<p>502 in pid.fields
+-&gt; False    # all pid elements are strings</p>
+<dl class="method">
+<dt id="ccpn.core.lib.Pid.Pid.clone">
+<code class="descname">clone</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Pid.Pid<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid.clone"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.clone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return copy of pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Pid.Pid.decrement">
+<code class="descname">decrement</code><span class="sig-paren">(</span><em>index: int</em>, <em>value: int</em><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Pid.Pid<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid.decrement"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.decrement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return new pid with position index decremented by value
+Assumes integer valued id at position index</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Pid.Pid.extend">
+<code class="descname">extend</code><span class="sig-paren">(</span><em>*args: object</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid.extend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.extend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make copy with additional fields</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Pid.Pid.fields">
+<code class="descname">fields</code><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.fields" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[str, ...]</em>, <em>immutable</em> - 
+id part of pid as a tuple of fields</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Pid.Pid.id">
+<code class="descname">id</code><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+return id part of pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Pid.Pid.increment">
+<code class="descname">increment</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid.increment"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.increment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return new pid with position index incremented by value
+Assumes integer valued id at position index</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="ccpn.core.lib.Pid.Pid.isValid">
+<em class="property">static </em><code class="descname">isValid</code><span class="sig-paren">(</span><em>text: str</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid.isValid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.isValid" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.lib.Pid.Pid.modify">
+<code class="descname">modify</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid.modify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.modify" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return new pid with position index modified by newId</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Pid.Pid.nameMap">
+<code class="descname">nameMap</code><em class="property"> = {'MO': 'Molecule'}</em><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.nameMap" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="ccpn.core.lib.Pid.Pid.new">
+<em class="property">static </em><code class="descname">new</code><span class="sig-paren">(</span><em>*args: object</em><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Pid.Pid<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#Pid.new"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.new" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return Pid object from arguments
+Apply str() on all arguments
+Have to use this as intermediate as str baseclass of Pid only accepts one argument</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Pid.Pid.str">
+<code class="descname">str</code><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.str" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>immutable</em> - 
+Convenience: return as string rather than object;
+allows to do things as obj.asPid.str rather then str(obj.asPid)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.Pid.Pid.type">
+<code class="descname">type</code><a class="headerlink" href="#ccpn.core.lib.Pid.Pid.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+return type part of pid</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Pid.createId">
+<code class="descclassname">ccpn.core.lib.Pid.</code><code class="descname">createId</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#createId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.createId" title="Permalink to this definition">¶</a></dt>
+<dd><p>make id from list of successive keys.
+Keys are converted to string, and illegal characters are converted to altCharacter</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Pid.createPid">
+<code class="descclassname">ccpn.core.lib.Pid.</code><code class="descname">createPid</code><span class="sig-paren">(</span><em>head: str</em>, <em>*args: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Pid.Pid<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#createPid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.createPid" title="Permalink to this definition">¶</a></dt>
+<dd><p>make pid from head and list of successive keys.
+Head may be an existing pid, or a naked string
+Keys are converted to string, and illegal characters are converted to altCharacter
+The head is  not checked - it should be either a valid pid or a class code</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Pid.decodePid">
+<code class="descclassname">ccpn.core.lib.Pid.</code><code class="descname">decodePid</code><span class="sig-paren">(</span><em>sourceObject</em>, <em>thePid: ccpn.core.lib.Pid.Pid</em><span class="sig-paren">)</span> &rarr; ccpn.core.lib.Pid.Pid=None<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#decodePid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.decodePid" title="Permalink to this definition">¶</a></dt>
+<dd><p>try to decode thePid relative to sourceObject
+return decoded pid object or None on not found or Error</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.lib.Pid.splitId">
+<code class="descclassname">ccpn.core.lib.Pid.</code><code class="descname">splitId</code><span class="sig-paren">(</span><em>idString</em><span class="sig-paren">)</span> &rarr; List[str=None]<a class="reference internal" href="../_modules/ccpn/core/lib/Pid.html#splitId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Pid.splitId" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split idString into tuple of component elements,
+mapping altCharacter back to separator and replacing empty strings with None</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.RestraintLib">
+<span id="ccpn-core-lib-restraintlib-module"></span><h2>ccpn.core.lib.RestraintLib module<a class="headerlink" href="#module-ccpn.core.lib.RestraintLib" title="Permalink to this headline">¶</a></h2>
 <p>General utilities for Restraints</p>
 <dl class="function">
-<dt id="ccpn.core.lib.Restraint.dihedralName">
-<code class="descclassname">ccpn.core.lib.Restraint.</code><code class="descname">dihedralName</code><span class="sig-paren">(</span><em>project</em>, <em>restraintItem: tuple</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/core/lib/Restraint.html#dihedralName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Restraint.dihedralName" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.lib.RestraintLib.dihedralName">
+<code class="descclassname">ccpn.core.lib.RestraintLib.</code><code class="descname">dihedralName</code><span class="sig-paren">(</span><em>project</em>, <em>restraintItem: tuple</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/core/lib/RestraintLib.html#dihedralName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.RestraintLib.dihedralName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get dihedral angle name from four-element atomId tuple</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.SpectrumLib">
+<span id="ccpn-core-lib-spectrumlib-module"></span><h2>ccpn.core.lib.SpectrumLib module<a class="headerlink" href="#module-ccpn.core.lib.SpectrumLib" title="Permalink to this headline">¶</a></h2>
+<p>SPectrum-related functions and utiliities</p>
+<dl class="class">
+<dt id="ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple">
+<em class="property">class </em><code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">MagnetisationTransferTuple</code><span class="sig-paren">(</span><em>dimension1</em>, <em>dimension2</em>, <em>transferType</em>, <em>isIndirect</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.dimension1">
+<code class="descname">dimension1</code><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.dimension1" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.dimension2">
+<code class="descname">dimension2</code><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.dimension2" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.isIndirect">
+<code class="descname">isIndirect</code><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.isIndirect" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.transferType">
+<code class="descname">transferType</code><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple.transferType" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -326,12 +830,15 @@ Unrecognised strings are returned unchanged</p>
   <ul>
 <li><a class="reference internal" href="#">ccpn.core.lib package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.lib.Assignment">ccpn.core.lib.Assignment module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.AssignmentLib">ccpn.core.lib.AssignmentLib module</a></li>
+<li><a class="reference internal" href="#ccpn-core-lib-ccpnnefio-module">ccpn.core.lib.CcpnNefIo module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.CcpnSorting">ccpn.core.lib.CcpnSorting module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Documentation">ccpn.core.lib.Documentation module</a></li>
-<li><a class="reference internal" href="#ccpn-core-lib-labeling-module">ccpn.core.lib.Labeling module</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.lib.Molecule">ccpn.core.lib.Molecule module</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.lib.Restraint">ccpn.core.lib.Restraint module</a></li>
+<li><a class="reference internal" href="#ccpn-core-lib-labelinglib-module">ccpn.core.lib.LabelingLib module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.MoleculeLib">ccpn.core.lib.MoleculeLib module</a></li>
+<li><a class="reference internal" href="#ccpn-core-lib-pid-module">ccpn.core.lib.Pid module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.RestraintLib">ccpn.core.lib.RestraintLib module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.SpectrumLib">ccpn.core.lib.SpectrumLib module</a></li>
 <li><a class="reference internal" href="#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Version">ccpn.core.lib.Version module</a></li>
 </ul>

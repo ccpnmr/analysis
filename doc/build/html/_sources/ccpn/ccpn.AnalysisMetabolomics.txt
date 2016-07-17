@@ -89,12 +89,4 @@ ccpn.AnalysisMetabolomics.Pipeline module
     :undoc-members:
     :show-inheritance:
 
-ccpn.AnalysisMetabolomics.SpectrumGroupsWidget module
------------------------------------------------------
-
-.. automodule:: ccpn.AnalysisMetabolomics.SpectrumGroupsWidget
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 

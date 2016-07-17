@@ -47,36 +47,36 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.Undo</h1><div class="highlight"><pre>
-<span class="sd">&quot;&quot;&quot;General undo handle supporting undo/redo stack</span>
+<span></span><span class="sd">&quot;&quot;&quot;General undo handle supporting undo/redo stack</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-01 17:49:50 +0100 (Fri, 01 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-01 17:49:50 +0100 (Fri, 01 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9551 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">deque</span>
 
-<span class="c"># def deleteAll(objects):</span>
-<span class="c">#   &quot;&quot;&quot;Delete each object in objects - utility for undoing multi-object creation functions&quot;&quot;&quot;</span>
-<span class="c">#   for obj in objects:</span>
-<span class="c">#     obj.delete()</span>
+<span class="c1"># def deleteAll(objects):</span>
+<span class="c1">#   &quot;&quot;&quot;Delete each object in objects - utility for undoing multi-object creation functions&quot;&quot;&quot;</span>
+<span class="c1">#   for obj in objects:</span>
+<span class="c1">#     obj.delete()</span>
 
 
 <span class="k">def</span> <span class="nf">_deleteAllApiObjects</span><span class="p">(</span><span class="n">objsToBeDeleted</span><span class="p">):</span>
@@ -84,26 +84,26 @@
 <span class="sd">  Does NOT look for additional deletes or do any checks. Programmer beware!!!</span>
 <span class="sd">  Does NOT do undo handling, as it is designed to be used within the Undo machinery&quot;&quot;&quot;</span>
 
-  <span class="c">##CCPNINTERNAL</span>
+  <span class="c1">##CCPNINTERNAL</span>
 
-  <span class="c"># NBNB USee with EXTREME CARE, and make sure you get ALL API objects being created</span>
+  <span class="c1"># NBNB USee with EXTREME CARE, and make sure you get ALL API objects being created</span>
 
   <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objsToBeDeleted</span><span class="p">:</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;isDeleted&#39;</span><span class="p">)):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;&quot;&quot;</span><span class="si">%s</span><span class="s">: _deleteAllApiObjects</span>
-<span class="s">       called on deleted object&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">qualifiedName</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isDeleted&#39;</span><span class="p">)):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span><span class="si">%s</span><span class="s2">: _deleteAllApiObjects</span>
+<span class="s2">       called on deleted object&quot;&quot;&quot;</span> <span class="o">%</span> <span class="n">obj</span><span class="o">.</span><span class="n">qualifiedName</span>
       <span class="p">)</span>
 
   <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objsToBeDeleted</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;preDelete&#39;</span><span class="p">,</span> <span class="p">()):</span>
+    <span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;preDelete&#39;</span><span class="p">,</span> <span class="p">()):</span>
       <span class="n">notify</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
   <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objsToBeDeleted</span><span class="p">:</span>
     <span class="n">obj</span><span class="o">.</span><span class="n">_singleDelete</span><span class="p">(</span><span class="n">objsToBeDeleted</span><span class="p">)</span>
 
-  <span class="c"># doNotifies</span>
+  <span class="c1"># doNotifies</span>
   <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objsToBeDeleted</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s">&#39;delete&#39;</span><span class="p">,</span> <span class="p">()):</span>
+    <span class="k">for</span> <span class="n">notify</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="p">()):</span>
       <span class="n">notify</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
 <div class="viewcode-block" id="restoreOriginalLinks"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.restoreOriginalLinks">[docs]</a><span class="k">def</span> <span class="nf">restoreOriginalLinks</span><span class="p">(</span><span class="n">obj2Value</span><span class="p">,</span> <span class="n">linkName</span><span class="p">):</span>
@@ -143,15 +143,15 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">maxWaypoints</span> <span class="o">=</span> <span class="n">maxWaypoints</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">maxOperations</span> <span class="o">=</span> <span class="n">maxOperations</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c"># points to next free slot (or first slot to redo)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c"># array of last item in each waypoint</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">False</span> <span class="c"># Block/unblock switch - internal use only</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">=</span> <span class="mi">0</span> <span class="c"># Blocking level - modify with increaseBlocking/decreaseBlocking only</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">=</span> <span class="mi">0</span>   <span class="c1"># points to next free slot (or first slot to redo)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># array of last item in each waypoint</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># Block/unblock switch - internal use only</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># Blocking level - modify with increaseBlocking/decreaseBlocking only</span>
     <span class="k">if</span> <span class="n">maxWaypoints</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">newWaypoint</span><span class="p">()</span>
     <span class="n">deque</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="c"># Reset to True to unblank errors during undo/redo</span>
+    <span class="c1"># Reset to True to unblank errors during undo/redo</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span> <span class="o">=</span> <span class="n">debug</span>
 
   <span class="nd">@property</span>
@@ -176,7 +176,7 @@
 <div class="viewcode-block" id="Undo.newWaypoint"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.newWaypoint">[docs]</a>  <span class="k">def</span> <span class="nf">newWaypoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Start new waypoint&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxWaypoints</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Attempt to set waypoint on Undo object that does not allow them &quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempt to set waypoint on Undo object that does not allow them &quot;</span><span class="p">)</span>
 
     <span class="n">waypoints</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span>
 
@@ -196,14 +196,14 @@
         <span class="n">waypoints</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">-=</span> <span class="n">nRemove</span>
     <span class="n">waypoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span></div>
 
-    <span class="c"># waypoints.append(self.nextIndex-1)</span>
+    <span class="c1"># waypoints.append(self.nextIndex-1)</span>
 
 <div class="viewcode-block" id="Undo.newItem"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.newItem">[docs]</a>  <span class="k">def</span> <span class="nf">newItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">undoMethod</span><span class="p">,</span> <span class="n">redoMethod</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">undoKwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
               <span class="n">redoArgs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">redoKwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add item to the undo stack.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="s">&#39;undo.newItem&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocking</span><span class="p">,</span> <span class="n">undoMethod</span><span class="p">,</span> <span class="n">redoMethod</span><span class="p">,</span> <span class="n">undoArgs</span><span class="p">,</span> <span class="n">undoKwargs</span><span class="p">,</span> <span class="n">redoArgs</span><span class="p">,</span>
+      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;undo.newItem&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">blocking</span><span class="p">,</span> <span class="n">undoMethod</span><span class="p">,</span> <span class="n">redoMethod</span><span class="p">,</span> <span class="n">undoArgs</span><span class="p">,</span> <span class="n">undoKwargs</span><span class="p">,</span> <span class="n">redoArgs</span><span class="p">,</span>
             <span class="n">redoKwargs</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">undoArgs</span><span class="p">:</span>
@@ -214,11 +214,11 @@
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_blockingLevel</span><span class="p">:</span>
       <span class="k">return</span>
 
-    <span class="c"># clear out redos that are no longer going to be doable</span>
+    <span class="c1"># clear out redos that are no longer going to be doable</span>
     <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
-    <span class="c"># add new data</span>
+    <span class="c1"># add new data</span>
     <span class="k">if</span> <span class="n">undoKwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">undoCall</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">undoMethod</span><span class="p">,</span> <span class="o">*</span><span class="n">undoArgs</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -229,12 +229,12 @@
       <span class="n">redoCall</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">redoMethod</span><span class="p">,</span> <span class="o">*</span><span class="n">redoArgs</span><span class="p">,</span> <span class="o">**</span><span class="n">redoKwargs</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">undoCall</span><span class="p">,</span> <span class="n">redoCall</span><span class="p">))</span>
 
-    <span class="c"># fix waypoints:</span>
+    <span class="c1"># fix waypoints:</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span>
     <span class="k">while</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">ll</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span><span class="p">:</span>
       <span class="n">ll</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
 
-    <span class="c"># correct for maxOperations</span>
+    <span class="c1"># correct for maxOperations</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">maxOperations</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span>
@@ -247,38 +247,38 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 
-  <span class="c"># def newItem(self, undoMethod, undoData, redoMethod, redoData=None):</span>
-  <span class="c">#   &quot;&quot;&quot;Add item to the undo stack.</span>
-  <span class="c">#      Note that might not know redoData until after we do undo.</span>
-  <span class="c">#      NBNB NO, we should know, so resetting facility disabled. Rasmus</span>
-  <span class="c">#   &quot;&quot;&quot;</span>
-  <span class="c">#</span>
-  <span class="c">#   if self._blocked:</span>
-  <span class="c">#     return</span>
-  <span class="c">#</span>
-  <span class="c">#   # clear out redos that are no longer going to be doable</span>
-  <span class="c">#   for n in range(len(self)-self.nextIndex):</span>
-  <span class="c">#     self.pop()</span>
-  <span class="c">#</span>
-  <span class="c">#   # add new data</span>
-  <span class="c">#   self.append((undoMethod, undoData, redoMethod, redoData))</span>
-  <span class="c">#</span>
-  <span class="c">#   # fix waypoints:</span>
-  <span class="c">#   ll = self.waypoints</span>
-  <span class="c">#   while ll and ll[-1] &gt;= self.nextIndex:</span>
-  <span class="c">#     ll.pop()</span>
-  <span class="c">#</span>
-  <span class="c">#   # correct for maxOperations</span>
-  <span class="c">#   if len(self) &gt; self.maxOperations:</span>
-  <span class="c">#     self.popleft()</span>
-  <span class="c">#     ll = self.waypoints</span>
-  <span class="c">#     if ll:</span>
-  <span class="c">#       for n,val in enumerate(ll):</span>
-  <span class="c">#         ll[n] = val - 1</span>
-  <span class="c">#       if ll[0] &lt; 0:</span>
-  <span class="c">#         del ll[0]</span>
-  <span class="c">#   else:</span>
-  <span class="c">#     self.nextIndex += 1</span>
+  <span class="c1"># def newItem(self, undoMethod, undoData, redoMethod, redoData=None):</span>
+  <span class="c1">#   &quot;&quot;&quot;Add item to the undo stack.</span>
+  <span class="c1">#      Note that might not know redoData until after we do undo.</span>
+  <span class="c1">#      NBNB NO, we should know, so resetting facility disabled. Rasmus</span>
+  <span class="c1">#   &quot;&quot;&quot;</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if self._blocked:</span>
+  <span class="c1">#     return</span>
+  <span class="c1">#</span>
+  <span class="c1">#   # clear out redos that are no longer going to be doable</span>
+  <span class="c1">#   for n in range(len(self)-self.nextIndex):</span>
+  <span class="c1">#     self.pop()</span>
+  <span class="c1">#</span>
+  <span class="c1">#   # add new data</span>
+  <span class="c1">#   self.append((undoMethod, undoData, redoMethod, redoData))</span>
+  <span class="c1">#</span>
+  <span class="c1">#   # fix waypoints:</span>
+  <span class="c1">#   ll = self.waypoints</span>
+  <span class="c1">#   while ll and ll[-1] &gt;= self.nextIndex:</span>
+  <span class="c1">#     ll.pop()</span>
+  <span class="c1">#</span>
+  <span class="c1">#   # correct for maxOperations</span>
+  <span class="c1">#   if len(self) &gt; self.maxOperations:</span>
+  <span class="c1">#     self.popleft()</span>
+  <span class="c1">#     ll = self.waypoints</span>
+  <span class="c1">#     if ll:</span>
+  <span class="c1">#       for n,val in enumerate(ll):</span>
+  <span class="c1">#         ll[n] = val - 1</span>
+  <span class="c1">#       if ll[0] &lt; 0:</span>
+  <span class="c1">#         del ll[0]</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     self.nextIndex += 1</span>
 
 
 <div class="viewcode-block" id="Undo.undo"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.undo">[docs]</a>  <span class="k">def</span> <span class="nf">undo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -286,9 +286,9 @@
 
 <span class="sd">    For now errors are handled by printing a warning and clearing the undo object&quot;&quot;&quot;</span>
 
-    <span class="c"># TBD: what should we do if undoMethod() throws an exception?</span>
+    <span class="c1"># TBD: what should we do if undoMethod() throws an exception?</span>
 
-    <span class="c"># print(&#39;@~@~ Undo.undo&#39;, self.nextIndex, self.maxWaypoints, self.waypoints, self._debug)</span>
+    <span class="c1"># print(&#39;@~@~ Undo.undo&#39;, self.nextIndex, self.maxWaypoints, self.waypoints, self._debug)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">return</span>
@@ -303,28 +303,27 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">undoTo</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
 
-
-    <span class="c"># print(&#39;@~@~ undoTo&#39;, self.nextIndex-1, undoTo)</span>
-    <span class="c"># block addition of items while operating</span>
+    <span class="c1"># print(&#39;@~@~ undoTo&#39;, self.nextIndex-1, undoTo)</span>
+    <span class="c1"># block addition of items while operating</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">undoCall</span> <span class="o">=</span> <span class="n">redoCall</span> <span class="o">=</span> <span class="bp">None</span>
       <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="n">undoTo</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">undoCall</span><span class="p">,</span> <span class="n">redoCall</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-          <span class="k">print</span> <span class="p">(</span><span class="s">&quot;undoing&quot;</span><span class="p">,</span> <span class="n">undoCall</span><span class="p">)</span>
+        <span class="c1"># if self._debug:</span>
+        <span class="c1">#   print (&quot;undoing&quot;, undoCall)</span>
 
         <span class="n">undoCall</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">=</span> <span class="n">undoTo</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
       <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span> <span class="p">(</span><span class="s">&quot;Error while undoing (</span><span class="si">%s</span><span class="s">). Undo stack is cleared.&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
-      <span class="c"># if self._debug:</span>
-      <span class="c">#   print (&quot;UNDO DEBUG: error in undo. Last undo function was:&quot;, undoCall)</span>
-      <span class="c">#   raise</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span> <span class="p">(</span><span class="s2">&quot;Error while undoing (</span><span class="si">%s</span><span class="s2">). Undo stack is cleared.&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;UNDO DEBUG: error in undo. Last undo function was:&quot;</span><span class="p">,</span> <span class="n">undoCall</span><span class="p">)</span>
+        <span class="k">raise</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="k">finally</span><span class="p">:</span>
-      <span class="c"># Added by Rasmus March 2015. Surely we need to reset self._blocked?</span>
+      <span class="c1"># Added by Rasmus March 2015. Surely we need to reset self._blocked?</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">False</span></div>
 
 <div class="viewcode-block" id="Undo.redo"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.redo">[docs]</a>  <span class="k">def</span> <span class="nf">redo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -332,7 +331,7 @@
 
 <span class="sd">    For now errors are handled by printing a warning and clearing the undo object&quot;&quot;&quot;</span>
 
-    <span class="c"># TBD: what should we do if redoMethod() throws an exception?</span>
+    <span class="c1"># TBD: what should we do if redoMethod() throws an exception?</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
       <span class="k">return</span>
@@ -348,35 +347,35 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">redoTo</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
-    <span class="c"># block addition of items while operating</span>
+    <span class="c1"># block addition of items while operating</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span><span class="p">,</span><span class="n">redoTo</span><span class="o">+</span><span class="mi">1</span><span class="p">):</span>
-        <span class="c"># undoMethod, undoData, redoMethod, redoData = self[n]</span>
-        <span class="c"># if redoData is None:</span>
-        <span class="c">#   redoMethod()</span>
-        <span class="c"># else:</span>
-        <span class="c">#   redoMethod(redoData)</span>
+        <span class="c1"># undoMethod, undoData, redoMethod, redoData = self[n]</span>
+        <span class="c1"># if redoData is None:</span>
+        <span class="c1">#   redoMethod()</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#   redoMethod(redoData)</span>
         <span class="n">undoCall</span><span class="p">,</span> <span class="n">redoCall</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
-        <span class="c"># if self._debug:</span>
-        <span class="c">#   print (&quot;@~@~ redoing&quot;, redoCall)</span>
+        <span class="c1"># if self._debug:</span>
+        <span class="c1">#   print (&quot;@~@~ redoing&quot;, redoCall)</span>
         <span class="n">redoCall</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">=</span> <span class="n">redoTo</span> <span class="o">+</span> <span class="mi">1</span>
     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
       <span class="kn">from</span> <span class="nn">ccpn.util.Logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
-      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Error while redoing (</span><span class="si">%s</span><span class="s">). Undo stack is cleared.&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+      <span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Error while redoing (</span><span class="si">%s</span><span class="s2">). Undo stack is cleared.&quot;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">:</span>
-        <span class="k">print</span> <span class="p">(</span><span class="s">&quot;REDO DEBUG: error in redo. Last redo call was:&quot;</span><span class="p">,</span> <span class="n">redoCall</span><span class="p">)</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;REDO DEBUG: error in redo. Last redo call was:&quot;</span><span class="p">,</span> <span class="n">redoCall</span><span class="p">)</span>
         <span class="k">raise</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="k">finally</span><span class="p">:</span>
-      <span class="c"># Addded by Rasmus March 2015. Surely we need to reset self._blocked?</span>
+      <span class="c1"># Addded by Rasmus March 2015. Surely we need to reset self._blocked?</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">False</span></div>
 
 <div class="viewcode-block" id="Undo.clear"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.clear">[docs]</a>  <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Clear and reset undo object &quot;&quot;&quot;</span>
-    <span class="c"># if self._debug:</span>
-    <span class="c">#   print (&#39;@~@~ CLEAR undo&#39;)</span>
+    <span class="c1"># if self._debug:</span>
+    <span class="c1">#   print (&#39;@~@~ CLEAR undo&#39;)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">waypoints</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_blocked</span> <span class="o">=</span> <span class="bp">False</span>
@@ -384,11 +383,11 @@
     <span class="n">deque</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Undo.canUndo"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.canUndo">[docs]</a>  <span class="k">def</span> <span class="nf">canUndo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Can an undo operation be performed?&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;True if an undo operation can be performed?&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
 
 <div class="viewcode-block" id="Undo.canRedo"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Undo.Undo.canRedo">[docs]</a>  <span class="k">def</span> <span class="nf">canRedo</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;can a redo operation be performed&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;True if a redo operation can be performed&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextIndex</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div></div>
 </pre></div>
 

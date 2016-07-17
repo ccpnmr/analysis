@@ -47,38 +47,38 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.util.LocalShutil</h1><div class="highlight"><pre>
-<span class="sd">&quot;&quot;&quot;Local copy of shutil - modified to ignore errors in copying permission bits with copystat</span>
+<span></span><span class="sd">&quot;&quot;&quot;Local copy of shutil - modified to ignore errors in copying permission bits with copystat</span>
 <span class="sd">WIndows-type file systems osmetimes cannot copy permissions, and teh error is not</span>
 <span class="sd">reliably caught on e.g. VMs</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-               <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                 <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9315 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9315 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
-<span class="c"># Deliberate</span>
+<span class="c1"># Deliberate</span>
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="c"># Override copytree to ignore copystat erroes:</span>
-<span class="c"># def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,</span>
-<span class="c">#              ignore_dangling_symlinks=False):</span>
-<span class="c"># Replaced copy2 (which uses copystat) with copy (which uses copymode)</span>
+<span class="c1"># Override copytree to ignore copystat erroes:</span>
+<span class="c1"># def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,</span>
+<span class="c1">#              ignore_dangling_symlinks=False):</span>
+<span class="c1"># Replaced copy2 (which uses copystat) with copy (which uses copymode)</span>
 <div class="viewcode-block" id="copytree"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.LocalShutil.copytree">[docs]</a><span class="k">def</span> <span class="nf">copytree</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">,</span> <span class="n">symlinks</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">ignore</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">copy_function</span><span class="o">=</span><span class="n">copy</span><span class="p">,</span>
              <span class="n">ignore_dangling_symlinks</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Recursively copy a directory tree.</span>
@@ -132,28 +132,28 @@
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">srcname</span><span class="p">):</span>
                 <span class="n">linkto</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="n">srcname</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">symlinks</span><span class="p">:</span>
-                    <span class="c"># We can&#39;t just leave it to `copy_function` because legacy</span>
-                    <span class="c"># code with a custom `copy_function` may rely on copytree</span>
-                    <span class="c"># doing the right thing.</span>
+                    <span class="c1"># We can&#39;t just leave it to `copy_function` because legacy</span>
+                    <span class="c1"># code with a custom `copy_function` may rely on copytree</span>
+                    <span class="c1"># doing the right thing.</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">linkto</span><span class="p">,</span> <span class="n">dstname</span><span class="p">)</span>
-                    <span class="c"># copystat(srcname, dstname, follow_symlinks=not symlinks)</span>
+                    <span class="c1"># copystat(srcname, dstname, follow_symlinks=not symlinks)</span>
                     <span class="k">try</span><span class="p">:</span>
                       <span class="n">copystat</span><span class="p">(</span><span class="n">srcname</span><span class="p">,</span> <span class="n">dstname</span><span class="p">,</span> <span class="n">follow_symlinks</span><span class="o">=</span><span class="ow">not</span> <span class="n">symlinks</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">why</span><span class="p">:</span>
-                      <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING from symlink copying: file permissions could not be copied. &#39;</span>
-                            <span class="s">&#39;Ignored - known problem on Windows-type file systems&#39;</span><span class="p">)</span>
-                    <span class="c"># ignore dangling symlink if the flag is on</span>
+                      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING from symlink copying: file permissions could not be copied. &#39;</span>
+                            <span class="s1">&#39;Ignored - known problem on Windows-type file systems&#39;</span><span class="p">)</span>
+                    <span class="c1"># ignore dangling symlink if the flag is on</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">linkto</span><span class="p">)</span> <span class="ow">and</span> <span class="n">ignore_dangling_symlinks</span><span class="p">:</span>
                         <span class="k">continue</span>
-                    <span class="c"># otherwise let the copy occurs. copy2 will raise an error</span>
+                    <span class="c1"># otherwise let the copy occurs. copy2 will raise an error</span>
                     <span class="n">copy_function</span><span class="p">(</span><span class="n">srcname</span><span class="p">,</span> <span class="n">dstname</span><span class="p">)</span>
             <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">srcname</span><span class="p">):</span>
                 <span class="n">copytree</span><span class="p">(</span><span class="n">srcname</span><span class="p">,</span> <span class="n">dstname</span><span class="p">,</span> <span class="n">symlinks</span><span class="p">,</span> <span class="n">ignore</span><span class="p">,</span> <span class="n">copy_function</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="c"># Will raise a SpecialFileError for unsupported file types</span>
+                <span class="c1"># Will raise a SpecialFileError for unsupported file types</span>
                 <span class="n">copy_function</span><span class="p">(</span><span class="n">srcname</span><span class="p">,</span> <span class="n">dstname</span><span class="p">)</span>
-        <span class="c"># catch the Error from the recursive copytree so that we can</span>
-        <span class="c"># continue with other files</span>
+        <span class="c1"># catch the Error from the recursive copytree so that we can</span>
+        <span class="c1"># continue with other files</span>
         <span class="k">except</span> <span class="n">Error</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
             <span class="n">errors</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">err</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">why</span><span class="p">:</span>
@@ -162,13 +162,13 @@
         <span class="n">copystat</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="n">dst</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">why</span><span class="p">:</span>
         <span class="k">if</span> <span class="ne">WindowsError</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">why</span><span class="p">,</span> <span class="ne">WindowsError</span><span class="p">):</span>
-            <span class="c"># Copying file access times may fail on Windows</span>
+            <span class="c1"># Copying file access times may fail on Windows</span>
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c"># Replaced error with warning</span>
-            <span class="c"># errors.append((src, dst, str(why)))</span>
-            <span class="k">print</span><span class="p">(</span><span class="s">&#39;WARNING: file permissions could not be copied. &#39;</span>
-                  <span class="s">&#39;Ignored - known problem on Windows-type file systems&#39;</span><span class="p">)</span>
+            <span class="c1"># Replaced error with warning</span>
+            <span class="c1"># errors.append((src, dst, str(why)))</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING: file permissions could not be copied. &#39;</span>
+                  <span class="s1">&#39;Ignored - known problem on Windows-type file systems&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">errors</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">Error</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">dst</span></div>

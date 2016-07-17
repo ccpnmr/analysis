@@ -47,63 +47,65 @@
           <div class="body" role="main">
             
   <h1>Source code for ccpn.core.NmrResidue</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c">#=========================================================================================</span>
-<span class="c"># Licence, Reference and Credits</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__credits__</span> <span class="o">=</span> <span class="s">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
-<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
-              <span class="s">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
-<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
-                <span class="s">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Last code modification:</span>
-<span class="c">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s">&quot;$Date: 2016-07-02 16:16:19 +0100 (Sat, 02 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s">&quot;$Revision: 9561 $&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
 
-<span class="c">#=========================================================================================</span>
-<span class="c"># Start of code</span>
-<span class="c">#=========================================================================================</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Optional</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">NmrChain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnSorting</span>
-<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">modelUtil</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">ResonanceGroup</span> <span class="k">as</span> <span class="n">ApiResonanceGroup</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span>
+<span class="c1">#from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery</span>
 
 
 <div class="viewcode-block" id="NmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue">[docs]</a><span class="k">class</span> <span class="nc">NmrResidue</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Nmr Residue, for assignment.&quot;&quot;&quot;</span>
   
-  <span class="c">#: Short class name, for PID.</span>
-  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s">&#39;NR&#39;</span>
-  <span class="c"># Attribute it necessary as subclasses must use superclass className</span>
-  <span class="n">className</span> <span class="o">=</span> <span class="s">&#39;NmrResidue&#39;</span>
+  <span class="c1">#: Short class name, for PID.</span>
+  <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;NR&#39;</span>
+  <span class="c1"># Attribute it necessary as subclasses must use superclass className</span>
+  <span class="n">className</span> <span class="o">=</span> <span class="s1">&#39;NmrResidue&#39;</span>
 
   <span class="n">_parentClass</span> <span class="o">=</span> <span class="n">NmrChain</span>
 
-  <span class="c">#: Name of plural link to instances of class</span>
-  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s">&#39;nmrResidues&#39;</span>
+  <span class="c1">#: Name of plural link to instances of class</span>
+  <span class="n">_pluralLinkName</span> <span class="o">=</span> <span class="s1">&#39;nmrResidues&#39;</span>
   
-  <span class="c">#: List of child classes.</span>
+  <span class="c1">#: List of child classes.</span>
   <span class="n">_childClasses</span> <span class="o">=</span> <span class="p">[]</span>
 
-  <span class="c"># Qualified name of matching API class</span>
+  <span class="c1"># Qualified name of matching API class</span>
   <span class="n">_apiClassQualifiedName</span> <span class="o">=</span> <span class="n">ApiResonanceGroup</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 
-  <span class="c"># CCPN properties  </span>
+  <span class="c1"># CCPN properties  </span>
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_apiResonanceGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiResonanceGroup</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot; CCPN resonanceGroup matching Residue&quot;&quot;&quot;</span>
@@ -140,7 +142,7 @@
     <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="n">apiResidue</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span>
     <span class="k">if</span> <span class="n">apiResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s">&#39;&#39;</span>
+      <span class="k">return</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">apiResidue</span><span class="o">.</span><span class="n">code3Letter</span>
 
@@ -170,27 +172,27 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">_wrappedData</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">offsetNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="s">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">offsetNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;&quot;All other NmrResidues with the same sequenceCode sorted by offSet suffix &#39;-1&#39;, &#39;+1&#39;, etc.&quot;&quot;&quot;</span>
     <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">offsetResonanceGroups</span><span class="p">)</span>
 
-<div class="viewcode-block" id="NmrResidue.getOffsetNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.getOffsetNmrResidue">[docs]</a>  <span class="k">def</span> <span class="nf">getOffsetNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s">&#39;NmrResidue&#39;</span><span class="p">]:</span>
+<div class="viewcode-block" id="NmrResidue.getOffsetNmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.getOffsetNmrResidue">[docs]</a>  <span class="k">def</span> <span class="nf">getOffsetNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Get offset NmrResidue with indicated offset</span>
 <span class="sd">    (or None, if no such offset NmrResidue exists&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">offsetNmrResidues</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">relativeOffset</span> <span class="o">==</span> <span class="n">offset</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">result</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="bp">None</span></div>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">mainNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s">&#39;NmrResidue&#39;</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">mainNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Main NmrResidue (self, or the residue that self is offset relative to&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">mainResonanceGroup</span><span class="p">)</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">nextNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s">&#39;NmrResidue&#39;</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">nextNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Next sequentially connected NmrResidue (or None, as appropriate).</span>
 <span class="sd">    Either from a connected NmrChain,</span>
 <span class="sd">    or the NmrResidue assigned to the next Residue in the same Chain&quot;&quot;&quot;</span>
@@ -202,7 +204,7 @@
     <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">and</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-      <span class="c"># Connected stretch</span>
+      <span class="c1"># Connected stretch</span>
       <span class="n">stretch</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span>
       <span class="k">if</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
@@ -210,14 +212,14 @@
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stretch</span><span class="p">[</span><span class="n">stretch</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
 
     <span class="k">elif</span> <span class="n">residue</span><span class="p">:</span>
-      <span class="c"># Assigned to residue</span>
+      <span class="c1"># Assigned to residue</span>
       <span class="n">nextResidue</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span>
       <span class="k">if</span> <span class="n">nextResidue</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">nextResidue</span><span class="o">.</span><span class="n">nmrResidue</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
-<div class="viewcode-block" id="NmrResidue.connectNext"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.connectNext">[docs]</a>  <span class="k">def</span> <span class="nf">connectNext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="s">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
+<div class="viewcode-block" id="NmrResidue.connectNext"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.connectNext">[docs]</a>  <span class="k">def</span> <span class="nf">connectNext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Connect free end of self to free end of next residue in sequence,</span>
 <span class="sd">    and return resulting connected NmrChain</span>
 
@@ -226,53 +228,53 @@
 <span class="sd">    NB Undoing a connection between two connected stretches</span>
 <span class="sd">    will get back a &#39;value&#39; stretch with a new shortName&quot;&quot;&quot;</span>
     <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="c"># apiResidue = apiResonanceGroup.assignedResidue</span>
+    <span class="c1"># apiResidue = apiResonanceGroup.assignedResidue</span>
     <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span>
 
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
 
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to value: None&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to value: None&quot;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
       <span class="n">xx</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;No object found matching Pid </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No object found matching Pid </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">xx</span>
 
     <span class="n">apiValueNmrChain</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrChain</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relativeOffset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect from offset residue&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect from offset residue&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">relativeOffset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to offset NmrResidue&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to offset NmrResidue&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect assigned NmrResidue - assign the value instead&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect assigned NmrResidue - assign the value instead&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to assigned NmrResidue - assign the NmrResidue instead&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to assigned NmrResidue - assign the NmrResidue instead&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect next NmrResidue - it is already connected&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect next NmrResidue - it is already connected&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">previousNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to next NmrResidue - it is already connected&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to next NmrResidue - it is already connected&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span> <span class="ow">and</span> <span class="n">apiValueNmrChain</span> <span class="ow">is</span> <span class="n">apiNmrChain</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot make cyclical connected NmrChain&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot make cyclical connected NmrChain&quot;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;connectNext&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;connectNext&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-        <span class="c"># At this point, self must be the last NmrResidue in a connected chain</span>
+        <span class="c1"># At this point, self must be the last NmrResidue in a connected chain</span>
         <span class="k">if</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
           <span class="n">undo</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_undo</span>
           <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
           <span class="k">try</span><span class="p">:</span>
-            <span class="c"># Value is first NmrResidue in a connected NmrChain</span>
+            <span class="c1"># Value is first NmrResidue in a connected NmrChain</span>
             <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span><span class="p">:</span>
               <span class="n">rg</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span>
             <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
@@ -287,16 +289,16 @@
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrChain</span>
 
       <span class="k">else</span><span class="p">:</span>
-        <span class="c"># self is unassigned, unconnected NmrResidue</span>
+        <span class="c1"># self is unassigned, unconnected NmrResidue</span>
         <span class="k">if</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-          <span class="c"># At this point value must be the first NmrResidue in a connected NmrChain</span>
+          <span class="c1"># At this point value must be the first NmrResidue in a connected NmrChain</span>
           <span class="n">undo</span> <span class="o">=</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
           <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
           <span class="k">try</span><span class="p">:</span>
             <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">apiValueNmrChain</span>
-            <span class="c"># Move self from last to first in target NmrChain</span>
-            <span class="n">ll</span> <span class="o">=</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;mainResonanceGroups&#39;</span><span class="p">]</span>
+            <span class="c1"># Move self from last to first in target NmrChain</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;mainResonanceGroups&#39;</span><span class="p">]</span>
             <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ll</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
           <span class="k">finally</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -312,7 +314,7 @@
         <span class="n">result</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">nmrChain</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="NmrResidue.disconnectNext"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.disconnectNext">[docs]</a>  <span class="k">def</span> <span class="nf">disconnectNext</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -325,49 +327,49 @@
     <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span>
     <span class="n">defaultChain</span> <span class="o">=</span>  <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;disconnectNext&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;disconnectNext&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># offset residue: no-op</span>
+        <span class="c1"># offset residue: no-op</span>
         <span class="k">return</span>
 
       <span class="k">elif</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># Assigned residue with successor residue - error</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># Assigned residue with successor residue - error</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s2"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-        <span class="c"># Connected stretch - break stretch, keeping first half in the NmrChain</span>
+        <span class="c1"># Connected stretch - break stretch, keeping first half in the NmrChain</span>
         <span class="n">stretch</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span>
 
         <span class="k">if</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
           <span class="k">return</span>
 
         <span class="k">if</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-          <span class="c"># chop off end ResonanceGroup</span>
+          <span class="c1"># chop off end ResonanceGroup</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
-            <span class="c"># delete one-element remaining chain</span>
+            <span class="c1"># delete one-element remaining chain</span>
             <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]:</span>
-          <span class="c"># chop off end ResonanceGroup</span>
+          <span class="c1"># chop off end ResonanceGroup</span>
           <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
 
         <span class="k">else</span><span class="p">:</span>
-          <span class="c"># make new connected NmrChain with rightmost ResonanceGroups</span>
+          <span class="c1"># make new connected NmrChain with rightmost ResonanceGroups</span>
           <span class="n">newNmrChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">isConnected</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
           <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">stretch</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">rg</span> <span class="ow">is</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
               <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">rg</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">newNmrChain</span>
-          <span class="n">newNmrChain</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;mainResonanceGroups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+          <span class="n">newNmrChain</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;mainResonanceGroups&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">previousNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s">&#39;NmrResidue&#39;</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">previousNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Previous sequentially connected NmrResidue (or None, as appropriate).</span>
 <span class="sd">    Either from a connected NmrChain,</span>
 <span class="sd">    or the NmrResidue assigned to the previous Residue in the same Chain&quot;&quot;&quot;</span>
@@ -378,7 +380,7 @@
     <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">and</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-      <span class="c"># Connected stretch</span>
+      <span class="c1"># Connected stretch</span>
       <span class="n">stretch</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span>
       <span class="k">if</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
@@ -386,11 +388,11 @@
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">stretch</span><span class="p">[</span><span class="n">stretch</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
 
     <span class="k">elif</span> <span class="n">residue</span><span class="p">:</span>
-      <span class="c"># Assigned to residue</span>
+      <span class="c1"># Assigned to residue</span>
       <span class="n">previousResidue</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">previousResidue</span>
       <span class="k">if</span> <span class="n">previousResidue</span><span class="p">:</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">previousResidue</span><span class="o">.</span><span class="n">nmrResidue</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
 
 <div class="viewcode-block" id="NmrResidue.connectPrevious"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.connectPrevious">[docs]</a>  <span class="k">def</span> <span class="nf">connectPrevious</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>
@@ -403,18 +405,18 @@
 <span class="sd">    will get back a &#39;value&#39; stretch with a new shortName&quot;&quot;&quot;</span>
 
     <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="c"># apiResidue = apiResonanceGroup.assignedResidue</span>
+    <span class="c1"># apiResidue = apiResonanceGroup.assignedResidue</span>
     <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span>
 
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
 
     <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to value: None&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to value: None&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
       <span class="n">xx</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">xx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;No object found matching Pid </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No object found matching Pid </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">xx</span>
 
@@ -422,37 +424,37 @@
 
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">relativeOffset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect from offset residue&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect from offset residue&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">relativeOffset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to offset NmrResidue&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to offset NmrResidue&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect assigned NmrResidue - assign the value instead&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect assigned NmrResidue - assign the value instead&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to assigned NmrResidue - assign the NmrResidue instead&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to assigned NmrResidue - assign the NmrResidue instead&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">previousNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect previous NmrResidue - it is already connected&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect previous NmrResidue - it is already connected&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">nextNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot connect to previous NmrResidue - it is already connected&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot connect to previous NmrResidue - it is already connected&quot;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span> <span class="ow">and</span> <span class="n">apiValueNmrChain</span> <span class="ow">is</span> <span class="n">apiNmrChain</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot make cyclical connected NmrChain&quot;</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot make cyclical connected NmrChain&quot;</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;connectPrevious&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;connectPrevious&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-        <span class="c"># At this point, self must be the first NmrResidue in a connected chain</span>
+        <span class="c1"># At this point, self must be the first NmrResidue in a connected chain</span>
           <span class="n">undo</span> <span class="o">=</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
           <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
             <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
           <span class="k">try</span><span class="p">:</span>
-            <span class="n">ll</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s">&#39;mainResonanceGroups&#39;</span><span class="p">]</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;mainResonanceGroups&#39;</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-              <span class="c"># Value is last NmrResidue in a connected NmrChain</span>
+              <span class="c1"># Value is last NmrResidue in a connected NmrChain</span>
               <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span><span class="p">):</span>
                 <span class="n">rg</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span>
                 <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ll</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
@@ -462,7 +464,7 @@
                              <span class="bp">self</span><span class="o">.</span><span class="n">connectPrevious</span><span class="p">,</span> <span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">value</span><span class="p">,))</span>
             <span class="k">else</span><span class="p">:</span>
               <span class="n">value</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span>
-              <span class="c"># Move value from last to first in target NmrChain</span>
+              <span class="c1"># Move value from last to first in target NmrChain</span>
               <span class="n">ll</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ll</span><span class="o">.</span><span class="n">pop</span><span class="p">())</span>
               <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
                 <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">setDirectNmrChain</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">connectPrevious</span><span class="p">,</span>
@@ -475,9 +477,9 @@
           <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrChain</span>
 
       <span class="k">else</span><span class="p">:</span>
-        <span class="c"># self is unassigned, unconnected NmrResidue</span>
+        <span class="c1"># self is unassigned, unconnected NmrResidue</span>
         <span class="k">if</span> <span class="n">apiValueNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-          <span class="c"># At this point value must be the last NmrResidue in a connected NmrChain</span>
+          <span class="c1"># At this point value must be the last NmrResidue in a connected NmrChain</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">apiValueNmrChain</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="n">newApiNmrChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">isConnected</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
@@ -486,7 +488,7 @@
         <span class="n">result</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">nmrChain</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="NmrResidue.disconnectPrevious"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.disconnectPrevious">[docs]</a>  <span class="k">def</span> <span class="nf">disconnectPrevious</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -499,37 +501,37 @@
     <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span>
     <span class="n">defaultChain</span> <span class="o">=</span>  <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;disconnectPrevious&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;disconnectPrevious&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># offset residue: no-op</span>
+        <span class="c1"># offset residue: no-op</span>
         <span class="k">return</span>
 
       <span class="k">elif</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># Assigned residue with successor residue - error</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># Assigned residue with successor residue - error</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s2"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-        <span class="c"># Connected stretch - break stretch, keeping first half in the NmrChain</span>
+        <span class="c1"># Connected stretch - break stretch, keeping first half in the NmrChain</span>
         <span class="n">stretch</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span>
 
         <span class="k">if</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
           <span class="k">return</span>
 
         <span class="k">elif</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-          <span class="c"># chop off end ResonanceGroup</span>
+          <span class="c1"># chop off end ResonanceGroup</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
           <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
-            <span class="c"># delete one-element remaining chain</span>
+            <span class="c1"># delete one-element remaining chain</span>
             <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
         <span class="k">elif</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-          <span class="c"># chop off end ResonanceGroup</span>
+          <span class="c1"># chop off end ResonanceGroup</span>
           <span class="n">stretch</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
 
         <span class="k">else</span><span class="p">:</span>
-          <span class="c"># make new connected NmrChain with rightmost ResonanceGroups</span>
+          <span class="c1"># make new connected NmrChain with rightmost ResonanceGroups</span>
           <span class="n">newNmrChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">newNmrChain</span><span class="p">(</span><span class="n">isConnected</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
           <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="n">stretch</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">rg</span> <span class="ow">is</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
@@ -547,23 +549,23 @@
     <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span>
     <span class="n">defaultChain</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">Constants</span><span class="o">.</span><span class="n">defaultNmrChainCode</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;disconnect&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;disconnect&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># offset residue: no-op</span>
+        <span class="c1"># offset residue: no-op</span>
         <span class="k">return</span>
 
       <span class="k">elif</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># Assigned residue with successor residue - error</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="c1"># Assigned residue with successor residue - error</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s2"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-        <span class="c"># Connected stretch - break stretch, keeping first half in the NmrChain</span>
+        <span class="c1"># Connected stretch - break stretch, keeping first half in the NmrChain</span>
         <span class="n">stretch</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">mainResonanceGroups</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">stretch</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
           <span class="k">for</span> <span class="n">rg</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">stretch</span><span class="p">):</span>
-            <span class="c"># reversed to add residues back in proper order (they ar added to end)</span>
+            <span class="c1"># reversed to add residues back in proper order (they ar added to end)</span>
             <span class="n">rg</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
           <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
@@ -571,7 +573,7 @@
           <span class="n">index</span> <span class="o">=</span> <span class="n">stretch</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span>
           <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
 
-          <span class="c"># NB operations are carefully selected to make sure they undo correctly</span>
+          <span class="c1"># NB operations are carefully selected to make sure they undo correctly</span>
           <span class="k">if</span> <span class="n">apiResonanceGroup</span> <span class="ow">is</span> <span class="n">stretch</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
             <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">defaultChain</span>
 
@@ -597,7 +599,7 @@
 <span class="sd">    sorted by decreasing probability. Probabilities are normalised to 1&quot;&quot;&quot;</span>
     <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">possibility</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residueProbs</span><span class="p">)</span>
-    <span class="n">totalWeight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">1.0</span>  <span class="c"># If sum is zero give raw weights</span>
+    <span class="n">totalWeight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">1.0</span>  <span class="c1"># If sum is zero give raw weights</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">totalWeight</span><span class="p">)</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">ll</span><span class="p">))</span>
 
   <span class="nd">@probableResidues.setter</span>
@@ -613,7 +615,7 @@
     <span class="sd">&quot;&quot;&quot;tuple of (residueType, probability) tuples for probable residue types</span>
 <span class="sd">    sorted by decreasing probability&quot;&quot;&quot;</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">weight</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">possibility</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residueTypeProbs</span><span class="p">)</span>
-    <span class="n">totalWeight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">1.0</span>  <span class="c"># If sum is zero give raw weights</span>
+    <span class="n">totalWeight</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span> <span class="ow">or</span> <span class="mf">1.0</span>  <span class="c1"># If sum is zero give raw weights</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">code3Letter</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">/</span><span class="n">totalWeight</span><span class="p">)</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">ll</span><span class="p">))</span>
 
   <span class="nd">@probableResidueTypes.setter</span>
@@ -625,13 +627,13 @@
     <span class="k">for</span> <span class="n">weight</span><span class="p">,</span> <span class="n">residueType</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
       <span class="n">chemComp</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">findFirstChemComp</span><span class="p">(</span><span class="n">code3Letter</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">chemComp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="s">&quot;Residue type </span><span class="si">%s</span><span class="s"> not recognised - skipping&quot;</span> <span class="o">%</span> <span class="n">residueType</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Residue type </span><span class="si">%s</span><span class="s2"> not recognised - skipping&quot;</span> <span class="o">%</span> <span class="n">residueType</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">newResidueTypeProb</span><span class="p">(</span><span class="n">chemComp</span><span class="o">=</span><span class="n">chemComp</span><span class="p">,</span> <span class="n">weight</span><span class="o">=</span><span class="n">weight</span><span class="p">)</span>
 
 <div class="viewcode-block" id="NmrResidue.deassign"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.deassign">[docs]</a>  <span class="k">def</span> <span class="nf">deassign</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reset sequenceCode and residueType assignment to default values&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;deassign&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;deassign&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
       <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
@@ -640,32 +642,40 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NmrResidue.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Rename NmrResidue. &#39;None&#39; deassigns; partly set names (&#39;.xyz&#39; or &#39;xyz.&#39; partly deassign&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Rename NmrResidue. changing its sequenceCode, residiueType, or both.</span>
+
+<span class="sd">    The value is a dot-separated string `sequenceCode`.`residueType`.</span>
+<span class="sd">    Values like None, &#39;abc&#39;, or &#39;abc.&#39; will set the residueType to None.</span>
+<span class="sd">    Values like None or &#39;.abc&#39; will set the sequenceCode to None,</span>
+<span class="sd">    resetting it to its canonical form, &#39;@`serial`.&quot;&quot;&quot;</span>
+
+    <span class="c1"># NBNB TODO - consider changing signature to sequenceCode, residueType</span>
+
     <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
     <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">residueType</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrResidue id: </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.NmrResidue id: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
                          <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
       <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">None</span>
       <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">residueType</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">None</span>
 
-    <span class="c"># Check if name is free</span>
+    <span class="c1"># Check if name is free</span>
     <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">previous</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="ow">and</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot rename </span><span class="si">%s</span><span class="s"> to </span><span class="si">%s</span><span class="s"> - assignment already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-    <span class="c">#</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot rename </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - assignment already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span>
       <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">resetResidueType</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="NmrResidue.moveToNmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.moveToNmrChain">[docs]</a>  <span class="k">def</span> <span class="nf">moveToNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newNmrChain</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="s">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="NmrResidue.moveToNmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.moveToNmrChain">[docs]</a>  <span class="k">def</span> <span class="nf">moveToNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newNmrChain</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reset NmrChain, breaking connected NmrChain if necessary.</span>
 
 <span class="sd">    If set to None resets to NmrChain &#39;@-&#39;</span>
@@ -673,11 +683,11 @@
 
     <span class="n">values</span> <span class="o">=</span><span class="p">{}</span>
     <span class="k">if</span> <span class="n">newNmrChain</span><span class="p">:</span>
-      <span class="n">values</span><span class="p">[</span><span class="s">&#39;newNmrChain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newNmrChain</span>
+      <span class="n">values</span><span class="p">[</span><span class="s1">&#39;newNmrChain&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newNmrChain</span>
 
     <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
     <span class="k">if</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">relativeOffset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot reset NmrChain for offset NmrResidue </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset NmrChain for offset NmrResidue </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">newNmrChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="bp">None</span>
@@ -686,14 +696,14 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">newNmrChain</span><span class="o">.</span><span class="n">_wrappedData</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;moveToNmrChain&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;moveToNmrChain&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">moveToNmrChain</span><span class="p">(</span><span class="n">apiNmrChain</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NmrResidue.assignTo"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.assignTo">[docs]</a>  <span class="k">def</span> <span class="nf">assignTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-               <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeToExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s">&#39;NmrResidue&#39;</span><span class="p">:</span>
+               <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mergeToExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;NmrResidue&#39;</span><span class="p">:</span>
 
     <span class="sd">&quot;&quot;&quot;Assign NmrResidue to new assignment, as defined by the naming parameters</span>
 <span class="sd">    and return the result.</span>
@@ -715,10 +725,10 @@
 <span class="sd">    will cause an error. Use moveToNmrChain(newNmrChainOrPid) instead</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="c"># Get parameter string for console echo - before parameters are changed</span>
+    <span class="c1"># Get parameter string for console echo - before parameters are changed</span>
     <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-      <span class="p">((</span><span class="s">&#39;chainCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-       <span class="p">(</span><span class="s">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;mergeToExisting&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+      <span class="p">((</span><span class="s1">&#39;chainCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+       <span class="p">(</span><span class="s1">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;mergeToExisting&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
       <span class="p">)</span>
     <span class="p">)</span>
 
@@ -727,47 +737,47 @@
     <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonanceGroup</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
 
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;assignTo&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                    <span class="n">parName</span><span class="o">=</span><span class="s">&#39;mergedNmrResidue&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;assignTo&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                    <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;mergedNmrResidue&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
 
       <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="k">if</span> <span class="n">sequenceCode</span> <span class="k">else</span> <span class="bp">None</span>
       <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
 
-      <span class="c"># Keep old values to go back to previous state</span>
+      <span class="c1"># Keep old values to go back to previous state</span>
 
       <span class="n">oldNmrChain</span> <span class="o">=</span>  <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">nmrChain</span>
       <span class="n">oldSequenceCode</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span>
       <span class="n">oldResidueType</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span>
 
-      <span class="c"># set missing parameters to existing values</span>
+      <span class="c1"># set missing parameters to existing values</span>
       <span class="n">chainCode</span> <span class="o">=</span> <span class="n">chainCode</span> <span class="ow">or</span> <span class="n">oldNmrChain</span><span class="o">.</span><span class="n">code</span>
       <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span> <span class="ow">or</span> <span class="n">oldSequenceCode</span>
 
       <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrResidue id: </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.NmrResidue id: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
                            <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">))</span>
       <span class="n">newNmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">chainCode</span><span class="p">)</span>
       <span class="n">newApiResonanceGroup</span> <span class="o">=</span> <span class="n">newNmrChain</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span>
         <span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">newApiResonanceGroup</span> <span class="ow">is</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
-        <span class="c"># We are reassigning to self - either a no-op or resetting the residueType</span>
+        <span class="c1"># We are reassigning to self - either a no-op or resetting the residueType</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span>
         <span class="k">if</span> <span class="n">residueType</span> <span class="ow">and</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="o">!=</span> <span class="n">residueType</span><span class="p">:</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">resetResidueType</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">newApiResonanceGroup</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="c"># we are moving to new, free assignment</span>
+        <span class="c1"># we are moving to new, free assignment</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span>
 
         <span class="k">try</span><span class="p">:</span>
-          <span class="c"># NB Complex resetting sequence necessary</span>
-          <span class="c"># # in case we are setting an offset and illegal sequenceCode</span>
-          <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c"># To guarantee against clashes</span>
-          <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">newNmrChain</span><span class="o">.</span><span class="n">_apiNmrChain</span> <span class="c"># Only directNmrChain is settable</span>
-           <span class="c"># Now we can (re)set - will throw error for e.g. illegal offset values</span>
+          <span class="c1"># NB Complex resetting sequence necessary</span>
+          <span class="c1"># # in case we are setting an offset and illegal sequenceCode</span>
+          <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c1"># To guarantee against clashes</span>
+          <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">newNmrChain</span><span class="o">.</span><span class="n">_apiNmrChain</span> <span class="c1"># Only directNmrChain is settable</span>
+           <span class="c1"># Now we can (re)set - will throw error for e.g. illegal offset values</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span>
           <span class="k">if</span> <span class="n">residueType</span><span class="p">:</span>
             <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">resetResidueType</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
@@ -776,55 +786,55 @@
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">oldNmrChain</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">oldSequenceCode</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s">&quot;Attempt to set illegal or inconsistent assignment: </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span>
-            <span class="o">%</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span> <span class="o">+</span> <span class="s">&quot;</span><span class="se">\n</span><span class="s">  Reset to original state&quot;</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Attempt to set illegal or inconsistent assignment: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">  Reset to original state&quot;</span>
           <span class="p">)</span>
           <span class="k">raise</span>
 
 
       <span class="k">else</span><span class="p">:</span>
-        <span class="c">#We are assigning to an existing NmrResidue</span>
+        <span class="c1">#We are assigning to an existing NmrResidue</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newApiResonanceGroup</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">mergeToExisting</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;New assignment clash with existing assignment,&quot;</span>
-                           <span class="s">&quot; and merging is disallowed&quot;</span><span class="p">)</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New assignment clash with existing assignment,&quot;</span>
+                           <span class="s2">&quot; and merging is disallowed&quot;</span><span class="p">)</span>
 
-        <span class="c"># Move or merge the NmrAtoms across and delete the current NmrResidue</span>
+        <span class="c1"># Move or merge the NmrAtoms across and delete the current NmrResidue</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">residueType</span> <span class="ow">or</span> <span class="n">newApiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="n">residueType</span><span class="p">:</span>
           <span class="k">for</span> <span class="n">resonance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonances</span><span class="p">:</span>
             <span class="n">newResonance</span> <span class="o">=</span> <span class="n">newApiResonanceGroup</span><span class="o">.</span><span class="n">findFirstResonance</span><span class="p">(</span><span class="n">implName</span><span class="o">=</span><span class="n">resonance</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">newResonance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
               <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceGroup</span> <span class="o">=</span> <span class="n">newApiResonanceGroup</span>
             <span class="k">else</span><span class="p">:</span>
-              <span class="c"># WARNING. This step is NOT undoable, and clears the undo stack</span>
+              <span class="c1"># WARNING. This step is NOT undoable, and clears the undo stack</span>
               <span class="n">clearUndo</span> <span class="o">=</span> <span class="bp">True</span>
               <span class="n">newResonance</span><span class="o">.</span><span class="n">absorbResonance</span><span class="p">(</span><span class="n">resonance</span><span class="p">)</span>
 
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
 
         <span class="k">else</span><span class="p">:</span>
-          <span class="c"># We cannot reassign if it involves changing residueType on an existing NmrResidue</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Cannot assign to </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">: NR:</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s"> already exists&quot;</span>
+          <span class="c1"># We cannot reassign if it involves changing residueType on an existing NmrResidue</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot assign to </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">: NR:</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> already exists&quot;</span>
           <span class="o">%</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span>
              <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">newApiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span><span class="p">))</span>
-      <span class="c">#</span>
+      <span class="c1">#</span>
       <span class="k">if</span> <span class="n">clearUndo</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s">&quot;Merging NmrAtoms from </span><span class="si">%s</span><span class="s"> into </span><span class="si">%s</span><span class="s">. Merging is NOT undoable.&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Merging NmrAtoms from </span><span class="si">%s</span><span class="s2"> into </span><span class="si">%s</span><span class="s2">. Merging is NOT undoable.&quot;</span>
                                       <span class="o">%</span> <span class="p">(</span><span class="n">oldPid</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">longPid</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
           <span class="n">undo</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-    <span class="c">#</span>
+    <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 
-  <span class="c"># Implementation functions</span>
+  <span class="c1"># Implementation functions</span>
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">NmrChain</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData (MolSystem.Residues) for all Residue children of parent Chain&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">parent</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
-      <span class="c"># for conected NmrChains you keep the order</span>
+      <span class="c1"># for conected NmrChains you keep the order</span>
       <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonanceGroups</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonanceGroups</span><span class="p">)</span>
@@ -852,7 +862,7 @@
 
   <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">value</span><span class="o">.</span><span class="n">_apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResidue</span>
-<span class="n">Residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;NmrResidue to which Residue is assigned&quot;</span><span class="p">)</span>
+<span class="n">Residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;NmrResidue to which Residue is assigned&quot;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrChain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">NmrResidue</span><span class="p">]:</span>
@@ -862,48 +872,106 @@
   <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrChain</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">mainResonanceGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
-<span class="n">NmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s">&quot;&quot;&quot;NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue</span>
-<span class="s">  (sequenceCode ending in &#39;-1&#39;, &#39;+1&#39;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment&quot;&quot;&quot;</span><span class="p">)</span>
+<span class="n">NmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;NmrResidues belonging to NmrChain that are NOT defined relative to another NmrResidue</span>
+<span class="s2">  (sequenceCode ending in &#39;-1&#39;, &#39;+1&#39;, etc.) For connected NmrChains in sequential order, otherwise sorted by assignment&quot;&quot;&quot;</span><span class="p">)</span>
 
 <span class="k">del</span> <span class="n">getter</span>
 <span class="k">del</span> <span class="n">setter</span>
 
 <span class="k">def</span> <span class="nf">_newNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrChain</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                    <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrResidue</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Create new ccpn.NmrResidue within ccpn.NmrChain&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Create new NmrResidue within NmrChain&quot;&quot;&quot;</span>
 
-  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-                                     <span class="p">(</span><span class="s">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+  <span class="n">originalSequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span>
 
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;newNmrResidue&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newNmrResidue&#39;</span><span class="p">)</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span> <span class="c"># delay notifiers till NmrResidue is fully ready</span>
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                     <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+
+  <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+  <span class="n">nmrProject</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span>
+  <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">residueType</span><span class="p">,</span> <span class="s1">&#39;details&#39;</span><span class="p">:</span><span class="n">comment</span><span class="p">,</span>
+        <span class="s1">&#39;residueType&#39;</span><span class="p">:</span><span class="n">residueType</span><span class="p">,</span><span class="s1">&#39;directNmrChain&#39;</span><span class="p">:</span><span class="n">apiNmrChain</span><span class="p">}</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newNmrResidue&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrResidue&#39;</span><span class="p">)</span>
+  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span> <span class="c1"># delay notifiers till NmrResidue is fully ready</span>
   <span class="k">try</span><span class="p">:</span>
-    <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="k">if</span> <span class="n">sequenceCode</span> <span class="k">else</span> <span class="bp">None</span>
 
-    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">):</span>
-      <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrResidue id: </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
-                         <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">))</span>
+    <span class="c1"># Convert value to string, and check</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid sequenceCode </span><span class="si">%s</span><span class="s2"> must be int, str, or None&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">))</span>
 
-    <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="n">nmrProject</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">nmrProject</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">newResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">residueType</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span>
-                                       <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">,</span> <span class="n">directNmrChain</span><span class="o">=</span><span class="n">apiNmrChain</span><span class="p">)</span>
+    <span class="n">serial</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">:</span>
+
+      <span class="c1"># Check the sequenceCode is not taken already</span>
+      <span class="n">previous</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span> <span class="ow">in</span> <span class="n">sequenceCode</span><span class="p">:</span>
+        <span class="c1"># sequenceCode contains &#39;.&#39; - check against remapped sequenceCode</span>
+        <span class="n">sq</span> <span class="o">=</span> <span class="n">sequenceCode</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">nr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">nr</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">==</span> <span class="n">sq</span><span class="p">:</span>
+            <span class="n">previous</span> <span class="o">=</span> <span class="n">nr</span>
+            <span class="k">break</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># No &#39;.&#39; - can check in API directly (faster)</span>
+        <span class="n">obj0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">obj0</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Existing </span><span class="si">%s</span><span class="s2"> clashes with id </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                         <span class="p">(</span><span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+
+      <span class="c1"># Handle reserved names</span>
+      <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">serial</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+          <span class="c1"># the rest of the name is not an int. We are OK</span>
+          <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">serial</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="c1"># this is a reserved name</span>
+          <span class="k">if</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">serial</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># The implied serial is free - we can set it</span>
+            <span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Name clashes with existing NmrResidue</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create NmrResidue with reserved name </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sequenceCode</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Just create new ResonanceGroup with default-type name</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="c1"># Create ResonanceGroup</span>
+    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sequenceCode</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">newResonanceGroup</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;resonanceGroups&#39;</span><span class="p">)</span>
+      <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="s2">&quot;Could not set sequenceCode of </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - keeping default value&quot;</span>
+          <span class="o">%</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">originalSequenceCode</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="c"># get chem comp ID strings from residue type</span>
+      <span class="c1"># get chem comp ID strings from residue type</span>
       <span class="n">tt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_residueName2chemCompId</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
+      <span class="c1">#tt = MoleculeQuery.fetchStdResNameMap(self._wrappedData.root).get(residueType)</span>
       <span class="k">if</span> <span class="n">tt</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">obj</span><span class="o">.</span><span class="n">molType</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">ccpCode</span> <span class="o">=</span> <span class="n">tt</span>
   <span class="k">finally</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-  <span class="c">#</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
-  <span class="c"># Do creation notifications</span>
-  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;create&#39;</span><span class="p">)</span>
+  <span class="c1"># Do creation notifications</span>
+  <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
+    <span class="c1"># If we have reset serial above this is needed</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">)</span>
 
   <span class="k">return</span> <span class="n">result</span>
 
@@ -911,36 +979,32 @@
 <span class="k">def</span> <span class="nf">_fetchNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrChain</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrResidue</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Fetch NmrResidue with residueType=residueType, creating it if necessary&quot;&quot;&quot;</span>
-  <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
-  <span class="k">if</span> <span class="n">residueType</span><span class="p">:</span>
-    <span class="n">values</span><span class="p">[</span><span class="s">&#39;residueType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">residueType</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s">&#39;fetchNmrResidue&#39;</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="n">values</span><span class="p">,</span>
-                                  <span class="n">parName</span><span class="o">=</span><span class="s">&#39;newNmrResidue&#39;</span><span class="p">)</span>
-  <span class="k">try</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span>
-    <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">residueType</span> <span class="o">!=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;</span><span class="si">%s</span><span class="s"> has residue type </span><span class="si">%s</span><span class="s">, not </span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span>
-                                                             <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span><span class="p">,</span>
-                                                             <span class="n">residueType</span><span class="p">))</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
-          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&quot;Character </span><span class="si">%s</span><span class="s"> not allowed in ccpn.NmrResidue id: </span><span class="si">%s</span><span class="s">.</span><span class="si">%s</span><span class="s">&quot;</span> <span class="o">%</span>
-                           <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">))</span>
 
-      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
+  <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+
+  <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;fetchNmrResidue&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
+                                  <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrResidue&#39;</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">sq</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+      <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sq</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">residueType</span> <span class="o">!=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s2">&quot;Existing </span><span class="si">%s</span><span class="s2"> does not match residue type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">residueType</span><span class="p">))</span>
+          <span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-  <span class="c">#</span>
+  <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span>
 
 
-<span class="c"># Connections to parents:</span>
+<span class="c1"># Connections to parents:</span>
 
 <span class="n">NmrChain</span><span class="o">.</span><span class="n">newNmrResidue</span> <span class="o">=</span> <span class="n">_newNmrResidue</span>
 <span class="k">del</span> <span class="n">_newNmrResidue</span>
@@ -949,28 +1013,28 @@
 <span class="k">def</span> <span class="nf">_renameNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">apiResonanceGroup</span><span class="p">:</span><span class="n">ApiResonanceGroup</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Reset pid for NmrResidue and all offset NmrResidues&quot;&quot;&quot;</span>
   <span class="n">nmrResidue</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span>
-  <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
+  <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
   <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">offsetNmrResidues</span><span class="p">:</span>
-    <span class="n">xx</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s">&#39;rename&#39;</span><span class="p">)</span>
+    <span class="n">xx</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
 
-<span class="c"># Notifiers:</span>
-<span class="c">#NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model</span>
-<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s">&#39;setSequenceCode&#39;</span><span class="p">)</span>
-<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s">&#39;setDirectNmrChain&#39;</span><span class="p">)</span>
-<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s">&#39;setResidueType&#39;</span><span class="p">)</span>
-<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s">&#39;setAssignedResidue&#39;</span><span class="p">)</span>
+<span class="c1"># Notifiers:</span>
+<span class="c1">#NBNB TBD We must make Resonance.ResonanceGroup 1..1 when we move beyond transition model</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s1">&#39;setSequenceCode&#39;</span><span class="p">)</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s1">&#39;setDirectNmrChain&#39;</span><span class="p">)</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s1">&#39;setResidueType&#39;</span><span class="p">)</span>
+<span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_renameNmrResidue</span><span class="p">,</span> <span class="n">ApiResonanceGroup</span><span class="p">,</span> <span class="s1">&#39;setAssignedResidue&#39;</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">_renameNmrResidue</span>
 
-<span class="c"># Rename notifiers put in to ensure renaming of NmrAtoms:</span>
+<span class="c1"># Rename notifiers put in to ensure renaming of NmrAtoms:</span>
 <span class="n">className</span> <span class="o">=</span> <span class="n">ApiResonanceGroup</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_apiNotifiers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
-  <span class="p">(</span> <span class="p">(</span><span class="s">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;setResonances&#39;</span><span class="p">),</span>
-    <span class="p">(</span><span class="s">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s">&#39;addResonance&#39;</span><span class="p">),</span>
+  <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;setResonances&#39;</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;_finaliseApiRename&#39;</span><span class="p">,</span> <span class="p">{},</span> <span class="n">className</span><span class="p">,</span> <span class="s1">&#39;addResonance&#39;</span><span class="p">),</span>
   <span class="p">)</span>
 <span class="p">)</span>
 
-<span class="c"># NB Residue&lt;-&gt;NmrResidue link depends solely on the NmrResidue name.</span>
-<span class="c"># So no notifiers on the link - notify on the NmrResidue rename instead.</span>
+<span class="c1"># NB Residue&lt;-&gt;NmrResidue link depends solely on the NmrResidue name.</span>
+<span class="c1"># So no notifiers on the link - notify on the NmrResidue rename instead.</span>
 </pre></div>
 
           </div>

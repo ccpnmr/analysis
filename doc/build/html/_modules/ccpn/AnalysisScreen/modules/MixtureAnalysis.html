@@ -1,0 +1,828 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisScreen.modules.MixtureAnalysis &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisScreen.modules.MixtureAnalysis</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;luca&#39;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.modules.MixtureOptimisation</span> <span class="kn">import</span> <span class="n">MixtureOptimisation</span>
+<span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">array</span><span class="p">,</span> <span class="n">amin</span><span class="p">,</span> <span class="n">average</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.MixturesGeneration</span> <span class="kn">import</span> <span class="n">getCompounds</span><span class="p">,</span> <span class="n">_createSamples</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisScreen.lib.SimulatedAnnealing</span> <span class="kn">import</span> <span class="n">randomDictMixtures</span><span class="p">,</span>  <span class="n">getMixtureInfo</span> <span class="p">,</span> <span class="n">calculateOverlapCount</span><span class="p">,</span><span class="n">scoreMixture</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Window</span> <span class="kn">import</span> <span class="n">navigateToPeakPosition</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundView</span> <span class="kn">import</span> <span class="n">CompoundView</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Module</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
+
+<span class="n">green</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Green&#39;</span><span class="p">)</span>
+<span class="n">red</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">)</span>
+<span class="n">yellow</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;yellow&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MixtureAnalysis"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.MixtureAnalysis.MixtureAnalysis">[docs]</a><span class="k">class</span> <span class="nc">MixtureAnalysis</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+
+  <span class="sd">&#39;&#39;&#39;Creates a module to analyse the mixtures&#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">minimalDistance</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MixtureAnalysis</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Mixture Analysis&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generalPreferences</span><span class="o">.</span><span class="n">colourScheme</span>
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">listOfSample</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span> <span class="o">=</span> <span class="n">minimalDistance</span>
+    <span class="c1">######## ======== Icons ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/applications-system&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">exportIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/export&#39;</span><span class="p">)</span>
+
+    <span class="c1">######## ======== Set Main Layout ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">######## ======== Set Secondary Layout ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">analysisFrameLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">analysisFrameLayout</span><span class="p">)</span>
+
+    <span class="c1">######## ======== Create widgets ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createSettingGroup</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_scoringTable</span><span class="p">()</span>
+
+    <span class="c1">######## ======== Set Tabs  ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTabWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">analysisFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="p">)</span>
+
+    <span class="c1">######## ======== Create 1thTab with peak Table and Molecule view  ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMolecule</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMolecule</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMolecule</span><span class="p">,</span> <span class="s1">&#39;Components peaks&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QToolBar</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1">######## ========  Create 2ndTab with multiple Molecule view ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeView</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeView</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeView</span><span class="p">,</span> <span class="s1">&#39;Components structure&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tableComponentPeaks</span><span class="p">()</span>
+
+    <span class="c1">######## ========  Create 3thTab with Components Info ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfo</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfoLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfo</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfoLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfo</span><span class="p">,</span> <span class="s1">&#39;Components Info&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_widgetsTabComponentsInfo</span><span class="p">()</span>
+
+    <span class="c1">######## ========  Create 4thTab Mixtures Management ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagement</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagement</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">addTab</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagement</span><span class="p">,</span> <span class="s1">&#39;Mixtures Management&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_mixtureManagementWidgets</span><span class="p">()</span>
+
+    <span class="c1">######## ========  registerNotify ====== ########</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">registerNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_findSelectedPeaks</span><span class="p">,</span> <span class="s1">&#39;peaks&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_findSelectedPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+
+
+  <span class="k">def</span> <span class="nf">_getVirtualSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Returns spectra mixtures (virtual samples) across all project sample &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">virtualSamples</span>
+
+
+  <span class="sd">&#39;&#39;&#39;######## ======== Scoring and Selection Table ====== ########&#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_scoringTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Fills the first table on the module with the virtual sample information &#39;&#39;&#39;</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Mixture Name&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">sample</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">pid</span><span class="p">)),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;N Components&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">sample</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">))),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;N Overlaps&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">sample</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">overlaps</span><span class="p">)),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Score&#39;</span><span class="p">,</span><span class="k">lambda</span> <span class="n">sample</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">score</span><span class="p">)),</span>
+              <span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tableSelection</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">400</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">())</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">analysisFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_tableSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="nb">object</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; For each row of the scoring table all the module information are refreshed &#39;&#39;&#39;</span>
+    <span class="n">objRow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createButtons</span><span class="p">(</span><span class="n">objRow</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_displayMixture</span><span class="p">(</span><span class="n">objRow</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_displayMolecules</span><span class="p">(</span><span class="n">objRow</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_displayMixturesInfo</span><span class="p">(</span><span class="n">objRow</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_populatePullDownSelection</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftListWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
+
+
+  <span class="sd">&#39;&#39;&#39; ######## ======== First Tab properties ====== ########   &#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_tableComponentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; This creates the peak table in the first tab&#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListObjects</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Position&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peak</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peak</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHeight</span><span class="p">(</span><span class="n">peak</span><span class="p">))]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectPeak</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_selectPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="nb">object</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; this callback  &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectedTablePeaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedTablePeaks</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">isSelected</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">,</span> <span class="s1">&#39;currents&#39;</span><span class="p">)</span>
+        <span class="c1"># self.project._appBase.current.clearPeaks()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">peak</span><span class="o">.</span><span class="n">isSelected</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peak</span> <span class="o">=</span> <span class="n">peak</span>
+
+  <span class="k">def</span> <span class="nf">_findSelectedPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">:</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; this callback, registered with a notifier, allows to select a peak either on the table, compoundView or</span>
+<span class="sd">    guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display &#39;&#39;&#39;</span>
+    <span class="c1"># self.peakTable.clearSelection()</span>
+    <span class="n">selectedPeaks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="n">currentDisplayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">currentPeaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentPeaks</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setCurrentObject</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
+              <span class="n">selectedPeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">,</span> <span class="s1">&#39;selected peaks&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setCurrentObjects</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">)</span>
+
+      <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">atomObject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">atomViews</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;H1&#39;</span><span class="p">:</span>
+          <span class="n">atomObject</span><span class="o">.</span><span class="n">select</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_getPeakHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="o">*</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">scale</span>
+
+  <span class="k">def</span> <span class="nf">_createButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; This creates buttons according with how many spectra are inside the mixture. &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">)</span><span class="c1">#,toggle=True)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleComponentButton</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="p">))</span>
+      <span class="c1"># self.componentButton.setChecked(False)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">40</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">toolBarComponents</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">componentButton</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_toggleComponentButton</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">componentButton</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;  Toggling the component button will populate the peak table and display the molecule on compoundViewer &#39;&#39;&#39;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
+    <span class="n">pressedButton</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">()</span>
+
+    <span class="n">buttons</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">pressedButton</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">children</span><span class="p">():</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="s1">&#39;callback&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">item</span> <span class="o">!=</span> <span class="n">componentButton</span><span class="p">:</span>
+          <span class="n">buttons</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">buttons</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #2a3358&quot;</span><span class="p">)</span>
+        <span class="n">pressedButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #020F31&quot;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #fbf4cc; border: 1px solid  #bd8413; color: #122043&quot;</span><span class="p">)</span>
+        <span class="n">pressedButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: #bd8413&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakListObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListObjects</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">spectrum</span><span class="p">:</span>
+        <span class="n">smiles</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">smiles</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span>  <span class="o">=</span> <span class="n">CompoundView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
+
+
+  <span class="sd">&#39;&#39;&#39; ######## ======== Second Tab properties (Multiple Compound View ====== ########   &#39;&#39;&#39;</span>
+  
+  <span class="k">def</span> <span class="nf">_displayMolecules</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;  displays the molecules on compoundViewers &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_clearTabMoleculeView</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+      <span class="n">chemicalName</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">component</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">synonyms</span><span class="p">))</span>
+      <span class="n">smiles</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">smiles</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span> <span class="o">=</span> <span class="n">CompoundView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smiles</span><span class="o">=</span><span class="n">smiles</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">180</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">compoundViewTab2</span><span class="o">.</span><span class="n">resetView</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_clearTabMoleculeView</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Delete all the buttons if a different mixture is selected on the scoring table &#39;&#39;&#39;</span>
+    <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeViewLayout</span>
+    <span class="n">items</span> <span class="o">=</span> <span class="p">[</span><span class="n">layout</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">layout</span><span class="o">.</span><span class="n">count</span><span class="p">())]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
+
+  <span class="sd">&#39;&#39;&#39; ######## ======== 3Th Tab properties ====== ########   &#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_widgetsTabComponentsInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; creates a table with the relevant information about the substances/component in the mixture &#39;&#39;&#39;</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Name&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">substance</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">substance</span><span class="o">.</span><span class="n">pid</span><span class="p">)),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;logP&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">substance</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">substance</span><span class="o">.</span><span class="n">logPartitionCoefficient</span><span class="p">)),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;psa&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">substance</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">substance</span><span class="o">.</span><span class="n">polarSurfaceArea</span><span class="p">)),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;H acceptors&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">substance</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">substance</span><span class="o">.</span><span class="n">hBondAcceptorCount</span><span class="p">)),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;H donors&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">substance</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">substance</span><span class="o">.</span><span class="n">hBondDonorCount</span><span class="p">)),</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;MW&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">substance</span><span class="p">:</span><span class="nb">str</span><span class="p">(</span><span class="n">substance</span><span class="o">.</span><span class="n">molecularMass</span><span class="p">))]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleInfoTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMoleculeInfoLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sampleInfoTable</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_displayMixturesInfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; fill the  sampleInfoTable  &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponents</span> <span class="o">=</span>  <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span>
+    <span class="n">substances</span> <span class="o">=</span> <span class="p">[</span><span class="n">sc</span><span class="o">.</span><span class="n">substance</span> <span class="k">for</span> <span class="n">sc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampleInfoTable</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">substances</span><span class="p">)</span>
+
+
+  <span class="sd">&#39;&#39;&#39; ###### ==== Fourth Tab properties (mixtureManagement) === ####</span>
+<span class="sd">    This tab is made by two widget lists. Each widget list has the spectra present in the respective mixture.</span>
+<span class="sd">    Left mixture is the selected on the scoring table. A pullDown lets select to create a new empty mixture or pick an other</span>
+<span class="sd">    from the project.</span>
+<span class="sd">    Moving spectra across by drag and drop allows the users to recreate manually the mixtures.&#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_mixtureManagementWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; creates all the widgets present in the mixture Management tab &#39;&#39;&#39;</span>
+    <span class="n">currentMixture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">contextMenu</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contextMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">contextMenu</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Reset&#39;</span><span class="p">,</span><span class="s1">&#39;Predict&#39;</span><span class="p">,</span><span class="s1">&#39;Apply&#39;</span><span class="p">],</span>
+                                       <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_resetMixtureScore</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predictScores</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createNewMixture</span><span class="p">],</span>
+                                       <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span><span class="s1">&#39;CLick to predict new mixtures&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Cancel&#39;</span><span class="p">],</span>
+                                   <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_resetInitialState</span><span class="p">],</span>
+                                   <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">warningLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;Cancel or Apply to continue&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftMixtureLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftMixtureLineEdit</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">warningLabel</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tabMixturesManagementLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftMixtureLineEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeLeftMixtureName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeRightMixtureName</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_disableRecalculateButtons</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">warningLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">contextMenuItem</span> <span class="o">=</span> <span class="s1">&#39;Not Implemented Yet&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_rightClickListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sender</span><span class="p">())</span>
+
+  <span class="k">def</span> <span class="nf">_populateLeftListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; fills the left widget with spectra scores from the selected mixture on the scoring table &#39;&#39;&#39;</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">leftMixtureLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+      <span class="n">color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">)</span>
+      <span class="n">header</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+      <span class="n">header</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
+      <span class="n">header</span><span class="o">.</span><span class="n">setTextColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; Single Score = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">score</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+
+        <span class="c1">#   self.leftListWidget.addItem(item)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;dropped&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_itemsDropped</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;dropped&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_itemsDropped</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">currentItemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_itemClicked</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_populatePullDownSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; fills the pulldown with the mixtures on the project (excludes the one already selected on the left listWidget)  &#39;&#39;&#39;</span>
+    <span class="n">currentMixture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select An Option&#39;</span><span class="p">,</span> <span class="s1">&#39;New empty mixture&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">mixture</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">mixture</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">currentMixture</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+       <span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mixture</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPullDown</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_pullDownSelectionAction</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_pullDownSelectionAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selected</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Each selection gives different behaviour on the right listWidget.</span>
+<span class="sd">     &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;New empty mixture&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;NewMixture&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">selected</span> <span class="o">==</span> <span class="s1">&#39;Select An Option&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftListWidget</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SA:&#39;</span><span class="o">+</span><span class="n">selected</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_populateRightListWidget</span><span class="p">(</span><span class="n">sample</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_populateRightListWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; fills the right widget with spectra scores from the selected mixture on the pulldown &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+      <span class="n">color</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">)</span>
+      <span class="n">header</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+      <span class="n">header</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
+      <span class="n">header</span><span class="o">.</span><span class="n">setTextColor</span><span class="p">(</span><span class="n">color</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; Single Score = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">score</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">currentItemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getListWidgetItems</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">SIGNAL</span><span class="p">(</span><span class="s2">&quot;dropped&quot;</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_itemsDropped</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">currentItemChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_itemClicked</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_getListWidgetItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># to do shorter</span>
+    <span class="sd">&#39;&#39;&#39;Get  Spectra from the right ListWidget &#39;&#39;&#39;</span>
+    <span class="n">itemsRightWidgetList</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="n">rightSpectra</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+      <span class="n">itemsRightWidgetList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">itemsRightWidgetList</span><span class="p">:</span>
+      <span class="n">itemText</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+      <span class="n">text</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">itemText</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+      <span class="n">rightSpectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span><span class="o">+</span><span class="n">text</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">rightSpectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">rightSpectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rightSpectrum</span><span class="p">)</span>
+
+    <span class="sd">&#39;&#39;&#39;Get Spectra from the left ListWidget &#39;&#39;&#39;</span>
+    <span class="n">itemsLeftWidgetList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">leftSpectra</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+      <span class="n">itemsLeftWidgetList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">itemsLeftWidgetList</span><span class="p">:</span>
+      <span class="n">itemText</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+
+      <span class="n">text</span><span class="p">,</span> <span class="n">space</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">itemText</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+      <span class="n">leftSpectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span><span class="o">+</span><span class="n">text</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">leftSpectrum</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">leftSpectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">leftSpectrum</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;leftSpectra&#39;</span><span class="p">:</span><span class="n">leftSpectra</span><span class="p">,</span><span class="s1">&#39;rightSpectra&#39;</span><span class="p">:</span><span class="n">rightSpectra</span><span class="p">}</span>
+
+  <span class="k">def</span> <span class="nf">_getListWidgetItemsTest</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">listWidget</span><span class="p">):</span>
+    <span class="n">items</span><span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">listWidget</span><span class="o">.</span><span class="n">count</span><span class="p">()):</span>
+      <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">listWidget</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_deleteComponent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">currentRow</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">takeItem</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_deleteMixture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; delete the mixture from the project &#39;&#39;&#39;</span>
+    <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">sample</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">sample</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_upDateScoringTable</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_upDateScoringTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; refresh the scoring table &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">())</span>
+
+
+  <span class="k">def</span> <span class="nf">_createNewMixture</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; create new mixtures after the items have been moved across the list widgets or a new empty mixture has been selected &#39;&#39;&#39;</span>
+    <span class="n">getLeftSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getListWidgetItems</span><span class="p">()[</span><span class="s1">&#39;leftSpectra&#39;</span><span class="p">]</span>
+    <span class="n">getRightSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getListWidgetItems</span><span class="p">()[</span><span class="s1">&#39;rightSpectra&#39;</span><span class="p">]</span>
+
+    <span class="n">oldLeftMixture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="n">oldRightMixture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getMixtureFromPullDown</span><span class="p">()</span>
+
+    <span class="n">leftMixtureName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftMixtureLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="n">rightMixtureName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;New empty mixture&#39;</span><span class="p">:</span>
+      <span class="n">rightMixtureName</span> <span class="o">=</span> <span class="s1">&#39;Mixture-&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">())</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">mixtures</span> <span class="o">=</span> <span class="p">{</span><span class="n">leftMixtureName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftCompounds</span><span class="p">,</span> <span class="n">rightMixtureName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightCompounds</span><span class="p">}</span>
+      <span class="n">oldLeftMixture</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="n">_createSamples</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">mixtures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">mixtures</span> <span class="o">=</span> <span class="p">{</span><span class="n">leftMixtureName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftCompounds</span><span class="p">,</span> <span class="n">rightMixtureName</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightCompounds</span><span class="p">}</span>
+      <span class="n">oldRightMixture</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="n">oldLeftMixture</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="n">_createSamples</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">mixtures</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_confirmNewMixtures</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_itemsDropped</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Returns the event of dropping data &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_changeButtonStatus</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_itemClicked</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; mouse left click, return the item clicked&#39;&#39;&#39;</span>
+    <span class="k">pass</span>
+
+  <span class="k">def</span> <span class="nf">_predictScores</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>  <span class="c1"># to do</span>
+    <span class="sd">&#39;&#39;&#39; Predict scores before to create a different mixture given the left spectra &#39;&#39;&#39;</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;This is leftSpectra&#39;</span><span class="p">)</span>
+    <span class="n">leftSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getListWidgetItems</span><span class="p">()[</span><span class="s1">&#39;leftSpectra&#39;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftCompounds</span> <span class="o">=</span> <span class="n">getCompounds</span><span class="p">(</span><span class="n">leftSpectra</span><span class="p">)</span>
+    <span class="n">leftComponentsScores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporarySampleComponentsScore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftCompounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span>
+      <span class="s1">&#39;Predicted Tot Score&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">scoreMixture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftCompounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">),</span> <span class="mi">2</span><span class="p">)))</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">leftComponentsScores</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">leftListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="n">rightSpectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getListWidgetItems</span><span class="p">()[</span><span class="s1">&#39;rightSpectra&#39;</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightCompounds</span> <span class="o">=</span> <span class="n">getCompounds</span><span class="p">(</span><span class="n">rightSpectra</span><span class="p">)</span>
+    <span class="n">rightComponentsScores</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">temporarySampleComponentsScore</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightCompounds</span> <span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="s1">&#39;Predicted Tot Score&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">scoreMixture</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightCompounds</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">),</span> <span class="mi">2</span><span class="p">)))</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="s1">&#39;Red&#39;</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">header</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">rightComponentsScores</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MixtureAnalysis.temporarySampleComponentsScore"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.MixtureAnalysis.MixtureAnalysis.temporarySampleComponentsScore">[docs]</a>  <span class="k">def</span> <span class="nf">temporarySampleComponentsScore</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mixtureCompounds</span><span class="p">,</span> <span class="n">minDist</span> <span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">componentsScores</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">mixtureCompounds</span><span class="p">:</span>
+      <span class="n">compoundName</span><span class="p">,</span> <span class="n">compoundPeakList</span> <span class="o">=</span> <span class="n">compound</span>
+      <span class="n">compoundsToCompare</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">mixtureCompounds</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">compoundName</span><span class="p">]</span>
+      <span class="n">overlaped</span> <span class="o">=</span> <span class="n">calculateOverlapCount</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">,</span> <span class="n">compoundsToCompare</span><span class="p">,</span> <span class="n">minDist</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">overlaped</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentsScores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">compoundName</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; temp Score= 0&#39;</span> <span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">overlaped</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">componentsScores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">compoundName</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; temp Score= &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">score</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">componentsScores</span></div>
+
+  <span class="k">def</span> <span class="nf">_temporaryScoringStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># to do shorter</span>
+    <span class="sd">&#39;&#39;&#39; Disable all the commands so user is forced to take a decision with the new scoring after a mixture has been recalculated &#39;&#39;&#39;</span>
+    <span class="k">pass</span>
+    <span class="c1"># self.pullDownSelection.setEnabled(False)</span>
+    <span class="c1"># for i in range(3):</span>
+    <span class="c1">#   self.tabWidget.setTabEnabled(i,False)</span>
+    <span class="c1"># self.calculateButtons.hide()</span>
+    <span class="c1"># self.applyButtons.show()</span>
+    <span class="c1"># self.rightListWidget.setAcceptDrops(False)</span>
+    <span class="c1"># self.leftListWidget.setAcceptDrops(False)</span>
+    <span class="c1"># for item in self._getListWidgetItemsTest(self.leftListWidget):</span>
+    <span class="c1">#   item.setFlags(QtCore.Qt.NoItemFlags)</span>
+    <span class="c1"># for item in self._getListWidgetItemsTest(self.rightListWidget):</span>
+    <span class="c1">#   item.setFlags(QtCore.Qt.NoItemFlags)</span>
+    <span class="c1"># self.warningLabel.show()</span>
+    <span class="c1"># self.scoringTable.selectionCallback = None</span>
+    <span class="c1"># print(&#39;Selection Table Disabled. Cancel or apply the new mixtures scores&#39;)</span>
+
+  <span class="k">def</span> <span class="nf">_confirmNewMixtures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span> <span class="c1"># to do shorter</span>
+    <span class="sd">&#39;&#39;&#39; restore the normal behavior if the buttons &#39;&#39;&#39;</span>
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_upDateScoringTable</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftListWidget</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_resetMixtureScore</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; restore the first scores calculated  &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_resetInitialState</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_getMixtureFromPullDown</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Documentation &#39;&#39;&#39;</span>
+    <span class="n">currentPullDownSelection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+    <span class="n">mixturePullDown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SA:&#39;</span><span class="o">+</span><span class="n">currentPullDownSelection</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mixturePullDown</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">mixturePullDown</span>
+
+  <span class="k">def</span> <span class="nf">_resetInitialState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; clears up the right listWidget and restores the buttons  &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">tabWidget</span><span class="o">.</span><span class="n">setTabEnabled</span><span class="p">(</span><span class="n">i</span><span class="p">,</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectAnOptionState</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_disableRecalculateButtons</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">warningLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_populateLeftListWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">selectionCallback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tableSelection</span>
+
+
+  <span class="k">def</span> <span class="nf">_changeLeftMixtureName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; changes the mixture name &#39;&#39;&#39;</span>
+    <span class="n">currentMixture</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scoringTable</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">leftMixtureLineEdit</span><span class="o">.</span><span class="n">isModified</span><span class="p">():</span>
+      <span class="n">currentMixture</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leftMixtureLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+  <span class="k">def</span> <span class="nf">_changeRightMixtureName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; changes the mixture name &#39;&#39;&#39;</span>
+    <span class="n">currentPullDownSelection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="o">.</span><span class="n">getText</span><span class="p">()</span>
+    <span class="n">mixturePullDown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">currentPullDownSelection</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mixturePullDown</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">mixturePullDown</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="o">.</span><span class="n">isModified</span><span class="p">():</span>
+        <span class="n">mixturePullDown</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+
+  <span class="k">def</span> <span class="nf">_initialLabelListWidgetRight</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Creates an initial message on the right ListWidget &#39;&#39;&#39;</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidgetItem</span><span class="p">(</span><span class="s1">&#39; Drag and drop items across to calculate the new scores&#39;</span><span class="p">)</span>
+    <span class="n">item</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">NoItemFlags</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_selectAnOptionState</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Creates an initial status on the right ListWidget &#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pullDownSelection</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;Select An Option&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightListWidget</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_initialLabelListWidgetRight</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_disableRecalculateButtons</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rightMixtureLineEdit</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_disableRecalculateButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; disables the buttons until a change occurs  &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">:</span>
+      <span class="n">button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+      <span class="c1"># button.setStyleSheet(&quot;background-color:#868D9D; color: #000000&quot;)</span>
+
+
+  <span class="k">def</span> <span class="nf">_changeButtonStatus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; enables the buttons when a change occurs &#39;&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">button</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">:</span>
+      <span class="n">button</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="c1"># if self.colourScheme == &#39;dark&#39;:</span>
+      <span class="c1">#   button.setStyleSheet(&quot;background-color:#535a83; color: #bec4f3&quot;)</span>
+      <span class="c1"># else:</span>
+      <span class="c1">#  button.setStyleSheet(&quot;background-color:#bd8413; color: #fdfdfc&quot;)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">calculateButtons</span><span class="o">.</span><span class="n">buttons</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+
+  <span class="sd">&#39;&#39;&#39; ######## ==== Gui Spectrum View properties  ====  ########   &#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_displayMixture</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; displays all the spectra present in a mixture &#39;&#39;&#39;</span>
+    <span class="n">currentDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clearDisplayView</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+      <span class="n">currentDisplay</span><span class="o">.</span><span class="n">displaySpectrum</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+  <span class="k">def</span> <span class="nf">_navigateToPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; for a given peak, it navigates to the peak position on the display  &#39;&#39;&#39;</span>
+    <span class="n">displayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spectrumDisplay</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+      <span class="n">navigateToPeakPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">peak</span><span class="o">=</span><span class="n">peak</span><span class="p">,</span> <span class="n">selectedDisplays</span><span class="o">=</span><span class="p">[</span><span class="n">displayed</span><span class="o">.</span><span class="n">pid</span><span class="p">],</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_clearDisplayView</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Deletes all the spectra from the display &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">currentDisplayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">currentDisplayed</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_openNewDisplay</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_closeBlankDisplay</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDisplayed</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+      <span class="n">spectrumView</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentDisplayed</span>
+
+  <span class="k">def</span> <span class="nf">_openNewDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; opens a new spectrum display &#39;&#39;&#39;</span>
+    <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">createSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">neighbor</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spectrumDisplay</span>
+
+  <span class="k">def</span> <span class="nf">_closeBlankDisplay</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; deletes a module display if present one &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="s1">&#39;BLANK DISPLAY&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">findAll</span><span class="p">()[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">guiWindow</span><span class="o">.</span><span class="n">deleteBlankDisplay</span><span class="p">()</span>
+
+
+  <span class="sd">&#39;&#39;&#39; ######## ==== Settings  ====  ########   &#39;&#39;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">_createSettingGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;GroupBox creates the settingGroup&#39;&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">,],</span>
+                                     <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_exportMixturesToXlsx</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_openOptimisationModule</span><span class="p">],</span> <span class="n">icons</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">exportIcon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">settingIcon</span><span class="p">,</span> <span class="p">],</span>
+                                     <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingButtons</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: transparent&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingFrameLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingButtons</span><span class="p">)</span>
+
+  <span class="c1"># def exportToXls(self):</span>
+    <span class="c1"># &#39;&#39;&#39; Export a simple xlxs file from the results &#39;&#39;&#39;</span>
+    <span class="c1"># self.nameAndPath = &#39;&#39;</span>
+    <span class="c1"># fType = &#39;XLS (*.xlsx)&#39;</span>
+    <span class="c1"># dialog = QtGui.QFileDialog</span>
+    <span class="c1"># filePath = dialog.getSaveFileName(self,filter=fType)</span>
+    <span class="c1"># self.nameAndPath = filePath</span>
+    <span class="c1">#</span>
+    <span class="c1"># sampleColumn = [str(sample.pid) for sample in self.project.samples]</span>
+    <span class="c1"># sampleComponents = [str(sample.spectra) for sample in self.project.samples]</span>
+    <span class="c1"># df = DataFrame({&#39;Mixture name&#39;: sampleColumn, &#39;Sample Components&#39;: sampleComponents})</span>
+    <span class="c1"># df.to_excel(self.nameAndPath, sheet_name=&#39;sheet1&#39;, index=False)</span>
+  <span class="c1"># def closeModule(self):</span>
+  <span class="c1">#</span>
+  <span class="c1">#   for module in self.moduleArea.findAll()[1].values():</span>
+  <span class="c1">#     if module.label.isHidden():</span>
+  <span class="c1">#       module.close()</span>
+  <span class="c1">#   self.close()</span>
+  <span class="k">def</span> <span class="nf">_exportMixturesToXlsx</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Export a simple xlxs file from the results &#39;&#39;&#39;</span>
+    <span class="n">dataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createMixturesDataFrame</span><span class="p">()</span>
+
+    <span class="n">fType</span> <span class="o">=</span> <span class="s1">&#39;XLSX (*.xlsx)&#39;</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFileDialog</span>
+    <span class="n">filePath</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">getSaveFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">filter</span><span class="o">=</span><span class="n">fType</span><span class="p">)</span>
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Mixtures&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_openOptimisationModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">mixtureOptimisation</span> <span class="o">=</span> <span class="n">MixtureOptimisation</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">virtualSamples</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getVirtualSamples</span><span class="p">(),</span>
+                          <span class="n">mixtureAnalysisModule</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">minimalDistance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">minimalDistance</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+
+    <span class="n">mixtureOptimisationModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">mixtureOptimisation</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MixtureAnalysis.createMixturesDataFrame"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.MixtureAnalysis.MixtureAnalysis.createMixturesDataFrame">[docs]</a>  <span class="k">def</span> <span class="nf">createMixturesDataFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+    <span class="n">sampleColumn</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span> <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">]</span>
+    <span class="n">sampleComponents</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;Mixture&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">]})</span>
+
+    <span class="k">return</span> <span class="n">df</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,11 @@
+DISCLAIMER:
+
+This Software is provided by the CCPN “AS-IS” and any express or implied warranties, including but not limited to,
+the implied warranties of merchantability, fitness for a particular purpose, are disclaimed. CCPN, the authors,
+the Department of Molecular and Cell Biology, and the University of Leicester shall never, and without any limit,
+be liable for any direct, indirect, incidental, special or consequential damages, cost, expense or any other
+payment incurred by Licensee, loss of use, data, profits, or business, as a result of The Software’s actions,
+failure, bugs and/or any other interaction between The Software and Licensee’s end-equipment, computers, data,
+other software or any 3rd party, end-equipment, computer or services or however otherwise caused.  Moreover,
+CCPN, the authors, the Department of Molecular and Cell Biology, and the University of Leicester shall never be
+liable for any defect in code written by Licensee when relying on The Software or using The Software’s source code.

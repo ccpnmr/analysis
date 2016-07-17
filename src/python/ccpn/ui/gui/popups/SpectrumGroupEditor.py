@@ -112,26 +112,15 @@ class SpectrumGroupEditor(QtGui.QDialog):
       self.leftPullDownSelection.setEnabled(False)
       self.leftPullDownSelection.hide()
       self.leftSpectrumGroupsLabel.hide()
+      self._selectAnOptionState()
 
     else:
+      self.spectrumGroupListWidgetLeft.clear()
       self.leftPullDownSelection.setEnabled(True)
       self.leftPullDownSelection.show()
       self.leftSpectrumGroupsLabel.show()
+      self._selectAnOptionState()
 
-
-  def _createNewSpectrumGroup(self):
-    spectrumGroup = self.project.newSpectrumGroup(name='NewSpectrumGroup-' + str(len(self.project.spectrumGroups)))
-    return spectrumGroup
-
-  def _getSpectrumGroup(self):
-
-    if len(self.project.spectrumGroups) > 0:
-      spectrumGroup = self.project.spectrumGroups[0]
-      return spectrumGroup
-    else:
-      self._createNewSpectrumGroup()
-      spectrumGroup = self.project.newSpectrumGroup(name='NewSpectrumGroup-'+str(len(self.project.spectrumGroups)))
-    #   return spectrumGroup
 
   def _populateLeftPullDownList(self):
     leftPullDownData = ['Select an Option']
@@ -196,7 +185,6 @@ class SpectrumGroupEditor(QtGui.QDialog):
         self.leftSpectrumGroupLineEdit.setText(str(selected))
         self.rightPullDownSelection.setData(self._getRightPullDownSelectionData())
 
-
       if self.selected == self.rightPullDownSelection.getText():
         self._selectAnOptionState()
         print('You cannot have the same SG on the left and right list')
@@ -211,7 +199,6 @@ class SpectrumGroupEditor(QtGui.QDialog):
         self.leftSpectrumGroupLineEdit.setText(self.spectrumGroup.name)
         if self.addNewSpectrumGroup:
           self._checkForDuplicatedNames()
-        # self.leftSpectrumGroupLineEdit.editingFinished.connect(self._changeButtonStatus())
     else:
       self.spectrumGroupListWidgetLeft.clear()
       self.leftSpectrumGroupLineEdit.setText('')
@@ -257,12 +244,9 @@ class SpectrumGroupEditor(QtGui.QDialog):
     if self.spectrumGroup:
       if self.spectrumGroup.pid in self.rightPullDownSelectionData: #This to avoid duplicates
         self.rightPullDownSelectionData.remove(self.spectrumGroup.pid)
-
-
     return self.rightPullDownSelectionData
 
   def _getAllSpectra(self):
-
     if self.spectrumGroup:
       allSpectra = [sp for sp in self.project.spectra]
       spectrumGroupSpectra = self.spectrumGroup.spectra
@@ -276,7 +260,6 @@ class SpectrumGroupEditor(QtGui.QDialog):
   def _changeLeftSpectrumGroupName(self):
     if self.leftSpectrumGroupLineEdit.isModified():
       self.spectrumGroup.rename(self.leftSpectrumGroupLineEdit.text())
-
 
   def _getItemListWidgets(self):
     leftWidgets = []
@@ -304,7 +287,6 @@ class SpectrumGroupEditor(QtGui.QDialog):
       if sg.name == newName:
         self.leftSpectrumGroupLineEdit.setText(str(sg.name)+'-1')
 
-
   def _setEditorMode(self):
 
     leftPullDownData = ['Select an Option']
@@ -315,7 +297,6 @@ class SpectrumGroupEditor(QtGui.QDialog):
       self.leftPullDownSelection.setData(leftPullDownData)
       self.spectrumGroupListWidgetLeft.clear()
       self.leftPullDownSelection.activated[str].connect(self._leftPullDownSelectionAction)
-
     else:
       self.addNewSpectrumGroup = True
       self._populateLeftPullDownList()
@@ -326,45 +307,51 @@ class SpectrumGroupEditor(QtGui.QDialog):
     rightWidgetSpectra = self._getItemListWidgets()['rightWidgetSpectra']
 
     if self.addNewSpectrumGroup:
-      name = str(self.leftSpectrumGroupLineEdit.text())
-      if name:
-        self.spectrumGroup = self.project.newSpectrumGroup(name)
-        self.spectrumGroup.spectra = list(set(leftWidgetSpectra))
-        self.addNewSpectrumGroup = False
-        self.selectInitialRadioButtons.hide()
-        self.leftSpectrumGroupsLabel.setText('Current')
-        self.leftPullDownSelection.setEnabled(False)
-        self.leftPullDownSelection.setData([str(self.spectrumGroup.name)])
-        self.applyButtons.buttons[1].setEnabled(True)
-      else:
-        print('Type a name to create a new Spectrum Group')
+      self._applyToNewSG(leftWidgetSpectra)
 
     if self.editorMode:
       if self.leftPullDownSelection.text != 'Select an Option':
         self.spectrumGroup = self.project.getByPid('SG:'+self.leftPullDownSelection.getText())
 
-
     if self.spectrumGroup:
-      self._changeLeftSpectrumGroupName()
-      self.spectrumGroup.spectra = list(set(leftWidgetSpectra))
-      self.spectrumGroupLabel.setText(str(self.spectrumGroup.name))
-      self.spectrumGroupLabel.show()
-      self._populateLeftPullDownList()
+      self._applyToCurrentSG(leftWidgetSpectra)
 
     if self.rightPullDownSelection.getText() == ' ':
-      # don't do changes to spectra
-      return
+      return # don't do changes to spectra
+
     if self.rightPullDownSelection.getText() == 'Available Spectra':
-      # don't do changes to spectra
-      return
+      return # don't do changes to spectra
 
     else:
-      # update the spectra on the right SG according to display
-      if self._getRightPullDownSpectrumGroup():
-        self._getRightPullDownSpectrumGroup().spectra = []
-        self._getRightPullDownSpectrumGroup().spectra = list(set(rightWidgetSpectra))
-        self._selectAnOptionState()
+     self._updateRightSGspectra(rightWidgetSpectra)
 
+
+  def _applyToNewSG(self, leftWidgetSpectra):
+    name = str(self.leftSpectrumGroupLineEdit.text())
+    if name:
+      self.spectrumGroup = self.project.newSpectrumGroup(name)
+      self.spectrumGroup.spectra = list(set(leftWidgetSpectra))
+      self.addNewSpectrumGroup = False
+      self.selectInitialRadioButtons.hide()
+      self.leftSpectrumGroupsLabel.setText('Current')
+      self.leftPullDownSelection.setEnabled(False)
+      self.leftPullDownSelection.setData([str(self.spectrumGroup.name)])
+      self.applyButtons.buttons[1].setEnabled(True)
+    else:
+      print('Type a name to create a new Spectrum Group')
+
+  def _applyToCurrentSG(self, leftWidgetSpectra):
+    self._changeLeftSpectrumGroupName()
+    self.spectrumGroup.spectra = list(set(leftWidgetSpectra))
+    self.spectrumGroupLabel.setText(str(self.spectrumGroup.name))
+    self.spectrumGroupLabel.show()
+    self._populateLeftPullDownList()
+
+  def _updateRightSGspectra(self, rightWidgetSpectra):
+    if self._getRightPullDownSpectrumGroup():
+      self._getRightPullDownSpectrumGroup().spectra = []
+      self._getRightPullDownSpectrumGroup().spectra = list(set(rightWidgetSpectra))
+      self._selectAnOptionState()
 
   def _updateLeftPullDown(self):
     self.leftPullDownSelection.setData([sg.name for sg in self.project.spectrumGroups])
@@ -405,9 +392,6 @@ class SpectrumGroupEditor(QtGui.QDialog):
       if len(self.project.spectra)>0:
         self.rightPullDownSelection.select('Available Spectra')
         self._populateListWidgetRight(self.project.spectra)
-
-
-
 
 
   def _cancelNewSpectrumGroup(self):

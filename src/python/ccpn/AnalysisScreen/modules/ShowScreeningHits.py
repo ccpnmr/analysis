@@ -29,11 +29,8 @@ class ShowScreeningHits(CcpnModule):
 
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
-    self.application = self.mainWindow.framework
-    self.preferences = self.application.preferences
-    self.generalPreferences = self.preferences.general
-    self.colourScheme = self.generalPreferences.colourScheme
-    self.moduleArea = self.mainWindow.moduleArea
+    print(self.moduleArea)
+
     self.colourScheme = self.project._appBase.preferences.general.colourScheme
 
     ######## ======== Set modules on moduleArea ====== ########

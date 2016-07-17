@@ -338,7 +338,6 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
 
   defaults = collections.OrderedDict((('name', None), ('isotopeCode', None)))
 
-
   # Set isotopeCode if empty
   if not isotopeCode:
     if name:
@@ -364,10 +363,24 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
         obj = None
       if obj is not None:
         previous = self._project._data2Obj[obj]
-        raise ValueError("Cannot create NmrAtom:%s.%s - reserved atom name clashes with %s"
-                         % (self._id, name, previous.longPid))
+        if '@' in obj.name:
+          # Two NmrAtoms both with same @serial. Error
+          raise ValueError("Cannot create NmrAtom:%s.%s - reserved atom name clashes with %s"
+                           % (self._id, name, previous.longPid))
+        else:
+          # We can renumber obj to free the serial for the new NmrAtom
+          newSerial = obj.parent._serialDict['resonances'] + 1
+          try:
+            modelUtil.resetSerial(obj, newSerial, 'resonances')
+          except ValueError:
+            self.project._logger.warning(
+              "Could not reset serial of %s to %s - keeping original value" %(previous, serial)
+            )
+          previous._finaliseAction('rename')
 
-  dd = {'resonanceGroup':resonanceGroup, 'isotopeCode':isotopeCode, 'name':name}
+  dd = {'resonanceGroup':resonanceGroup, 'isotopeCode':isotopeCode}
+  if serial is None:
+    dd['name'] = name
 
   self._startFunctionCommandBlock('newNmrAtom', values=locals(), defaults=defaults,
                                   parName='newNmrAtom')
@@ -376,8 +389,13 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
     obj = nmrProject.newResonance(**dd)
     result = self._project._data2Obj.get(obj)
     if serial is not None:
-      modelUtil.resetSerial(obj, serial, 'resonances')
-      result._finaliseAction('rename')
+      try:
+        modelUtil.resetSerial(obj, serial, 'resonances')
+      except ValueError:
+        self.project._logger.warning(
+          "Could not set (reserved) name of %s to %s - set to %s instead"
+                                     %(result, name, result.name))
+        result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
   #

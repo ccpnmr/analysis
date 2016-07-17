@@ -50,7 +50,7 @@ class NefIoTest(WrapperTesting):
   projectPath = 'CcpnCourse2b'
 
   def test_nef_write_read(self):
-    nefPath = self.projectPath + '.out.nef'
+    nefPath = self.project.path + '.out.nef'
     CcpnNefIo.saveNefProject(self.project, nefPath)
     application = self.project._appBase
     application.loadProject(nefPath)

@@ -27,7 +27,6 @@ import random
 import os
 import time
 from collections import OrderedDict as OD
-from functools import partial
 from operator import attrgetter
 from typing import List, Union, Optional, Sequence
 from ccpn.core.Project import Project
@@ -35,6 +34,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
+from ccpn.core.lib import RestraintLib
 from ccpn.util import Common as commonUtil
 from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
@@ -141,7 +141,6 @@ nef2CcpnMap = {
   )),
 
   'nef_chemical_shift_list':OD((
-    ('name', None),
     ('atom_chemical_shift_units','unit'),
     ('ccpn_serial','serial'),
     ('ccpn_autoUpdate','autoUpdate'),
@@ -293,7 +292,6 @@ nef2CcpnMap = {
     ('chemical_shift_list',None),
     ('experiment_classification','spectrum.experimentType'),
     ('experiment_type','spectrum.experimentName'),
-    ('ccpn_spectrum_name','spectrum.name'),
     ('ccpn_positive_contour_count','spectrum.positiveContourCount'),
     ('ccpn_positive_contour_base','spectrum.positiveContourBase'),
     ('ccpn_positive_contour_factor','spectrum.positiveContourFactor'),
@@ -594,7 +592,7 @@ nef2CcpnMap = {
   # TODO add function to get NefReader to load mutiple projects, settings
 
 def saveNefProject(project:'Project', path:str, overwriteExisting:bool=False,
-                   deletePrefixes = ()):
+                   skipPrefixes=()):
   """Save project NEF file to path"""
 
   dirPath, fileName = os.path.split(path)
@@ -607,22 +605,22 @@ def saveNefProject(project:'Project', path:str, overwriteExisting:bool=False,
   if os.path.exists(filePath) and not overwriteExisting:
     raise IOError("%s already exists" % filePath)
 
-  text = convert2NefString(project, deletePrefixes=deletePrefixes)
+  text = convert2NefString(project, skipPrefixes=skipPrefixes)
 
-  if not os.path.isdir(dirPath):
+  if dirPath and not os.path.isdir(dirPath):
     os.makedirs(dirPath)
 
   open(filePath, 'w').write(text)
 
 
-def convert2NefString(project, deletePrefixes=()):
+def convert2NefString(project, skipPrefixes=()):
   """Convert project to NEF string"""
   converter = CcpnNefWriter(project)
   dataBlock = converter.exportProject()
 
   # Delete tags starting with certain prefixes.
   # NB designed to strip out 'ccpn' tags to make output comaprison easier
-  for prefix in deletePrefixes:
+  for prefix in skipPrefixes:
     # Could be done faster, but this is a rare operation
     for sftag in list(dataBlock.keys()):
       if sftag.startswith(prefix):
@@ -634,11 +632,11 @@ def convert2NefString(project, deletePrefixes=()):
             del sf[tag]
           else:
             val = sf[tag]
-            if isinstance(val, dict):
+            if isinstance(val, StarIo.NmrLoop):
               # This is a loop:
-              for looptag in list(val.keys()):
+              for looptag in list(val.columns):
                 if looptag.startswith(prefix):
-                  val.removeColumn(looptag)
+                  val.removeColumn(looptag, removeData=True)
 
   return dataBlock.toString()
 
@@ -698,8 +696,9 @@ class CcpnNefWriter:
     # RestraintLists and
     restraintLists = sorted(project.restraintLists,
                             key=attrgetter('restraintType', 'serial'))
+    singleDataSet = bool(restraintLists) and len(set(x.dataSet for x in restraintLists)) == 1
     for obj in restraintLists:
-      saveFrames.append(self.restraintList2Nef(obj))
+      saveFrames.append(self.restraintList2Nef(obj, singleDataSet=singleDataSet))
 
     # Spectra
     for obj in project.spectra:
@@ -849,8 +848,10 @@ class CcpnNefWriter:
     #
     return result
 
-  def restraintList2Nef(self, restraintList) -> StarIo.NmrSaveFrame:
+  def restraintList2Nef(self, restraintList, singleDataSet=False) -> StarIo.NmrSaveFrame:
     """Convert RestraintList to CCPN NEF saveframe"""
+
+    project = restraintList._project
 
     # Set up frame
     restraintType = restraintList.restraintType
@@ -869,7 +870,10 @@ class CcpnNefWriter:
       category = 'ccpn_restraint_list'
       loopName = 'ccpn_restraint'
 
-    name = '`%s`%s' % (restraintList.dataSet.serial, restraintList.name)
+    name = restraintList.name
+    if not singleDataSet:
+      # If there are multiple DataSets, add the dataSet serial for disambiguation
+      name = '`%s`%s' % (restraintList.dataSet.serial, name)
 
     result = self._newNefSaveFrame(restraintList, category, name)
 
@@ -878,9 +882,9 @@ class CcpnNefWriter:
     if category in ('nef_rdc_restraint_list', 'ccpn_restraint_list'):
       tensor = restraintList.tensor
       if tensor is not None:
-        result['tensor_magnitude'] = tensor.axial
-        result['tensor_rhombicity'] = tensor.rhombic
-        result['ccpn_tensor_isotropic_value'] = tensor.isotropic
+        result['tensor_magnitude'] = tensor.axial or None
+        result['tensor_rhombicity'] = tensor.rhombic or None
+        result['ccpn_tensor_isotropic_value'] = tensor.isotropic or None
 
 
     loop = result[loopName]
@@ -908,6 +912,8 @@ class CcpnNefWriter:
         assignments = list(zip(*(x.split('.') for x in item)))
         for ii,tag in enumerate(('chain_code', 'sequence_code', 'residue_type', 'atom_name',)):
           row._set(tag, assignments[ii])
+        if category == 'nef_dihedral_restraint_list':
+          row['name'] = RestraintLib.dihedralName(project, item)
     #
     return result
 
@@ -936,7 +942,7 @@ class CcpnNefWriter:
 
     # frameCode for saveFrame that holds spectrum adn first peaklist.
     # If not None, the peakList will be read into that specttum
-    masterFrameCode =  self.ccpn2SaveFrameName.get(spectrum)
+    spectrumAlreadySaved =  bool(self.ccpn2SaveFrameName.get(spectrum))
 
     # We do not support sampled or unprocessed dimensions yet. NBNB TBD.
     if any (x != 'Frequency' for x in spectrum.dimensionTypes):
@@ -947,12 +953,12 @@ class CcpnNefWriter:
 
     # Get unique frame name
     name = spectrum.name
-    if masterFrameCode is not None:
+    if spectrumAlreadySaved:
       # not the first time this spectrum appears.
       name = '%s`%s`' % (name, peakList.serial)
       while spectrum.project.getSpectrum(name):
         # Realistically this should never happen,
-        # but it is a further (if imperfect) guard against clashed
+        # but it is a further (if imperfect) guard against clashes
         # This name is taken - modify it
         name = '%s`%s`' % (name, peakList.serial)
 
@@ -961,10 +967,8 @@ class CcpnNefWriter:
     result = self._newNefSaveFrame(peakList, category, name)
 
     self.ccpn2SaveFrameName[peakList] = result['sf_framecode']
-    if masterFrameCode is None:
+    if not spectrumAlreadySaved:
       self.ccpn2SaveFrameName[spectrum] = result['sf_framecode']
-    else:
-      result['ccpn_master_spectrum'] = '$' + masterFrameCode
 
     result['chemical_shift_list'] = self.ccpn2SaveFrameName.get(peakList.chemicalShiftList)
 
@@ -1075,7 +1079,7 @@ class CcpnNefWriter:
 
     if data:
       category = 'nef_peak_restraint_links'
-      columns = ('nmr_spectrum_id', 'peak_id', 'restraint_list_id', 'restraint_list_id', )
+      columns = ('nmr_spectrum_id', 'peak_id', 'restraint_list_id', 'restraint_id', )
       # Set up frame
       result = self._newNefSaveFrame(restraintLists[0].project, category, category)
       loopName = 'nef_peak_restraint_link'
@@ -1116,7 +1120,7 @@ class CcpnNefWriter:
 
     self.ccpn2SaveFrameName[substance] = result['sf_framecode']
 
-    loopName = 'ccpn_substance_synonyms'
+    loopName = 'ccpn_substance_synonym'
     loop = result[loopName]
     for synonym in substance.synonyms:
       loop.newRow((synonym,))
@@ -1213,13 +1217,15 @@ class CcpnNefReader:
   # Importer functions - used for converting saveframes and loops
   importers = {}
 
-  def __init__(self, application, specificationFile=None, mode='standard'):
+  def __init__(self, application, specificationFile=None, mode='standard',
+               testing=False):
 
     self.application = application
     self.mode=mode
     self.saveFrameName = None
     self.warnings = []
     self.errors = []
+    self.testing = testing
 
     # Map for resolving crosslinks in NEF file
     self.frameCode2Object = {}
@@ -1237,23 +1243,24 @@ class CcpnNefReader:
     #
     return dataBlock
 
-  def loadNewProject(self, path:str):
-    """Load NEF file at path into project"""
+  # def loadNewProject(self, path:str):
+  #   """Load NEF file at path into project"""
+  #
+  #   dataBlock = self.getNefData(path)
+  #   project = self.application.newProject(dataBlock.name)
+  #   self.application._echoBlocking += 1
+  #   self.application.project._undo.increaseBlocking()
+  #   try:
+  #     self.importNewProject(project, dataBlock)
+  #   finally:
+  #     self.application._echoBlocking -= 1
+  #     self.application.project._undo.decreaseBlocking()
+  #
+  #   #
+  #   return project
 
-    dataBlock = self.getNefData(path)
-    project = self.application.newProject(dataBlock.name)
-    self.application._echoBlocking += 1
-    self.application.project._undo.increaseBlocking()
-    try:
-      self.importNewProject(project, dataBlock)
-    finally:
-      self.application._echoBlocking -= 1
-      self.application.project._undo.decreaseBlocking()
-
-    #
-    return project
-
-  def importNewProject(self, project:Project, dataBlock:StarIo.NmrDataBlock):
+  def importNewProject(self, project:Project, dataBlock:StarIo.NmrDataBlock,
+                       projectIsEmpty=True):
     """Import entire project from dataBlock into empty Project"""
 
 
@@ -1303,9 +1310,9 @@ class CcpnNefReader:
         result = importer(self, project, saveFrame)
         if isinstance(result, AbstractWrapperObject):
           self.frameCode2Object[saveFrameName] = result
-        elif not isinstance(result, list):
-          self.warning("Unexpected return %s while reading %s" %
-                       (result, saveFrameName))
+        # elif not isinstance(result, list):
+        #   self.warning("Unexpected return %s while reading %s" %
+        #                (result, saveFrameName))
 
         # Handle unmapped elements
         extraTags = [x for x in saveFrame
@@ -1342,12 +1349,10 @@ class CcpnNefReader:
   def load_nef_molecular_system(self, project, saveFrame):
     """load nef_molecular_system saveFrame"""
 
-    print ('@~@~ molsys', saveFrame['sf_framecode'])
     mapping = nef2CcpnMap['nef_molecular_system']
     for tag, ccpnTag in mapping.items():
-      print ('@~@~ tag, ccpnTag', tag, ccpnTag)
       if ccpnTag == _isALoop:
-        loop = saveFrame.get(ccpnTag)
+        loop = saveFrame.get(tag)
         if loop:
           importer = self.importers[tag]
           importer(self, project, loop)
@@ -1361,8 +1366,6 @@ class CcpnNefReader:
     """Load nef_sequence loop"""
 
     result = []
-
-    print ('@~@~ load_nef_sequence', list(loop.keys()), len(loop.data))
 
     chainData = {}
     for row in loop.data:
@@ -1390,24 +1393,23 @@ class CcpnNefReader:
       sequence = tuple(tuple(row.get(tag) for tag in tags) for row in rows)
       lastChain = sequence2Chain.get(sequence)
       if lastChain is None:
-        newSubstance = project.fetchNefSubstance(sequence=rows, compoundName=compoundName)
-        newChain = newSubstance.createChainFromSubstance(shortName=chainCode, role=role,
-                                                         comment=comment)
+        newSubstance = project.fetchNefSubstance(sequence=rows, name=compoundName)
+        newChain = newSubstance.createChain(shortName=chainCode, role=role,
+                                            comment=comment)
         sequence2Chain[sequence] = newChain
-        print ('@~@~', chainCode, newChain, lastChain, sequence)
       else:
-        newChain = lastChain.substance.createChainFromSubstance(shortName=chainCode,
-                                                                role=role, comment=comment)
+        newChain = lastChain.substance.createChain(shortName=chainCode, role=role,
+                                                   comment=comment)
       #
       result.append(newChain)
 
       # Add Residue comments
-      for ii, apiMolResidue in newChain._wrappedData.sortedMolResidues():
-        # WE must do this at teh API level to be sure we get the Residues in the
+      for ii, apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
+        # WE must do this at the API level to be sure we get the Residues in the
         # input order rather than in sorted order
         comment = rows[ii].get('ccpn_comment')
         if comment:
-          apiMolResidue.details = comment
+          apiResidue.details = comment
     #
     return result
   #
@@ -1438,8 +1440,8 @@ class CcpnNefReader:
 
 
 
-  def _defaultSaveFrameLoader(self, parent, saveFrame, creatorFuncName):
-    """load standard saveFrame"""
+  def load_nef_chemical_shift_list(self, project, saveFrame):
+    """load nef_chemical_shift_list saveFrame"""
 
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
@@ -1448,16 +1450,17 @@ class CcpnNefReader:
 
     parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-    # Get name from frameCode, if the mapping has one
-    # A bit of a hack,this, but it should work for
-    # 1) unique saveframes, where the frameCOde is the same s the category (no-op)
-    # 2) saveframes where there is a 'name' attribute set from the frameCode
-    name = framecode[len(category) + 1:]
-    if name and 'name' in mapping and mapping['name'] is None:
-      parameters['name'] = name
+    parameters['name'] = framecode[len(category) + 1:]
 
     # Make main object
-    result = getattr(parent, creatorFuncName)(**parameters)
+    result = project.newChemicalShiftList(**parameters)
+
+    if self.testing:
+      # When testing you want the values to remain as read
+      result.autoUpdate = False
+      # NB The above is how it ought to work.
+      # The below is how it is working as of July 2016
+      result._wrappedData.topObject.shiftAveraging = False
 
     # Load loops, with object as parent
     for loopName in loopNames:
@@ -1469,8 +1472,7 @@ class CcpnNefReader:
     return result
   #
 
-  importers['nef_chemical_shift_list'] = partial(_defaultSaveFrameLoader,
-                                                 creatorFuncName='newChemicalShiftList')
+  importers['nef_chemical_shift_list'] = load_nef_chemical_shift_list
 
   def load_nef_chemical_shift(self, parent, loop):
     """load nef_chemical_shift loop"""
@@ -1496,7 +1498,7 @@ class CcpnNefReader:
 
       except ValueError:
         self.warning("Cannot produce NmrAtom for assignment %s. Skipping ChemicalShift" % (tt,))
-        # SHould eventually be removed - raise while still testing
+        # Should eventually be removed - raise while still testing
         raise
     #
     return result
@@ -1514,15 +1516,6 @@ class CcpnNefReader:
 
     parameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping)
 
-    # Get name from frameCode, and correct for ccpn dataSetSerial addition
-    name = framecode[len(category) + 1:]
-    dataSetSerial = saveFrame.get('ccpn_dataset_serial')
-    if dataSetSerial is not None:
-      ss = '`%s`' % dataSetSerial
-      if name.startswith(ss):
-        name = name[len(ss):]
-    parameters['name'] = name
-
     if category == 'nef_distance_restraint_list':
       restraintType = 'Distance'
     elif category == 'nef_dihedral_restraint_list':
@@ -1536,6 +1529,21 @@ class CcpnNefReader:
                      (restraintType, framecode))
         return
     parameters['restraintType'] = restraintType
+    namePrefix = restraintType[:3].capitalize() + '-'
+
+    # Get name from frameCode, add typ e disambiguation, and correct for ccpn dataSetSerial addition
+    name = framecode[len(category) + 1:]
+    if not name.startswith(namePrefix):
+      # Add prefix for disambiguation since NEF but NOT CCPN has separate namespaces
+      # for different constraint types
+      if not restraintType.lower() in name.lower():
+        name = namePrefix + name
+    dataSetSerial = saveFrame.get('ccpn_dataset_serial')
+    if dataSetSerial is not None:
+      ss = '`%s`' % dataSetSerial
+      if name.startswith(ss):
+        name = name[len(ss):]
+    parameters['name'] = name
 
     # Make main object
     dataSet = self.fetchDataSet(dataSetSerial)
@@ -1636,30 +1644,47 @@ class CcpnNefReader:
     framecode = saveFrame['sf_framecode']
     mapping = nef2CcpnMap[category]
 
+
+    # Get peakList parameters and make peakList
+    peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
+
     # Get spectrum parameters
     spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
                                                                   ccpnPrefix='spectrum')
     # Get name from spectrum parameters, or from the frameCode
-    spectrumName = None
-    if 'name' in spectrumParameters:
-      spectrumName = spectrumParameters.pop('name')
-    if not spectrumName:
-      spectrumName = framecode[len(category) + 1:]
+    spectrumName = framecode[len(category) + 1:]
+    peakListSerial = peakListParameters.get('serial')
+    if peakListSerial:
+      ss = '`%s`' % peakListSerial
+      # Remove peakList serial suffix (which was added for disambiguation)
+      # So that multiple pealkLists all go to one Spectrum
+      if spectrumName.endswith(ss):
+        spectrumName = spectrumName[:-len(ss)]
 
     shiftListFrameCode = saveFrame.get('chemical_shift_list')
     if shiftListFrameCode:
       spectrumParameters['chemicalShiftList'] = self.frameCode2Object[shiftListFrameCode]
 
-    # get per-dimension data
+    # get per-dimension data - NB these are mandatory and cannot be worked around
     dimensionData = self.read_nef_spectrum_dimension(project,
                                                      saveFrame['nef_spectrum_dimension'])
 
     spectrum = produceSpectrum(project, spectrumName, spectrumParameters, dimensionData)
 
-    # Get peakList parameters and make peakList
-    parameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
+    # read and incorporate dimension transfer data - better to get spectrum fully ready first
+    loopName = 'nef_spectrum_dimension_transfer'
+    # Those are treated elsewhere
+    loop = saveFrame.get(loopName)
+    if loop:
+      importer = self.importers[loopName]
+      importer(self, spectrum, loop)
+
+    if not dimensionData.get('axisCodes:'):
+      # Set CCPN Hn/Nh (etc.) axis codes if not read in
+      # Must be done after nef_spectrum_dimension_transfer is read
+      self.adjustAxisCodes(spectrum, dimensionData)
     # Make PeakLst
-    peakList = spectrum.newPeakList(**parameters)
+    peakList = spectrum.newPeakList(**peakListParameters)
     # Load peaks
     self.load_nef_peak(peakList, saveFrame.get('nef_peak'))
 
@@ -1676,6 +1701,71 @@ class CcpnNefReader:
     return peakList
   #
   importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
+
+
+  def load_nef_spectrum_dimension_transfer(self, spectrum, loop):
+
+    transferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space',
+                     'relayed-alternate')
+
+    if loop:
+      apiExperiment = spectrum._wrappedData.experiment
+
+      data = loop.data
+      # Remove invalid data rows
+      dataLists = []
+      for row in data:
+        ll = [row.get(tag) for tag in ('dimension_1', 'dimension_2', 'transfer_type',
+                                       'is_indirect')]
+        if (apiExperiment.findFirstExpDim(dim=row['dimension_1']) is None or
+            apiExperiment.findFirstExpDim(dim=row['dimension_2']) is None or
+            row['transfer_type'] not in transferTypes):
+          self.warning("Illegal values in nef_spectrum_dimension_transfer: %s"
+                       % list(row.values()))
+        else:
+          dataLists.append(ll)
+
+      # Store expTransfers in API as we can not be sure we will get a refExperiment
+      for ll in dataLists:
+        expDimRefs = []
+        for dim in ll[:2]:
+          expDim = apiExperiment.findFirstExpDim(dim=dim)
+          # After spectrum creation there will be one :
+          expDimRefs.append(expDim.sortedExpDimRefs()[0])
+        if apiExperiment.findFirstExpTransfer(expDimRefs=expDimRefs) is None:
+          xx = apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=ll[2],
+                                       isDirect=not ll[3])
+        else:
+          self.warning("Duplicate nef_spectrum_dimension_transfer: %s" % (ll,))
+  #
+  importers['nef_spectrum_dimension_transfer'] = load_nef_spectrum_dimension_transfer
+
+  def adjustAxisCodes(self, spectrum, dimensionData):
+
+      pass
+      #print ('@~@~ CCPN data. Still TODO')
+
+      # # Use data to rename axisCodes
+      # axisCodes = spectrum.axisCodes
+      # newCodes = list(axisCodes)
+      # atomTypes = [commonUtil.splitIntFromChars(x)[1] for x in spectrum.isotopeCodes]
+      # acquisitionAxisCode = spectrum.acquisitionAxisCode
+      # if acquisitionAxisCode is not None:
+      #   acquisitionDim = axisCodes.index(acquisitionAxisCode) + 1
+      #   if acquisitionAxisCode == atomTypes[acquisitionDim - 1]:
+      #     # this axisCode needs improvement
+      #     for pair in oneBondPairs:
+      #       # First do acquisition dimension
+      #       if acquisitionDim in pair:
+      #         ll = pair.copy()
+      #         ll.remove(acquisitionDim)
+      #         otherDim = ll[0]
+      #         otherCode = axisCodes[otherDim - 1]
+      #         if otherCode == atomTypes[otherDim - 1]:
+
+
+
+
 
 
   def read_nef_spectrum_dimension(self, project, loop):
@@ -1744,8 +1834,8 @@ class CcpnNefReader:
       nmrAtoms = []
       for tt in assignments:
         if all(x is None for x in tt):
-          # No assignments
-          break
+          # No assignment
+          nmrAtoms.append(None)
         elif tt[1] and tt[3]:
           # Enough for an assignment - make it
           nmrResidue = self.produceNmrResidue(*tt[:3])
@@ -1769,7 +1859,7 @@ class CcpnNefReader:
     mapping = nef2CcpnMap['nef_peak_restraint_links']
     for tag, ccpnTag in mapping.items():
       if ccpnTag == _isALoop:
-        loop = saveFrame.get(ccpnTag)
+        loop = saveFrame.get(tag)
         if loop:
           importer = self.importers[tag]
           importer(self, project, loop)
@@ -1783,6 +1873,14 @@ class CcpnNefReader:
     """Load nef_peak_restraint_link loop"""
 
     links = {}
+
+    # NBNB TODO. There was a very strange bug in this function
+    # When I was using PeakList.getPeak(str(serial))
+    # and RestraintList.getRestraint(str(serial), peaks and restraints were
+    # sometimes missed even though teh data were present.
+    # Doing the test at tge API level (as now) fixed the problem
+    # THIS SHOULD BE IMPOSSIBLE
+    # At some point we ought to go back, reproduce the bug, and remove the reason for it.
 
     for row in loop.data:
       peakList = self.frameCode2Object.get(row.get('nmr_spectrum_id'))
@@ -1799,14 +1897,14 @@ class CcpnNefReader:
           % row.get('restraint_list_id')
         )
         continue
-      peak = peakList.getPeak(str(row.get('peak_id')))
+      peak = peakList._wrappedData.findFirstPeak(serial=row.get('peak_id'))
       if peak is None:
         self.warning(
           "No peak %s found in %s Skipping peak_restraint_link"
           % (row.get('peak_id'), row.get('nmr_spectrum_id'))
         )
         continue
-      restraint = restraintList.getResatraint(str(row.get('restraint_id')))
+      restraint = restraintList._wrappedData.findFirstConstraint(serial=row.get('restraint_id'))
       if restraint is None:
         self.warning(
           "No restraint %s found in %s Skipping peak_restraint_link"
@@ -1822,7 +1920,6 @@ class CcpnNefReader:
     # Set the actual links
     for restraint, peaks in links.items():
       restraint.peaks = peaks
-
     #
     return None
   #
@@ -1939,7 +2036,7 @@ class CcpnNefReader:
             val = saveFrame.get(tag)
             if val is not None:
               # necessary as tags like ccpn_serial should NOT be set if absent of None
-              parameters[ccpnTag] = val
+              parameters[parts[1]] = val
 
     #
     return parameters, loopNames
@@ -2008,6 +2105,7 @@ class CcpnNefReader:
         nmrAtom = nmrResidue.fetchNmrAtom(newName)
         break
       except ValueError:
+        raise
         newName = '`%s`' % newName
         self.warning("New NmrAtom:%s.%s name caused an error.  Renamed %s.%s"
                      % (nmrResidue._id, name, nmrResidue._id, newName))
@@ -2059,6 +2157,9 @@ def produceSpectrum(project:'Project', spectrumName:str, spectrumParameters:dict
   treated specially (see below)
   """
 
+
+  dimTags = list(dimensionData.keys())
+
   spectrum = project.getSpectrum(spectrumName)
   if spectrum is None:
     # Spectrum did not already exist
@@ -2085,8 +2186,9 @@ def produceSpectrum(project:'Project', spectrumName:str, spectrumParameters:dict
 
     if spectrum is None:
       # Spectrum could not be loaded - now create a dummy spectrum
-      if 'axisCodes' in dimensionData:
-        axisCodes = dimensionData.pop('axisCodes')
+      if 'axisCodes' in dimTags:
+        dimTags.remove('axisCodes')
+        axisCodes = dimensionData['axisCodes']
 
       else:
         # axisCodes were not set - produce a serviceable set
@@ -2102,45 +2204,66 @@ def produceSpectrum(project:'Project', spectrumName:str, spectrumParameters:dict
       # make new spectrum with default parameters
       spectrum = project.createDummySpectrum(axisCodes, spectrumName)
 
+      # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
+      # If necessary an empty PeakList is added downstream
+      spectrum.peakLists[0].delete()
+      spectrum._wrappedData.__dict__['_serialDict']['peakLists'] = 0
+
     # (Re)set all spectrum attributes
 
     # First per-dimension ones
     if 'absolute_peak_positions' in dimensionData:
       # NB We are not using these. What could we do with them?
-      dimensionData.pop('absolute_peak_positions')
+      dimTags.remove('absolute_peak_positions')
     if 'is_acquisition' in dimensionData:
-      values = dimensionData.pop('is_acquisition')
+      dimTags.remove('is_acquisition')
+      values = dimensionData['is_acquisition']
       if values.count(True) == 1:
         ii = values.index(True)
         spectrum.acquisitionAxisCode = axisCodes[ii]
     if 'folding' in dimensionData:
-      values = [None if x == 'none' else x for x in dimensionData.pop('folding')]
+      dimTags.remove('folding')
+      values = [None if x == 'none' else x for x in dimensionData['folding']]
       spectrum.foldingModes = values
     if 'pointCounts' in dimensionData:
-      spectrum.pointCounts = pointCounts = dimensionData.pop('pointCounts')
+      dimTags.remove('pointCounts')
+      spectrum.pointCounts = pointCounts = dimensionData['pointCounts']
       if 'totalPointCounts' in dimensionData:
-        spectrum.totalPointCounts = dimensionData.pop('totalPointCounts')
+        dimTags.remove('totalPointCounts')
+        spectrum.totalPointCounts = dimensionData['totalPointCounts']
       else:
         spectrum.totalPointCounts = pointCounts
     # Needed below:
-    value_first_point = dimensionData.get('value_first_point')
-    if value_first_point is not None:
-      dimensionData.pop('value_first_point')
-    referencePoints = dimensionData.get('referencePoints')
-    if referencePoints is not None:
-      dimensionData.pop('referencePoints')
+    if 'value_first_point' in dimensionData:
+      dimTags.remove('value_first_point')
+    if 'referencePoints' in dimensionData:
+      dimTags.remove('referencePoints')
+    # value_first_point = dimensionData.get('value_first_point')
+    # if value_first_point is not None:
+    #   dimensionData.pop('value_first_point')
+    # referencePoints = dimensionData.get('referencePoints')
+    # if referencePoints is not None:
+    #   dimensionData.pop('referencePoints')
 
     # Remaining per-dimension values match the spectrum. Set them.
     # NB we use the old (default) values where the new value is None
     # - some attributes like spectralWidths do not accept None.
-    for tag, vals in dimensionData.items():
+    if 'spectrometerFrequencies' in dimTags:
+      # spectrometerFrequencies MUST be set before spectralWidths,
+      # as the spectralWidths are otherwise modified
+      dimTags.remove('spectrometerFrequencies')
+      dimTags.insert(0, 'spectrometerFrequencies')
+    for tag in dimTags:
+      vals = dimensionData[tag]
       # Use old values where new ones are None
       oldVals = getattr(spectrum, tag)
       vals = [x if x is not None else oldVals[ii] for ii,x in enumerate(vals)]
       setattr(spectrum, tag, vals)
 
     # Set referencing.
+    value_first_point = dimensionData.get('value_first_point')
     if value_first_point is not None:
+      referencePoints = dimensionData.get('referencePoints')
       if referencePoints is None:
         # not CCPN data
         referenceValues = spectrum.referenceValues
@@ -2167,7 +2290,9 @@ def produceSpectrum(project:'Project', spectrumName:str, spectrumParameters:dict
 
   # Then spectrum-level ones
   for tag, val in spectrumParameters.items():
-    setattr(spectrum, tag, val)
+    if tag != 'dimensionCount':
+      # dimensionCount is handled already and not settable
+      setattr(spectrum, tag, val)
   #
   return spectrum
 
@@ -2208,17 +2333,17 @@ def _testTextIo(path):
   else:
     raise ValueError("File name does not end in '.nef': %s" % path)
 
-  application = getFramework(projectPath=path)
-
   time1 = time.time()
-  application.start()
+  application = getFramework()
+  application.nefReader.testing = True
+  application.loadProject(path)
+
   project = application.project
-  print ('@~@~ chains', project.chains, [len(project.residues)])
   time2 = time.time()
-  print ("===> Loaded %s from NEF file in seconds %s" % (project.name, time2-time1))
-  saveNefProject(project, outPath, overwriteExisting=True, deletePrefixes=('ccpn',))
+  print ("====> Loaded %s from NEF file in seconds %s" % (project.name, time2-time1))
+  saveNefProject(project, outPath, overwriteExisting=True, skipPrefixes=('ccpn',))
   time3 = time.time()
-  print ("===> Saved  %s  to  NEF file in seconds %s" % (project.name, time3-time2))
+  print ("====> Saved  %s  to  NEF file in seconds %s" % (project.name, time3-time2))
 
 
 if __name__ == '__main__':

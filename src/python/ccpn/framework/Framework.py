@@ -724,22 +724,47 @@ class Framework:
       if self.project is not None:
         self._closeProject()
 
-      sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
-
       if subType == ioFormats.CCPN:
+        sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
         project = coreIo.loadProject(path)
+        project._resetUndo(debug=_DEBUG)
+        self._initialiseProject(project)
       elif subType == ioFormats.NEF:
-        project = self.nefReader.loadNewProject(path)
-
-      project._resetUndo(debug=_DEBUG)
-      self._initialiseProject(project)
-
-
+        sys.stderr.write('==> Loading %s project (Experimental Only!) "%s"\n' % (subType, path))
+        project = self._loafNefFile(path)
+        project._resetUndo(debug=_DEBUG)
+      #
       return project
 
     else:
       sys.stderr.write('==> Could not recognise "%s" as a project\n' % path)
 
+  def _loafNefFile(self, path:str) -> Project:
+    """Load Project from NEF file at path, and do necessary setup"""
+
+    mainWindow = None
+    if hasattr(self.ui, 'mainWindow'):
+      mainWindow = self.ui.mainWindow
+
+    if mainWindow is not None:
+      sys.stderr.write("==> NEF file loading not yet implemented for Gui interface. Aborting...")
+      return
+
+    dataBlock = self.nefReader.getNefData(path)
+    project = self.newProject(dataBlock.name)
+    self._echoBlocking += 1
+    self.project._undo.increaseBlocking()
+    try:
+      self.nefReader.importNewProject(project, dataBlock)
+    finally:
+      self._echoBlocking -= 1
+      self.project._undo.decreaseBlocking()
+
+    if mainWindow is not None:
+      # TODO initialisation does not work properly. Needs fixing.
+      mainWindow.sideBar.fillSideBar(project)
+    #
+    return project
 
   def clearRecentProjects(self):
     self.preferences.recentFiles = []
@@ -1360,8 +1385,8 @@ class Framework:
   def printToFile(self, spectrumDisplay=None):
 
     current = self.current
-    if not spectrumDisplay:
-      spectrumDisplay = current.spectrumDisplay
+    # if not spectrumDisplay:
+    #   spectrumDisplay = current.spectrumDisplay
     if not spectrumDisplay and current.strip:
       spectrumDisplay = current.strip.spectrumDisplay
     if not spectrumDisplay and self.spectrumDisplays:

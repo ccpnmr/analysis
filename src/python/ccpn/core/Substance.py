@@ -205,7 +205,7 @@ class Substance(AbstractWrapperObject):
   def sequenceString(self) -> Optional[str]:
     """Molecular sequence string - set by the createPolymerSubstance function. Substances
     created by this function can be used to generate matching chains with the
-    createChainFromSubstance function
+    substance.createChain function
 
     For standard polymers defaults to a string of one-letter codes;
     for other molecules to a comma-separated tuple of three-letter codes"""

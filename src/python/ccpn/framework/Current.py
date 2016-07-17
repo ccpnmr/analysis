@@ -36,11 +36,13 @@ from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
 # TODO: refactoring using _definitions needed
 # Classes (in addition to Project) that have a corresponding 'current' field
-_currentClasses = [Spectrum, SpectrumGroup, Peak, Integral, NmrChain, NmrResidue, NmrAtom,
-                   SpectrumDisplay, Strip, ]
+_currentClasses = [SpectrumGroup, Peak, NmrChain, NmrResidue, NmrAtom,
+                   Strip, ]
 
 # 'current' fields that do not correspond to a wrapper class. Must be plural and end in 's'
-_currentExtraFields = ['regions', 'positions']
+_currentExtraFields = ['positions']
+
+_fieldsToUseInPlural = ['peaks', 'positions', 'strips']
 
 # Fields in current (there is a current.xyz attribute with related functions
 # for every 'xyz' in fields
@@ -57,34 +59,35 @@ class Current:
   # Definitions of the attributes of the Current object
   _definitions = [
     # attribute name,                      storage name,        description
-    (noCap(Integral.className),            '_integral',        'last selected integral'),
-    (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
+    # (noCap(Integral.className),            '_integrals[-1]',        'last selected integral'),
+    # (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
 
-    (noCap(NmrAtom.className),             '_nmrAtom',         'last selected nmrAtom'),
-    (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
+    (noCap(NmrAtom.className),             '_nmrAtoms[-1]',         'last selected nmrAtom'),
+    # (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
 
-    (noCap(NmrChain.className),            '_nmrChain',        'last selected nmrChain'),
-    (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
+    (noCap(NmrChain.className),            '_nmrChains[-1]',        'last selected nmrChain'),
+    # (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
 
-    (noCap(NmrResidue.className),          '_nmrResidue',      'last selected nmrResidue'),
-    (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
+    (noCap(NmrResidue.className),          '_nmrResidues[-1]',      'last selected nmrResidue'),
+    # (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
 
-    ('regions',                            '_regions',         'last selected region'),
+    # ('regions',                            '_regions',         'last selected region'),
 
-    (noCap(Peak.className),                '_peak',            'last selected peak'),
+    (noCap(Peak.className),                '_peaks[-1]',            'last selected peak'),
     (noCap(Peak._pluralLinkName),          '_peaks',           'all selected peaks'),
 
-    ('positions',                          '_positions',       'last cursor position'),
+    ('position',                          '_positions[-1]',       'last cursor position'),
+    ('positions',                          '_positions',       'last cursor positions'),
 
-    (noCap(Spectrum.className),            '_spectrum',        'current spectrum'), # broken
-    (noCap(Spectrum._pluralLinkName),      '_spectra',         'list with all spectra present in a module'), # (broken)
+    # (noCap(Spectrum.className),            '_spectra[-1]',        'current spectrum'), # broken
+    # (noCap(Spectrum._pluralLinkName),      '_spectra',         'list with all spectra present in a module'), # (broken)
 
-    (noCap(SpectrumDisplay.className),     '_spectrumDisplay', 'current spectrumDisplay'), # (broken)
+    # (noCap(SpectrumDisplay.className),     '_spectrumDisplay', 'current spectrumDisplay'), # (broken)
 
-    (noCap(SpectrumGroup.className),       '_spectrumGroup',   'current spectrum'), # broken
-    (noCap(SpectrumGroup._pluralLinkName), '_spectrumGroups',  'list with all spectra present in a module'), # (broken)
+    (noCap(SpectrumGroup.className),       '_spectrumGroups[-1]',   'current spectrum'), # broken
+    # (noCap(SpectrumGroup._pluralLinkName), '_spectrumGroups',  'list with all spectra present in a module'), # (broken)
 
-    (noCap(Strip.className),               '_strip',           'selected strip'),
+    (noCap(Strip.className),               '_strips[-1]',           'selected strip'),
     (noCap(Strip._pluralLinkName),         '_strips',          'lists with all strips'),
   ]
 
@@ -169,13 +172,6 @@ class Current:
         func(value)
 
     def getter(self):
-      return tuple(getField(self))
-    def setter(self, value):
-      setField(self, list(value))
-    #
-    setattr(cls, plural, property(getter, setter, None, "Current %s" % plural))
-
-    def getter(self):
       ll = getField(self)
       return ll[-1] if ll else None
     def setter(self, value):
@@ -183,28 +179,37 @@ class Current:
     #
     setattr(cls, singular, property(getter, setter, None, "Current %s" % singular))
 
-    def adder(self, value):
-      """Add %s to current.%s""" % (singular, plural)
-      values = getField(self)
-      if value not in values:
-        setField(self, values + [value])
-    #
-    setattr(cls, 'add' + singular.capitalize(), adder)
+    if plural in _fieldsToUseInPlural:
 
-    def remover(self, value):
-      """Remove %s from current.%s""" % (singular, plural)
-      values = getField(self)
-      if value in values:
-        values.remove(value)
-      setField(self, values)
-    #
-    setattr(cls, 'remove' + singular.capitalize(), remover)
+      def getter(self):
+        return tuple(getField(self))
+      def setter(self, value):
+        setField(self, list(value))
+      #
+      setattr(cls, plural, property(getter, setter, None, "Current %s" % plural))
 
-    def clearer(self):
-      """Clear current.%s""" % plural
-      setField(self, [])
-    #
-    setattr(cls, 'clear' + plural.capitalize(), clearer)
+      def adder(self, value):
+        """Add %s to current.%s""" % (singular, plural)
+        values = getField(self)
+        if value not in values:
+          setField(self, values + [value])
+      #
+      setattr(cls, 'add' + singular.capitalize(), adder)
+
+      def remover(self, value):
+        """Remove %s from current.%s""" % (singular, plural)
+        values = getField(self)
+        if value in values:
+          values.remove(value)
+        setField(self, values)
+      #
+      setattr(cls, 'remove' + singular.capitalize(), remover)
+
+      def clearer(self):
+        """Clear current.%s""" % plural
+        setField(self, [])
+      #
+      setattr(cls, 'clear' + plural.capitalize(), clearer)
 
     if not isinstance(param, str):
       # param is a class - Add notifiers for deleted objects

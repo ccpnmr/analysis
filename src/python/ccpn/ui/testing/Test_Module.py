@@ -76,7 +76,7 @@ class ModuleTest(WrapperTesting):
     task2 = project.newTask('TestTask')
     window2 = project.newWindow(title='W2')
     undo.undo()
-    undo.undo()
+    self.assertRaises(KeyError, undo.undo)
     undo.redo()
     undo.redo()
 

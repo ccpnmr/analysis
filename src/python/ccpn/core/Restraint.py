@@ -273,9 +273,13 @@ def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None
     dd = {'figureOfMerit':figureOfMerit, 'vectorLength':vectorLength, 'details':comment,
           'peaks':peaks}
     obj = self._wrappedData.newGenericConstraint(**dd)
-    if serial is not None:
-      modelUtil.resetSerial(obj, serial, 'constraints')
     result = self._project._data2Obj.get(obj)
+    if serial is not None:
+      try:
+        modelUtil.resetSerial(obj, serial, 'constraints')
+      except ValueError:
+        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                     %(result, serial))
   finally:
     self._project.unblankNotification()
     self._project._appBase._endCommandBlock()

@@ -393,8 +393,13 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
     apiPeak = apiPeakList.newPeak(height=height, volume=volume,
                                   heightError=heightError, volumeError=volumeError,
                                   figOfMerit=figureOfMerit, annotation=annotation, details=comment)
+    result = self._project._data2Obj.get(apiPeak)
     if serial is not None:
-      modelUtil.resetSerial(apiPeak, serial, 'peaks')
+      try:
+        modelUtil.resetSerial(apiPeak, serial, 'peaks')
+      except ValueError:
+        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                     %(result, serial))
     # set peak position
     # NBNB TBD currently unused parameters could be added, and will have to come in here as well
     apiPeakDims = apiPeak.sortedPeakDims()
@@ -419,7 +424,6 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
                undoArgs=(apiObjectsCreated,),
                redoArgs=(apiObjectsCreated,  (apiPeak.topObject,)))
 
-  result = self._project._data2Obj.get(apiPeak)
 
   # DO creation notifications
   if serial is not None:

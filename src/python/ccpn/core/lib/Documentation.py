@@ -82,7 +82,6 @@ def refreshSphinxDocumentation():
   # Additional directories to skip
   command.append(joinPath(pythonDirectory, 'ccpn/macros'))
   command[2] = outputDirs[module]
-  # print ('\n\n@~@~', command)
   apidoc.main(command)
 
 
@@ -95,7 +94,6 @@ def refreshSphinxDocumentation():
   # command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/memops'))
   # command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/xml'))
   # command[2] = outputDirs[module]
-  # # print ('\n\n@~@~', command)
   # apidoc.main(command)
 
 

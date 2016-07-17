@@ -272,7 +272,7 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
   if previous is not None:
     raise ValueError("%s already exists" % previous.longPid)
 
-  self._startFunctionCommandBlock('createChainFromSubstance', values=locals(), defaults=defaults,
+  self._startFunctionCommandBlock('createChain', values=locals(), defaults=defaults,
                                   parName='newChain')
   try:
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,

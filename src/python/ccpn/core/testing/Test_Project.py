@@ -106,12 +106,6 @@ class ProjectTestExperimentTypeMap(WrapperTesting):
   def test_experimentTypeMap(self):
     experimentTypeMap = self.project._experimentTypeMap
     self.assertEqual(list(sorted(experimentTypeMap.keys())), [1,2,3,4,5,6])
-    # for key, dd in experimentTypeMap.items():
-    #   print("@~@~", key)
-    #   for kk,vv in sorted(dd.items()):
-    #     print ("       ", kk)
-    #     for kk1,vv1 in sorted(vv.items()):
-    #       print ("                    ", kk1, vv1)
 
     experimentTypeMap2 = self.project._experimentTypeMap
     # Undo and redo all operations

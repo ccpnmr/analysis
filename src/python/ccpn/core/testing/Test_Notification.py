@@ -110,6 +110,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import unittest
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 def notifyfunc(obj, value=None, ll=None):
@@ -219,7 +220,10 @@ class NotificationTest(WrapperTesting):
     self.assertEqual(registered.get(('Note','delete')), {})
     self.assertEqual(registered.get(('Note','change')), {})
 
-
+  # NOtifier suspension has been temporarily disabled,
+  # due to problems with suspended delete notifiers.
+  # This test should be reinstated, and the supension should be reinstated and fixed
+  @unittest.skip
   def test_notifiers_suspend(self):
     project = self.project
     ll = []

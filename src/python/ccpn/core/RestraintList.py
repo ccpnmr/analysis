@@ -23,15 +23,15 @@ __version__ = "$Revision$"
 
 import operator
 import collections
-# from ccpn.util import Common as commonUtil
-from ccpnmodel.ccpncore.lib import Constants as coreConstants
-from ccpn.util.Tensor import Tensor
+
 from ccpn.core.lib import Pid
-from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.DataSet import DataSet
-
+from ccpnmodel.ccpncore.lib import Constants as coreConstants
+from ccpnmodel.ccpncore.lib import Util as modelUtil
+from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList as ApiAbstractConstraintList
+from ccpn.util.Tensor import Tensor
 
 class RestraintList(AbstractWrapperObject):
   """ RestraintList - A container for restraints, with type determined by the restraintType
@@ -69,14 +69,14 @@ class RestraintList(AbstractWrapperObject):
 
   def __init__(self, project, wrappedData):
 
-    # NB The name will only be unique within the DataSet, which could cause
-    # problems if anyone was silly enough to write out restraintLists from
-    # different DataSets to the same NEF file.
+    # NB The name will only be unique within the DataSet.
+    # NEF I/O therefore adds a prefix to distinguish the DataSet
 
     self._wrappedData = wrappedData
     self._project = project
-    defaultName = ('%ss%s' %
-                   (self._wrappedData.constraintType, wrappedData.serial))
+
+    namePrefix = self._wrappedData.constraintType[:3].capitalize() + '-'
+    defaultName = ('%s%s' % (namePrefix, wrappedData.serial))
     self._setUniqueStringKey(wrappedData, defaultName)
     super().__init__(project, wrappedData)
 
@@ -266,7 +266,8 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                       comment:str=None, unit:str=None, potentialType:str='unknown',
                       tensorMagnitude:float=0.0, tensorRhombicity:float=0.0,
                       tensorIsotropicValue:float=0.0, tensorChainCode:str=None,
-                      tensorSequenceCode:str=None, tensorResidueType:str=None) -> RestraintList:
+                      tensorSequenceCode:str=None, tensorResidueType:str=None,
+                      serial=None) -> RestraintList:
   """Create new ccpn.RestraintList of type restraintType within ccpn.DataSet"""
 
 
@@ -277,6 +278,7 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
      ('comment',None), ('unit',None), ('potentialType', 'unknown'),
      ('tensorMagnitude', 0.0), ('tensorRhombicity', 0.0), ('tensorIsotropicValue', 0.0),
      ('tensorChainCode',None), ('tensorSequenceCode',None), ('tensorResidueType', None),
+     ('serial', None),
     )
   )
 
@@ -301,10 +303,18 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                                                      tensorChainCode=tensorChainCode,
                                                      tensorSequenceCode=tensorSequenceCode,
                                                      tensorResidueType=tensorResidueType )
+    result = self._project._data2Obj.get(obj)
+    if serial is not None:
+      try:
+        modelUtil.resetSerial(obj, serial, 'constraintLists')
+      except ValueError:
+        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                     %(result, serial))
+      result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
   #
-  return self._project._data2Obj.get(obj)
+  return result
 
 DataSet.newRestraintList = _newRestraintList
 del _newRestraintList

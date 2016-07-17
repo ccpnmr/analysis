@@ -825,6 +825,8 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
                    comment:str=None) -> NmrResidue:
   """Create new ccpn.NmrResidue within ccpn.NmrChain"""
 
+  originalSequenceCode = sequenceCode
+
   defaults = collections.OrderedDict((('sequenceCode', None), ('residueType', None),
                                      ('comment', None)))
 
@@ -888,8 +890,15 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
     # Create ResonanceGroup
     dd['sequenceCode'] = sequenceCode
     obj = nmrProject.newResonanceGroup(**dd)
+    result = self._project._data2Obj.get(obj)
     if serial is not None:
-      modelUtil.resetSerial(obj, serial, 'resonanceGroups')
+      try:
+        modelUtil.resetSerial(obj, serial, 'resonanceGroups')
+      except ValueError:
+        self.project._logger.warning(
+          "Could not set sequenceCode of %s to %s - keeping default value"
+          %(result, originalSequenceCode)
+        )
 
     if residueType is not None:
       # get chem comp ID strings from residue type
@@ -900,8 +909,6 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
   finally:
     self._project.unblankNotification()
     self._project._appBase._endCommandBlock()
-  #
-  result = self._project._data2Obj.get(obj)
 
   # Do creation notifications
   if serial is not None:

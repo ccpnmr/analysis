@@ -206,7 +206,11 @@ def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm', autoUpdat
     obj = self._wrappedData.newShiftList(**dd)
     result = self._data2Obj.get(obj)
     if serial is not None:
-      modelUtil.resetSerial(obj, serial, 'shiftLists')
+      try:
+        modelUtil.resetSerial(obj, serial, 'measurementLists')
+      except ValueError:
+        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                     %(result, serial))
       result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()

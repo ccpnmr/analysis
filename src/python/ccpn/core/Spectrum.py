@@ -26,20 +26,16 @@ __version__ = "$Revision$"
 
 import numpy
 import operator
-import collections
 from typing import Sequence, Tuple, Optional
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.api.ccp.general import DataLocation
 from ccpn.core.lib import Pid
+from ccpn.core.lib.SpectrumLib import MagnetisationTransferTuple
 
 from ccpnmodel.ccpncore.lib.Io import Formats
 
-# MagnetisationTransferTuple
-MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
-  ['dimension1', 'dimension2', 'transferType', 'isIndirect']
-)
 
 class Spectrum(AbstractWrapperObject):
   """NMR spectrum."""
@@ -234,6 +230,9 @@ class Spectrum(AbstractWrapperObject):
         if value == refExperiment.name:
           # refExperiment matches name string - set it
           self._wrappedData.experiment.refExperiment = refExperiment
+          synonym = refExperiment.synonym
+          if synonym:
+            self.experimentName = synonym
           return
     # nothing found - error:
     raise ValueError("No reference experiment matches name '%s'" % value)
@@ -824,8 +823,11 @@ class Spectrum(AbstractWrapperObject):
     """
 
     result = []
-    apiRefExperiment = self._wrappedData.experiment.refExperiment
+    apiExperiment = self._wrappedData.experiment
+    apiRefExperiment = apiExperiment.refExperiment
+
     if apiRefExperiment:
+      # We should use the refExperiment - if present
       magnetisationTransferDict = apiRefExperiment.magnetisationTransferDict()
       refExpDimRefs = [x if x is None else x.refExpDimRef for x in self._mainExpDimRefs()]
       for ii, rxdr in enumerate(refExpDimRefs):
@@ -836,7 +838,21 @@ class Spectrum(AbstractWrapperObject):
             if rxdr2 is not None:
               tt = magnetisationTransferDict.get(frozenset((rxdr, rxdr2)))
               if tt:
-                result.append(MagnetisationTransferTuple(dim1, jj+1, tt[0], tt[1]))
+                result.append(MagnetisationTransferTuple(dim1, jj + 1, tt[0], tt[1]))
+
+    else:
+      # Without a refExperiment use parameters stored in the API (for reproducibility)
+      ll = []
+      for apiExpTransfer in apiExperiment.expTransfers:
+        item = [x.expDim.dim for x in apiExpTransfer.expDimRefs]
+        item.sort()
+        item.append(apiExpTransfer.transferType)
+        item.append(not(apiExpTransfer.isDirect))
+        ll.append(item)
+      for item in sorted(ll):
+        result.append(MagnetisationTransferTuple(*item))
+
+
     #
     return tuple(result)
 

@@ -23,4 +23,5 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 
+from ccpn.framework.lib.misc import _checked
 

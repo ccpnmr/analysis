@@ -42,6 +42,7 @@ from ccpn.core.lib import Version
 
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
+from ccpn.framework.lib.misc import _checked
 
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.framework.Current import Current
@@ -60,6 +61,7 @@ _DEBUG = False
 componentNames = ('Assignment', 'Screening', 'Structure')
 
 interfaceNames = ('NoUi', 'Gui')
+
 
 def printCreditsText(fp, programName, version):
   """Initial text to terminal """

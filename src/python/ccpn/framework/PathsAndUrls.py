@@ -26,17 +26,21 @@ from ccpn.util import Path
 
 
 # CCPN Urls
-ccpnUrl        = 'http://www.ccpn.ac.uk'
-ccpnLicenceUrl = 'http://www.ccpn.ac.uk/licence'
-ccpnIssuesUrl = 'https://sourceforge.net/p/ccpn/bugs/'
+ccpnUrl                         = 'http://www.ccpn.ac.uk'
+ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/licence'
+ccpnIssuesUrl                   = 'https://sourceforge.net/p/ccpn/bugs/'
 
 # CCPN code
 ccpnCodePath                    = Path.getTopDirectory()
-defaultPreferencesPath          = os.path.join(ccpnCodePath, 'config', 'defaultv3settings.json')
-userPreferencesPath             = '~/.ccpn/v3settings.json'
+ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
+defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
 
 # Program tutorials and documentation
 shortcutsPath                   = os.path.join(ccpnCodePath, 'doc', 'static', 'AnalysisShortcuts.pdf')
 beginnersTutorialPath           = os.path.join(ccpnCodePath, 'tutorials', 'BeginnersTutorial.pdf')
 backboneAssignmentTutorialPath  = os.path.join(ccpnCodePath, 'tutorials', 'BackboneAssignmentTutorial.pdf')
 documentationPath               = os.path.join(ccpnCodePath, 'doc', 'build', 'html', 'index.html')
+
+# User settings
+userPreferencesDirectory        = os.path.expanduser('~/.ccpn')
+userPreferencesPath             = os.path.join(userPreferencesDirectory,'v3settings.json')

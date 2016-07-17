@@ -90,16 +90,6 @@ class PreferencesPopup(QtGui.QDialog):
     self.colourSchemeBox.currentIndexChanged.connect(self._changeColourScheme)
     row += 1
 
-    self.autoSaveLayoutLabel = Label(self, text="Show ToolBar(s): ", grid=(row, 0))
-    self.autoSaveLayoutBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.showToolbar)
-    self.autoSaveLayoutBox.toggled.connect(partial(self._toggleGeneralOptions, 'showToolbar'))
-    row += 1
-
-    self.spectrumBorderLabel = Label(self, text="Show Spectrum Border: ", grid=(row, 0))
-    self.spectrumBorderBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.showSpectrumBorder)
-    self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
-    row += 1
-
     self.useNativeLabel = Label(self, text="Use Native File Dialogs: ", grid=(row, 0))
     self.useNativeBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.useNative)
     self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNative'))
@@ -110,7 +100,17 @@ class PreferencesPopup(QtGui.QDialog):
     self.useNativeBox.toggled.connect(partial(self._toggleGeneralOptions, 'useNativeWebbrowser'))
     row += 1
 
-    self.regionPaddingLabel = Label(self, text="Region Percent Padding", grid=(row, 0))
+    self.autoSaveLayoutLabel = Label(self, text="Show ToolBar(s): ", grid=(row, 0))
+    self.autoSaveLayoutBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.showToolbar)
+    self.autoSaveLayoutBox.toggled.connect(partial(self._toggleGeneralOptions, 'showToolbar'))
+    row += 1
+
+    self.spectrumBorderLabel = Label(self, text="Show Spectrum Border: ", grid=(row, 0))
+    self.spectrumBorderBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.showSpectrumBorder)
+    self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
+    row += 1
+
+    self.regionPaddingLabel = Label(self, text="Spectral Padding (%)", grid=(row, 0))
     self.regionPaddingData = LineEdit(self, grid=(row, 1))
     self.regionPaddingData.setText('%.0f' % (100*self.preferences.general.stripRegionPadding))
     self.regionPaddingData.editingFinished.connect(self._setRegionPadding)
@@ -154,7 +154,6 @@ class PreferencesPopup(QtGui.QDialog):
   def _setAuxiliaryFilesPath(self):
       newPath = self.auxiliaryFilesData.text()
       self.preferences.general.auxiliaryFilesPath = newPath
-
 
   def _getMacroFilesPath(self):
     if os.path.exists(os.path.expanduser(self.macroPathData.text())):

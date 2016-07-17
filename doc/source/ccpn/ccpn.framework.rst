@@ -33,6 +33,14 @@ ccpn.framework.Framework module
     :undoc-members:
     :show-inheritance:
 
+ccpn.framework.PathsAndUrls module
+----------------------------------
+
+.. automodule:: ccpn.framework.PathsAndUrls
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.framework.Translation module
 ---------------------------------
 

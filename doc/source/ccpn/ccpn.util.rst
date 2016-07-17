@@ -12,7 +12,6 @@ Subpackages
 .. toctree::
 
     ccpn.util.Bmrb
-    ccpn.util.NEFreader
 
 Submodules
 ----------
@@ -109,14 +108,6 @@ ccpn.util.Phasing module
 ------------------------
 
 .. automodule:: ccpn.util.Phasing
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.util.Pid module
---------------------
-
-.. automodule:: ccpn.util.Pid
     :members:
     :undoc-members:
     :show-inheritance:

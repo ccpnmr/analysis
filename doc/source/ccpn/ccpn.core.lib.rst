@@ -9,10 +9,18 @@ ccpn.core.lib package
 Submodules
 ----------
 
-ccpn.core.lib.Assignment module
--------------------------------
+ccpn.core.lib.AssignmentLib module
+----------------------------------
 
-.. automodule:: ccpn.core.lib.Assignment
+.. automodule:: ccpn.core.lib.AssignmentLib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.CcpnNefIo module
+------------------------------
+
+.. automodule:: ccpn.core.lib.CcpnNefIo
     :members:
     :undoc-members:
     :show-inheritance:
@@ -33,26 +41,42 @@ ccpn.core.lib.Documentation module
     :undoc-members:
     :show-inheritance:
 
-ccpn.core.lib.Labeling module
------------------------------
+ccpn.core.lib.LabelingLib module
+--------------------------------
 
-.. automodule:: ccpn.core.lib.Labeling
+.. automodule:: ccpn.core.lib.LabelingLib
     :members:
     :undoc-members:
     :show-inheritance:
 
-ccpn.core.lib.Molecule module
------------------------------
+ccpn.core.lib.MoleculeLib module
+--------------------------------
 
-.. automodule:: ccpn.core.lib.Molecule
+.. automodule:: ccpn.core.lib.MoleculeLib
     :members:
     :undoc-members:
     :show-inheritance:
 
-ccpn.core.lib.Restraint module
-------------------------------
+ccpn.core.lib.Pid module
+------------------------
 
-.. automodule:: ccpn.core.lib.Restraint
+.. automodule:: ccpn.core.lib.Pid
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.RestraintLib module
+---------------------------------
+
+.. automodule:: ccpn.core.lib.RestraintLib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.SpectrumLib module
+--------------------------------
+
+.. automodule:: ccpn.core.lib.SpectrumLib
     :members:
     :undoc-members:
     :show-inheritance:

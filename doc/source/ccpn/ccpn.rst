@@ -11,9 +11,9 @@ Subpackages
 
 .. toctree::
 
+    ccpn.AnalysisAssign
     ccpn.AnalysisMetabolomics
-    ccpn.Assign
-    ccpn.Screen
+    ccpn.AnalysisScreen
     ccpn.core
     ccpn.framework
     ccpn.ui

@@ -136,10 +136,10 @@ class SubstancePropertiesPopup(QtGui.QDialog):
 
 
   def _chemicalNameWidget(self):
-    self.chemicalNameLabel = Label(self, text="Chemical Name")
-    self.chemicalName = LineEdit(self,text='None', )
+    self.chemicalNameLabel = Label(self, text="Chemical Names")
+    self.chemicalName = LineEdit(self)
     if self.substance:
-      self.substance.synonyms = (str(self.chemicalName.text()),)
+      self.chemicalName.setText(str(self.substance.synonyms))
 
 
   def _smilesWidget(self):

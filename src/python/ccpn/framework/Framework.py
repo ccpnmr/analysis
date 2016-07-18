@@ -1,9 +1,10 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
 __credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
-__license__   = "CCPN license. See www.ccpn.ac.uk/license"
+__license__   = "CCPN license. See " + ccpnLicenceUrl
 __reference__ = "Skinner et al, J. Biomol. NMR, 2016, submitted"
 
 #=========================================================================================

@@ -318,26 +318,27 @@
     <span class="n">newMixtures</span> <span class="o">=</span> <span class="n">annealMixtures</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span><span class="n">coolingMethod</span><span class="o">=</span><span class="n">coolingMethod</span><span class="p">,</span> <span class="n">startTemp</span><span class="o">=</span><span class="n">startTemp</span><span class="p">,</span> <span class="n">finalTemp</span><span class="o">=</span><span class="n">finalTemp</span><span class="p">,</span>
                                  <span class="n">maxSteps</span><span class="o">=</span><span class="n">maxSteps</span><span class="p">,</span> <span class="n">tempK</span><span class="o">=</span><span class="n">tempK</span><span class="p">,</span> <span class="n">minDistance</span><span class="o">=</span><span class="n">minDistance</span><span class="p">)</span>
     <span class="n">copyNewMixtures</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">newMixtures</span><span class="p">)</span>
-    <span class="n">currScore</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">newMixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">currScore</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-      <span class="c1"># showScoresPerMixture(copyNewMixtures,minDistance)</span>
-      <span class="k">return</span> <span class="n">copyNewMixtures</span>
-    <span class="k">if</span> <span class="n">currScore</span> <span class="o">&lt;=</span> <span class="n">startingScore</span><span class="p">:</span>
-      <span class="k">print</span><span class="p">(</span><span class="n">currScore</span><span class="p">,</span> <span class="s1">&#39;Step Score&#39;</span><span class="p">)</span>
-      <span class="n">bestIteration</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">currScore</span><span class="p">:</span> <span class="n">copyNewMixtures</span><span class="p">})</span>
-      <span class="n">startingScore</span> <span class="o">=</span> <span class="n">currScore</span>
-    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-  <span class="c1"># print(&#39;Best bestIteration&#39;, bestIteration)</span>
-  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
-    <span class="n">bestMixtures</span> <span class="o">=</span> <span class="n">findBestMixtures</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">bestMixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">),</span> <span class="s1">&#39;Best Score&#39;</span><span class="p">)</span>
-    <span class="c1"># showScoresPerMixture(bestMixtures,minDistance)</span>
-    <span class="k">return</span> <span class="n">bestMixtures</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No Better Iteration found, original mixtures are returned&#39;</span><span class="p">)</span>
-    <span class="n">sc</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">copyMixtures</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
-    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;startingScore&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">copyMixtures</span></div>
+    <span class="k">if</span> <span class="n">newMixtures</span><span class="p">:</span>
+      <span class="n">currScore</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">newMixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">currScore</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># showScoresPerMixture(copyNewMixtures,minDistance)</span>
+        <span class="k">return</span> <span class="n">copyNewMixtures</span>
+      <span class="k">if</span> <span class="n">currScore</span> <span class="o">&lt;=</span> <span class="n">startingScore</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">currScore</span><span class="p">,</span> <span class="s1">&#39;Step Score&#39;</span><span class="p">)</span>
+        <span class="n">bestIteration</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">currScore</span><span class="p">:</span> <span class="n">copyNewMixtures</span><span class="p">})</span>
+        <span class="n">startingScore</span> <span class="o">=</span> <span class="n">currScore</span>
+      <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="c1"># print(&#39;Best bestIteration&#39;, bestIteration)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="n">bestMixtures</span> <span class="o">=</span> <span class="n">findBestMixtures</span><span class="p">(</span><span class="n">bestIteration</span><span class="p">)</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">bestMixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">),</span> <span class="s1">&#39;Best Score&#39;</span><span class="p">)</span>
+      <span class="c1"># showScoresPerMixture(bestMixtures,minDistance)</span>
+      <span class="k">return</span> <span class="n">bestMixtures</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No Better Iteration found, original mixtures are returned&#39;</span><span class="p">)</span>
+      <span class="n">sc</span> <span class="o">=</span> <span class="n">calculateTotalScore</span><span class="p">(</span><span class="n">copyMixtures</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
+      <span class="k">print</span><span class="p">(</span><span class="s1">&#39;startingScore&#39;</span><span class="p">,</span> <span class="n">sc</span><span class="p">)</span>
+      <span class="k">return</span> <span class="n">copyMixtures</span></div>
 
 
 <div class="viewcode-block" id="showScoresPerMixture"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.SimulatedAnnealing.showScoresPerMixture">[docs]</a><span class="k">def</span> <span class="nf">showScoresPerMixture</span><span class="p">(</span><span class="n">mixtures</span><span class="p">,</span><span class="n">minDistance</span><span class="p">):</span>

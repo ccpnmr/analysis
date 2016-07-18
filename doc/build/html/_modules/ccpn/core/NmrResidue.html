@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -87,7 +87,23 @@
 
 
 <div class="viewcode-block" id="NmrResidue"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue">[docs]</a><span class="k">class</span> <span class="nc">NmrResidue</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Nmr Residue, for assignment.&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Nmr Residues are used for assignment. An NmrResidue within an assigned NmrChain is</span>
+<span class="sd">  by definition assigned to the Residue with the same sequenceCode</span>
+<span class="sd">  (if any). An NmrResidue is defined by its containing chain and sequenceCode, so you cannot have</span>
+<span class="sd">  two NmrResidues with the same NmrChain and sequenceCode but different residueType.</span>
+
+<span class="sd">  An NmrResidue created without a name will be given the name</span>
+<span class="sd">  &#39;@ij&#39;, where ij is the serial number of the NmrResidue. Names of this form are reserved.</span>
+<span class="sd">  Setting the NmrResidue sequenceCode to None will revert to this default name.</span>
+
+<span class="sd">  An NmrResidue can be defined by a sequential offset relative to another NmrResidue. E.g. the</span>
+<span class="sd">  NmrResidue i-1 relative to NmrResidue @5.@185.ALA would be named @5.@185-1.VAL. Reassigning</span>
+<span class="sd">  NR:@5.@185.ALA to NR:B.do1.ALA or NR:B.125.THR, would cause the offset NmrResidue</span>
+<span class="sd">  to be reassigned to NR:B.do1-1.VAL or NR:B.125-1.VAL, respectively. Offsets can be any integer</span>
+<span class="sd">  (including &#39;+0&#39;.</span>
+
+<span class="sd">  NmrResidues that are not offset can be linked into consecutive stretches by putting them</span>
+<span class="sd">  into connected NmrChains (see NmrChain). &quot;&quot;&quot;</span>
   
   <span class="c1">#: Short class name, for PID.</span>
   <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;NR&#39;</span>

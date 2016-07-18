@@ -56,6 +56,14 @@ ccpn.core.ChemicalShiftList module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.Complex module
+------------------------
+
+.. automodule:: ccpn.core.Complex
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.Data module
 ---------------------
 

@@ -51,11 +51,47 @@
 <span class="sd">Values that are not defined for a given dimension (e.g. sampled dimensions) are given as None.</span>
 <span class="sd">Reference-related values apply only to the first Reference given (which is sufficient for</span>
 <span class="sd">all common cases).</span>
+
+<span class="sd">Dimension identifiers run from 1 to the number of dimensions (e.g. 1,2,3 for a 3D).</span>
+<span class="sd">Per-dimension values are given in the order data are stored in the spectrum file - for</span>
+<span class="sd">CCPN data the preferred convention is to have the acquisition dimension as dimension 1.</span>
+
+<span class="sd">The axisCodes are used as an alternative axis identifier. They are unique strings (so they can</span>
+<span class="sd">b recognised even if the axes are reordered in display). The axisCodes reflect the isotope</span>
+<span class="sd">on the relevant axis, and match the dimension identifiers in the reference experiment templates,</span>
+<span class="sd">linking a dimension to the correct reference experiment dimension. They are also used to map</span>
+<span class="sd">automatically spectrum axes to display axes and to other spectra. By default the axis name</span>
+<span class="sd">is the name of the atom being measured. Axes that are linked by a onebond</span>
+<span class="sd">magnetisation transfer are given a lower-case suffix to show the nucleus bound to.</span>
+<span class="sd">Duplicate axis names are distinguished by a</span>
+<span class="sd">numerical suffix. The rules are best shown by example:</span>
+
+<span class="sd">Experiment                 axisCodes</span>
+
+<span class="sd">1D Bromine NMR             Br</span>
+
+<span class="sd">3D proton NOESY-TOCSY      H, H1, H2</span>
+
+<span class="sd">19F-13C-HSQC               Fc, Cf</span>
+
+<span class="sd">15N-NOESY-HSQC OR</span>
+<span class="sd">15N-HSQC-NOESY:            Hn, Nh, H</span>
+
+<span class="sd">4D HCCH-TOCSY              Hc, Ch, Hc1, Ch1</span>
+
+<span class="sd">HNCA/CB                    H. N. C</span>
+
+<span class="sd">HNCO                       Hn, Nh, CO     *(CO is treated as a separate type)*</span>
+
+<span class="sd">HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*</span>
+
 <span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># TODO double check axis codes for HCACO, HNCO, and use of Hcn axiscodes</span>
+
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,8 +102,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -87,7 +123,8 @@
 
 
 <div class="viewcode-block" id="Spectrum"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Spectrum">[docs]</a><span class="k">class</span> <span class="nc">Spectrum</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;NMR spectrum.&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;A Spectrum object contains all the stored properties of an NMR spectrum, as well as the</span>
+<span class="sd">  path to the stored NMR data file.&quot;&quot;&quot;</span>
 
   <span class="c1">#: Short class name, for PID.</span>
   <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SP&#39;</span>

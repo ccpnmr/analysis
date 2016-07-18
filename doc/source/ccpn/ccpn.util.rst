@@ -152,6 +152,14 @@ ccpn.util.Ticks module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.Time module
+---------------------
+
+.. automodule:: ccpn.util.Time
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.Undo module
 ---------------------
 

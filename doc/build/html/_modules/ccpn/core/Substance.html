@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -92,12 +92,20 @@
 <span class="p">}</span>
 
 <div class="viewcode-block" id="Substance"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Substance">[docs]</a><span class="k">class</span> <span class="nc">Substance</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Substance (molecule, material, buffer, cell, ..).</span>
+  <span class="sd">&quot;&quot;&quot;A Substance is a chemical entity or material that can be added to a Sample.</span>
+<span class="sd">  Substances are defined by their name and labeling attributes (labeling defaults to None).</span>
+<span class="sd">  Renaming a Substance will also rename all SampleComponents and SpectrumHits associated with</span>
+<span class="sd">  it, so as to preserve the link between the objects.</span>
 
-<span class="sd">  The default substanceType is &#39;Molecule&#39;, corresponding to one or more molecules.</span>
-<span class="sd">  It is possible (but not mandatory)to make a Substance associated to a single chain molecule,</span>
-<span class="sd">  using the Project.createPolymerSubstance function. There is currently no provision for</span>
-<span class="sd">  associating a Substance with several chains in a multi-chain - use Composite instead.</span>
+<span class="sd">  The most common case (by far) is substanceType &#39;Molecule&#39;, which corresponds to a chemical entity,</span>
+<span class="sd">  such as Calmodulin, ATP, or NaCl. This type of Substance will have Smiles strings, sequence,</span>
+<span class="sd">  and other molecular attributes as appropriate. Such a Substance may be associated with one</span>
+<span class="sd">  or more Chains, and cna be used as a starting point to generate new Chains, using the</span>
+<span class="sd">  Project.createPolymerSubstance() function.</span>
+
+<span class="sd">  ADVANCED: It is also possible to create Substances with substanceType &#39;Material&#39; or &#39;Cell&#39;.</span>
+<span class="sd">  Materials are used to describe chemical mixtures, such as fetal calf serum, algal lysate, or</span>
+<span class="sd">  &#39;standard experiment buffer number 3&#39;.</span>
 <span class="sd">   &quot;&quot;&quot;</span>
   
   <span class="c1">#: Short class name, for PID.</span>
@@ -516,7 +524,7 @@
   <span class="sd">&quot;&quot;&quot;Create new substance WITHOUT storing the sequence internally</span>
 <span class="sd">  (and hence not suitable for making chains). SubstanceType defaults to &#39;Molecule&#39;.</span>
 
-<span class="sd">  ADVANCED alternatives are &#39;Cell&#39;, &#39;Material&#39;, and &#39;Composite&#39;&quot;&quot;&quot;</span>
+<span class="sd">  ADVANCED alternatives are &#39;Cell&#39; and &#39;Material&#39;&quot;&quot;&quot;</span>
 
   <span class="k">if</span> <span class="n">labeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">apiLabeling</span> <span class="o">=</span> <span class="n">DEFAULT_LABELING</span>

@@ -363,7 +363,7 @@
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">:</span>
       <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_isRegistered</span><span class="p">():</span>
-        <span class="n">popup</span> <span class="o">=</span> <span class="n">RegisterPopup</span><span class="p">(</span><span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">,</span> <span class="n">modal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">popup</span> <span class="o">=</span> <span class="n">RegisterPopup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">,</span> <span class="n">modal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
         <span class="n">popup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
         <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
         <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
@@ -1427,7 +1427,10 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">submitMacroPopup</span> <span class="o">=</span> <span class="n">SubmitMacroPopup</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">submitMacroPopup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
     <span class="bp">self</span><span class="o">.</span><span class="n">submitMacroPopup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
-
+<div class="viewcode-block" id="Framework.showLicense"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showLicense">[docs]</a>
+  <span class="k">def</span> <span class="nf">showLicense</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">licensePath</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_systemOpen</span><span class="p">(</span><span class="n">licensePath</span><span class="p">)</span>
 
 
   <span class="c1">#########################################    End Menu callbacks   ##################################################</span>

@@ -103,7 +103,7 @@ IntegralList are both children of Spectrum; and Peak is a child of PeakList.</p>
 </div>
 <p>The <strong>Project</strong> object serves as container for all other data objects and the starting
 point for navigation.</p>
-<p>A <strong>Spectrum</strong> contains all the stored properties of a spectrum, as well as the path to the
+<p>A <strong>Spectrum</strong> object contains all the stored properties of a spectrum, as well as the path to the
 stored NMR data file.</p>
 <p>A <strong>SpectrumReference</strong> holds detailed information about axes and referencing needed for
 e.g. multple-quantum, projection, and reduced-dimensionality experiments.</p>
@@ -248,7 +248,7 @@ all of which should be self-explanatory.</p>
 <dt id="ccpn.core.Atom.Atom">
 <em class="property">class </em><code class="descclassname">ccpn.core.Atom.</code><code class="descname">Atom</code><a class="reference internal" href="../_modules/ccpn/core/Atom.html#Atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Atom.Atom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Molecular Atom.</p>
+<p>A molecular Atom, coontained in a Residue.</p>
 <dl class="method">
 <dt id="ccpn.core.Atom.Atom.addInterAtomBond">
 <code class="descname">addInterAtomBond</code><span class="sig-paren">(</span><em>atom: ccpn.core.Atom.Atom</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Atom.html#Atom.addInterAtomBond"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Atom.Atom.addInterAtomBond" title="Permalink to this definition">¶</a></dt>
@@ -398,7 +398,7 @@ serial number of CalculationStep, used in Pid and to identify the CalculationSte
 <dt id="ccpn.core.Chain.Chain">
 <em class="property">class </em><code class="descclassname">ccpn.core.Chain.</code><code class="descname">Chain</code><a class="reference internal" href="../_modules/ccpn/core/Chain.html#Chain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Chain.Chain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Molecular Chain.</p>
+<p>A molecular Chain, containing one or more Residues.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.atoms">
 <code class="descname">atoms</code><a class="headerlink" href="#ccpn.core.Chain.Chain.atoms" title="Permalink to this definition">¶</a></dt>
@@ -656,6 +656,30 @@ ccpn.Spectra that use ChemicalShiftList to store chemical shifts</p>
 <code class="descname">unit</code><a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
 Measurement unit of ChemicalShiftList. Should always be &#8216;ppm&#8217;</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.Complex">
+<span id="ccpn-core-complex-module"></span><h2>ccpn.core.Complex module<a class="headerlink" href="#module-ccpn.core.Complex" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.core.Complex.Complex">
+<em class="property">class </em><code class="descclassname">ccpn.core.Complex.</code><code class="descname">Complex</code><a class="reference internal" href="../_modules/ccpn/core/Complex.html#Complex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Complex.Complex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
+<p>A group of Chains, which can be used as a single object to describe a
+molecular complex.</p>
+<p>NB NOT YET IMPLEMENTED</p>
+<dl class="attribute">
+<dt id="ccpn.core.Complex.Complex.className">
+<code class="descname">className</code><em class="property"> = 'Complex'</em><a class="headerlink" href="#ccpn.core.Complex.Complex.className" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Complex.Complex.shortClassName">
+<code class="descname">shortClassName</code><em class="property"> = 'MX'</em><a class="headerlink" href="#ccpn.core.Complex.Complex.shortClassName" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class name and Short class name, for PID.</p>
 </dd></dl>
 
 </dd></dl>
@@ -939,7 +963,8 @@ Universal identifier for dataSet</p>
 <dt id="ccpn.core.Integral.Integral">
 <em class="property">class </em><code class="descclassname">ccpn.core.Integral.</code><code class="descname">Integral</code><a class="reference internal" href="../_modules/ccpn/core/Integral.html#Integral"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Integral.Integral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>n-dimensional Integral. Includes fields for per-dimension values.</p>
+<p>n-dimensional Integral, with integration region and value.</p>
+<p>Includes fields for per-dimension values.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Integral.Integral.annotation">
 <code class="descname">annotation</code><a class="headerlink" href="#ccpn.core.Integral.Integral.annotation" title="Permalink to this definition">¶</a></dt>
@@ -1205,7 +1230,14 @@ title of Model (not used in PID).</p>
 <dt id="ccpn.core.NmrAtom.NmrAtom">
 <em class="property">class </em><code class="descclassname">ccpn.core.NmrAtom.</code><code class="descname">NmrAtom</code><a class="reference internal" href="../_modules/ccpn/core/NmrAtom.html#NmrAtom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Nmr Atom, used for assigning peaks and shifts.</p>
+<p>NmrAtom objects are used for assignment. An NmrAtom within an assigned NmrResidue is
+by definition assigned to the Atom with the same name (if any).</p>
+<p>NmrAtoms serve as a way of connecting a named nucleus to an observed chemical shift,
+and peaks are assigned to NmrAtoms. Renaming an NmrAtom (or its containing NmrResidue or
+NmrChain) automatically updates peak assignments and ChemicalShifts that use the NmrAtom,
+preserving the link.</p>
+<p>NmrAtom names must start with the atom type, (&#8216;H&#8217; for proton, &#8216;D&#8217; for deuterium, &#8216;C&#8217; for
+carbon, etc.), with &#8216;?&#8217; for &#8216;unknown.</p>
 <dl class="method">
 <dt id="ccpn.core.NmrAtom.NmrAtom.assignTo">
 <code class="descname">assignTo</code><span class="sig-paren">(</span><em>chainCode: str = None</em>, <em>sequenceCode: int | str = None</em>, <em>residueType: str = None</em>, <em>name: str = None</em>, <em>mergeToExisting=False</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrAtom.NmrAtom<a class="reference internal" href="../_modules/ccpn/core/NmrAtom.html#NmrAtom.assignTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.assignTo" title="Permalink to this definition">¶</a></dt>
@@ -1320,7 +1352,17 @@ NmrAtom serial number - set at creation and unchangeable</p>
 <dt id="ccpn.core.NmrChain.NmrChain">
 <em class="property">class </em><code class="descclassname">ccpn.core.NmrChain.</code><code class="descname">NmrChain</code><a class="reference internal" href="../_modules/ccpn/core/NmrChain.html#NmrChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Nmr Assignment Chain.</p>
+<p>NmrChains are used for NMR assignment. An NmrChain is by definition assigned to the
+Chain with the same shortName (if any).</p>
+<p>An NmrChain created without a name will be given the name
+<a class="reference external" href="mailto:'&#37;&#52;&#48;ij">'<span>&#64;</span>ij</a>&#8216;, where ij is the serial number of the NmrChain. Names of this form are reserved.
+Setting the NmrChain shortName to None will revert to this default name.</p>
+<p>The order of NmrResidues within an NmrChain is not significant (they are given in sorted order).
+NmrChains with isConnected==True are used to describe connected but as yet unassigned
+stretches of NmrResidues, and here the NmrResidues are given in sequential order
+(N-terminal to C-terminal for proteins). Connected NmrChains have names of the form &#8216;#ij&#8217;
+where ij is the serial number of the NmrChain, and cannot be renamed.  Names of this form are
+reserved.</p>
 <dl class="method">
 <dt id="ccpn.core.NmrChain.NmrChain.assignConnectedResidues">
 <code class="descname">assignConnectedResidues</code><span class="sig-paren">(</span><em>firstResidue: ccpn.core.Residue.Residue | str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrChain.html#NmrChain.assignConnectedResidues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.assignConnectedResidues" title="Permalink to this definition">¶</a></dt>
@@ -1460,7 +1502,20 @@ Connected NmrChains (isConnected == True) always have canonical names of the for
 <dt id="ccpn.core.NmrResidue.NmrResidue">
 <em class="property">class </em><code class="descclassname">ccpn.core.NmrResidue.</code><code class="descname">NmrResidue</code><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Nmr Residue, for assignment.</p>
+<p>Nmr Residues are used for assignment. An NmrResidue within an assigned NmrChain is
+by definition assigned to the Residue with the same sequenceCode
+(if any). An NmrResidue is defined by its containing chain and sequenceCode, so you cannot have
+two NmrResidues with the same NmrChain and sequenceCode but different residueType.</p>
+<p>An NmrResidue created without a name will be given the name
+<a class="reference external" href="mailto:'&#37;&#52;&#48;ij">'<span>&#64;</span>ij</a>&#8216;, where ij is the serial number of the NmrResidue. Names of this form are reserved.
+Setting the NmrResidue sequenceCode to None will revert to this default name.</p>
+<p>An NmrResidue can be defined by a sequential offset relative to another NmrResidue. E.g. the
+NmrResidue i-1 relative to NmrResidue &#64;5.&#64;185.ALA would be named &#64;5.&#64;185-1.VAL. Reassigning
+NR:&#64;5.&#64;185.ALA to NR:B.do1.ALA or NR:B.125.THR, would cause the offset NmrResidue
+to be reassigned to NR:B.do1-1.VAL or NR:B.125-1.VAL, respectively. Offsets can be any integer
+(including &#8216;+0&#8217;.</p>
+<p>NmrResidues that are not offset can be linked into consecutive stretches by putting them
+into connected NmrChains (see NmrChain).</p>
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.assignTo">
 <code class="descname">assignTo</code><span class="sig-paren">(</span><em>chainCode: str = None</em>, <em>sequenceCode: int | str = None</em>, <em>residueType: str = None</em>, <em>mergeToExisting: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrResidue.NmrResidue<a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.assignTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.assignTo" title="Permalink to this definition">¶</a></dt>
@@ -1770,11 +1825,11 @@ Free-form text comment</p>
 <dt id="ccpn.core.Peak.Peak">
 <em class="property">class </em><code class="descclassname">ccpn.core.Peak.</code><code class="descname">Peak</code><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Peak. Includes per-dimension values and (multiple) assignments.
-Measurements that require more than one NmrAtom for an individual assignment
+<p>Peak object, holding position, intensity, and assignment information</p>
+<p>Measurements that require more than one NmrAtom for an individual assignment
 (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
 experiments etc.) are not supported (yet). Assignments can be viewed and set
-either as an assignment list for each dimension (dimensionNmrAtoms) or as a
+either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
 list of all possible assignment combinations (assignedNmrAtoms)</p>
 <dl class="method">
 <dt id="ccpn.core.Peak.Peak.addAssignment">
@@ -2635,7 +2690,7 @@ Use Project.loadData or Project.createDummySpectrum instead</p>
 <code class="descname">newSubstance</code><span class="sig-paren">(</span><em>name: str</em>, <em>labeling: str = None</em>, <em>substanceType: str = 'Molecule'</em>, <em>userCode: str = None</em>, <em>smiles: str = None</em>, <em>inChi: str = None</em>, <em>casNumber: str = None</em>, <em>empiricalFormula: str = None</em>, <em>molecularMass: float = None</em>, <em>comment: str = None</em>, <em>synonyms: Sequence[str] = ()</em>, <em>atomCount: int = None</em>, <em>bondCount: int = None</em>, <em>ringCount: int = None</em>, <em>hBondDonorCount: int = None</em>, <em>hBondAcceptorCount: int = None</em>, <em>polarSurfaceArea: float = None</em>, <em>logPartitionCoefficient: float = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.newSubstance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new substance WITHOUT storing the sequence internally
 (and hence not suitable for making chains). SubstanceType defaults to &#8216;Molecule&#8217;.</p>
-<p>ADVANCED alternatives are &#8216;Cell&#8217;, &#8216;Material&#8217;, and &#8216;Composite&#8217;</p>
+<p>ADVANCED alternatives are &#8216;Cell&#8217; and &#8216;Material&#8217;</p>
 </dd></dl>
 
 <dl class="method">
@@ -2941,7 +2996,9 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 <dt id="ccpn.core.PseudoDimension.PseudoDimension">
 <em class="property">class </em><code class="descclassname">ccpn.core.PseudoDimension.</code><code class="descname">PseudoDimension</code><a class="reference internal" href="../_modules/ccpn/core/PseudoDimension.html#PseudoDimension"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PseudoDimension.PseudoDimension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>ADVANCED. PsudoDimension - Sampled dimension with non-gridded values</p>
+<p>ADVANCED. A sampled SPectrum axis with non-gridded values. Used to describe
+sampled-value axes in pseudo-2D and nD experiments, such as the time delay axis for T1
+experiments.</p>
 <dl class="attribute">
 <dt id="ccpn.core.PseudoDimension.PseudoDimension.axisCode">
 <code class="descname">axisCode</code><a class="headerlink" href="#ccpn.core.PseudoDimension.PseudoDimension.axisCode" title="Permalink to this definition">¶</a></dt>
@@ -3045,7 +3102,7 @@ SpectrumHits (for screening/metabolomics) that refer to individual points in the
 <dt id="ccpn.core.Residue.Residue">
 <em class="property">class </em><code class="descclassname">ccpn.core.Residue.</code><code class="descname">Residue</code><a class="reference internal" href="../_modules/ccpn/core/Residue.html#Residue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Residue.Residue" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Molecular Residue.</p>
+<p>A molecular Residue, contained in a Chain, and containing Atoms.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.atoms">
 <code class="descname">atoms</code><a class="headerlink" href="#ccpn.core.Residue.Residue.atoms" title="Permalink to this definition">¶</a></dt>
@@ -3654,7 +3711,8 @@ Unit for restraints</p>
 <dt id="ccpn.core.Sample.Sample">
 <em class="property">class </em><code class="descclassname">ccpn.core.Sample.</code><code class="descname">Sample</code><a class="reference internal" href="../_modules/ccpn/core/Sample.html#Sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Sample.Sample" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>NMR or other sample.</p>
+<p>Corresponds to an NMR (or other) sample, with properties such as amount, pH,
+and sample identifiers. The composition is given through the contained SampleComponent objects.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Sample.Sample.amount">
 <code class="descname">amount</code><a class="headerlink" href="#ccpn.core.Sample.Sample.amount" title="Permalink to this definition">¶</a></dt>
@@ -3815,7 +3873,10 @@ SpectrumHits that were found using Sample</p>
 <dt id="ccpn.core.SampleComponent.SampleComponent">
 <em class="property">class </em><code class="descclassname">ccpn.core.SampleComponent.</code><code class="descname">SampleComponent</code><a class="reference internal" href="../_modules/ccpn/core/SampleComponent.html#SampleComponent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Sample Component - material making up sample.</p>
+<p>A Samplecomponent indicates a Substance contained in a specific Sample,
+(e.g. protein, buffer, salt), and its  concentrations.</p>
+<p>The Substance referred to is defined by the &#8216;name&#8217; and &#8216;labeling&#8217; attributes.
+FOr this reason teh SampleCOmponent cannot be renamed. See Substance.</p>
 <dl class="attribute">
 <dt id="ccpn.core.SampleComponent.SampleComponent.className">
 <code class="descname">className</code><em class="property"> = 'SampleComponent'</em><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.className" title="Permalink to this definition">¶</a></dt>
@@ -3912,11 +3973,34 @@ Substance corresponding to SampleComponent</p>
 Values that are not defined for a given dimension (e.g. sampled dimensions) are given as None.
 Reference-related values apply only to the first Reference given (which is sufficient for
 all common cases).</p>
+<p>Dimension identifiers run from 1 to the number of dimensions (e.g. 1,2,3 for a 3D).
+Per-dimension values are given in the order data are stored in the spectrum file - for
+CCPN data the preferred convention is to have the acquisition dimension as dimension 1.</p>
+<p>The axisCodes are used as an alternative axis identifier. They are unique strings (so they can
+b recognised even if the axes are reordered in display). The axisCodes reflect the isotope
+on the relevant axis, and match the dimension identifiers in the reference experiment templates,
+linking a dimension to the correct reference experiment dimension. They are also used to map
+automatically spectrum axes to display axes and to other spectra. By default the axis name
+is the name of the atom being measured. Axes that are linked by a onebond
+magnetisation transfer are given a lower-case suffix to show the nucleus bound to.
+Duplicate axis names are distinguished by a
+numerical suffix. The rules are best shown by example:</p>
+<p>Experiment                 axisCodes</p>
+<p>1D Bromine NMR             Br</p>
+<p>3D proton NOESY-TOCSY      H, H1, H2</p>
+<p>19F-13C-HSQC               Fc, Cf</p>
+<p>15N-NOESY-HSQC OR
+15N-HSQC-NOESY:            Hn, Nh, H</p>
+<p>4D HCCH-TOCSY              Hc, Ch, Hc1, Ch1</p>
+<p>HNCA/CB                    H. N. C</p>
+<p>HNCO                       Hn, Nh, CO     <em>(CO is treated as a separate type)</em></p>
+<p>HCACO                      Hca, CAh, CO    <em>(CA is treated as a separate type)</em></p>
 <dl class="class">
 <dt id="ccpn.core.Spectrum.Spectrum">
 <em class="property">class </em><code class="descclassname">ccpn.core.Spectrum.</code><code class="descname">Spectrum</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>wrappedData: ccpnmodel.ccpncore.api.ccp.nmr.Nmr.ShiftList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>NMR spectrum.</p>
+<p>A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
+path to the stored NMR data file.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.acquisitionAxisCode">
 <code class="descname">acquisitionAxisCode</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.acquisitionAxisCode" title="Permalink to this definition">¶</a></dt>
@@ -4478,7 +4562,7 @@ Always None for sampled dimensions.</p>
 <dt id="ccpn.core.SpectrumGroup.SpectrumGroup">
 <em class="property">class </em><code class="descclassname">ccpn.core.SpectrumGroup.</code><code class="descname">SpectrumGroup</code><a class="reference internal" href="../_modules/ccpn/core/SpectrumGroup.html#SpectrumGroup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Group of spectra - used for organising spectra.</p>
+<p>Combines multiple Spectrum objects into a group, so they can be treated as a single object.</p>
 <dl class="attribute">
 <dt id="ccpn.core.SpectrumGroup.SpectrumGroup.className">
 <code class="descname">className</code><em class="property"> = 'SpectrumGroup'</em><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup.className" title="Permalink to this definition">¶</a></dt>
@@ -4519,7 +4603,11 @@ Spectra that make up SpectrumGroup.</p>
 <dt id="ccpn.core.SpectrumHit.SpectrumHit">
 <em class="property">class </em><code class="descclassname">ccpn.core.SpectrumHit.</code><code class="descname">SpectrumHit</code><a class="reference internal" href="../_modules/ccpn/core/SpectrumHit.html#SpectrumHit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumHit.SpectrumHit" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Hit (active compound for screening, observed compound for Metabolomics) observed in Spectrum</p>
+<p>Used in screening and metabolomics implementations to describe
+a &#8216;hit&#8217;, i.e. that a Substance has been found to be present (metabolomics) or active (screening) in a given
+spectrum.</p>
+<p>The Substance referred to is defined by the SubsanceName attribute, which is part of the ID.
+For this reason SpectrumHits cannot be renamed.</p>
 <dl class="attribute">
 <dt id="ccpn.core.SpectrumHit.SpectrumHit.className">
 <code class="descname">className</code><em class="property"> = 'SpectrumHit'</em><a class="headerlink" href="#ccpn.core.SpectrumHit.SpectrumHit.className" title="Permalink to this definition">¶</a></dt>
@@ -4651,9 +4739,11 @@ Name of hit substance</p>
 <dt id="ccpn.core.SpectrumReference.SpectrumReference">
 <em class="property">class </em><code class="descclassname">ccpn.core.SpectrumReference.</code><code class="descname">SpectrumReference</code><a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#SpectrumReference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>ADVANCED. NMR spectrum reference. Can only exist for Fourier transformed dimensions
-(CCPN: FreqDataDim). Required for experiments with assignable splittings (e.g. J-coupling, RDC),
-reduced-dimensionality, more than one nucleus per axis,
+<p>ADVANCED. A <strong>SpectrumReference</strong> holds detailed information about axes and referencing
+needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.</p>
+<p>SpectrumRefefences can only exist for Fourier transformed dimensions.
+Required for describing experiments with assignable splittings (e.g. J-coupling, RDC),
+reduced dimensionality, more than one nucleus per axis,
 or multi-atom parameters (J-dimensions, MQ dimensions).</p>
 <dl class="attribute">
 <dt id="ccpn.core.SpectrumReference.SpectrumReference.axisCode">
@@ -4992,11 +5082,18 @@ The residue IDs and their order is the same for all Models in the ensemble.</p>
 <dt id="ccpn.core.Substance.Substance">
 <em class="property">class </em><code class="descclassname">ccpn.core.Substance.</code><code class="descname">Substance</code><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Substance (molecule, material, buffer, cell, ..).</p>
-<p>The default substanceType is &#8216;Molecule&#8217;, corresponding to one or more molecules.
-It is possible (but not mandatory)to make a Substance associated to a single chain molecule,
-using the Project.createPolymerSubstance function. There is currently no provision for
-associating a Substance with several chains in a multi-chain - use Composite instead.</p>
+<p>A Substance is a chemical entity or material that can be added to a Sample.
+Substances are defined by their name and labeling attributes (labeling defaults to None).
+Renaming a Substance will also rename all SampleComponents and SpectrumHits associated with
+it, so as to preserve the link between the objects.</p>
+<p>The most common case (by far) is substanceType &#8216;Molecule&#8217;, which corresponds to a chemical entity,
+such as Calmodulin, ATP, or NaCl. This type of Substance will have Smiles strings, sequence,
+and other molecular attributes as appropriate. Such a Substance may be associated with one
+or more Chains, and cna be used as a starting point to generate new Chains, using the
+Project.createPolymerSubstance() function.</p>
+<p>ADVANCED: It is also possible to create Substances with substanceType &#8216;Material&#8217; or &#8216;Cell&#8217;.
+Materials are used to describe chemical mixtures, such as fetal calf serum, algal lysate, or
+&#8216;standard experiment buffer number 3&#8217;.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.atomCount">
 <code class="descname">atomCount</code><a class="headerlink" href="#ccpn.core.Substance.Substance.atomCount" title="Permalink to this definition">¶</a></dt>
@@ -5215,6 +5312,7 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-chain-module">ccpn.core.Chain module</a></li>
 <li><a class="reference internal" href="#ccpn-core-chemicalshift-module">ccpn.core.ChemicalShift module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.ChemicalShiftList">ccpn.core.ChemicalShiftList module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.Complex">ccpn.core.Complex module</a></li>
 <li><a class="reference internal" href="#ccpn-core-data-module">ccpn.core.Data module</a></li>
 <li><a class="reference internal" href="#ccpn-core-dataset-module">ccpn.core.DataSet module</a></li>
 <li><a class="reference internal" href="#ccpn-core-integral-module">ccpn.core.Integral module</a></li>

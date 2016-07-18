@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-17 13:44:53 +0100 (Sun, 17 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9674 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -84,7 +84,20 @@
 
 
 <div class="viewcode-block" id="NmrChain"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain">[docs]</a><span class="k">class</span> <span class="nc">NmrChain</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Nmr Assignment Chain.&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;NmrChains are used for NMR assignment. An NmrChain is by definition assigned to the</span>
+<span class="sd">  Chain with the same shortName (if any).</span>
+
+<span class="sd">  An NmrChain created without a name will be given the name</span>
+<span class="sd">  &#39;@ij&#39;, where ij is the serial number of the NmrChain. Names of this form are reserved.</span>
+<span class="sd">  Setting the NmrChain shortName to None will revert to this default name.</span>
+
+<span class="sd">  The order of NmrResidues within an NmrChain is not significant (they are given in sorted order).</span>
+<span class="sd">  NmrChains with isConnected==True are used to describe connected but as yet unassigned</span>
+<span class="sd">  stretches of NmrResidues, and here the NmrResidues are given in sequential order</span>
+<span class="sd">  (N-terminal to C-terminal for proteins). Connected NmrChains have names of the form &#39;#ij&#39;</span>
+<span class="sd">  where ij is the serial number of the NmrChain, and cannot be renamed.  Names of this form are</span>
+<span class="sd">  reserved.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
   
   <span class="c1">#: Short class name, for PID.</span>
   <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;NC&#39;</span>

@@ -30,9 +30,13 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 
 class SpectrumReference(AbstractWrapperObject):
-  """ADVANCED. NMR spectrum reference. Can only exist for Fourier transformed dimensions
-  (CCPN: FreqDataDim). Required for experiments with assignable splittings (e.g. J-coupling, RDC),
-  reduced-dimensionality, more than one nucleus per axis,
+  """ ADVANCED. A **SpectrumReference** holds detailed information about axes and referencing
+  needed for e.g. multple-quantum, projection, and reduced-dimensionality experiments.
+
+
+  SpectrumRefefences can only exist for Fourier transformed dimensions.
+  Required for describing experiments with assignable splittings (e.g. J-coupling, RDC),
+  reduced dimensionality, more than one nucleus per axis,
   or multi-atom parameters (J-dimensions, MQ dimensions)."""
 
   #: Short class name, for PID.

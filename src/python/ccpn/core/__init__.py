@@ -52,7 +52,7 @@ IntegralList are both children of Spectrum; and Peak is a child of PeakList.
 The **Project** object serves as container for all other data objects and the starting
 point for navigation.
 
-A **Spectrum** contains all the stored properties of a spectrum, as well as the path to the
+A **Spectrum** object contains all the stored properties of a spectrum, as well as the path to the
 stored NMR data file.
 
 A **SpectrumReference** holds detailed information about axes and referencing needed for

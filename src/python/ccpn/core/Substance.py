@@ -43,12 +43,20 @@ _apiClassNameMap = {
 }
 
 class Substance(AbstractWrapperObject):
-  """Substance (molecule, material, buffer, cell, ..).
+  """A Substance is a chemical entity or material that can be added to a Sample.
+  Substances are defined by their name and labeling attributes (labeling defaults to None).
+  Renaming a Substance will also rename all SampleComponents and SpectrumHits associated with
+  it, so as to preserve the link between the objects.
 
-  The default substanceType is 'Molecule', corresponding to one or more molecules.
-  It is possible (but not mandatory)to make a Substance associated to a single chain molecule,
-  using the Project.createPolymerSubstance function. There is currently no provision for
-  associating a Substance with several chains in a multi-chain - use Composite instead.
+  The most common case (by far) is substanceType 'Molecule', which corresponds to a chemical entity,
+  such as Calmodulin, ATP, or NaCl. This type of Substance will have Smiles strings, sequence,
+  and other molecular attributes as appropriate. Such a Substance may be associated with one
+  or more Chains, and cna be used as a starting point to generate new Chains, using the
+  Project.createPolymerSubstance() function.
+
+  ADVANCED: It is also possible to create Substances with substanceType 'Material' or 'Cell'.
+  Materials are used to describe chemical mixtures, such as fetal calf serum, algal lysate, or
+  'standard experiment buffer number 3'.
    """
   
   #: Short class name, for PID.
@@ -467,7 +475,7 @@ def _newSubstance(self:Project, name:str, labeling:str=None, substanceType:str='
   """Create new substance WITHOUT storing the sequence internally
   (and hence not suitable for making chains). SubstanceType defaults to 'Molecule'.
 
-  ADVANCED alternatives are 'Cell', 'Material', and 'Composite'"""
+  ADVANCED alternatives are 'Cell' and 'Material'"""
 
   if labeling is None:
     apiLabeling = DEFAULT_LABELING

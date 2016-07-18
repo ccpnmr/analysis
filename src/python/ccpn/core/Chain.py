@@ -36,7 +36,7 @@ from typing import Tuple, Optional, Union, Sequence
 
 
 class Chain(AbstractWrapperObject):
-  """Molecular Chain."""
+  """A molecular Chain, containing one or more Residues."""
   
   #: Short class name, for PID.
   shortClassName = 'MC'

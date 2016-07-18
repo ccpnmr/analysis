@@ -38,7 +38,23 @@ from ccpnmodel.ccpncore.lib import Constants
 
 
 class NmrResidue(AbstractWrapperObject):
-  """Nmr Residue, for assignment."""
+  """Nmr Residues are used for assignment. An NmrResidue within an assigned NmrChain is
+  by definition assigned to the Residue with the same sequenceCode
+  (if any). An NmrResidue is defined by its containing chain and sequenceCode, so you cannot have
+  two NmrResidues with the same NmrChain and sequenceCode but different residueType.
+
+  An NmrResidue created without a name will be given the name
+  '@ij', where ij is the serial number of the NmrResidue. Names of this form are reserved.
+  Setting the NmrResidue sequenceCode to None will revert to this default name.
+
+  An NmrResidue can be defined by a sequential offset relative to another NmrResidue. E.g. the
+  NmrResidue i-1 relative to NmrResidue @5.@185.ALA would be named @5.@185-1.VAL. Reassigning
+  NR:@5.@185.ALA to NR:B.do1.ALA or NR:B.125.THR, would cause the offset NmrResidue
+  to be reassigned to NR:B.do1-1.VAL or NR:B.125-1.VAL, respectively. Offsets can be any integer
+  (including '+0'.
+
+  NmrResidues that are not offset can be linked into consecutive stretches by putting them
+  into connected NmrChains (see NmrChain). """
   
   #: Short class name, for PID.
   shortClassName = 'NR'

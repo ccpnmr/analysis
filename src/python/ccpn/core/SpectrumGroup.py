@@ -33,7 +33,8 @@ from ccpnmodel.ccpncore.lib import Util as coreUtil
 
 
 class SpectrumGroup(AbstractWrapperObject):
-  """Group of spectra - used for organising spectra."""
+  """Combines multiple Spectrum objects into a group, so they can be treated as a single object.
+"""
   
   #: Short class name, for PID.
   shortClassName = 'SG'

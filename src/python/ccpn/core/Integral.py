@@ -29,7 +29,9 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from typing import Optional, Tuple, Sequence, List
 
 class Integral(AbstractWrapperObject):
-  """n-dimensional Integral. Includes fields for per-dimension values.
+  """n-dimensional Integral, with integration region and value.
+
+  Includes fields for per-dimension values.
   """
   
   #: Short class name, for PID.

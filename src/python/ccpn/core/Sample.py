@@ -38,7 +38,8 @@ from ccpnmodel.ccpncore.lib import Util as coreUtil
 
 
 class Sample(AbstractWrapperObject):
-  """NMR or other sample."""
+  """Corresponds to an NMR (or other) sample, with properties such as amount, pH,
+  and sample identifiers. The composition is given through the contained SampleComponent objects."""
   
   #: Short class name, for PID.
   shortClassName = 'SA'

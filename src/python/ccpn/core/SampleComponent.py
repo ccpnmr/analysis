@@ -37,7 +37,11 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 
 class SampleComponent(AbstractWrapperObject):
-  """Sample Component - material making up sample."""
+  """ A Samplecomponent indicates a Substance contained in a specific Sample,
+  (e.g. protein, buffer, salt), and its  concentrations.
+
+  The Substance referred to is defined by the 'name' and 'labeling' attributes.
+  FOr this reason teh SampleCOmponent cannot be renamed. See Substance."""
   
   #: Short class name, for PID.
   shortClassName = 'SC'

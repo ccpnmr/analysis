@@ -29,11 +29,8 @@ from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
 
-
-# NBNB TBD add settable linkedAtoms link for non-ChemComp links ???
-
 class Atom(AbstractWrapperObject):
-  """Molecular Atom."""
+  """A molecular Atom, coontained in a Residue."""
 
   #: Class name and Short class name, for PID.
   shortClassName = 'MA'

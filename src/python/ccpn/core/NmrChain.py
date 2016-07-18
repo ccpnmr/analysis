@@ -35,7 +35,20 @@ from ccpnmodel.ccpncore.lib import Constants
 
 
 class NmrChain(AbstractWrapperObject):
-  """Nmr Assignment Chain."""
+  """NmrChains are used for NMR assignment. An NmrChain is by definition assigned to the
+  Chain with the same shortName (if any).
+
+  An NmrChain created without a name will be given the name
+  '@ij', where ij is the serial number of the NmrChain. Names of this form are reserved.
+  Setting the NmrChain shortName to None will revert to this default name.
+
+  The order of NmrResidues within an NmrChain is not significant (they are given in sorted order).
+  NmrChains with isConnected==True are used to describe connected but as yet unassigned
+  stretches of NmrResidues, and here the NmrResidues are given in sequential order
+  (N-terminal to C-terminal for proteins). Connected NmrChains have names of the form '#ij'
+  where ij is the serial number of the NmrChain, and cannot be renamed.  Names of this form are
+  reserved.
+  """
   
   #: Short class name, for PID.
   shortClassName = 'NC'

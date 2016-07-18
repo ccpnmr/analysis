@@ -39,7 +39,16 @@ from ccpnmodel.ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 
 
 class NmrAtom(AbstractWrapperObject):
-  """Nmr Atom, used for assigning peaks and shifts."""
+  """NmrAtom objects are used for assignment. An NmrAtom within an assigned NmrResidue is
+  by definition assigned to the Atom with the same name (if any).
+
+  NmrAtoms serve as a way of connecting a named nucleus to an observed chemical shift,
+  and peaks are assigned to NmrAtoms. Renaming an NmrAtom (or its containing NmrResidue or
+  NmrChain) automatically updates peak assignments and ChemicalShifts that use the NmrAtom,
+  preserving the link.
+
+  NmrAtom names must start with the atom type, ('H' for proton, 'D' for deuterium, 'C' for
+  carbon, etc.), with '?' for 'unknown."""
 
   
   #: Short class name, for PID.

@@ -29,7 +29,7 @@ from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Residue as ApiResidue
 
 
 class Residue(AbstractWrapperObject):
-  """Molecular Residue."""
+  """A molecular Residue, contained in a Chain, and containing Atoms."""
   
   #: Short class name, for PID.
   shortClassName = 'MR'

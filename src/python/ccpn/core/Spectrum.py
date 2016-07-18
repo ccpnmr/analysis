@@ -2,7 +2,43 @@
 Values that are not defined for a given dimension (e.g. sampled dimensions) are given as None.
 Reference-related values apply only to the first Reference given (which is sufficient for
 all common cases).
+
+Dimension identifiers run from 1 to the number of dimensions (e.g. 1,2,3 for a 3D).
+Per-dimension values are given in the order data are stored in the spectrum file - for
+CCPN data the preferred convention is to have the acquisition dimension as dimension 1.
+
+The axisCodes are used as an alternative axis identifier. They are unique strings (so they can
+b recognised even if the axes are reordered in display). The axisCodes reflect the isotope
+on the relevant axis, and match the dimension identifiers in the reference experiment templates,
+linking a dimension to the correct reference experiment dimension. They are also used to map
+automatically spectrum axes to display axes and to other spectra. By default the axis name
+is the name of the atom being measured. Axes that are linked by a onebond
+magnetisation transfer are given a lower-case suffix to show the nucleus bound to.
+Duplicate axis names are distinguished by a
+numerical suffix. The rules are best shown by example:
+
+Experiment                 axisCodes
+
+1D Bromine NMR             Br
+
+3D proton NOESY-TOCSY      H, H1, H2
+
+19F-13C-HSQC               Fc, Cf
+
+15N-NOESY-HSQC OR
+15N-HSQC-NOESY:            Hn, Nh, H
+
+4D HCCH-TOCSY              Hc, Ch, Hc1, Ch1
+
+HNCA/CB                    H. N. C
+
+HNCO                       Hn, Nh, CO     *(CO is treated as a separate type)*
+
+HCACO                      Hca, CAh, CO    *(CA is treated as a separate type)*
+
 """
+# TODO double check axis codes for HCACO, HNCO, and use of Hcn axiscodes
+
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
@@ -38,7 +74,8 @@ from ccpnmodel.ccpncore.lib.Io import Formats
 
 
 class Spectrum(AbstractWrapperObject):
-  """NMR spectrum."""
+  """A Spectrum object contains all the stored properties of an NMR spectrum, as well as the
+  path to the stored NMR data file."""
 
   #: Short class name, for PID.
   shortClassName = 'SP'

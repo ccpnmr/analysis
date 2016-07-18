@@ -34,11 +34,12 @@ from ccpnmodel.ccpncore.lib import Util as modelUtil
 from typing import Optional, Tuple, Union, Sequence
 
 class Peak(AbstractWrapperObject):
-  """Peak. Includes per-dimension values and (multiple) assignments.
+  """Peak object, holding position, intensity, and assignment information
+
   Measurements that require more than one NmrAtom for an individual assignment
   (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
   experiments etc.) are not supported (yet). Assignments can be viewed and set
-  either as an assignment list for each dimension (dimensionNmrAtoms) or as a
+  either as a list of assignments for each dimension (dimensionNmrAtoms) or as a
   list of all possible assignment combinations (assignedNmrAtoms)"""
   
   #: Short class name, for PID.

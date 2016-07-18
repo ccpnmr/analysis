@@ -32,7 +32,12 @@ from ccpn.util import Constants
 
 
 class SpectrumHit(AbstractWrapperObject):
-  """Hit (active compound for screening, observed compound for Metabolomics) observed in Spectrum"""
+  """Used in screening and metabolomics implementations to describe
+a 'hit', i.e. that a Substance has been found to be present (metabolomics) or active (screening) in a given
+spectrum.
+
+The Substance referred to is defined by the SubsanceName attribute, which is part of the ID.
+For this reason SpectrumHits cannot be renamed."""
 
   #: Short class name, for PID.
   shortClassName = 'SH'

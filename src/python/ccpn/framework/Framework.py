@@ -1,10 +1,9 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
 __credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
-__license__   = "CCPN license. See " + ccpnLicenceUrl
+__license__   = "CCPN license. see http://www.ccpn.ac.uk"
 __reference__ = "Skinner et al, J. Biomol. NMR, 2016, submitted"
 
 #=========================================================================================
@@ -65,12 +64,13 @@ interfaceNames = ('NoUi', 'Gui')
 
 def printCreditsText(fp, programName, version):
   """Initial text to terminal """
+  from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
 
   lines = []
   lines.append("%s, version: %s" % (programName, version))
   lines.append("")
   lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
-  lines.append("%s. Not to be distributed without prior consent!" % __license__)
+  lines.append("CCPN licence. See %s. Not to be distributed without prior consent!" % ccpnLicenceUrl)
   lines.append("")
   lines.append("Written by:   %s" % __credits__)
   lines.append("")

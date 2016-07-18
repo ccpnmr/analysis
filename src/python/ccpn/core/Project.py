@@ -877,7 +877,7 @@ class Project(AbstractWrapperObject):
 
     chains = []
     for sequence in sequences:
-      chains.append(self.createSimpleChain(sequence=sequence[1], compoundName=sequence[0],
+      chains.append(self.createChain(sequence=sequence[1], compoundName=sequence[0],
                                             molType='protein'))
     #
     return chains

@@ -12,11 +12,13 @@ from urllib.request import urlopen
 
 from datetime import datetime
 
+from ccpn.framework.PathsAndUrls import ccpn2Url
+
 from ccpn.util import Path
 from ccpn.ui.gui.widgets import InputDialog
 from ccpn.ui.gui.widgets import MessageDialog
 
-SERVER = 'http://www2.ccpn.ac.uk/'
+SERVER = ccpn2Url + '/'
 SERVER_DB_ROOT = 'ccpNmrUpdate'
 SERVER_DB_FILE = '__UpdateData.db'
 # the reason to use a CGI script just to download a file is because of exception handling

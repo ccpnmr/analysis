@@ -46,8 +46,9 @@ MAX_LOG_FILE_DAYS = 7
 
 logger = None
 
-DEFAULT_LOGGER_NAME = 'defaultLogger'
-defaultLogger = logging.getLogger(DEFAULT_LOGGER_NAME)
+#DEFAULT_LOGGER_NAME = 'defaultLogger'
+defaultLogger = logging.getLogger('defaultLogger')
+defaultLogger.propagate = False
 
 def getLogger():
 
@@ -57,6 +58,7 @@ def getLogger():
     return defaultLogger
 
   return logger
+
 
 def createLogger(loggerName, project, stream=None, level=None, mode='a',
                  removeOldLogsDays=MAX_LOG_FILE_DAYS):
@@ -90,10 +92,11 @@ def createLogger(loggerName, project, stream=None, level=None, mode='a',
     # there seems no way to close the logger itself
     # and just closing the handler does not work
     # (and certainly do not want to close stdout or stderr)
-    for handler in logger.handlers[:]:
+    for handler in logger.handlers:
       logger.removeHandler(handler)
   else:
     logger = logging.getLogger(loggerName)
+    logger.propagate = False
 
   logger.logPath = logPath  # just for convenience
   logger.shutdown = logging.shutdown  # just for convenience but tricky

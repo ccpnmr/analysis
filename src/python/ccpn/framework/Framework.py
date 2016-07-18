@@ -615,7 +615,8 @@ class Framework:
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
       (),
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
-                   ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')])
+                   ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),
+                   ("Reset Zoom", self.resetZoom, [('shortcut', 'rz')])
                   )),
       (),
       ("Python Console", self.toggleConsole, [('shortcut', 'py'),
@@ -1169,6 +1170,10 @@ class Framework:
   def togglePhaseConsole(self):
     if self.current.strip is not None:
       self.current.strip.spectrumDisplay.togglePhaseConsole()
+
+  def resetZoom(self):
+    if self.current.strip is not None:
+      self.current.strip.resetZoom()
 
   def toggleConsole(self):
     """

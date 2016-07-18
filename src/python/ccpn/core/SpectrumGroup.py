@@ -88,7 +88,7 @@ class SpectrumGroup(AbstractWrapperObject):
 
   # Implementation functions
   def rename(self, value:str):
-    """Rename SpectrumGroup, changing its Id and Pid"""
+    """Rename SpectrumGroup, changing its name and Pid"""
     oldName = self.name
     self._startFunctionCommandBlock('rename', value)
     undo = self._project._undo

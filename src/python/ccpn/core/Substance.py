@@ -390,9 +390,9 @@ class Substance(AbstractWrapperObject):
 
   # Implementation functions
   def rename(self, name:str=None, labeling:str=None):
-    """Rename Substance, changing its Id and Pid, and rename SampleComponents and SpectrumHits
-    with matching names. If name is None, the existing value will be used.
-    Labeling 'None'  means 'Natural abundance'"""
+    """Rename Substance, changing its name and/or labeling and Pid, and rename
+    SampleComponents and SpectrumHits with matching names. If name is None, the existing value w
+    ill be used. Labeling 'None'  means 'Natural abundance'"""
 
     oldName = self.name
     if name is None:
@@ -648,7 +648,7 @@ Project.createPolymerSubstance = _createPolymerSubstance
 del _createPolymerSubstance
 
 def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
-  """get or create ccpn.Substance with given name and labeling."""
+  """get or create Substance with given name and labeling."""
 
 
   if labeling is None:

@@ -30,7 +30,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
 
 class IntegralList(AbstractWrapperObject):
-  """Integral List."""
+  """An object containing Integrals. Note: the object is not a (subtype of a) Python list.
+  To access all Integral objects, use integralList.integrals."""
   
   #: Short class name, for PID.
   shortClassName = 'IL'
@@ -89,7 +90,7 @@ class IntegralList(AbstractWrapperObject):
   
   @property
   def title(self) -> str:
-    """name of IntegralList"""
+    """title of IntegralList (not used in PID)."""
     return self._wrappedData.name
     
   @title.setter
@@ -132,7 +133,7 @@ class IntegralList(AbstractWrapperObject):
 # Connections to parents:
 
 def _newIntegralList(self:Spectrum, title:str=None, comment:str=None) -> IntegralList:
-  """Create new ccpn.IntegralList within ccpn.Spectrum"""
+  """Create new IntegralList within Spectrum"""
 
   defaults = collections.OrderedDict((('title', None), ('comment', None)))
 

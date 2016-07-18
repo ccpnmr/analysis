@@ -40,9 +40,9 @@ _currentClasses = [SpectrumGroup, Peak, NmrChain, NmrResidue, NmrAtom,
                    Strip, ]
 
 # 'current' fields that do not correspond to a wrapper class. Must be plural and end in 's'
-_currentExtraFields = ['positions']
+_currentExtraFields = ['positions', 'cursorPositions']
 
-_fieldsToUseInPlural = ['peaks', 'positions', 'strips']
+_fieldsAreSingularOnly = ['spectrumGroups', 'cursorPositions', 'strips']
 
 # Fields in current (there is a current.xyz attribute with related functions
 # for every 'xyz' in fields
@@ -59,25 +59,28 @@ class Current:
   # Definitions of the attributes of the Current object
   _definitions = [
     # attribute name,                      storage name,        description
-    # (noCap(Integral.className),            '_integrals[-1]',        'last selected integral'),
+    # (noCap(Integral.className),            '_integrals[-1]',   'last selected integral'),
     # (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
 
-    (noCap(NmrAtom.className),             '_nmrAtoms[-1]',         'last selected nmrAtom'),
-    # (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
+    (noCap(NmrAtom.className),             '_nmrAtoms[-1]',    'last selected nmrAtom'),
+    (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
 
-    (noCap(NmrChain.className),            '_nmrChains[-1]',        'last selected nmrChain'),
-    # (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
+    (noCap(NmrChain.className),            '_nmrChains[-1]',   'last selected nmrChain'),
+    (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
 
-    (noCap(NmrResidue.className),          '_nmrResidues[-1]',      'last selected nmrResidue'),
-    # (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
+    (noCap(NmrResidue.className),          '_nmrResidues[-1]', 'last selected nmrResidue'),
+    (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
 
     # ('regions',                            '_regions',         'last selected region'),
 
-    (noCap(Peak.className),                '_peaks[-1]',            'last selected peak'),
+    (noCap(Peak.className),                '_peaks[-1]',       'last selected peak'),
     (noCap(Peak._pluralLinkName),          '_peaks',           'all selected peaks'),
 
-    ('position',                          '_positions[-1]',       'last cursor position'),
+    ('position',                           '_positions[-1]',   'last cursor position'),
     ('positions',                          '_positions',       'last cursor positions'),
+
+    ('cursorPosition',        '_cursorPositions[-1]', 'last cursor position - (posX,posY) tuple'),
+    # ('cursorPositions',       '_cursorPositions',     'last cursor positions - (posX,posY) tuples'),
 
     # (noCap(Spectrum.className),            '_spectra[-1]',        'current spectrum'), # broken
     # (noCap(Spectrum._pluralLinkName),      '_spectra',         'list with all spectra present in a module'), # (broken)
@@ -88,7 +91,7 @@ class Current:
     # (noCap(SpectrumGroup._pluralLinkName), '_spectrumGroups',  'list with all spectra present in a module'), # (broken)
 
     (noCap(Strip.className),               '_strips[-1]',           'selected strip'),
-    (noCap(Strip._pluralLinkName),         '_strips',          'lists with all strips'),
+    # (noCap(Strip._pluralLinkName),         '_strips',          'lists with all strips'),
   ]
 
   # create the doc-string dynamically from definitions above;
@@ -179,7 +182,7 @@ class Current:
     #
     setattr(cls, singular, property(getter, setter, None, "Current %s" % singular))
 
-    if plural in _fieldsToUseInPlural:
+    if plural not in _fieldsAreSingularOnly:
 
       def getter(self):
         return tuple(getField(self))

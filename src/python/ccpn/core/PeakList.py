@@ -38,7 +38,8 @@ from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 
 class PeakList(AbstractWrapperObject):
-  """Peak List."""
+  """An object containing Peaks. Note: the object is not a (subtype of a) Python list.
+  To access all Peak objects, use PeakList.peaks."""
   
   #: Short class name, for PID.
   shortClassName = 'PL'
@@ -91,7 +92,7 @@ class PeakList(AbstractWrapperObject):
   
   @property
   def title(self) -> str:
-    """title of PeakList"""
+    """title of PeakList (not used in PID)."""
     return self._wrappedData.name
     
   @title.setter
@@ -136,7 +137,7 @@ class PeakList(AbstractWrapperObject):
 
   @property
   def isSimulated(self) -> bool:
-    """Is peakList simulated"""
+    """True if this PeakList is simulated."""
     return self._wrappedData.isSimulated
 
   @isSimulated.setter
@@ -403,7 +404,7 @@ class PeakList(AbstractWrapperObject):
 
 def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
              isSimulated:bool=False, serial:int=None) -> PeakList:
-  """Create new empty ccpn.PeakList within ccpn.Spectrum"""
+  """Create new empty PeakList within Spectrum"""
 
   defaults = collections.OrderedDict((('title', None), ('comment', None), ('isSimulated', False),
                                       ('serial', None)))

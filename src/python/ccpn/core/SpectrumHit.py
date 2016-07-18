@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import List
+from typing import List, Optional
 import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
@@ -128,8 +128,8 @@ class SpectrumHit(AbstractWrapperObject):
     self._wrappedData.normalisedChange = value
 
   @property
-  def isConfirmed(self) -> bool:
-    """Is Hit confirmed? True: yes; False; No; None: not determined"""
+  def isConfirmed(self) -> Optional[bool]:
+    """True if this Hit is confirmed? True: yes; False; no; None: not determined"""
     return  self._wrappedData.isConfirmed
 
   @isConfirmed.setter
@@ -194,7 +194,7 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
                     figureOfMerit:float=None,  meritCode:str=None, normalisedChange:float=None,
                     isConfirmed:bool=None, concentration:float=None, concentrationError:float=None,
                     concentrationUnit:str=None, comment:str=None):
-  """Create new ccpn.SpectrumHit within ccpn.Spectrum"""
+  """Create new SpectrumHit within Spectrum"""
 
   # Default values for 'new' function, as used for echoing to console
   defaults = collections.OrderedDict(

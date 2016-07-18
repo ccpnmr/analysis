@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Optional
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -32,8 +32,8 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 class SpectrumReference(AbstractWrapperObject):
   """ADVANCED. NMR spectrum reference. Can only exist for Fourier transformed dimensions
   (CCPN: FreqDataDim). Required for experiments with assignable splittings (e.g. J-coupling, RDC),
-  reduced-dimensionality, more than one nucleus per axis, o
-  r multi-atom parameters (J-dimensions, MQ dimensions)."""
+  reduced-dimensionality, more than one nucleus per axis,
+  or multi-atom parameters (J-dimensions, MQ dimensions)."""
 
   #: Short class name, for PID.
   shortClassName = 'SR'
@@ -140,7 +140,7 @@ class SpectrumReference(AbstractWrapperObject):
       self._wrappedData.expDimRef.isotopeCodes = value
 
   @property
-  def foldingMode(self) -> bool:
+  def foldingMode(self) -> Optional[str]:
     """folding mode matching reference (values: 'aliased', 'folded', None)"""
     dd = {True:'folded', False:'aliased', None:None}
     return dd[self._wrappedData.expDimRef.isFolded]
@@ -217,7 +217,7 @@ class SpectrumReference(AbstractWrapperObject):
 
   @property
   def isAcquisition(self) -> bool:
-    """Is this dimension the acquisition dimension?"""
+    """True if this dimension is the acquisition dimension?"""
     return self._wrappedData.dataDim.expDim.isAquisition
 
   @isAcquisition.setter
@@ -243,7 +243,7 @@ def _newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:fl
                        maxAliasedFrequency:float=None, minAliasedFrequency:float=None,
                        foldingMode:str=None, axisUnit:str=None, referencePoint:float=0.0,
                        referenceValue:float=0.0) -> SpectrumReference:
-  """Create new ccpn.SpectrumReference within ccpn.Spectrum"""
+  """Create new SpectrumReference within Spectrum"""
   dataSource = self._wrappedData
   dataDim = dataSource.findFirstDataDim(dim=dimension)
   if dataDim is None:

@@ -29,7 +29,7 @@ from ccpn.core.DataSet import DataSet
 
 class CalculationStep(AbstractWrapperObject):
   """CalculationStep information, for tracking successive calculations.
-  Orderd from oldest to newest"""
+  Ordered from oldest to newest"""
   
   #: Short class name, for PID.
   shortClassName = 'DC'
@@ -65,7 +65,7 @@ class CalculationStep(AbstractWrapperObject):
     
   @property
   def _parent(self) -> DataSet:
-    """DataSet containing ccpn.RestraintList."""
+    """DataSet containing RestraintList."""
     return  self._project._data2Obj[self._wrappedData.nmrConstraintStore]
   
   dataSet = _parent
@@ -171,7 +171,7 @@ def getter(self:DataSet) -> List[CalculationStep]:
   uuid = self.uuid
   return [x for x in self.calculationSteps if x.outputDataUuid == uuid]
 DataSet.inputCalculationSteps = property(getter, None, None,
-                          "ccpn.CalculationSteps (from this DataSet) that gave DataSet as output"
+                          "ccpn.CalculationSteps (from this DataSet) that yielded DataSet as output"
                           "\nNB there can be more than one, because the DataSet may result from\n"
                           "multiple calculations that do not have intermediate DataSets stored")
 del getter
@@ -180,7 +180,7 @@ def _newCalculationStep(self:DataSet, programName:str=None, programVersion:str=N
                         scriptName:str=None, script:str=None,
                         inputDataUuid:str=None, outputDataUuid:str=None,
                         inputDataSet:DataSet=None, outputDataSet:DataSet=None,) -> CalculationStep:
-  """Create new ccpn.CalculationStep within ccpn.DataSet"""
+  """Create new CalculationStep within DataSet"""
 
 
   # Default values for 'new' function, as used for echoing to console

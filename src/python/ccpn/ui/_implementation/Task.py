@@ -151,7 +151,7 @@ class Task(AbstractWrapperObject):
 
 # newTask function
 def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Task:
-  """Create new ccpn.Task"""
+  """Create new Task"""
 
   for ss in name, nameSpace:
     if ss and Pid.altCharacter in ss:

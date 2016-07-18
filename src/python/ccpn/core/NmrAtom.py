@@ -39,7 +39,7 @@ from ccpnmodel.ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
 
 
 class NmrAtom(AbstractWrapperObject):
-  """Nmr Atom, used for assigning,peaks and shifts. (corresponds to ApiResonance)."""
+  """Nmr Atom, used for assigning peaks and shifts."""
 
   
   #: Short class name, for PID.
@@ -142,7 +142,7 @@ class NmrAtom(AbstractWrapperObject):
 
   @property
   def assignedPeaks(self) -> Tuple[Peak]:
-    """All ccpn.Peaks assigned to the ccpn.NmrAtom"""
+    """All Peaks assigned to the NmrAtom"""
     apiResonance = self._wrappedData
     apiPeaks = [x.peakDim.peak for x in apiResonance.peakDimContribs]
     apiPeaks.extend([x.peakDim.peak for x in apiResonance.peakDimContribNs])
@@ -151,7 +151,10 @@ class NmrAtom(AbstractWrapperObject):
     return sorted(data2Obj[x] for x in set(apiPeaks))
 
   def rename(self, value:str=None):
-    """Rename object, changing id, Pid, and internal representation"""
+    """Rename the NmrAtom, changing ita name, Pid, and internal representation."""
+
+    # NBNB TODO change so you can set names of teh form '@123' (?)
+
     # NB This is a VERY special case
     # - API code and notifiers will take care of resetting id and Pid
     self._startFunctionCommandBlock('rename', value)
@@ -331,7 +334,7 @@ del getter
 del setter
     
 def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
-  """Create new ccpn.NmrAtom within ccpn.NmrResidue. If name is None, use default name
+  """Create new NmrAtom within NmrResidue. If name is None, use default name
   (of form e.g. 'H@211', 'N@45', ...)"""
   nmrProject = self._project._wrappedData
   resonanceGroup = self._wrappedData

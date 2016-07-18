@@ -78,7 +78,7 @@ class DataSet(AbstractWrapperObject):
 
   @property
   def title(self) -> str:
-    """Title of DataSet"""
+    """Title of DataSet (not used in PID)."""
     return self._wrappedData.name
 
   @title.setter
@@ -87,7 +87,7 @@ class DataSet(AbstractWrapperObject):
 
   @property
   def programName(self) -> str:
-    """Name of program doing calculation"""
+    """Name of program performing the calculation"""
     return self._wrappedData.programName
 
   @programName.setter
@@ -96,7 +96,7 @@ class DataSet(AbstractWrapperObject):
 
   @property
   def programVersion(self) -> Optional[str]:
-    """Version of program doing calculation"""
+    """Version of program performing the calculation"""
     return self._wrappedData.programVersion
 
   @programVersion.setter
@@ -123,7 +123,7 @@ class DataSet(AbstractWrapperObject):
 
   @property
   def uuid(self) -> Optional[str]:
-    """Univcersal identifier for dataSet"""
+    """Universal identifier for dataSet"""
     return self._wrappedData.uuid
 
   @uuid.setter
@@ -173,7 +173,7 @@ class DataSet(AbstractWrapperObject):
 def _newDataSet(self:Project, title:str=None, programName:str=None, programVersion:str=None,
                 dataPath:str=None, creationDate:datetime.datetime=None, uuid:str=None,
                 comment:str=None, serial:int=None) -> DataSet:
-  """Create new ccpn.DataSet"""
+  """Create new DataSet"""
 
   defaults = collections.OrderedDict((('title', None), ('programName', None),
                                      ('programVersion', None), ('dataPath', None),

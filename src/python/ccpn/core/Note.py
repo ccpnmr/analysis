@@ -108,7 +108,7 @@ class Note(AbstractWrapperObject):
 
   # Implementation functions
   def rename(self, value:str):
-    """Rename Note, changing its Id and Pid"""
+    """Rename Note, changing its name and Pid."""
     if not value:
       raise ValueError("Note name must be set")
 

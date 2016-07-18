@@ -94,8 +94,8 @@ class NmrChain(AbstractWrapperObject):
   
   @property
   def isConnected(self) -> bool:
-    """Is this NmrChain a connected stretch
-    (in which case the mainNmrResidues are sequentially connected"""
+    """True if this this NmrChain is a connected stretch
+    (in which case the mainNmrResidues are sequentially connected)."""
     return self._wrappedData.isConnected
 
   @property
@@ -126,8 +126,11 @@ class NmrChain(AbstractWrapperObject):
       self.rename(value._wrappedData.code)
 
   def rename(self, value:str):
-    """Rename NmrChain, changing its Id and Pid.
+    """Rename NmrChain, changing its shortName and Pid.
     Use the 'deassign' function if you want to revert to the canonical name"""
+
+    # NBNB TODO Allow renaming to names of teh form '@123' (?)
+
     wrappedData = self._apiNmrChain
     if self._wrappedData.isConnected:
       raise ValueError("Connected NmrChain cannot be renamed")
@@ -226,7 +229,7 @@ del setter
 
 def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label:str='?',
                 comment:str=None) -> NmrChain:
-  """Create new ccpn.NmrChain. Set isConnected=True to get connected NmrChain.
+  """Create new NmrChain. Setting isConnected=True produces a connected NmrChain.
 
   :param str shortName: shortName for new nmrChain (optional, defaults to '@ijk' or '#ijk',  ijk positive integer
   :param bool isConnected: (default to False) If true the NmrChain is a connected stretch. This can NOT be changed later

@@ -62,7 +62,7 @@ class Window(AbstractWrapperObject):
 
   @property
   def title(self) -> str:
-    """Window display title"""
+    """Window display title (not used in PID)."""
     return self._wrappedData.title
 
   @property

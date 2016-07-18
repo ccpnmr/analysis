@@ -173,7 +173,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     else:
       return
 
-    if self is self.current.strips[0]:
+    # if self is self.current.strips[0]:
+    if self is self.current.strip:
       for orientation in ('right', 'bottom'):
         axisItem = self.plotItem.axes[orientation]['item']
         axisItem.setPen(color=axisColour)

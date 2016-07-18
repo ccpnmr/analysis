@@ -65,7 +65,7 @@ class StructureEnsemble(AbstractWrapperObject):
   # CCPN properties  
   @property
   def _apiStructureEnsemble(self) -> ApiStructureEnsemble:
-    """ CCPN api StructureEnsemble matching ccpn.StructureEnsemble"""
+    """ CCPN api StructureEnsemble matching StructureEnsemble"""
     return self._wrappedData
     
   @property
@@ -87,7 +87,7 @@ class StructureEnsemble(AbstractWrapperObject):
   def atomIds(self) -> Tuple[str, ...]:
     """Tuple of atom id ('chainCode.sequenceCode.residueType.atomName' for atoms making up
     structure ensemble
-    The atom IDs and their order is the same for all ccpn.Models in the ensemble."""
+    The atom IDs and their order is the same for all Models in the ensemble."""
     result = []
     residue = None
     for atom in self._wrappedData.orderedAtoms:
@@ -106,7 +106,7 @@ class StructureEnsemble(AbstractWrapperObject):
   def residueIds(self) -> Tuple[str, ...]:
     """Tuple of atom id ('chainCode.sequenceCode.residueType' for residues making up
     structure ensemble
-    The residue IDs and their order is the same for all ccpn.Models in the ensemble."""
+    The residue IDs and their order is the same for all Models in the ensemble."""
     result = []
     residue = None
     for atom in self._wrappedData.orderedAtoms:
@@ -613,7 +613,7 @@ class StructureEnsemble(AbstractWrapperObject):
     return parent._wrappedData.molSystem.sortedStructureEnsembles()
 
 def _newStructureEnsemble(self:Project, ensembleId:int=None, comment:str=None) -> StructureEnsemble:
-  """Create new, empty ccpn.StructureEnsemble"""
+  """Create new, empty StructureEnsemble"""
 
   defaults = collections.OrderedDict((('ensembleId', None), ('comment', None)))
   

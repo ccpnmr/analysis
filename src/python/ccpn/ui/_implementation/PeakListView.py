@@ -123,7 +123,7 @@ class PeakListView(AbstractWrapperObject):
 
   @property
   def isSymbolDisplayed(self) -> bool:
-    """Is peak marker displayed?"""
+    """True if the peak marker symbol is displayed."""
     return self._wrappedData.peakListView.isSymbolDisplayed
 
   @isSymbolDisplayed.setter
@@ -132,7 +132,7 @@ class PeakListView(AbstractWrapperObject):
 
   @property
   def isTextDisplayed(self) -> bool:
-    """Is peak annotation displayed?"""
+    """True if the peak annotation is displayed?"""
     return self._wrappedData.peakListView.isTextDisplayed
 
   @isTextDisplayed.setter

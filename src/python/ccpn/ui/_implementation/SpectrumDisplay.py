@@ -114,7 +114,7 @@ class SpectrumDisplay(AbstractWrapperObject):
 
   @property
   def is1D(self) -> bool:
-    """Is this a 1D display"""
+    """True if this is a 1D display."""
     tt = self.axisCodes
     return bool(tt and tt[1] == 'intensity')
 

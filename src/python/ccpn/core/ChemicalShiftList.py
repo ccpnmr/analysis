@@ -36,8 +36,11 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 
 class ChemicalShiftList(AbstractWrapperObject):
-  """Chemical Shift list. A chemical shift list named 'default' is used by default for
-   new experiments, and is created if necessary."""
+  """An object containing Chemical Shifts. Note: the object is not a (subtype of a) Python list.
+  To access all ChemicalShift objects, use chemicalShiftList.chemicalShifts.
+
+  A chemical shift list named 'default' is used by default for new experiments,
+  and is created if necessary."""
   
   #: Short class name, for PID.
   shortClassName = 'CL'
@@ -86,7 +89,7 @@ class ChemicalShiftList(AbstractWrapperObject):
   
   @property
   def name(self) -> str:
-    """name of ChemicalShiftList. Changing it will rename the ChemicalShiftList"""
+    """name of ChemicalShiftList. """
     return self._wrappedData.name
 
   @property
@@ -109,8 +112,7 @@ class ChemicalShiftList(AbstractWrapperObject):
 
   @property
   def isSimulated(self) -> bool:
-    """
-    is ChemicalShiftList simulated?"""
+    """True if the ChemicalShiftList is simulated."""
     return self._wrappedData.isSimulated
 
   @isSimulated.setter
@@ -139,7 +141,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     
   # Implementation functions
   def rename(self, value:str):
-    """Rename ChemicalShiftList, changing Id and Pid of ChemicalShiftList"""
+    """Rename ChemicalShiftList, changing its name and Pid."""
     if value:
       previous = self._project.getChemicalShiftList(value.translate(Pid.remapSeparators))
       if previous not in (None, self):
@@ -182,7 +184,7 @@ del setter
 
 def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm', autoUpdate:bool=True,
                           isSimulated:bool=False, serial:int=None, comment:str=None) -> ChemicalShiftList:
-  """Create new ccpn.ChemicalShiftList"""
+  """Create new ChemicalShiftList."""
 
   defaults = collections.OrderedDict((('name', None), ('unit', 'ppm'), ('autoUpdate', True),
                                       ('isSimulated', False), ('serial', None), ('comment', None)))

@@ -163,7 +163,7 @@ class Mark(AbstractWrapperObject):
 # newMark functions
 def _newMark(self:Task, colour:str, positions:Sequence[float], axisCodes:Sequence,
              style:str='simple', units:Sequence[str]=(), labels:Sequence[str]=()) -> Mark:
-  """Create new ccpn.Mark
+  """Create new Mark
 
   :param str colour: Mark colour
   :param tuple/list positions: Position in unit (default ppm) of all lines in the mark

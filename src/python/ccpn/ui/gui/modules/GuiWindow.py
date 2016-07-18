@@ -141,13 +141,14 @@ class GuiWindow(DropBase):
   def getCurrentPositionAndStrip(self):
     current = self._appBase.current
     current.strip = current.viewBox.parentObject().parent
-    position = [current.viewBox.position.x(),
-                current.viewBox.position.y()]
-    if len(current.strip.axisOrder) > 2:
-      for axis in current.strip.orderedAxes[2:]:
-        position.append(axis.position)
-    current.position = tuple(position)
-    return current.strip, current.position
+    cursorPosition = (current.viewBox.position.x(),
+                      current.viewBox.position.y())
+    # if len(current.strip.axisOrder) > 2:
+    #   for axis in current.strip.orderedAxes[2:]:
+    #     position.append(axis.position)
+    # current.position = tuple(position)
+    current.cursorPosition = cursorPosition
+    return current.strip, current.cursorPosition
 
 
 

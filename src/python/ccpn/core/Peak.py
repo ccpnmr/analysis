@@ -35,7 +35,7 @@ from typing import Optional, Tuple, Union, Sequence
 
 class Peak(AbstractWrapperObject):
   """Peak. Includes per-dimension values and (multiple) assignments.
-  Measurements that require more htn one NmrAtom for an individual assignment
+  Measurements that require more than one NmrAtom for an individual assignment
   (such as  splittings, J-couplings, MQ dimensions, reduced-dimensionality
   experiments etc.) are not supported (yet). Assignments can be viewed and set
   either as an assignment list for each dimension (dimensionNmrAtoms) or as a
@@ -203,15 +203,20 @@ class Peak(AbstractWrapperObject):
 
   @property
   def dimensionNmrAtoms(self) -> Tuple[Tuple['NmrAtom', ...], ...]:
-    """Peak dimension assignment - a list of lists of NmrAtoms for each dimension.
-    One ofg two alternative views on the Peak assignment.
-    Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
-    Setting dimensionAssignments implies that all combinations are possible
+    """Peak dimension assignment - a tuple of tuples with the assigned NmrAtoms for each dimension.
+    One of two alternative views on the Peak assignment.
 
-    Example:
-      ((<NA:A.127.LEU.HA>, <NA:A.127.LEU.HBX>, <NA:A.127.LEU.HBY>,<NA:A.127.LEU.HG>),
+    Example, for a 13C HSQC:
+      ((<NA:A.127.LEU.HA>, <NA:A.127.LEU.HBX>, <NA:A.127.LEU.HBY>, <NA:A.127.LEU.HG>,
+
        (<NA:A.127.LEU.CA>, <NA:A.127.LEU.CB>)
-       )"""
+       )
+
+    Assignments as a list of individual combinations is given in 'assignedNmrAtoms'.
+    Note that by setting dimensionAssignments you tel the program that all combinations are
+    possible - in the example that all four protons could be bound to either of the carbons
+
+    To (re)set the assignment for a single dimension, use the Peak.assignDimension method. """
     result = []
     for peakDim in self._wrappedData.sortedPeakDims():
 
@@ -253,13 +258,19 @@ class Peak(AbstractWrapperObject):
     (e.g. a tuple of triplets for a 3D spectrum).
     One of two alternative views on the Peak assignment.
     Missing assignments are entered as None.
-    Assignments for each dimension are given in 'dimensionNmrAtoms'.
 
-    Example:
+    Example, for 13H HSQC::
       ((<NA:A.127.LEU.HA>, <NA:A.127.LEU.CA>),
+
       (<NA:A.127.LEU.HBX>, <NA:A.127.LEU.CB>),
+
       (<NA:A.127.LEU.HBY>, <NA:A.127.LEU.CB>),
+
       (<NA:A.127.LEU.HG>, None),)
+
+    To add a single assignment tuple, use the Peak.addAssignment method
+
+    See also dimensionNmrAtoms, which gives assignments per dimension.
 
     """
     data2Obj = self._project._data2Obj
@@ -333,7 +344,7 @@ class Peak(AbstractWrapperObject):
       self.assignedNmrAtoms = assignedNmrAtoms
 
   def assignDimension(self, axisCode:str, value:Union[Union[str,'NmrAtom'],
-                                                      Sequence[Union[str,'NmrAtom']]]):
+                                                      Sequence[Union[str,'NmrAtom']]]=None):
     """Assign dimension with axisCode to value (NmrAtom, or Pid or sequence of either, or None)
     """
 
@@ -368,13 +379,15 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
             position:Sequence[float]=(), positionError:Sequence[float]=(),
             pointPosition:Sequence[float]=(), serial:int=None) -> Peak:
-  """Create new ccpn.Peak within ccpn.peakList
+  """Create new Peak within peakList
 
   NB you must create the peak before you can assign it. The assignment attributes are:
 
-  - assignedNmrAtoms - A list of all (e.g.) assignment triplets for a 3D spectrum
+  - assignedNmrAtoms - A tuple of all (e.g.) assignment triplets for a 3D spectrum
 
-  - dimensionNmrAtoms - A list of list of assignments, one for each dimension"""
+  - dimensionNmrAtoms - A tuple of tuples of assignments, one for each dimension
+
+  See the Peak class for details"""
 
   defaults = collections.OrderedDict(
     (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),

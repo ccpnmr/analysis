@@ -292,19 +292,31 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # CCPN INTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,
     and from Framework to set up initial state
     """
-    strips = set(self._appBase.current.strips)
-    # Rasmus HACK!
-    # This code broke because it got triggered (via a current notifier) when strips
-    # were deleted but self was not. A bigger fix is needed, but for now try this
+    strip = self._appBase.current.strip
+    # # Rasmus HACK!
+    # # This code broke because it got triggered (via a current notifier) when strips
+    # # were deleted but self was not. A bigger fix is needed, but for now try this
     myStrips = [self._project._data2Obj.get(x) for x in self._wrappedData.strips]
-    myStrips = [x for x in myStrips if x is not None]
-    if len(myStrips) <= 1 or not strips.intersection(myStrips):
-    # if not strips.intersection(self.strips) or len(self.strips) == 1:
-      # no strip in display is in current.strips, or only 1 strip in display, so disable removeStrip button
+    if len(myStrips) <= 1 or not strip in myStrips:
+      # current.strip not in display, or only 1 strip in display, so disable removeStrip button
       enabled = False
     else:
       enabled = True
     self.removeStripAction.setEnabled(enabled)
+
+    # strips = set(self._appBase.current.strips)
+    # # Rasmus HACK!
+    # # This code broke because it got triggered (via a current notifier) when strips
+    # # were deleted but self was not. A bigger fix is needed, but for now try this
+    # myStrips = [self._project._data2Obj.get(x) for x in self._wrappedData.strips]
+    # myStrips = [x for x in myStrips if x is not None]
+    # if len(myStrips) <= 1 or not strips.intersection(myStrips):
+    # # if not strips.intersection(self.strips) or len(self.strips) == 1:
+    #   # no strip in display is in current.strips, or only 1 strip in display, so disable removeStrip button
+    #   enabled = False
+    # else:
+    #   enabled = True
+    # self.removeStripAction.setEnabled(enabled)
 
 def _deletedPeak(peak:Peak):
   """Function for notifiers.

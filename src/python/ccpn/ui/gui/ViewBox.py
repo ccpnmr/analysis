@@ -105,6 +105,9 @@ class ViewBox(pg.ViewBox):
     yPosition = self.mapSceneToView(event.pos()).y()
     self.current.positions = [xPosition, yPosition]
 
+    # This is the correct future style for cursorPosition handling
+    self.current.cursorPosition = (xPosition, yPosition)
+
     if event.button() == QtCore.Qt.LeftButton:
     #
       if (event.modifiers() & QtCore.Qt.ShiftModifier):

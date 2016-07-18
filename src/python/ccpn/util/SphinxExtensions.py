@@ -100,7 +100,9 @@ def autodoc_process_docstring():
             ll.append("*%s*" % typ)
           if bool(obj.fset):
             # property is modifiable, add it to doc string
-            ll.append('*settable*')
+            ll.append('*mutable*')
+          else:
+            ll.append('*immutable*')
           if ll:
             #lines[:0] = [', '.join(ll) + '\n', '\n']
             lines[:0] = ['\- %s - ' % ', '.join(ll)]

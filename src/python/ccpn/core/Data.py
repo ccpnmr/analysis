@@ -33,8 +33,8 @@ from ccpn.core.DataSet import DataSet
 
 
 class Data(AbstractWrapperObject):
-  """CalculationStep information, for tracking successive calculations.
-  Orderd from oldest to newest"""
+  """Object storing links to the data structures (PeakLists, Spectra, StructureEnsembles etc.)
+  connected to a given DataSet, and their associated calculation parameters."""
   
   #: Short class name, for PID.
   shortClassName = 'DA'
@@ -71,14 +71,17 @@ class Data(AbstractWrapperObject):
     
   @property
   def _parent(self) -> DataSet:
-    """DataSet containing ccpn.Data."""
+    """DataSet containing Data."""
     return  self._project._data2Obj[self._wrappedData.nmrConstraintStore]
   
   calculationStep = _parent
   
   @property
   def attachedObjectPid(self) -> Optional[str]:
-    """Pid for attached object - used to calculate the attachedObject"""
+    """Pid for attached object - used to calculate the attachedObject
+
+    Remains unchanged also if the object pointed to is renamed or deleted, to
+    preserve, as far as possible, the original data."""
     return self._wrappedData.attachedObjectPid
 
   @attachedObjectPid.setter
@@ -87,10 +90,11 @@ class Data(AbstractWrapperObject):
 
   @property
   def attachedObject(self) -> Optional[AbstractWrapperObject]:
-    """attached object - synchronised with self.attachedObjectPid.
+    """attached object - derived from self.attachedObjectPid.
 
-    NB if the attached object is renamed, this is link is broken,
-    and the attachedObjectPid is kept unchanged"""
+    If no attached object matching attachedObjectPid can be found
+    (object has been renamed, deleted, or teh attachedObjectPid is incorrect)
+    this attriibute has the value None."""
     ss = self._wrappedData.attachedObjectPid
     if ss:
       return self.getByPid(ss)
@@ -108,8 +112,10 @@ class Data(AbstractWrapperObject):
   def parameters(self) -> dict:
     """Keyword-value dictionary of parameters.
     NB the value is a copy - modifying it will not modify the actual data.
+    Use the setParameter, deleteParameter, clearParameters, and updateParameters
+    methods to modify the parameters.
 
-    Values can be anything that can be exported to JSON,
+    Dictionary alues can be anything that can be exported to JSON,
     including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
     or pandas DataFrame, Series, or Panel"""
     return dict((x.name, x.value) for x in self._wrappedData.parameters)
@@ -138,12 +144,13 @@ class Data(AbstractWrapperObject):
       parameter.delete()
 
   def updateParameters(self, value:dict):
-    """update parameters"""
+    """Convenience routine, similar to dict.update().
+    Calls self.setParameter(key, value) for each key,value pair in the input."""
     for key,val in value.items():
       self.setParameter(key, val)
 
   def rename(self, value:str):
-    """Rename Data, changing its Id and Pid"""
+    """Rename Data, changing its nmme and Pid"""
     oldName = self.name
     undo = self._project._undo
     self._startFunctionCommandBlock('rename', value)
@@ -178,7 +185,7 @@ class Data(AbstractWrapperObject):
 
 def _newData(self:DataSet, name:str, attachedObjectPid:str=None,
              attachedObject:AbstractWrapperObject=None) -> Data:
-  """Create new ccpn.Data within ccpn.DataSet"""
+  """Create new Data within DataSet"""
 
   defaults = {'attachedObjectPid':None}
 

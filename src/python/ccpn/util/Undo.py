@@ -334,9 +334,9 @@ class Undo(deque):
     deque.clear(self)
 
   def canUndo(self) -> bool:
-    """Can an undo operation be performed?"""
+    """True if an undo operation can be performed?"""
     return self.nextIndex > 0
 
   def canRedo(self) -> bool:
-    """can a redo operation be performed"""
+    """True if a redo operation can be performed"""
     return self.nextIndex <= len(self)

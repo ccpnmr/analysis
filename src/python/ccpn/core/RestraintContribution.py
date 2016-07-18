@@ -288,7 +288,7 @@ def _newRestraintContribution(self:Restraint, targetValue:float=None, error:floa
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
                     scale:float=1.0, isDistanceDependent:bool=None, combinationId:int=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
-  """Create new ccpn.RestraintContribution within ccpn.Restraint"""
+  """Create new RestraintContribution within Restraint"""
 
 
   defaults = collections.OrderedDict(

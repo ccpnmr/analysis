@@ -29,7 +29,7 @@ from ccpn.util import Common as commonUtil
 class Tensor:
   """Rank 2 tensor value.
 
-  Unlike most other ccpn classes Tensor is NOT linked to a ccpn.Project and does not have a pid"""
+  Unlike most other ccpn classes Tensor is NOT linked to a Project and does not have a pid"""
 
   def __init__(self, xx:float=0.0, yy:float=0.0, zz:float=0.0,
                isotropic:float=0.0, axial:float=0.0, rhombic:float=0.0,

@@ -160,7 +160,7 @@ class SampleComponent(AbstractWrapperObject):
 
   @property
   def spectrumHits(self) -> Tuple[SpectrumHit, ...]:
-    """ccpn.SpectrumHits found for ccpn.SampleComponent"""
+    """ccpn.SpectrumHits found for SampleComponent"""
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._apiSampleComponent.sortedSpectrumHits())
 
@@ -184,7 +184,7 @@ def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
-  """Create new ccpn.SampleComponent within ccpn.Sample
+  """Create new SampleComponent within Sample
 
   Automatically creates the corresponding Substance if the name is not already taken
   """

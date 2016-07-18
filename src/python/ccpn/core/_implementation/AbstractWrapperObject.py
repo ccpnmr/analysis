@@ -214,7 +214,7 @@ class AbstractWrapperObject():
 
   @property
   def isDeleted(self) -> bool:
-    """Is object deleted?"""
+    """True if this object is deleted."""
     return (not hasattr(self, '_wrappedData') or self._wrappedData is None)
   
   # CCPN abstract properties
@@ -260,7 +260,7 @@ class AbstractWrapperObject():
     raise NotImplementedError("Code error: function not implemented")
 
   def rename(self, value:str):
-    """Change the object name or other key attribute(s), changing the object id, pid,
+    """Change the object name or other key attribute(s), changing the object pid,
        and all internal references to maintain consistency.
        Some Objects (Chain, Residue, Atom) cannot be renamed"""
     raise ValueError("%s objects cannot be renamed" % self.__class__.__name__)
@@ -283,7 +283,7 @@ class AbstractWrapperObject():
     self._wrappedData.delete()
 
   def getByPid(self, pidstring:str) :
-    """Get an arbitrary ccpn.Object from either its pid (e.g. 'SP:HSQC2') or its longPid
+    """Get an arbitrary data object from either its pid (e.g. 'SP:HSQC2') or its longPid
     (e.g. 'Spectrum:HSQC2'
 
     Returns None for invalid or unrecognised input strings."""

@@ -24,7 +24,7 @@ __version__ = "$Revision$"
 
 import os
 
-# NB this import cna cause circular imports, but ccpn.__init__ makes sure it does not happen
+# NB this import can cause circular imports, but ccpn.__init__ makes sure it does not happen
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import ApiPath

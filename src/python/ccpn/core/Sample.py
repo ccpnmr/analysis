@@ -126,7 +126,7 @@ class Sample(AbstractWrapperObject):
 
   @property
   def isHazardous(self) -> bool:
-    """is sample a hazard?"""
+    """True if this Sample is a hazard?"""
     return self._wrappedData.isHazard
 
   @isHazardous.setter
@@ -135,7 +135,8 @@ class Sample(AbstractWrapperObject):
 
   @property
   def isVirtual(self) -> bool:
-    """is sample virtual? Virtual samples serve as templates and may not be linked to Spectra"""
+    """True if this sample is virtual and does not describe an actual Sample..
+    Virtual samples serve as templates and may not be linked to Spectra"""
     return self._wrappedData.isVirtual
 
   @isVirtual.setter
@@ -198,7 +199,8 @@ class Sample(AbstractWrapperObject):
 
   @property
   def spectra(self) -> Tuple[Spectrum, ...]:
-    """ccpn.Spectra acquired using ccpn.Sample (excluding multiSample spectra)"""
+    """ccpn.Spectra acquired using
+     ccpn.Sample (excluding multiSample spectra)"""
     ff = self._project._data2Obj.get
     return tuple(ff(y) for x in self._wrappedData.sortedNmrExperiments()
                  for y in x.sortedDataSources())
@@ -210,7 +212,7 @@ class Sample(AbstractWrapperObject):
 
   @property
   def spectrumHits(self) -> Tuple[SpectrumHit, ...]:
-    """ccpn.SpectrumHits that were found using ccpn.Sample"""
+    """SpectrumHits that were found using Sample"""
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._apiSample.sortedSpectrumHits())
 
@@ -222,7 +224,7 @@ class Sample(AbstractWrapperObject):
 
   # Implementation functions
   def rename(self, value:str):
-    """Rename Sample, changing its Id and Pid"""
+    """Rename Sample, changing its name and Pid."""
     oldName = self.name
     self._startFunctionCommandBlock('rename', value)
     undo = self._project._undo
@@ -258,7 +260,7 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
                amount:float=None, amountUnit:str=None, isVirtual:bool=False, isHazardous:bool=None,
                creationDate:datetime=None, batchIdentifier:str=None, plateIdentifier:str=None,
                rowNumber:int=None, columnNumber:int=None, comment:str=None) -> Sample:
-  """Create new ccpn.Sample"""
+  """Create new Sample"""
 
   # Default values for 'new' function, as used for echoing to console
   defaults = collections.OrderedDict(

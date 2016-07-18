@@ -34,8 +34,11 @@ from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import AbstractConstraintList 
 from ccpn.util.Tensor import Tensor
 
 class RestraintList(AbstractWrapperObject):
-  """ RestraintList - A container for restraints, with type determined by the restraintType
-  attribute. Typical examples are Distance and Dihedral restraints, but can also be used to store
+  """ An object containing Restraints. Note: the object is not a (subtype of a) Python list.
+  To access all rRstraint objects, use RestraintList.restraints.
+
+  RThe type of restraint is determined by the restraintType attribute.
+  Typical examples are Distance, Dihedral and Rdc restraints, but can also be used to store
   measurements or derived values (Rdc, J coupling, T1, T2, Chemical Shift, ...)
   """
 
@@ -125,7 +128,7 @@ class RestraintList(AbstractWrapperObject):
     
   @property
   def _parent(self) -> DataSet:
-    """DataSet containing ccpn.RestraintList."""
+    """DataSet containing RestraintList."""
     return  self._project._data2Obj[self._wrappedData.nmrConstraintStore]
   
   dataSet = _parent
@@ -242,7 +245,7 @@ class RestraintList(AbstractWrapperObject):
     
   # Implementation functions
   def rename(self, value:str):
-    """rename RestraintList, changing Id and Pid"""
+    """rename RestraintList, changing its name and Pid."""
     if not value:
       raise ValueError("RestraintList name must be set")
 
@@ -268,7 +271,7 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                       tensorIsotropicValue:float=0.0, tensorChainCode:str=None,
                       tensorSequenceCode:str=None, tensorResidueType:str=None,
                       serial=None) -> RestraintList:
-  """Create new ccpn.RestraintList of type restraintType within ccpn.DataSet"""
+  """Create new RestraintList of type restraintType within DataSet"""
 
 
 

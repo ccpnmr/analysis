@@ -593,7 +593,15 @@ class NmrResidue(AbstractWrapperObject):
       self._project._appBase._endCommandBlock()
 
   def rename(self, value:str=None):
-    """Rename NmrResidue. 'None' deassigns; partly set names ('.xyz' or 'xyz.' partly deassign"""
+    """Rename NmrResidue. changing its sequenceCode, residiueType, or both.
+
+    The value is a dot-separated string `sequenceCode`.`residueType`.
+    Values like None, 'abc', or 'abc.' will set the residueType to None.
+    Values like None or '.abc' will set the sequenceCode to None,
+    resetting it to its canonical form, '@`serial`."""
+
+    # NBNB TODO - consider changing signature to sequenceCode, residueType
+
     apiResonanceGroup = self._apiResonanceGroup
     sequenceCode = residueType = None
     if value:
@@ -823,7 +831,7 @@ del setter
 
 def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:str=None,
                    comment:str=None) -> NmrResidue:
-  """Create new ccpn.NmrResidue within ccpn.NmrChain"""
+  """Create new NmrResidue within NmrChain"""
 
   originalSequenceCode = sequenceCode
 

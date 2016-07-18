@@ -94,7 +94,7 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def isDisplayed(self) -> bool:
-    """Is spectrum displayed?"""
+    """True if this spectrum is displayed."""
     return self._wrappedData.spectrumView.isDisplayed
 
   @isDisplayed.setter
@@ -163,7 +163,7 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def displayPositiveContours(self) -> bool:
-    """Are positive contours displayed?"""
+    """True if positive contours are displayed?"""
     return self._wrappedData.spectrumView.displayPositiveContours
 
   @displayPositiveContours.setter
@@ -232,7 +232,7 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def displayNegativeContours(self) -> bool:
-    """Are negative contours displayed?"""
+    """True if negative contours are displayed?"""
     return self._wrappedData.spectrumView.displayNegativeContours
 
   @displayNegativeContours.setter

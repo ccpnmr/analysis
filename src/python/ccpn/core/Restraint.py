@@ -249,7 +249,7 @@ del setter
 # Connections to parents:
 def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None,
                   peaks:Sequence=(), vectorLength:float=None, serial:int=None) -> Restraint:
-  """Create new ccpn.Restraint within ccpn.RestraintList.
+  """Create new Restraint within RestraintList.
 
   ADVANCED: Note that you just create at least one RestraintContribution afterwards in order to
   have valid data. Use the simpler createSimpleRestraint instead, unless you have specific

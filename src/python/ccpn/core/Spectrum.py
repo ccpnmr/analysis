@@ -887,7 +887,7 @@ class Spectrum(AbstractWrapperObject):
   # Implementation functions
 
   def rename(self, value:str):
-    """Rename Spectrum, changing Id and Pid"""
+    """Rename Spectrum, changing its name and Pid"""
     if value:
       self._startFunctionCommandBlock('rename', value)
       try:
@@ -949,8 +949,8 @@ class Spectrum(AbstractWrapperObject):
 
 
 def _newSpectrum(self:Project, name:str) -> Spectrum:
-  """Creation of new ccpn.Spectrum NOT IMPLEMENTED.
-  Use ccpn.Project.loadData or ccpn.Project.createDummySpectrum instead"""
+  """Creation of new Spectrum NOT IMPLEMENTED.
+  Use Project.loadData or Project.createDummySpectrum instead"""
 
   raise NotImplementedError("Not implemented. Use loadSpectrum instead")
 

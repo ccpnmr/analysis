@@ -92,13 +92,13 @@ class Chain(AbstractWrapperObject):
     self._wrappedData.role = value
 
   @property
-  def isCyclic(self) -> str:
-    """Is this a cyclic polymer?"""
-    return self._wrappedData.molecule.isCyclic
+  def isCyclic(self) -> bool:
+    """True if this is a cyclic polymer."""
+    return self._wrappedData.molecule.isStdCyclic
   
   @property
   def comment(self) -> str:
-    """Free-form text comment"""
+    """Free-form text comment."""
     return self._wrappedData.details
     
   @comment.setter
@@ -107,7 +107,7 @@ class Chain(AbstractWrapperObject):
 
   @property
   def substance(self) -> Optional[Substance]:
-    """ccpn.Substance with sequence matching to ccpn.Chain
+    """Substance with sequence matching to Chain
 
     If there are multiple matches, select labeling=='std'
     or, failing that, the first found (sorting alphabetically on labeling)"""
@@ -164,7 +164,7 @@ class Chain(AbstractWrapperObject):
   # Implementation functions
 
   def rename(self, value:str):
-    """Rename Chain, changing its Id and Pid"""
+    """Rename Chain, changing its shortName and Pid."""
     if value:
       previous = self._project.getChain(value.translate(Pid.remapSeparators))
       if previous not in (None, self):
@@ -254,7 +254,7 @@ del _createChain
 
 def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
                              comment:str=None) -> Chain:
-  """Create new ccpn.Chain that matches ccpn.Substance"""
+  """Create new Chain that matches Substance"""
   defaults = collections.OrderedDict((('shortName', None), ('role', None), ('comment', None)))
 
   if self.substanceType != 'Molecule':

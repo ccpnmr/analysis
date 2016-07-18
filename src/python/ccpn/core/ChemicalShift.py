@@ -91,7 +91,7 @@ class ChemicalShift(AbstractWrapperObject):
     return self._wrappedData.figOfMerit
 
   @figureOfMerit.setter
-  def figureOfMerit(self, value:str):
+  def figureOfMerit(self, value:float):
     self._wrappedData.figOfMerit = value
   
   @property
@@ -128,7 +128,7 @@ del getter
 def _newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
                      valueError:float=0.0, figureOfMerit:float=1.0,
                      comment:str=None) -> ChemicalShift:
-  """Create new ccpn.ChemicalShift within ccpn.ChemicalShiftList"""
+  """Create new ChemicalShift within ChemicalShiftList."""
 
   nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
   defaults = collections.OrderedDict((('valueError', 0.0), ('figureOfMerit', 1.0),

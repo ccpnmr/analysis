@@ -46,7 +46,14 @@ from ccpnmodel.ccpncore.lib.spectrum.formats.Lookup import readXls,readCsv
 
 
 class Project(AbstractWrapperObject):
-  """Project (root) object. Corresponds to API: NmrProject"""
+  """ The Project is the object that contains all data objects and serves as the hub for
+  navigating between them.
+
+  There are eleven top-level data objects directly within a project, of which seven have child
+  objects of their own, namely Spectrum, Sample, Chain, NmrChain, ChemicalShiftList, DataSet
+  and StructureEnsemble. The child data objects are organised in a logical hierarchy; for example,
+  a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain is made up of
+  -Residues, which are made up of Atoms. """
   
   #: Short class name, for PID.
   shortClassName = 'PR'

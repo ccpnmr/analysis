@@ -11,39 +11,107 @@ Class Hierarchy
 ^^^^^^^^^^^^^^^
 
 Classes are organised in a hierarchy, with all data objects ultimately contained within the Project:
+The diagram shows the hierarchy, with child objects displaced to the right of the containing parent
+object. E.g. Spectrum, SpectrumGroup, and DataSet are all children of Project; PeakList and
+IntegralList are both children of Spectrum; and Peak is a child of PeakList.
 
 ::
 
   Project
-  |       Spectrum
-  |       |       SpectrumReference
-  |       |       PeakList
-  |       |       |       Peak
-  |       |       IntegralList
-  |       |       |       Integral
-  |       |       PseudoDimension
-  |       |       SpectrumHit
-  |       SpectrumGroup
-  |       Sample
-  |       |       SampleComponent
-  |       Substance
-  |       Chain
-  |       |       Residue
-  |       |       |       Atom
-  |       NmrChain
-  |       |       NmrResidue
-  |       |       |       NmrAtom
-  |       ChemicalShiftList
-  |       |       ChemicalShift
-  |       DataSet
-  |       |       RestraintList
-  |       |       |       Restraint
-  |       |       |       |       RestraintContribution
-  |       |       CalculationStep
-  |       |       Data
-  |       StructureEnsemble
-  |       |       Model
-  |       Note
+  \-------Spectrum
+          \-------SpectrumReference
+          \-------PeakList
+                  \-------Peak
+          \-------IntegralList
+                  \-------Integral
+          \-------PseudoDimension
+          \-------SpectrumHit
+  \-------SpectrumGroup
+  \-------Sample
+          \-------SampleComponent
+  \-------Substance
+  \-------Chain
+          \-------Residue
+                  \-------Atom
+  \-------Complex
+  \-------NmrChain
+          \-------NmrResidue
+                  \-------NmrAtom
+  \-------ChemicalShiftList
+          \-------ChemicalShift
+  \-------DataSet
+          \-------RestraintList
+                  \-------Restraint
+                          \-------RestraintContribution
+          \-------CalculationStep
+          \-------Data
+  \-------StructureEnsemble
+          \-------Model
+  \-------Note
+
+The **Project** object serves as container for all other data objects and the starting
+point for navigation.
+
+A **Spectrum** contains all the stored properties of a spectrum, as well as the path to the
+stored NMR data file.
+
+A **SpectrumReference** holds detailed information about axes and referencing needed for
+e.g. multple-quantum, projection, and reduced-dimensionality experiments.
+
+A **PeakList** serves as a container for **Peak** objects,
+which contain Peak position, intensity and assignment information.
+
+An **IntegralList** serves as a container for **Integral**
+objects, which contain Integral intervals and values.
+
+A **PseudoDimension** object is used to describe
+sampled-value axes, such as the time delay axis for T1 experiments.
+
+A **SpectrumHis** object is used in screening and metabolomics implementations to describe
+that a Substance has been found to be present (metabolomics) or active (screening) in a given
+spectrum.
+
+A **SpectrumGroup** combines multiple Spectrum objects, so they can be treated as a single object.
+
+A **Sample** corresponds to an NMR sample. It is made up of **SampleComponents**, which indicate
+which individual chemical entities make up that Sample, (e.g. protein, buffer, salt), and
+their concentrations.
+
+A **Substance** object represents a defined chemical entity, e.g. Lysozyme, ATP, NaCl, or (less
+commonly) a composite material like fetal calf serum or standard lysis buffer.
+
+A **Chain** object corresponds to a molecular chain. It is made up of **Residue** objects,
+which in turn are made up of **Atom** objects.
+
+A **Complex** is a group of chain objects, combined so that they can be treated as a single
+object.
+
+Assignment is done through a hierarchy of **NmrChain**, **NmrResidue**, and **NmrAtom**
+objects. that parallels the hierarchy of molecular chains. An NmrChain (NmrResidue, Atom) is
+considered assigned to the Chain (Residue, Atom) with the same ID.
+NmrAtom objects serve as a way of connecting a named nucleus to an observed chemical shift, and
+peaks are assigned to NmrAtoms.
+
+A **ChemicalShiftList** object is a container for **ChemicalShift** objects, which represent
+observed chemical shifts.
+
+**DataSet** objects serve to group RestraintLists and other input and output from a
+calculation.
+
+A **RestraintList** contains **Restraint** Objects of a specific type (distance, dihedral, etc.).
+**RestraintContribution** objects hold the detailed information; they are needed for
+complex restraints, like coupled phi and psi dihedral restraints.
+
+The **CalculatioinStep** object is used to track the calculation history of DataSets, storing
+input and output DataSet IDs, and the names of the programs used.
+
+**Data** object storing links to the data structures (PeakLists, Spectra, StructureEnsembles
+etc.) connected to a given DataSet, and their associated calculation parameters.
+
+A **StructureEnsemble** object is a container for ensembles of coordinate structures, with each
+coordinate structure defined by a **Model** object.
+
+**Note** objects contain free-text information to be stored in a project.
 
 
 Common Class elements
@@ -90,7 +158,7 @@ Delete object, with all contained objects and underlying data.
 
 **getByPid(pidString)**
 
-Get an arbitrary ccpn.Object from either its pid (e.g. 'SP:HSQC2') or its longPid
+Get an arbitrary data object from either its pid (e.g. 'SP:HSQC2') or its longPid
 (e.g. 'Spectrum:HSQC2'
 
 Returns None for invalid or unrecognised input strings.
@@ -109,7 +177,7 @@ There are no public getter and setter functions. For collections you will get an
 of the internal collection, to prevent accidental modification of the data
 (e.g. myPeakList.peaks will return a tuple, not a list)
 
-Each object has a link to the containing object (e.g. myPeakList.spectrum)
+Each object has a link to the containing (parent) object (e.g. myPeakList.spectrum)
 
 Each class has a link to contained objects,
 and a function to get a contained object by relative id.

@@ -29,7 +29,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from typing import Optional, Tuple, Sequence, List
 
 class Integral(AbstractWrapperObject):
-  """n-dimensional Integral. Includes values for per-dimension values.
+  """n-dimensional Integral. Includes fields for per-dimension values.
   """
   
   #: Short class name, for PID.
@@ -230,7 +230,7 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
                  figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
                  limits:Sequence[Tuple[float,float]]=(),
                  pointLimits:Sequence[Tuple[float,float]]=()) -> Integral:
-  """Create new ccpn.Integral within ccpn.IntegralList"""
+  """Create new Integral within IntegralList"""
 
   defaults = collections.OrderedDict((('value', None), ('valueError', None), ('bias', None),
                                      ('slopes', None), ('figureOfMerit', 1.0), ('annotation', None),

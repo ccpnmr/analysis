@@ -31,9 +31,6 @@ from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
 
 
-# from ccpn.core.lib import Pid
-
-
 class Model(AbstractWrapperObject):
   """ ccpn.Model - Structural Model, or one member of the structure ensemble."""
   
@@ -57,7 +54,7 @@ class Model(AbstractWrapperObject):
   # CCPN properties
   @property
   def _apiModel(self) -> ApiModel:
-    """ API Model matching ccpn.Model"""
+    """ API Model matching Model"""
     return self._wrappedData
 
   @property
@@ -72,14 +69,14 @@ class Model(AbstractWrapperObject):
     
   @property
   def _parent(self) -> StructureEnsemble:
-    """ccpn.StructureEnsemble containing ccpn.Model."""
+    """StructureEnsemble containing Model."""
     return  self._project._data2Obj[self._wrappedData.structureEnsemble]
   
   structureEnsemble = _parent
   
   @property
   def title(self) -> str:
-    """title of Model"""
+    """title of Model (not used in PID)."""
     return self._wrappedData.name
 
   @title.setter

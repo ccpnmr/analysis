@@ -62,6 +62,14 @@ class PeakTable(CcpnModule):
     Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
     self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peak')
+    self.project.unRegisterNotifier('Peak', 'create', self._refreshPeakTable)
+    self.project.unRegisterNotifier('Peak', 'modify', self._refreshPeakTable)
+    self.project.unRegisterNotifier('Peak', 'rename', self._refreshPeakTable)
+    self.project.unRegisterNotifier('Peak', 'delete', self._refreshPeakTable)
+    self.project.unRegisterNotifier('PeakList', 'create', self._updatePeakLists)
+    self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
+    self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
+    self.project.unRegisterNotifier('PeakList', 'delete', self._updatePeakLists)
     self.close()
 
 
@@ -178,17 +186,17 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.registerNotifier('PeakList', 'rename', self._updatePeakLists, onceOnly=True)
     self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists, onceOnly=True)
 
-
-  def _closeModule(self):
-    self.project.unRegisterNotifier('Peak', 'create', self._refreshPeakTable)
-    self.project.unRegisterNotifier('Peak', 'modify', self._refreshPeakTable)
-    self.project.unRegisterNotifier('Peak', 'rename', self._refreshPeakTable)
-    self.project.unRegisterNotifier('Peak', 'delete', self._refreshPeakTable)
-    self.project.unRegisterNotifier('PeakList', 'create', self._updatePeakLists)
-    self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
-    self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
-    self.project.unRegisterNotifier('PeakList', 'delete', self._updatePeakLists)
-    self.close()
+  #
+  # def _closeModule(self):
+  #   self.project.unRegisterNotifier('Peak', 'create', self._refreshPeakTable)
+  #   self.project.unRegisterNotifier('Peak', 'modify', self._refreshPeakTable)
+  #   self.project.unRegisterNotifier('Peak', 'rename', self._refreshPeakTable)
+  #   self.project.unRegisterNotifier('Peak', 'delete', self._refreshPeakTable)
+  #   self.project.unRegisterNotifier('PeakList', 'create', self._updatePeakLists)
+  #   self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
+  #   self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
+  #   self.project.unRegisterNotifier('PeakList', 'delete', self._updatePeakLists)
+  #   self.close()
 
 
   def _updatePeakLists(self, value):

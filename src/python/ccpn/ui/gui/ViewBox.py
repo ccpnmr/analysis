@@ -264,10 +264,10 @@ class ViewBox(pg.ViewBox):
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod='gaussian')
 
-            self.current.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
-            self.current.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
-                                       selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
-                apiSpectrumView.spectrumView.displayNegativeContours))
+            # self.current.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
+            # self.current.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
+            #                            selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
+            #     apiSpectrumView.spectrumView.displayNegativeContours))
           else:
             y0 = startPosition.y()
             y1 = endPosition.y()

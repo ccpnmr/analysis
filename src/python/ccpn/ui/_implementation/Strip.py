@@ -345,14 +345,15 @@ class Strip(AbstractWrapperObject):
 
     orderedAxes = self.orderedAxes
     for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
-      zPosition = peak.position[zDataDim.dimensionIndex]
-      # NBNB W3e do not think this should add anything - the region should be set correctly.
-      # RHF, WB
-      # zPlaneSize = zDataDim.getDefaultPlaneSize()
-      zPlaneSize = 0.
-      zRegion = orderedAxes[2+ii].region
-      if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
-        return False
+      if zDataDim:
+        zPosition = peak.position[zDataDim.dimensionIndex]
+        # NBNB W3e do not think this should add anything - the region should be set correctly.
+        # RHF, WB
+        # zPlaneSize = zDataDim.getDefaultPlaneSize()
+        zPlaneSize = 0.
+        zRegion = orderedAxes[2+ii].region
+        if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
+          return False
     #
     return True
 

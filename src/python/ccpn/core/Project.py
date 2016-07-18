@@ -167,7 +167,7 @@ class Project(AbstractWrapperObject):
 
     Cleanup includes wrapped data graphics objects (e.g. Window, Strip, ...)"""
     # Remove undo stack:
-    self._logger.info("project._close()")
+    self._logger.info("Closing %s" % self.path)
 
     self._resetUndo(maxWaypoints=0)
 

@@ -22,34 +22,8 @@ __version__ = ": 7686 $"
 
 import sys
 import os
-import time
 import json
-
-class Time(float):
-    """Simple class to print time in ascii, represented as floats as in time.time()"""
-    def __str__(self):
-        """Print as a string"""
-        return time.asctime(time.localtime(self))
-
-    def __add__(self, other):
-      t = float(self) + float(other)
-      return Time(t)
-
-    def __sub__(self, other):
-      t = float(self) - float(other)
-      return Time(t)
-
-    @staticmethod
-    def fromString(string):
-        """Make from a string, inverse of __str__"""
-        return Time(time.mktime(time.strptime(string)))
-#end class
-    
-def now():
-    return Time(time.time())
-day = 24*3600.0
-week = 7*day
-year = 365*day
+from ccpn.util.Time import Time, now, day, week, year
 
 def decode(key, string):
     #string = string.decode()

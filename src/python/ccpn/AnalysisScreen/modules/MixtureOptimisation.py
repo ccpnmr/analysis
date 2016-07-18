@@ -139,10 +139,10 @@ class MixtureOptimisation(CcpnModule):
     self.settingFrameLayout.addWidget(self.scoringListWidget)
 
     ######## ======== Set Buttons  ====== ########
-    self.panelButtons = ButtonList(self, texts=['Show Status', 'Show Graph', 'Cancel', 'Perform','Apply'],
-                                   callbacks=[None, None, None, self._recalculateMixtures, self._applyNewMixtures],
-                                   icons=[None, None, None, None, None],
-                                   tipTexts=[None, None, None, None, None],
+    self.panelButtons = ButtonList(self, texts=[ 'Perform','Apply'],
+                                   callbacks=[self._recalculateMixtures, self._applyNewMixtures],
+                                   icons=[None, None],
+                                   tipTexts=[ None, None],
                                    direction='H')
     self.buttonsFrameLayout.addWidget(self.panelButtons)
     # self._disableButtons()

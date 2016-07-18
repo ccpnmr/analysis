@@ -314,7 +314,7 @@ class Framework:
 
     if self.ui:
       if not self._isRegistered():
-        popup = RegisterPopup(version=self.applicationVersion, modal=True)
+        popup = RegisterPopup(self.ui.mainWindow, version=self.applicationVersion, modal=True)
         popup.show()
         popup.raise_()
         popup.exec_()
@@ -1378,6 +1378,9 @@ class Framework:
     self.submitMacroPopup.show()
     self.submitMacroPopup.raise_()
 
+  def showLicense(self):
+    from ccpn.framework.PathsAndUrls import licensePath
+    self._systemOpen(licensePath)
 
 
   #########################################    End Menu callbacks   ##################################################

@@ -103,7 +103,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
   def _setSubstanceWidgets(self):
     self.substanceLabel = Label(self, text="Current Substances")
     self.substancePulldownList = PulldownList(self)
-    self.substancePulldownList.setFixedWidth(210)
+    self.substancePulldownList.setMinimumWidth(210)
     if self.newSampleComponentToCreate:
       self._fillsubstancePulldownList()
       self.substancePulldownList.activated[str].connect(self._fillInfoFromSubstance)
@@ -111,6 +111,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
   def componentNameEditWidget(self):
     self.sampleComponentNewNameLabel = Label(self, text="Name")
     self.nameComponentLineEdit = LineEdit(self)
+    # self.nameComponentLineEdit.setMinimumWidth(216)
     self.nameComponentLineEdit.editingFinished.connect(self._updateButtons)
     self.nameComponentLineEdit.setReadOnly(False)
     self.nameComponentLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)
@@ -124,7 +125,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
   def setLabelingWidget(self):
     self.sampleComponentLabelingLabel = Label(self, text="Labeling")
     self.labelingPulldownList = PulldownList(self)
-    self.labelingPulldownList.setFixedWidth(210)
+    self.labelingPulldownList.setMinimumWidth(210)
     self.labelingPulldownList.setData(Labeling)
     self.labelingPulldownList.setEnabled(False)
     self.labelingPulldownList.activated[str].connect(self._labelingSpecialCases)
@@ -138,7 +139,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
   def componentRoleWidget(self):
     self.typeLabel = Label(self,text="Role")
     self.typePulldownList = PulldownList(self)
-    self.typePulldownList.setFixedWidth(210)
+    self.typePulldownList.setMinimumWidth(210)
     self.typePulldownList.setData(TYPECOMPONENT)
     if self.sampleComponent:
       self.typePulldownList.set(str(self.sampleComponent.role))
@@ -146,7 +147,7 @@ class EditSampleComponentPopup(QtGui.QDialog):
   def concentrationUnitWidget(self):
     self.concentrationUnitLabel = Label(self, text="Concentration Unit")
     self.concentrationUnitPulldownList = PulldownList(self)
-    self.concentrationUnitPulldownList.setFixedWidth(210)
+    self.concentrationUnitPulldownList.setMinimumWidth(210)
     self.concentrationUnitPulldownList.setData(C_COMPONENT_UNIT)
     if self.sampleComponent:
       self.concentrationUnitPulldownList.set(str(self.sampleComponent.concentrationUnit))
@@ -196,7 +197,6 @@ class EditSampleComponentPopup(QtGui.QDialog):
       self.substancePulldownList.set('Select an option')
 
   def _editorOptionWidgets(self):
-    self.setFixedHeight(250)
     self.spacerLabel.hide()
     self.selectInitialRadioButtons.hide()
     self.substanceLabel.hide()

@@ -74,7 +74,7 @@ class SpectrumGroupEditor(QtGui.QDialog):
   def _setApplyButtons(self):
     self.applyButtons = ButtonList(self, texts=['Cancel', 'Restore', 'Apply', 'Ok'],
                                    callbacks=[self.reject, self._restoreButton, self._applyChanges, self._okButton],
-                                   tipTexts=['close pop up', '', 'cancel the last action', None], direction='h',
+                                   tipTexts=['', '', '', None], direction='h',
                                    hAlign='r')
     if self.addNewSpectrumGroup:  # Restore button disabled
       self.applyButtons.buttons[1].setEnabled(False)

@@ -27,7 +27,7 @@ __author__ = 'rhf22'
 
 import typing
 
-from ccpn.core.lib import Version
+from ccpn.framework import Version
 from ccpn.util import Path as corePath
 import subprocess
 import os

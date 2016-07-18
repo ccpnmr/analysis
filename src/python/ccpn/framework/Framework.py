@@ -31,14 +31,13 @@ from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
-from ccpn.core.lib.Version import applicationVersion
 from ccpn.core.PeakList import PeakList
 
 from ccpn.util import Path
 from ccpn.util import Register
 from ccpn.util.AttrDict import AttrDict
 
-from ccpn.core.lib import Version
+from ccpn.framework import Version
 
 from ccpn.framework.Translation import languages, defaultLanguage
 from ccpn.framework.Translation import translator
@@ -135,7 +134,7 @@ class Arguments:
 def getFramework(projectPath=None, **kw):
 
   args = Arguments(projectPath=projectPath, **kw)
-  result = Framework('CcpNmr', applicationVersion, args)
+  result = Framework('CcpNmr', Version.applicationVersion, args)
   result.start()
   #
   return result

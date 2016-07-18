@@ -23,6 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 from PyQt4 import QtCore, QtGui
 
+from ccpn.framework.PathsAndUrls import ccpnUrl
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
@@ -166,7 +168,7 @@ class UtilityButtonList(ButtonList):
       
     elif self.popup:
       from ccpn.ui.gui.widgets.WebView import WebViewPopup
-      popup = WebViewPopup(self.popup, url=self.helpMsg or 'http://www.ccpn.ac.uk/documentation')  
+      popup = WebViewPopup(self.popup, url=self.helpMsg or ccpnUrl + '/documentation')
   
   def closePopup(self):
   
@@ -193,7 +195,7 @@ if __name__ == '__main__':
   popup = BasePopup(title='Test ButtonList')
   popup.setSize(200,60)
   buttons = ButtonList(parent=popup, texts=texts, callbacks=callbacks, icons=icons)
-  utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl="http://www.ccpn.ac.uk/software")
+  utils = UtilityButtonList(parent=popup, texts=texts, callbacks=callbacks, helpUrl=ccpnUrl+"/software")
   
   app.start()
 

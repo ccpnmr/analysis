@@ -29,8 +29,9 @@ import sys
 import uuid
 
 from ccpn.util import Logging
-
 from ccpn.util import Url
+
+from ccpn.framework.PathsAndUrls import ccpn2Url
 
 userAttributes = ('name', 'organisation', 'email')
 
@@ -40,7 +41,7 @@ def _registrationPath():
 
 def _registrationServerScript():
 
-  return 'http://www2.ccpn.ac.uk/cgi-bin/register/registerV3'
+  return ccpn2Url + '/cgi-bin/register/registerV3'
 
 def loadDict():
 

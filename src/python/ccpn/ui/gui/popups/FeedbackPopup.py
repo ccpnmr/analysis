@@ -30,6 +30,8 @@ import random
 
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
+from ccpn.framework.PathsAndUrls import ccpn2Url
+
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
@@ -45,7 +47,7 @@ from ccpn.util import Url
 LOG_FILE_TEXT = 'Log file'
 PROJECT_DIR_TEXT = 'Project directory'
 
-SCRIPT_URL = 'http://www2.ccpn.ac.uk/cgi-bin/feedback/submitFeedback.py'
+SCRIPT_URL = ccpn2Url + '/cgi-bin/feedback/submitFeedback.py'
 
 # code below has to be synchronised with code in SCRIPT_URL
 

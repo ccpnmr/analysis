@@ -9,11 +9,12 @@ from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.MessageDialog import showError
+from ccpn.framework.PathsAndUrls import ccpnUrl
 ###from ccpn.ui.gui.widgets.WebView import WebViewPanel
 
 from ccpn.util import Register
 
-licenseUrl = 'http://www.ccpn.ac.uk/license'
+licenseUrl = ccpnUrl + '/license'
 
 class RegisterPopup(QtGui.QDialog):
 

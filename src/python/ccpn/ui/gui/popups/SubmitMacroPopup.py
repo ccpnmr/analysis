@@ -30,6 +30,8 @@ import urllib
 
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
+from ccpn.framework.PathsAndUrls import ccpn2Url
+
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
@@ -41,7 +43,7 @@ from ccpn.ui.gui.widgets.TextEditor import TextEditor
 from ccpn.util import Register
 from ccpn.util import Url
 
-SCRIPT_URL = 'http://www2.ccpn.ac.uk/cgi-bin/macros/submitMacro.py'
+SCRIPT_URL = ccpn2Url + '/cgi-bin/macros/submitMacro.py'
 
 # code below has to be synchronised with code in SCRIPT_URL
 

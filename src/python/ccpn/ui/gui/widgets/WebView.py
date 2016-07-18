@@ -24,6 +24,8 @@ __version__ = "$Revision$"
 
 from PyQt4 import QtCore, QtGui, QtWebKit
 
+from ccpn.framework.PathsAndUrls import ccpnUrl
+
 from ccpn.ui.gui.widgets.BasePopup import BasePopup
 from ccpn.ui.gui.widgets.Base import Base
 
@@ -65,7 +67,7 @@ if __name__ == '__main__':
   
   app = TestApplication()
 
-  popup = WebViewPopup(url='http://www.ccpn.ac.uk')
+  popup = WebViewPopup(url=ccpnUrl)
   
   popup.show()
   popup.raise_()

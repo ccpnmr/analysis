@@ -269,26 +269,27 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
     newMixtures = annealMixtures(mixtures,coolingMethod=coolingMethod, startTemp=startTemp, finalTemp=finalTemp,
                                  maxSteps=maxSteps, tempK=tempK, minDistance=minDistance)
     copyNewMixtures = copy.deepcopy(newMixtures)
-    currScore = calculateTotalScore(newMixtures,minDistance)
-    if currScore == 0:
-      # showScoresPerMixture(copyNewMixtures,minDistance)
-      return copyNewMixtures
-    if currScore <= startingScore:
-      print(currScore, 'Step Score')
-      bestIteration.update({currScore: copyNewMixtures})
-      startingScore = currScore
-    i += 1
-  # print('Best bestIteration', bestIteration)
-  if len(bestIteration)>0:
-    bestMixtures = findBestMixtures(bestIteration)
-    print(calculateTotalScore(bestMixtures,minDistance), 'Best Score')
-    # showScoresPerMixture(bestMixtures,minDistance)
-    return bestMixtures
-  else:
-    print('No Better Iteration found, original mixtures are returned')
-    sc = calculateTotalScore(copyMixtures, minDistance)
-    print('startingScore', sc)
-    return copyMixtures
+    if newMixtures:
+      currScore = calculateTotalScore(newMixtures,minDistance)
+      if currScore == 0:
+        # showScoresPerMixture(copyNewMixtures,minDistance)
+        return copyNewMixtures
+      if currScore <= startingScore:
+        print(currScore, 'Step Score')
+        bestIteration.update({currScore: copyNewMixtures})
+        startingScore = currScore
+      i += 1
+    # print('Best bestIteration', bestIteration)
+    if len(bestIteration)>0:
+      bestMixtures = findBestMixtures(bestIteration)
+      print(calculateTotalScore(bestMixtures,minDistance), 'Best Score')
+      # showScoresPerMixture(bestMixtures,minDistance)
+      return bestMixtures
+    else:
+      print('No Better Iteration found, original mixtures are returned')
+      sc = calculateTotalScore(copyMixtures, minDistance)
+      print('startingScore', sc)
+      return copyMixtures
 
 
 def showScoresPerMixture(mixtures,minDistance):

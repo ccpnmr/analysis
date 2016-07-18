@@ -4,6 +4,7 @@ Qt = QtCore.Qt
 from ccpnmodel.ccpncore.memops.metamodel import Util as metaUtil
 
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Entry import Entry
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
@@ -44,15 +45,32 @@ This needs to be done once on every computer you use the programme on.
       self.entries.append(entry)
       row += 1
 
+    licenseFrame = Frame(frame, grid=(row, 0), gridSpan=(1,2))
+    row += 1
+
+    self.licenseCheckBox = CheckBox(licenseFrame,
+                                    text='I have read and agree to the terms and conditions of the license',
+                                    callback=self._toggledCheckBox, grid=(0,0))
+    self.licenseCheckBox.setChecked(False)
+    button = Button(licenseFrame, text='Show License', callback=self._showLicense, grid=(0,1))
+
     buttonFrame = Frame(frame, grid=(row,0), gridSpan=(1,2))
     ##self.licenseButton = Button(buttonFrame, 'Show License', callback=self.toggleLicense, grid=(0,0))
-    button = Button(buttonFrame, 'Register', callback=self._register, grid=(0, 1))
+    self.registerButton = Button(buttonFrame, 'Register', callback=self._register, grid=(0, 1))
+    self.registerButton.setEnabled(False)
     row += 1
 
     ##self.licensePanel = WebViewPanel(frame, url=licenseUrl, grid=(row,0), gridSpan=(1,2))
     ##self.licensePanel.hide()
     #self.resize(300,200)
- 
+
+  def _toggledCheckBox(self, *args, **kw):
+    self.registerButton.setEnabled(self.licenseCheckBox.isChecked())
+
+  def _showLicense(self):
+    self.parent().application.showLicense()
+
+  """
   def _toggleLicense(self):
 
     if self.licensePanel.isVisible():
@@ -63,6 +81,7 @@ This needs to be done once on every computer you use the programme on.
       self.licensePanel.show()
       self.resize(700,700)
       self.licenseButton.setText('Hide License')
+  """
 
   def _register(self):
 

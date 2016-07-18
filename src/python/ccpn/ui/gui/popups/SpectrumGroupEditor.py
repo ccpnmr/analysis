@@ -338,7 +338,9 @@ class SpectrumGroupEditor(QtGui.QDialog):
       self.leftPullDownSelection.setData([str(self.spectrumGroup.name)])
       self.applyButtons.buttons[1].setEnabled(True)
     else:
-      print('Type a name to create a new Spectrum Group')
+      self.leftSpectrumGroupLineEdit.setText('Unnamed')
+      self._applyToNewSG(leftWidgetSpectra)
+
 
   def _applyToCurrentSG(self, leftWidgetSpectra):
     self._changeLeftSpectrumGroupName()

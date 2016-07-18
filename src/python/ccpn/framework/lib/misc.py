@@ -40,7 +40,7 @@ cyphers['3.0.a3'] = [1468679340.425289, 1468679340.423687]
 cyphers['3.0.b1'] = [1468679340.425723, 1468679340.426897]
 
 def _check(key=None, doDecode=True):
-    from ccpn.core.lib.Version import applicationVersion
+    from ccpn.framework.Version import applicationVersion
     
     def message(*chars):
         return ''.join([c for c in map(chr,chars)])
@@ -72,7 +72,7 @@ def _check(key=None, doDecode=True):
         if not os.path.exists(lfile):
             sys.stderr.write(message1)
             sys.exit(1)
-        with open(lfile,'r') as fp:
+        with open(lfile, 'r', encoding='UTF-8') as fp:
             key = fp.readlines()[0]
             fp.close()
 

@@ -411,12 +411,12 @@ class ViewBox(pg.ViewBox):
         startPosition = self.mapSceneToView(event.buttonDownPos())
         endPosition = self.mapSceneToView(event.pos())
         orderedAxes = self.current.strip.orderedAxes
-        selectedRegion = [[round(startPosition.x(), 3), round(startPosition.y(), 3)],
-                          [round(endPosition.x(), 3), round(endPosition.y(), 3)]]
+        selectedRegion = [[round(startPosition.x(), 3), round(endPosition.x(), 3)],
+                          [round(startPosition.y(), 3), round(endPosition.y(), 3)]]
         if len(orderedAxes) > 2:
           for n in orderedAxes[2:]:
-            selectedRegion[0].append(n.region[0])
-            selectedRegion[1].append(n.region[1])
+            selectedRegion.append((n.region[0], n.region[1]))
+
         for spectrumView in self.current.strip.spectrumViews:
           if not spectrumView.isVisible():
             continue
@@ -428,12 +428,9 @@ class ViewBox(pg.ViewBox):
           console = mainWindow.pythonConsole
 
           if spectrumView.spectrum.dimensionCount > 1:
-            # nD's
-            a = sorted(map(list, zip(*selectedRegion)))
-            selectedRegion = [tuple(sorted(x)) for x in (list(a))]
-            # TODO: remove/alter api-involvement
+            sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
             apiSpectrumView = spectrumView._wrappedData
-            newPeaks = peakList.pickPeaksNd(selectedRegion,
+            newPeaks = peakList.pickPeaksNd(sortedSelectedRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod='gaussian')

@@ -391,10 +391,9 @@ class PeakList(AbstractWrapperObject):
       if mapping is not None:
         selectedRegion.insert(ii, [positions[mapping]-tolerances[ii], positions[mapping]+tolerances[ii]])
       else:
-
         selectedRegion.insert(ii, [limits[ii][0], limits[ii][1]])
 
-    regionToPick = list(zip(*selectedRegion))
+    regionToPick = selectedRegion
     peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg)
     return peaks
 

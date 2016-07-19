@@ -1,4 +1,22 @@
-"""Module Documentation here
+"""
+
+Zoom and pan:
+    Left-drag: pans the spectrum.
+    Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
+    Two successive shift-right-clicks: define zoombox
+    control-right click: reset the zoom
+
+Peaks:
+    Left-click: select peak near cursor in a spectrum display.
+    Control(Cmd)-left-drag: selects peaks in an area specified by the cursor.
+
+    Control(Cmd)-Shift-Left-click: picks a peak at the cursor position.
+    Control(Cmd)-shift-left-drag: picks peaks in an area specified by the cursor.
+
+Others:
+    Right-click raises the context menu.
+
+
 
 """
 #=========================================================================================
@@ -21,17 +39,132 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+import sys
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 from pyqtgraph.Point import Point
 
 from ccpn.ui.gui.widgets.Menu import Menu
-
-
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
-class ViewBox(pg.ViewBox):
+from ccpn.util.Logging import getLogger
+logger = getLogger()
 
+
+def doDebug(msg):
+  if False: #cannot get the regular debugger to work and likely do not want this on during production anyway
+    sys.stderr.write(msg)
+
+def controlShiftLeftMouse(event:QtGui.QMouseEvent):
+  # Return True for control(cmd)-shift-left-Mouse event
+  result = event.button() == QtCore.Qt.LeftButton \
+    and (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('DEBUG mouse: Control-shift-left-Mouse event at %s' % event.pos())
+  return result
+
+def controlLeftMouse(event:QtGui.QMouseEvent):
+  # Return True for control(cmd)-left-Mouse event
+  result = event.button() == QtCore.Qt.LeftButton \
+    and (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Control-left-Mouse event at %s' % event.pos())
+  return result
+
+def shiftLeftMouse(event:QtGui.QMouseEvent):
+  # Return True for shift-left-Mouse event
+  result = event.button() == QtCore.Qt.LeftButton \
+    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Shift-left-Mouse event at %s' % event.pos())
+  return result
+
+def leftMouse(event:QtGui.QMouseEvent):
+  # Return True for left-Mouse event
+  result = event.button() == QtCore.Qt.LeftButton \
+    and not event.modifiers()
+  if result:
+    doDebug('Left-Mouse event at %s' % event.pos())
+  return result
+
+def controlShiftRightMouse(event:QtGui.QMouseEvent):
+  # Return True for control(cmd)-shift-right-Mouse event
+  result = event.button() == QtCore.Qt.RightButton \
+    and (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Control-shift-right-Mouse event at %s' % event.pos())
+  return result
+
+def controlRightMouse(event:QtGui.QMouseEvent):
+  # Return True for control(cmd)-right-Mouse event
+  result = event.button() == QtCore.Qt.RightButton \
+    and (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Control-right-Mouse event at %s' % event.pos())
+  return result
+
+def shiftRightMouse(event:QtGui.QMouseEvent):
+  # Return True for shift-right-Mouse event
+  result = event.button() == QtCore.Qt.RightButton \
+    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Shift-right-Mouse event at %s' % event.pos())
+  return result
+
+def rightMouse(event:QtGui.QMouseEvent):
+  # Return True for right-Mouse event
+  result = event.button() == QtCore.Qt.RightButton \
+    and not event.modifiers()
+  if result:
+    doDebug('Right-Mouse event at %s' % event.pos())
+  return result
+
+def controlShiftMiddleMouse(event:QtGui.QMouseEvent):
+  # Return True for control(cmd)-shift-middle-Mouse event
+  result = event.button() == QtCore.Qt.MiddleButton \
+    and (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Control-shift-middle-Mouse event at %s' % event.pos())
+  return result
+
+def controlMiddleMouse(event:QtGui.QMouseEvent):
+  # Return True for control(cmd)-middle-Mouse event
+  result = event.button() == QtCore.Qt.MiddleButton \
+    and (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and not (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Control-middle-Mouse event at %s' % event.pos())
+  return result
+
+def shiftMiddleMouse(event:QtGui.QMouseEvent):
+  # Return True for shift-middle-Mouse event
+  result = event.button() == QtCore.Qt.MiddleButton \
+    and not (event.modifiers() & QtCore.Qt.ControlModifier)\
+    and     (event.modifiers() & QtCore.Qt.ShiftModifier)
+  if result:
+    doDebug('Shift-middle-Mouse event at %s' % event.pos())
+  return result
+
+def middleMouse(event:QtGui.QMouseEvent):
+  # Return True for middle-Mouse event
+  result = event.button() == QtCore.Qt.MiddleButton \
+    and not event.modifiers()
+  if result:
+    doDebug('Middle-Mouse event at %s' % event.pos())
+  return result
+
+
+class ViewBox(pg.ViewBox):
+  """
+  Base-class to implement mouse and drag events in spectral canvas, axes
+  """
   sigClicked = QtCore.Signal(object)
 
   def __init__(self, current=None, parent=None, *args, **kwds):
@@ -57,6 +190,7 @@ class ViewBox(pg.ViewBox):
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
     self.hoverEvent = self._hoverEvent
+    self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
     # self.getMenu = self._getMenu
 
     self.peakWidthPixels = 20  # for ND peaks
@@ -87,18 +221,10 @@ class ViewBox(pg.ViewBox):
       self.menu = Menu('', self.parent(), isFloatWidget=True)
       return self.menu
 
-
-
   def _mouseClickEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     click events.
-
-    Left click selects peaks in a spectrum display.
-    Control(Cmd)-Shift+Left click picks a peak at the cursor position.
-    Right click raises the context menu.
-
-
     """
     self.current.strip = self.parentObject().parent
     xPosition = self.mapSceneToView(event.pos()).x()
@@ -108,83 +234,108 @@ class ViewBox(pg.ViewBox):
     # This is the correct future style for cursorPosition handling
     self.current.cursorPosition = (xPosition, yPosition)
 
-    if event.button() == QtCore.Qt.LeftButton:
-    #
-      if (event.modifiers() & QtCore.Qt.ShiftModifier):
-        if  (event.modifiers() & QtCore.Qt.ControlModifier):
-          # Shift Ctrl drag - pick peaks
-          mousePosition=self.mapSceneToView(event.pos())
-          position = [mousePosition.x(), mousePosition.y()]
-          for spectrumView in self.current.strip.spectrumViews:
-            peakList = spectrumView.spectrum.peakLists[0]
-            orderedAxes = self.current.strip.orderedAxes
-            if len(orderedAxes) > 2:
-              for n in orderedAxes[2:]:
-                position.append(n.position)
-            peak = peakList.newPeak(position=position)
-            self.current.addPeak(peak)
-            peak.isSelected = True
-            self.current.strip.showPeaks(peakList)
+    if controlShiftLeftMouse(event):
+      # Control-Shift-left-click: pick peak
+      mousePosition=self.mapSceneToView(event.pos())
+      position = [mousePosition.x(), mousePosition.y()]
+      for spectrumView in self.current.strip.spectrumViews:
+        peakList = spectrumView.spectrum.peakLists[0]
+        orderedAxes = self.current.strip.orderedAxes
+        if len(orderedAxes) > 2:
+          for n in orderedAxes[2:]:
+            position.append(n.position)
+        peak = peakList.newPeak(position=position)
+        self.current.addPeak(peak)
+        peak.isSelected = True
+        self.current.strip.showPeaks(peakList)
 
+    elif controlLeftMouse(event):
+      # Control-left-click; select peak and add to selection
+      event.accept()
+      self._selectPeak(xPosition, yPosition)
+
+    elif leftMouse(event):
+      # Left-click; select peak, deselecting others
+      event.accept()
+      self._deselectPeaks()
+      self._selectPeak(xPosition, yPosition)
+
+    elif shiftRightMouse(event):
+      # Two successive shift-right-clicks: define zoombox
+      event.accept()
+      if self._successiveClicks is None:
+        self._resetBoxes()
+        self._successiveClicks = Point(event.pos())
       else:
-        # Left button either Ctrl or no modifier
-        event.accept()
-        # xPosition = self.mapSceneToView(event.pos()).x()
-        # yPosition = self.mapSceneToView(event.pos()).y()
-        # self.current.positions = [xPosition, yPosition]
+        self._setView(Point(self._successiveClicks), Point(event.pos()))
+        self._successiveClicks = None
+        self._resetBoxes()
 
-        xPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(self.peakWidthPixels, 0)).x() - self.mapSceneToView(QtCore.QPoint(0, 0)).x())
-        yPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(0, self.peakWidthPixels)).y() - self.mapSceneToView(QtCore.QPoint(0, 0)).y())
-        xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
-        yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
-        if len(self.current.strip.orderedAxes) > 2:
-          # NBNB TBD FIXME what about 4D peaks?
-          zPositions = self.current.strip.orderedAxes[2].region
-        else:
-          zPositions = None
+    elif rightMouse(event) and axis is None:
+      # right click on canvas, not the axes
+      event.accept()
+      self._raiseContextMenu(event)
 
-        if not (event.modifiers() & QtCore.Qt.ControlModifier):
-          # First deselect current peaks - but not if we are in Ctrl mode
+    elif controlRightMouse(event) and axis is None:
+      # control-right-mouse click: reset the zoom
+      event.accept()
+      self.current.strip.resetZoom()
 
-          # NBNB TBD FIXME. We need to deselect ALL peaks
-          for spectrumView in self.current.strip.spectrumViews:
-            for peakList in spectrumView.spectrum.peakLists:
-              for peak in peakList.peaks:
-                peak.isSelected = False
+    else:
+      # reset and hide all for all other clicks an drags
+      self._resetBoxes()
+      event.accept()
 
-          # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
-          # Probably we should replace 'peak.isSelected' with 'peak in current.peaks'
-          # Meanwhile at least deselect current peaks
-          for peak in self.current.peaks:
-            peak.isSelected = False
+  def _deselectPeaks(self):
+    "Deselected all current peaks"
+    # NBNB TBD FIXME. We need to deselect ALL peaks
+    for spectrumView in self.current.strip.spectrumViews:
+      for peakList in spectrumView.spectrum.peakLists:
+        for peak in peakList.peaks:
+          peak.isSelected = False
 
-          self.current.clearPeaks()
+    # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
+    # Probably we should replace 'peak.isSelected' with 'peak in current.peaks'
+    # Meanwhile at least deselect current peaks
+    for peak in self.current.peaks:
+      peak.isSelected = False
 
-        # now select (take first one within range)
-        for spectrumView in self.current.strip.spectrumViews:
-          if spectrumView.spectrum.dimensionCount == 1:
-            continue
-          for peakListView in spectrumView.peakListViews:
-            if peakListView.isVisible():
-              for peak in peakListView.peakList.peaks:
-                if (xPositions[0] < float(peak.position[0]) < xPositions[1]
-                  and yPositions[0] < float(peak.position[1]) < yPositions[1]):
-                  if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
-                    peak.isSelected = True
-                    # Bug fix - Rasmus 14/3/2016
-                    # self.current.peak = peak
-                    self.current.addPeak(peak)
-                    break
+    self.current.clearPeaks()
 
-    elif event.button() == QtCore.Qt.RightButton:
-      if not event.modifiers():
-        event.accept()
-        if axis is None:
-          self._raiseContextMenu(event)
+  def _selectPeak(self, xPosition, yPosition):
+    "Select first peak near cursor xPosition, yPosition"
+    xPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(self.peakWidthPixels, 0)).x() - self.mapSceneToView(QtCore.QPoint(0, 0)).x())
+    yPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(0, self.peakWidthPixels)).y() - self.mapSceneToView(QtCore.QPoint(0, 0)).y())
+    xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
+    yPositions = [yPosition - 0.5*yPeakWidth, yPosition + 0.5*yPeakWidth]
+    if len(self.current.strip.orderedAxes) > 2:
+      # NBNB TBD FIXME what about 4D peaks?
+      zPositions = self.current.strip.orderedAxes[2].region
+    else:
+      zPositions = None
 
-      elif (event.modifiers() & QtCore.Qt.ShiftModifier):
-        event.accept()
+    # now select (take first one within range)
+    for spectrumView in self.current.strip.spectrumViews:
+      if spectrumView.spectrum.dimensionCount == 1:
+        continue
+      for peakListView in spectrumView.peakListViews:
+        if peakListView.isVisible():
+          for peak in peakListView.peakList.peaks:
+            if (xPositions[0] < float(peak.position[0]) < xPositions[1]
+              and yPositions[0] < float(peak.position[1]) < yPositions[1]):
+              if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
+                peak.isSelected = True
+                # Bug fix - Rasmus 14/3/2016
+                # self.current.peak = peak
+                self.current.addPeak(peak)
+                break
 
+  def _resetBoxes(self):
+    "Reset/Hide the boxes "
+    self._succesiveClicks = None
+    self.selectionBox.hide()
+    self.pickBox.hide()
+    self.rbScaleBox.hide()
 
   def _hoverEvent(self, event):
     self.current.viewBox = self
@@ -213,29 +364,27 @@ class ViewBox(pg.ViewBox):
     self.pickBox.scale(r.width(), r.height())
     self.pickBox.show()
 
-
-
   def _mouseDragEvent(self, event:QtGui.QMouseEvent, axis=None):
     """
     Re-implementation of PyQtGraph mouse drag event to allow custom actions off of different mouse
     drag events.
-
-    Left drag pans the spectrum.
-    Control(Cmd)+left drag selects peaks in an area specified by the mouse.
-    Control(Cmd)-shift+left drag selects peaks in an area specified by the mouse.
-    Shift+right drag/middle drag draws a zooming box and zooms the viewbox.
     """
 
     self.current.strip = self.parentObject().parent
-    if event.button() == QtCore.Qt.LeftButton and not event.modifiers():
+    if leftMouse(event):
+      # Left-drag: Panning of the spectrum
       pg.ViewBox.mouseDragEvent(self, event)
 
-    elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier):
-      if event.isFinish():
-
-        self.pickBox.hide()
+    elif controlShiftLeftMouse(event):
+      # Control(Cmd)+shift+left drag: Peak-picking
+      event.accept()
+      if not event.isFinish():
+        # not isFinish() is not the same as isStart() in behavior; The latter will fire for every move, the former only
+        # at the end of the move
+        self._resetBoxes()
+        self._updatePickBox(event.buttonDownPos(), event.pos())
+      else:
+        self._resetBoxes()
         startPosition = self.mapSceneToView(event.buttonDownPos())
         endPosition = self.mapSceneToView(event.pos())
         orderedAxes = self.current.strip.orderedAxes
@@ -256,23 +405,26 @@ class ViewBox(pg.ViewBox):
           console = mainWindow.pythonConsole
 
           if spectrumView.spectrum.dimensionCount > 1:
+            # nD's
             a = sorted(map(list, zip(*selectedRegion)))
             selectedRegion = [tuple(sorted(x)) for x in (list(a))]
+            # TODO: remove/alter api-involvement
             apiSpectrumView = spectrumView._wrappedData
             newPeaks = peakList.pickPeaksNd(selectedRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod='gaussian')
-
-            # self.current.project._logger.info('peakList = project.getByPid("%s")', peakList.pid)
-            # self.current.project._logger.info("peakList.pickPeaksNd('selectedRegion={0}, doPos={1}, doNeg={2})".format(
-            #                            selectedRegion, apiSpectrumView.spectrumView.displayPositiveContours,
-            #     apiSpectrumView.spectrumView.displayNegativeContours))
           else:
+            # 1D's
             y0 = startPosition.y()
             y1 = endPosition.y()
             y0, y1 = min(y0, y1), max(y0, y1)
             newPeaks = peakList.pickPeaks1d(spectrumView,  [startPosition.x(), endPosition.x()], [y0, y1])
+
+          # Add the new peaks to selection
+          for peak in newPeaks:
+            peak.isSelected = True
+            self.current.addPeak(peak)
 
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:
@@ -281,43 +433,17 @@ class ViewBox(pg.ViewBox):
                 if peakList.spectrum in spectra:
                   strip.showPeaks(peakList)
 
-
+    elif controlLeftMouse(event):
+      # Control(Cmd)+left drag: selects peaks
+      event.accept()
+      if not event.isFinish():
+        # not isFinish() is not the same as isStart() in behavior; The latter will fire for every move, the former only
+        # at the end of the move
+        self._resetBoxes()
+        self._updateSelectionBox(event.buttonDownPos(), event.pos())
       else:
-          self._updatePickBox(event.buttonDownPos(), event.pos())
-      event.accept()
-
-
-
-    elif (event.button() == QtCore.Qt.RightButton) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier) and not (
-              event.modifiers() & QtCore.Qt.ControlModifier) or event.button() == QtCore.Qt.MidButton:
-      if event.isFinish():  ## This is the final move in the drag; change the view scale now
-        self.rbScaleBox.hide()
-        ax = QtCore.QRectF(Point(event.buttonDownPos(event.button())), Point(event.pos()))
-        ax = self.childGroup.mapRectFromParent(ax)
-        self.showAxRect(ax)
-        self.axHistoryPointer += 1
-        self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
-      else:
-        self.updateScaleBox(event.buttonDownPos(), event.pos())
-
-      event.accept()
-
-    elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier) and (
-              event.modifiers() & QtCore.Qt.ShiftModifier):
-
-
-      event.accept()
-
-    elif (event.button() == QtCore.Qt.LeftButton) and (
-              event.modifiers() & QtCore.Qt.ControlModifier):
-       # Add select area
-      if event.isStart():
-        startPosition = event.buttonDownPos()
-      elif event.isFinish():
+        self._resetBoxes()
         endPosition = self.mapSceneToView(event.pos())
-        self.selectionBox.hide()
         startPosition = self.mapSceneToView(event.buttonDownPos())
         xPositions = sorted(list([startPosition.x(), endPosition.x()]))
         yPositions = sorted(list([startPosition.y(), endPosition.y()]))
@@ -367,13 +493,28 @@ class ViewBox(pg.ViewBox):
                   else:
                     peak.isSelected = True
                     self.current.addPeak(peak)
-      else:
-        self._updateSelectionBox(event.buttonDownPos(), event.pos())
+
+    elif middleMouse(event) or \
+         shiftLeftMouse(event)or shiftMiddleMouse(event) or shiftRightMouse(event):
+      # Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
       event.accept()
-
-
+      if not event.isFinish():
+        # not isFinish() is not the same as isStart() in behavior; The latter will fire for every move, the former only
+        # at the end of the move
+        self._resetBoxes()
+        self.updateScaleBox(event.buttonDownPos(), event.pos())
+      else: ## This is the final move in the drag; change the view scale now
+        self._resetBoxes()
+        self._setView(Point(event.buttonDownPos(event.button())), Point(event.pos()))
 
     ## above events remove pan abilities from plot window,
     ## need to re-implement them without changing mouseMode
     else:
       event.ignore()
+
+  def _setView(self, point1, point2):
+      ax = QtCore.QRectF(point1, point2)
+      ax = self.childGroup.mapRectFromParent(ax)
+      self.showAxRect(ax)
+      self.axHistoryPointer += 1
+      self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]

@@ -12,7 +12,7 @@ Zoom and pan:
 
 Peaks:
     Left-click:                         select peak near cursor in a spectrum display, deselecting others
-    Control(Cmd)-left-click:            select peak near cursor in a spectrum display, adding to selection.
+    Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
     Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
 
     Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
@@ -25,7 +25,7 @@ Others:
 By Mouse button:
 
     Left-click:                         select peak near cursor in a spectrum display, deselecting others
-    Control(Cmd)-left-click:            select peak near cursor in a spectrum display, adding to selection.
+    Control(Cmd)-left-click:            (de)select peak near cursor in a spectrum display, adding/removing to selection.
     Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
 
     Left-drag:                          pans the spectrum.
@@ -76,7 +76,7 @@ logger = getLogger()
 
 def doDebug(msg):
   if False: #cannot get the regular debugger to work and likely do not want this on during production anyway
-    sys.stderr.write(msg)
+    sys.stderr.write(msg +'\n')
 
 def controlShiftLeftMouse(event:QtGui.QMouseEvent):
   # Return True for control(cmd)-shift-left-Mouse event
@@ -184,9 +184,63 @@ def middleMouse(event:QtGui.QMouseEvent):
   return result
 
 
+class CrossHair():
+  "class to implement a cross-hair"
+
+  def __init__(self, parent, position=Point(0,0), show=True, rgb=None, colour=None, **kwds):
+    """CrossHair init,
+       stetting color, using rgb or colour, which-ever is
+                       not None (default to grey) + optional **kwds
+       setting visibility
+       add CrossHair to parent using addItem method
+    """
+    if rgb:
+      pen = pg.functions.mkPen(color=rgb, **kwds)
+    elif colour:
+      pen = pg.functions.mkPen(color=rgb, **kwds)
+    else:
+      pen = pg.functions.mkPen(color=(129,129,129), **kwds)
+
+    self.vLine = pg.InfiniteLine(angle=90, movable=False, pen=pen)
+    self.hLine = pg.InfiniteLine(angle=0, movable=False, pen=pen)
+    parent.addItem(self.vLine, ignoreBounds=True)
+    parent.addItem(self.hLine, ignoreBounds=True)
+    self._parent = parent
+
+    self.setPosition(position)
+    if show:
+      self.show()
+    else:
+      self.hide()
+
+  def setPosition(self, position):
+    self.vLine.setPos(position)
+    self.hLine.setPos(position)
+    self._position = position  # last set position
+
+  def show(self):
+    #print(">> show")
+    self.vLine.show()
+    self.hLine.show()
+
+  def hide(self):
+    #print(">> hide")
+    self.vLine.hide()
+    self.hLine.hide()
+
+  def isVisible(self):
+    return self.vLine.isVisible()
+
+  def toggle(self):
+    if self.isVisible():
+      self.hide()
+    else:
+      self.show()
+
+
 class ViewBox(pg.ViewBox):
   """
-  Base-class to implement mouse and drag events in spectral canvas, axes
+  Base-class to implement mouse and drag events in in PlotWidget.py; it will inherit the same parent as PlotWidget
   """
   sigClicked = QtCore.Signal(object)
 
@@ -194,27 +248,33 @@ class ViewBox(pg.ViewBox):
     pg.ViewBox.__init__(self, *args, **kwds)
     self.current = current
     self.menu = None # Override pyqtgraph ViewBoxMenu
-    self.menu = self._getMenu()
+    self.menu = self._getMenu() # built in GuiStrip, GuiStripNd, GuiStrip1D
     self.current = current
     self.parent = parent
+
+    # self.rbScaleBox: Native pyQTgraph; used for Zoom
+
     self.selectionBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
     self.selectionBox.setPen(pg.functions.mkPen((255, 0, 255), width=1))
     self.selectionBox.setBrush(pg.functions.mkBrush(255, 100, 255, 100))
     self.selectionBox.setZValue(1e9)
     self.selectionBox.hide()
     self.addItem(self.selectionBox, ignoreBounds=True)
+
     self.pickBox = QtGui.QGraphicsRectItem(0, 0, 1, 1)
     self.pickBox.setPen(pg.functions.mkPen((0, 255, 255), width=1))
     self.pickBox.setBrush(pg.functions.mkBrush(100, 255, 255, 100))
     self.pickBox.setZValue(1e9)
     self.pickBox.hide()
     self.addItem(self.pickBox, ignoreBounds=True)
+
     self.project = current._project
     self.mouseClickEvent = self._mouseClickEvent
     self.mouseDragEvent = self._mouseDragEvent
     self.hoverEvent = self._hoverEvent
+
     self._successiveClicks = None  # GWV: Store successive click events for zooming; None means first click not set
-    # self.getMenu = self._getMenu
+    self.crossHair = CrossHair(self, show=False, rgb=(255,255,0), dash=[20.0,7.0]) # dashes in pixels, [on, off]
 
     self.peakWidthPixels = 20  # for ND peaks
 
@@ -259,6 +319,8 @@ class ViewBox(pg.ViewBox):
 
     if controlShiftLeftMouse(event):
       # Control-Shift-left-click: pick peak
+      event.accept()
+      self._resetBoxes()
       mousePosition=self.mapSceneToView(event.pos())
       position = [mousePosition.x(), mousePosition.y()]
       for spectrumView in self.current.strip.spectrumViews:
@@ -273,13 +335,15 @@ class ViewBox(pg.ViewBox):
         self.current.strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
-      # Control-left-click; select peak and add to selection
+      # Control-left-click; (de-)select peak and add/remove to selection
       event.accept()
+      self._resetBoxes()
       self._selectPeak(xPosition, yPosition)
 
     elif leftMouse(event):
       # Left-click; select peak, deselecting others
       event.accept()
+      self._resetBoxes()
       self._deselectPeaks()
       self._selectPeak(xPosition, yPosition)
 
@@ -289,25 +353,30 @@ class ViewBox(pg.ViewBox):
       if self._successiveClicks is None:
         self._resetBoxes()
         self._successiveClicks = Point(event.pos())
+        position = self.mapSceneToView(event.pos())
+        self.crossHair.setPosition(position)
+        self.crossHair.show()
       else:
         self._setView(Point(self._successiveClicks), Point(event.pos()))
-        self._successiveClicks = None
         self._resetBoxes()
+        self._successiveClicks = None
 
     elif rightMouse(event) and axis is None:
       # right click on canvas, not the axes
       event.accept()
+      self._resetBoxes()
       self._raiseContextMenu(event)
 
     elif controlRightMouse(event) and axis is None:
       # control-right-mouse click: reset the zoom
       event.accept()
+      self._resetBoxes()
       self.current.strip.resetZoom()
 
     else:
-      # reset and hide all for all other clicks an drags
+      # reset and hide all for all other clicks
       self._resetBoxes()
-      event.accept()
+      event.ignore()
 
   def _deselectPeaks(self):
     "Deselected all current peaks"
@@ -326,7 +395,9 @@ class ViewBox(pg.ViewBox):
     self.current.clearPeaks()
 
   def _selectPeak(self, xPosition, yPosition):
-    "Select first peak near cursor xPosition, yPosition"
+    """(de-)Select first peak near cursor xPosition, yPosition
+       if peak already was selected, de-select it
+    """
     xPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(self.peakWidthPixels, 0)).x() - self.mapSceneToView(QtCore.QPoint(0, 0)).x())
     yPeakWidth = abs(self.mapSceneToView(QtCore.QPoint(0, self.peakWidthPixels)).y() - self.mapSceneToView(QtCore.QPoint(0, 0)).y())
     xPositions = [xPosition - 0.5*xPeakWidth, xPosition + 0.5*xPeakWidth]
@@ -347,18 +418,25 @@ class ViewBox(pg.ViewBox):
             if (xPositions[0] < float(peak.position[0]) < xPositions[1]
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):
               if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
-                peak.isSelected = True
-                # Bug fix - Rasmus 14/3/2016
-                # self.current.peak = peak
-                self.current.addPeak(peak)
+                #print(">>found peak", peak, peak.isSelected, peak in self.current.peaks)
+                if peak.isSelected and peak in self.current.peaks:
+                  #TODO: need official way to remove peak from current
+                  self.current._peaks.remove(peak)
+                  peak.isSelected = False
+                else:
+                  peak.isSelected = True
+                  # Bug fix - Rasmus 14/3/2016
+                  # self.current.peak = peak
+                  self.current.addPeak(peak)
                 break
 
   def _resetBoxes(self):
     "Reset/Hide the boxes "
-    self._succesiveClicks = None
+    self._successiveClicks = None
     self.selectionBox.hide()
     self.pickBox.hide()
     self.rbScaleBox.hide()
+    self.crossHair.hide()
 
   def _hoverEvent(self, event):
     self.current.viewBox = self
@@ -429,6 +507,7 @@ class ViewBox(pg.ViewBox):
 
           if spectrumView.spectrum.dimensionCount > 1:
             sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
+            #TODO: remove reference to apidata
             apiSpectrumView = spectrumView._wrappedData
             newPeaks = peakList.pickPeaksNd(sortedSelectedRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
@@ -523,18 +602,23 @@ class ViewBox(pg.ViewBox):
         # at the end of the move
         self._resetBoxes()
         self.updateScaleBox(event.buttonDownPos(), event.pos())
-      else: ## This is the final move in the drag; change the view scale now
+      else:
+        # This is the final move in the drag; change the view scale now
         self._resetBoxes()
-        self._setView(Point(event.buttonDownPos(event.button())), Point(event.pos()))
+        #self._setView(Point(event.buttonDownPos(event.button())), Point(event.pos()))
+        self._setView(Point(event.buttonDownPos()), Point(event.pos()))
 
     ## above events remove pan abilities from plot window,
     ## need to re-implement them without changing mouseMode
     else:
+      self._resetBoxes()
       event.ignore()
 
   def _setView(self, point1, point2):
       ax = QtCore.QRectF(point1, point2)
       ax = self.childGroup.mapRectFromParent(ax)
       self.showAxRect(ax)
-      self.axHistoryPointer += 1
-      self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
+      # This was copied from pyqtgraph viewbox, but appears a oddly
+      # implemented zoom stack, which could amount to a memory leak
+      #self.axHistoryPointer += 1
+      #self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]

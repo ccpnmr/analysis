@@ -28,7 +28,7 @@ from ccpn.util import Path
 # CCPN Urls
 ccpnUrl                         = 'http://www.ccpn.ac.uk'
 ccpn2Url                        = 'http://www2.ccpn.ac.uk'
-ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/licence'
+ccpnLicenceUrl                  = 'http://www.ccpn.ac.uk/v3-software/downloads/license'
 ccpnIssuesUrl                   = 'https://sourceforge.net/p/ccpn/bugs/'
 
 # CCPN code

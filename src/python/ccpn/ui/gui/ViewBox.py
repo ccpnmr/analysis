@@ -1,23 +1,46 @@
 """
+By Functionality:
 
 Zoom and pan:
-    Left-drag: pans the spectrum.
-    Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
-    Two successive shift-right-clicks: define zoombox
-    control-right click: reset the zoom
+    Left-drag:                          pans the spectrum.
+    Middle-drag:                        draws a zooming box and zooms the viewbox.
+    shift-left-drag:                    draws a zooming box and zooms the viewbox.
+    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
+    shift-right-drag:                   draws a zooming box and zooms the viewbox.
+    Two successive shift-right-clicks:  define zoombox
+    control-right click:                reset the zoom
 
 Peaks:
-    Left-click: select peak near cursor in a spectrum display.
-    Control(Cmd)-left-drag: selects peaks in an area specified by the cursor.
+    Left-click:                         select peak near cursor in a spectrum display, deselecting others
+    Control(Cmd)-left-click:            select peak near cursor in a spectrum display, adding to selection.
+    Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
 
-    Control(Cmd)-Shift-Left-click: picks a peak at the cursor position.
-    Control(Cmd)-shift-left-drag: picks peaks in an area specified by the cursor.
+    Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
+    Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
 
 Others:
-    Right-click raises the context menu.
+    Right-click:                        raises the context menu.
 
 
+By Mouse button:
 
+    Left-click:                         select peak near cursor in a spectrum display, deselecting others
+    Control(Cmd)-left-click:            select peak near cursor in a spectrum display, adding to selection.
+    Control(Cmd)-Shift-Left-click:      picks a peak at the cursor position, adding to selection
+
+    Left-drag:                          pans the spectrum.
+    shift-left-drag:                    draws a zooming box and zooms the viewbox.
+    Control(Cmd)-left-drag:             selects peaks in an area specified by the dragged region.
+    Control(Cmd)-shift-left-drag:       picks peaks in an area specified by the dragged region.
+
+    Middle-drag:                        draws a zooming box and zooms the viewbox.
+    shift-middle-drag:                  draws a zooming box and zooms the viewbox.
+
+    Right-click:                        raises the context menu.
+    control-right click:                reset the zoom
+    Two successive shift-right-clicks:  define zoombox
+
+    shift-right-drag:                   draws a zooming box and zooms the viewbox.
 """
 #=========================================================================================
 # Licence, Reference and Credits

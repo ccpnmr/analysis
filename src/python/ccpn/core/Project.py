@@ -623,6 +623,8 @@ class Project(AbstractWrapperObject):
   def unblankNotification(self):
     """Resume notifier execution after blanking"""
     self._notificationBlanking -= 1
+    if self._notificationBlanking < 0:
+      raise TypeError("Code Error: _notificationBlanking below zero!")
 
   def suspendNotification(self):
     """Suspend notifier execution and accumulate notifiers for later execution"""

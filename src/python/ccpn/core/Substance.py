@@ -563,6 +563,7 @@ def _fetchNefSubstance(self:Project, sequence:Sequence[dict], name:str=None):
 
   self._startFunctionCommandBlock('fetchNefSubstance', values=locals(), defaults=defaults,
                                   parName='newSubstance')
+  self._project.blankNotification()
   try:
 
     name = name or 'Molecule_1'

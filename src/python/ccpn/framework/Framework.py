@@ -200,10 +200,15 @@ class Framework:
     else:
       project = self.newProject()
 
-    sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
-
     if not self._checkRegistration():
       return
+
+    # Needed in case project load failed
+    if not project:
+      sys.stderr.write('==> No project, aborting ...\n')
+      return
+
+    sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
     # self.project = project
     self.ui.start()
@@ -967,6 +972,12 @@ class Framework:
       if event:
         event.ignore()
 
+  def _closeExtraWindows(self):
+    tempAreas = self.ui.mainWindow.moduleArea.tempAreas
+    if len(tempAreas) > 0:
+      for tempArea in tempAreas:
+        tempArea.window().close()
+
   def _closeProject(self):
     """Close project and clean up - when opening another or quitting application"""
 
@@ -978,6 +989,7 @@ class Framework:
       self.project = None
     if self.ui.mainWindow:
       # ui/gui cleanup
+      self._closeExtraWindows()
       self.ui.mainWindow.deleteLater()
     self.ui.mainWindow = None
     self.current = None

@@ -121,6 +121,12 @@ def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy,
             print('WARNING: file permissions could not be copied. '
                   'Ignored - known problem on Windows-type file systems')
     if errors:
+        print ("""ERRORS in shutil copytree recursive copying. Some possible reasons:
+- Absolute file name too long
+- Permission errors
+- Mismatch between Windows and Linux file systems
+Copy is incomplete.
+""")
         raise Error(errors)
     return dst
 

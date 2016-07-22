@@ -54,7 +54,7 @@ def calcHashCode(filePath):
   if not os.access(filePath, os.R_OK):
     return 0
 
-  fp = open(filePath, 'rU')
+  fp = open(filePath, 'rU', encoding='utf-8')
   data = fp.read()
   fp.close()
 

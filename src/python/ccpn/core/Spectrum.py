@@ -955,9 +955,11 @@ class Spectrum(AbstractWrapperObject):
         elif isotopeCode == '13C' or isotopeCode == '15N':
           tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
           tolerances[ii] = tolerance
-        else:
+        elif isotopeCode:
           tolerance = max([0.2, self.spectralWidths[ii]/self.pointCounts[ii]])
           tolerances[ii] = tolerance
+        else:
+          tolerances[ii] = None
 
       self.assignmentTolerances = tolerances
     finally:

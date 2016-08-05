@@ -526,7 +526,7 @@ class ViewBox(pg.ViewBox):
             y0 = startPosition.y()
             y1 = endPosition.y()
             y0, y1 = min(y0, y1), max(y0, y1)
-            newPeaks = peakList.pickPeaks1d(spectrumView,  [startPosition.x(), endPosition.x()], [y0, y1])
+            newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
 
           # Add the new peaks to selection
           for peak in newPeaks:

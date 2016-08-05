@@ -1,7 +1,5 @@
 __author__ = 'simon1'
 
-import pyqtgraph as pg
-
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
@@ -11,22 +9,23 @@ import typing
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
-MODULE_DICT = {'SEQUENCE GRAPH': 'showSequenceGraph',
-               'PEAK ASSIGNER': 'showPeakAssigner',
-               'ATOM SELECTOR': 'showAtomSelector',
-               'BACKBONE ASSIGNMENT': 'showBackboneAssignmentModule',
-               'CHEMICAL SHIFT TABLE':'showChemicalShiftTable',
-               'MACRO EDITOR':'editMacro',
-               'NMR RESIDUE TABLE': 'showNmrResidueTable',
-               'PEAK LIST': 'showPeakTable',
-               'PICK AND ASSIGN': 'showPickAndAssignModule',
-               'REFERENCE CHEMICAL SHIFTS': 'showRefChemicalShifts',
-               'RESIDUE INFORMATION': 'showResidueInformation',
-               'SEQUENCE': 'toggleSequenceModule',
-               'PARASSIGN SETUP': 'showParassignSetup',
-               'API DOCUMENTATION': 'showApiDocumentation',
-               'PYTHON CONSOLE': 'toggleConsole',
-               'NOTES EDITOR': 'showNotesEditor'
+MODULE_DICT = {
+  'SEQUENCE GRAPH'           : 'showSequenceGraph',
+  'PEAK ASSIGNER'            : 'showPeakAssigner',
+  'ATOM SELECTOR'            : 'showAtomSelector',
+  'BACKBONE ASSIGNMENT'      : 'showBackboneAssignmentModule',
+  'CHEMICAL SHIFT TABLE'     : 'showChemicalShiftTable',
+  'MACRO EDITOR'             : 'editMacro',
+  'NMR RESIDUE TABLE'        : 'showNmrResidueTable',
+  'PEAK LIST'                : 'showPeakTable',
+  'PICK AND ASSIGN'          : 'showPickAndAssignModule',
+  'REFERENCE CHEMICAL SHIFTS': 'showRefChemicalShifts',
+  'RESIDUE INFORMATION'      : 'showResidueInformation',
+  'SEQUENCE'                 : 'toggleSequenceModule',
+  'PARASSIGN SETUP'          : 'showParassignSetup',
+  'API DOCUMENTATION'        : 'showApiDocumentation',
+  'PYTHON CONSOLE'           : 'toggleConsole',
+  'NOTES EDITOR'             : 'showNotesEditor'
                }
 
 LINE_COLOURS = {
@@ -78,7 +77,7 @@ def navigateToPositionInStrip(strip, positions, axisCodes=None, widths=None):
           # if the list item is a str with value, full, reset the corresponding axis
           if widths[ii] == 'full':
             strip.resetAxisRange(stripAxisIndex)
-          if widths[ii] == 'default':
+          if widths[ii] == 'default' and stripAxisIndex < 2:
             # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
             if spectrumLib.name2IsotopeCode(axisCode) == '13C' or spectrumLib.name2IsotopeCode(axisCode) == '15N':
               strip.orderedAxes[stripAxisIndex].width = 5
@@ -86,8 +85,23 @@ def navigateToPositionInStrip(strip, positions, axisCodes=None, widths=None):
               strip.orderedAxes[stripAxisIndex].width = 0.5
 
 
-def makeStripPlot(spectrumDisplay, nmrAtoms):
-  pass
+def makeStripPlot(spectrumDisplay, nmrAtomPairs, autoWidth=True):
+
+  numberOfStrips = len(spectrumDisplay.strips)
+
+  # Make sure there are enough strips to display nmrAtomPairs
+  if numberOfStrips < len(nmrAtomPairs):
+    for ii in range(numberOfStrips, len(nmrAtomPairs)):
+      spectrumDisplay.strips[-1].clone()
+
+  # loop through strips and navigate to appropriate position in strip
+  for ii, strip in enumerate(spectrumDisplay.strips):
+    if autoWidth:
+      widths = ['default'] * len(strip.axisCodes)
+    else:
+      widths = None
+    navigateToNmrAtomsInStrip(nmrAtomPairs[ii], strip, widths=widths)
+
 
 
 def navigateToPeakPosition(project:Project, peak:Peak=None,
@@ -135,11 +149,7 @@ def matchAxesAndNmrAtoms(strip, nmrAtoms):
   return shiftDict
 
 
-# def navigateToNmrResidue(project, nmrResidue):
-#   navigateToNmrAtoms(project, nmrResidue.nmrAtoms)
-
-
-def navigateToNmrAtomsInStrip(nmrAtoms:typing.List[NmrAtom], strip:'GuiStrip'=None,  markPositions:bool=False):
+def navigateToNmrAtomsInStrip(nmrAtoms:typing.List[NmrAtom], strip:'GuiStrip'=None,  widths=None, markPositions:bool=False):
   """
   Takes an NmrResidue and optional spectrum displays and strips and navigates the strips
   and spectrum displays to the positions specified by the peak.
@@ -154,18 +164,20 @@ def navigateToNmrAtomsInStrip(nmrAtoms:typing.List[NmrAtom], strip:'GuiStrip'=No
   atomPositions = [[x.value for x in shiftDict[axisCode]] for axisCode in strip.axisOrder]
   positions = []
   for atomPos in atomPositions:
-    if len(atomPos) < 2:
-      positions.append(atomPos[0])
+    if atomPos:
+      if len(atomPos) < 2:
+        positions.append(atomPos[0])
+      else:
+        positions.append(max(atomPos)-min(atomPos)/2)
     else:
-      positions.append(max(atomPos)-min(atomPos)/2)
+      positions.append('')
+  navigateToPositionInStrip(strip, positions, strip.axisOrder, widths=widths)
 
-  navigateToPositionInStrip(strip, positions, strip.axisOrder)
 
 def markPositions(project, axisCodes, atomPositions):
     """
     Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.
     """
-
     if project._appBase.ui.mainWindow is not None:
       mainWindow = project._appBase.ui.mainWindow
     else:

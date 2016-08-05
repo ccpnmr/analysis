@@ -84,6 +84,7 @@ class SpinSystemLabel(DropBase, Label):
         self.strip.guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
         try:
           nr2 = project.getByPid('NR:%s' % nmrResidue)
+          print(nr1, nr2)
           if nr1 and nr2:
             if direction == '-1':
               nr1.connectPrevious(nr2)
@@ -102,7 +103,7 @@ class SpinSystemLabel(DropBase, Label):
               current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
             # except AttributeError:
             #   project._logger.warn('Backbone module is not active')
-        except AtrributeError:
+        except AttibuteError:
           project._logger.warn('Cannot connect non-existent Nmr Residues')
 
 

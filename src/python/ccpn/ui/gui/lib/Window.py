@@ -188,7 +188,7 @@ def markPositions(project, axisCodes, atomPositions):
       for atomPosition in atomPositions[ii]:
         atomName = atomPosition.nmrAtom.name
         if atomName[:2] in LINE_COLOURS.keys():
-          task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axisCode])
+          task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axisCode], labels=[atomName])
           """
           # code to add text markers to lines in displays
           textItem = pg.TextItem(atomName, color=LINE_COLOURS[atomName[:2]])

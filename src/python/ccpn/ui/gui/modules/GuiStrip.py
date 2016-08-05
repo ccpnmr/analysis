@@ -134,6 +134,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     
     self.vRulerLineDict = {}  # ruler --> vertical line for that ruler
     self.hRulerLineDict = {}  # ruler --> horizontal line for that ruler
+    self.rulerLabelDict = {}  # ruler --> label for that ruler
     self._initRulers()
     
     self.mousePixel = None
@@ -542,8 +543,6 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       self.vLine.setPos(position)
     if position2 is not None:
       self.vLine2.setPos(position2)
-
-
     position = axisPositionDict.get(self._crosshairCode(axes[1].code))
     position2 = axisPositionDict.get(self._crosshairCode(axes[0].code))
     if position is not None:
@@ -812,6 +811,7 @@ def _rulerCreated(project:Project, apiRuler:ApiRuler):
   """]Notifier function for creating rulers"""
   axisCode = apiRuler.axisCode # TBD: use label and unit
   position = apiRuler.position
+  label = apiRuler.label
   colour = None
   if apiRuler.mark.colour[0] == '#':
     colour = Colour(apiRuler.mark.colour)
@@ -827,6 +827,15 @@ def _rulerCreated(project:Project, apiRuler:ApiRuler):
       line.setPos(position)
       strip.plotWidget.addItem(line, ignoreBounds=True)
       strip.vRulerLineDict[apiRuler] = line
+      if label:
+        textItem = pg.TextItem(label, color=colour)
+        y = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).y()
+        textItem.anchor = pg.Point(0, 1)
+        textItem.setPos(position, y)
+        strip.plotWidget.addItem(textItem)
+        strip.xAxisAtomLabels.append(textItem)
+        strip.rulerLabelDict[apiRuler] = textItem
+
 
     elif axisCode == axisOrder[1]:
       if colour:
@@ -836,6 +845,14 @@ def _rulerCreated(project:Project, apiRuler:ApiRuler):
       line.setPos(position)
       strip.plotWidget.addItem(line, ignoreBounds=True)
       strip.hRulerLineDict[apiRuler] = line
+      if label:
+        textItem = pg.TextItem(label, color=colour)
+        x = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).x()
+        textItem.anchor = pg.Point(0, 0)
+        textItem.setPos(x, position)
+        strip.plotWidget.addItem(textItem)
+        strip.yAxisAtomLabels.append(textItem)
+        strip.rulerLabelDict[apiRuler] = textItem
 
 def _rulerDeleted(project:Project, apiRuler:ApiRuler):
   task = project._data2Obj[apiRuler.mark.guiTask]
@@ -844,6 +861,9 @@ def _rulerDeleted(project:Project, apiRuler:ApiRuler):
       if apiRuler in dd:
         line = dd.pop(apiRuler)
         strip.plotWidget.removeItem(line)
+      if apiRuler in strip.rulerLabelDict:
+        label = strip.rulerLabelDict.pop(apiRuler)
+        strip.plotWidget.removeItem(label)
 
 # Add notifier functions to Project
 

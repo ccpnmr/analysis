@@ -106,8 +106,6 @@ class SpinSystemLabel(DropBase, Label):
           project._logger.warn('Cannot connect non-existent Nmr Residues')
 
 
-
-
 def _renameNmrResidueForGraphics(nmrResidue:NmrResidue, oldPid:str):
   """Effect rename for NmrResidue
 

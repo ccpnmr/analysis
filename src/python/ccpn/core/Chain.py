@@ -192,7 +192,7 @@ class Chain(AbstractWrapperObject):
 
 
 
-def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:str='Molecule_1',
+def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:str=None,
               startNumber:int=1, molType:str=None, isCyclic:bool=False,
               shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Create new chain from sequence of residue codes
@@ -210,7 +210,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
   """
 
   defaults = collections.OrderedDict(
-    (('compoundName', 'Molecule_1'), ('startNumber', 1), ('molType', None), ('isCyclic', False),
+    (('compoundName', None), ('startNumber', 1), ('molType', None), ('isCyclic', False),
      ('shortName', None), ('role', None), ('comment', None)
     )
   )

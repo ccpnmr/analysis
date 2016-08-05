@@ -63,7 +63,7 @@ class ChemicalShiftList(AbstractWrapperObject):
     self._wrappedData = wrappedData
     self._project = project
     defaultName = 'Shifts%s' % wrappedData.serial
-    self._setUniqueStringKey(wrappedData, defaultName)
+    self._setUniqueStringKey(defaultName)
     super().__init__(project, wrappedData)
 
   # CCPN properties  

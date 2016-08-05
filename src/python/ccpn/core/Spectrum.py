@@ -240,17 +240,6 @@ class Spectrum(AbstractWrapperObject):
   def spinningRate(self, value:float):
     self._wrappedData.experiment.spinningRate = value
 
-  # @property
-  # def chemicalShiftList(self) -> ChemicalShiftList:
-  #   """ChemicalShiftList associated with Spectrum."""
-  #   return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)
-  #
-  # @chemicalShiftList.setter
-  # def chemicalShiftList(self, value:ChemicalShiftList):
-  #
-  #   value = self.getByPid(value) if isinstance(value, str) else value
-  #   self._wrappedData.experiment.shiftList = value._wrappedData
-
   @property
   def experimentType(self) -> str:
     """Systematic experiment type descriptor (CCPN system)."""
@@ -584,24 +573,6 @@ class Spectrum(AbstractWrapperObject):
   @measurementTypes.setter
   def measurementTypes(self, value):
     self._setExpDimRefAttribute('measurementType', value)
-  #
-  # @property
-  # def maxAliasedFrequencies(self) -> Tuple[Optional[float], ...]:
-  #   """maximum possible peak frequency (in ppm) for main dimensions reference, per dimension """
-  #   return tuple(x and x.maxAliasedFreq for x in self._mainExpDimRefs())
-  #
-  # @maxAliasedFrequencies.setter
-  # def maxAliasedFrequencies(self, value):
-  #   self._setExpDimRefAttribute('maxAliasedFreq', value, mandatory=False)
-  #
-  # @property
-  # def minAliasedFrequencies(self) -> Tuple[Optional[float], ...]:
-  #   """minimum possible peak frequency (in ppm) for main dimensions reference, per dimension"""
-  #   return tuple(x and x.minAliasedFreq for x in self._mainExpDimRefs())
-  #
-  # @minAliasedFrequencies.setter
-  # def minAliasedFrequencies(self, value):
-  #   self._setExpDimRefAttribute('minAliasedFreq', value, mandatory=False)
 
 
   @property

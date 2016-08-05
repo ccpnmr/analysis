@@ -13,6 +13,9 @@ from functools import partial
 
 class ExperimentTypePopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, project=None, **kw):
+
+    from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
+
     super(ExperimentTypePopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.parent = parent
@@ -33,6 +36,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
       # Get the text that was used in the pulldown from the refExperiment
       apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
       text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+      text = priorityNameRemapping.get(text, text)
       spPulldown.setCurrentIndex(spPulldown.findText(text))
 
     self.buttonBox = Button(self, grid=(len(project.spectra)+1, 1), text='Close',

@@ -101,7 +101,7 @@ class Project(AbstractWrapperObject):
     if not isinstance(wrappedData, ApiNmrProject):
       raise ValueError("Project initialised with %s, should be ccp.nmr.Nmr.NmrProject."
                        % wrappedData)
-    
+
     # set up attributes
     self._project = self
     self._wrappedData = wrappedData
@@ -939,12 +939,12 @@ class Project(AbstractWrapperObject):
     else:
       formstring = defaultName + '_%d'
       i = 1
-      result =  formstring % (name,i)
+      result =  formstring % i
     while (apiProject.findFirstMolecule(name=result) or
            apiComponentStore.findFirstComponent(name=result)):
       i += 1
-      result = '%s_%d' % (name,i)
-    if result != name and name != defaultName:
+      result = formstring % i
+    if name and result != name and name != defaultName:
       self._logger.warning(
       "CCPN molecule named %s already exists. New molecule has been named %s" %
       (name,result))

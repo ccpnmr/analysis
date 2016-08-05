@@ -132,6 +132,9 @@ class FilePathValidator(QtGui.QValidator):
 
 class GeneralTab(QtGui.QWidget, Base):
   def __init__(self, spectrum, parent=None, item=None):
+
+    from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
+
     super(GeneralTab, self).__init__(parent)
     self.item = item
     self.spectrum = spectrum
@@ -191,7 +194,11 @@ class GeneralTab(QtGui.QWidget, Base):
       spectrumType = PulldownList(self, vAlign='t', grid=(7, 1))
       spectrumType.addItems(SPECTRA)
 
-      spectrumType.setCurrentIndex(spectrumType.findText(spectrum.experimentName))
+      # Added to account for renaming of experiments
+      text = spectrumType.findText(spectrum.experimentName)
+      text = priorityNameRemapping.get(text, text)
+
+      spectrumType.setCurrentIndex(spectrumType.findText(text))
       spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)
@@ -216,6 +223,8 @@ class GeneralTab(QtGui.QWidget, Base):
       # Get the text that was used in the pulldown from the refExperiment
       apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
       text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+      # Added to account for renaming of experiments
+      text = priorityNameRemapping.get(text, text)
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))
 
       self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)

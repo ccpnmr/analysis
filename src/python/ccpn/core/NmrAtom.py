@@ -89,9 +89,12 @@ class NmrAtom(AbstractWrapperObject):
   @property
   def _idTuple(self) -> AtomIdTuple:
     """ID as chainCode, sequenceCode, residueType, atomName namedtuple
-    NB Unlike the _id and key, these do NOT have reserved characters maped to '^'"""
+    NB Unlike the _id and key, these do NOT have reserved characters mapped to '^'
+    NB _idTuple replaces empty strings with None"""
     parent = self._parent
-    return AtomIdTuple(parent._parent.shortName, parent.sequenceCode, parent.residueType, self.name)
+    ll = [parent._parent.shortName, parent.sequenceCode, parent.residueType, self.name]
+    return AtomIdTuple(*(x or None for x in ll))
+
 
   @property
   def name(self) -> str:
@@ -361,6 +364,7 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
   serial = None
   if name:
     # Check for name clashes
+
     previous = self.getNmrAtom(name.translate(Pid.remapSeparators))
     if previous is not None:
       raise ValueError("%s already exists" % previous.longPid)
@@ -407,19 +411,22 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
         self.project._logger.warning(
           "Could not set (reserved) name of %s to %s - set to %s instead"
                                      %(result, name, result.name))
-        result._finaliseAction('rename')
+      result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
   #
   return result
 
-def fetchNmrAtom(self:NmrResidue, name:str):
+def _fetchNmrAtom(self:NmrResidue, name:str):
   """Fetch NmrAtom with name=name, creating it if necessary"""
-  resonanceGroup = self._wrappedData
+  # resonanceGroup = self._wrappedData
   self._startFunctionCommandBlock('fetchNmrAtom', name, parName='newNmrAtom')
   try:
-    result = (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or
-            self.newNmrAtom(name=name))
+    self.getNmrAtom(name.translate(Pid.remapSeparators))
+    result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
+              self.newNmrAtom(name=name))
+    # result = (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or
+    #         self.newNmrAtom(name=name))
   finally:
     self._project._appBase._endCommandBlock()
   #
@@ -470,7 +477,7 @@ def _produceNmrAtom(self:Project, atomId:str=None, chainCode:str=None,
 # Connections to parents:
 NmrResidue.newNmrAtom = _newNmrAtom
 del _newNmrAtom
-NmrResidue.fetchNmrAtom = fetchNmrAtom
+NmrResidue.fetchNmrAtom = _fetchNmrAtom
 
 Project._produceNmrAtom = _produceNmrAtom
 

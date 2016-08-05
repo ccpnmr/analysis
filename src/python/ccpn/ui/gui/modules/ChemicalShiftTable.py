@@ -60,7 +60,7 @@ class ChemicalShiftTable(CcpnModule):
     return (len(set(x for x in peaks
                     if x.peakList.chemicalShiftList is chemicalShiftList)))
 
-  def _callback(self):
+  def _callback(self, obj, row, col):
     pass
 
 
@@ -119,5 +119,5 @@ class NmrAtomShiftTable(ChemicalShiftTable):
 
     self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)
 
-  def _callback(self):
+  def _callback(self, obj, row, col):
     pass

@@ -30,7 +30,7 @@ from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
 
 class Atom(AbstractWrapperObject):
-  """A molecular Atom, coontained in a Residue."""
+  """A molecular Atom, contained in a Residue."""
 
   #: Class name and Short class name, for PID.
   shortClassName = 'MA'
@@ -71,9 +71,11 @@ class Atom(AbstractWrapperObject):
   @property
   def _idTuple(self) -> AtomIdTuple:
     """ID as chainCode, sequenceCode, residueType, atomName namedtuple
-    NB Unlike the _id and key, these do NOT have reserved characters maped to '^'"""
+    NB Unlike the _id and key, these do NOT have reserved characters mapped to '^'
+    NB _idTuple replaces empty strings with None"""
     parent = self._parent
-    return AtomIdTuple(parent._parent.shortName, parent.sequenceCode, parent.residueType, self.name)
+    ll = [parent._parent.shortName, parent.sequenceCode, parent.residueType, self.name]
+    return AtomIdTuple(*(x or None for x in ll))
 
   @property
   def name(self) -> str:

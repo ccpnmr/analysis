@@ -15,7 +15,7 @@ MODULE_DICT = {'SEQUENCE GRAPH': 'showSequenceGraph',
                'PEAK ASSIGNER': 'showPeakAssigner',
                'ATOM SELECTOR': 'showAtomSelector',
                'BACKBONE ASSIGNMENT': 'showBackboneAssignmentModule',
-               'CHEMICAL SHIFT LISTS':'showChemicalShiftTable',
+               'CHEMICAL SHIFT TABLE':'showChemicalShiftTable',
                'MACRO EDITOR':'editMacro',
                'NMR RESIDUE TABLE': 'showNmrResidueTable',
                'PEAK LIST': 'showPeakTable',
@@ -163,12 +163,12 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
               shiftDict[axis.code].append(shift)
 
       if len(display.axisCodes) > 2:
-
         atomPositions = shiftDict[display.strips[0].axisOrder[2]]
-        display.strips[0].orderedAxes[2].position = atomPositions[0].value
-        if len(atomPositions) > 1:
-          for i in range(len(atomPositions[1:])):
-            display.addStrip()
+        if atomPositions:
+          display.strips[0].orderedAxes[2].position = atomPositions[0].value
+          if len(atomPositions) > 1:
+            for i in range(len(atomPositions[1:])):
+              display.addStrip()
 
       atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
       for guiStrip in display.strips:
@@ -192,7 +192,8 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
         if markPositions:
           markPositionsInStrips(project, guiStrip, guiStrip.orderedAxes[:2], atomPositions2)
 
-  elif strip:
+  # elif strip:
+  else:
     shiftDict = {}
     for axis in strip.orderedAxes:
       shiftDict[axis.code] = []
@@ -213,7 +214,7 @@ def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
         if len(atomPositions[ii]) > 1:
           axis.position = (maximum+minimum)/2
           axis.width = maximum-minimum
-        else:
+        elif atomPositions[ii]:
           axis.position = atomPositions[ii][0].value
           axis.width = adjustment*2
         #   axis.width = width
@@ -260,7 +261,7 @@ def markPositionsInStrips(project, strip:'GuiStrip', axes, atomPositions, centre
         if len(atomPositions[ii]) > 1:
           axis.position = (maximum+minimum)/2
           axis.width = maximum-minimum
-        else:
+        elif atomPositions[ii]:
           axis.position = atomPositions[ii][0].value
           axis.width = adjustment*2
 
@@ -274,6 +275,9 @@ def isPositionWithinfBounds(strip:'GuiStrip', shift:ChemicalShift, axis:object):
 
     NBNB Bug Fixed by Rasmus 13/3/2016.
     This was not used then. Maybe it should be?
+
+    Modified to use aliasingLimits instead of apectrumlmits. Rasmus, 24/7/2016
+
   """
   minima = []
   maxima = []
@@ -282,8 +286,10 @@ def isPositionWithinfBounds(strip:'GuiStrip', shift:ChemicalShift, axis:object):
   for spectrumView in strip.spectrumViews:
     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
     index = spectrumIndices[axisIndex]
-    minima.append(spectrumView.spectrum.spectrumLimits[index][0])
-    maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
+    # minima.append(spectrumView.spectrum.spectrumLimits[index][0])
+    # maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
+    minima.append(spectrumView.spectrum.aliasingLimits[index][0])
+    maxima.append(spectrumView.spectrum.aliasingLimits[index][1])
     # print(shift, strip, axis.code)
     # if axis.code in spectrumView.spectrum.axisCodes:
     #   index = spectrumView.spectrum.axisCodes.index(axis.code)

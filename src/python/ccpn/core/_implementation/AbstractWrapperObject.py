@@ -192,7 +192,18 @@ class AbstractWrapperObject():
     """Python 2 behaviour - objects equal only to themselves."""
     return hash(id(self))
   
-  # CCPN properties 
+  # CCPN properties
+
+  @property
+  def className(self) -> str:
+    """Class name - necessary since the actual objects may be of a subclass.."""
+    return self.__class__.className
+
+  @property
+  def shortClassName(self) -> str:
+    """Short class name, for PID. Must be overridden for each subclass."""
+    return self.__class__.shortClassName
+
   @property
   def project(self) -> 'Project':
     """The Project (root)containing the object."""
@@ -451,15 +462,14 @@ class AbstractWrapperObject():
           del self._pid2Obj[obj.shortClassName][obj._id]
         del data2Obj[apiObj]
 
-  def _setUniqueStringKey(self, apiObj:'ccpn.api.memops.Implementation.DataObject',
-                          defaultValue:str, keyTag:str='name') -> str:
-    """(re)set obj.keyAttr to make it a unique key, using defaultValue if not set
-    NB - if called BEFORE data2obj etc. dictionaries are set"""
+  def _setUniqueStringKey(self, defaultValue:str, keyTag:str='name') -> str:
+    """(re)set self._werappedData.keyTag to make it a unique key, using defaultValue
+    if not set NB - is called BEFORE data2obj etc. dictionaries are set"""
 
     wrappedData = self._wrappedData
     if not hasattr (wrappedData,keyTag):
       raise ValueError("Cannot set unique %s for %s: %s object has no attribute %s"
-                       % (keyTag, self, wrappedData.__class__, keyTag))
+                       % (keyTag, self.className, wrappedData.__class__, keyTag))
 
     undo = self._project._undo
     if undo is not None:
@@ -472,26 +482,23 @@ class AbstractWrapperObject():
       value = getattr(wrappedData, keyTag)
       if value is None:
         value = defaultValue
-        setattr(wrappedData, keyTag, value)
 
       # Set to new, unique value if present value is a duplicate
-      apiObjects = self._getAllWrappedData(self._parent)
-      for apiSibling in apiObjects:
-        if apiSibling is wrappedData:
-          # We have reached the object itself in the list. Enough
-          break
-        elif getattr(apiSibling, keyTag) == value:
-          # Object name is duplicate of earlier object name - make unique name
+      competitorDict = set(getattr(x, keyTag)
+                            for x in self._getAllWrappedData(self._parent)
+                            if x is not wrappedData)
 
-          # First try appending serial, if possible
-          if hasattr(apiObj, 'serial'):
-            value = '%s-%s' % (value, apiObj.serial)
-          else:
-            value = commonUtil.incrementName(value)
-          while any(x for x in apiSibling if getattr(x, keyTag) == value):
-            value = commonUtil.incrementName(value)
-          setattr(self, keyTag, value)
-          break
+      if value in competitorDict and hasattr(wrappedData, 'serial'):
+        # First try appending serial
+        value = '%s-%s' % (value, wrappedData.serial)
+
+      while value in competitorDict:
+        # Keep incrementing suffix till value is unique
+        value = commonUtil.incrementName(value)
+
+      # Set the unique result
+      setattr(wrappedData, keyTag, value)
+
     finally:
       if wrappedData not in self._project._data2Obj:
         wrappedData.root.override = False
@@ -580,6 +587,7 @@ class AbstractWrapperObject():
     """Do wrapper level finalisation, and execute all notifiers
 
     action is one of: 'create', 'delete', 'change', 'rename'"""
+
 
     project = self.project
     if project._notificationBlanking:

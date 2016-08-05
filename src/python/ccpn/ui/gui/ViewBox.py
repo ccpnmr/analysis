@@ -489,11 +489,13 @@ class ViewBox(pg.ViewBox):
         startPosition = self.mapSceneToView(event.buttonDownPos())
         endPosition = self.mapSceneToView(event.pos())
         orderedAxes = self.current.strip.orderedAxes
+
         selectedRegion = [[round(startPosition.x(), 3), round(endPosition.x(), 3)],
                           [round(startPosition.y(), 3), round(endPosition.y(), 3)]]
         if len(orderedAxes) > 2:
           for n in orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
+
 
         for spectrumView in self.current.strip.spectrumViews:
           if not spectrumView.isVisible():
@@ -509,7 +511,13 @@ class ViewBox(pg.ViewBox):
             sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
             #TODO: remove reference to apidata
             apiSpectrumView = spectrumView._wrappedData
-            newPeaks = peakList.pickPeaksNd(sortedSelectedRegion,
+            spectrumAxisCodes = spectrumView.spectrum.axisCodes
+            stripAxisCodes = self.current.strip.axisCodes
+            sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+            for n, axisCode in enumerate(spectrumAxisCodes):
+              idx = stripAxisCodes.index(axisCode)
+              sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+            newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
                                             fitMethod='gaussian')

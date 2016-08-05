@@ -9,12 +9,17 @@ from PyQt4 import QtGui, QtCore
 
 
 class RestraintTable(CcpnModule):
-  def __init__(self, parent=None, restraintLists=None, name='Distance Restraint Table', **kw):
-
-    if not restraintLists:
-      restraintLists = []
+  def __init__(self, parent=None, restraintLists=None, name='Restraint Table', **kw):
 
     CcpnModule.__init__(self, name=name)
+
+    project = kw.get('project')
+
+    if not restraintLists:
+      if project is None:
+        restraintLists = []
+      else:
+        restraintLists = project.restraintLists
 
     self.restraintLists = restraintLists
 
@@ -24,8 +29,8 @@ class RestraintTable(CcpnModule):
     widget1 = QtGui.QWidget(self)
     widget1.setLayout(QtGui.QGridLayout())
     widget1.layout().addWidget(label, 0, 0, QtCore.Qt.AlignLeft)
-    self.chemicalShiftListPulldown = PulldownList(self, grid=(0, 1))
-    widget1.layout().addWidget(self.chemicalShiftListPulldown, 0, 1)
+    self.restraintListPulldown = PulldownList(self, grid=(0, 1))
+    widget1.layout().addWidget(self.restraintListPulldown, 0, 1)
     self.layout.addWidget(widget1, 0, 0)
 
     columns = [('#', '_key'),
@@ -48,14 +53,14 @@ class RestraintTable(CcpnModule):
                 'NmrAtom'
                 ]
 
-    self.chemicalShiftTable = GuiTableGenerator(self, restraintLists,
+    self.restraintTable = GuiTableGenerator(self, restraintLists,
                                                 actionCallback=self._callback, columns=columns,
-                                                selector=self.chemicalShiftListPulldown,
+                                                selector=self.restraintListPulldown,
                                                 tipTexts=tipTexts)
 
     newLabel = Label(self, '', grid=(2, 0))
 
-    self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)
+    self.layout.addWidget(self.restraintTable, 3, 0, 1, 4)
 
   def _getContributions(self, restraint):
     """return number of peaks assigned to NmrAtom in Experiments and PeakLists

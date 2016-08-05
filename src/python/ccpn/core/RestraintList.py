@@ -80,7 +80,7 @@ class RestraintList(AbstractWrapperObject):
 
     namePrefix = self._wrappedData.constraintType[:3].capitalize() + '-'
     defaultName = ('%s%s' % (namePrefix, wrappedData.serial))
-    self._setUniqueStringKey(wrappedData, defaultName)
+    self._setUniqueStringKey(defaultName)
     super().__init__(project, wrappedData)
 
   # Special error-raising functions for people who think RestraintList is a list
@@ -270,7 +270,7 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                       tensorMagnitude:float=0.0, tensorRhombicity:float=0.0,
                       tensorIsotropicValue:float=0.0, tensorChainCode:str=None,
                       tensorSequenceCode:str=None, tensorResidueType:str=None,
-                      serial=None) -> RestraintList:
+                      serial=None, itemLength=None) -> RestraintList:
   """Create new RestraintList of type restraintType within DataSet"""
 
 
@@ -281,14 +281,15 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
      ('comment',None), ('unit',None), ('potentialType', 'unknown'),
      ('tensorMagnitude', 0.0), ('tensorRhombicity', 0.0), ('tensorIsotropicValue', 0.0),
      ('tensorChainCode',None), ('tensorSequenceCode',None), ('tensorResidueType', None),
-     ('serial', None),
+     ('serial', None), ('itemLength', None),
     )
   )
 
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
 
-  itemLength = coreConstants.constraintListType2ItemLength.get(restraintType)
+  if itemLength is None:
+    itemLength = coreConstants.constraintListType2ItemLength.get(restraintType)
   if itemLength is None:
     raise ValueError("restraintType %s not recognised" % restraintType)
 

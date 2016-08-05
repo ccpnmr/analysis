@@ -296,7 +296,7 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
   
   return result
   
-def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
+def _fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   """Fetch chain with given shortName; If none exists call newNmrChain to make one first
 
   If shortName is None returns a new NmrChain with name staritng with '@'
@@ -321,7 +321,8 @@ def fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
 # Connections to parents:
 Project.newNmrChain = _newNmrChain
 del _newNmrChain
-Project.fetchNmrChain = fetchNmrChain
+Project.fetchNmrChain = _fetchNmrChain
+del _fetchNmrChain
 
 # Notifiers:
 className = ApiNmrChain._metaclass.qualifiedName()

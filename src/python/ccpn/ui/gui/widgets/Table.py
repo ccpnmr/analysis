@@ -238,7 +238,8 @@ class ObjectTable(QtGui.QTableView, Base):
 
       if row >= 0:
         obj = self.objects[row]
-        self.callback(obj, row, col)
+        if self.callback:
+          self.callback(obj, row, col)
 
 
   def getCurrentIndex(self):

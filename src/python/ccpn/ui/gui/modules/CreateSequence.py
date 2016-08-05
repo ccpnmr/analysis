@@ -34,7 +34,7 @@ class CreateSequence(QtGui.QDialog, Base):
     self.sequenceStart = 1
     self.chainCode = 'A'
     # self.sequence = sequenceEditor.toPlainText()
-    self.moleculeName = 'Molecule 1'
+    self.moleculeName = None
     moleculeName.textChanged.connect(self._setMoleculeName)
     lineEdit1a.valueChanged.connect(self._setSequenceStart)
     lineEdit2a.textChanged.connect(self._setChainCode)

@@ -283,7 +283,7 @@ class ViewBox(pg.ViewBox):
     Raise the context menu
     """
     from functools import partial
-    from ccpn.ui.gui.lib.Window import navigateToPeakPosition, navigateToPosition
+    from ccpn.ui.gui.lib.Window import navigateToPeakPosition, navigateToPositionInStrip
     position = event.screenPos()
     self.menu.navigateToMenu.clear()
     if self.current.peak:
@@ -295,8 +295,8 @@ class ViewBox(pg.ViewBox):
       for spectrumDisplay in self.current.project.spectrumDisplays:
         axisCodes = self.current.strip.axisCodes
         if len(list(set(spectrumDisplay.strips[0].axisCodes) & set(self.current.strip.axisCodes))) <= 2:
-          self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPosition, self.current.project, self.current.cursorPosition,
-                                                                        axisCodes, [spectrumDisplay.pid]))
+          self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPositionInStrip, self.current.cursorPosition,
+                                                                        axisCodes))
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
 
   def _getMenu(self):

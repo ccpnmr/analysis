@@ -221,7 +221,7 @@ class PeakList(AbstractWrapperObject):
     return result
 
   # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
-  def pickPeaks1d(self, data1d, dataRange, intensityRange=None, size:int=3, mode:str='wrap') -> List['Peak']:
+  def pickPeaks1d(self, dataRange, intensityRange=None, size:int=3, mode:str='wrap') -> List['Peak']:
     """
     Pick 1D peaks form data1d float array
     """

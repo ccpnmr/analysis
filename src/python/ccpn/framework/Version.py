@@ -27,3 +27,4 @@ revision = int(__version__.split()[1])
 applicationVersion = '3.0.b1'
 authors = __credits__
 projectName = 'CCPN'
+

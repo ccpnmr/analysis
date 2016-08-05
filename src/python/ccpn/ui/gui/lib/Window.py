@@ -3,7 +3,7 @@ __author__ = 'simon1'
 import pyqtgraph as pg
 
 from ccpn.core.ChemicalShift import ChemicalShift
-from ccpn.core.NmrResidue import NmrResidue
+from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
@@ -31,209 +31,154 @@ MODULE_DICT = {'SEQUENCE GRAPH': 'showSequenceGraph',
 
 LINE_COLOURS = {
   'CA': '#0000FF',
-  'CB': '#2400FF',
-  'CG': '#4800FF',
-  'CD': '#6D00FF',
-  'CE': '#9100FF',
-  'CZ': '#B600FF',
-  'CH': '#DA00FF',
-  'C': '#FF00FF',
+  'CB': '#0024FF',
+  'CG': '#0048FF',
+  'CD': '#006DFF',
+  'CE': '#0091FF',
+  'CZ': '#00B6FF',
+  'CH': '#00DAFF',
+  'C' : '#00FFFF',
   'HA': '#FF0000',
-  'HB': '#DA2400',
-  'HG': '#B64800',
-  'HD': '#916D00',
-  'HE': '#6D9100',
-  'HZ': '#48B600',
-  'HH': '#24DA00',
-  'H': '#00FF00',
-  'N': '#00FFFF',
-  'ND': '#3FFFBF',
-  'NE': '#7FFF7F',
-  'NZ': '#BFFF3F',
+  'HB': '#FF0024',
+  'HG': '#FF0048',
+  'HD': '#FF006D',
+  'HE': '#FF0091',
+  'HZ': '#FF00B6',
+  'HH': '#FF00DA',
+  'H' : '#FF00FF',
+  'N' : '#00FF00',
+  'ND': '#3FFF00',
+  'NE': '#7FFF00',
+  'NZ': '#BFFF00',
   'NH': '#FFFF00',
 }
 
 
-def navigateToPosition(project:Project, position=None, axisCodes=None,
-   selectedDisplays:typing.List[GuiSpectrumDisplay]=None, strip:'GuiStrip'=None,  markPositions:bool=False):
+def navigateToPositionInStrip(strip, positions, axisCodes=None, widths=None):
   """
-  Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
-  to the positions specified by the peak.
+  Takes a strip, a list of positions and optionally, a parallel list of axisCodes.
+  Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates
+  to the positions in the displayed axis order of the strip.
   """
+  if not axisCodes:
+    axisCodes = strip.axisCodes
 
-  if selectedDisplays is None:
-    selectedDisplays = [display.pid for display in project.spectrumDisplays]
+
+  axisCodeMapping = [spectrumLib.axisCodeMatch(code, strip.axisCodes) for code in axisCodes]
+  for ii, axisCode in enumerate(strip.axisCodes):
+    stripAxisIndex = axisCodeMapping.index(axisCode)
+    if positions[ii]:
+      strip.orderedAxes[stripAxisIndex].position = positions[ii]
+    if widths:
+      if widths[ii]:
+        # if this item in the list contains a float, set the axis width to that float value
+        if isinstance(widths[ii], float):
+          strip.orderedAxes[stripAxisIndex].width = widths[ii]
+        elif isinstance(widths[ii], str):
+          # if the list item is a str with value, full, reset the corresponding axis
+          if widths[ii] == 'full':
+            strip.resetAxisRange(stripAxisIndex)
+          if widths[ii] == 'default':
+            # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
+            if spectrumLib.name2IsotopeCode(axisCode) == '13C' or spectrumLib.name2IsotopeCode(axisCode) == '15N':
+              strip.orderedAxes[stripAxisIndex].width = 5
+            else:
+              strip.orderedAxes[stripAxisIndex].width = 0.5
 
 
-  for displayPid in selectedDisplays:
-    display = project.getByPid(displayPid)
-    axisPositions = dict(zip(axisCodes, list(position)))
-    if project._appBase.ui.mainWindow is not None:
-      mainWindow = project._appBase.ui.mainWindow
-    else:
-      mainWindow = project._appBase._mainWindow
-    task = mainWindow.task
-    # mark = task.newMark('white', position, axisCodes)
-
-    # if not strip:
-    # for strip in display.strips:
-    for axis in display.strips[0].orderedAxes:
-      try:
-        axisCodeMatch = spectrumLib.axisCodeMatch(axis.code, axisCodes)
-        if axisCodeMatch is not None:
-          axis.position = axisPositions[axisCodeMatch]
-          mark = task.newMark('white', [axis.position], [axisCodeMatch])
-      except TypeError:
-        pass
+def makeStripPlot(spectrumDisplay, nmrAtoms):
+  pass
 
 
 def navigateToPeakPosition(project:Project, peak:Peak=None,
-   selectedDisplays:typing.List[GuiSpectrumDisplay]=None, strip:'GuiStrip'=None,  markPositions:bool=False):
+   selectedDisplays:typing.List[GuiSpectrumDisplay]=None, strip:'GuiStrip'=None):
   """
   Takes a peak and optional spectrum displays and strips and navigates the strips and spectrum displays
   to the positions specified by the peak.
   """
 
-  if selectedDisplays is None:
+  if selectedDisplays is None and not strip:
     selectedDisplays = [display.pid for display in project.spectrumDisplays]
 
   if peak is None:
-    peak = project._appBase.current.peaks[0]
-
-  for displayPid in selectedDisplays:
-    display = project.getByPid(displayPid)
-    positions = peak.position
-    axisCodes = peak.peakList.spectrum.axisCodes
-    axisPositions = dict(zip(axisCodes, positions))
-    if project._appBase.ui.mainWindow is not None:
-      mainWindow = project._appBase.ui.mainWindow
+    if project._appBase.current.peaks[0]:
+      peak = project._appBase.current.peaks[0]
     else:
-      mainWindow = project._appBase._mainWindow
-    task = mainWindow.task
-    mark = task.newMark('white', positions, axisCodes)
+      print('No peak passed in')
+      return
 
-    # if not strip:
-    # for strip in display.strips:
-    for axis in display.strips[0].orderedAxes:
-      try:
-        axisCodeMatch = spectrumLib.axisCodeMatch(axis.code, axisCodes)
-        if axisCodeMatch is not None:
-          axis.position = axisPositions[axisCodeMatch]
-          mark = task.newMark('white', [axis.position], [axisCodeMatch])
-      except TypeError:
-        pass
+  positions = peak.position
+  axisCodes = peak.axisCodes
 
-
-def centreAxis(axis, atomPositions):
-  if spectrumLib.name2IsotopeCode(axis.code) == '13C' or spectrumLib.name2IsotopeCode(axis.code) == '15N':
-    adjustment = 5
+  if not strip:
+    for displayPid in selectedDisplays:
+      display = project.getByPid(displayPid)
+      for strip in display.strips:
+        navigateToPositionInStrip(strip, positions, axisCodes)
   else:
-    adjustment = 0.25
-
-  minimum = min(list(sorted([a.value for a in atomPositions]))) - adjustment
-  maximum = max(list(sorted([a.value for a in atomPositions]))) + adjustment
-  if len(atomPositions) > 1:
-    axis.position = (maximum+minimum)/2
-    axis.width = maximum-minimum
-  else:
-    axis.position = atomPositions[0].value
-    axis.width = adjustment*2
+    navigateToPositionInStrip(strip, positions, axisCodes)
 
 
 
-def navigateToNmrResidue(project:Project, nmrResidue:NmrResidue,
-                         selectedDisplays:typing.List[GuiSpectrumDisplay]=None,
-                         strip:'GuiStrip'=None,  markPositions:bool=False):
+def matchAxesAndNmrAtoms(strip, nmrAtoms):
+
+  shiftDict = {}
+  shiftList = strip.spectra[0].chemicalShiftList
+  for axis in strip.orderedAxes:
+    shiftDict[axis.code] = []
+    for atom in nmrAtoms:
+      if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
+        shift = shiftList.getChemicalShift(atom.id)
+        if shift is not None and isPositionWithinfBounds(strip, shift, axis):
+          shiftDict[axis.code].append(shift)
+
+  return shiftDict
+
+
+# def navigateToNmrResidue(project, nmrResidue):
+#   navigateToNmrAtoms(project, nmrResidue.nmrAtoms)
+
+
+def navigateToNmrAtomsInStrip(nmrAtoms:typing.List[NmrAtom], strip:'GuiStrip'=None,  markPositions:bool=False):
   """
   Takes an NmrResidue and optional spectrum displays and strips and navigates the strips
   and spectrum displays to the positions specified by the peak.
   """
-  if selectedDisplays is None:
-    selectedDisplays = project.spectrumDisplays
 
   if not strip:
-    for display in selectedDisplays:
-      shiftDict = {}
-      for axis in display.strips[0].orderedAxes:
-        shiftDict[axis.code] = []
-        for atom in nmrResidue.nmrAtoms:
-          if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
-            shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
-            if shift is not None and isPositionWithinfBounds(display.strips[0], shift, axis):
-              shiftDict[axis.code].append(shift)
+    print('no strip specified')
+    return
 
-      if len(display.axisCodes) > 2:
-        atomPositions = shiftDict[display.strips[0].axisOrder[2]]
-        if atomPositions:
-          display.strips[0].orderedAxes[2].position = atomPositions[0].value
-          if len(atomPositions) > 1:
-            for i in range(len(atomPositions[1:])):
-              display.addStrip()
+  shiftDict = matchAxesAndNmrAtoms(strip, nmrAtoms)
+  # atomPositions = shiftDict[strip.axisOrder[2]]
+  atomPositions = [[x.value for x in shiftDict[axisCode]] for axisCode in strip.axisOrder]
+  positions = []
+  for atomPos in atomPositions:
+    if len(atomPos) < 2:
+      positions.append(atomPos[0])
+    else:
+      positions.append(max(atomPos)-min(atomPos)/2)
 
-      atomPositions2 = [shiftDict[axis.code] for axis in display.strips[0].orderedAxes[:2]]
-      for guiStrip in display.strips:
-        for ii, axis in enumerate(guiStrip.orderedAxes[:2]):
-          if len(atomPositions2[ii]) > 0:
-            # _centreAxis(axis, atomPositions2[ii])
-              if spectrumLib.name2IsotopeCode(axis.code) == '13C':# or spectrumLib.name2IsotopeCode(axis.code) == '15N':
-                adjustment = 5
-              else:
-                adjustment = 0.25
+  navigateToPositionInStrip(strip, positions, strip.axisOrder)
 
-              minimum = min(list(sorted([a.value for a in atomPositions2[ii]]))) - adjustment
-              maximum = max(list(sorted([a.value for a in atomPositions2[ii]]))) + adjustment
-              if len(atomPositions2[ii]) > 1:
-                axis.position = (maximum+minimum)/2
-                axis.width = maximum-minimum
-              else:
-                axis.position = atomPositions2[ii][0].value
-                axis.width = adjustment*2
+def markPositions(project, axisCodes, atomPositions):
+    """
+    Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.
+    """
 
-        if markPositions:
-          markPositionsInStrips(project, guiStrip, guiStrip.orderedAxes[:2], atomPositions2)
-
-  # elif strip:
-  else:
-    shiftDict = {}
-    for axis in strip.orderedAxes:
-      shiftDict[axis.code] = []
-      for atom in nmrResidue.nmrAtoms:
-        if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
-          shift = project.chemicalShiftLists[0].getChemicalShift(atom.id)
-          if shift is not None:
-            shiftDict[axis.code].append(shift)
-    atomPositions = [shiftDict[axis.code] for axis in strip.orderedAxes]
-    for ii, axis in enumerate(strip.orderedAxes):
-      if len(atomPositions[ii]) > 0:
-        if spectrumLib.name2IsotopeCode(axis.code) == '13C':# or spectrumLib.name2IsotopeCode(axis.code) == '15N':
-          adjustment = 5
-        else:
-          adjustment = 0.25
-        minimum = min(list(sorted([a.value for a in atomPositions[ii]]))) - adjustment
-        maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
-        if len(atomPositions[ii]) > 1:
-          axis.position = (maximum+minimum)/2
-          axis.width = maximum-minimum
-        elif atomPositions[ii]:
-          axis.position = atomPositions[ii][0].value
-          axis.width = adjustment*2
-        #   axis.width = width
-    if markPositions:
-      markPositionsInStrips(project, strip, strip.orderedAxes, atomPositions)
-
-
-def markPositionsInStrips(project, strip:'GuiStrip', axes, atomPositions, centre=False):
     if project._appBase.ui.mainWindow is not None:
       mainWindow = project._appBase.ui.mainWindow
     else:
       mainWindow = project._appBase._mainWindow
     task = mainWindow.task
-    for ii, axis in enumerate(axes):
-      for atomPosition in atomPositions[ii]:
 
+    for ii, axisCode in enumerate(axisCodes):
+      for atomPosition in atomPositions[ii]:
         atomName = atomPosition.nmrAtom.name
         if atomName[:2] in LINE_COLOURS.keys():
-          task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axis.code])
+          task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axisCode])
+          """
+          # code to add text markers to lines in displays
           textItem = pg.TextItem(atomName, color=LINE_COLOURS[atomName[:2]])
           if ii == 0:
             y = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).y()
@@ -247,54 +192,32 @@ def markPositionsInStrips(project, strip:'GuiStrip', axes, atomPositions, centre
             textItem.setPos(x, atomPosition.value)
             strip.plotWidget.addItem(textItem)
             strip.yAxisAtomLabels.append(textItem)
+            """
         else:
-          task.newMark('white', [atomPosition.value], [axis.code])
-      # _centreAxis(axis, atomPositions[ii])
-      if centre:
-        if spectrumLib.name2IsotopeCode(axis.code) == '13C' or spectrumLib.name2IsotopeCode(axis.code) == '15N':
-          adjustment = 5
-        else:
-          adjustment = 0.25
-
-        minimum = min(list(sorted([a.value for a in atomPositions[ii]]))) - adjustment
-        maximum = max(list(sorted([a.value for a in atomPositions[ii]]))) + adjustment
-        if len(atomPositions[ii]) > 1:
-          axis.position = (maximum+minimum)/2
-          axis.width = maximum-minimum
-        elif atomPositions[ii]:
-          axis.position = atomPositions[ii][0].value
-          axis.width = adjustment*2
-
-
-
+          task.newMark('white', [atomPosition.value], [axisCode])
 
 def isPositionWithinfBounds(strip:'GuiStrip', shift:ChemicalShift, axis:object):
   """
-  Determines whether a given shift if within the bounds of the specified axis of the specified
-    strip.
+  Determines whether a given shift is within the bounds of the specified axis of the specified
+  strip.
 
-    NBNB Bug Fixed by Rasmus 13/3/2016.
-    This was not used then. Maybe it should be?
+  NBNB Bug Fixed by Rasmus 13/3/2016.
+  This was not used then. Maybe it should be?
 
-    Modified to use aliasingLimits instead of apectrumlmits. Rasmus, 24/7/2016
+  Modified to use aliasingLimits instead of spectrumLimits. Rasmus, 24/7/2016
 
   """
   minima = []
   maxima = []
 
   axisIndex = strip.axisOrder.index(axis.code)
+
   for spectrumView in strip.spectrumViews:
     spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
     index = spectrumIndices[axisIndex]
-    # minima.append(spectrumView.spectrum.spectrumLimits[index][0])
-    # maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
     minima.append(spectrumView.spectrum.aliasingLimits[index][0])
     maxima.append(spectrumView.spectrum.aliasingLimits[index][1])
-    # print(shift, strip, axis.code)
-    # if axis.code in spectrumView.spectrum.axisCodes:
-    #   index = spectrumView.spectrum.axisCodes.index(axis.code)
-    #   minima.append(spectrumView.spectrum.spectrumLimits[index][0])
-    #   maxima.append(spectrumView.spectrum.spectrumLimits[index][1])
+
   if len(maxima) < 1:
     return True
   else:

@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 import typing
-from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
+from ccpn.ui.gui.lib.Window import navigateToPeakPosition
 
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
@@ -99,7 +99,7 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self.deleteSelectedPeaks))
     QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark)
     QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
-    QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project))
+    # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
     QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
     QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks)

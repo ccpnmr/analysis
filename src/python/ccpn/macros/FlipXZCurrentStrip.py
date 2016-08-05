@@ -32,5 +32,5 @@ else:
     axisOrder.extend(current.strip.axisOrder[3:])
   spectra = current.strip.spectra
   newDisplay = ui.mainWindow.createSpectrumDisplay(spectra[0], axisOrder=axisOrder)
-  for spectrum in spectra:
+  for spectrum in spectra[1:]:
     newDisplay.displaySpectrum(spectrum)

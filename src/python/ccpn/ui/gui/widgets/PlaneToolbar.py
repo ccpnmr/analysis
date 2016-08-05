@@ -41,7 +41,6 @@ class PlaneToolbar(ToolBar):
       self.prevPlaneButton.setFixedHeight(19)
       planeLabel = DoubleSpinbox(self, showButtons=False)
       planeLabel.setFixedHeight(19)
-      # below shouldn't be needed, this is set elsewhere
       planeLabel.valueChanged.connect(partial(callbacks[2], i))
       self.nextPlaneButton = Button(self,'>', callback=partial(callbacks[1], i))
       self.nextPlaneButton.setFixedWidth(19)

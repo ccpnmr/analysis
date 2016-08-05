@@ -254,13 +254,16 @@ class GuiStripNd(GuiStrip):
 
       planeLabel.setSingleStep(minZPlaneSize)
 
-      if minAliasedFrequency is not None:
-        planeLabel.setMinimum(minAliasedFrequency)
+      # have to do the following in order: maximum, value, minimum
+      # otherwise Qt will set bogus value to guarantee that minimum <= value <= maximum
 
       if maxAliasedFrequency is not None:
         planeLabel.setMaximum(maxAliasedFrequency)
 
       planeLabel.setValue(zAxis.position)
+
+      if minAliasedFrequency is not None:
+        planeLabel.setMinimum(minAliasedFrequency)
 
       if not self.haveSetupZWidgets:
         # have to set this up here, otherwise the callback is called too soon and messes up the position
@@ -278,15 +281,22 @@ class GuiStripNd(GuiStrip):
     planeLabel = self.planeToolbar.planeLabels[n]
     planeSize = planeLabel.singleStep()
 
+    # below is hack to prevent initial setting of value to 99.99 when dragging spectrum onto blank display
+    if planeLabel.minimum() == 0 and planeLabel.value() == 99.99 and planeLabel.maximum() == 99.99:
+      return
+
     if planeCount:
       delta = planeSize * planeCount
-      zAxis.position += delta
+      position = zAxis.position + delta
+      if planeLabel.minimum() <= position <= planeLabel.maximum():
+        zAxis.position = position
       #planeLabel.setValue(zAxis.position)
     elif position is not None: # should always be the case
-      zAxis.position = position
-      self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
-      self.logger.info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
-      #planeLabel.setValue(zAxis.position)
+      if planeLabel.minimum() <= position <= planeLabel.maximum():
+        zAxis.position = position
+        self.pythonConsole.writeConsoleCommand("strip.changeZPlane(position=%f)" % position, strip=self)
+        self.logger.info("strip = application.getByGid('%s')\nstrip.changeZPlane(position=%f)" % (self.pid, position))
+        #planeLabel.setValue(zAxis.position)
 
       # else:
       #   print('position is outside spectrum bounds')
@@ -330,10 +340,12 @@ class GuiStripNd(GuiStrip):
     Sets the value of the z plane position box if the specified value is within the displayable limits.
     """
     planeLabel = self.planeToolbar.planeLabels[n]
-    if planeLabel.valueChanged:
-      value = planeLabel.value()
+    #if planeLabel.valueChanged():
+    #  value = planeLabel.value()
     # 8/3/2016 Rasmus Fogh. Fixed untested (obvious bug)
     # if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
+
+    # not sure the check below is needed since presumably Qt guarantees this
     if planeLabel.minimum() <= value <= planeLabel.maximum():
       self.changeZPlane(n, position=value)
 

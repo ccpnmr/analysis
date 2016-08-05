@@ -68,7 +68,7 @@ class SpinSystemLabel(DropBase, Label):
       processedPid = pid[:-2]
       wrapperObject = self._appBase.getByPid(processedPid)
       nmrResidue = wrapperObject.planeToolbar.spinSystemLabel.text()
-      nr1 = current.nmrResidue
+      nr1 = current.nmrResidue.mainNmrResidue
       if wrapperObject.pid == self.strip.pid:
         return
       if direction == '-1':
@@ -83,7 +83,7 @@ class SpinSystemLabel(DropBase, Label):
       else:
         self.strip.guiSpectrumDisplay.copyStrip(wrapperObject, sinkIndex)
         try:
-          nr2 = project.getByPid('NR:%s' % nmrResidue)
+          nr2 = project.getByPid('NR:%s' % nmrResidue).mainNmrResidue
           if nr1 and nr2:
             if direction == '-1':
               nr1.connectPrevious(nr2)

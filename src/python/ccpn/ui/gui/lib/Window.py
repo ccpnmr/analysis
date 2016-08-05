@@ -189,22 +189,6 @@ def markPositions(project, axisCodes, atomPositions):
         atomName = atomPosition.nmrAtom.name
         if atomName[:2] in LINE_COLOURS.keys():
           task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axisCode], labels=[atomName])
-          """
-          # code to add text markers to lines in displays
-          textItem = pg.TextItem(atomName, color=LINE_COLOURS[atomName[:2]])
-          if ii == 0:
-            y = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).y()
-            textItem.anchor = pg.Point(0, 1)
-            textItem.setPos(atomPosition.value, y)
-            strip.plotWidget.addItem(textItem)
-            strip.xAxisAtomLabels.append(textItem)
-          if ii == 1:
-            x = strip.plotWidget.plotItem.vb.mapSceneToView(strip.viewBox.boundingRect().bottomLeft()).x()
-            textItem.anchor = pg.Point(0, 0)
-            textItem.setPos(x, atomPosition.value)
-            strip.plotWidget.addItem(textItem)
-            strip.yAxisAtomLabels.append(textItem)
-            """
         else:
           task.newMark('white', [atomPosition.value], [axisCode])
 

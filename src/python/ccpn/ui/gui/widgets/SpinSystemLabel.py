@@ -102,7 +102,7 @@ class SpinSystemLabel(DropBase, Label):
               current.strip.planeToolbar.spinSystemLabel.setText(current.nmrResidue._id)
             # except AttributeError:
             #   project._logger.warn('Backbone module is not active')
-        except AttibuteError:
+        except AttributeError:
           project._logger.warn('Cannot connect non-existent Nmr Residues')
 
 

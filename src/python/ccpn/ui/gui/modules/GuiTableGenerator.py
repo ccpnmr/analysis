@@ -42,6 +42,12 @@ class GuiTableGenerator(QtGui.QWidget, Base):
         self._updateSelectorContents()
 
 
+
+  def setTableCallback(self, callback):
+    self.table.callback = None
+    self.table.doubleClicked.connect(callback)
+
+
   def _changeObjectList(self, objectList:object):
     """
     Changes the objectList specified in the selector.

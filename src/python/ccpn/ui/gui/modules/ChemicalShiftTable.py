@@ -18,8 +18,6 @@ class ChemicalShiftTable(CcpnModule):
 
     self.chemicalShiftLists = chemicalShiftLists
 
-    # label = Label(self, "Chemical Shift List:")
-    # self.layout.addWidget(label, 0, 0)
     label = Label(self, "Chemical Shift List:")
     widget1 = QtGui.QWidget(self)
     widget1.setLayout(QtGui.QGridLayout())
@@ -27,8 +25,6 @@ class ChemicalShiftTable(CcpnModule):
     self.chemicalShiftListPulldown = PulldownList(self, grid=(0, 1))
     widget1.layout().addWidget(self.chemicalShiftListPulldown, 0, 1)
     self.layout.addWidget(widget1, 0, 0)
-    # if callback is None:
-    #   callback=self.selectPeak
 
     columns = [('#', '_key'),
                ('Shift', lambda chemicalShift: '%8.3f' % chemicalShift.value),

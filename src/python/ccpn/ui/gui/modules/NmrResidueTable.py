@@ -21,7 +21,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
     Base.__init__(self, **kw)
     self.project = project
     self.nmrChains = project.nmrChains
-
+    self.callback = callback
     label = Label(self, "NmrChain:")
     widget1 = QtGui.QWidget(self)
     widget1.setLayout(QtGui.QGridLayout())
@@ -42,7 +42,7 @@ class NmrResidueTable(QtGui.QWidget, Base):
                 'Sequence code of NmrResidue',  'Type of NmrResidue',
                 'Atoms in NmrResidue', 'Number of peaks assigned to Nmr Residue']
 
-    self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains, actionCallback=callback, columns=columns,
+    self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains, actionCallback=self.callback, columns=columns,
                                              selector=self.nmrChainPulldown, tipTexts=tipTexts, objectType='nmrResidues',
                                              selectionCallback=self._setNmrResidue)
 

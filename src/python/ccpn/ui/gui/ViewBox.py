@@ -283,7 +283,8 @@ class ViewBox(pg.ViewBox):
     Raise the context menu
     """
     from functools import partial
-    from ccpn.ui.gui.lib.Window import navigateToPeakPosition, navigateToPositionInStrip
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
+    from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
     position = event.screenPos()
     self.menu.navigateToMenu.clear()
     if self.current.peak:

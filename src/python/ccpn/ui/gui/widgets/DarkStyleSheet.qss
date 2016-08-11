@@ -1,5 +1,8 @@
 CallTipWidget {color: #bec4f3;}
 
+QWidget#spectrumSelectionWidget {background-color: #2a3358;}
+
+
 QColorDialog {
     background-color: #2a3358;
 }
@@ -358,3 +361,4 @@ Dock SequenceGraph QWidget { background-color: #000021;
 ColorDialog {
               background-color: #2a3358;
               }
+

@@ -46,8 +46,6 @@ from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 
 
-from sklearn import svm
-
 def isInterOnlyExpt(experimentType:str) -> bool:
   """
   Determines if the specified experiment is an inter-residual only experiment
@@ -474,3 +472,14 @@ def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict
         result[mt] = newSet
   #
   return result
+
+def getBoundNmrAtomPairs(nmrAtoms, nucleus):
+
+  result = []
+  for na1 in nmrAtoms:
+    if na1.name.startswith(nucleus):
+      for na2 in na1.boundNmrAtoms:
+        if na2 in nmrAtoms:
+          result.append(tuple(sorted([na1, na2])))
+
+  return list(set(result))

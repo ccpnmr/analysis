@@ -36,7 +36,7 @@ from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 import typing
-from ccpn.ui.gui.lib.Window import navigateToPeakPosition
+from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay

@@ -193,7 +193,8 @@ class GuiStripNd(GuiStrip):
       spectrumLimits = spectrumView.spectrum.spectrumLimits
       positionArray.append(spectrumLimits[spectrumIndices[axis]])
 
-    zoomArray = ([min(positionArray), max(positionArray)])
+    positionArrayFlat = numpy.array(positionArray).flatten()
+    zoomArray = ([min(positionArrayFlat), max(positionArrayFlat)])
     if axis == 0:
       self.zoomX(*zoomArray)
     elif axis == 1:

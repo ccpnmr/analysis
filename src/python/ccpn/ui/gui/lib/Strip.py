@@ -15,7 +15,6 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
 
 
   axisCodeMapping = [code for code in axisCodes if code in strip.axisCodes]
-  print(axisCodeMapping, axisCodes, 'ssss')
   for ii, axisCode in enumerate(strip.axisCodes):
     stripAxisIndex = axisCodeMapping.index(axisCode)
     if positions[ii]:
@@ -89,7 +88,6 @@ def navigateToNmrAtomsInStrip(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom], w
     return
 
   shiftDict = matchAxesAndNmrAtoms(strip, nmrAtoms)
-  print('shiftDict', shiftDict)
   # atomPositions = shiftDict[strip.axisOrder[2]]
   atomPositions = [[x.value for x in shiftDict[axisCode]] for axisCode in strip.axisOrder]
   positions = []
@@ -101,5 +99,4 @@ def navigateToNmrAtomsInStrip(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom], w
         positions.append(max(atomPos)-min(atomPos)/2)
     else:
       positions.append('')
-  print(positions)
   navigateToPositionInStrip(strip, positions, widths=widths)

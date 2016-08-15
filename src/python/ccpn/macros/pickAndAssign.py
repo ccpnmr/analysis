@@ -1,4 +1,4 @@
-from ccpn.core.lib.AssignmentLib import copyAssignments, isInterOnlyExpt
+from ccpn.core.lib.AssignmentLib import copyPeakListAssignments, isInterOnlyExpt
 
 # NBNB TBD FIXME. Looks broken. Clean up or remove? RHF
 

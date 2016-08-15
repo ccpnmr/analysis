@@ -150,7 +150,7 @@ class GuiStripNd(GuiStrip):
     # self.contextMenu.addAction(self.crossHairAction, isFloatWidget=True)
     return self.contextMenu
 
-  def resetZoom(self):
+  def resetZoom(self, axis=None):
     """
     Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.
     """
@@ -178,6 +178,26 @@ class GuiStripNd(GuiStrip):
     self.pythonConsole.writeConsoleCommand("strip.resetZoom()", strip=self)
     self.logger.info("strip = application.getByGid('%s')\nstrip.resetZoom()" % self.pid)
     return zoomXArray, zoomYArray
+
+  def resetAxisRange(self, axis):
+    if not axis:
+      return
+
+    positionArray = []
+
+    for spectrumView in self.spectrumViews:
+
+      # Get spectrum dimension index matching display X or Y
+      # without using axis codes, as they may not match
+      spectrumIndices = spectrumView._displayOrderSpectrumDimensionIndices
+      spectrumLimits = spectrumView.spectrum.spectrumLimits
+      positionArray.append(spectrumLimits[spectrumIndices[axis]])
+
+    zoomArray = ([min(positionArray), max(positionArray)])
+    if axis == 0:
+      self.zoomX(*zoomArray)
+    elif axis == 1:
+      self.zoomY(*zoomArray)
 
 
   def _updateRegion(self, viewBox):

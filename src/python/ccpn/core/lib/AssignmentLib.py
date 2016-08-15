@@ -33,7 +33,6 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               'NE2', 'NH1', 'NH2', 'NZ']}
 
 
-import typing
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrResidue import NmrResidue
@@ -44,6 +43,7 @@ from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
+import numpy
 
 
 def isInterOnlyExpt(experimentType:str) -> bool:
@@ -168,7 +168,7 @@ def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=
 #   if axisCode[0] == 'H':
 #     return '1H'
 
-def copyAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
+def copyPeakListAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
   """
 
   Takes a reference peakList and assigns NmrAtoms to dimensions
@@ -483,3 +483,37 @@ def getBoundNmrAtomPairs(nmrAtoms, nucleus):
           result.append(tuple(sorted([na1, na2])))
 
   return list(set(result))
+
+
+def findClosePeaks(peak, matchPeakList):
+
+  closePeaks = []
+  refAxisCodes = peak.axisCodes
+  matchAxisCodes = matchPeakList.spectrum.axisCodes
+  mappingArray = [refAxisCodes.index(axisCode) for axisCode in refAxisCodes
+                  if axisCode in matchAxisCodes]
+  mappingArray2 = [matchAxisCodes.index(axisCode) for axisCode in refAxisCodes
+                   if axisCode in matchAxisCodes]
+  refPeakPosition = numpy.array([peak.position[dim] for dim in mappingArray if dim is not None])
+
+  for mPeak in matchPeakList.peaks:
+    matchArray = []
+    for dim in mappingArray2:
+      matchArray.append(mPeak.position[dim])
+
+    dist = numpy.linalg.norm(refPeakPosition-numpy.array(matchArray))
+    if dist < 0.02:
+      closePeaks.append(mPeak)
+
+  return closePeaks
+
+def copyPeakAssignments(refPeak, peaks):
+
+  refAxisCodes = refPeak.axisCodes
+  for peak in peaks:
+    matchAxisCodes = peak.axisCodes
+    mappingArray2 = [matchAxisCodes.index(axisCode) for axisCode in refAxisCodes if axisCode in matchAxisCodes]
+    for jj, dim in enumerate(mappingArray2):
+      atom = refPeak.dimensionNmrAtoms[jj][0]
+      axisCode = peak.axisCodes[dim]
+      peak.assignDimension(axisCode, [atom])

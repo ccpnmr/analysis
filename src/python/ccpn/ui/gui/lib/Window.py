@@ -58,20 +58,23 @@ def markPositions(project, axisCodes, atomPositions):
     """
     Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.
     """
-    if project._appBase.ui.mainWindow is not None:
-      mainWindow = project._appBase.ui.mainWindow
-    else:
-      mainWindow = project._appBase._mainWindow
-    task = mainWindow.task
+    project._startFunctionCommandBlock('markPositions', project, axisCodes, atomPositions)
+    try:
+      if project._appBase.ui.mainWindow is not None:
+        mainWindow = project._appBase.ui.mainWindow
+      else:
+        mainWindow = project._appBase._mainWindow
+      task = mainWindow.task
 
-    for ii, axisCode in enumerate(axisCodes):
-      for atomPosition in atomPositions[ii]:
-        atomName = atomPosition.nmrAtom.name
-        if atomName[:2] in LINE_COLOURS.keys():
-          task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axisCode], labels=[atomName])
-        else:
-          task.newMark('white', [atomPosition.value], [axisCode])
+      for ii, axisCode in enumerate(axisCodes):
+        for atomPosition in atomPositions[ii]:
+          atomName = atomPosition.nmrAtom.name
+          if atomName[:2] in LINE_COLOURS.keys():
+            task.newMark(LINE_COLOURS[atomName[:2]], [atomPosition.value], [axisCode], labels=[atomName])
+          else:
+            task.newMark('white', [atomPosition.value], [axisCode])
 
 
-
+    finally:
+      project._appBase._endCommandBlock()
 

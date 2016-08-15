@@ -35,23 +35,28 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
     navigateToPositionInStrip(strip, positions, axisCodes)
 
 
-def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[NmrAtom]], autoWidth=True):
+def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[NmrAtom]], autoWidth=True, widths=None):
 
-  numberOfStrips = len(spectrumDisplay.strips)
+  project = spectrumDisplay.project
+  project._startFunctionCommandBlock('makeStripPlot', spectrumDisplay, nmrAtomPairs, autoWidth, widths)
+  try:
 
-  # Make sure there are enough strips to display nmrAtomPairs
-  if numberOfStrips < len(nmrAtomPairs):
-    for ii in range(numberOfStrips, len(nmrAtomPairs)):
-      spectrumDisplay.strips[-1].clone()
+    numberOfStrips = len(spectrumDisplay.strips)
 
-  print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))
-  # loop through strips and navigate to appropriate position in strip
-  for ii, strip in enumerate(spectrumDisplay.strips):
-    if autoWidth:
-      widths = ['default'] * len(strip.axisCodes)
-    else:
-      widths = None
-    navigateToNmrAtomsInStrip(strip, nmrAtomPairs[ii], widths=widths)
+    # Make sure there are enough strips to display nmrAtomPairs
+    if numberOfStrips < len(nmrAtomPairs):
+      for ii in range(numberOfStrips, len(nmrAtomPairs)):
+        spectrumDisplay.strips[-1].clone()
+
+    # loop through strips and navigate to appropriate position in strip
+    for ii, strip in enumerate(spectrumDisplay.strips):
+      if autoWidth:
+        widths = ['default'] * len(strip.axisCodes)
+      elif not widths:
+        widths = None
+      navigateToNmrAtomsInStrip(strip, nmrAtomPairs[ii], widths=widths)
+  finally:
+    project._appBase._endCommandBlock()
 
 
 def makeStripPlotFromSingles(spectrumDisplay:GuiSpectrumDisplay, nmrAtoms:List[NmrAtom], autoWidth=True):
@@ -63,7 +68,6 @@ def makeStripPlotFromSingles(spectrumDisplay:GuiSpectrumDisplay, nmrAtoms:List[N
     for ii in range(numberOfStrips, len(nmrAtoms)):
       spectrumDisplay.strips[-1].clone()
 
-  print(nmrAtoms, spectrumDisplay.strips)
   # print(spectrumDisplay, nmrAtomPairs, len(nmrAtomPairs), len(spectrumDisplay.strips))
   # loop through strips and navigate to appropriate position in strip
   for ii, strip in enumerate(spectrumDisplay.strips):

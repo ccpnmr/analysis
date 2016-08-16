@@ -518,6 +518,7 @@ class ViewBox(pg.ViewBox):
             for n, axisCode in enumerate(spectrumAxisCodes):
               idx = stripAxisCodes.index(axisCode)
               sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+              print(axisCode, idx, sortedSelectedRegion[n])
             newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,

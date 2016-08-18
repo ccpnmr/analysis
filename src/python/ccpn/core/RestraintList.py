@@ -285,8 +285,12 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
     )
   )
 
-  if name and Pid.altCharacter in name:
-    raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
+  if name:
+    if Pid.altCharacter in name:
+      raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
+  else:
+    # This may not be unique, but that should be handled downstream
+    name = restraintType
 
   if itemLength is None:
     itemLength = coreConstants.constraintListType2ItemLength.get(restraintType)

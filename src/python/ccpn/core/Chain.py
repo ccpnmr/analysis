@@ -193,8 +193,8 @@ class Chain(AbstractWrapperObject):
 
 
 def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:str=None,
-              startNumber:int=1, molType:str=None, isCyclic:bool=False,
-              shortName:str=None, role:str=None, comment:str=None) -> Chain:
+                 startNumber:int=1, molType:str=None, isCyclic:bool=False,
+                 shortName:str=None, role:str=None, comment:str=None) -> Chain:
   """Create new chain from sequence of residue codes
 
   Automatically creates the corresponding polymer Substance if the compoundName is not already taken

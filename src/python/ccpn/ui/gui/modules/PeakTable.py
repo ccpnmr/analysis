@@ -254,7 +254,8 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.peakTable.updateTable()
 
 
-  def _refreshPeakTable(self, peak):
+  def _refreshPeakTable(self, peak, dummy=None):
+    # Dummy argument needed as the function is called for rename notifiers
     self.peakTable.updateTable()
 
 

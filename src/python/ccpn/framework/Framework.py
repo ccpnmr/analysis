@@ -736,7 +736,7 @@ class Framework:
         project._resetUndo(debug=_DEBUG)
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:
-        sys.stderr.write('==> Loading %s project (Experimental Only!) "%s"\n' % (subType, path))
+        sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
         project = self._loafNefFile(path)
         project._resetUndo(debug=_DEBUG)
       #
@@ -748,13 +748,13 @@ class Framework:
   def _loafNefFile(self, path:str) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
-    mainWindow = None
-    if hasattr(self.ui, 'mainWindow'):
-      mainWindow = self.ui.mainWindow
-
-    if mainWindow is not None:
-      sys.stderr.write("==> NEF file loading not yet implemented for Gui interface. Aborting...")
-      return
+    # mainWindow = None
+    # if hasattr(self.ui, 'mainWindow'):
+    #   mainWindow = self.ui.mainWindow
+    #
+    # if mainWindow is not None:
+    #   sys.stderr.write("==> NEF file loading not yet implemented for Gui interface. Aborting...")
+    #   return
 
     dataBlock = self.nefReader.getNefData(path)
     project = self.newProject(dataBlock.name)
@@ -766,9 +766,9 @@ class Framework:
       self._echoBlocking -= 1
       self.project._undo.decreaseBlocking()
 
-    if mainWindow is not None:
-      # TODO initialisation does not work properly. Needs fixing.
-      mainWindow.sideBar.fillSideBar(project)
+    # if mainWindow is not None:
+    #   # TODO initialisation does not work properly. Needs fixing.
+    #   mainWindow.sideBar.fillSideBar(project)
     #
     return project
 

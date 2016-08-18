@@ -897,7 +897,8 @@ class Project(AbstractWrapperObject):
   def loadProject(self, path:str, subType:str) -> "Project":
     """Load project from file into application and return the new project"""
 
-    if subType == ioFormats.CCPN:
+    # if subType == ioFormats.CCPN:
+    if subType in (ioFormats.CCPN, ioFormats.NEF):
       return self._appBase.loadProject(path)
     else:
       raise ValueError("Project file type %s is not recognised" % subType)

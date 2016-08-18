@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 
 import random
 import os
+import sys
 import time
 from collections import OrderedDict as OD
 from operator import attrgetter, itemgetter
@@ -32,6 +33,7 @@ from typing import List, Union, Optional, Sequence
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
+from ccpn.core.lib import SpectrumLib
 from ccpnmodel.ccpncore.lib import Constants as coreConstants
 from ccpn.core.lib.MoleculeLib import extraBoundAtomPairs
 from ccpn.core.lib import RestraintLib
@@ -161,7 +163,7 @@ nef2CcpnMap = {
 
   'nef_distance_restraint_list':OD((
     ('potential_type','potentialType'),
-    ('origin','origin'),
+    ('restraint_origin','origin'),
     ('ccpn_tensor_chain_code','tensorChainCode'),
     ('ccpn_tensor_sequence_code','tensorSequenceCode'),
     ('ccpn_tensor_residue_type','tensorResidueType'),
@@ -199,7 +201,7 @@ nef2CcpnMap = {
 
   'nef_dihedral_restraint_list':OD((
     ('potential_type','potentialType'),
-    ('origin','origin'),
+    ('restraint_origin','origin'),
     ('ccpn_tensor_chain_code','tensorChainCode'),
     ('ccpn_tensor_sequence_code','tensorSequenceCode'),
     ('ccpn_tensor_residue_type','tensorResidueType'),
@@ -246,7 +248,7 @@ nef2CcpnMap = {
 
   'nef_rdc_restraint_list':OD((
     ('potential_type','potentialType'),
-    ('origin','origin'),
+    ('restraint_origin','origin'),
     ('tensor_magnitude', 'tensorMagnitude'),
     ('tensor_rhombicity', 'tensorRhombicity'),
     ('tensor_chain_code','tensorChainCode'),
@@ -332,10 +334,10 @@ nef2CcpnMap = {
     ('folding',None),
     ('absolute_peak_positions',None),
     ('is_acquisition',None),
+    ('ccpn_axis_code','axisCodes'),
   )),
   'ccpn_spectrum_dimension':OD((
     ('dimension_id',None),
-    ('axis_code','axisCodes'),
     ('point_count','pointCounts'),
     ('reference_point','referencePoints'),
     ('total_point_count','totalPointCounts'),
@@ -548,7 +550,7 @@ nef2CcpnMap = {
 
   'ccpn_restraint_list':OD((
     ('potential_type','potentialType'),
-    ('origin','origin'),
+    ('restraint_origin','origin'),
     ('tensor_chain_code','tensorChainCode'),
     ('tensor_sequence_code','tensorSequenceCode'),
     ('tensor_residue_type','tensorResidueType'),
@@ -777,7 +779,7 @@ class CcpnNefWriter:
 
     # NBNB TBD FIXME add proper values for format version from specification file
     result['format_name'] = 'nmr_exchange_format'
-    result['format_version'] = '0.91'
+    result['format_version'] = '0.200'
     # format_version=None
     result['coordinate_file_name'] = coordinateFileName
     if headObject.className == 'Project':
@@ -948,7 +950,7 @@ class CcpnNefWriter:
         # NB _set command takes care of varying number of items
         assignments = list(zip(*(x.split('.') for x in item)))
         for ii,tag in enumerate(('chain_code', 'sequence_code', 'residue_type', 'atom_name',)):
-          row._set(tag, assignments[ii])
+          row._set(tag, [x or None for x in assignments[ii]])
         if category == 'nef_dihedral_restraint_list':
           row['name'] = RestraintLib.dihedralName(project, item)
     #
@@ -1296,7 +1298,6 @@ class CcpnNefWriter:
 
 
 class CcpnNefReader:
-
   # Importer functions - used for converting saveframes and loops
   importers = {}
 
@@ -1376,6 +1377,8 @@ class CcpnNefReader:
 
     # Now read assignment from ChemicaShiftLists to get '@' and '#' with right serials
     self.preloadAssignmentData(dataBlock)
+
+    self.defaultChainCode = None
 
 
     extraCategories = []
@@ -1470,10 +1473,11 @@ class CcpnNefReader:
       while defaultChainCode in chainData:
         defaultChainCode = commonUtil.incrementName(defaultChainCode)
       chainData[defaultChainCode] = chainData.pop(None)
+    self.defaultChainCode = defaultChainCode
 
 
     sequence2Chain = {}
-    tags =('sequence_code', 'residue_type', 'linking', 'residue_variant')
+    tags =('residue_type', 'linking', 'residue_variant')
     for chainCode, rows in sorted(chainData.items()):
       compoundName = rows[0].get('ccpn_compound_name')
       role = rows[0].get('ccpn_chain_role')
@@ -1488,6 +1492,20 @@ class CcpnNefReader:
       else:
         newChain = lastChain.substance.createChain(shortName=chainCode, role=role,
                                                    comment=comment)
+      for apiResidue in newChain._wrappedData.sortedResidues():
+        # Necessary to guarantee against name clashes
+        # Direct access to avoid unnecessary nootifiers
+        apiResidue.__dict__['seqInsertCode'] = '__@~@~__'
+      for ii,apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
+        # NB we have to lop over API residues to be sure we get the residues
+        # in creation order rather than sorted order
+        residue = project._data2Obj[apiResidue]
+        residue.rename(rows[ii].get('sequence_code'))
+        residue._finaliseRename()
+
+      # Nexessary as notification is blanked here:
+      newChain._finaliseRename()
+
       #
       result.append(newChain)
 
@@ -1510,14 +1528,16 @@ class CcpnNefReader:
     result = []
 
     for row in loop.data:
-      id1 = Pid.createId(row[x] for x in ('chain_code_1', 'sequence_code_1',
-                                           'residue_type_1', 'atom_name_1', ))
-      id2 = Pid.createId(row[x] for x in ('chain_code_2', 'sequence_code_2',
-                                           'residue_type_2', 'atom_name_2', ))
+      id1 = Pid.createId(*(row[x] for x in ('chain_code_1', 'sequence_code_1',
+                                           'residue_type_1', 'atom_name_1', )))
+      id2 = Pid.createId(*(row[x] for x in ('chain_code_2', 'sequence_code_2',
+                                           'residue_type_2', 'atom_name_2', )))
       atom1 = project.getAtom(id1)
       atom2 = project.getAtom(id2)
-      if atom1 is None or atom2 is None:
-        self.warning("Unknown atom for bond  %s - %s Skipping..." % (id1, id2))
+      if atom1 is None:
+        self.warning("Unknown atom %s for bond to %s. Skipping..." % (id1, id2))
+      elif atom2 is None:
+        self.warning("Unknown atom %s for bond to %s. Skipping..." % (id2, id1))
       else:
         result.append((atom1, atom2))
         atom1.addInterAtomBond(atom2)
@@ -1723,8 +1743,8 @@ class CcpnNefReader:
 
     mapping = nef2CcpnMap[loop.name]
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+    contributionTags = sorted(map2.values())
     restraints = {}
-    restraintContributions = {}
     assignTags = ('chain_code', 'sequence_code', 'residue_type', 'atom_name')
     for row in loop.data:
 
@@ -1734,6 +1754,7 @@ class CcpnNefReader:
       # TODO check that row matches restraint values
       # - as it is we use first appearance only
       if restraint is None:
+        valuesToContribution = {}
         dd = {'serial':serial}
         val = row.get('ccpn_vector_length')
         if val is not None:
@@ -1751,15 +1772,22 @@ class CcpnNefReader:
       # Get or make restraintContribution
       parameters = self._parametersFromLoopRow(row, map2)
       combinationId = parameters.get('combinationId')
-      contribution = restraintContributions.get((serial, combinationId))
-      # TODO check that row matches contribution values
-      # - as it is we use first appearance only
-      if not contribution:
+      if combinationId:
+        # Items in a combination are ANDed, so each line hs one contribution
         contribution = restraint.newRestraintContribution(**parameters)
-        restraintContributions[(serial, combinationId)] = contribution
+        nonAssignmentValues = tuple(parameters.get(tag) for tag in contributionTags)
+      else:
+        nonAssignmentValues = tuple(parameters.get(tag) for tag in contributionTags)
+        contribution = valuesToContribution.get(nonAssignmentValues)
+        if contribution is None:
+          contribution = restraint.newRestraintContribution(**parameters)
+          valuesToContribution[nonAssignmentValues] = contribution
 
       # Add item
       ll = [row._get(tag)[:itemLength] for tag in assignTags]
+      # Reset missing chain codes to default
+      ll[0] = [x or self.defaultChainCode for x in ll[0]]
+
       idStrings = []
       for item in zip(*ll):
         idStrings.append(Pid.IDSEP.join(('' if x is None else str(x)) for x in item))
@@ -1778,11 +1806,12 @@ class CcpnNefReader:
 
   def load_nef_nmr_spectrum(self, project, saveFrame):
 
+    dimensionTransferTags = ('dimension_1', 'dimension_2', 'transfer_type', 'is_indirect')
+
     # Get ccpn-to-nef mappping for saveframe
     category = saveFrame['sf_category']
     framecode = saveFrame['sf_framecode']
     mapping = nef2CcpnMap[category]
-
 
     # Get peakList parameters and make peakList
     peakListParameters, dummy = self._parametersFromSaveFrame(saveFrame, mapping)
@@ -1790,6 +1819,7 @@ class CcpnNefReader:
     # Get spectrum parameters
     spectrumParameters, loopNames = self._parametersFromSaveFrame(saveFrame, mapping,
                                                                   ccpnPrefix='spectrum')
+
     # Get name from spectrum parameters, or from the frameCode
     spectrumName = framecode[len(category) + 1:]
     peakListSerial = peakListParameters.get('serial')
@@ -1803,7 +1833,7 @@ class CcpnNefReader:
     spectrum = project.getSpectrum(spectrumName)
     if spectrum is None:
       # Spectrum does not already exist - create it.
-      # NB For CCPN-exported projects spectra with multiple poeakLists are handl3ed this way
+      # NB For CCPN-exported projects spectra with multiple peakLists are handled this way
 
       shiftListFrameCode = saveFrame.get('chemical_shift_list')
       if shiftListFrameCode:
@@ -1812,8 +1842,21 @@ class CcpnNefReader:
       # get per-dimension data - NB these are mandatory and cannot be worked around
       dimensionData = self.read_nef_spectrum_dimension(project,
                                                        saveFrame['nef_spectrum_dimension'])
+      # read  dimension transfer data
+      loopName = 'nef_spectrum_dimension_transfer'
+      # Those are treated elsewhere
+      loop = saveFrame.get(loopName)
+      if loop:
+        data = loop.data
+        transferData = [
+          SpectrumLib.MagnetisationTransferTuple(*(row.get(tag) for tag in dimensionTransferTags))
+          for row in data
+        ]
+      else:
+        transferData = []
 
-      spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData)
+      spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
+                                transferData=transferData)
 
       # Make data storage object
       filePath = saveFrame.get('ccpn_spectrum_file_path')
@@ -1824,29 +1867,6 @@ class CcpnNefReader:
         storageParameters['numPoints'] = spectrum.pointCounts
         spectrum._wrappedData.addDataStore(filePath, **storageParameters)
 
-
-      # read and incorporate dimension transfer data - better to get spectrum fully ready first
-      loopName = 'nef_spectrum_dimension_transfer'
-      # Those are treated elsewhere
-      loop = saveFrame.get(loopName)
-      if loop:
-        importer = self.importers[loopName]
-        importer(self, spectrum, loop)
-
-      # read and incorporate dimension transfer data - better to get spectrum fully ready first
-      loopName = 'ccpn_spectrum_dimension'
-      # Those are treated elsewhere
-      loop = saveFrame.get(loopName)
-      if loop:
-        ccpnDimensionData, dummy = self.read_ccpn_spectrum_dimension(spectrum, loop)
-      else:
-        ccpnDimensionData = {}
-
-      if not ccpnDimensionData.get('axisCodes:'):
-        # Set CCPN Hn/Nh (etc.) axis codes if not read in
-        # Must be done after nef_spectrum_dimension_transfer is read
-        self.adjustAxisCodes(spectrum, dimensionData)
-
     # Make PeakLst
     peakList = spectrum.newPeakList(**peakListParameters)
     # Load peaks
@@ -1854,7 +1874,7 @@ class CcpnNefReader:
 
     # Load remaining loops, with spectrum as parent
     for loopName in loopNames:
-      if loopName not in  ('nef_spectrum_dimension','ccpn_spectrum_dimension', 'nef_peak',
+      if loopName not in  ('nef_spectrum_dimension', 'nef_peak',
                            'nef_spectrum_dimension_transfer'):
         # Those are treated elsewhere
         loop = saveFrame.get(loopName)
@@ -1867,17 +1887,35 @@ class CcpnNefReader:
   importers['nef_nmr_spectrum'] = load_nef_nmr_spectrum
 
 
+  def read_nef_spectrum_dimension_transfer(self, loop):
+
+    transferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space',
+                     'relayed-alternate')
+
+    result = []
+
+    if loop:
+      data = loop.data
+      for row in data:
+        ll = [row.get(tag) for tag in ('dimension_1', 'dimension_2', 'transfer_type',
+                                       'is_indirect')]
+        result.append(SpectrumLib.MagnetisationTransferTuple(*ll))
+    #
+    return result
+
+
   def load_nef_spectrum_dimension_transfer(self, spectrum, loop):
 
     transferTypes = ('onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'through-space',
                      'relayed-alternate')
+
+    result = []
 
     if loop:
       apiExperiment = spectrum._wrappedData.experiment
 
       data = loop.data
       # Remove invalid data rows
-      dataLists = []
       for row in data:
         ll = [row.get(tag) for tag in ('dimension_1', 'dimension_2', 'transfer_type',
                                        'is_indirect')]
@@ -1887,9 +1925,15 @@ class CcpnNefReader:
           self.warning("Illegal values in nef_spectrum_dimension_transfer: %s"
                        % list(row.values()))
         else:
-          dataLists.append(ll)
+          result.append(SpectrumLib.MagnetisationTransferTuple(*ll))
+    #
+    return result
 
+  def process_nef_spectrum_dimension_transfer(self, spectrum, dataLists):
       # Store expTransfers in API as we can not be sure we will get a refExperiment
+
+      apiExperiment = spectrum._wrappedData.experiment
+
       for ll in dataLists:
         expDimRefs = []
         for dim in ll[:2]:
@@ -1901,11 +1945,9 @@ class CcpnNefReader:
                                        isDirect=not ll[3])
         else:
           self.warning("Duplicate nef_spectrum_dimension_transfer: %s" % (ll,))
-  #
-  importers['nef_spectrum_dimension_transfer'] = load_nef_spectrum_dimension_transfer
 
 
-  def read_ccpn_spectrum_dimension(self, spectrum, loop) -> dict:
+  def load_ccpn_spectrum_dimension(self, spectrum, loop) -> dict:
     """Read ccpn_spectrum_dimension loop, set the relevant values,
     and return the spectrum and other parameters for further processing"""
 
@@ -1945,32 +1987,31 @@ class CcpnNefReader:
     lowerLimits = extras.get('lower_aliasing_limit', defaultLimits)
     higherLimits = extras.get('higher_aliasing_limit', defaultLimits)
     spectrum.aliasingLimits = list(zip(lowerLimits, higherLimits))
+  #
+  importers['ccpn_spectrum_dimension'] = load_ccpn_spectrum_dimension
 
-    #
-    return params, extras
-
-  def adjustAxisCodes(self, spectrum, dimensionData):
-
-      pass
-      #print ('@~@~ CCPN data. Still TODO')
-
-      # # Use data to rename axisCodes
-      # axisCodes = spectrum.axisCodes
-      # newCodes = list(axisCodes)
-      # atomTypes = [commonUtil.splitIntFromChars(x)[1] for x in spectrum.isotopeCodes]
-      # acquisitionAxisCode = spectrum.acquisitionAxisCode
-      # if acquisitionAxisCode is not None:
-      #   acquisitionDim = axisCodes.index(acquisitionAxisCode) + 1
-      #   if acquisitionAxisCode == atomTypes[acquisitionDim - 1]:
-      #     # this axisCode needs improvement
-      #     for pair in oneBondPairs:
-      #       # First do acquisition dimension
-      #       if acquisitionDim in pair:
-      #         ll = pair.copy()
-      #         ll.remove(acquisitionDim)
-      #         otherDim = ll[0]
-      #         otherCode = axisCodes[otherDim - 1]
-      #         if otherCode == atomTypes[otherDim - 1]:
+  # def adjustAxisCodes(self, spectrum, dimensionData):
+  #
+  #   pass
+  #   #print ('@~@~ CCPN data. Still TODO')
+  #
+  #   # Use data to rename axisCodes
+  #   axisCodes = spectrum.axisCodes
+  #   newCodes = list(axisCodes)
+  #   atomTypes = [commonUtil.splitIntFromChars(x)[1] for x in spectrum.isotopeCodes]
+  #   acquisitionAxisCode = spectrum.acquisitionAxisCode
+  #   if acquisitionAxisCode is not None:
+  #     acquisitionDim = axisCodes.index(acquisitionAxisCode) + 1
+  #     if acquisitionAxisCode == atomTypes[acquisitionDim - 1]:
+  #       # this axisCode needs improvement
+  #       for pair in oneBondPairs:
+  #         # First do acquisition dimension
+  #         if acquisitionDim in pair:
+  #           ll = pair.copy()
+  #           ll.remove(acquisitionDim)
+  #           otherDim = ll[0]
+  #           otherCode = axisCodes[otherDim - 1]
+  #           if otherCode == atomTypes[otherDim - 1]:
 
 
   def read_nef_spectrum_dimension(self, project, loop):
@@ -1997,8 +2038,6 @@ class CcpnNefReader:
         else:
           # Unmapped attributes are passed with the original tag for later processing
           result[nefTag] = list(row.get(nefTag) for row in rows)
-    # Not needed further on.
-    del result['dimension_id']
     #
     return result
 
@@ -2415,7 +2454,7 @@ class CcpnNefReader:
 
 
 def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict,
-                   dimensionData:dict):
+                   dimensionData:dict, transferData):
   """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
 
   :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
@@ -2452,25 +2491,35 @@ def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict
           # get axisCodes
           spectrum.axisCodes = dimensionData['axisCodes']
 
+    dimensionIds = dimensionData['dimension_id']
+    dimTags.remove('dimension_id')
+
+    acquisitionAxisIndex = None
+    if 'is_acquisition' in dimensionData:
+      dimTags.remove('is_acquisition')
+      values = dimensionData['is_acquisition']
+      if values.count(True) == 1:
+        acquisitionAxisIndex = values.index(True)
+
     if spectrum is None:
       # Spectrum could not be loaded - now create a dummy spectrum
+
       if 'axisCodes' in dimTags:
+        # We have the axisCodes, from ccpn
         dimTags.remove('axisCodes')
         axisCodes = dimensionData['axisCodes']
 
       else:
         # axisCodes were not set - produce a serviceable set
-        axisCodes = []
-        for isotopeCode in dimensionData['isotopeCodes']:
-          ss = axisCode = commonUtil.splitIntFromChars(isotopeCode)[1]
-          ii = 0
-          while axisCode in axisCodes:
-            ii += 1
-            axisCode = ss + str(ii)
-          axisCodes.append(axisCode)
+        axisCodes = makeNefAxisCodes(isotopeCodes=dimensionData['isotopeCodes'],
+                                     dimensionIds=dimensionIds,
+                                     acquisitionAxisIndex=acquisitionAxisIndex,
+                                     transferData=transferData)
 
       # make new spectrum with default parameters
       spectrum = project.createDummySpectrum(axisCodes, spectrumName)
+      if acquisitionAxisIndex is not None:
+        spectrum.acquisitionAxisCode = axisCodes[acquisitionAxisIndex]
 
       # Delete autocreated peaklist  and reset - we want any read-in peakList to be the first
       # If necessary an empty PeakList is added downstream
@@ -2483,12 +2532,6 @@ def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict
     if 'absolute_peak_positions' in dimensionData:
       # NB We are not using these. What could we do with them?
       dimTags.remove('absolute_peak_positions')
-    if 'is_acquisition' in dimensionData:
-      dimTags.remove('is_acquisition')
-      values = dimensionData['is_acquisition']
-      if values.count(True) == 1:
-        ii = values.index(True)
-        spectrum.acquisitionAxisCode = axisCodes[ii]
     if 'folding' in dimensionData:
       dimTags.remove('folding')
       values = [None if x == 'none' else x for x in dimensionData['folding']]
@@ -2530,8 +2573,15 @@ def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict
 
     # Set referencing.
     value_first_point = dimensionData.get('value_first_point')
-    if value_first_point is not None:
-      referencePoints = dimensionData.get('referencePoints')
+    referencePoints = dimensionData.get('referencePoints')
+    if value_first_point is None:
+      # If reading NEF we must get value_first_point,
+      #  but in other uses we might be getting referencePoints, referenceValues directly
+      referenceValues = dimensionData.get('referenceValues')
+      if referenceValues and referencePoints:
+        spectrum.referencePoints = referencePoints
+        spectrum.referenceValues = referenceValues
+    else:
       if referencePoints is None:
         # not CCPN data
         referenceValues = spectrum.referenceValues
@@ -2566,6 +2616,60 @@ def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict
 
   else:
     raise ValueError("Spectrum named %s already exists" % spectrumName)
+
+def makeNefAxisCodes(isotopeCodes, dimensionIds, acquisitionAxisIndex, transferData):
+
+  nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
+  dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
+  dimensionToAxisCode = dimensionToNucleus.copy()
+  acquisitionAtEnd = False
+  if acquisitionAxisIndex is not None:
+    acquisitionAtEnd = acquisitionAxisIndex >= 0.5*len(isotopeCodes)
+
+  oneBondConnections = {}
+  for startNuc in 'FH':
+    # look for onebond to F or H, the latter taking p;riority
+    for dim1, dim2, transferType, isIndirect in transferData:
+      if transferType == 'onebond':
+        nuc1, nuc2 = dimensionToNucleus[dim1], dimensionToNucleus[dim2]
+        if startNuc in (nuc1, nuc2):
+          if startNuc == nuc1:
+            oneBondConnections[dim1] = dim2
+          else:
+            oneBondConnections[dim2] = dim1
+          dimensionToAxisCode[dim1] = nuc1 + nuc2.lower()
+          dimensionToAxisCode[dim2] = nuc2 + nuc1.lower()
+
+  result = []
+  if acquisitionAtEnd:
+    # reverse, because acquisition end of dimensions should
+    # be the one WITHOUT number suffixes
+    dimensionIds.reverse()
+  for dim in dimensionIds:
+    axisCode = dimensionToAxisCode[dim]
+    if axisCode in result:
+      ii = 0
+      ss = axisCode
+      while ss in result:
+        ii += 1
+        ss = '%s%s' % (axisCode, ii)
+      otherDim = oneBondConnections.get(dim)
+      if otherDim is not None:
+        # We are adding a suffix to e.g. Hc. Add the same suffix to equivalent Ch
+        # NB this should only happen for certain 4D experiments.
+        # NB not well tested, but better than leaving in a known error.
+        ss = '%s%s' % (dimensionToAxisCode[otherDim], ii)
+        if otherDim < dim:
+          result[otherDim - 1] = ss
+        dimensionToAxisCode[otherDim] = ss
+
+    result.append(axisCode)
+  if acquisitionAtEnd:
+    # put result back in dimension order
+    result.reverse()
+  #
+  return result
+
 
 def _printOutMappingDict(mappingDict):
   """Utility - print out mapping dict for editing and copying"""
@@ -2647,8 +2751,8 @@ def _testNefIo(path, skipPrefixes=()):
 if __name__ == '__main__':
   import sys
   path = sys.argv[1]
-  # _testNefIo(path, skipPrefixes=('ccpn',))
-  nefpath = _exportToNef(path)
-  _testNefIo(nefpath)
+  _testNefIo(path, skipPrefixes=('ccpn',))
+  # nefpath = _exportToNef(path)
+  # _testNefIo(nefpath)
   # nefpath = _exportToNef(path, skipPrefixes=('ccpn',))
   # _testNefIo(nefpath, skipPrefixes=('ccpn',))

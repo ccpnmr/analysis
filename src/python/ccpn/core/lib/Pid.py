@@ -64,7 +64,8 @@ def createId(*args) -> str:
   Keys are converted to string, and illegal characters are converted to altCharacter"""
 
   # map args to corrected strings
-  return IDSEP.join(str(val).translate(remapSeparators) for val in args)
+  return IDSEP.join(('' if val is None else str(val).translate(remapSeparators))
+                    for val in args)
 
 def splitId(idString) -> List[Optional[str]]:
   """Split idString into tuple of component elements,

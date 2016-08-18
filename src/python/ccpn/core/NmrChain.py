@@ -299,7 +299,7 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
 def _fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
   """Fetch chain with given shortName; If none exists call newNmrChain to make one first
 
-  If shortName is None returns a new NmrChain with name staritng with '@'
+  If shortName is None returns a new NmrChain with name starting with '@'
   """
   self._startFunctionCommandBlock('fetchNmrChain', shortName, parName='newNmrChain')
   try:

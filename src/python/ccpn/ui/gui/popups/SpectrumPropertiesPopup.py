@@ -160,7 +160,9 @@ class GeneralTab(QtGui.QWidget, Base):
     self.setWindowTitle("Spectrum Properties")
 
     apiDataStore = spectrum._apiDataSource.dataStore
-    if apiDataStore.dataLocationStore.name == 'standard':
+    if not apiDataStore:
+      self.pathData.setText('<None>')
+    elif apiDataStore.dataLocationStore.name == 'standard':
       dataUrlName = apiDataStore.dataUrl.name
       if dataUrlName == 'insideData':
         self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
@@ -318,7 +320,9 @@ class GeneralTab(QtGui.QWidget, Base):
 
 
       apiDataStore = self.spectrum._apiDataSource.dataStore
-      if apiDataStore.dataLocationStore.name == 'standard':
+      if not apiDataStore:
+        self.pathData.setText('<None>')
+      elif apiDataStore.dataLocationStore.name == 'standard':
         dataUrlName = apiDataStore.dataUrl.name
         if dataUrlName == 'insideData':
           self.pathData.setText('$INSIDE/%s' % apiDataStore.path)
@@ -353,7 +357,7 @@ class GeneralTab(QtGui.QWidget, Base):
     apiDataSource = self.spectrum._apiDataSource
     apiDataStore = apiDataSource.dataStore
 
-    if apiDataStore.dataLocationStore.name != 'standard':
+    if not apiDataStore or apiDataStore.dataLocationStore.name != 'standard':
       raise NotImplemented('Non-standard API data store locations are invalid.')
 
     dataUrlName = apiDataStore.dataUrl.name

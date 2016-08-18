@@ -286,7 +286,7 @@ class RestraintContribution(AbstractWrapperObject):
 def _newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,
                     weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
                     additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                    scale:float=1.0, isDistanceDependent:bool=None, combinationId:int=None,
+                    scale:float=1.0, isDistanceDependent:bool=False, combinationId:int=None,
                     restraintItems:Sequence=()) -> RestraintContribution:
   """Create new RestraintContribution within Restraint"""
 
@@ -295,7 +295,7 @@ def _newRestraintContribution(self:Restraint, targetValue:float=None, error:floa
     (
       ('targetValue',None), ('error',None), ('weight',1.0),
       ('upperLimit',None), ('lowerLimit',None), ('additionalUpperLimit',None),
-      ('additionalLowerLimit',None), ('scale', 1.0), ('isDistanceDependent',None),
+      ('additionalLowerLimit',None), ('scale', 1.0), ('isDistanceDependent',False),
       ('restraintItems',()),
     )
   )
@@ -308,7 +308,7 @@ def _newRestraintContribution(self:Restraint, targetValue:float=None, error:floa
     obj = func(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
                lowerLimit=lowerLimit, additionalUpperLimit=additionalUpperLimit,
                additionalLowerLimit=additionalLowerLimit, scale=scale,
-               isDistanceDependent=isDistanceDependent)
+               isDistanceDependent=isDistanceDependent, combinationId=combinationId)
     result = self._project._data2Obj.get(obj)
     result.restraintItems = restraintItems
   finally:

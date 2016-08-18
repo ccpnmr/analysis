@@ -291,7 +291,7 @@ def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None
   #
   return result
 
-def createSimpleRestraint(self:RestraintList,comment:str=None,
+def createSimpleRestraint(self:RestraintList, comment:str=None, figureOfMerit:float=None,
                         peaks:Sequence[Peak]=(),  targetValue:float=None, error:float=None,
                         weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
                         additionalUpperLimit:float=None, additionalLowerLimit:float=None,
@@ -305,9 +305,9 @@ def createSimpleRestraint(self:RestraintList,comment:str=None,
 
   defaults = collections.OrderedDict(
     (
-      ('comment',None), ('peaks',()), ('targetValue',None), ('error',None), ('weight',1.0),
+      ('comment',None), ('figureOfMerit',None), ('peaks',()), ('targetValue',None), ('error',None), ('weight',1.0),
       ('upperLimit',None), ('lowerLimit',None), ('additionalUpperLimit',None),
-      ('additionalLowerLimit',None), ('scale', 1.0) ('vectorLength',None), ('restraintItems',()),
+      ('additionalLowerLimit',None), ('scale', 1.0), ('vectorLength',None), ('restraintItems',()),
     )
   )
   values = locals().copy()
@@ -321,12 +321,13 @@ def createSimpleRestraint(self:RestraintList,comment:str=None,
   self._startFunctionCommandBlock('createSimpleRestraint', values=values, defaults=defaults,
                                   parName='newRestraint')
   try:
-    restraint = self.newRestraint(comment=comment, peaks=peaks)
+    restraint = self.newRestraint(comment=comment, peaks=peaks, figureOfMerit=figureOfMerit,
+                                  vectorLength=vectorLength, )
     restraint.newRestraintContribution(targetValue=targetValue,error=error, weight=weight,
                               upperLimit=upperLimit, lowerLimit=lowerLimit,
                               additionalUpperLimit=additionalUpperLimit,
                               additionalLowerLimit=additionalLowerLimit,scale=scale,
-                              vectorLength=vectorLength, restraintItems=restraintItems)
+                              restraintItems=restraintItems)
   finally:
     self._project._appBase._endCommandBlock()
   #

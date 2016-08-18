@@ -195,7 +195,7 @@ def _newData(self:DataSet, name:str, attachedObjectPid:str=None,
     if attachedObjectPid is None:
       attachedObjectPid = attachedObject.pid
     else:
-      raiseValueError(
+      raise ValueError(
         "Either attachedObject or attachedObjectPid must be None - values were %s and %s"
                       % (attachedObject, attachedObjectPid))
 

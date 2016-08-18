@@ -9,7 +9,7 @@ from numpy import array, amin, average
 from ccpn.AnalysisScreen.lib.MixturesGeneration import getCompounds, _createSamples
 from ccpn.AnalysisScreen.lib.SimulatedAnnealing import randomDictMixtures,  getMixtureInfo , calculateOverlapCount,scoreMixture
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.lib.Window import navigateToPeakPosition
+# from ccpn.ui.gui.lib.Window import navigateToPeakPosition
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.CompoundView import CompoundView
@@ -656,6 +656,8 @@ class MixtureAnalysis(CcpnModule):
 
   def _navigateToPosition(self, peaks):
     ''' for a given peak, it navigates to the peak position on the display  '''
+
+    from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
     displayed = self.project.strips[0].spectrumDisplay
 
     self.mainWindow.clearMarks()

@@ -15,7 +15,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.CompoundView import CompoundView, Variant, importSmiles
-from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
+# from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
@@ -395,6 +395,7 @@ class ShowScreeningHits(CcpnModule):
 
   def _hitTableCallback(self, row:int=None, col:int=None, obj:object=None):
     ''' Documentation '''
+    from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
 
     peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
     # displayed = self.project.getByPid('GD:user.View.1D:H')

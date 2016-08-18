@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import typing
+from collections import OrderedDict
 from ccpn.core.Atom import Atom
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
@@ -76,15 +77,16 @@ def extraBoundAtomPairs(project:Project, selectSequential:bool=None) -> typing.L
 
   Returns sequential bond pairs if selectSequential is True,
   non-sequential bond pairs if selectSequential is False,
-  and both if selectSequential is None
-
-  NBNB until further notice sequential bonds are detected for amino acids only!"""
+  and both if selectSequential is None"""
 
   result = []
 
   # TODO NBNB extend to non-protein atoms. This is a HACK!!
-  lastAtomNames = ['C']
-  firstAtomNames = ['N']
+  refAtomNames = {
+    ('protein',):{'first':['N'], 'last':['C']},
+    ('DNA',):{'first':['P'], 'last':["O3'"]},
+  }
+  refAtomNames[('RNA',)] = refAtomNames[('DNA', 'RNA',)] = refAtomNames[('DNA',)]
 
   getData2Obj = project._data2Obj.get
 
@@ -93,19 +95,67 @@ def extraBoundAtomPairs(project:Project, selectSequential:bool=None) -> typing.L
 
   for atom1, atom2 in atomPairs:
 
-    atomName1 = atom1.name
-    atomName2 = atom2.name
-    if (atomName1 in lastAtomNames and atomName2 in firstAtomNames and
-        atom1.residue.nextResidue is atom2.residue):
-      isSequential = True
-    elif (atomName2 in lastAtomNames and atomName1 in firstAtomNames and
-        atom2.residue.nextResidue is atom1.residue):
-      isSequential = True
-    else:
-      isSequential = False
+    isSequential = False
+
+    molTypes = tuple(sorted(set((atom1._wrappedData.residue.molType,
+                                 atom2._wrappedData.residue.molType))))
+    refdd = refAtomNames.get(molTypes)
+    if refdd is not None:
+      # molTypes match, this could be sequential
+      atomName1 = atom1.name
+      atomName2 = atom2.name
+      if (atomName1 in refdd['last'] and atomName2 in refdd['first'] and
+          atom1.residue.nextResidue is atom2.residue):
+        isSequential = True
+      elif (atomName2 in refdd['last'] and atomName1 in refdd['first'] and
+          atom2.residue.nextResidue is atom1.residue):
+        isSequential = True
 
     if selectSequential is None or bool(selectSequential ) == isSequential:
       result.append(tuple(sorted((atom1, atom2))))
   #
   result.sort()
   return result
+
+def sequenceMatchOffset(reference:OrderedDict, sequence:OrderedDict) -> typing.Optional[int]:
+  """Check if residues in sequence match those in reference, directly or with an offset.
+  Reference and sequence are OrderedDict(sequenceCode:residueType)
+  Both integer and string sequenceCodes (or a mixture) will give correct results
+  - other types of key will not.
+
+  Returns 0 if all(reference.get(key) == val for key, val in sequence.items())
+
+  Otherwise tries to convert keys in sequence and reference to integers
+  and checks if all (reference.get(key+offset) == val for key, val in sequence.items())
+  for some offset.
+
+  Returns the offset is a match is found,, None if no match is found
+  """
+
+  if not reference or not sequence:
+    return None
+
+  if None in reference.values() or None in sequence.values():
+    raise ValueError("Input sequence contained residueType None")
+
+  if all(reference.get(key) == val for key, val in sequence.items()):
+    # matches sequence with zero offset correction
+    return 0
+
+  else:
+    # No luck. Convert to integers and try with an offset
+    try:
+      reference2 = OrderedDict(((int(key), val) for key,val in reference.items()))
+      sequence2 = OrderedDict(((int(key), val) for key,val in sequence.items()))
+    except ValueError:
+      # Could not convert to integer. Failure
+      return None
+
+    minOffset = min(reference2.keys()) - min(sequence2.keys())
+    maxOffset = max(reference2.keys()) - max(sequence2.keys())
+    for offset in range(minOffset, maxOffset + 1):
+      if all(reference2.get(key + offset) == val for key, val in sequence2.items()):
+        return offset
+
+    # No offset matched. Result is failure
+    return None

@@ -959,6 +959,9 @@ def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
       result = self.newNmrResidue(sequenceCode=None, residueType=residueType)
     else:
       # First see if we have it already
+      # Should not be necessary, but it is an easy mistake to pass it as integer instead of string
+      sequenceCode = str(sequenceCode)
+
       apiResult = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
       result = apiResult and self._project._data2Obj[apiResult]
 

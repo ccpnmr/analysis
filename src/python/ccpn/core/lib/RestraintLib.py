@@ -46,55 +46,67 @@ def dihedralName(project, restraintItem:tuple) -> str:
       # These are not correct atomId. Just return NOne
       return None
 
-    if residues[0]._wrappedData.molResidue.nextMolResidue is residues[-1]._wrappedData.molResidue:
-      # last residue is sequential successor to first
-      # Sequential dihedrals for protein, DNA, and RNA
-      if (atomNames == ['N', 'CA', 'C', 'N'] and
-          residues[0] is residues[1] and
-          residues[0] is residues[2]):
-        return 'PSI'
-      elif (atomNames == ['C', 'N', 'CA', 'C'] and
-          residues[1] is residues[2] and
-          residues[1] is residues[3]):
-        return 'PHI'
-      elif (atomNames == ['CA', 'C', 'N', 'CA'] and
-          residues[0] is residues[1] and
-          residues[2] is residues[3]):
-        return 'OMEGA'
-      elif atomNames == ("O3'", "P", "O5'", "C5'"):
-        return 'ALPHA'
-      elif atomNames == ("C4'", "C3'", "O3'", "P"):
-        return 'EPSILON'
-      elif atomNames == ("C3'", "O3'", "P", "O5'"):
-        return 'ZETA'
-    elif (
+    if residues[0] is residues[-1]:
+      if (
         residues[0] is residues[1] and
-        residues[1] is residues[2] and
         residues[2] is residues[3] ):
-      # Intraresidue dihedrals. NB, CHI dihedrals will only catch standard residues
-      # and others with the same atom names
-      if (atomNames[:3] == ['N', 'CA', 'CB'] and
-          atomNames[3] in ('CG', 'OG', 'SG', 'CG1')):
-        return 'CHI1'
-      elif (atomNames[:2] == ['CA', 'CB'] and
-            atomNames[2] in ('CG', 'CG1') and
-            atomNames[3] in ('CD', 'CD1', 'ND1', 'SD')):
-        return 'CHI2'
-      elif atomNames[:2] == ('CB', 'CG'):
-        if atomNames[2:] in (('CD', 'OE1'), ('CD', 'CE'), ('CD', 'NE'), ('SD', 'CE'),):
-          return 'CHI3'
-      elif atomNames in (('CG', 'CD', 'CE', 'NZ'), ('CG', 'CD', 'NE', 'CZ')):
-        return 'CHI4'
-      elif atomNames == ('CD', 'NE', 'CZ', 'NH1'):
-        return 'CHI5'
-      elif atomNames in (("O4'", "C1'", 'N1', 'C2'), ("O4'", "C1'", 'N9', 'C4')):
-        return 'CHI'
-      elif atomNames == ("P", "O5'", "C5'", "C4'"):
-        return 'BETA'
-      elif atomNames == ("O5'", "C5'", "C4'", "C3'"):
-        return 'GAMMA'
-      elif atomNames == ("C5'", "C4'", "C3'", "O3'"):
-        return 'DELTA'
+        if atomNames[-1] < atomNames[0]:
+          atomNames.reverse()
+        # Intraresidue dihedrals. NB, CHI dihedrals will only catch standard residues
+        # and others with the same atom names
+        if atomNames in (
+            ['N', 'CA', 'CB', 'SG'],
+            ['N', 'CA', 'CB', 'OG'],
+            ['CG', 'CB', 'CA', 'N'],
+            ['CG1', 'CB', 'CA', 'N'],):
+          return 'CHI1'
+        elif (atomNames[:2] == ['CA', 'CB'] and
+              atomNames[2] in ['CG', 'CG1'] and
+              atomNames[3] in ['CD', 'CD1', 'ND1', 'SD']):
+          return 'CHI2'
+        elif atomNames[:2] == ['CB', 'CG']:
+          if atomNames[2:] in (['CD', 'OE1'], ['CD', 'CE'], ['CD', 'NE'], ['SD', 'CE'],):
+            return 'CHI3'
+        elif atomNames in (['CG', 'CD', 'CE', 'NZ'], ['CG', 'CD', 'NE', 'CZ']):
+          return 'CHI4'
+        elif atomNames == ['CD', 'NE', 'CZ', 'NH1']:
+          return 'CHI5'
+        elif atomNames in (['C2', 'N1', "C1'", "O4'"], ['C4', 'N9', "C1'", "O4'"]):
+          return 'CHI'
+        elif atomNames == ["C4'", "C5'", "O5'", "P"]:
+          return 'BETA'
+        elif atomNames == ["C3'", "C4'", "C5'", "O5'"]:
+          return 'GAMMA'
+        elif atomNames == ["C5'", "C4'", "C3'", "O3'"]:
+          return 'DELTA'
+    else:
+
+      if residues[0] is residues[-1].nextResidue:
+        # Reverse if order is wrong way around
+        residues.reverse()
+        atomNames.reverse()
+        
+      if residues[-1] is residues[0].nextResidue:
+        # last residue is sequential successor to first
+        # Sequential dihedrals for protein, DNA, and RNA
+        if (atomNames == ['N', 'CA', 'C', 'N'] and
+            residues[0] is residues[1] and
+            residues[0] is residues[2]):
+          return 'PSI'
+        elif (atomNames == ['C', 'N', 'CA', 'C'] and
+            residues[1] is residues[2] and
+            residues[1] is residues[3]):
+          return 'PHI'
+        elif (atomNames == ['CA', 'C', 'N', 'CA'] and
+            residues[0] is residues[1] and
+            residues[2] is residues[3]):
+          return 'OMEGA'
+        elif atomNames == ["O3'", "P", "O5'", "C5'"]:
+          return 'ALPHA'
+        elif atomNames == ["C4'", "C3'", "O3'", "P"]:
+          return 'EPSILON'
+        elif atomNames == ["C3'", "O3'", "P", "O5'"]:
+          return 'ZETA'
   #
   return None
 

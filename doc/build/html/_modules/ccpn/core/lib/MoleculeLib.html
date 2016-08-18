@@ -72,6 +72,7 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Atom</span> <span class="kn">import</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
@@ -125,15 +126,16 @@
 
 <span class="sd">  Returns sequential bond pairs if selectSequential is True,</span>
 <span class="sd">  non-sequential bond pairs if selectSequential is False,</span>
-<span class="sd">  and both if selectSequential is None</span>
-
-<span class="sd">  NBNB until further notice sequential bonds are detected for amino acids only!&quot;&quot;&quot;</span>
+<span class="sd">  and both if selectSequential is None&quot;&quot;&quot;</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
   <span class="c1"># TODO NBNB extend to non-protein atoms. This is a HACK!!</span>
-  <span class="n">lastAtomNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">]</span>
-  <span class="n">firstAtomNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;N&#39;</span><span class="p">]</span>
+  <span class="n">refAtomNames</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="p">(</span><span class="s1">&#39;protein&#39;</span><span class="p">,):{</span><span class="s1">&#39;first&#39;</span><span class="p">:[</span><span class="s1">&#39;N&#39;</span><span class="p">],</span> <span class="s1">&#39;last&#39;</span><span class="p">:[</span><span class="s1">&#39;C&#39;</span><span class="p">]},</span>
+    <span class="p">(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,):{</span><span class="s1">&#39;first&#39;</span><span class="p">:[</span><span class="s1">&#39;P&#39;</span><span class="p">],</span> <span class="s1">&#39;last&#39;</span><span class="p">:[</span><span class="s2">&quot;O3&#39;&quot;</span><span class="p">]},</span>
+  <span class="p">}</span>
+  <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;RNA&#39;</span><span class="p">,)]</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,</span> <span class="s1">&#39;RNA&#39;</span><span class="p">,)]</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="p">[(</span><span class="s1">&#39;DNA&#39;</span><span class="p">,)]</span>
 
   <span class="n">getData2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
 
@@ -142,22 +144,70 @@
 
   <span class="k">for</span> <span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span> <span class="ow">in</span> <span class="n">atomPairs</span><span class="p">:</span>
 
-    <span class="n">atomName1</span> <span class="o">=</span> <span class="n">atom1</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">atomName2</span> <span class="o">=</span> <span class="n">atom2</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">atomName1</span> <span class="ow">in</span> <span class="n">lastAtomNames</span> <span class="ow">and</span> <span class="n">atomName2</span> <span class="ow">in</span> <span class="n">firstAtomNames</span> <span class="ow">and</span>
-        <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
-      <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">atomName2</span> <span class="ow">in</span> <span class="n">lastAtomNames</span> <span class="ow">and</span> <span class="n">atomName1</span> <span class="ow">in</span> <span class="n">firstAtomNames</span> <span class="ow">and</span>
-        <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
-      <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">molTypes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">((</span><span class="n">atom1</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">molType</span><span class="p">,</span>
+                                 <span class="n">atom2</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">molType</span><span class="p">))))</span>
+    <span class="n">refdd</span> <span class="o">=</span> <span class="n">refAtomNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">molTypes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">refdd</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># molTypes match, this could be sequential</span>
+      <span class="n">atomName1</span> <span class="o">=</span> <span class="n">atom1</span><span class="o">.</span><span class="n">name</span>
+      <span class="n">atomName2</span> <span class="o">=</span> <span class="n">atom2</span><span class="o">.</span><span class="n">name</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">atomName1</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;last&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">atomName2</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">]</span> <span class="ow">and</span>
+          <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
+        <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">elif</span> <span class="p">(</span><span class="n">atomName2</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;last&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">atomName1</span> <span class="ow">in</span> <span class="n">refdd</span><span class="p">[</span><span class="s1">&#39;first&#39;</span><span class="p">]</span> <span class="ow">and</span>
+          <span class="n">atom2</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nextResidue</span> <span class="ow">is</span> <span class="n">atom1</span><span class="o">.</span><span class="n">residue</span><span class="p">):</span>
+        <span class="n">isSequential</span> <span class="o">=</span> <span class="bp">True</span>
 
     <span class="k">if</span> <span class="n">selectSequential</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">bool</span><span class="p">(</span><span class="n">selectSequential</span> <span class="p">)</span> <span class="o">==</span> <span class="n">isSequential</span><span class="p">:</span>
       <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">((</span><span class="n">atom1</span><span class="p">,</span> <span class="n">atom2</span><span class="p">))))</span>
   <span class="c1">#</span>
   <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
   <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="sequenceMatchOffset"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.sequenceMatchOffset">[docs]</a><span class="k">def</span> <span class="nf">sequenceMatchOffset</span><span class="p">(</span><span class="n">reference</span><span class="p">:</span><span class="n">OrderedDict</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">OrderedDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+  <span class="sd">&quot;&quot;&quot;Check if residues in sequence match those in reference, directly or with an offset.</span>
+<span class="sd">  Reference and sequence are OrderedDict(sequenceCode:residueType)</span>
+<span class="sd">  Both integer and string sequenceCodes (or a mixture) will give correct results</span>
+<span class="sd">  - other types of key will not.</span>
+
+<span class="sd">  Returns 0 if all(reference.get(key) == val for key, val in sequence.items())</span>
+
+<span class="sd">  Otherwise tries to convert keys in sequence and reference to integers</span>
+<span class="sd">  and checks if all (reference.get(key+offset) == val for key, val in sequence.items())</span>
+<span class="sd">  for some offset.</span>
+
+<span class="sd">  Returns the offset is a match is found,, None if no match is found</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">reference</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">sequence</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">None</span>
+
+  <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">reference</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input sequence contained residueType None&quot;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">reference</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="c1"># matches sequence with zero offset correction</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># No luck. Convert to integers and try with an offset</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">reference2</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">reference</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+      <span class="n">sequence2</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">sequence</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+      <span class="c1"># Could not convert to integer. Failure</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="n">minOffset</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">min</span><span class="p">(</span><span class="n">sequence2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">maxOffset</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">max</span><span class="p">(</span><span class="n">sequence2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">offset</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">minOffset</span><span class="p">,</span> <span class="n">maxOffset</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+      <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">reference2</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="n">offset</span><span class="p">)</span> <span class="o">==</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">sequence2</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="k">return</span> <span class="n">offset</span>
+
+    <span class="c1"># No offset matched. Result is failure</span>
+    <span class="k">return</span> <span class="bp">None</span></div>
 </pre></div>
 
           </div>

@@ -61,11 +61,13 @@
 
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpn2Url</span>
+
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">InputDialog</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">MessageDialog</span>
 
-<span class="n">SERVER</span> <span class="o">=</span> <span class="s1">&#39;http://www2.ccpn.ac.uk/&#39;</span>
+<span class="n">SERVER</span> <span class="o">=</span> <span class="n">ccpn2Url</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
 <span class="n">SERVER_DB_ROOT</span> <span class="o">=</span> <span class="s1">&#39;ccpNmrUpdate&#39;</span>
 <span class="n">SERVER_DB_FILE</span> <span class="o">=</span> <span class="s1">&#39;__UpdateData.db&#39;</span>
 <span class="c1"># the reason to use a CGI script just to download a file is because of exception handling</span>
@@ -101,7 +103,7 @@
   <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">R_OK</span><span class="p">):</span>
     <span class="k">return</span> <span class="mi">0</span>
 
-  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
+  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
   <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
   <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 

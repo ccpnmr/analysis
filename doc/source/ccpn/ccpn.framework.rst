@@ -49,4 +49,12 @@ ccpn.framework.Translation module
     :undoc-members:
     :show-inheritance:
 
+ccpn.framework.Version module
+-----------------------------
+
+.. automodule:: ccpn.framework.Version
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 

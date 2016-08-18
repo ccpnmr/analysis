@@ -49,4 +49,12 @@ ccpn.AnalysisAssign.modules.SequenceGraph module
     :undoc-members:
     :show-inheritance:
 
+ccpn.AnalysisAssign.modules.SideChainAssignmentModule module
+------------------------------------------------------------
+
+.. automodule:: ccpn.AnalysisAssign.modules.SideChainAssignmentModule
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 

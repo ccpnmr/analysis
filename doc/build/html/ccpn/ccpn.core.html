@@ -226,6 +226,7 @@ all of which should be self-explanatory.</p>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.AssignmentLib">ccpn.core.lib.AssignmentLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-ccpnnefio-module">ccpn.core.lib.CcpnNefIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.CcpnSorting">ccpn.core.lib.CcpnSorting module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-dataio-module">ccpn.core.lib.DataIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Documentation">ccpn.core.lib.Documentation module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-labelinglib-module">ccpn.core.lib.LabelingLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.MoleculeLib">ccpn.core.lib.MoleculeLib module</a></li>
@@ -233,7 +234,6 @@ all of which should be self-explanatory.</p>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.RestraintLib">ccpn.core.lib.RestraintLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.SpectrumLib">ccpn.core.lib.SpectrumLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Version">ccpn.core.lib.Version module</a></li>
 </ul>
 </li>
 </ul>
@@ -248,7 +248,7 @@ all of which should be self-explanatory.</p>
 <dt id="ccpn.core.Atom.Atom">
 <em class="property">class </em><code class="descclassname">ccpn.core.Atom.</code><code class="descname">Atom</code><a class="reference internal" href="../_modules/ccpn/core/Atom.html#Atom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Atom.Atom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>A molecular Atom, coontained in a Residue.</p>
+<p>A molecular Atom, contained in a Residue.</p>
 <dl class="method">
 <dt id="ccpn.core.Atom.Atom.addInterAtomBond">
 <code class="descname">addInterAtomBond</code><span class="sig-paren">(</span><em>atom: ccpn.core.Atom.Atom</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Atom.html#Atom.addInterAtomBond"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Atom.Atom.addInterAtomBond" title="Permalink to this definition">¶</a></dt>
@@ -663,7 +663,6 @@ Measurement unit of ChemicalShiftList. Should always be &#8216;ppm&#8217;</p>
 </div>
 <div class="section" id="module-ccpn.core.Complex">
 <span id="ccpn-core-complex-module"></span><h2>ccpn.core.Complex module<a class="headerlink" href="#module-ccpn.core.Complex" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
 <dl class="class">
 <dt id="ccpn.core.Complex.Complex">
 <em class="property">class </em><code class="descclassname">ccpn.core.Complex.</code><code class="descname">Complex</code><a class="reference internal" href="../_modules/ccpn/core/Complex.html#Complex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Complex.Complex" title="Permalink to this definition">¶</a></dt>
@@ -884,7 +883,7 @@ multiple calculations that do not have intermediate DataSets stored</p>
 
 <dl class="method">
 <dt id="ccpn.core.DataSet.DataSet.newRestraintList">
-<code class="descname">newRestraintList</code><span class="sig-paren">(</span><em>restraintType</em>, <em>name: str = None</em>, <em>origin: str = None</em>, <em>comment: str = None</em>, <em>unit: str = None</em>, <em>potentialType: str = 'unknown'</em>, <em>tensorMagnitude: float = 0.0</em>, <em>tensorRhombicity: float = 0.0</em>, <em>tensorIsotropicValue: float = 0.0</em>, <em>tensorChainCode: str = None</em>, <em>tensorSequenceCode: str = None</em>, <em>tensorResidueType: str = None</em>, <em>serial=None</em><span class="sig-paren">)</span> &rarr; ccpn.core.RestraintList.RestraintList<a class="headerlink" href="#ccpn.core.DataSet.DataSet.newRestraintList" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newRestraintList</code><span class="sig-paren">(</span><em>restraintType</em>, <em>name: str = None</em>, <em>origin: str = None</em>, <em>comment: str = None</em>, <em>unit: str = None</em>, <em>potentialType: str = 'unknown'</em>, <em>tensorMagnitude: float = 0.0</em>, <em>tensorRhombicity: float = 0.0</em>, <em>tensorIsotropicValue: float = 0.0</em>, <em>tensorChainCode: str = None</em>, <em>tensorSequenceCode: str = None</em>, <em>tensorResidueType: str = None</em>, <em>serial=None</em>, <em>itemLength=None</em><span class="sig-paren">)</span> &rarr; ccpn.core.RestraintList.RestraintList<a class="headerlink" href="#ccpn.core.DataSet.DataSet.newRestraintList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new RestraintList of type restraintType within DataSet</p>
 </dd></dl>
 
@@ -1339,7 +1338,6 @@ NmrAtom serial number - set at creation and unchangeable</p>
 
 </dd></dl>
 
-
 </div>
 <div class="section" id="ccpn-core-nmrchain-module">
 <h2>ccpn.core.NmrChain module<a class="headerlink" href="#ccpn-core-nmrchain-module" title="Permalink to this headline">¶</a></h2>
@@ -1395,7 +1393,10 @@ Free-form text comment</p>
 <dl class="method">
 <dt id="ccpn.core.NmrChain.NmrChain.fetchNmrResidue">
 <code class="descname">fetchNmrResidue</code><span class="sig-paren">(</span><em>sequenceCode: int | str = None</em>, <em>residueType: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrResidue.NmrResidue<a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.fetchNmrResidue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Fetch NmrResidue with residueType=residueType, creating it if necessary</p>
+<dd><p>Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,
+creating it if necessary.</p>
+<p>if sequenceCode is None will create a new NmrResidue</p>
+<p>if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode</p>
 </dd></dl>
 
 <dl class="method">
@@ -1482,6 +1483,7 @@ Connected NmrChains (isConnected == True) always have canonical names of the for
 </dd></dl>
 
 </dd></dl>
+
 </div>
 <div class="section" id="ccpn-core-nmrresidue-module">
 <h2>ccpn.core.NmrResidue module<a class="headerlink" href="#ccpn-core-nmrresidue-module" title="Permalink to this headline">¶</a></h2>
@@ -1709,7 +1711,8 @@ Residue to which NmrResidue is assigned</p>
 <dt id="ccpn.core.NmrResidue.NmrResidue.residueType">
 <code class="descname">residueType</code><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.residueType" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>immutable</em> - 
-Residue type string (e.g. &#8216;ALA&#8217;). Part of id. Use self.assignTo or self.rename to reset the residueType</p>
+Residue type string (e.g. &#8216;ALA&#8217;). Part of id. Use self.assignTo or
+self.rename to reset the residueType</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2064,7 +2067,7 @@ PeakListViews showing Spectrum</p>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaks1d">
-<code class="descname">pickPeaks1d</code><span class="sig-paren">(</span><em>data1d</em>, <em>dataRange</em>, <em>intensityRange=None</em>, <em>size: int = 3</em>, <em>mode: str = 'wrap'</em><span class="sig-paren">)</span> &rarr; List[Peak]<a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1d" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaks1d</code><span class="sig-paren">(</span><em>dataRange</em>, <em>intensityRange=None</em>, <em>size: int = 3</em>, <em>mode: str = 'wrap'</em><span class="sig-paren">)</span> &rarr; List[Peak]<a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1d" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick 1D peaks form data1d float array</p>
 </dd></dl>
 
@@ -2211,7 +2214,7 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.createChain">
-<code class="descname">createChain</code><span class="sig-paren">(</span><em>sequence: Sequence[str], compoundName: str = 'Molecule_1', startNumber: int = 1, molType: str = None, isCyclic: bool = False, shortName: str = None, role: str = None, comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Chain.Chain<a class="headerlink" href="#ccpn.core.Project.Project.createChain" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createChain</code><span class="sig-paren">(</span><em>sequence: Sequence[str], compoundName: str = None, startNumber: int = 1, molType: str = None, isCyclic: bool = False, shortName: str = None, role: str = None, comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Chain.Chain<a class="headerlink" href="#ccpn.core.Project.Project.createChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new chain from sequence of residue codes</p>
 <p>Automatically creates the corresponding polymer Substance if the compoundName is not already taken</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -2317,7 +2320,7 @@ and return the result</p>
 <dt id="ccpn.core.Project.Project.fetchNmrChain">
 <code class="descname">fetchNmrChain</code><span class="sig-paren">(</span><em>shortName: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrChain.NmrChain<a class="headerlink" href="#ccpn.core.Project.Project.fetchNmrChain" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch chain with given shortName; If none exists call newNmrChain to make one first</p>
-<p>If shortName is None returns a new NmrChain with name staritng with &#8216;&#64;&#8217;</p>
+<p>If shortName is None returns a new NmrChain with name starting with &#8216;&#64;&#8217;</p>
 </dd></dl>
 
 <dl class="method">
@@ -3165,6 +3168,13 @@ NmrResidue to which Residue is assigned</p>
 Previous sequentially connected Residue</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Residue.Residue.rename">
+<code class="descname">rename</code><span class="sig-paren">(</span><em>sequenceCode: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Residue.html#Residue.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Residue.Residue.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset Residue.sequenceCode (residueType is immutable).
+Renaming to None sets the sequence code to the seqId (serial number equivalent)</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.residueType">
 <code class="descname">residueType</code><a class="headerlink" href="#ccpn.core.Residue.Residue.residueType" title="Permalink to this definition">¶</a></dt>
@@ -3276,7 +3286,7 @@ lowerLimit of restraint - consensus of all contributions or None</p>
 
 <dl class="method">
 <dt id="ccpn.core.Restraint.Restraint.newRestraintContribution">
-<code class="descname">newRestraintContribution</code><span class="sig-paren">(</span><em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale: float = 1.0</em>, <em>isDistanceDependent: bool = None</em>, <em>combinationId: int = None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.RestraintContribution.RestraintContribution<a class="headerlink" href="#ccpn.core.Restraint.Restraint.newRestraintContribution" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newRestraintContribution</code><span class="sig-paren">(</span><em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale: float = 1.0</em>, <em>isDistanceDependent: bool = False</em>, <em>combinationId: int = None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.RestraintContribution.RestraintContribution<a class="headerlink" href="#ccpn.core.Restraint.Restraint.newRestraintContribution" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new RestraintContribution within Restraint</p>
 </dd></dl>
 
@@ -3345,7 +3355,7 @@ weight of restraint - consensus of all contributions or None</p>
 
 <dl class="function">
 <dt id="ccpn.core.Restraint.createSimpleRestraint">
-<code class="descclassname">ccpn.core.Restraint.</code><code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><em>self: ccpn.core.RestraintList.RestraintList</em>, <em>comment: str = None</em>, <em>peaks: Sequence[ccpn.core.Peak.Peak] = ()</em>, <em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale=1.0</em>, <em>vectorLength=None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Restraint.Restraint<a class="reference internal" href="../_modules/ccpn/core/Restraint.html#createSimpleRestraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Restraint.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.core.Restraint.</code><code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><em>self: ccpn.core.RestraintList.RestraintList</em>, <em>comment: str = None</em>, <em>figureOfMerit: float = None</em>, <em>peaks: Sequence[ccpn.core.Peak.Peak] = ()</em>, <em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale=1.0</em>, <em>vectorLength=None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Restraint.Restraint<a class="reference internal" href="../_modules/ccpn/core/Restraint.html#createSimpleRestraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Restraint.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Restraint with a single RestraintContribution within the RestraintList.
 The function takes all the information needed and creates the RestraintContribution as</p>
 <blockquote>
@@ -3516,7 +3526,7 @@ Free-form text comment</p>
 
 <dl class="method">
 <dt id="ccpn.core.RestraintList.RestraintList.createSimpleRestraint">
-<code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><em>comment: str = None</em>, <em>peaks: Sequence[ccpn.core.Peak.Peak] = ()</em>, <em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale=1.0</em>, <em>vectorLength=None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Restraint.Restraint<a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><em>comment: str = None</em>, <em>figureOfMerit: float = None</em>, <em>peaks: Sequence[ccpn.core.Peak.Peak] = ()</em>, <em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale=1.0</em>, <em>vectorLength=None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Restraint.Restraint<a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Restraint with a single RestraintContribution within the RestraintList.
 The function takes all the information needed and creates the RestraintContribution as</p>
 <blockquote>

@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $&quot;</span>
 <span class="n">__credits__</span>   <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner &amp; Geerten W Vuister&quot;</span>
-<span class="n">__license__</span>   <span class="o">=</span> <span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+<span class="n">__license__</span>   <span class="o">=</span> <span class="s2">&quot;CCPN license. see http://www.ccpn.ac.uk&quot;</span>
 <span class="n">__reference__</span> <span class="o">=</span> <span class="s2">&quot;Skinner et al, J. Biomol. NMR, 2016, submitted&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
@@ -80,14 +80,13 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation</span> <span class="kn">import</span> <span class="n">Io</span> <span class="k">as</span> <span class="n">coreIo</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnNefIo</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.lib.Version</span> <span class="kn">import</span> <span class="n">applicationVersion</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.AttrDict</span> <span class="kn">import</span> <span class="n">AttrDict</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Version</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework</span> <span class="kn">import</span> <span class="n">Version</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.framework.Translation</span> <span class="kn">import</span> <span class="n">languages</span><span class="p">,</span> <span class="n">defaultLanguage</span>
 <span class="kn">from</span> <span class="nn">ccpn.framework.Translation</span> <span class="kn">import</span> <span class="n">translator</span>
@@ -114,12 +113,13 @@
 
 <div class="viewcode-block" id="printCreditsText"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.printCreditsText">[docs]</a><span class="k">def</span> <span class="nf">printCreditsText</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">programName</span><span class="p">,</span> <span class="n">version</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Initial text to terminal &quot;&quot;&quot;</span>
+  <span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpnLicenceUrl</span>
 
   <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">, version: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">programName</span><span class="p">,</span> <span class="n">version</span><span class="p">))</span>
   <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
   <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">__copyright__</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">__copyright__</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)]</span> <span class="o">+</span> <span class="s1">&#39;- 2016&#39;</span><span class="p">)</span>
-  <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">. Not to be distributed without prior consent!&quot;</span> <span class="o">%</span> <span class="n">__license__</span><span class="p">)</span>
+  <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;CCPN licence. See </span><span class="si">%s</span><span class="s2">. Not to be distributed without prior consent!&quot;</span> <span class="o">%</span> <span class="n">ccpnLicenceUrl</span><span class="p">)</span>
   <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
   <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Written by:   </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">__credits__</span><span class="p">)</span>
   <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
@@ -184,7 +184,7 @@
 <div class="viewcode-block" id="getFramework"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.getFramework">[docs]</a><span class="k">def</span> <span class="nf">getFramework</span><span class="p">(</span><span class="n">projectPath</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
 
   <span class="n">args</span> <span class="o">=</span> <span class="n">Arguments</span><span class="p">(</span><span class="n">projectPath</span><span class="o">=</span><span class="n">projectPath</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="n">Framework</span><span class="p">(</span><span class="s1">&#39;CcpNmr&#39;</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">Framework</span><span class="p">(</span><span class="s1">&#39;CcpNmr&#39;</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">applicationVersion</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
   <span class="n">result</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
@@ -249,10 +249,15 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newProject</span><span class="p">()</span>
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Done, </span><span class="si">%s</span><span class="s1"> is starting</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicationName</span><span class="p">)</span>
-
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkRegistration</span><span class="p">():</span>
       <span class="k">return</span>
+
+    <span class="c1"># Needed in case project load failed</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="p">:</span>
+      <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; No project, aborting ...</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Done, </span><span class="si">%s</span><span class="s1"> is starting</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">applicationName</span><span class="p">)</span>
 
     <span class="c1"># self.project = project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
@@ -493,7 +498,7 @@
       <span class="k">for</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">objectParameters</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
           <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">pid</span>
-        <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> = project.getByPid(</span><span class="si">%s</span><span class="s2">)</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+        <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> = project.getByPid(</span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
       <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">command</span><span class="p">)</span>
 
       <span class="c1"># echo command strings</span>
@@ -666,7 +671,8 @@
       <span class="p">(</span><span class="s2">&quot;Atom Selector&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">showAtomSelector</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;as&#39;</span><span class="p">)]),</span>
       <span class="p">(),</span>
       <span class="p">(</span><span class="s2">&quot;Current&quot;</span><span class="p">,</span> <span class="p">((</span><span class="s2">&quot;Show/Hide Toolbar&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggleToolbar</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;tb&#39;</span><span class="p">)]),</span>
-                   <span class="p">(</span><span class="s2">&quot;Show/Hide Phasing Console&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">togglePhaseConsole</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;pc&#39;</span><span class="p">)])</span>
+                   <span class="p">(</span><span class="s2">&quot;Show/Hide Phasing Console&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">togglePhaseConsole</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;pc&#39;</span><span class="p">)]),</span>
+                   <span class="p">(</span><span class="s2">&quot;Reset Zoom&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">resetZoom</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;rz&#39;</span><span class="p">)])</span>
                   <span class="p">)),</span>
       <span class="p">(),</span>
       <span class="p">(</span><span class="s2">&quot;Python Console&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">toggleConsole</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;py&#39;</span><span class="p">),</span>
@@ -780,7 +786,7 @@
         <span class="n">project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">_DEBUG</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialiseProject</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
       <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">NEF</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Loading </span><span class="si">%s</span><span class="s1"> project (Experimental Only!) &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subType</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Loading </span><span class="si">%s</span><span class="s1"> project &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subType</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loafNefFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">_DEBUG</span><span class="p">)</span>
       <span class="c1">#</span>
@@ -792,13 +798,13 @@
   <span class="k">def</span> <span class="nf">_loafNefFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Load Project from NEF file at path, and do necessary setup&quot;&quot;&quot;</span>
 
-    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="p">,</span> <span class="s1">&#39;mainWindow&#39;</span><span class="p">):</span>
-      <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-
-    <span class="k">if</span> <span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;==&gt; NEF file loading not yet implemented for Gui interface. Aborting...&quot;</span><span class="p">)</span>
-      <span class="k">return</span>
+    <span class="c1"># mainWindow = None</span>
+    <span class="c1"># if hasattr(self.ui, &#39;mainWindow&#39;):</span>
+    <span class="c1">#   mainWindow = self.ui.mainWindow</span>
+    <span class="c1">#</span>
+    <span class="c1"># if mainWindow is not None:</span>
+    <span class="c1">#   sys.stderr.write(&quot;==&gt; NEF file loading not yet implemented for Gui interface. Aborting...&quot;)</span>
+    <span class="c1">#   return</span>
 
     <span class="n">dataBlock</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nefReader</span><span class="o">.</span><span class="n">getNefData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newProject</span><span class="p">(</span><span class="n">dataBlock</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -810,9 +816,9 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">-=</span> <span class="mi">1</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
 
-    <span class="k">if</span> <span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="c1"># TODO initialisation does not work properly. Needs fixing.</span>
-      <span class="n">mainWindow</span><span class="o">.</span><span class="n">sideBar</span><span class="o">.</span><span class="n">fillSideBar</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+    <span class="c1"># if mainWindow is not None:</span>
+    <span class="c1">#   # TODO initialisation does not work properly. Needs fixing.</span>
+    <span class="c1">#   mainWindow.sideBar.fillSideBar(project)</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">project</span>
 <div class="viewcode-block" id="Framework.clearRecentProjects"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.clearRecentProjects">[docs]</a>
@@ -1016,6 +1022,12 @@
       <span class="k">if</span> <span class="n">event</span><span class="p">:</span>
         <span class="n">event</span><span class="o">.</span><span class="n">ignore</span><span class="p">()</span>
 
+  <span class="k">def</span> <span class="nf">_closeExtraWindows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">tempAreas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">tempAreas</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tempAreas</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">tempArea</span> <span class="ow">in</span> <span class="n">tempAreas</span><span class="p">:</span>
+        <span class="n">tempArea</span><span class="o">.</span><span class="n">window</span><span class="p">()</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
   <span class="k">def</span> <span class="nf">_closeProject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Close project and clean up - when opening another or quitting application&quot;&quot;&quot;</span>
 
@@ -1027,6 +1039,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">:</span>
       <span class="c1"># ui/gui cleanup</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_closeExtraWindows</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
@@ -1220,6 +1233,10 @@
   <span class="k">def</span> <span class="nf">togglePhaseConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span></div>
       <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">togglePhaseConsole</span><span class="p">()</span>
+<div class="viewcode-block" id="Framework.resetZoom"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.resetZoom">[docs]</a>
+  <span class="k">def</span> <span class="nf">resetZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">resetZoom</span><span class="p">()</span>
 <div class="viewcode-block" id="Framework.toggleConsole"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.toggleConsole">[docs]</a>
   <span class="k">def</span> <span class="nf">toggleConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

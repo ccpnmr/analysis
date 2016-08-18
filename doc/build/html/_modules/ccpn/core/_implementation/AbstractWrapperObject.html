@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9763 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -241,7 +241,18 @@
     <span class="sd">&quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
   
-  <span class="c1"># CCPN properties </span>
+  <span class="c1"># CCPN properties</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">className</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Class name - necessary since the actual objects may be of a subclass..&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">className</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">shortClassName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Short class name, for PID. Must be overridden for each subclass.&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">shortClassName</span>
+
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">project</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Project&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;The Project (root)containing the object.&quot;&quot;&quot;</span>
@@ -265,6 +276,25 @@
   <span class="k">def</span> <span class="nf">isDeleted</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;True if this object is deleted.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="p">(</span><span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_wrappedData&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">ccpnInternalData</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary containing arbitrary type data for internal use.</span>
+
+<span class="sd">    Data can be nested strings, numbers, lists, tuples, (ordered) dicts,</span>
+<span class="sd">    numpy arrays, pandas structures, CCPN Tensor objects, and any</span>
+<span class="sd">    object that can be serialised to JSON. This does NOT include CCPN or</span>
+<span class="sd">    CCPN API objects.</span>
+
+<span class="sd">    Data are kept on save and reload, but there is NO guarantee against</span>
+<span class="sd">    trampling by other code&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span>
+
+  <span class="nd">@ccpnInternalData.setter</span>
+  <span class="k">def</span> <span class="nf">ccpnInternalData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;ccpnInternalData must be None or a dictionary, was </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span> <span class="o">=</span> <span class="n">value</span>
   
   <span class="c1"># CCPN abstract properties</span>
   
@@ -500,15 +530,14 @@
           <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">][</span><span class="n">obj</span><span class="o">.</span><span class="n">_id</span><span class="p">]</span>
         <span class="k">del</span> <span class="n">data2Obj</span><span class="p">[</span><span class="n">apiObj</span><span class="p">]</span>
 
-  <span class="k">def</span> <span class="nf">_setUniqueStringKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiObj</span><span class="p">:</span><span class="s1">&#39;ccpn.api.memops.Implementation.DataObject&#39;</span><span class="p">,</span>
-                          <span class="n">defaultValue</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;(re)set obj.keyAttr to make it a unique key, using defaultValue if not set</span>
-<span class="sd">    NB - if called BEFORE data2obj etc. dictionaries are set&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">_setUniqueStringKey</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">defaultValue</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;(re)set self._werappedData.keyTag to make it a unique key, using defaultValue</span>
+<span class="sd">    if not set NB - is called BEFORE data2obj etc. dictionaries are set&quot;&quot;&quot;</span>
 
     <span class="n">wrappedData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span> <span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span><span class="n">keyTag</span><span class="p">):</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot set unique </span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2"> object has no attribute </span><span class="si">%s</span><span class="s2">&quot;</span>
-                       <span class="o">%</span> <span class="p">(</span><span class="n">keyTag</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">))</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">keyTag</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">))</span>
 
     <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
     <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -521,26 +550,23 @@
       <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">value</span> <span class="o">=</span> <span class="n">defaultValue</span>
-        <span class="nb">setattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 
       <span class="c1"># Set to new, unique value if present value is a duplicate</span>
-      <span class="n">apiObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">)</span>
-      <span class="k">for</span> <span class="n">apiSibling</span> <span class="ow">in</span> <span class="n">apiObjects</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">apiSibling</span> <span class="ow">is</span> <span class="n">wrappedData</span><span class="p">:</span>
-          <span class="c1"># We have reached the object itself in the list. Enough</span>
-          <span class="k">break</span>
-        <span class="k">elif</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">apiSibling</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
-          <span class="c1"># Object name is duplicate of earlier object name - make unique name</span>
+      <span class="n">competitorDict</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">wrappedData</span><span class="p">)</span>
 
-          <span class="c1"># First try appending serial, if possible</span>
-          <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiObj</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">apiObj</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-          <span class="k">while</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiSibling</span> <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">)</span> <span class="o">==</span> <span class="n">value</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-          <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-          <span class="k">break</span>
+      <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">competitorDict</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
+        <span class="c1"># First try appending serial</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">)</span>
+
+      <span class="k">while</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">competitorDict</span><span class="p">:</span>
+        <span class="c1"># Keep incrementing suffix till value is unique</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+      <span class="c1"># Set the unique result</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="n">wrappedData</span><span class="p">,</span> <span class="n">keyTag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
     <span class="k">finally</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">wrappedData</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">:</span>
         <span class="n">wrappedData</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span>
@@ -629,6 +655,7 @@
     <span class="sd">&quot;&quot;&quot;Do wrapper level finalisation, and execute all notifiers</span>
 
 <span class="sd">    action is one of: &#39;create&#39;, &#39;delete&#39;, &#39;change&#39;, &#39;rename&#39;&quot;&quot;&quot;</span>
+
 
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
     <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_notificationBlanking</span><span class="p">:</span>

@@ -33,6 +33,14 @@ ccpn.core.lib.CcpnSorting module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.lib.DataIo module
+---------------------------
+
+.. automodule:: ccpn.core.lib.DataIo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.lib.Documentation module
 ----------------------------------
 
@@ -85,14 +93,6 @@ ccpn.core.lib.Util module
 -------------------------
 
 .. automodule:: ccpn.core.lib.Util
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.core.lib.Version module
-----------------------------
-
-.. automodule:: ccpn.core.lib.Version
     :members:
     :undoc-members:
     :show-inheritance:

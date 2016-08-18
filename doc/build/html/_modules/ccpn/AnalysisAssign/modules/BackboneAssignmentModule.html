@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-11 14:11:32 +0100 (Mon, 11 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-11 19:28:58 +0100 (Thu, 11 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -64,8 +64,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: skinnersp $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-11 14:11:32 +0100 (Mon, 11 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9617 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-11 19:28:58 +0100 (Thu, 11 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9785 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -74,12 +74,16 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 <span class="kn">import</span> <span class="nn">typing</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.lib.scoring</span> <span class="kn">import</span> <span class="n">qScore</span>
+<span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.lib.scoring</span> <span class="kn">import</span> <span class="n">getNmrResidueMatches</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShift</span> <span class="kn">import</span> <span class="n">ChemicalShift</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Window</span> <span class="kn">import</span> <span class="n">navigateToNmrResidue</span><span class="p">,</span> <span class="n">markPositionsInStrips</span><span class="p">,</span> <span class="n">centreAxis</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.SpectrumDisplay</span> <span class="kn">import</span> <span class="n">makeStripPlot</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToNmrAtomsInStrip</span><span class="p">,</span> <span class="n">matchAxesAndNmrAtoms</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Window</span> <span class="kn">import</span> <span class="n">markPositions</span>
+
+
 
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.NmrResidueTable</span> <span class="kn">import</span> <span class="n">NmrResidueTable</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiStrip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
@@ -90,7 +94,6 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ListWidget</span> <span class="kn">import</span> <span class="n">ListWidget</span>
 
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">spectrumLib</span>
 
 
 <div class="viewcode-block" id="BackboneAssignmentModule"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule">[docs]</a><span class="k">class</span> <span class="nc">BackboneAssignmentModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
@@ -126,21 +129,30 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateNmrChainPulldown</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateNmrChainList</span><span class="p">)</span>
 
-
-
   <span class="k">def</span> <span class="nf">_updateNmrChainList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrChain</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrChain specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">objectLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_updateNmrChainPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrChain</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrChain specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">objectLists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_updateSelectorContents</span><span class="p">()</span>
 
   <span class="k">def</span> <span class="nf">_updateNmrResidueTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="n">oldPid</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrResidue specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
     <span class="k">if</span> <span class="n">nmrResidue</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">:</span>
-      <span class="c1"># self.nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">_updateSelectorContents</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
-      <span class="c1"># self.nmrResidueTable.nmrResidueTable._updateSelectorContents()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">updateTable</span><span class="p">()</span>
 
 
@@ -160,11 +172,14 @@
 <span class="sd">    Initiates assignment procedure when triggered by selection of an NmrResidue from the nmrResidueTable</span>
 <span class="sd">    inside the module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrResidue specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;_startAssignment&#39;</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_setupShiftDicts</span><span class="p">()</span>
 
-      <span class="c1"># self.navigateTo(nmrResidue, row, col)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span>
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;assigner&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="o">.</span><span class="n">clearAllItems</span><span class="p">()</span>
@@ -184,9 +199,16 @@
   <span class="k">def</span> <span class="nf">_navigateTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">strip</span><span class="p">:</span><span class="n">GuiStrip</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Takes an NmrResidue and an optional GuiStrip and changes z position(s) of all available displays</span>
-<span class="sd">    to chemical shift value NmrAtoms in the NmrResidue. Creates assignMatrix for strip matching and</span>
-<span class="sd">    add strips to matchModule(s) corresponding to assignment matches.</span>
+<span class="sd">    to chemical shift value NmrAtoms in the NmrResidue. Takes corresponding value from inter-residual</span>
+<span class="sd">    or intra-residual chemical shift dictionaries, using the NmrResidue pid as the key.</span>
+<span class="sd">    Determines which nmrResidue(s) match the query NmrResidue and creates up to five strips, one for</span>
+<span class="sd">    each of the match NmrResidue, and marks the carbon positions.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrResidue specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;_navigateTo&#39;</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
@@ -198,57 +220,44 @@
       <span class="n">selectedDisplays</span> <span class="o">=</span> <span class="p">[</span><span class="n">display</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span>
                           <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span><span class="p">]</span>
 
-      <span class="n">chemicalShiftList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
 
+      <span class="c1"># If NmrResidue is a -1 offset NmrResidue, set queryShifts as value from self.interShifts dictionary</span>
+      <span class="c1"># Set matchShifts as self.intraShifts</span>
       <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;-1&#39;</span><span class="p">):</span>
         <span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;-1&#39;</span>
         <span class="n">iNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">iNmrResidue</span>
-        <span class="n">navigateToNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">iNmrResidue</span><span class="p">,</span> <span class="n">selectedDisplays</span><span class="o">=</span><span class="n">selectedDisplays</span><span class="p">,</span>
-                             <span class="n">strip</span><span class="o">=</span><span class="n">strip</span><span class="p">,</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
-
-        <span class="n">queryShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span>
+        <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">shift</span> <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span> <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span><span class="p">]</span>
         <span class="n">matchShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span>
-        <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">selectedDisplays</span><span class="p">:</span>
-          <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
-            <span class="n">strip</span> <span class="o">=</span> <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-          <span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">iNmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
-          <span class="n">shiftDict</span> <span class="o">=</span> <span class="p">{}</span>
-          <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">:</span>
-            <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
-              <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">_apiResonance</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">):</span>
-                <span class="n">shift</span> <span class="o">=</span> <span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                  <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">iNmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
-              <span class="k">if</span> <span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="n">atom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">!=</span> <span class="s1">&#39;13C&#39;</span><span class="p">):</span>
-                <span class="n">shift</span> <span class="o">=</span> <span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-                  <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
-          <span class="n">atomPositions</span> <span class="o">=</span> <span class="p">[</span><span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">]</span>
-          <span class="n">markPositionsInStrips</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[:</span><span class="mi">2</span><span class="p">],</span> <span class="n">atomPositions</span><span class="p">,</span> <span class="n">centre</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
+      <span class="c1"># If NmrResidue is not an offset NmrResidue, set queryShifts as value from self.intraShifts dictionary</span>
+      <span class="c1"># Set matchShifts as self.interShifts</span>
       <span class="k">else</span><span class="p">:</span>
         <span class="n">direction</span> <span class="o">=</span> <span class="s1">&#39;+1&#39;</span>
         <span class="n">iNmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">iNmrResidue</span>
-        <span class="n">navigateToNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">iNmrResidue</span><span class="p">,</span> <span class="n">selectedDisplays</span><span class="o">=</span><span class="n">selectedDisplays</span><span class="p">,</span>
-                             <span class="n">markPositions</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">strip</span><span class="p">)</span>
-        <span class="n">queryShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span>
+        <span class="n">queryShifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">shift</span> <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span> <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span><span class="p">]</span>
         <span class="n">matchShifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">interShifts</span>
-        <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">selectedDisplays</span><span class="p">:</span>
-          <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
-            <span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
 
-      <span class="n">assignMatrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buildAssignmentMatrix</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">,</span> <span class="n">matchShifts</span><span class="p">)</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">assignMatrix</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">iNmrResidue</span>
+      <span class="c1"># If a strip is not specified, use the first strip in the each of the spectrumDisplays in selectedDisplays.</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+        <span class="n">strips</span> <span class="o">=</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">selectedDisplays</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">strips</span> <span class="o">=</span> <span class="p">[</span><span class="n">strip</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">strips</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_displayNmrResidueInStrip</span><span class="p">(</span><span class="n">iNmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_centreStripForNmrResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="p">)</span>
+        <span class="n">amidePair</span> <span class="o">=</span> <span class="p">[</span><span class="n">iNmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">),</span> <span class="n">iNmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)]</span>
+        <span class="n">carbonAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span><span class="p">]</span>
+        <span class="n">axisCodePositionDict</span> <span class="o">=</span> <span class="n">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="o">=</span><span class="nb">set</span><span class="p">((</span><span class="n">amidePair</span><span class="o">+</span><span class="n">carbonAtoms</span><span class="p">)))</span>
+        <span class="n">markPositions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">axisCodePositionDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">axisCodePositionDict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+      <span class="n">assignMatrix</span> <span class="o">=</span> <span class="n">getNmrResidueMatches</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">,</span> <span class="n">matchShifts</span><span class="p">,</span> <span class="s1">&#39;averageQScore&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">assignMatrix</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No matches found for NmrResidue: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
         <span class="k">return</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_createMatchStrips</span><span class="p">(</span><span class="n">assignMatrix</span><span class="p">)</span>
+
       <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;assigner&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="o">.</span><span class="n">nmrChainPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">!=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="o">.</span><span class="n">nmrChainPulldown</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
@@ -259,6 +268,41 @@
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
 
+
+
+  <span class="k">def</span> <span class="nf">_displayNmrResidueInStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    navigate strip position to position specified by nmrResidue and set spinSystemLabel to nmrResidue id</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrResidue specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No Strip specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="n">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="o">=</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="o">=</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">))</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_centreStripForNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Centre y-axis of strip based on chemical shifts of from NmrResidue.nmrAtoms</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidue</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrResidue specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No Strip specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="n">yShifts</span> <span class="o">=</span> <span class="n">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">)[</span><span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">yShiftValues</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">yShifts</span><span class="p">]</span>
+    <span class="n">yPosition</span> <span class="o">=</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">yShiftValues</span><span class="p">)</span> <span class="o">+</span> <span class="nb">min</span><span class="p">(</span><span class="n">yShiftValues</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
+    <span class="n">yWidth</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">yShiftValues</span><span class="p">)</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">yShiftValues</span><span class="p">)</span><span class="o">+</span><span class="mi">10</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">yPosition</span>
+    <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">yWidth</span>
 
   <span class="k">def</span> <span class="nf">_setupShiftDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -279,89 +323,47 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">intraShifts</span><span class="p">[</span><span class="n">nmrResidue</span><span class="p">]</span> <span class="o">=</span> <span class="n">shifts</span>
 
-
-
   <span class="k">def</span> <span class="nf">_createMatchStrips</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assignMatrix</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">ChemicalShift</span><span class="p">]],</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates strips in match module corresponding to the best assignment possibilities</span>
 <span class="sd">    in the assignMatrix.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">chemicalShiftList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
-    <span class="n">assignmentScores</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assignMatrix</span><span class="p">[</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">numberOfMatches</span><span class="p">]</span>
-    <span class="k">for</span> <span class="n">assignmentScore</span> <span class="ow">in</span> <span class="n">assignmentScores</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
-      <span class="n">matchResidue</span> <span class="o">=</span> <span class="n">assignMatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">assignmentScore</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">assignMatrix</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No assignment matrix specified&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="c1"># Assignment score has format {score: nmrResidue} where score is a float</span>
+    <span class="c1"># assignMatrix[0] is a dict {score: nmrResidue} assignMatrix[1] is a concurrent list of scores</span>
+    <span class="n">assignmentScores</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">assignMatrix</span><span class="o">.</span><span class="n">keys</span><span class="p">()))[</span><span class="mi">0</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">numberOfMatches</span><span class="p">]</span>
+    <span class="n">nmrAtomPairs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">assignmentScore</span> <span class="ow">in</span> <span class="n">assignmentScores</span><span class="p">:</span>
+      <span class="n">matchResidue</span> <span class="o">=</span> <span class="n">assignMatrix</span><span class="p">[</span><span class="n">assignmentScore</span><span class="p">]</span>
       <span class="k">if</span> <span class="n">matchResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;-1&#39;</span><span class="p">):</span>
         <span class="n">iNmrResidue</span> <span class="o">=</span> <span class="n">matchResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
-
       <span class="k">else</span><span class="p">:</span>
         <span class="n">iNmrResidue</span> <span class="o">=</span> <span class="n">matchResidue</span>
+      <span class="n">nmrAtomPairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">iNmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">),</span> <span class="n">iNmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)))</span>
 
-      <span class="k">for</span> <span class="n">matchModule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">matchModule</span><span class="p">)</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">numberOfMatches</span><span class="p">:</span>
-          <span class="n">newStrip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">matchModule</span><span class="p">)</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span>
-          <span class="n">newStrip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">iNmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
-          <span class="n">navigateToNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">iNmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">newStrip</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">matchModule</span><span class="p">)</span><span class="o">.</span><span class="n">orderedStrips</span><span class="p">[</span><span class="n">assignmentScores</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">assignmentScore</span><span class="p">)]</span>
-          <span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">iNmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
-          <span class="n">navigateToNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">iNmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">strip</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">modulePid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span><span class="p">:</span>
+      <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">modulePid</span><span class="p">)</span>
+      <span class="n">makeStripPlot</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">)</span>
 
-    <span class="n">firstMatchResidue</span> <span class="o">=</span> <span class="n">assignMatrix</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">assignmentScores</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
-    <span class="n">shifts</span> <span class="o">=</span> <span class="p">[</span><span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">firstMatchResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CA&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">id</span><span class="p">),</span>
-              <span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">firstMatchResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CB&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">id</span><span class="p">)]</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">strip</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">strips</span><span class="p">):</span>
+        <span class="n">nmrResidueId</span> <span class="o">=</span> <span class="n">nmrAtomPairs</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_id</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidueId</span><span class="p">)</span>
 
+      <span class="bp">self</span><span class="o">.</span><span class="n">_centreStripForNmrResidue</span><span class="p">(</span><span class="n">assignMatrix</span><span class="p">[</span><span class="n">assignmentScores</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">module</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-
-
-    <span class="k">if</span> <span class="n">firstMatchResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;-1&#39;</span><span class="p">):</span>
-      <span class="n">iNmrResidue</span> <span class="o">=</span> <span class="n">firstMatchResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">iNmrResidue</span> <span class="o">=</span> <span class="n">firstMatchResidue</span>
-
-    <span class="k">for</span> <span class="n">matchModule</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span><span class="p">:</span>
-      <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">matchModule</span><span class="p">)</span>
-      <span class="n">navigateToNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">iNmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">module</span><span class="o">.</span><span class="n">orderedStrips</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-      <span class="n">module</span><span class="o">.</span><span class="n">orderedStrips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">iNmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
-      <span class="n">centreAxis</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="n">orderedStrips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">shifts</span><span class="p">)</span>
-
-
-  <span class="k">def</span> <span class="nf">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assigner</span><span class="p">:</span><span class="n">CcpnModule</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequenceGraph</span><span class="p">:</span><span class="n">CcpnModule</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    # CCPN INTERNAL - called in showSequenceGraph method of GuiMainWindow.</span>
 <span class="sd">    Connects Sequence Graph to this module.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span> <span class="o">=</span> <span class="n">assigner</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">assigner</span> <span class="o">=</span> <span class="n">assigner</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span> <span class="o">=</span> <span class="n">sequenceGraph</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">assigner</span> <span class="o">=</span> <span class="n">sequenceGraph</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="o">.</span><span class="n">nmrResidueTable</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="o">.</span><span class="n">setMode</span><span class="p">(</span><span class="s1">&#39;fragment&#39;</span><span class="p">)</span>
 
-
-  <span class="k">def</span> <span class="nf">_buildAssignmentMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queryShifts</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">ChemicalShift</span><span class="p">],</span>
-                             <span class="n">matchShifts</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">ChemicalShift</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">ChemicalShift</span><span class="p">]],</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a dictionary of NmrResidues and qScores between queryShifts and matching shifts.</span>
-<span class="sd">    Returns dictionary and a list of the qScores.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">scores</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">matrix</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">res</span><span class="p">,</span> <span class="n">shift</span> <span class="ow">in</span> <span class="n">matchShifts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="n">qScore</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">shift</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">qScore</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">shift</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-
-          <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="n">qScore</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">shift</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span><span class="o">+</span><span class="n">qScore</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">shift</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">))</span><span class="o">/</span><span class="mi">2</span>
-          <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
-          <span class="n">matrix</span><span class="p">[</span><span class="n">score</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
-      <span class="c1"># elif len(queryShifts) == 1:</span>
-      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">shift</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">qScore</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">shift</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-
-          <span class="n">score</span> <span class="o">=</span> <span class="n">qScore</span><span class="p">(</span><span class="n">queryShifts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">,</span> <span class="n">shift</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-          <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">score</span><span class="p">)</span>
-          <span class="n">matrix</span><span class="p">[</span><span class="n">score</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span>
-
-    <span class="k">return</span> <span class="n">matrix</span><span class="p">,</span> <span class="n">scores</span>
 
 <div class="viewcode-block" id="BackboneAssignmentModule.closeModule"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule.closeModule">[docs]</a>  <span class="k">def</span> <span class="nf">closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;backboneModule&#39;</span><span class="p">)</span>

@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-15 15:24:06 +0100 (Mon, 15 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: skinnersp $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-15 15:24:06 +0100 (Mon, 15 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9786 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -82,7 +82,6 @@
               <span class="s1">&#39;NE2&#39;</span><span class="p">,</span> <span class="s1">&#39;NH1&#39;</span><span class="p">,</span> <span class="s1">&#39;NH2&#39;</span><span class="p">,</span> <span class="s1">&#39;NZ&#39;</span><span class="p">]}</span>
 
 
-<span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
@@ -93,9 +92,8 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.assignment.ChemicalShift</span> <span class="kn">import</span> <span class="n">getSpinSystemResidueProbability</span><span class="p">,</span> <span class="n">getAtomProbability</span><span class="p">,</span> <span class="n">getResidueAtoms</span><span class="p">,</span> <span class="n">getCcpCodes</span><span class="p">,</span> <span class="n">getSpinSystemScore</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">spectrumLib</span>
 <span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">numpy</span>
 
-
-<span class="kn">from</span> <span class="nn">sklearn</span> <span class="kn">import</span> <span class="n">svm</span>
 
 <div class="viewcode-block" id="isInterOnlyExpt"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.AssignmentLib.isInterOnlyExpt">[docs]</a><span class="k">def</span> <span class="nf">isInterOnlyExpt</span><span class="p">(</span><span class="n">experimentType</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;</span>
@@ -219,7 +217,7 @@
 <span class="c1">#   if axisCode[0] == &#39;H&#39;:</span>
 <span class="c1">#     return &#39;1H&#39;</span>
 
-<div class="viewcode-block" id="copyAssignments"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.AssignmentLib.copyAssignments">[docs]</a><span class="k">def</span> <span class="nf">copyAssignments</span><span class="p">(</span><span class="n">referencePeakList</span><span class="p">:</span><span class="n">PeakList</span><span class="p">,</span> <span class="n">matchPeakList</span><span class="p">:</span><span class="n">PeakList</span><span class="p">):</span>
+<div class="viewcode-block" id="copyPeakListAssignments"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.AssignmentLib.copyPeakListAssignments">[docs]</a><span class="k">def</span> <span class="nf">copyPeakListAssignments</span><span class="p">(</span><span class="n">referencePeakList</span><span class="p">:</span><span class="n">PeakList</span><span class="p">,</span> <span class="n">matchPeakList</span><span class="p">:</span><span class="n">PeakList</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">  Takes a reference peakList and assigns NmrAtoms to dimensions</span>
@@ -523,6 +521,51 @@
         <span class="n">result</span><span class="p">[</span><span class="n">mt</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSet</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="getBoundNmrAtomPairs"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.AssignmentLib.getBoundNmrAtomPairs">[docs]</a><span class="k">def</span> <span class="nf">getBoundNmrAtomPairs</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">nucleus</span><span class="p">):</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">na1</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">na1</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">nucleus</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">na2</span> <span class="ow">in</span> <span class="n">na1</span><span class="o">.</span><span class="n">boundNmrAtoms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">na2</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">([</span><span class="n">na1</span><span class="p">,</span> <span class="n">na2</span><span class="p">])))</span>
+
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">result</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="findClosePeaks"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.AssignmentLib.findClosePeaks">[docs]</a><span class="k">def</span> <span class="nf">findClosePeaks</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">matchPeakList</span><span class="p">):</span>
+
+  <span class="n">closePeaks</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">refAxisCodes</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span>
+  <span class="n">matchAxisCodes</span> <span class="o">=</span> <span class="n">matchPeakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span>
+  <span class="n">mappingArray</span> <span class="o">=</span> <span class="p">[</span><span class="n">refAxisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="k">for</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">refAxisCodes</span>
+                  <span class="k">if</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">matchAxisCodes</span><span class="p">]</span>
+  <span class="n">mappingArray2</span> <span class="o">=</span> <span class="p">[</span><span class="n">matchAxisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="k">for</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">refAxisCodes</span>
+                   <span class="k">if</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">matchAxisCodes</span><span class="p">]</span>
+  <span class="n">refPeakPosition</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">mappingArray</span> <span class="k">if</span> <span class="n">dim</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">])</span>
+
+  <span class="k">for</span> <span class="n">mPeak</span> <span class="ow">in</span> <span class="n">matchPeakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+    <span class="n">matchArray</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">mappingArray2</span><span class="p">:</span>
+      <span class="n">matchArray</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mPeak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">])</span>
+
+    <span class="n">dist</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">refPeakPosition</span><span class="o">-</span><span class="n">numpy</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matchArray</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="mf">0.02</span><span class="p">:</span>
+      <span class="n">closePeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mPeak</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">closePeaks</span></div>
+
+<div class="viewcode-block" id="copyPeakAssignments"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.AssignmentLib.copyPeakAssignments">[docs]</a><span class="k">def</span> <span class="nf">copyPeakAssignments</span><span class="p">(</span><span class="n">refPeak</span><span class="p">,</span> <span class="n">peaks</span><span class="p">):</span>
+
+  <span class="n">refAxisCodes</span> <span class="o">=</span> <span class="n">refPeak</span><span class="o">.</span><span class="n">axisCodes</span>
+  <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+    <span class="n">matchAxisCodes</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span>
+    <span class="n">mappingArray2</span> <span class="o">=</span> <span class="p">[</span><span class="n">matchAxisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="k">for</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">refAxisCodes</span> <span class="k">if</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">matchAxisCodes</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">mappingArray2</span><span class="p">):</span>
+      <span class="n">atom</span> <span class="o">=</span> <span class="n">refPeak</span><span class="o">.</span><span class="n">dimensionNmrAtoms</span><span class="p">[</span><span class="n">jj</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">axisCode</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+      <span class="n">peak</span><span class="o">.</span><span class="n">assignDimension</span><span class="p">(</span><span class="n">axisCode</span><span class="p">,</span> <span class="p">[</span><span class="n">atom</span><span class="p">])</span></div>
 </pre></div>
 
           </div>

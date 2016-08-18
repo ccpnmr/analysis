@@ -244,7 +244,7 @@
     <span class="k">if</span> <span class="n">attachedObjectPid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">attachedObjectPid</span> <span class="o">=</span> <span class="n">attachedObject</span><span class="o">.</span><span class="n">pid</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">raiseValueError</span><span class="p">(</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
         <span class="s2">&quot;Either attachedObject or attachedObjectPid must be None - values were </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span>
                       <span class="o">%</span> <span class="p">(</span><span class="n">attachedObject</span><span class="p">,</span> <span class="n">attachedObjectPid</span><span class="p">))</span>
 

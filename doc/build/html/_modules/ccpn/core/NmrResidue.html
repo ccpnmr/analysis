@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9763 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -154,7 +154,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">residueType</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Residue type string (e.g. &#39;ALA&#39;). Part of id. Use self.assignTo or self.rename to reset the residueType&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Residue type string (e.g. &#39;ALA&#39;). Part of id. Use self.assignTo or</span>
+<span class="sd">    self.rename to reset the residueType&quot;&quot;&quot;</span>
     <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="n">apiResidue</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span>
     <span class="k">if</span> <span class="n">apiResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -926,9 +927,9 @@
       <span class="n">previous</span> <span class="o">=</span> <span class="bp">None</span>
       <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span> <span class="ow">in</span> <span class="n">sequenceCode</span><span class="p">:</span>
         <span class="c1"># sequenceCode contains &#39;.&#39; - check against remapped sequenceCode</span>
-        <span class="n">sq</span> <span class="o">=</span> <span class="n">sequenceCode</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">nr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">nr</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">==</span> <span class="n">sq</span><span class="p">:</span>
+        <span class="n">matchString</span> <span class="o">=</span> <span class="n">sequenceCode</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
+        <span class="k">for</span> <span class="n">nr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">nr</span><span class="o">.</span><span class="n">_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">matchString</span><span class="p">):</span>
             <span class="n">previous</span> <span class="o">=</span> <span class="n">nr</span>
             <span class="k">break</span>
       <span class="k">else</span><span class="p">:</span>
@@ -941,20 +942,15 @@
                          <span class="p">(</span><span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
 
       <span class="c1"># Handle reserved names</span>
-      <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-          <span class="n">serial</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-          <span class="c1"># the rest of the name is not an int. We are OK</span>
-          <span class="k">pass</span>
-        <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">serial</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-          <span class="c1"># this is a reserved name</span>
-          <span class="k">if</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">serial</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-            <span class="c1"># The implied serial is free - we can set it</span>
-            <span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Name clashes with existing NmrResidue</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create NmrResidue with reserved name </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sequenceCode</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span> <span class="ow">and</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+        <span class="c1"># this is a reserved name</span>
+        <span class="n">serial</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+        <span class="k">if</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">serial</span><span class="o">=</span><span class="n">serial</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="c1"># The implied serial is free - we can set it</span>
+          <span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># Name clashes with existing NmrResidue</span>
+          <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create NmrResidue with reserved name </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">sequenceCode</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="c1"># Just create new ResonanceGroup with default-type name</span>
@@ -994,7 +990,13 @@
 
 <span class="k">def</span> <span class="nf">_fetchNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrChain</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                      <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrResidue</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Fetch NmrResidue with residueType=residueType, creating it if necessary&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Fetch NmrResidue with sequenceCode=sequenceCode and residueType=residueType,</span>
+<span class="sd">  creating it if necessary.</span>
+
+<span class="sd">  if sequenceCode is None will create a new NmrResidue</span>
+
+<span class="sd">  if bool(residueType)  is False will return any existing NmrResidue that matches the sequenceCode</span>
+<span class="sd">  &quot;&quot;&quot;</span>
 
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;residueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
 
@@ -1002,18 +1004,26 @@
                                   <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrResidue&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># Make new NmrResidue always</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">sq</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
-      <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sq</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiResonanceGroup</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">residueType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">residueType</span> <span class="o">!=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span><span class="p">:</span>
+      <span class="c1"># First see if we have it already</span>
+      <span class="c1"># Should not be necessary, but it is an easy mistake to pass it as integer instead of string</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+
+      <span class="n">apiResult</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">apiResult</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiResult</span><span class="p">]</span>
+
+      <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># NB - if this cannot be created we get the error from newNmrResidue</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">residueType</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">residueType</span> <span class="o">!=</span> <span class="n">residueType</span><span class="p">:</span>
+          <span class="c1"># Residue types clash - error:</span>
           <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s2">&quot;Existing </span><span class="si">%s</span><span class="s2"> does not match residue type </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="n">residueType</span><span class="p">))</span>
           <span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
   <span class="c1">#</span>

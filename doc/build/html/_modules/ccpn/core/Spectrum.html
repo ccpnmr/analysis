@@ -91,7 +91,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -102,8 +102,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9763 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -288,17 +288,6 @@
   <span class="nd">@spinningRate.setter</span>
   <span class="k">def</span> <span class="nf">spinningRate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">experiment</span><span class="o">.</span><span class="n">spinningRate</span> <span class="o">=</span> <span class="n">value</span>
-
-  <span class="c1"># @property</span>
-  <span class="c1"># def chemicalShiftList(self) -&gt; ChemicalShiftList:</span>
-  <span class="c1">#   &quot;&quot;&quot;ChemicalShiftList associated with Spectrum.&quot;&quot;&quot;</span>
-  <span class="c1">#   return self._project._data2Obj.get(self._wrappedData.experiment.shiftList)</span>
-  <span class="c1">#</span>
-  <span class="c1"># @chemicalShiftList.setter</span>
-  <span class="c1"># def chemicalShiftList(self, value:ChemicalShiftList):</span>
-  <span class="c1">#</span>
-  <span class="c1">#   value = self.getByPid(value) if isinstance(value, str) else value</span>
-  <span class="c1">#   self._wrappedData.experiment.shiftList = value._wrappedData</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">experimentType</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -633,24 +622,6 @@
   <span class="nd">@measurementTypes.setter</span>
   <span class="k">def</span> <span class="nf">measurementTypes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setExpDimRefAttribute</span><span class="p">(</span><span class="s1">&#39;measurementType&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-  <span class="c1">#</span>
-  <span class="c1"># @property</span>
-  <span class="c1"># def maxAliasedFrequencies(self) -&gt; Tuple[Optional[float], ...]:</span>
-  <span class="c1">#   &quot;&quot;&quot;maximum possible peak frequency (in ppm) for main dimensions reference, per dimension &quot;&quot;&quot;</span>
-  <span class="c1">#   return tuple(x and x.maxAliasedFreq for x in self._mainExpDimRefs())</span>
-  <span class="c1">#</span>
-  <span class="c1"># @maxAliasedFrequencies.setter</span>
-  <span class="c1"># def maxAliasedFrequencies(self, value):</span>
-  <span class="c1">#   self._setExpDimRefAttribute(&#39;maxAliasedFreq&#39;, value, mandatory=False)</span>
-  <span class="c1">#</span>
-  <span class="c1"># @property</span>
-  <span class="c1"># def minAliasedFrequencies(self) -&gt; Tuple[Optional[float], ...]:</span>
-  <span class="c1">#   &quot;&quot;&quot;minimum possible peak frequency (in ppm) for main dimensions reference, per dimension&quot;&quot;&quot;</span>
-  <span class="c1">#   return tuple(x and x.minAliasedFreq for x in self._mainExpDimRefs())</span>
-  <span class="c1">#</span>
-  <span class="c1"># @minAliasedFrequencies.setter</span>
-  <span class="c1"># def minAliasedFrequencies(self, value):</span>
-  <span class="c1">#   self._setExpDimRefAttribute(&#39;minAliasedFreq&#39;, value, mandatory=False)</span>
 
 
   <span class="nd">@property</span>
@@ -1004,9 +975,11 @@
         <span class="k">elif</span> <span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">or</span> <span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;15N&#39;</span><span class="p">:</span>
           <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCounts</span><span class="p">[</span><span class="n">ii</span><span class="p">]])</span>
           <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">tolerance</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">isotopeCode</span><span class="p">:</span>
           <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="mf">0.2</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectralWidths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">pointCounts</span><span class="p">[</span><span class="n">ii</span><span class="p">]])</span>
           <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">tolerance</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">tolerances</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span>
 
       <span class="bp">self</span><span class="o">.</span><span class="n">assignmentTolerances</span> <span class="o">=</span> <span class="n">tolerances</span>
     <span class="k">finally</span><span class="p">:</span>

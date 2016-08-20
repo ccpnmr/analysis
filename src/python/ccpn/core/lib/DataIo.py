@@ -68,6 +68,14 @@ def importCyanaRestraints(project, dataPath, restraintType='Distance'):
                                            comment="Cyana restraint list load")
   extractCyanaRestraints(restraintList, text)
 
+def importInsightRestraints(project, dataPath, restraintType='Distance'):
+  text = open(dataPath).read()
+
+  dataSet = project.dataSets[-1]
+  restraintList = dataSet.newRestraintList(restraintType=restraintType,
+                                           comment="Insight restraint list load")
+  extractInsightRestraints(restraintList, text)
+
 def getProject(projectPath):
   from ccpn.framework.Framework import getFramework
   projectPath = os.path.normpath(os.path.abspath(projectPath))
@@ -124,6 +132,113 @@ def extractCyanaRestraints(restraintList, text):
       ids.append(tt + (atomName,))
     items = ['%s.%s.%s.%s' % (tt) for tt in ids]
     restraintList.createSimpleRestraint(upperLimit=value, restraintItems=(items,))
+
+
+
+
+def extractInsightRestraints(restraintList, text):
+  """Extract  restraints from text - INsight format ???. NBNB HACK! - assuming format:
+  #NOE_distance
+  1:A_23:H8          1:TYR_162:HD*       3.100  6.400  5.000 100.00 100.00 1000.000  0.00
+  etc.
+
+  Used for 1nk2
+
+  This is an ad-hoc function to read information from PDB=-deposited
+  restraint blocks, customised for (a) particular case(s)
+
+  residueTypes are not read, to avoid complications with non-standard
+  DNA/RNA names. User beware"""
+
+
+
+  conversion = {
+    "H2'1":"H2'",
+    "H2'2":"H2''",
+    "H2'X":"H2'*",
+    "H5'1":"H5'",
+    "H5'2":"H5''",
+    "H5'X":"H5'*",
+    "H5M*":"H7%",
+    "H5MX":"H7%",
+    "HN":"H",
+    "HA1":"HA2",
+    "HA2":"HA3",
+    "HB1":"HB2",
+    "HB2":"HB3",
+    "HBR":"HB2",
+    "HBS":"HB3",
+    "HGR":"HG2",
+    "HGS":"HG3",
+    "HDR":"HD2",
+    "HDS":"HD3",
+  }
+
+  # Conversions not used for certain residues (given below)
+  conditionalConversion = {
+    "HG1":"HG2",
+    "HG2":"HG3",
+    "HD1":"HD2",
+    "HD2":"HD3",
+    "HE1":"HE2",
+    "HE2":"HE3",
+  }
+  conditionalResidueTypes = ['PHE', 'TYR', 'TRP', 'HIS', 'THR']
+
+  allAtomNames = set()
+
+  project = restraintList._project
+  sequenceCodeMap = {}
+  for residue in project.residues:
+    sequenceCode = residue.sequenceCode
+    if sequenceCode in sequenceCodeMap:
+      raise ValueError("Duplicate sequenceCode %s in project chains. Aborting" % sequenceCode)
+    # NB we convert sequenceCode to int 1) for sorting, 2) because non-int examples will not appear
+    sequenceCodeMap[sequenceCode] = (residue.chain.shortName, sequenceCode, residue.residueType)
+
+  for line in text.splitlines():
+
+    # ignore empty and comment lines
+    line = line.upper().strip()
+    if not line or line[0] in '#!':
+      continue
+
+    ll = line.split()[:5]
+    lower = float(ll[2]) or None
+    upper =  float(ll[3])
+    if upper > 90:
+      upper = None
+
+    target =  float(ll[4])
+    if target > 90:
+      target = None
+
+    items = []
+    for atomId in ll[:2]:
+      dummy, res, atomName = atomId.split(':')
+      residueType, sequenceCode = res.split('_')
+      tt = sequenceCodeMap[sequenceCode]
+
+      ss = conversion.get(atomName)
+      if ss is None:
+        ss2 = conditionalConversion.get(atomName)
+        if (ss2 is not None
+            and not [x for x in conditionalResidueTypes if residueType.startswith(x)]):
+          # do conditional name conversion
+          atomName = ss2
+        elif atomName[-1] == '*' and atomName[-2] != "'":
+          atomName = atomName[:-1] + '%'
+      else:
+        atomName = ss
+
+      allAtomNames.add((atomName, residueType))
+
+      items.append('.'.join(tt + (atomName,)))
+    restraintList.createSimpleRestraint(lowerLimit=lower, upperLimit=upper, targetValue=target,
+                                        restraintItems=(items,))
+
+  for tt in sorted(allAtomNames):
+    print('  %s:"",' % (tt,))
 
 
 
@@ -188,6 +303,33 @@ def loadCasdRdcList(project, path):
                                                    tensorRhombicity=rhombicity,
                                                    tensorSequenceCode=sequenceCode)
           restraintLists[orientation] = restraintList
+  finally:
+    project._appBase._echoBlocking -= 1
+
+def loadSimplePeakList(spectrum, peakFile, axisCodes=None, skipColumns=0):
+  """Ad-hoc HACK - load simple peak table file
+
+  columns are hardwired"""
+
+  project = spectrum._project
+
+  if axisCodes:
+    reordering = [axisCodes.index(x) for x in spectrum.axisCodes]
+
+  peakList = spectrum.newPeakList()
+  project._appBase._echoBlocking += 1
+  try:
+    for line in open(peakFile):
+      line = line.strip()
+      if line and line[0] not in '!#':
+        params = {}
+        ll = line.split()
+        position = [float(x) for x in ll[skipColumns:3+skipColumns]]
+        if axisCodes:
+          position = [position[x] for x in reordering]
+        params['position'] = position
+        params['height'] = float(ll[3+skipColumns])
+        peakList.newPeak(**params)
   finally:
     project._appBase._echoBlocking -= 1
 
@@ -308,7 +450,7 @@ def readNmrStarChemicalShifts(project, path,  chainOrder='CAB'):
   chainOrder are the vhsinCOdes to use, in order of the BMRB entity codes"""
   dataExtent = StarIo.parseNmrStarFile(path, wrapInDataBlock=True)
   dataBlock = list(dataExtent.values())[0]
-  newShiftList = loadNmrStarChemicalShifts(project, dataBlock, chainOrder=chainOrder)
+  newShiftLists = loadNmrStarChemicalShifts(project, dataBlock, chainOrder=chainOrder)
   for nmrChain in project.nmrChains:
     alignNmrChain(nmrChain)
     collapseXH3Groups(nmrChain)
@@ -348,6 +490,9 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock,chainOrder:str=None) -> 
   Chains will be named A, B, ... taking the next free letter
 
   NB This is a quick hack. E.g.No use is made of author naming info."""
+
+  result = []
+
   defaultChainCodeValues = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
   chainCodes = {}
   chainCodeIndex = 0
@@ -375,6 +520,7 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock,chainOrder:str=None) -> 
     chemicalShiftList = project.newChemicalShiftList(name=name,
                                                      autoUpdate=False,
                                                      comment='Loaded from NmrStar')
+    result.append(chemicalShiftList)
     project._appBase._echoBlocking += 1
     try:
       for row in loop.data:
@@ -401,10 +547,12 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock,chainOrder:str=None) -> 
         else:
           isotopeCode = None
         ambiguityCode = row.get('ambiguity_code')
+        if ambiguityCode:
+          ambiguityCode = int(ambiguityCode)
         try:
           # Ungainly and slow.
           # But we want to use New, in order to pass in the isotopeCode
-          # (just in case the name does nto start with the right letter)
+          # (just in case the name does not start with the right letter)
           # And we want to get the previous atom when there is one.
           #' This also avoids messing with remapping names with dots in etc.
           nmrAtom = nmrResidue.newNmrAtom(name=atomName, isotopeCode=isotopeCode)
@@ -425,7 +573,7 @@ def loadNmrStarChemicalShifts(project, nmrStarDatablock,chainOrder:str=None) -> 
     finally:
       project._appBase._echoBlocking -= 1
   #
-  return chemicalShiftList
+  return result
 
 def collapseXH3Groups(nmrChain:'NmrChain'):
   """Convert triplets of NmrAtoms to single CH3/NH3 NmrAtoms
@@ -504,26 +652,46 @@ def convertBmrbAmbiguousAtoms(nmrChain):
     sequenceCode = nmrResidue.sequenceCode
     residueType = nmrResidue.residueType
 
-    # special cases, DNA H2', H2'', DNA/RNA H5', H5''
+    type4NmrAtoms = []
 
     # group NmrAtoms into potential matching groups
     groups = {}
     for nmrAtom in nmrResidue.nmrAtoms:
       name = nmrAtom.name
 
-      if name.endswith("'"):
-        # special case, ambigous atom pairs ending in ' or ''
-        dd2 = nmrAtom.ccpnInternalData
-        if dd2:
-          xx = dd2.get('ambiguityCode')
-          if xx in ('2','3'):
-            # Ambiguous = set the name
-            if name.endswith("''"):
-              newName = name[:-2] + 'Y'
-            else:
-              newName = name[:-1] + 'X'
-            # NB, if the name is already taken we get a nameclash
-            nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)
+      dd2 = nmrAtom.ccpnInternalData
+      if dd2:
+        ambiguityCode = dd2.get('ambiguityCode')
+      else:
+        ambiguityCode = None
+
+      if ambiguityCode == 5:
+        # interresidue ambiguity
+        nmrAtom.assignTo(chainCode, str(sequenceCode) + '?', residueType, name)
+
+      elif ambiguityCode == 6:
+        # interchain ambiguity
+        nmrAtom.assignTo(chainCode + '?', sequenceCode, residueType, name)
+
+      elif ambiguityCode == 9:
+        # unknown ambiguity
+        nmrAtom.assignTo(chainCode + '?', str(sequenceCode) + '?', residueType + '?', name + '?')
+
+      elif ambiguityCode == 4:
+        # intraresidue ambiguity
+        type4NmrAtoms.append(nmrAtom)
+
+      elif name.endswith("'"):
+        # special case, ambiguous atom pairs ending in ' or ''
+        # Deal with them singly
+        if ambiguityCode in (2,3):
+          # Ambiguous = set the name
+          if name.endswith("''"):
+            newName = name[:-2] + 'Y'
+          else:
+            newName = name[:-1] + 'X'
+          # NB, if the name is already taken we get a nameclash
+          nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)
 
       # elif name.endswith('"'):
       #   # Should not happen, but it looks like " can be used instead of ''        dd2 = nmrAtom.ccpnInternalData
@@ -559,6 +727,15 @@ def convertBmrbAmbiguousAtoms(nmrChain):
         dd[nucleus] = ll
         ll[indx] = nmrAtom
 
+    if type4NmrAtoms:
+      # We have ambiguous-in-residue atoms. name them.
+      type4NmrAtoms.sort()
+      names = [x.name for x in type4NmrAtoms]
+      for ii,nmrAtom in enumerate(type4NmrAtoms):
+        names = [names[ii]] + [names[x] for x in range(len(names)) if x != ii]
+        newName = '|'.join(names)
+        nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)
+
     # Rename to 'XY' name form
     for locator, dd in groups.items():
 
@@ -572,7 +749,7 @@ def convertBmrbAmbiguousAtoms(nmrChain):
             dd2 = na.ccpnInternalData
             if dd2:
               xx = dd2.get('ambiguityCode')
-              if xx in ('2','3'):
+              if xx in (2,3):
                 ambiguityCode = xx
                 break
         else:
@@ -713,6 +890,38 @@ def loadCasdData(project, casdDirectory):
   #
   project.save()
 
+# def cleanUpRestraintNames(project):
+#   """Change strange restraint names to sensible ones
+#
+#   NBNB Ad-hoc hack"""
+#
+#   conversion = {
+#     "H2'1":"H2'",
+#     "H2'2":"H2''",
+#     "H5'1":"H5'",
+#     "H5'2":"H5''",
+#     "H5M*":"H7%",
+#     "H5MX":"H7%",
+#   }
+#
+#
+#   for contribution in project.restraintContributions:
+#     items = []
+#     for tt in contribution.restraintItems:
+#       ll = []
+#       for atomId in tt:
+#         res, nam = atomId.rsplit('.',1)
+#         nam2 = conversion.get(nam)
+#         print ('--->', res, nam, nam2)
+#         if nam2 is not None:
+#           print ('@~@~ renaming', res, nam, nam2)
+#           atomId = '%s.%s' % (res, nam2)
+#         ll.append(atomId)
+#       if not ll in items:
+#         # Skip duplicates
+#         items.append(ll)
+#     contribution.restraintItems = items
+
 def cleanUpDocrProject(project):
   """Clean up DOCR project - converting restraints to ambiguous atoms
   (e.g. HBa/HBb) to restraints to % atoms (e.g. HB%).
@@ -743,8 +952,8 @@ if __name__ == '__main__':
   name, projectPath, bmrbEntryPath = sys.argv[1:4]
   projectPath = os.path.normpath(os.path.abspath(projectPath))
   bmrbEntryPath = os.path.normpath(os.path.abspath(bmrbEntryPath))
-  project = loadDocrProject(name, projectPath, bmrbEntryPath, chainOrder='CAB')
-
+  # project = loadDocrProject(name, projectPath, bmrbEntryPath, chainOrder='CAB')
+  project = loadDocrProject(name, projectPath, bmrbEntryPath)
   if len(sys.argv) > 4:
     casdDirectory = sys.argv[4]
     casdDirectory = os.path.normpath(os.path.abspath(casdDirectory))
@@ -755,7 +964,7 @@ if __name__ == '__main__':
   # projectPath, dataPath = sys.argv[1:3]
   # dataPath = os.path.normpath(os.path.abspath(dataPath))
   # project = getProject(projectPath)
-  # importCyanaRestraints(project, dataPath)
+  # importInsightRestraints(project, dataPath)
   # remapRestraintItems(project)
   # project.save()
 

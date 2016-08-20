@@ -2454,7 +2454,7 @@ class CcpnNefReader:
 
 
 def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict,
-                   dimensionData:dict, transferData):
+                   dimensionData:dict, transferData=None):
   """Get or create spectrum using dictionaries of attributes, such as read in from NEF.
 
   :param spectrumParameters keyword-value dictionary of attribute to set on resulting spectrum
@@ -2491,9 +2491,6 @@ def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict
           # get axisCodes
           spectrum.axisCodes = dimensionData['axisCodes']
 
-    dimensionIds = dimensionData['dimension_id']
-    dimTags.remove('dimension_id')
-
     acquisitionAxisIndex = None
     if 'is_acquisition' in dimensionData:
       dimTags.remove('is_acquisition')
@@ -2510,6 +2507,12 @@ def createSpectrum(project: 'Project', spectrumName:str, spectrumParameters:dict
         axisCodes = dimensionData['axisCodes']
 
       else:
+        if transferData is None:
+          raise ValueError("Function needs either axisCodes or transferData")
+
+        dimensionIds = dimensionData['dimension_id']
+        dimTags.remove('dimension_id')
+
         # axisCodes were not set - produce a serviceable set
         axisCodes = makeNefAxisCodes(isotopeCodes=dimensionData['isotopeCodes'],
                                      dimensionIds=dimensionIds,
@@ -2751,8 +2754,8 @@ def _testNefIo(path, skipPrefixes=()):
 if __name__ == '__main__':
   import sys
   path = sys.argv[1]
-  _testNefIo(path, skipPrefixes=('ccpn',))
-  # nefpath = _exportToNef(path)
-  # _testNefIo(nefpath)
-  # nefpath = _exportToNef(path, skipPrefixes=('ccpn',))
-  # _testNefIo(nefpath, skipPrefixes=('ccpn',))
+  # _testNefIo(path, skipPrefixes=('ccp# ,))
+  # nefpath = _exportToNef(# th)
+  # _testNefIo(nef# th)
+  nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
+  _testNefIo(nefpath, skipPrefixes=('ccpn',))

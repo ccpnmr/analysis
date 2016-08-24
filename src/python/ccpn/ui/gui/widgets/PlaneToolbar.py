@@ -41,7 +41,13 @@ class PlaneToolbar(ToolBar):
       self.prevPlaneButton.setFixedHeight(19)
       planeLabel = DoubleSpinbox(self, showButtons=False)
       planeLabel.setFixedHeight(19)
-      planeLabel.valueChanged.connect(partial(callbacks[2], i))
+      # below does not work because it allows wheel events to behave but not manual text entry (some Qt stupidity)
+      # so instead use a wheelEvent to deal with the wheel events and editingFinished (in GuiStripNd) to do text
+      #planeLabel.valueChanged.connect(partial(callbacks[2], i))
+      if callbacks[2]:
+        planeLabel.wheelEvent = partial(self._wheelEvent, i)
+        self.prevPlaneCallback = callbacks[0]
+        self.nextPlaneCallback = callbacks[1]
       self.nextPlaneButton = Button(self,'>', callback=partial(callbacks[1], i))
       self.nextPlaneButton.setFixedWidth(19)
       self.nextPlaneButton.setFixedHeight(19)
@@ -57,3 +63,10 @@ class PlaneToolbar(ToolBar):
       self.planeLabels.append(planeLabel)
       self.planeCounts.append(planeCount)
 
+  def _wheelEvent(self, n, event):
+    if event.delta() > 0: # note that in Qt5 this becomes angleDelta()
+      if self.prevPlaneCallback:
+        self.prevPlaneCallback(n)
+    else:
+      if self.nextPlaneCallback:
+        self.nextPlaneCallback(n)

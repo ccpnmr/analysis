@@ -361,12 +361,11 @@ class GuiStripNd(GuiStrip):
     Sets the value of the z plane position box if the specified value is within the displayable limits.
     """
     planeLabel = self.planeToolbar.planeLabels[n]
-    #if planeLabel.valueChanged():
-    #  value = planeLabel.value()
+    if 1: # planeLabel.valueChanged: (<-- isn't that always true??)
+      value = planeLabel.value()
     # 8/3/2016 Rasmus Fogh. Fixed untested (obvious bug)
     # if planeLabel.minimum() <= planeLabel.value() <= planeLabel.maximum():
 
-    # not sure the check below is needed since presumably Qt guarantees this
     if planeLabel.minimum() <= value <= planeLabel.maximum():
       self.changeZPlane(n, position=value)
 

@@ -180,12 +180,22 @@ class PeakList(AbstractWrapperObject):
       positions = list(sorted(map(list, zip(*positions))))
       startPoint = []
       endPoint = []
-      dataDims = self.spectrum._apiDataSource.sortedDataDims()
       spectrum = self.spectrum
+      dataDims = spectrum._apiDataSource.sortedDataDims()
+      aliasingLimits = spectrum.aliasingLimits
+      apiPeaks = []
       for ii, dataDim in enumerate(dataDims):
+        aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
+        value0 = positions[0][ii]
+        value1 = positions[1][ii]
+        value0, value1 = min(value0, value1), max(value0, value1)
+        if value1 < aliasingLimit0 or value0 > aliasingLimit1:
+          break  # completely outside aliasing region
+        value0 = max(value0, aliasingLimit0)
+        value1 = min(value1, aliasingLimit1)
         # -1 below because points start at 1 in data model
-        position0 = dataDim.primaryDataDimRef.valueToPoint(positions[0][ii]) - 1
-        position1 = dataDim.primaryDataDimRef.valueToPoint(positions[1][ii]) - 1
+        position0 = dataDim.primaryDataDimRef.valueToPoint(value0) - 1
+        position1 = dataDim.primaryDataDimRef.valueToPoint(value1) - 1
         position0, position1 = min(position0, position1), max(position0, position1)
         # want integer grid points above position0 and below position1
         # add 1 to position0 because above
@@ -195,16 +205,16 @@ class PeakList(AbstractWrapperObject):
         position1 = int(position1+1)
         startPoint.append((dataDim.dim, position0))
         endPoint.append((dataDim.dim, position1))
+      else:
+        startPoints = [point[1] for point in sorted(startPoint)]
+        endPoints = [point[1] for point in sorted(endPoint)]
+        # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
 
-      startPoints = [point[1] for point in sorted(startPoint)]
-      endPoints = [point[1] for point in sorted(endPoint)]
-      # print(isoOrdering, startPoint, startPoints, endPoint, endPoints)
+        posLevel = spectrum.positiveContourBase if doPos else None
+        negLevel = spectrum.negativeContourBase if doNeg else None
 
-      posLevel = spectrum.positiveContourBase if doPos else None
-      negLevel = spectrum.negativeContourBase if doNeg else None
-
-      apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
-                     posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod, excludedRegions=excludedRegions,
+        apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
+                       posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod, excludedRegions=excludedRegions,
                      excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
 
       data2ObjDict = self._project._data2Obj

@@ -25,7 +25,7 @@ from typing import Sequence, List, Optional
 import collections
 import numpy
 from numpy import argwhere
-from scipy.ndimage import maximum_filter
+from scipy.ndimage import maximum_filter, minimum_filter
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
@@ -230,10 +230,9 @@ class PeakList(AbstractWrapperObject):
 
     return result
 
-  # def pickPeaks1d(self:'PeakList', spectrumView, size:int=3, mode:str='wrap'):
   def pickPeaks1d(self, dataRange, intensityRange=None, size:int=3, mode:str='wrap') -> List['Peak']:
     """
-    Pick 1D peaks form data1d float array
+    Pick 1D peaks from a dataRange (E.G selection in ViewBox)
     """
 
     self._project.suspendNotification()
@@ -250,16 +249,16 @@ class PeakList(AbstractWrapperObject):
         return peaks
       maxFilter = maximum_filter(selectedData[1], size=size, mode=mode)
       boolsMax = selectedData[1] == maxFilter
-      if intensityRange is None: 
-        spectrum.estimateNoise()*10
-        if selectedData.max() < threshold:
-          return peaks
-        boolsVal = selectedData[1] > threshold
-        boolsPeak = boolsVal & boolsMax
-      else:
-        boolsPeak = boolsMax
-      indices = argwhere(boolsPeak) # True positional indices
-      for position in indices:
+      indices = argwhere(boolsMax)
+
+      minFilter = minimum_filter(selectedData[1], size=size, mode=mode)
+      boolsMin = selectedData[1] == minFilter
+      negBoolsPeak = boolsMin
+      indicesMin = argwhere(negBoolsPeak)
+
+      fullIndices = numpy.append(indices, indicesMin)  # True positional indices
+
+      for position in fullIndices:
         peakPosition = [float(selectedData[0][position])]
         height = selectedData[1][position]
         if intensityRange is None or intensityRange[0] <= height <= intensityRange[1]:
@@ -272,50 +271,47 @@ class PeakList(AbstractWrapperObject):
 
 
   def pickPeaks1dFiltered(self, size:int=9, mode:str='wrap', ignoredRegions=None,
-                          noiseThreshold=None):
+                          noiseThreshold=None, negativePeaks=True):
     """
     Pick 1D peaks form data in  self.spectrum
     """
-    defaults = collections.OrderedDict(
-      ( ('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('noiseThreshold', None)
-      )
-    )
+    defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('noiseThreshold', None)))
 
     self._startFunctionCommandBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
     ll = []
     try:
-      if not ignoredRegions:
+      if ignoredRegions is None:
         ignoredRegions = [[-20.1,-19.1]]
-
       peaks = []
       spectrum = self.spectrum
-
       data = spectrum._apiDataSource.get1dSpectrumData()
-
-
       ppmValues = data[0]
-
-      if noiseThreshold == 0:
+      if noiseThreshold == 0 or noiseThreshold is None:
         noiseThreshold = spectrum.estimateNoise()*5
-
       masks = []
       for region in ignoredRegions:
-
         mask = (ppmValues > region[0]) | (ppmValues < region[1])
         masks.append(mask)
-
       fullmask = [all(mask) for mask in zip(*masks)]
       newArray2 = (numpy.ma.MaskedArray(data, mask=numpy.logical_not((fullmask, fullmask))))
 
       if (newArray2.size == 0) or (data.max() < noiseThreshold):
-       return peaks
-      boolsVal = newArray2[1] > noiseThreshold
+        return peaks
+
+      posBoolsVal = newArray2[1] > noiseThreshold
       maxFilter = maximum_filter(newArray2[1], size=size, mode=mode)
-
-
       boolsMax = newArray2[1] == maxFilter
-      boolsPeak = boolsVal & boolsMax
-      indices = argwhere(boolsPeak) # True positional indices
+      boolsPeak = posBoolsVal & boolsMax
+      indices = argwhere(boolsPeak)
+
+      if negativePeaks:
+        minFilter = minimum_filter(data[1], size=size, mode=mode)
+        boolsMin = newArray2[1] == minFilter
+        negBoolsVal = newArray2[1] < -noiseThreshold
+        negBoolsPeak = negBoolsVal & boolsMin
+        indicesMin = argwhere(negBoolsPeak)
+        indices = numpy.append(indices, indicesMin)
+
       for position in indices:
         peakPosition = [float(newArray2[0][position])]
         height = newArray2[1][position]
@@ -325,7 +321,6 @@ class PeakList(AbstractWrapperObject):
       self._project._appBase._endCommandBlock()
 
     return peaks
-
 
 
   def subtractPeakLists(self, peakList2:'PeakList') -> 'PeakList':

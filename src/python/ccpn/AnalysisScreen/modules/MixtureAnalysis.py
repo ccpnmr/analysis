@@ -136,12 +136,12 @@ class MixtureAnalysis(CcpnModule):
     objRow = self.scoringTable.getCurrentObject()
     self._createButtons(objRow)
     self._displayMixture(objRow)
-    self._displayMolecules(objRow)
-    self._displayMixturesInfo(objRow)
-    self._populatePullDownSelection()
-    self._populateLeftListWidget()
-    self.rightListWidget.clear()
-    self._selectAnOptionState()
+    # self._displayMolecules(objRow)
+    # self._displayMixturesInfo(objRow)
+    # self._populatePullDownSelection()
+    # self._populateLeftListWidget()
+    # self.rightListWidget.clear()
+    # self._selectAnOptionState()
 
 
   ''' ######## ======== First Tab properties ====== ########   '''
@@ -200,12 +200,17 @@ class MixtureAnalysis(CcpnModule):
     ''' This creates buttons according with how many spectra are inside the mixture. '''
     self.toolBarComponents.clear()
     for sampleComponent in sample.sampleComponents:
-      spectrum = sampleComponent.substance.referenceSpectra[0]
+      if len(sampleComponent.substance.referenceSpectra) > 0:
+        spectrum = sampleComponent.substance.referenceSpectra[0]
+      else:
+        spectrum = self.project.getByPid('SP:' + str(sampleComponent.substance.name))
       self.componentButton = Button(self, text=spectrum.id)#,toggle=True)
       self.componentButton.clicked.connect(partial(self._toggleComponentButton, spectrum, sample, self.componentButton))
       # self.componentButton.setChecked(False)
       self.componentButton.setFixedHeight(40)
       self.toolBarComponents.addWidget(self.componentButton)
+
+
 
   def _toggleComponentButton(self, spectrum, sample, componentButton):
     '''  Toggling the component button will populate the peak table and display the molecule on compoundViewer '''
@@ -232,12 +237,14 @@ class MixtureAnalysis(CcpnModule):
       self.peakTable.setObjects(self.peakListObjects[-1])
 
     for sampleComponent in sample.sampleComponents:
-      if sampleComponent.substance.referenceSpectra[0] == spectrum:
-        smiles = sampleComponent.substance.smiles
-        self.compoundView  = CompoundView(self, smiles=smiles, preferences=self.preferences)
-        self.tabPeaksMoleculeLayout.addWidget(self.compoundView, 1,1)
 
-        self.compoundView.resetView()
+      if len(sampleComponent.substance.referenceSpectra)>0:
+        if sampleComponent.substance.referenceSpectra[0] == spectrum:
+          smiles = sampleComponent.substance.smiles
+          if smiles is not None:
+            self.compoundView  = CompoundView(self, smiles=smiles, preferences=self.preferences)
+            self.tabPeaksMoleculeLayout.addWidget(self.compoundView, 1,1)
+            self.compoundView.resetView()
 
 
   ''' ######## ======== Second Tab properties (Multiple Compound View ====== ########   '''
@@ -248,12 +255,14 @@ class MixtureAnalysis(CcpnModule):
 
     for component in sample.sampleComponents:
       chemicalName = (''.join(str(x) for x in component.substance.synonyms))
-      smiles = component.substance.smiles
-      self.compoundViewTab2 = CompoundView(self, smiles=smiles, preferences=self.preferences)
-      self.compoundViewTab2.setMaximumWidth(180)
-      self.tabMoleculeViewLayout.addWidget(self.compoundViewTab2)
 
-      self.compoundViewTab2.resetView()
+      smiles = component.substance.smiles
+      print(smiles)
+      if smiles is not None:
+        self.compoundViewTab2 = CompoundView(self, smiles=smiles, preferences=self.preferences)
+        self.compoundViewTab2.setMaximumWidth(180)
+        self.tabMoleculeViewLayout.addWidget(self.compoundViewTab2)
+        self.compoundViewTab2.resetView()
 
 
   def _clearTabMoleculeView(self, sample):
@@ -402,7 +411,7 @@ class MixtureAnalysis(CcpnModule):
       header.setTextColor(color)
       self.rightListWidget.addItem(header)
       for sampleComponent in sample.sampleComponents:
-        spectrum = sampleComponent.substance.referenceSpectra[0]
+        # spectrum = sampleComponent.substance.referenceSpectra[0]
         item = QtGui.QListWidgetItem(str(sampleComponent.name) + ' Single Score = ' + str(sampleComponent.score))
         self.rightListWidget.addItem(item)
       self.rightListWidget.currentItemChanged.connect(self._getListWidgetItems)
@@ -502,11 +511,10 @@ class MixtureAnalysis(CcpnModule):
 
   def _predictScores(self):  # to do
     ''' Predict scores before to create a different mixture given the left spectra '''
-    print('This is leftSpectra')
     leftSpectra = self._getListWidgetItems()['leftSpectra']
     self.leftCompounds = getCompounds(leftSpectra)
     leftComponentsScores = self.temporarySampleComponentsScore(self.leftCompounds, self.minimalDistance )
-    self.leftListWidget.clear()
+    # self.leftListWidget.clear()
     header = QtGui.QListWidgetItem(
       'Predicted Tot Score' + str(round(scoreMixture(self.leftCompounds, self.minimalDistance), 2)))
     header.setFlags(QtCore.Qt.NoItemFlags)
@@ -527,6 +535,8 @@ class MixtureAnalysis(CcpnModule):
     self.rightListWidget.addItem(header)
     for i in rightComponentsScores:
       self.rightListWidget.addItem(i)
+
+    self.calculateButtons.buttons[1].setEnabled(False)
 
     self.calculateButtons.buttons[2].setEnabled(True)
 
@@ -609,7 +619,6 @@ class MixtureAnalysis(CcpnModule):
     currentPullDownSelection = self.pullDownSelection.getText()
     mixturePullDown = self.project.getByPid(currentPullDownSelection)
     if mixturePullDown is not None:
-      print(mixturePullDown)
       if self.rightMixtureLineEdit.isModified():
         mixturePullDown.rename(self.rightMixtureLineEdit.text())
 
@@ -652,7 +661,12 @@ class MixtureAnalysis(CcpnModule):
     ''' displays all the spectra present in a mixture '''
     currentDisplay = self._clearDisplayView()
     for sampleComponent in sample.sampleComponents:
-      currentDisplay.displaySpectrum(sampleComponent.substance.referenceSpectra[0])
+      if len(sampleComponent.substance.referenceSpectra)>0:
+        currentDisplay.displaySpectrum(sampleComponent.substance.referenceSpectra[0])
+      else:
+        spectrum = self.project.getByPid('SP:'+str(sampleComponent.substance.name))
+        if spectrum is not None:
+          currentDisplay.displaySpectrum(spectrum)
 
   def _navigateToPosition(self, peaks):
     ''' for a given peak, it navigates to the peak position on the display  '''
@@ -736,6 +750,6 @@ class MixtureAnalysis(CcpnModule):
     from pandas import DataFrame
     sampleColumn = [str(sample.pid) for sample in self.project.samples if sample.isVirtual]
     sampleComponents = [str(sample.spectra) for sample in self.project.samples]
-    df = DataFrame({'Mixture': [c.id for c in self.project.sampleComponents]})
+    df = DataFrame({'Mixture': [c.id for c in self.project.sampleComponents if c.sample.isVirtual]})
 
     return df

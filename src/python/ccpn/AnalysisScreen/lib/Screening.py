@@ -43,39 +43,36 @@ def spectrumFromPeaks(x, peaks):
   return spectrum
 
 
-def matchedPosition(stdPeaks, componentPeaks, tolerance:float=0.005, minimumMatches:int=1):
+def matchedPosition(samplePeaks, componentPeaks, tolerance:float=0.005, minimumMatches:int=1):
   '''
-  Matches peaks from the std spectrum ( Std off resonance -  Std on resonance) to a given reference component.
+  Matches peak positions from the sample spectrum to a given reference component.
 
   '''
-  #
-  # stdArray = np.array(stdPeaks)
-  # componentArray = np.array(componentPeaks)
-  #
-  #
-  # diff_STD_Comp = abs(componentArray - stdArray)
-  # pos = [i for i in diff_STD_Comp if i <= tolerance]
-  # matchedPositions = []
-  # for i in range(len(pos)):
-  #     matchedPos = np.argsort(diff_STD_Comp)[i]
-  #     matchedPositions.append(componentPeaks[matchedPos])
-  # if len(matchedPositions)>=minimumMatches:
-  #   return  matchedPositions
-  #
 
-  ''''''
-
-  matchedPositions = [stdPosition for componentPosition in componentPeaks
-                            for stdPosition in stdPeaks if abs(stdPosition-componentPosition)<=tolerance]
+  matchedPositions = [samplePosition for componentPosition in componentPeaks
+                      for samplePosition in samplePeaks if abs(samplePosition - componentPosition) <= tolerance]
   if len(matchedPositions)>=minimumMatches:
-   return matchedPositions
+   return set(list(matchedPositions))
 
-def createStdDifferenceSpectrum(stdOffResonance, stdOnResonance):
+def _subtractTwoSpectra(stdOffResonance, stdOnResonance):
   stdOffResonanceArray = stdOffResonance._apiDataSource.get1dSpectrumData()[1]
   stdOnResonanceArray = stdOnResonance._apiDataSource.get1dSpectrumData()[1]
 
   stdDifference = stdOffResonanceArray - stdOnResonanceArray
   return stdDifference
+
+def getPeakPositions(spectrum):
+  if len(spectrum.peakLists)>0:
+    return [peak.position[0] for peak in spectrum.peakLists[0].peaks]
+  else:
+    print('No peakList found')
+
+def getSampleSpectraByExpType(sample, expType):
+  spectra = []
+  for spectrum in sample.spectra:
+    if spectrum.experimentType == str(expType):
+      spectra.append(spectrum)
+  return spectra
 
 
 
@@ -121,8 +118,70 @@ def writeBruker(directory, data):
 
   with open(os.path.join(directory, procDir, realFileName), 'wb') as f:
       f.write(data.astype('<i4').tobytes())
-#
-# def stdEfficency(self, spectrumOffResonance, spectrumOnResonance, stdDifferenceSpectrum):
-#
-#   for peak in spectrumOffResonance:
 
+
+def matchSTDToReference(project, minDistance):
+  for sample in project.samples:
+    if not sample.isVirtual:
+      componentList = []
+
+      spectrumOffResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_Off_Res']
+      spectrumOffResonancePeaks = [peak for peak in spectrumOffResonance[0].peakLists[0].peaks]
+      spectrumOffPeaksPosition = [peak.position[0] for peak in spectrumOffResonancePeaks]
+
+      spectrumOnResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_On_Res']
+      spectrumOnResonancePeaks = [peak for peak in spectrumOnResonance[0].peakLists[0].peaks]
+      spectrumOfnPeaksPosition = [peak.position[0] for peak in spectrumOnResonancePeaks]
+
+      stdSpectrum = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_STD']
+      stdPeakList = [peak for peak in stdSpectrum[0].peakLists[0].peaks]
+      stdPosition = [peak.position[0] for peak in stdPeakList]
+
+      for sampleComponent in sample.sampleComponents:
+        componentPeakList = [peak for peak in sampleComponent.substance.referenceSpectra[0].peakLists[0].peaks]
+        componentPosition = [peak.position[0] for peak in componentPeakList]
+        componentDict = {sampleComponent: componentPosition}
+        componentList.append(componentDict)
+        newPeakList = sampleComponent.substance.referenceSpectra[0].newPeakList()
+
+      for components in componentList:
+        for sampleComponent, peakPositions in components.items():
+          match = matchedPosition(stdPosition, peakPositions, tolerance=float(minDistance),
+                                  minimumMatches=1)  # self.minimumPeaksBox.value())
+          if match is not None:
+            newHit = sample.spectra[0].newSpectrumHit(substanceName=str(sampleComponent.name))
+            for position in match:
+              newPeakListPosition = sampleComponent.substance.referenceSpectra[0].peakLists[1].newPeak(
+                position=[position], height=0.00)
+
+            # merit = self._stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPosition)
+            # if len(merit) > 0:
+            #   newHit.meritCode = str(merit[0]) + '%'
+
+
+def _loadSpectrumDifference(project, path, sample, SGname='SG:STD'):
+  newSpectrumStd = project.loadData(path)
+  newSpectrumStd[0].comment = 'spectrum_STD'
+  newSpectrumStd[0].scale = float(0.1)
+  spectrumName = str(newSpectrumStd[0].name)
+
+  sample.spectra += (newSpectrumStd[0],)
+  print(sample.spectra)
+  spectrumGroupSTD = project.getByPid(SGname)
+  spectrumGroupSTD.spectra += (newSpectrumStd[0],)
+  print(newSpectrumStd[0].id, 'created and loaded in the project')
+
+def createStdDifferenceSpectrum(project, filePath):
+  for sample in project.samples:
+    if not sample.isVirtual:
+      if len(sample.spectra) > 0:
+        spectrumOffResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_Off_Res']
+        spectrumOnResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_On_Res']
+
+        spectrumDiff = _subtractTwoSpectra(spectrumOffResonance[0], spectrumOnResonance[0])
+        if filePath.endswith("/"):
+          path = filePath + sample.name + '_Std'
+        else:
+          path = filePath + '/' + sample.name + '_Std_diff'
+        writeBruker(path, spectrumDiff)
+        _loadSpectrumDifference(project, str(path) + '/pdata/1/1r', sample)

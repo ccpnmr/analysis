@@ -18,9 +18,72 @@ from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Spinbox import Spinbox
+from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
+from ccpn.ui.gui.widgets.PipelineWidgets import PipelineBox, PipelineDropArea
 
 Qt = QtCore.Qt
 Qkeys = QtGui.QKeySequence
+
+
+class StdSpectrumCreatorBox(PipelineBox,):
+  def __init__(self, name=None, pipelineArea=None, params=None, project=None, **kw):
+
+    super(StdSpectrumCreatorBox, self)
+    PipelineBox.__init__(self,name=name, pipelineArea=pipelineArea)
+
+    self.project = project
+    self.path = self.project._appBase.preferences.general.auxiliaryFilesPath + '/'
+    self._setMainLayout()
+    self._createWidgets()
+
+
+
+  def _setMainLayout(self):
+    self.mainFrame = QtGui.QFrame()
+    self.mainLayout = QtGui.QGridLayout()
+    self.mainFrame.setLayout(self.mainLayout)
+    self.layout.addWidget(self.mainFrame, 0,0,0,0)
+
+  def _createWidgets(self):
+
+    self.createButton = Button(self, text='create new spectrum', callback=self._createSpectrumDifference)
+    self.pullDownOffRes = PulldownList(self, texts=['SG:STD_OFF_Res'])
+    self.pullDownOnRes = PulldownList(self, texts=['SG:STD_ON_Res'])
+    self.lineEditPath = LineEdit(self, text=str(self.path))
+
+    self.mainLayout.addWidget(self.pullDownOffRes,0,0)
+    self.mainLayout.addWidget(self.pullDownOnRes,0,1)
+    self.mainLayout.addWidget(self.lineEditPath,1,0)
+    self.mainLayout.addWidget(self.createButton,1,1 )
+
+
+
+  def _createSpectrumDifference(self):
+    for sample in self.project.samples:
+      if not sample.isVirtual:
+
+        spectrumDiff = createStdDifferenceSpectrum(sample.spectra[0], sample.spectra[1])
+        if self.lineEditPath.text().endswith("/"):
+          self.newFilePath = self.lineEditPath.text() + sample.name + '_Std_diff'
+        else:
+          self.newFilePath = self.lineEditPath.text() + '/' + sample.name + '_Std_diff'
+        writeBruker(self.newFilePath, spectrumDiff)
+        self._loadSpectrumDifference(self.newFilePath + '/pdata/1/1r')
+
+  def _loadSpectrumDifference(self, path, SGname='SG:STD_DIFF'):
+    self.newSpectrumStd = self.project.loadData(path)
+    self.newSpectrumStd[0].scale = float(0.1)
+    spectrumName = str(self.newSpectrumStd[0].name)
+
+    for sample in self.project.samples:
+      if not sample.isVirtual:
+        if sample.name == spectrumName.replace('_Std_diff-1', ''):
+          sample.spectra += (self.newSpectrumStd[0],)
+          spectrumGroupSTD = self.project.getByPid(SGname)
+          spectrumGroupSTD.spectra += (self.newSpectrumStd[0],)
+          print(self.newSpectrumStd[0].id, 'created and loaded in the project')
+
+
 
 class StdSpectrumCreator(QtGui.QWidget, Base):
 
@@ -52,7 +115,7 @@ class StdSpectrumCreator(QtGui.QWidget, Base):
         writeBruker(self.newFilePath, spectrumDiff)
         self._loadSpectrumDifference(self.newFilePath + '/pdata/1/1r')
 
-  def _loadSpectrumDifference(self, path):
+  def _loadSpectrumDifference(self, path, SGname='SG:STD_DIFF'):
     self.newSpectrumStd = self.project.loadData(path)
     self.newSpectrumStd[0].scale = float(0.1)
     spectrumName = str(self.newSpectrumStd[0].name)
@@ -61,9 +124,10 @@ class StdSpectrumCreator(QtGui.QWidget, Base):
       if not sample.isVirtual:
         if sample.name == spectrumName.replace('_Std_diff-1',''):
           sample.spectra += (self.newSpectrumStd[0],)
-          spectrumGroupSTD = self.project.getByPid('SG:STD_DIFF')
+          spectrumGroupSTD = self.project.getByPid(SGname)
           spectrumGroupSTD.spectra += (self.newSpectrumStd[0],)
           print(self.newSpectrumStd[0].id, 'created and loaded in the project')
+
 
 
 
@@ -197,9 +261,7 @@ class PickPeaksWidget(QtGui.QWidget):
 
   def _pickPeaks(self):
     for sample in self.project.samples:
-      if hasattr(sample, 'minScore'):
-        pass
-      else:
+      if not sample.isVirtual:
         for spectrum in sample.spectra:
          spectrum.peakLists[0].pickPeaks1dFiltered(size=9, ignoredRegions=None, noiseThreshold=0)
         for sampleComponent in sample.sampleComponents:
@@ -209,9 +271,7 @@ class PickPeaksWidget(QtGui.QWidget):
     if len(self.project.samples)>0:
       samplesData = []
       for sample in self.project.samples:
-        if hasattr(sample, 'minScore'):
-          pass
-        else:
+        if not sample.isVirtual:
           samplesData.append([str(spectrum.id) for spectrum in sample.spectra])
       self.samplePullDown.setData(samplesData[0])
 
@@ -252,9 +312,7 @@ class MatchPeaks(QtGui.QWidget):
   def _matchPosition(self):
     # print(self.sender().parent().parent().parent().parent().parent().parent().parent())
     for sample in self.project.samples:
-      if hasattr(sample, 'minScore'):
-        pass
-      else:
+      if not sample.isVirtual:
         componentList = []
 
         spectrumOffResonancePeaks = [peak for peak in sample.spectra[0].peakLists[0].peaks]
@@ -290,12 +348,7 @@ class MatchPeaks(QtGui.QWidget):
 
 
   def _showHitsModule(self):
-    # self.screeningSettingModule.close()
     showScreeningHits = ShowScreeningHits(parent=self.mainWindow, project=self.project)
-    # if self._appBase.ui.mainWindow is not None:
-    #   self.mainWindow = self._appBase.ui.mainWindow
-    # else:
-    #   self.mainWindow = self._appBase._mainWindow
     showScreeningHitsModule = self.mainWindow.moduleArea.addModule(showScreeningHits, position='bottom')
     spectrumDisplay = self.mainWindow.createSpectrumDisplay(self.project.spectra[0])
 

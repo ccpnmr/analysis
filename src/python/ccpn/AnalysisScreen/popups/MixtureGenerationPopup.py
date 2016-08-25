@@ -3,8 +3,8 @@ __author__ = 'luca'
 from PyQt4 import QtGui
 from ccpn.AnalysisScreen.modules.MixtureAnalysis import MixtureAnalysis
 from ccpn.AnalysisScreen.modules.MixtureOptimisation import SimulatedAnnealingWidgets
-from ccpn.AnalysisScreen.modules.ScreeningPipeline import ExcludeRegions
-# from ccpn.AnalysisScreen.lib.MixtureGeneration import setupSamples
+from ccpn.ui.gui.popups.PickPeaks1DPopup import ExcludeRegions
+
 from ccpn.AnalysisScreen.lib.MixturesGeneration import _initialiseMixtures
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
@@ -115,7 +115,7 @@ class MixtureGenerationPopup(QtGui.QDialog):
     self.ppmDistance.setSuffix(" ppm")
 
     #
-    self.selectSpectraLabel = Label(self, text="Select spectra to mix")
+    self.selectSpectraLabel = Label(self, text="Select SpectrumGroup")
     self.selectSpectraPullDown = PulldownList(self)
 
     #

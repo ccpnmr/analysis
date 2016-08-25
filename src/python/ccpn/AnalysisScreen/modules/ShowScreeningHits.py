@@ -25,7 +25,7 @@ class ShowScreeningHits(CcpnModule):
     super(ShowScreeningHits, self)
     CcpnModule.__init__(self, name='Hit Analysis')
     self.project = project
-    self.setFixedHeight(300)
+    # self.setFixedHeight(300)
 
     self.mainWindow = parent
     self.moduleArea = self.mainWindow.moduleArea
@@ -140,7 +140,7 @@ class ShowScreeningHits(CcpnModule):
     ''' Documentation '''
 
     self.listWidgetsHitDetails = QtGui.QListWidget()
-    self.listWidgetsHitDetails.setMaximumSize(400,200)
+    # self.listWidgetsHitDetails.setMaximumSize(400,200)
     self.listWidgetsHitDetails.setMinimumSize(200,200)
     self.hitDetailsGroupLayout.addWidget(self.listWidgetsHitDetails, 1,0)
 
@@ -320,9 +320,12 @@ class ShowScreeningHits(CcpnModule):
     ''' Documentation '''
 
     currentObjPulldown = self.pullDownHit.currentObject()
-    if hasattr(currentObjPulldown, 'substanceName'):
-      substance = self.project.getByPid('SU:'+currentObjPulldown.substanceName+'.H')
-      return substance.sampleComponents[0]
+    if hasattr(currentObjPulldown, 'spectrum'):
+      spectrumHit = currentObjPulldown
+      substanceName = spectrumHit.substanceName
+      substance = self.project.getByPid('SU:'+substanceName+'.')
+      if substance is not None:
+        return substance.sampleComponents[0]
     else:
       sampleComponent = currentObjPulldown
       return sampleComponent
@@ -400,8 +403,8 @@ class ShowScreeningHits(CcpnModule):
     peaks = self._getPullDownObj().substance.referenceSpectra[0].peakLists[1].peaks
     # displayed = self.project.getByPid('GD:user.View.1D:H')
     displayed = self.project.strips[0]._parent
-    for peak in peaks:
-      navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
+    # for peak in peaks:
+    #   navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)
 
 
   def _moveNextRow(self):
@@ -537,17 +540,17 @@ class ShowScreeningHits(CcpnModule):
     ''' return sample spectra and spectrum from the hit pulldown'''
     spectraToDisplay = []
 
-    sampleSpectraToDisplay = [x for x in self.pullDownHit.currentObject().sample.spectra]
+    sampleSpectraToDisplay = [x for x in self.pullDownHit.currentObject().sample.spectra if x.experimentType != 'Water-LOGSY.H']
 
     sampleSpectraToDisplay[-1].scale =  float(0.03125)
 
     spectraToDisplay.append(sampleSpectraToDisplay)
     currentObjPulldown = self.pullDownHit.currentObject()
-    if hasattr(currentObjPulldown, 'substanceName'):
-      substance = self.project.getByPid('SU:'+currentObjPulldown.substanceName+'.H')
-      referenceSpectrum = substance.referenceSpectra[0]
-      referenceSpectrum.scale = float(0.5)
-      spectraToDisplay[0].append(referenceSpectrum)
+
+    if hasattr(currentObjPulldown, 'spectrum'):
+      spectrumHit = currentObjPulldown.spectrum
+      spectrumHit.scale = float(0.5)
+      spectraToDisplay[0].append(spectrumHit)
     else:
       refSpectrum = currentObjPulldown.substance.referenceSpectra[0]
       refSpectrum.scale = float(0.5)

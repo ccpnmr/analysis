@@ -1,7 +1,7 @@
 __author__ = 'simon1'
 
 from PyQt4 import QtCore, QtGui
-
+from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.Button import Button
@@ -31,6 +31,15 @@ class CcpnModule(Module):
 
   def closeModule(self):
     self.close()
+
+  def dropEvent(self, *args):
+    source = args[0].source()
+
+    if hasattr(source, 'implements') and source.implements('dock'):
+      DockDrop.dropEvent(self, *args)
+    else:
+      args[0].ignore()
+      return
 
 class CcpnModuleLabel(ModuleLabel):
   def __init__(self, *args):

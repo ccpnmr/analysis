@@ -13,7 +13,7 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
-
+from collections import OrderedDict
 
 class ExcludeRegions(QtGui.QWidget):
 
@@ -24,29 +24,28 @@ class ExcludeRegions(QtGui.QWidget):
 
 
     self.solvents = {'Acetic Acid-d4': [0,0, 2.14,2.0, 11.75,11.65],
-            'Acetone-d6 & Water': [0,0, 2.15,2.0, 2.90, 2.80],
-            'Acetonitrile-d3 & water': [0,0, 2.20,1.94],
-            'Benzene-d6 & water': [0,0, 0.60,0.50, 7.25,7.15],
-            'Chloroform-d': [0,0, 1.60,1.50, 7.35,7.25],
-            'Deuterium Oxide': [0,0, 4.75,4.65],
-            'Dichloromethane-d2 & water': [0,0, 1.60,1.50, 5.42,5.32],
-            'Dimethyl Sulfoxide-d6': [0,0, 2.60,2.50, 3.40,3.30],
-            'Dimethylformamide-d7 & water': [0,0, 8.11,8.01, 2.99,2.91, 2.83,2.73, 3.60,3.50],
-            'p-Dioxane-d8 & water':[0,0, 2.60,2.50, 3.63,3.50 ],
-            'Tetrachloromethane-d2 & water': [0,0, 1.70,1.60, 6.10,6.00],
-            'Ethanol-d6 & water': [0,0, 1.21,1.11, 3.66,3.56, 5.40,5.29],
-            'Methanol-d4': [0,0, 3.40,3.30, 4.90,4.80],
-            'Pyridine-d5 & water': [0,0, 8.74,8.84, 7.68,7.58, 7.32,7.22, 5.10,5.00],
-            'Trifluoroacetic acid-d': [0,0, 11.60,11.50],
-            'Tetrahydrofuran-d8 & water': [0,0, 3.68,3.58, 2.60,2.50, 1.83,1.73],
-            'New regions': [0,0, 0.2, 0.1],
-            'Toulene-d8 & water': [0,0, 7.18,6.98, 2.19,2.09, 2.50,2.40, 5.10,5.00],
-            'Trifluoroethanol-d3 & water':[0,0, 5.12,5.02, 3.98,3.88],
-            'Carbon Tetrachloride & water ': [0,0, 1.20, 1.10],
-            'water': [0,0, 5, 4.5]}
+                     'Acetone-d6 & Water': [0,0, 2.15,2.0, 2.90, 2.80],
+                     'Acetonitrile-d3 & water': [0,0, 2.20,1.94],
+                     'Benzene-d6 & water': [0,0, 0.60,0.50, 7.25,7.15],
+                     'Chloroform-d': [0,0, 1.60,1.50, 7.35,7.25],
+                     'Deuterium Oxide': [0,0, 4.75,4.65],
+                     'Dichloromethane-d2 & water': [0,0, 1.60,1.50, 5.42,5.32],
+                     'Dimethyl Sulfoxide-d6': [0,0, 2.60,2.50, 3.40,3.30],
+                     'Dimethylformamide-d7 & water': [0,0, 8.11,8.01, 2.99,2.91, 2.83,2.73, 3.60,3.50],
+                     'p-Dioxane-d8 & water':[0,0, 2.60,2.50, 3.63,3.50 ],
+                     'Tetrachloromethane-d2 & water': [0,0, 1.70,1.60, 6.10,6.00],
+                     'Ethanol-d6 & water': [0,0, 1.21,1.11, 3.66,3.56, 5.40,5.29],
+                     'Methanol-d4': [0,0, 3.40,3.30, 4.90,4.80],
+                     'Pyridine-d5 & water': [0,0, 8.74,8.84, 7.68,7.58, 7.32,7.22, 5.10,5.00],
+                     'Trifluoroacetic acid-d': [0,0, 11.60,11.50],
+                     'Tetrahydrofuran-d8 & water': [0,0, 3.68,3.58, 2.60,2.50, 1.83,1.73],
+                     'New regions': [0,0, 0.2, 0.1],
+                     'Toulene-d8 & water': [0,0, 7.18,6.98, 2.19,2.09, 2.50,2.40, 5.10,5.00],
+                     'Trifluoroethanol-d3 & water':[0,0, 5.12,5.02, 3.98,3.88],
+                     'Carbon Tetrachloride & water ': [0,0, 1.20, 1.10],
+                     'water': [0,0, 5, 4.5]}
 
     self.pulldownSolvents = PulldownList(self, grid=(0, 1), hAlign='c')
-    self.pulldownSolvents.setFixedWidth(105)
     self.pulldownSolvents.activated[str].connect(self._addRegions)
     for solvent in sorted(self.solvents):
       self.pulldownSolvents.addItem(solvent)
@@ -57,14 +56,18 @@ class ExcludeRegions(QtGui.QWidget):
     self.scrollArea.setWidget(self.scrollAreaWidgetContents)
     self.regioncount = 0
     self.excludedRegions = []
+    self.excludedSolvents = []
     self.comboBoxes = []
 
 
   def _addRegions(self, pressed):
     '''   '''
+
     widgetList = []
     for solvent in sorted(self.solvents):
+      solventValues = [(),()]
       if pressed == ('%s' %solvent):
+        solventValues[0] += (solvent,)
         self.solventType = Label(self.scrollAreaWidgetContents, text=solvent, grid=(self.regioncount,0))
         self.closebutton = Button(self.scrollAreaWidgetContents,'Remove from selection', grid=(self.regioncount,1))
         values = (self.solvents[solvent])
@@ -76,10 +79,10 @@ class ExcludeRegions(QtGui.QWidget):
 
         valueCount = len(values)//2
         self.positions = [(i+self.regioncount, j) for i in range(valueCount)
-                     for j in range(2)]
+                          for j in range(2)]
         for self.position, values in zip(self.positions, sorted(values)):
           if values == 0:
-             continue
+            continue
           self.regioncount += valueCount
           self.spin = DoubleSpinbox(self.scrollAreaWidgetContents, grid=(self.position))
           self.spin.setSingleStep(0.01)
@@ -87,9 +90,45 @@ class ExcludeRegions(QtGui.QWidget):
           self.spin.setPrefix('ppm')
           self.spin.setValue(values)
           widgetList.append(self.spin)
+          solventValues[1]+= (self.spin,)
+      self.excludedSolvents.append(solventValues)
     self.comboBoxes.append(widgetList)
     self.closebutton.clicked.connect(partial(self._deleteRegions, self.positions))
 
+
+  def getSolventsAndValues(self):
+    self.excludedSolvents = [x for x in self.excludedSolvents if len(x[0])>0]
+    solventsAndValues = []
+    for item in self.excludedSolvents:
+      try:
+        solvent, widgets = item
+        values = [round(widget.value(),2) for widget in widgets]
+        values.insert(0, 0)
+        values.insert(0, 0)
+        solventsAndValues.append(((solvent[0]),values))
+      except:
+        pass
+    return OrderedDict(solventsAndValues)
+
+  def _getExcludedRegions(self):
+    excludedRegions = []
+    self.excludedSolvents = [x for x in self.excludedSolvents if len(x[0]) > 0]
+    for item in self.excludedSolvents:
+      solvent, widgets = item
+      try: # try because widgets can be dinamically deleted
+        self.values = [round(widget.value(), 2) for widget in widgets]
+        pairedValues = list(self._chunks(self.values, 2))
+        excludedRegions.append(pairedValues)
+      except:
+        pass
+    if len(excludedRegions)>0:
+      return [item for sublist in excludedRegions for item in sublist]
+
+
+  def _chunks(self, l, n):
+    """Yield successive n-sized chunks from list. Needed this format!"""
+    for i in range(0, len(l), n):
+      yield sorted(l[i:i + n], key=float, reverse=True)
 
   def _deleteRegions(self, positions):
     '''   '''
@@ -99,32 +138,6 @@ class ExcludeRegions(QtGui.QWidget):
         widget1.hide()
       else:
         widget1.deleteLater()
-
-  def _getExcludedRegions(self): # How to do better!?
-    '''   '''
-    excludedRegions = []
-
-    for comboboxPair in self.comboBoxes:
-      try:
-        if comboboxPair[0].value() is not None:
-          firstPair = (sorted([comboboxPair[0].value(), comboboxPair[1].value()],reverse=True))
-          excludedRegions.append(firstPair)
-        if comboboxPair[2].value() is not None:
-          secondPair = (sorted([comboboxPair[2].value(), comboboxPair[3].value()],reverse=True))
-          excludedRegions.append(secondPair)
-        if comboboxPair[4].value() is not None:
-          thirdPair = (sorted([comboboxPair[4].value(), comboboxPair[5].value()],reverse=True))
-          excludedRegions.append(thirdPair)
-        if comboboxPair[6].value() is not None:
-          fourthPair = (sorted([comboboxPair[6].value(), comboboxPair[7].value()],reverse=True))
-          excludedRegions.append(fourthPair)
-      except:
-        pass
-      for i in excludedRegions:
-          if len(i) == 0:
-            excludedRegions.remove(i)
-    return excludedRegions
-
 
 class PickPeak1DPopup(QtGui.QDialog):
 
@@ -170,6 +183,8 @@ class PickPeak1DPopup(QtGui.QDialog):
                                               tipTexts=None)
     self._addSpectrumCheckBoxes()
     self._addSpectrumGroupsCheckBoxes()
+
+
     self.noiseLevelLabel = Label(self, text='Noise Level Threshold')
     self.noiseLevelRadioButtons = RadioButtons(self,
                                                texts=['Estimated', 'Manual'],
@@ -195,6 +210,8 @@ class PickPeak1DPopup(QtGui.QDialog):
                                         callbacks=[self.reject, self._pickFromSelectedSpectra],
                                         tipTexts=[None, None],
                                         direction='h', hAlign='r')
+    self.pickNegativeLabel = Label(self, text='Pick negative peaks')
+    self.pickNegativeCheckBox = CheckBox(self, checked=True)
 
   def _addWidgetsToLayout(self):
     self.mainLayout.addWidget(self.tabWidget, 0, 0, 1, 2)
@@ -208,6 +225,8 @@ class PickPeak1DPopup(QtGui.QDialog):
     self.tabGeneralSetupLayout.addWidget(self.maximumFilterSizeSpinbox, 4, 1)
     self.tabGeneralSetupLayout.addWidget(self.maximumFilterMode, 5, 0)
     self.tabGeneralSetupLayout.addWidget(self.maximumFilterModePulldownList, 5, 1)
+    self.tabGeneralSetupLayout.addWidget(self.pickNegativeLabel, 6, 0)
+    self.tabGeneralSetupLayout.addWidget(self.pickNegativeCheckBox, 6, 1)
     self.mainLayout.addWidget(self.pickCancelButtons, 10, 1)
 
   def showSpectraOption(self):
@@ -217,11 +236,10 @@ class PickPeak1DPopup(QtGui.QDialog):
         self.spGroupsCheckBox.hide()
         cb.show()
       for sg in self.allSG_CheckBoxes:
-        sg.show()
+        sg.hide()
 
     else:
       self.spectrumCheckBox.hide()
-
       for cb in self.allCheckBoxes:
         cb.hide()
       for sg in self.allSG_CheckBoxes:
@@ -276,7 +294,6 @@ class PickPeak1DPopup(QtGui.QDialog):
       if cb.isChecked():
         spectrum = self.project.getByPid('SP:'+str(cb.text()))
         spectra.append(spectrum)
-
     return spectra
 
   def _getSpectrumGroupsSpectra(self):
@@ -301,12 +318,12 @@ class PickPeak1DPopup(QtGui.QDialog):
   def _pickFromSelectedSpectra(self):
 
     spectra = list(set(self._getSelectedSpectra()+self._getSpectrumGroupsSpectra()))
-
+    negativePeaks = self.pickNegativeCheckBox.get()
     size = self.maximumFilterSizeSpinbox.value()
     mode = self.maximumFilterModePulldownList.getText()
     ignoredRegions = self.excludedRegionsTab._getExcludedRegions()
     noiseThreshold = self._getNoiseThreshold()
     for spectrum in spectra:
       spectrum.peakLists[0].pickPeaks1dFiltered(size=size, mode=mode, ignoredRegions=ignoredRegions,
-                                                noiseThreshold=noiseThreshold)
+                                                noiseThreshold=noiseThreshold, negativePeaks=negativePeaks)
     self.accept()

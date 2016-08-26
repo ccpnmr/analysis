@@ -616,6 +616,7 @@ class Framework:
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
+      ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
@@ -1147,6 +1148,21 @@ class Framework:
     self.ui.mainWindow.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
+
+
+  def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:PeakList=None):
+    """
+    Displays Peak table on left of main window with specified list selected.
+    """
+    from ccpn.ui.gui.modules.RestraintTable import RestraintTable
+    if not self.project.restraintLists:
+      self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
+      MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      return
+    restraintTable = RestraintTable(self.project, selectedList=selectedList, project=self.project)
+    self.ui.mainWindow.moduleArea.addModule(restraintTable, position=position, relativeTo=relativeTo)
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
+    self.project._logger.info("application.showRestraintTable()")
 
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
     """

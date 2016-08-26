@@ -23,8 +23,6 @@ class RestraintTable(CcpnModule):
 
     self.restraintLists = restraintLists
 
-    # label = Label(self, "Chemical Shift List:")
-    # self.layout.addWidget(label, 0, 0)
     label = Label(self, "Restraint List:")
     widget1 = QtGui.QWidget(self)
     widget1.setLayout(QtGui.QGridLayout())
@@ -43,14 +41,13 @@ class RestraintTable(CcpnModule):
                # ('Peak count', lambda chemicalShift: '%3d ' % self._getShiftPeakCount(chemicalShift))
                ]
 
-    tipTexts = ['Atom Pid',
-                'Value of chemical shift',
-                'Standard deviation of chemical shift',
-                'Standard deviation of chemical shift',
-                'Standard deviation of chemical shift',
-                'Standard deviation of chemical shift',
-                # 'Number of peaks associated with this ChemicalShiftList that are assigned to this '
-                'NmrAtom'
+    tipTexts = ['Restraimt Id',
+                'Atoms involved in the restraint',
+                'Target value for the restraint',
+                'Upper limit for the restraint',
+                'Lower limitf or the restraint',
+                'Error on the restraint',
+                'Number of peaks used to derive this restraint '
                 ]
 
     self.restraintTable = GuiTableGenerator(self, restraintLists,
@@ -65,15 +62,18 @@ class RestraintTable(CcpnModule):
   def _getContributions(self, restraint):
     """return number of peaks assigned to NmrAtom in Experiments and PeakLists
     using ChemicalShiftList"""
-    return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
+    if restraint.restraintContributions[0].restraintItems:
+      return ' - '.join(restraint.restraintContributions[0].restraintItems[0])
 
 
   def _getRestraintPeakCount(self, restraint):
     """return number of peaks assigned to NmrAtom in Experiments and PeakLists
     using ChemicalShiftList"""
-    import random
     peaks = restraint.peaks
-    return random.randint(0, 15)
+    if peaks:
+      return len(peaks)
+    else:
+      return 0
 
   def _callback(self):
     pass

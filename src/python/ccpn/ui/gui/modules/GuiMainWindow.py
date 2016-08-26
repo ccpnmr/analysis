@@ -262,74 +262,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     return result
     
 
-  # def _showDocumentation(self, title, *args):
-  #
-  #   newModule = CcpnModule("API Documentation")
-  #   path = os.path.join(Path.getTopDirectory(), 'doc', *args)
-  #   view = CcpnWebView(path)
-  #   newModule.addWidget(view)
-  #   self.moduleArea.addModule(newModule)
-    
-
-  # def showNmrResidueModule(self, position='bottom', relativeTo=None):
-  #   """Shows Nmr Residue Module."""
-  #   from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
-  #   newModule = CcpnModule("Nmr Residue")
-  #   nmrResidueModule = NmrResiduePopup(newModule, self._project)
-  #   newModule.layout.addWidget(nmrResidueModule)
-  #   self.moduleArea.addModule(newModule, position=position, relativeTo=relativeTo)
-
-
-  def addBlankDisplay(self, position='right', relativeTo=None):
-    if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
-      blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
-      if blankDisplay.isVisible():
-        return
-      else:
-        self.moduleArea.moveModule(blankDisplay, position, None)
-    else:
-      self.blankDisplay = GuiBlankDisplay(self.moduleArea)
-      self.moduleArea.addModule(self.blankDisplay, position, None)
-
-    self.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
-    self._project._logger.info("application.addBlankDisplay()")
-
-  # def showSequenceModule(self, position='top', relativeTo=None):
-  #   """
-  #   Displays Sequence Module at the top of the screen.
-  #   """
-  #   self.sequenceModule = SequenceModule(self._project)
-  #   self.moduleArea.addModule(self.sequenceModule, position=position, relativeTo=relativeTo)
-  #   return self.sequenceModule
-
-  # def hideSequenceModule(self):
-  #   """Hides sequence module"""
-  #   self.sequenceModule.close()
-  #   delattr(self, 'sequenceModule')
-
-
-  # def showNmrResidueTable(self, position='bottom', relativeTo=None):
-  #   """Displays Nmr Residue Table"""
-  #   from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
-  #   nmrResidueTable = NmrResidueTable(self, self._project)
-  #   nmrResidueTableModule = CcpnModule(name='Nmr Residue Table')
-  #   nmrResidueTableModule.layout.addWidget(nmrResidueTable)
-  #   self.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
-  #   self.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
-  #   self.project._logger.info("application.showNmrResidueTable()")
-
-  # def toggleSequenceModule(self):
-  #   """Toggles whether Sequence Module is displayed or not"""
-  #   if hasattr(self, 'sequenceModule'):
-  #     if self.sequenceModule.isVisible():
-  #       self.hideSequenceModule()
-  #
-  #   else:
-  #     self.showSequenceModule()
-  #   self.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
-  #   self.project._logger.info("application.toggleSequenceModule()")
-
-
   def loadProject(self, projectDir=None):
     """
     Opens a loadProject dialog box if project directory is not specified.
@@ -345,14 +277,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if projectDir:
         self.application.loadProject(projectDir)
 
-
-  # def showPeakPickPopup(self):
-  #   """
-  #   Displays Peak Picking Popup.
-  #   """
-  #   from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
-  #   popup = PeakFindPopup(parent=self, project=self.project)
-  #   popup.exec_()
 
 
   def _raiseObjectProperties(self, item):
@@ -429,31 +353,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     info = MessageDialog.showInfo('Not implemented yet',
           'This function has not been implemented in the current version', colourScheme=self.colourScheme)
 
-  # def archiveProject(self):
-  #
-  #   project = self._project
-  #   apiProject = project._wrappedData.parent
-  #   projectPath = project.path
-  #   now = datetime.datetime.now().strftime('%y%m%d%H%M%S')
-  #   filePrefix = '%s_%s' % (os.path.basename(projectPath), now)
-  #   filePrefix = os.path.join(os.path.dirname(projectPath), filePrefix)
-  #   fileName = apiIo.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
-  #
-  #   MessageDialog.showInfo('Project Archived',
-  #         'Project archived to %s' % fileName, colourScheme=self.colourScheme)
-    
-  # def showBackupPopup(self):
-  #
-  #   if not self.backupPopup:
-  #     self.backupPopup = BackupPopup(self)
-  #   self.backupPopup.show()
-  #   self.backupPopup.raise_()
-  
-  # def showApplicationPreferences(self):
-  #   """
-  #   Displays Application Preferences Popup.
-  #   """
-  #   PreferencesPopup(preferences=self._appBase.preferences, project=self._project).exec_()
 
   def _closeEvent(self, event=None):
     """
@@ -499,81 +398,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         event.ignore()
 
 
-  # def showMetabolomicsModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   self.showMm = MetabolomicsModule(self.project)
-  #   self.moduleArea.addModule(self.showMm, position=position)
-
-
-
-  # def showPickandFitModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   spectrumDisplay = self.createSpectrumDisplay()
-  #   from ccpn.AnalysisMetabolomics.PickandFit import PickandFit, PickandFitTable
-  #   fitModule = PickandFit(spectrumDisplay.module, strip=spectrumDisplay.strips[0], grid=(2, 0), gridSpan=(1, 4))
-  #   PickandFitTable(spectrumDisplay.module, project=self._project, fitModule=fitModule, grid=(0, 4), gridSpan=(3, 1))
-  #   if self.blankDisplay:
-  #     self.blankDisplay.setParent(None)
-  #     self.blankDisplay = None
-
-
-  # def showIntegralAssigmentModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-  #   from ccpn.AnalysisMetabolomics.IntegralAssignment import IntegralAssignment
-  #   self.iaModule = IntegralAssignment(self)
-  #   spectrumDisplay.module.layout.addWidget(self.iaModule, 2, 0, 1, 4)
-  #   if self.blankDisplay:
-  #     self.blankDisplay.setParent(None)
-  #     self.blankDisplay = None
-
-
-  # def showPeakAssigmentModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   spectrumDisplay = self.createSpectrumDisplay(self._project.spectra[0])
-  #   from ccpn.AnalysisMetabolomics.PeakAssignment import PeakAssignment
-  #   PeakAssignment(spectrumDisplay.module, self._project, grid=(2, 0), gridSpan=(1, 4))
-  #   if self.blankDisplay:
-  #     self.blankDisplay.setParent(None)
-  #     self.blankDisplay = None
-
-
-  # def showParassignSetup(self):
-  #   try:
-  #     from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
-  #     self.ps = ParassignSetup(project=self.project)
-  #     newModule = CcpnModule(name='PARAssign Setup')
-  #     newModule.addWidget(self.ps)
-  #     self.moduleArea.addModule(newModule)
-  #   except ImportError:
-  #     print('PARAssign cannot be found')
-
-
-  # def toggleConsole(self):
-  #   """
-  #   Toggles whether python console is displayed at bottom of the main window.
-  #   """
-  #
-  #   if 'PYTHON CONSOLE' in self.moduleArea.findAll()[1]:
-  #     if self.pythonConsoleModule.isVisible():
-  #       self.pythonConsoleModule.hide()
-  #     else:
-  #       self.moduleArea.moveModule(self.pythonConsoleModule, 'bottom', None)
-  #   else:
-  #     self.pythonConsoleModule = CcpnModule(name='Python Console')
-  #     self.pythonConsoleModule.layout.addWidget(self.pythonConsole)
-  #     self.moduleArea.addModule(self.pythonConsoleModule, 'bottom')
-
-
-  # def showMacroEditor(self):
-  #   """
-  #   Displays macro editor.
-  #   """
-  #   editor = MacroEditor(self.moduleArea, self, "Macro Editor")
-
-  # def newMacroFromConsole(self):
-  #   """
-  #   Displays macro editor with contents of python console inside.
-  #   """
-  #   editor = MacroEditor(self.moduleArea, self, "Macro Editor")
-  #   editor.textBox.setText(self.pythonConsole.textEditor.toPlainText())
-
   def newMacroFromLog(self):
     """
     Displays macro editor with contents of the log.
@@ -582,80 +406,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     l = open(self.project._logger.logPath, 'r').readlines()
     text = ''.join([line.strip().split(':', 6)[-1]+'\n' for line in l])
     editor.textBox.setText(text)
-
-  # def startMacroRecord(self):
-  #   """
-  #   Displays macro editor with additional buttons for recording a macro.
-  #   """
-  #   self.macroEditor = MacroEditor(self.moduleArea, self, "Macro Editor", showRecordButtons=True)
-  #   self.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
-  #   self.project._logger.info("application.startMacroRecord()")
-
-
-  # def defineUserShortcuts(self):
-  #   info = MessageDialog.showInfo('Not implemented yet!',
-  #         'This function has not been implemented in the current version',
-  #         colourScheme=self.colourScheme)
-
-
-  # def showNotesEditor(self):
-  #   if self._appBase.ui.mainWindow is not None:
-  #     mainWindow = self._appBase.ui.mainWindow
-  #   else:
-  #     mainWindow = self._appBase._mainWindow
-  #   self.notesEditor = NotesEditor(mainWindow.moduleArea, self._project, name='Notes Editor')
-
-
-  # def showCommandHelp(self):
-  #   info = MessageDialog.showInfo('Not implemented yet!',
-  #         'This function has not been implemented in the current version',
-  #         colourScheme=self.colourScheme)
-
-
-  # def showBeginnersTutorial(self):
-  #   path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BeginnersTutorial.pdf')
-  #   if 'linux' in sys.platform.lower():
-  #     os.system("xdg-open %s" % path)
-  #   else:
-  #     os.system('open %s' % path)
-
-  # def showBackboneTutorial(self):
-  #   path = os.path.join(Path.getTopDirectory(), 'data', 'testProjects', 'CcpnSec5BBTutorial', 'BackboneAssignmentTutorial.pdf')
-  #   if 'linux' in sys.platform.lower():
-  #     os.system("xdg-open %s" % path)
-  #   else:
-  #     os.system('open %s' % path)
-
-  # def showAboutPopup(self):
-  #   from ccpn.ui.gui.popups.AboutPopup import AboutPopup
-  #   popup = AboutPopup()
-  #   popup.exec_()
-  #   popup.raise_()
-
-
-  # def showAboutCcpnPopup(self):
-  #   import webbrowser
-  #   webbrowser.open('http://www.ccpn.ac.uk')
-
-
-  # def showCodeInspectionPopup(self):
-  #   info = MessageDialog.showInfo('Not implemented yet!',
-  #         'This function has not been implemented in the current version',
-  #         colourScheme=self.colourScheme)
-
-
-  # def showUpdatePopup(self):
-  #   if not self.updatePopup:
-  #     self.updatePopup = UpdatePopup(self)
-  #   self.updatePopup.show()
-  #   self.updatePopup.raise_()
-
-
-  # def showFeedbackPopup(self):
-  #   if not self.feedbackPopup:
-  #     self.feedbackPopup = FeedbackPopup(self)
-  #   self.feedbackPopup.show()
-  #   self.feedbackPopup.raise_()
 
 
   # the below is in Framework (slightly different implementation) so presumably does not belong here???
@@ -678,80 +428,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       self._fillRecentMacrosMenu()
       self.pythonConsole._runMacro(macroFile)
 
-
-  # def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):
-  #   """
-  #   Displays Peak table on left of main window with specified list selected.
-  #   """
-  #   peakList = PeakTable(self._project, selectedList=selectedList)
-  #   self.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)
-  #   self.pythonConsole.writeConsoleCommand("application.showPeakTable()")
-  #   self.project._logger.info("application.showPeakTable()")
-
-
-  # def showChemicalShiftTable(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   """
-  #   Displays Chemical Shift table.
-  #   """
-  #   from ccpn.ui.gui.modules.ChemicalShiftTable import NmrAtomShiftTable as Table
-  #   chemicalShiftTable = Table(chemicalShiftLists=self._project.chemicalShiftLists)
-  #   self.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)
-  #   self.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
-  #   self.project._logger.info("application.showChemicalShiftTable()")
-
-
-  # def showAtomSelector(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   """Displays Atom Selector."""
-  #   self.atomSelector = AtomSelector(self, project=self._project)
-  #   self.moduleArea.addModule(self.atomSelector, position=position, relativeTo=relativeTo)
-  #   self.pythonConsole.writeConsoleCommand("application.showAtomSelector()")
-  #   self.project._logger.info("application.showAtomSelector()")
-  #   return self.atomSelector
-
-
-  # def showDataPlottingModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-  #   dpModule = DataPlottingModule(self.moduleArea, position=position, relativeTo=relativeTo)
-
-
-  # def saveProject(self):
-  #   """Opens save Project as dialog box if project has not been saved before, otherwise saves
-  #   project with existing project name."""
-  #   apiProject = self._project._wrappedData.root
-  #   if hasattr(apiProject, '_temporaryDirectory'):
-  #     # self.saveProjectAs()
-  #     # Replaced by equivalent application function
-  #     self._appBase.saveProjectAs()
-  #   else:
-  #     self._appBase.saveProject()
-    
-
-  # def saveProjectAs(self):
-  #   """Opens save Project as dialog box and saves project with name specified in the file dialog."""
-  #   # Imported here to avoid risk of circular imports.
-  #   from ccpn.application import Framework
-  #   # TODO try to refactor this
-  #   newPath = Framework.getSaveDirectory()
-  #   if newPath:
-  #     # Next line unnecessary, but does no harm
-  #     newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
-  #     #self._appBase.saveProject(newPath=newProjectPath, newProjectName=os.path.basename(newPath),
-  #     # createFallback=False)
-  #     self._appBase.saveProject(newPath=newProjectPath, createFallback=False)
-
-
-  # def printToFile(self, spectrumDisplay=None):
-  #   current = self._appBase.current
-  #   if not spectrumDisplay:
-  #     spectrumDisplay = current.spectrumDisplay
-  #   if not spectrumDisplay and current.strip:
-  #     spectrumDisplay = current.strip.spectrumDisplay
-  #   if not spectrumDisplay and self.spectrumDisplays:
-  #     spectrumDisplay = self.spectrumDisplays[0]
-  #   if spectrumDisplay:
-  #     path = QtGui.QFileDialog.getSaveFileName(self, caption='Print to File', filter='SVG (*.svg)')
-  #     if not path:
-  #       return
-  #     spectrumDisplay.printToFile(path)
 
   def _resetRemoveStripAction(self, strips):
     for spectrumDisplay in self.spectrumDisplays:

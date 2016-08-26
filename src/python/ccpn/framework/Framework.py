@@ -1091,21 +1091,23 @@ class Framework:
   ## MENU callbacks:  VIEW
   ###################################################################################################################
 
-  def addBlankDisplay(self, position='right', relativeTo=None):
-    from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 
-    if 'BLANK DISPLAY' in self.ui.mainWindow.moduleArea.findAll()[1]:
-      blankDisplay = self.ui.mainWindow.moduleArea.findAll()[1]['BLANK DISPLAY']
-      if blankDisplay.isVisible():
-        return
-      else:
-        self.ui.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
-    else:
-      self.blankDisplay = GuiBlankDisplay(self.ui.mainWindow.moduleArea)
-      self.ui.mainWindow.moduleArea.addModule(self.blankDisplay, position, None)
+  def addBlankDisplay(self, position='right', relativeTo=None):
+    self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
 
     self.ui.mainWindow.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
     self.project._logger.info("application.addBlankDisplay()")
+
+  # Property to issue deprecation warning, remove when value removed
+  @property
+  def blankDisplay(self):
+    from warnings import warn
+    warn('{}.{} is deprecated.'.format(__class__, __name__), category=DeprecationWarning)
+    return self.__blankDisplay
+  @blankDisplay.setter
+  def blankDisplay(self, value):
+    self.__blankDisplay = value
+
 
   def showChemicalShiftTable(self, position:str='bottom', relativeTo:CcpnModule=None):
     """

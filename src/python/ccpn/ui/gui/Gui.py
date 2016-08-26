@@ -175,6 +175,22 @@ class Gui(Ui):
   def getByGid(self, gid):
     return self.application.project.getByPid(gid)
 
+
+  def addBlankDisplay(self, position='right', relativeTo=None):
+    from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+
+    if 'BLANK DISPLAY' in self.mainWindow.moduleArea.findAll()[1]:
+      blankDisplay = self.mainWindow.moduleArea.findAll()[1]['BLANK DISPLAY']
+      if blankDisplay.isVisible():
+        return
+      else:
+        self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
+    else:
+      blankDisplay = GuiBlankDisplay(self.mainWindow.moduleArea)
+      self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
+
+    return blankDisplay
+
 ########################################################
 #
 #  Wrapper notifier functions

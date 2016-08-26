@@ -110,12 +110,13 @@ class PeakPicker1D(PipelineBox):
 
   def showSpectraOption(self):
     if self.selectSpectraOption.get() == 'Spectra':
+      self.spectrumCheckBox.show()
+      self.spGroupsCheckBox.hide()
       for cb in self.allCheckBoxes:
-        self.spectrumCheckBox.show()
-        self.spGroupsCheckBox.hide()
         cb.show()
       for sg in self.allSG_CheckBoxes:
         sg.hide()
+
 
     else:
       self.spectrumCheckBox.hide()

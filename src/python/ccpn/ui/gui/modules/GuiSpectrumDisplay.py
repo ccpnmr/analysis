@@ -190,11 +190,12 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     for strip in self.strips:
       strip._unregisterStrip()
     if len(self._appBase.project.spectrumDisplays) == 1:
-      if self._appBase.ui.mainWindow is not None:
-        mainWindow = self._appBase.ui.mainWindow
-      else:
-        mainWindow = self._appBase._mainWindow
-      mainWindow.addBlankDisplay()
+      # if self._appBase.ui.mainWindow is not None:
+      #   mainWindow = self._appBase.ui.mainWindow
+      # else:
+      #   mainWindow = self._appBase._mainWindow
+      # mainWindow.addBlankDisplay()
+      self.gui.addBlankDisplay()
     # self.module.close()
     self.delete()
 

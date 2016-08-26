@@ -177,6 +177,9 @@ class Gui(Ui):
 
 
   def addBlankDisplay(self, position='right', relativeTo=None):
+    logParametersString = "position={position}, relativeTo={relativeTo}".format(
+      position="'"+position+"'" if isinstance(position, str) else position,
+      relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
     from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 
     if 'BLANK DISPLAY' in self.mainWindow.moduleArea.findAll()[1]:
@@ -189,7 +192,20 @@ class Gui(Ui):
       blankDisplay = GuiBlankDisplay(self.mainWindow.moduleArea)
       self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
 
+    import inspect
+    i0, i1 = inspect.stack()[0:2]
+    if i0.function != i1.function:  # Caller function name matches, we don't log...
+      code_context = i1.code_context[0]
+      if 'ui.{}('.format(i0.function) in code_context:
+        logString = 'application.ui.addBlankDisplay({})'.format(logParametersString)
+        self.logCommand(logString)
+        self.application.project._logger.info(logString)
+
     return blankDisplay
+
+
+  def logCommand(self, cmd):
+    self.mainWindow.pythonConsole.writeConsoleCommand(cmd)
 
 ########################################################
 #

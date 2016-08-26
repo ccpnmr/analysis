@@ -1094,10 +1094,15 @@ class Framework:
 
 
   def addBlankDisplay(self, position='right', relativeTo=None):
+    logParametersString = "position={position}, relativeTo={relativeTo}".format(
+      position="'"+position+"'" if isinstance(position, str) else position,
+      relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
     self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
 
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand(("application.addBlankDisplay()"))
-    self.project._logger.info("application.addBlankDisplay()")
+    logString = 'application.addBlankDisplay({})'.format(logParametersString)
+    self.ui.logCommand(logString)
+    self.project._logger.info(logString)
+
 
   # Property to issue deprecation warning, remove when value removed
   @property

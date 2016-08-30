@@ -110,9 +110,10 @@ def getNmrResiduePrediction(nmrResidue:NmrResidue, chemicalShiftList:ChemicalShi
   tot = sum(predictions.values())
   refinedPredictions = {}
   for code in CCP_CODES:
-    v = int(predictions[code]/tot * 100)
-    if v > 0:
-      refinedPredictions[code] = v
+    if tot > 0:
+      v = int(predictions[code]/tot * 100)
+      if v > 0:
+        refinedPredictions[code] = v
 
   finalPredictions = []
 

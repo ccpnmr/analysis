@@ -75,9 +75,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
-    # self.label.hide()
-    # self.label = DockLabel(name, self)
-    # self.label.show()
     self.project = project
     self.sampledDims = {}
     if not selectedList and project.peakLists:

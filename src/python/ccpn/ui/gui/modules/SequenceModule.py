@@ -90,7 +90,6 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
   def __init__(self, parent, project, scene, position, chain, placeholder=None):
     QtGui.QGraphicsTextItem.__init__(self)
 
-
     self.chain = chain
     self.setPos(QtCore.QPointF(position[0], position[1]))
     if placeholder:
@@ -214,17 +213,20 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
         guiResidue = self.parent.residueDict.get(res.sequenceCode)
         guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                              res.shortName+'</strong></div>')
-      if self._appBase.ui.mainWindow is not None:
-        mainWindow = self._appBase.ui.mainWindow
+      if self._appBase is not None:
+        appBase = self._appBase
       else:
-        mainWindow = self._appBase._mainWindow
-      if hasattr(mainWindow, 'backboneModule'):
-        nmrResidueTable = mainWindow.backboneModule.nmrResidueTable.nmrResidueTable
-        nmrResidueTable.objectLists = self.project.nmrChains
-        nmrResidueTable.updateTable()
+        appBase = self._appBase
+      if hasattr(appBase, 'backboneModule'):
+        nmrResidueTable = appBase.backboneModule.nmrResidueTable
+        nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
+        nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
+        # nmrResidueTable.updateTable()
+        # nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
 
       event.accept()
     self.parent.parent.overlay.hide()
+    self.project._appBase.sequenceGraph.resetSequenceGraph()
 
 
 

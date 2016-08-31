@@ -1106,11 +1106,12 @@ class Framework:
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
-    self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
 
-    logString = 'application.addBlankDisplay({})'.format(logParametersString)
-    self.ui.logCommand(logString)
-    self.project._logger.info(logString)
+    self._startCommandBlock('application.addBlankDisplay({})'.format(logParametersString))
+    try:
+      self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
+    finally:
+      self._endCommandBlock()
 
 
   # Property to issue deprecation warning, remove when value removed

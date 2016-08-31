@@ -180,32 +180,33 @@ class Gui(Ui):
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
-    from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
-
-    if 'BLANK DISPLAY' in self.mainWindow.moduleArea.findAll()[1]:
-      blankDisplay = self.mainWindow.moduleArea.findAll()[1]['BLANK DISPLAY']
-      if blankDisplay.isVisible():
-        return
-      else:
-        self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
-    else:
-      blankDisplay = GuiBlankDisplay(self.mainWindow.moduleArea)
-      self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
-
+    log = False
     import inspect
     i0, i1 = inspect.stack()[0:2]
     if i0.function != i1.function:  # Caller function name matches, we don't log...
       code_context = i1.code_context[0]
       if 'ui.{}('.format(i0.function) in code_context:
-        logString = 'application.ui.addBlankDisplay({})'.format(logParametersString)
-        self.logCommand(logString)
-        self.application.project._logger.info(logString)
+        log = True
+    if log:
+      self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
+    try:
+      from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 
-    return blankDisplay
+      if 'BLANK DISPLAY' in self.mainWindow.moduleArea.findAll()[1]:
+        blankDisplay = self.mainWindow.moduleArea.findAll()[1]['BLANK DISPLAY']
+        if blankDisplay.isVisible():
+          return
+        else:
+          self.mainWindow.moduleArea.moveModule(blankDisplay, position, None)
+      else:
+        blankDisplay = GuiBlankDisplay(self.mainWindow.moduleArea)
+        self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
+        self.blankDisplay = self.addBlankDisplay(position=position, relativeTo=relativeTo)
+      return blankDisplay
 
-
-  def logCommand(self, cmd):
-    self.mainWindow.pythonConsole.writeConsoleCommand(cmd)
+    finally:
+      if log:
+        self.application._endCommandBlock()
 
 ########################################################
 #

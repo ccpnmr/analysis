@@ -32,6 +32,7 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.PeakList import PeakList
+from ccpn.core.IntegralList import IntegralList
 
 from ccpn.util import Path
 from ccpn.util import Register
@@ -590,8 +591,8 @@ class Framework:
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
       ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
-      ("Integration", self.showIntegrationModule, [('shortcut', 'it'),
-                                                   ('enabled', False)]),
+      ("Integrate", self.showIntegrationModule, [('shortcut', 'in'),
+                                                 ('enabled', False)]),
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj'),
                                                         ('enabled', False)]),
@@ -616,6 +617,8 @@ class Framework:
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
+      ("Integral Table", self.showIntegralTable, [('shortcut', 'it'),
+                                                  ('enabled', False)]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -1004,8 +1007,10 @@ class Framework:
     from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
     SpectrumGroupEditor(parent=self.ui.mainWindow, project=self.project, editorMode=True).exec_()
 
+
   def showProjectionPopup(self):
     pass
+
 
   def showExperimentTypePopup(self):
     """
@@ -1015,6 +1020,7 @@ class Framework:
     popup = ExperimentTypePopup(self.ui.mainWindow, self.project)
     popup.exec_()
 
+
   def showPeakPickPopup(self):
     """
     Displays Peak Picking Popup.
@@ -1022,6 +1028,7 @@ class Framework:
     from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
     popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
     popup.exec_()
+
 
   def showIntegrationModule(self, position:str='bottom', relativeTo:CcpnModule=None):
     spectrumDisplay = self.ui.mainWindow.createSpectrumDisplay(self.project.spectra[0])
@@ -1039,7 +1046,6 @@ class Framework:
   ## MENU callbacks:  Molecule
   ###################################################################################################################
 
-
   def showMoleculePopup(self):
     """
     Displays sequence creation popup.
@@ -1048,6 +1054,7 @@ class Framework:
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showMoleculePopup()")
     self.project._logger.info("application.showMoleculePopup()")
     popup = CreateSequence(self.ui.mainWindow, project=self.project).exec_()
+
 
   def toggleSequenceModule(self):
     """Toggles whether Sequence Module is displayed or not"""
@@ -1058,6 +1065,7 @@ class Framework:
       self.showSequenceModule()
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.toggleSequenceModule()")
     self.project._logger.info("application.toggleSequenceModule()")
+
 
   def showSequenceModule(self, position='top', relativeTo=None):
     """
@@ -1070,10 +1078,12 @@ class Framework:
                                             position=position, relativeTo=relativeTo)
     return self.sequenceModule
 
+
   def hideSequenceModule(self):
     """Hides sequence module"""
     self.sequenceModule.close()
     delattr(self, 'sequenceModule')
+
 
   def inspectMolecule(self):
     from ccpn.ui.gui.widgets import MessageDialog
@@ -1081,17 +1091,16 @@ class Framework:
                                   'This function has not been implemented in the current version',
                                   colourScheme=self.ui.mainWindow.colourScheme)
 
+
   def showRefChemicalShifts(self):
     """Displays Reference Chemical Shifts module."""
     from ccpn.ui.gui.modules.ReferenceChemicalShifts import ReferenceChemicalShifts
     self.refChemShifts = ReferenceChemicalShifts(self.project, self.ui.mainWindow.moduleArea)
 
 
-
   ###################################################################################################################
   ## MENU callbacks:  VIEW
   ###################################################################################################################
-
 
   def addBlankDisplay(self, position='right', relativeTo=None):
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
@@ -1140,6 +1149,7 @@ class Framework:
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
 
+
   def showPeakTable(self, position:str='left', relativeTo:CcpnModule=None, selectedList:PeakList=None):
     """
     Displays Peak table on left of main window with specified list selected.
@@ -1153,6 +1163,17 @@ class Framework:
     self.ui.mainWindow.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
+
+
+  def showIntegralTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:IntegralList=None):
+    logParametersString = "position={position}, relativeTo={relativeTo}, selectedList={selectedList}".format(
+      position="'"+position+"'" if isinstance(position, str) else position,
+      relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo,
+      selectedList="'" + selectedList + "'" if isinstance(selectedList, str) else selectedList,)
+    self.ui.showIntegralTable(position=position, relativeTo=relativeTo, selectedList=selectedList)
+    logString = 'application.showIntegralTable({})'.format(logParametersString)
+    self.ui.logCommand(logString)
+    self.project._logger.info(logString)
 
 
   def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:PeakList=None):

@@ -14,6 +14,14 @@ from PyQt4 import QtCore, QtGui
 
 class SequenceModule(CcpnModule):
 
+  """
+  The module displays all chains in the project as one-letter amino acids. The one letter residue
+  sequence codes are all instances of the GuiChainResidue class and the style applied to a residue
+  indicates its assignment state and, when coupled with the Sequence Graph module, indicates if a
+  stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and
+  QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.
+  """
+
   def __init__(self, project):
     CcpnModule.__init__(self, size=(10, 30), name='Sequence')
 
@@ -36,7 +44,8 @@ class SequenceModule(CcpnModule):
                       """)
     self.residueCount = 0
     self.layout.addWidget(self.scrollArea)
-
+    # connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop
+    # assignment routines.
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
     self.chainLabels = []
     self.widgetHeight = 0
@@ -52,7 +61,7 @@ class SequenceModule(CcpnModule):
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
-    CCPN INTERNAL called in predictSequencePosition method of SequenceGraph
+    CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.
     Highlights regions on the sequence specified by the list of residues passed in.
     """
     for res1 in self.chainLabels[0].residueDict.values():
@@ -61,9 +70,9 @@ class SequenceModule(CcpnModule):
     for residue in residues:
       guiResidue = self.chainLabels[0].residueDict[residue.sequenceCode]
       guiResidue._styleResidue()
-    if self.project._appBase.preferences.general.colourScheme == 'dark':
+    if self.colourScheme == 'dark':
       colour = '#e4e15b'
-    elif self.project._appBase.preferences.general.colourScheme == 'light':
+    elif self.colourScheme == 'light':
       colour = '#009a00'
     guiResidues = []
     for residue in residues:
@@ -71,8 +80,6 @@ class SequenceModule(CcpnModule):
       guiResidues.append(guiResidue)
       guiResidue.setHtml('<div style="color: %s;text-align: center; padding: 0px;">' % colour+
                            residue.shortName+'</div>')
-
-
 
 
   def _addChainLabel(self, chain:Chain=None, placeholder=False):
@@ -86,11 +93,16 @@ class SequenceModule(CcpnModule):
 
 
 class GuiChainLabel(QtGui.QGraphicsTextItem):
-
+  """
+  This class is acts as an anchor for each chain displayed in the Sequence Module.
+  On instantiation an instance of the GuiChainResidue class is created for each residue in the chain
+  along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.
+  """
   def __init__(self, parent, project, scene, position, chain, placeholder=None):
     QtGui.QGraphicsTextItem.__init__(self)
 
     self.chain = chain
+    self.colourScheme = project._appBase.preferences.general.colourScheme
     self.setPos(QtCore.QPointF(position[0], position[1]))
     if placeholder:
       self.text = 'No Chains in Project!'
@@ -99,9 +111,9 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     self.parent = parent
     self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
     self.setFont(Font(size=20, bold=True))
-    if project._appBase.preferences.general.colourScheme == 'dark':
+    if self.colourScheme == 'dark':
       colour = '#bec4f3'
-    elif project._appBase.preferences.general.colourScheme == 'light':
+    elif self.colourScheme == 'light':
       colour = '#bd8413'
     self.setDefaultTextColor(QtGui.QColor(colour))
     self.residueDict = {}
@@ -126,10 +138,11 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
     font.setStyleHint(QtGui.QFont.Monospace)
     self.setFont(font)
-    if project._appBase.preferences.general.colourScheme == 'dark':
+    self.colourScheme = project._appBase.preferences.general.colourScheme
+    if self.colourScheme == 'dark':
       self.colour1 = '#bec4f3'
       self.colour2 = '#f7ffff'
-    elif project._appBase.preferences.general.colourScheme == 'light':
+    elif self.colourScheme == 'light':
       self.colour1 = '#bd8413'
       self.colour2 = '#666e98'
     self.setDefaultTextColor(QtGui.QColor(self.colour1))
@@ -148,6 +161,9 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
 
   def _styleResidue(self):
+    """
+    A convenience function for applying the correct styling to GuiChainResidues depending on their state.
+    """
     if self.residue.nmrResidue is not None:
       self.setHtml('<div style="color: %s; text-align: center;"><strong>' % self.colour2 +
                    self.residue.shortName+'</strong></div>')
@@ -157,7 +173,7 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
   def _setFontBold(self):
     """
-    Sets font to bold, necessary as QtGui.QGraphicsTextItem are used for display of residue
+    Sets font to bold, necessary as QtGui.QGraphicsTextItems are used for display of residue
     one letter codes.
     """
     format = QtGui.QTextCharFormat()
@@ -166,10 +182,15 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
 
   def _dragEnterEvent(self, event:QtGui.QMouseEvent):
+    """
+    A re-implementation of the QGraphicsTextItem.dragEnterEvent to facilitate the correct colouring
+    of GuiChainResidues during drag-and-drop.
+    Required for processNmrChains to work properly.
+    """
 
-    if self.project._appBase.preferences.general.colourScheme == 'dark':
+    if self.colourScheme == 'dark':
       colour = '#e4e15b'
-    elif self.project._appBase.preferences.general.colourScheme == 'light':
+    elif self.colourScheme == 'light':
       colour = '#009a00'
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
@@ -177,9 +198,14 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     event.accept()
 
   def _dragLeaveEvent(self, event:QtGui.QMouseEvent):
-    if self.project._appBase.preferences.general.colourScheme == 'dark':
+    """
+    A re-implementation of the QGraphicsTextItem.dragLeaveEvent to facilitate the correct colouring
+    of GuiChainResidues during drag-and-drop.
+    Required for processNmrChains to work properly.
+    """
+    if self.colourScheme == 'dark':
       colour = '#f7ffff'
-    elif self.project._appBase.preferences.general.colourScheme == 'light':
+    elif self.colourScheme == 'light':
       colour = '#666e98'
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
@@ -189,14 +215,13 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
   def processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
     """
-    Process a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
+    Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
     all succeeding residues according to the length of the list.
     """
 
-
-    if self.project._appBase.preferences.general.colourScheme == 'dark':
+    if self.colourScheme == 'dark':
       colour = '#f7ffff'
-    elif self.project._appBase.preferences.general.colourScheme == 'light':
+    elif self.colourScheme == 'light':
       colour = '#666e98'
     guiRes = self.scene.itemAt(event.scenePos())
     nmrChain = self.project.getByPid(data[0])
@@ -221,8 +246,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
         nmrResidueTable = appBase.backboneModule.nmrResidueTable
         nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
         nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
-        # nmrResidueTable.updateTable()
-        # nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
 
       event.accept()
     self.parent.parent.overlay.hide()

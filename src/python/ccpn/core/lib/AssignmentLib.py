@@ -58,9 +58,11 @@ def isInterOnlyExpt(experimentType:str) -> bool:
     return True
   return False
 
+
 def assignAlphas(nmrResidue:NmrResidue, peaks:typing.List[Peak]):
   """
-  Assigns CA and CA-1 NmrAtoms to dimensions of specified peaks.
+  Assigns CA and CA-1 NmrAtoms to dimensions of pairs of specified peaks, assuming that one has
+  a height greater than the other, e.g. in an HNCA or HNCACB experiment.
   """
   if len(peaks) > 1:
     chain = nmrResidue.nmrChain
@@ -97,6 +99,7 @@ def assignBetas(nmrResidue:NmrResidue, peaks:typing.List[Peak]):
   elif len(peaks) == 1:
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
 
+
 def getNmrResiduePrediction(nmrResidue:NmrResidue, chemicalShiftList:ChemicalShiftList, prior:float=0.05):
   """
   Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
@@ -122,6 +125,7 @@ def getNmrResiduePrediction(nmrResidue:NmrResidue, chemicalShiftList:ChemicalShi
     finalPredictions.append([key, str(value)+' %'])
 
   return finalPredictions
+
 
 def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=False):
   """
@@ -153,21 +157,6 @@ def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=
     finalPredictions.append([key, value])
   return finalPredictions
 
-# NBNB replaced by ccpnmodel.ccpncore.lib.spectrum.Spectrum.name2IsotopeCode
-# def getIsotopeCodeOfAxis(axisCode):
-#   """
-#
-#   Takes an axisCode and returns the appropriate isotope code
-#   Inputs:
-#   :param axisCode
-#   :returns isotopeCode
-#   """
-#   if axisCode[0] == 'C':
-#     return '13C'
-#   if axisCode[0] == 'N':
-#     return '15N'
-#   if axisCode[0] == 'H':
-#     return '1H'
 
 def copyPeakListAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
   """
@@ -202,6 +191,7 @@ def copyPeakListAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
     refPositions = project.getByPid(result).position
     if all([abs(refPositions[ii] - peak.position[ii]) < tolerances[ii] for ii in mappingArray if ii is not None]):
       [peak.assignDimension(axisCode=refAxisCodes[ii], value=dimNmrAtoms[ii]) for ii in mappingArray if ii is not None]
+
 
 def propagateAssignments(peaks:typing.List[Peak]=None, referencePeak:Peak=None, current:object=None,
                          tolerances:typing.List[float]=None):
@@ -297,16 +287,6 @@ def propagateAssignments(peaks:typing.List[Peak]=None, referencePeak:Peak=None, 
           peak.assignDimension(axisCode, nmrAtom)
 
 
-# Not in use - RHF
-# def assignPeakDimension(peak, dim, nmrAtom):
-#     axisCode = getAxisCodeForPeakDimension(peak, dim)
-#     peak.assignDimension(axisCode=axisCode, value=[nmrAtom])
-
-    # No longer necessary
-    # shiftList = peak.peakList.spectrum.chemicalShiftList
-    # shiftList.newChemicalShift(value=peak.position[dim], nmrAtom=nmrAtom)
-
-
 def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
                            chain:Chain, chemicalShiftList:ChemicalShiftList):
   """
@@ -357,7 +337,7 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
       residue = spinSystem.assignedResidue
       if residue:
         assignDict[residue] = spinSystem
-    #
+
     residues = chain.sortedResidues()
     seq = [r.ccpCode for r in residues]
 
@@ -408,17 +388,10 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
         score, residues = data
         score /= sumScore
         datum = [i+1, 100.0*score]
-        # color = (1-score, score, 0)
 
-        # colors = [color, color]
         for residue in residues:
           if residue:
             datum.append(residue.seqCode)
-            # if assignDict.get(residue):
-            #   colors.append('#8080FF')
-            # else:
-            #   colors.append(None)
-
           else:
             datum.append(None)
             # colors.append(None)
@@ -428,7 +401,6 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
         objectList.append([100*score, residues2])
 
     return objectList
-
 
 
 def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict:
@@ -474,8 +446,12 @@ def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict
   #
   return result
 
-def getBoundNmrAtomPairs(nmrAtoms, nucleus):
 
+def getBoundNmrAtomPairs(nmrAtoms, nucleus):
+  """
+  Takes a set of NmrAtoms and a nucleus e.g. 'H' or 'C' and returns a list of unique pairs of
+  nmrAtoms in the input that are bound to each other.
+  """
   result = []
   for na1 in nmrAtoms:
     if na1.name.startswith(nucleus):
@@ -486,8 +462,13 @@ def getBoundNmrAtomPairs(nmrAtoms, nucleus):
   return list(set(result))
 
 
-def findClosePeaks(peak, matchPeakList):
-
+def findClosePeaks(peak, matchPeakList, tolerance=0.02):
+  """
+  Takes an input peak and finds all peaks in the matchPeakList that are close in space to the position
+  of the input peak. A close peak is defined as one for which the euclidean distance between its position
+  and that of the input peak is less than the specified tolerance. AxisCodes are used to match dimensions
+  between peaks to ensure correct distance calculation.
+  """
   closePeaks = []
   refAxisCodes = peak.axisCodes
   matchAxisCodes = matchPeakList.spectrum.axisCodes
@@ -503,7 +484,7 @@ def findClosePeaks(peak, matchPeakList):
       matchArray.append(mPeak.position[dim])
 
     dist = numpy.linalg.norm(refPeakPosition-numpy.array(matchArray))
-    if dist < 0.02:
+    if dist < tolerance:
       closePeaks.append(mPeak)
 
   return closePeaks

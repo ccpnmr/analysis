@@ -26,7 +26,7 @@ MODULE_DICT = {
   'PARASSIGN SETUP'          : 'showParassignSetup',
   'API DOCUMENTATION'        : 'showApiDocumentation',
   'PYTHON CONSOLE'           : 'toggleConsole',
-  'BLANK DISPLAY'            : 'addBlankDsiplay',
+  'BLANK DISPLAY'            : 'addBlankDisplay',
   'NOTES EDITOR'             : 'showNotesEditor'
                }
 

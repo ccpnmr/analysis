@@ -594,8 +594,7 @@ class Framework:
       ("Integrate", self.showIntegrationModule, [('shortcut', 'in'),
                                                  ('enabled', False)]),
       (),
-      ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj'),
-                                                        ('enabled', False)]),
+      ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
     ]
                ))
 
@@ -1009,7 +1008,11 @@ class Framework:
 
 
   def showProjectionPopup(self):
-    pass
+    if not self.project.spectra:
+      MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+    from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
+    popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
+    popup.exec_()
 
 
   def showExperimentTypePopup(self):

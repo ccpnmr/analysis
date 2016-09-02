@@ -22,15 +22,15 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-CCP_CODES =  ('Ala','Cys','Asp','Glu','Phe','Gly','His','Ile','Lys','Leu','Met','Asn',
-              'Pro','Gln','Arg','Ser','Thr','Val','Trp','Tyr')
+CCP_CODES = ('Ala', 'Cys', 'Asp', 'Glu', 'Phe', 'Gly', 'His', 'Ile', 'Lys', 'Leu', 'Met', 'Asn',
+             'Pro', 'Gln', 'Arg', 'Ser', 'Thr', 'Val', 'Trp', 'Tyr')
 
-ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3', 'CG',
-              'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3'], '1H': ['H', 'HA', 'HA2', 'HA3', 'HB', 'HB*', 'HB2',
-              'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1', 'HE2', 'HE21',
+ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', 'CE1', 'CE2', 'CE3',
+              'CG', 'CG1', 'CG2', 'CH2', 'CZ', 'CZ2', 'CZ3'], '1H': ['H', 'HA', 'HA2', 'HA3', 'HB',
+              'HB*', 'HB2', 'HB3', 'HD*', 'HD1', 'HD1*', 'HD2', 'HD2*', 'HD3', 'HE', 'HE*', 'HE1',
               'HE22', 'HE3', 'HG', 'HG1', 'HG1*', 'HG12', 'HG13', 'HG2', 'HG2*', 'HG3', 'HH', 'HH11',
-              'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'],'15N': ['N', 'ND1', 'NE', 'NE1',
-              'NE2', 'NH1', 'NH2', 'NZ']}
+              'HE2', 'HE21', 'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'],'15N': ['N',
+              'ND1', 'NE', 'NE1', 'NE2', 'NH1', 'NH2', 'NZ']}
 
 
 from ccpn.core.Chain import Chain
@@ -44,7 +44,6 @@ from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidue
 from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 import numpy
-
 
 def isInterOnlyExpt(experimentType:str) -> bool:
   """
@@ -100,7 +99,7 @@ def assignBetas(nmrResidue:NmrResidue, peaks:typing.List[Peak]):
     peaks[0].assignDimension(axisCode='C', value=[nmrResidue.fetchNmrAtom(name='CB')])
 
 
-def getNmrResiduePrediction(nmrResidue:NmrResidue, chemicalShiftList:ChemicalShiftList, prior:float=0.05):
+def getNmrResiduePrediction(nmrResidue:NmrResidue, chemicalShiftList:ChemicalShiftList, prior:float=0.05) -> list:
   """
   Takes an NmrResidue and a ChemicalShiftList and returns a dictionary of the residue type to
   confidence levels for that NmrResidue.
@@ -127,7 +126,7 @@ def getNmrResiduePrediction(nmrResidue:NmrResidue, chemicalShiftList:ChemicalShi
   return finalPredictions
 
 
-def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=False):
+def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=False) -> list:
   """
   Takes a ccpCode, a chemical shift value and an isotope code and returns a dictionary of
   atom type predictions to confidence values..
@@ -149,21 +148,22 @@ def getNmrAtomPrediction(ccpCode:str, value:float, isotopeCode:str, strict:bool=
       v = int(value/tot * 100)
     if v > 0:
       refinedPredictions[key] = v
-  #
+
   finalPredictions = []
-  #
+
   for value in sorted(refinedPredictions.values(), reverse=True)[:5]:
     key = [key for key, val in refinedPredictions.items() if val==value][0]
     finalPredictions.append([key, value])
+
   return finalPredictions
 
 
 def copyPeakListAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
   """
-
   Takes a reference peakList and assigns NmrAtoms to dimensions
   of a match peakList based on matching axis codes.
   """
+
   import numpy
   from sklearn.ensemble import RandomForestClassifier
   project = referencePeakList.project
@@ -288,7 +288,7 @@ def propagateAssignments(peaks:typing.List[Peak]=None, referencePeak:Peak=None, 
 
 
 def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
-                           chain:Chain, chemicalShiftList:ChemicalShiftList):
+                           chain:Chain, chemicalShiftList:ChemicalShiftList)  -> list:
   """
   Determines location of a set of NmrResidues in the specified chain using residue type
   predictions.
@@ -410,7 +410,7 @@ def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict
   If the two dimensions have the same nucleus, the NmrAtom pairs are sorted, otherwise
   they are in the dimension order.
 
-  Peak.assignedNmrAtoms are used to determine which NmrAtoms are connected"""
+  Peak.assignedNmrAtoms is used to determine which NmrAtoms are connected"""
 
   # For subsequent filtering, I recommend:
   # isInterOnlyExpt (this file)
@@ -443,11 +443,11 @@ def nmrAtomPairsByDimensionTransfer(peakLists:typing.Sequence[PeakList]) -> dict
       if None in isotopeCodes or isotopeCodes[0] == isotopeCodes[1]:
         newSet = set(tuple(sorted(x for x in nmrAtoms)) for nmrAtoms in aSet)
         result[mt] = newSet
-  #
+
   return result
 
 
-def getBoundNmrAtomPairs(nmrAtoms, nucleus):
+def getBoundNmrAtomPairs(nmrAtoms, nucleus) -> list:
   """
   Takes a set of NmrAtoms and a nucleus e.g. 'H' or 'C' and returns a list of unique pairs of
   nmrAtoms in the input that are bound to each other.

@@ -180,18 +180,10 @@ class Gui(Ui):
     logParametersString = "position={position}, relativeTo={relativeTo}".format(
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
-    log = False
-    import inspect
-    i0, i1 = inspect.stack()[0:2]
-    if i0.function != i1.function:  # Caller function name matches, we don't log...
-      code_context = i1.code_context[0]
-      if 'ui.{}('.format(i0.function) in code_context:
-        log = True
-    if log:
-      self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
-    try:
-      from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+    self.application._startCommandBlock('application.ui.addBlankDisplay({})'.format(logParametersString))
 
+    from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+    try:
       if 'BLANK DISPLAY' in self.mainWindow.moduleArea.findAll()[1]:
         blankDisplay = self.mainWindow.moduleArea.findAll()[1]['BLANK DISPLAY']
         if blankDisplay.isVisible():
@@ -201,12 +193,49 @@ class Gui(Ui):
       else:
         blankDisplay = GuiBlankDisplay(self.mainWindow.moduleArea)
         self.mainWindow.moduleArea.addModule(blankDisplay, position, None)
-        self.blankDisplay = self.addBlankDisplay(position=position, relativeTo=relativeTo)
       return blankDisplay
-
     finally:
-      if log:
-        self.application._endCommandBlock()
+      self.application._endCommandBlock()
+
+
+  from ccpn.core.IntegralList import IntegralList
+  from ccpn.ui.gui.widgets.Module import CcpnModule
+  def showIntegralTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:IntegralList=None):
+    logParametersString = "position={position}, relativeTo={relativeTo}, selectedList={selectedList}".format(
+      position="'" + position + "'" if isinstance(position, str) else position,
+      relativeTo="'" + relativeTo + "'" if isinstance(relativeTo, str) else relativeTo,
+      selectedList="'" + selectedList + "'" if isinstance(selectedList, str) else selectedList)
+    # log = False
+    # import inspect
+    # i0, i1 = inspect.stack()[0:2]
+    # if i0.function != i1.function:  # Caller function name matches, we don't log...
+    #   code_context = i1.code_context[0]
+    #   if 'ui.{}('.format(i0.function) in code_context:
+    #     log = True
+    # if log:
+    #   self.application._startCommandBlock(
+    #     'application.ui.showIntegralTable({})'.format(logParametersString))
+    # try:
+    #   from ccpn.ui.gui.modules.IntegralTable import IntegralTable
+    #
+    #   if 'INTEGRAL TABLE' in self.mainWindow.moduleArea.findAll()[1]:
+    #     integralTable = self.mainWindow.moduleArea.findAll()[1]['INTEGRAL TABLE']
+    #     if integralTable.isVisible():
+    #       return
+    #     else:
+    #       self.mainWindow.moduleArea.moveModule(integralTable, position=position,
+    #                                                 relativeTo=relativeTo)
+    #   else:
+    #    integralTable = IntegralTable(project=self.application.project, selectedList=selectedList)
+    #    self.mainWindow.moduleArea.addModule(integralTable, position=position,
+    #                                         relativeTo=relativeTo)
+    #
+    #   return integralTable
+    #
+    # finally:
+    #   if log:
+    #     self.application._endCommandBlock()
+
 
 ########################################################
 #

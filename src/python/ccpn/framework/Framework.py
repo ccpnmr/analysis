@@ -389,29 +389,29 @@ class Framework:
     if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
       with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
         layout = yaml.load(f)
-        typ, contents, state = layout['main']
+      typ, contents, state = layout['main']
 
-        # TODO: When UI has a main window, change the call below (then move the whole function!)
-        containers, modules = self.ui.mainWindow.moduleArea.findAll()
-        flatten = lambda *n: (e for a in n
+      # TODO: When UI has a main window, change the call below (then move the whole function!)
+      containers, modules = self.ui.mainWindow.moduleArea.findAll()
+      flatten = lambda *n: (e for a in n
         for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
-        flatContents = list(flatten(contents))
-        for item in flatContents:
-          if item in list(MODULE_DICT.keys()):
-            obj = modules.get(item)
+      flatContents = list(flatten(contents))
+      for item in flatContents:
+        if item in list(MODULE_DICT.keys()):
+          obj = modules.get(item)
+          if not obj:
+            func = getattr(self, MODULE_DICT[item])
+            func()
+      for s in layout['float']:
+        typ, contents, state = s[0]['main']
+        containers, modules = self.ui.mainWindow.moduleArea.findAll()
+        for item in contents:
+          if item[0] == 'dock':
+            obj = modules.get(item[1])
             if not obj:
-             func = getattr(self, MODULE_DICT[item])
-             func()
-        for s in layout['float']:
-          typ, contents, state = s[0]['main']
-          containers, modules = self.ui.mainWindow.moduleArea.findAll()
-          for item in contents:
-            if item[0] == 'dock':
-              obj = modules.get(item[1])
-              if not obj:
-                func = getattr(self, MODULE_DICT[item[1]])
-                func()
-        self.ui.mainWindow.moduleArea.restoreState(layout)
+              func = getattr(self, MODULE_DICT[item[1]])
+              func()
+      self.ui.mainWindow.moduleArea.restoreState(layout)
 
 
   def getByPid(self, pid):
@@ -618,7 +618,7 @@ class Framework:
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Integral Table", self.showIntegralTable, [('shortcut', 'it'),
-                                                  ('enabled', False)]),
+                                                  ('enabled', True)]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -1103,16 +1103,7 @@ class Framework:
   ###################################################################################################################
 
   def addBlankDisplay(self, position='right', relativeTo=None):
-    logParametersString = "position={position}, relativeTo={relativeTo}".format(
-      position="'"+position+"'" if isinstance(position, str) else position,
-      relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo)
-
-    self._startCommandBlock('application.addBlankDisplay({})'.format(logParametersString))
-    try:
-      self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
-    finally:
-      self._endCommandBlock()
-
+    self.blankDisplay = self.ui.addBlankDisplay(position=position, relativeTo=relativeTo)
 
   # Property to issue deprecation warning, remove when value removed
   @property
@@ -1171,10 +1162,12 @@ class Framework:
       position="'"+position+"'" if isinstance(position, str) else position,
       relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo,
       selectedList="'" + selectedList + "'" if isinstance(selectedList, str) else selectedList,)
-    self.ui.showIntegralTable(position=position, relativeTo=relativeTo, selectedList=selectedList)
-    logString = 'application.showIntegralTable({})'.format(logParametersString)
-    self.ui.logCommand(logString)
-    self.project._logger.info(logString)
+
+    self._startCommandBlock('application.showIntegralTable({})'.format(logParametersString))
+    try:
+      self.ui.showIntegralTable(position=position, relativeTo=relativeTo, selectedList=selectedList)
+    finally:
+      self._endCommandBlock()
 
 
   def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:PeakList=None):

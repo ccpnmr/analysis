@@ -271,6 +271,10 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
         newObjectItem.setText(0, "<New>")
 
+      if shortClassName == 'SG':
+        # need this because otherwise only first SG has its spectra displayed on sidebar
+        self._refreshSidebarSpectra(self.project)
+
     elif shortClassName == 'PL':
       for itemParent in self._findItems(obj.spectrum.pid):
         self._addItem(itemParent, obj.pid)

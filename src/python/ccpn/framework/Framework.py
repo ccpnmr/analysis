@@ -808,28 +808,31 @@ class Framework:
   def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
     # TODO: convert this to a save and call self.project.save()
-    successful = self.project.save(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
-    if not successful:
-      sys.stderr.write('==> Project save failed\n')
+    if hasattr(self.project._wrappedData.root, '_temporaryDirectory'):
+      successful = self.saveProjectAs()
+    else:
+      successful = self.project.save(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
+      if not successful:
+        sys.stderr.write('==> Project save failed\n')
 
-      # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
+        # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
-    self.ui.mainWindow._updateWindowTitle()
-    self._updateRecentFiles()
+      self.ui.mainWindow._updateWindowTitle()
+      self._updateRecentFiles()
 
-    layout = self.ui.mainWindow.moduleArea.saveState()
-    layoutPath = os.path.join(self.project.path, 'layouts')
-    if not os.path.exists(layoutPath):
-      os.makedirs(layoutPath)
-    import yaml
-    with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
-      yaml.dump(layout, stream)
-      stream.close()
-    # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
+      layout = self.ui.mainWindow.moduleArea.saveState()
+      layoutPath = os.path.join(self.project.path, 'layouts')
+      if not os.path.exists(layoutPath):
+        os.makedirs(layoutPath)
+      import yaml
+      with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
+        yaml.dump(layout, stream)
+        stream.close()
+      # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
 
-    sys.stderr.write('==> Project successfully saved\n')
-    # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
-    #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
+      sys.stderr.write('==> Project successfully saved\n')
+      # MessageDialog.showMessage('Project saved', 'Project successfully saved!',
+      #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
     return successful
 

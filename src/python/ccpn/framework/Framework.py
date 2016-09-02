@@ -349,7 +349,6 @@ class Framework:
 
   def initGraphics(self):
     """Set up graphics system after loading"""
-    from ccpn.ui.gui.lib.Window import MODULE_DICT
     from ccpn.ui.gui.modules import GuiStrip
 
     project = self.project
@@ -1013,6 +1012,7 @@ class Framework:
   def showProjectionPopup(self):
     if not self.project.spectra:
       MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      return
     from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
     popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
     popup.exec_()

@@ -33,9 +33,16 @@ class SpectrumProjectionPopup(QtGui.QDialog, Base):
     self.buttonBox = ButtonList(self, grid=(5, 1), callbacks=[self.reject, self.makeProjection],
                                 texts=['Cancel', 'Make Projection'], gridSpan=(1, 2))
 
+    self.setAxisPulldown(self.spectrumPulldown.currentText())
+
   def setAxisPulldown(self, spectrumPid):
+    spectrum = self.project.getByPid(spectrumPid)
     axisCodes = self.project.getByPid(spectrumPid).axisCodes
+    path = '/'.join(spectrum.filePath.split('/')[:-1])+'/'+spectrum.name+'-proj.ft2'
+    self.filePathLineEdit.setText(path)
     self.axisPulldown.setData(axisCodes)
+
+
 
   def makeProjection(self):
     spectrum = self.project.getByPid(self.spectrumPulldown.currentText())
@@ -46,13 +53,15 @@ class SpectrumProjectionPopup(QtGui.QDialog, Base):
     axisCodeIndex = spectrum.axisCodes.index(projectionAxisCode)
     axisIndices.remove(axisCodeIndex)
     xDim, yDim = axisIndices
-    print(spectrum, filePath, method, xDim, yDim)
     spectrum.projectedToFile(path=filePath, xDim=xDim+1, yDim=yDim+1, method=method)
+    self.project.loadData(filePath)
     self.accept()
 
   def _getSpectrumFile(self):
     if os.path.exists('/'.join(self.filePathLineEdit.text().split('/')[:-1])):
       currentSpectrumDirectory = '/'.join(self.filePathLineEdit.text().split('/')[:-1])
+    elif self.project._appBase.preferences.general.dataPath:
+      currentSpectrumDirectory = self.project._appBase.preferences.general.dataPath
     else:
       currentSpectrumDirectory = os.path.expanduser('~')
     dialog = FileDialog(self, text='Select Projection File', directory=currentSpectrumDirectory,

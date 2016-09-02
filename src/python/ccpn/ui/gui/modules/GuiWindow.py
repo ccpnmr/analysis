@@ -29,6 +29,7 @@ from PyQt4 import QtGui
 
 from ccpn.ui.gui.widgets import MessageDialog
 
+
 # from pyqtgraph.modulearea import DockArea
 from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 # from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
@@ -113,6 +114,19 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip)
 
 
+
+
+
+  def setUserShortcuts(self, preferences=None):
+
+    from functools import reduce
+
+    userShortcuts = {
+      'w, 2': 'ui.mainWindow.loadProject',
+    }
+    for shortcut, function in userShortcuts.items():
+      stub = self.namespace.get(function.split('.')[0])
+      QtGui.QShortcut(QtGui.QKeySequence(shortcut), self, reduce(getattr, function.split('.')[1:], stub))
 
   def deleteSelectedPeaks(self, parent=None):
 

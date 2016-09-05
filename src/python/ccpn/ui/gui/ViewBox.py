@@ -515,10 +515,12 @@ class ViewBox(pg.ViewBox):
             spectrumAxisCodes = spectrumView.spectrum.axisCodes
             stripAxisCodes = self.current.strip.axisCodes
             sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+
+            remapIndices = spectrumLib._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
             for n, axisCode in enumerate(spectrumAxisCodes):
-              idx = stripAxisCodes.index(axisCode)
+              # idx = stripAxisCodes.index(axisCode)
+              idx = remapIndices[n]
               sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-              print(axisCode, idx, sortedSelectedRegion[n])
             newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,

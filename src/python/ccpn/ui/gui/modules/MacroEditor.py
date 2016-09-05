@@ -64,7 +64,7 @@ class MacroEditor(DropBase, CcpnModule):
     """
     Opens a save file dialog and saves the text inside the textbox to a file specified in the dialog.
     """
-    macroPath = self.preferences.general.macroPath
+    macroPath = self.preferences.general.userMacroPath
     # colourScheme = self.preferences.general.colourScheme
     newText = self.textBox.toPlainText()
     dialog = FileDialog(self, fileMode=FileDialog.AnyFile, text='Save Macro As...',
@@ -81,7 +81,7 @@ class MacroEditor(DropBase, CcpnModule):
     Opens a file dialog box at the macro path specified in the application preferences and loads the
     contents of the macro file into the textbox.
     """
-    macroPath = self.preferences.general.macroPath
+    macroPath = self.preferences.general.userMacroPath
     dialog = FileDialog(self, text='Open Macro', fileMode=FileDialog.ExistingFile,
                         acceptMode=FileDialog.AcceptOpen, directory=macroPath,
                         preferences=self.preferences.general, filter='*.py')

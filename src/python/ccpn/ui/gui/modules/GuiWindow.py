@@ -53,8 +53,8 @@ class GuiWindow(DropBase):
     self.moduleArea.guiWindow = self
     self.moduleArea.setGeometry(0, 0, 12000, 8000)
     if not self._wrappedData.modules:
-      self.blankDisplay = GuiBlankDisplay(self.moduleArea)
-      self.moduleArea.addModule(self.blankDisplay, position=None)
+      blankDisplay = GuiBlankDisplay(self.moduleArea)
+      self.moduleArea.addModule(blankDisplay, position=None)
 
             
   def deleteBlankDisplay(self):

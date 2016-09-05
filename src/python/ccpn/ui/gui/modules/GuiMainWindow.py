@@ -417,8 +417,8 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if macroFile is None:
       dialog = FileDialog(self, fileMode=FileDialog.ExistingFile, text="Run Macro",
                           acceptMode=FileDialog.AcceptOpen, preferences=self._appBase.preferences.general)
-      if os.path.exists(self._appBase.preferences.general.macroPath):
-        dialog.setDirectory(self._appBase.preferences.general.macroPath)
+      if os.path.exists(self._appBase.preferences.general.userMacroPath):
+        dialog.setDirectory(self._appBase.preferences.general.userMacroPath)
       macroFile = dialog.selectedFile()
       if not macroFile:
         return

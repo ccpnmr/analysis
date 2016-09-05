@@ -65,9 +65,23 @@ class PreferencesPopup(QtGui.QDialog):
 
     self.macroPathLabel = Label(self, text="Macro Path", grid=(row, 0))
     self.macroPathData = LineEdit(self, grid=(row, 1))
-    self.macroPathData.setText(self.preferences.general.macroPath)
+    self.macroPathData.setText(self.preferences.general.userMacroPath)
     self.macroPathDataButton = Button(self, grid=(row, 2), callback=self._getMacroFilesPath, icon='icons/directory', hPolicy='fixed')
     self.macroPathData.editingFinished.connect(self._setMacroFilesPath)
+    row += 1
+
+    self.pluginPathLabel = Label(self, text="Plugin Path", grid=(row, 0))
+    self.pluginPathData = LineEdit(self, grid=(row, 1))
+    self.pluginPathData.setText(self.preferences.general.userPluginPath)
+    self.pluginPathDataButton = Button(self, grid=(row, 2), callback=self._getPluginFilesPath, icon='icons/directory', hPolicy='fixed')
+    self.pluginPathData.editingFinished.connect(self._setPluginFilesPath)
+    row += 1
+
+    self.extensionPathLabel = Label(self, text="Extension Path", grid=(row, 0))
+    self.extensionPathData = LineEdit(self, grid=(row, 1))
+    self.extensionPathData.setText(self.preferences.general.userExtensionPath)
+    self.extensionPathDataButton = Button(self, grid=(row, 2), callback=self._getExtensionFilesPath, icon='icons/directory', hPolicy='fixed')
+    self.extensionPathData.editingFinished.connect(self._setExtensionFilesPath)
     row += 1
 
     self.languageLabel = Label(self, text="Language", grid=(row, 0))
@@ -165,11 +179,43 @@ class PreferencesPopup(QtGui.QDialog):
     directory = dialog.selectedFiles()
     if len(directory) > 0:
       self.macroPathData.setText(directory[0])
-      self.preferences.general.macroPath = directory[0]
+      self.preferences.general.userMacroPath = directory[0]
+
+  def _getPluginFilesPath(self):
+    if os.path.exists(os.path.expanduser(self.pluginPathData.text())):
+      currentDataPath = os.path.expanduser(self.pluginPathData.text())
+    else:
+      currentDataPath = os.path.expanduser('~')
+    dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                           preferences=self.preferences.general)
+    directory = dialog.selectedFiles()
+    if len(directory) > 0:
+      self.pluginPathData.setText(directory[0])
+      self.preferences.general.pluginMacroPath = directory[0]
+
+  def _getExtensionFilesPath(self):
+    if os.path.exists(os.path.expanduser(self.extensionPathData.text())):
+      currentDataPath = os.path.expanduser(self.extensionPathData.text())
+    else:
+      currentDataPath = os.path.expanduser('~')
+    dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
+                           preferences=self.preferences.general)
+    directory = dialog.selectedFiles()
+    if len(directory) > 0:
+      self.extensionPathData.setText(directory[0])
+      self.preferences.general.userExtensionPath = directory[0]
 
   def _setMacroFilesPath(self):
       newPath = self.macroPathData.text()
-      self.preferences.general.macroPath = newPath
+      self.preferences.general.userMacroPath = newPath
+
+  def _setPluginFilesPath(self):
+      newPath = self.pluginPathData.text()
+      self.preferences.general.userPluginPath = newPath
+
+  def _setExtensionFilesPath(self):
+      newPath = self.macroExtensionData.text()
+      self.preferences.general.userExtensionPath = newPath
 
   def _changeLanguage(self, value):
     self.preferences.general.language = (LANGUAGES[value])

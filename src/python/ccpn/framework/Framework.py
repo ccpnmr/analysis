@@ -32,7 +32,6 @@ from ccpn.core.Project import Project
 from ccpn.core._implementation import Io as coreIo
 from ccpn.core.lib import CcpnNefIo
 from ccpn.core.PeakList import PeakList
-from ccpn.core.IntegralList import IntegralList
 
 from ccpn.util import Path
 from ccpn.util import Register
@@ -590,8 +589,8 @@ class Framework:
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
       ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
-      ("Integrate", self.showIntegrationModule, [('shortcut', 'in'),
-                                                 ('enabled', False)]),
+      # ("Integrate", self.showIntegrationModule, [('shortcut', 'in'),
+      #                                            ('enabled', False)]),
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
     ]
@@ -615,8 +614,8 @@ class Framework:
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
-      ("Integral Table", self.showIntegralTable, [('shortcut', 'it'),
-                                                  ('enabled', True)]),
+      # ("Integral Table", self.showIntegralTable, [('shortcut', 'it'),
+      #                                             ('enabled', True)]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
@@ -1036,18 +1035,6 @@ class Framework:
     popup.exec_()
 
 
-  def showIntegrationModule(self, position:str='bottom', relativeTo:CcpnModule=None):
-    spectrumDisplay = self.ui.mainWindow.createSpectrumDisplay(self.project.spectra[0])
-    from ccpn.AnalysisMetabolomics.Integration import IntegrationTable, IntegrationWidget
-    spectrumDisplay.integrationWidget = IntegrationWidget(spectrumDisplay.module,
-                                                          project=self.project, grid=(2, 0), gridSpan=(1, 4))
-    spectrumDisplay.integrationTable = IntegrationTable(spectrumDisplay.module,
-                                                        project=self.project, grid=(0, 4), gridSpan=(3, 1))
-    self.current.strip = spectrumDisplay.strips[0]
-    if self.ui.mainWindow.blankDisplay:
-      self.ui.mainWindow.blankDisplay.setParent(None)
-      self.ui.mainWindow.blankDisplay = None
-
   ###################################################################################################################
   ## MENU callbacks:  Molecule
   ###################################################################################################################
@@ -1161,19 +1148,6 @@ class Framework:
     self.ui.mainWindow.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
-
-
-  def showIntegralTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:IntegralList=None):
-    logParametersString = "position={position}, relativeTo={relativeTo}, selectedList={selectedList}".format(
-      position="'"+position+"'" if isinstance(position, str) else position,
-      relativeTo="'"+relativeTo+"'" if isinstance(relativeTo, str) else relativeTo,
-      selectedList="'" + selectedList + "'" if isinstance(selectedList, str) else selectedList,)
-
-    self._startCommandBlock('application.showIntegralTable({})'.format(logParametersString))
-    try:
-      self.ui.showIntegralTable(position=position, relativeTo=relativeTo, selectedList=selectedList)
-    finally:
-      self._endCommandBlock()
 
 
   def showRestraintTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:PeakList=None):
@@ -1325,7 +1299,7 @@ class Framework:
     if macroFile is None:
       dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Run Macro",
                           acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
-                          directory=self.preferences.general.macroPath, filter='*.py')
+                          directory=self.preferences.general.userMacroPath, filter='*.py')
       macroFile = dialog.selectedFile()
       if not macroFile:
         return
@@ -1488,11 +1462,10 @@ def getSaveDirectory(preferences=None):
 
 def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
 
-  def _readPreferencesFile(preferencesPath):
-    fp = open(preferencesPath)
-    preferences = json.load(fp, object_hook=AttrDict) #TODO find a better way ?!?
-    fp.close()
-    return preferences
+  # def _readPreferencesFile(preferencesPath):
+  #   with open(preferencesPath) as fp:
+  #     preferences = json.load(fp, object_hook=AttrDict) #TODO find a better way ?!?
+  #   return preferences
 
   def _updateDict(d, u):
     import collections
@@ -1512,13 +1485,16 @@ def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
   # read the default settings
   from ccpn.framework.PathsAndUrls import defaultPreferencesPath
   preferencesPath = (defaultPath if defaultPath else defaultPreferencesPath)
-  preferences = _readPreferencesFile(preferencesPath)
+  with open(preferencesPath) as fp:
+    preferences = json.load(fp, object_hook=AttrDict)
 
   # read user settings and update if not skipped
   if not skipUserPreferences:
     from ccpn.framework.PathsAndUrls import userPreferencesPath
     preferencesPath = (userPath if userPath else os.path.expanduser(userPreferencesPath))
-    if os.path.exists(preferencesPath):
-      _updateDict(preferences, _readPreferencesFile(preferencesPath))
+    if os.path.isfile(preferencesPath):
+      with open(preferencesPath) as fp:
+        userPreferences = json.load(fp, object_hook=AttrDict)
+      preferences = _updateDict(preferences, userPreferences)
 
   return preferences

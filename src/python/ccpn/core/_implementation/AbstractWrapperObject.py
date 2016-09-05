@@ -613,6 +613,7 @@ class AbstractWrapperObject():
       return
 
     className = self.className
+    # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
     iterator = (project._context2Notifiers.setdefault((name, action), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
     pendingNotifications = project._pendingNotifications

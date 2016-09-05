@@ -30,6 +30,7 @@ import os
 import time
 
 defaultLogLevel = logging.INFO
+# defaultLogLevel = logging.DEBUG
 
 # this code assumes we only have one project open at a time
 # when a new logger is created the handlers for the old one are closed

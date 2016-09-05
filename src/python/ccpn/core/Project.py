@@ -812,6 +812,7 @@ class Project(AbstractWrapperObject):
     # get object
     className, target = tuple(sorted(classNames))
     # self._doNotification(classNames[0], classNames[1], self)
+    # NB 'AbstractWrapperObject' not currently in use (Sep 2016), but kept for future needs
     iterator = (self._context2Notifiers.setdefault((name, target), OrderedDict())
                for name in (className, 'AbstractWrapperObject'))
     # TODO suspension temporarily disabled

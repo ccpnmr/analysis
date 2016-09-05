@@ -22,6 +22,8 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from collections import OrderedDict
+
 from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.DropBase import DropBase
@@ -41,16 +43,24 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 
-from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.core import _coreClassMap
 
-# NB RestraintList ('RL') is not in for the moment. Needs to be added later
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
 # Also parents must appear before their children
-classesInSideBar = ('SG', 'SP', 'PL', 'SA', 'SC', 'SU', 'MC', 'NC', 'NR', 'NA',
-                    'CL', 'SE', 'MO', 'DS',
-                    'RL', 'NO')
+
+_classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList',
+                        'Sample', 'SampleComponent', 'Substance', 'Chain',
+                        'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
+                        'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
+
+ll = [_coreClassMap[x] for x in _classNamesInSidebar]
+classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
+# classesInSideBar = ('SG', 'SP', 'PL', 'SA', 'SC', 'SU', 'MC', 'NC', 'NR', 'NA',
+#                     'CL', 'SE', 'MO', 'DS',
+#                     'RL', 'NO')
 
 classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
 
@@ -173,9 +183,15 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.colourScheme = project._appBase.preferences.general.colourScheme
 
     # Register notifiers to maintain sidebar
-    notifier = project.registerNotifier('AbstractWrapperObject', 'create', self._createItem)
-    notifier = project.registerNotifier('AbstractWrapperObject', 'delete', self._removeItem)
-    notifier = project.registerNotifier('AbstractWrapperObject', 'rename', self._renameItem)
+    for cls in classesInSideBar.values():
+      className = cls.className
+      project.registerNotifier(className, 'create', self._createItem)
+      project.registerNotifier(className, 'delete', self._removeItem)
+      project.registerNotifier(className, 'rename', self._renameItem)
+
+    # notifier = project.registerNotifier('AbstractWrapperObject', 'create', self._createItem)
+    # notifier = project.registerNotifier('AbstractWrapperObject', 'delete', self._removeItem)
+    # notifier = project.registerNotifier('AbstractWrapperObject', 'rename', self._renameItem)
     notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
                                         onceOnly=True)
     project.duplicateNotifier('SpectrumGroup', 'create', notifier)
@@ -270,10 +286,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         newObjectItem = QtGui.QTreeWidgetItem(newItem)
         newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
         newObjectItem.setText(0, "<New>")
-
-      if shortClassName == 'SG':
-        # need this because otherwise only first SG has its spectra displayed on sidebar
-        self._refreshSidebarSpectra(self.project)
 
     elif shortClassName == 'PL':
       for itemParent in self._findItems(obj.spectrum.pid):

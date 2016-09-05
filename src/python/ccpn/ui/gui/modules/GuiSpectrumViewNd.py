@@ -573,6 +573,9 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   def paint(self, painter, option, widget=None):
 
+    if self.isDeleted or self.project.isDeleted or not self.isVisible():
+      return
+
     ##if not widget:
     ##  return
     dataStore = self._apiDataSource.dataStore
@@ -584,11 +587,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     self.okDataFile = True
         
-    # NBNB this should NEVER be called if self.strip is None (i.e. self is deleted)
-    # if self.isVisible() and self.strip is not None:
-    if self.isVisible() and not self.isDeleted:
-      self._drawContours(painter)
-    
+    self._drawContours(painter)
+
   def boundingRect(self):  # seems necessary to have
       
     return QtCore.QRectF(-2000, -2000, 2000, 2000)  # TBD: remove hardwiring

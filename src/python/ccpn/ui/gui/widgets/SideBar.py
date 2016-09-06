@@ -51,7 +51,7 @@ from ccpn.core import _coreClassMap
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
 # Also parents must appear before their children
 
-_classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList',
+_classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
                         'Sample', 'SampleComponent', 'Substance', 'Chain',
                         'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
@@ -205,6 +205,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       # self._removeItem( self.project, spectrum)
       self._removeItem(spectrum)
       self._createItem(spectrum)
+      for obj in spectrum.peakLists + spectrum.integralLists:
+        self._createItem(obj)
 
 
 
@@ -266,55 +268,88 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       return
 
     shortClassName = obj.shortClassName
+    parent = obj._parent
+    project = obj._project
 
-    if shortClassName == 'SP':
-      # Spectrum - special behaviour - put them under SpectrumGroups, if any
-      spectrumGroups = obj.spectrumGroups
-      if spectrumGroups:
-        for sg in spectrumGroups:
-          for sgitem in self._findItems(str(sg.pid)):
-            self._addItem(sgitem, str(obj.pid))
+    if shortClassName in classesInSideBar:
 
-        return
+      if parent is project:
 
+        if shortClassName == 'SP':
+          # Spectrum - special behaviour - put them under SpectrumGroups, if any
+          spectrumGroups = obj.spectrumGroups
+          if spectrumGroups:
+            for sg in spectrumGroups:
+              for sgitem in self._findItems(str(sg.pid)):
+                newItem = self._addItem(sgitem, str(obj.pid))
+                newObjectItem = QtGui.QTreeWidgetItem(newItem)
+                newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+                newObjectItem.setText(0, "<New>")
 
-    if shortClassName in classesInTopLevel:
-      itemParent = self._typeToItem.get(shortClassName)
-      newItem = self._addItem(itemParent, obj.pid)
+            return
 
-      if shortClassName in ['SP', 'SA', 'NC']:
-        newObjectItem = QtGui.QTreeWidgetItem(newItem)
-        newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-        newObjectItem.setText(0, "<New>")
+        itemParent = self._typeToItem.get(shortClassName)
+        newItem = self._addItem(itemParent, obj.pid)
 
-    elif shortClassName == 'PL':
-      for itemParent in self._findItems(obj.spectrum.pid):
-        self._addItem(itemParent, obj.pid)
+        if shortClassName in ['SP', 'SA', 'NC']:
+          newObjectItem = QtGui.QTreeWidgetItem(newItem)
+          newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+          newObjectItem.setText(0, "<New>")
 
-    elif shortClassName == 'SC':
-      for itemParent in self._findItems(obj.sample.pid):
-        self._addItem(itemParent, obj.pid)
-
-    elif shortClassName == 'NR':
-      for itemParent in self._findItems(obj.nmrChain.pid):
-        self._addItem(itemParent, obj.pid)
-
-    elif shortClassName == 'NA':
-      for itemParent in self._findItems(obj.nmrResidue.pid):
-        self._addItem(itemParent, obj.pid)
-
-    elif shortClassName == 'RL':
-      for itemParent in self._findItems(obj.dataSet.pid):
-        self._addItem(itemParent, obj.pid)
-
-    elif shortClassName == 'MO':
-      for itemParent in self._findItems(obj.structureEnsemble.pid):
-        self._addItem(itemParent, obj.pid)
+      else:
+        for itemParent in self._findItems(parent.pid):
+          self._addItem(itemParent, obj.pid)
 
     else:
       # Object type is not in sidebar
       return None
 
+    # if shortClassName == 'SP':
+    #   # Spectrum - special behaviour - put them under SpectrumGroups, if any
+    #   spectrumGroups = obj.spectrumGroups
+    #   if spectrumGroups:
+    #     for sg in spectrumGroups:
+    #       for sgitem in self._findItems(str(sg.pid)):
+    #         self._addItem(sgitem, str(obj.pid))
+    #
+    #     return
+    #
+    # if shortClassName in classesInTopLevel:
+    #   itemParent = self._typeToItem.get(shortClassName)
+    #   newItem = self._addItem(itemParent, obj.pid)
+    #
+    #   if shortClassName in ['SP', 'SA', 'NC']:
+    #     newObjectItem = QtGui.QTreeWidgetItem(newItem)
+    #     newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    #     newObjectItem.setText(0, "<New>")
+    #
+    # elif shortClassName == 'PL':
+    #   for itemParent in self._findItems(obj.spectrum.pid):
+    #     self._addItem(itemParent, obj.pid)
+    #
+    # elif shortClassName == 'SC':
+    #   for itemParent in self._findItems(obj.sample.pid):
+    #     self._addItem(itemParent, obj.pid)
+    #
+    # elif shortClassName == 'NR':
+    #   for itemParent in self._findItems(obj.nmrChain.pid):
+    #     self._addItem(itemParent, obj.pid)
+    #
+    # elif shortClassName == 'NA':
+    #   for itemParent in self._findItems(obj.nmrResidue.pid):
+    #     self._addItem(itemParent, obj.pid)
+    #
+    # elif shortClassName == 'RL':
+    #   for itemParent in self._findItems(obj.dataSet.pid):
+    #     self._addItem(itemParent, obj.pid)
+    #
+    # elif shortClassName == 'MO':
+    #   for itemParent in self._findItems(obj.structureEnsemble.pid):
+    #     self._addItem(itemParent, obj.pid)
+    #
+    # else:
+    #   # Object type is not in sidebar
+    #   return None
 
   def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
     """rename item(s) from previous pid oldPid to current object pid"""

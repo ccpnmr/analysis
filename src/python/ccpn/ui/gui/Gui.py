@@ -132,6 +132,7 @@ class Gui(Ui):
     sys.stderr.write('==> Gui interface is ready\n' )
     splash.close()
     splash.finish(self.mainWindow)
+    self.mainWindow._fillMacrosMenu()
     self.mainWindow.setUserShortcuts()
 
 

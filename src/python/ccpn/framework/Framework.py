@@ -638,7 +638,8 @@ class Framework:
       ("New from Log...", self.newMacroFromLog),
       (),
       ("Record Macro...", self.startMacroRecord),
-      ("Run...", self.runMacro, [('shortcut', 'rm')]),
+      ("Run", ()),
+      # ("Run...", self.runMacro, [('shortcut', 'rm')]),
       ("Run Recent", ()),
       (),
       ("Define Shortcut...", self.defineShortcut, [('enabled', False)])

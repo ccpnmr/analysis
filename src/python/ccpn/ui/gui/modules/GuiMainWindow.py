@@ -313,6 +313,58 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                     callback=self.application.clearRecentProjects))
 
 
+  def _fillMacrosMenu(self):
+    """
+    Populates recent macros menu with last ten macros ran.
+    TODO: make sure that running a macro adds it to the prefs and calls this function
+    """
+
+    runMacrosMenu = self.getMenuAction('Macro->Run')
+    runMacrosMenu.clear()
+
+    from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath
+
+    try:
+      ccpnMacros = os.listdir(ccpnMacroPath)
+      ccpnMacros = [f for f in ccpnMacros if
+                    os.path.isfile(os.path.join(ccpnMacroPath, f))]
+      ccpnMacros = [f for f in ccpnMacros if f.split('.')[-1] == 'py']
+      ccpnMacros = [f for f in ccpnMacros if not f.startswith('_')]
+
+      for macro in ccpnMacros:
+        action = Action(self, text=macro, translate=False,
+                        callback=partial(self.runMacro,
+                                         macroFile=os.path.join(ccpnMacroPath, macro)))
+        runMacrosMenu.addAction(action)
+      if len(ccpnMacros) > 0:
+        runMacrosMenu.addSeparator()
+    except FileNotFoundError:
+      pass
+
+    try:
+      userMacroPath = os.path.expanduser(self.application.preferences.general.userMacroPath)
+      userMacros = os.listdir(userMacroPath)
+      userMacros = [f for f in userMacros if
+                    os.path.isfile(os.path.join(userMacroPath, f))]
+      userMacros = [f for f in userMacros if f.split('.')[-1] == 'py']
+      userMacros = [f for f in userMacros if not f.startswith('_')]
+
+      for macro in userMacros:
+          action = Action(self, text=macro, translate=False,
+                          callback=partial(self.runMacro,
+                                           macroFile=os.path.join(userMacroPath, macro)))
+          runMacrosMenu.addAction(action)
+      if len(userMacros) > 0:
+        runMacrosMenu.addSeparator()
+    except FileNotFoundError:
+      pass
+
+    runMacrosMenu.addAction(Action(runMacrosMenu, text='Refresh',
+                                    callback=self._fillMacrosMenu))
+    runMacrosMenu.addAction(Action(runMacrosMenu, text='Browse...',
+                                    callback=self.runMacro))
+
+
   def _fillRecentMacrosMenu(self):
     """
     Populates recent macros menu with last ten macros ran.
@@ -423,7 +475,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       if not macroFile:
         return
 
-    if os.path.exists(macroFile):
+    if os.path.isfile(macroFile):
       self.application.preferences.recentMacros.append(macroFile)
       self._fillRecentMacrosMenu()
       self.pythonConsole._runMacro(macroFile)

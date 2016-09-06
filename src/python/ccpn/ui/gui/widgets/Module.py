@@ -10,7 +10,10 @@ Module = Dock
 ModuleLabel = DockLabel
 
 class CcpnModule(Module):
-  def __init__(self, name, **kw):
+
+  includeSettingsWidget = False
+
+  def __init__(self, name, logger=None, **kw):
     super(CcpnModule, self).__init__(name, self)
     self.label.hide()
     self.label = CcpnModuleLabel(name.upper(), self)
@@ -18,16 +21,31 @@ class CcpnModule(Module):
     self.label.closeButton.clicked.connect(self.closeModule)
     self.label.fixedWidth = True
     self.autoOrientation = False
-    self.widget1 = QtGui.QWidget(self)
-    self.widget2 = QtGui.QWidget(self)
-    self.addWidget(self.widget1, 0, 0)
-    self.addWidget(self.widget2, 1, 0)
+    self.mainWidget = QtGui.QWidget(self)
+    self.settingsWidget = QtGui.QWidget(self)
+    self.addWidget(self.mainWidget, 0, 0)
+    self.addWidget(self.settingsWidget, 1, 0)
+    if not self.includeSettingsWidget:
+      self.settingsWidget.hide()
 
 
 
   def resizeEvent(self, event):
     self.setOrientation('vertical', force=True)
     self.resizeOverlay(self.size())
+
+
+  def toggleSettingsWidget(self, button=None):
+    """
+    Toggles display of settings widget in module.
+    """
+    if self.includeSettingsWidget:
+      if button.isChecked():
+        self.settingsWidget.show()
+      else:
+        self.settingsWidget.hide()
+    else:
+      print('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
   def closeModule(self):
     self.close()

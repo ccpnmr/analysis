@@ -45,6 +45,9 @@ class IpythonConsole(Widget, Base):
 
         consoleLayout.addWidget(self.ipythonWidget)
 
+        namespace['runMacro'] = self._runMacro
+
+
         runMacroButton = QtGui.QPushButton()
         runMacroButton.clicked.connect(self._runMacro)
         runMacroButton.setText('Run Macro')

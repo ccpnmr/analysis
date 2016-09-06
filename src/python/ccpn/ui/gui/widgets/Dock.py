@@ -16,10 +16,10 @@ class CcpnDock(Dock):
     self.label.closeButton.clicked.connect(self.closeModule)
     self.label.fixedWidth = True
     self.autoOrientation = False
-    self.widget1 = QtGui.QWidget(self)
-    self.widget2 = QtGui.QWidget(self)
-    self.addWidget(self.widget1, 0, 0)
-    self.addWidget(self.widget2, 1, 0)
+    self.mainWidget = QtGui.QWidget(self)
+    self.settingsWidget = QtGui.QWidget(self)
+    self.addWidget(self.mainWidget, 0, 0)
+    self.addWidget(self.settingsWidget, 1, 0)
 
   def resizeEvent(self, event):
     self.setOrientation('vertical', force=True)

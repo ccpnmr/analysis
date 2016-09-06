@@ -642,7 +642,7 @@ class Framework:
       # ("Run...", self.runMacro, [('shortcut', 'rm')]),
       ("Run Recent", ()),
       (),
-      ("Define Shortcut...", self.defineShortcut, [('enabled', False)])
+      ("Define User Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')])
     ]
                ))
 
@@ -1233,10 +1233,9 @@ class Framework:
 
     try:
       from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
-      menuItems = [("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1')])]
+      menuItems = [("PARAssign Setup", self.showParassignSetup)]
     except ImportError:
-      menuItems = [("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1'),
-                                                                 ('enabled', False)])]
+      menuItems = [("PARAssign Setup", self.showParassignSetup, [('enabled', False)])]
 
     return menuItems
 
@@ -1283,14 +1282,14 @@ class Framework:
     Displays macro editor with additional buttons for recording a macro.
     """
     self.macroEditor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor", showRecordButtons=True)
-    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
+    self.uipyinWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
 
 
   def defineUserShortcuts(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-                                  'This function has not been implemented in the current version',
-                                  colourScheme=self.ui.mainWindow.colourScheme)
+
+    from ccpn.ui.gui.modules.ShortcutModule import ShortcutModule
+    self.shortcutModule = ShortcutModule(self.ui.mainWindow)
 
   def runMacro(self, macroFile:str=None):
     """

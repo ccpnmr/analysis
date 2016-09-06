@@ -58,9 +58,9 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
     CcpnModule.__init__(self, name='Blank Display')
     # moduleArea.addModule(self, 'right')
 
-    self.label2 = Label(self.widget1, text='Drag Spectrum Here', textColor='#bec4f3')
+    self.label2 = Label(self.mainWidget, text='Drag Spectrum Here', textColor='#bec4f3')
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
-    self.widget2.hide()
+    self.settingsWidget.hide()
 
 
     DropBase.__init__(self, moduleArea.guiWindow._appBase)

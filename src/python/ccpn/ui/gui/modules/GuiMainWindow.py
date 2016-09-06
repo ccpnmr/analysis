@@ -97,9 +97,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     project = self._project
     path = project.path
     self.namespace['project'] = project
+    self.namespace['runMacro'] = self.pythonConsole._runMacro
+
     msg = path + (' created' if isNew else ' opened')
     self.statusBar().showMessage(msg)
-
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
     self.pythonConsole.writeConsoleCommand(msg2)
 
@@ -177,7 +178,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
                       'ui': self.application.ui,
                       'mainWindow': self,
-
                       'project': self.application.project,
                       'loadProject': self.application.loadProject,
                       'newProject': self.application.newProject,

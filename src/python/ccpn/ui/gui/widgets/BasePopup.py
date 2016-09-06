@@ -54,7 +54,7 @@ class BasePopup(QtGui.QWidget, Base):
       
     if location:
       self.show()  # TBD: is this needed?
-      self.setGeometry(*location)
+      # self.setGeometry(*location)
 
     self.setWindowTitle(title)
 
@@ -80,46 +80,46 @@ class BasePopup(QtGui.QWidget, Base):
     self.raise_()
     self.activateWindow()
   
-  def setSize(self, w, h):
-  
-    self.setGeometry(self.x(), self.y(), w, h)
-  
-  def setGeometry(self, x, y, w=None, h=None):
-    
-    # this resizes / moves popup if it doesn't fit on screen
-    # not sure if we need this functionality but leave for now
-    
-    if w is None:
-      w = self.rect().width()
-    
-    if h is None:
-      h = self.rect().width()  
-     
-    screenRect = QtGui.QApplication.desktop()
-       
-    sWidth = screenRect.width()
-    sHeight = screenRect.height()
-    
-    w = min(sWidth, w)
-    h = min(sHeight, h)
-    
-    if (x+w) > sWidth:
-      if w == 1:
-        x = sWidth // 2
-      else:
-        x = sWidth - w
-    elif x < 0:
-      x = 0
-    
-    if (y+h) > sHeight:
-      if h == 1:
-        y = sHeight // 2
-      else:
-        y = sHeight - h  
-    elif y < 0:
-      y = 0
-          
-    QtGui.QWidget.setGeometry(self, x, y, w, h)
+  # def setSize(self, w, h):
+  #
+  #   self.setGeometry(self.x(), self.y(), w, h)
+  #
+  # def setGeometry(self, x, y, w=None, h=None):
+  #
+  #   # this resizes / moves popup if it doesn't fit on screen
+  #   # not sure if we need this functionality but leave for now
+  #
+  #   if w is None:
+  #     w = self.rect().width()
+  #
+  #   if h is None:
+  #     h = self.rect().width()
+  #
+  #   screenRect = QtGui.QApplication.desktop()
+  #
+  #   sWidth = screenRect.width()
+  #   sHeight = screenRect.height()
+  #
+  #   w = min(sWidth, w)
+  #   h = min(sHeight, h)
+  #
+  #   if (x+w) > sWidth:
+  #     if w == 1:
+  #       x = sWidth // 2
+  #     else:
+  #       x = sWidth - w
+  #   elif x < 0:
+  #     x = 0
+  #
+  #   if (y+h) > sHeight:
+  #     if h == 1:
+  #       y = sHeight // 2
+  #     else:
+  #       y = sHeight - h
+  #   elif y < 0:
+  #     y = 0
+  #
+  #   QtGui.QWidget.setGeometry(self, x, y, w, h)
 
   def body(self, master):
     

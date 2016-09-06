@@ -6,11 +6,11 @@ strip = current.strip
 
 # Define the querySpectrum as the second spectrum in the 
 # strip using the spectra attribute of the Strip class
-querySpectrum = strip.spectra[1]
+querySpectrum = strip.spectra[0]
 
 # Define the refSpectrum as the first spectrum in the 
 # strip using the spectra attribute of the Strip class
-refSpectrum = strip.spectra[0]
+refSpectrum = strip.spectra[1]
 
 # Define the peak picking ranges for the two dimensions
 hRange = [6.2, 14.0] # list for 1H picking range

@@ -119,14 +119,18 @@ class GuiWindow(DropBase):
 
   def setUserShortcuts(self, preferences=None):
 
-    from functools import reduce
+    from functools import reduce, partial
 
-    userShortcuts = {
-      'w, 2': 'ui.mainWindow.loadProject',
-    }
+    userShortcuts = preferences.shortcuts
     for shortcut, function in userShortcuts.items():
-      stub = self.namespace.get(function.split('.')[0])
-      QtGui.QShortcut(QtGui.QKeySequence(shortcut), self, reduce(getattr, function.split('.')[1:], stub))
+
+      if function.split('(')[0] == 'runMacro':
+        QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
+                  self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]))
+
+      else:
+        stub = self.namespace.get(function.split('.')[0])
+        QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self, reduce(getattr, function.split('.')[1:], stub))
 
   def deleteSelectedPeaks(self, parent=None):
 

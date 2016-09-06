@@ -329,7 +329,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       ccpnMacros = [f for f in ccpnMacros if
                     os.path.isfile(os.path.join(ccpnMacroPath, f))]
       ccpnMacros = [f for f in ccpnMacros if f.split('.')[-1] == 'py']
+      ccpnMacros = [f for f in ccpnMacros if not f.startswith('.')]
       ccpnMacros = [f for f in ccpnMacros if not f.startswith('_')]
+      ccpnMacros = sorted(ccpnMacros)
 
       for macro in ccpnMacros:
         action = Action(self, text=macro, translate=False,
@@ -347,7 +349,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       userMacros = [f for f in userMacros if
                     os.path.isfile(os.path.join(userMacroPath, f))]
       userMacros = [f for f in userMacros if f.split('.')[-1] == 'py']
+      userMacros = [f for f in userMacros if not f.startswith('.')]
       userMacros = [f for f in userMacros if not f.startswith('_')]
+      userMacros = sorted(userMacros)
 
       for macro in userMacros:
           action = Action(self, text=macro, translate=False,

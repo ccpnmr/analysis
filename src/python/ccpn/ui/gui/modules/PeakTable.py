@@ -25,6 +25,7 @@ from ccpn.core.Peak import Peak
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -41,6 +42,9 @@ from PyQt4 import QtGui, QtCore
 UNITS = ['ppm', 'Hz', 'point']
 
 class PeakTable(CcpnModule):
+
+  includeSettingsWidget = True
+
   def __init__(self, project, selectedList=None):
     CcpnModule.__init__(self, name='Peak List')
 
@@ -48,14 +52,27 @@ class PeakTable(CcpnModule):
       project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
       return
 
-    self.peakList = PeakListSimple(self, project, selectedList=selectedList)
+    self.peakList = PeakListSimple(self.mainWidget, project, selectedList=selectedList)
     self.layout.addWidget(self.peakList)
     self.current = project._appBase.current
+    self.settingsButton = self.placeSettingsButton(buttonParent=self.peakList, buttonGrid=(0, 8))
     # self.current.registerNotify(self.peakList._selectPeakInTable, 'peak')
-    self.closeModule = self._closeModule
     if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
       self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
+
+    serialCheckLabel = Label(self.settingsWidget, text='Serial', grid=(0, 0))
+    serialCheckBox = CheckBox(self.settingsWidget, grid=(0, 1))
+    assignCheckLabel = Label(self.settingsWidget, text='Assign', grid=(0, 2))
+    assignCheckBox = CheckBox(self.settingsWidget, grid=(0, 3))
+    positionCheckLabel = Label(self.settingsWidget, text='Position', grid=(1, 0))
+    positionCheckBox = CheckBox(self.settingsWidget, grid=(1, 1))
+    heightCheckLabel = Label(self.settingsWidget, text='Height', grid=(1, 2))
+    heightCheckBox = CheckBox(self.settingsWidget, grid=(1, 3))
+    volumeCheckLabel = Label(self.settingsWidget, text='Volume', grid=(2, 0))
+    volumeCheckBox = CheckBox(self.settingsWidget, grid=(2, 1))
+    linewidthCheckLabel = Label(self.settingsWidget, text='Line Width', grid=(2, 2))
+    linewidthCheckBox = CheckBox(self.settingsWidget, grid=(2, 3))
 
   def _closeModule(self):
     """
@@ -120,7 +137,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
                                        getColumnsFunction=self.getExtraColumns, selector=self.peakListPulldown,
                                        multiSelect=True, unitPulldown=self.posUnitPulldown)
 
-    self.layout().addWidget(self.peakTable, 1, 0, 1, 8)
+    self.layout().addWidget(self.peakTable, 1, 0, 1, 9)
     if selectedList is not None:
       self.peakListPulldown.setCurrentIndex(selectedList)
 

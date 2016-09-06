@@ -100,7 +100,7 @@ def defineProgramArguments():
   #                                               help='Show %s component' % component.lower())
   parser.add_argument('--language',
                       help=('Language for menus, etc.; valid options = (%s); default=%s' %
-                            ('|'.join(languages) ,defaultLanguage)),
+                            ('|'.join(languages), defaultLanguage)),
                       default=defaultLanguage)
   parser.add_argument('--interface',
                       help=('User interface, to use; one of  = (%s); default=%s' %

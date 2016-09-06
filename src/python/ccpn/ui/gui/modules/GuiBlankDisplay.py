@@ -51,6 +51,8 @@ from ccpn.ui.gui.DropBase import DropBase
 
 class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else the drop events are not processed
 
+  includeSettingsWidget = False
+
   def __init__(self, moduleArea):
     
     self.moduleArea = moduleArea
@@ -60,12 +62,10 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
 
     self.label2 = Label(self.mainWidget, text='Drag Spectrum Here', textColor='#bec4f3')
     self.label2.setAlignment(QtCore.Qt.AlignCenter)
-    self.settingsWidget.hide()
-
 
     DropBase.__init__(self, moduleArea.guiWindow._appBase)
     self.setOrientation = self._setOrientation
-    self.closeModule = self._closeModule
+    # self.closeModule = self._closeModule
 
   def _setOrientation(self, o='vertical', force=True):
     """

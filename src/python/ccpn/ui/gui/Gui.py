@@ -133,7 +133,7 @@ class Gui(Ui):
     splash.close()
     splash.finish(self.mainWindow)
     self.mainWindow._fillMacrosMenu()
-    self.mainWindow.setUserShortcuts()
+    self.mainWindow.setUserShortcuts(self.mainWindow._appBase.preferences)
 
 
     self.qtApp.start()

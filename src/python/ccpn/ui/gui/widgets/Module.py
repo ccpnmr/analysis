@@ -6,6 +6,8 @@ from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.Button import Button
 
+from functools import partial
+
 Module = Dock
 ModuleLabel = DockLabel
 
@@ -13,26 +15,40 @@ class CcpnModule(Module):
 
   includeSettingsWidget = False
 
-  def __init__(self, name, logger=None, **kw):
+  def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, **kw):
     super(CcpnModule, self).__init__(name, self)
     self.label.hide()
     self.label = CcpnModuleLabel(name.upper(), self)
     self.label.show()
-    self.label.closeButton.clicked.connect(self.closeModule)
+    self.label.closeButton.clicked.connect(self._closeModule)
     self.label.fixedWidth = True
     self.autoOrientation = False
     self.mainWidget = QtGui.QWidget(self)
-    self.settingsWidget = QtGui.QWidget(self)
     self.addWidget(self.mainWidget, 0, 0)
-    self.addWidget(self.settingsWidget, 1, 0)
-    if not self.includeSettingsWidget:
+
+    if self.includeSettingsWidget:
+      self.settingsWidget = QtGui.QWidget(self)
+      self.addWidget(self.settingsWidget, 1, 0)
       self.settingsWidget.hide()
+
+
+      #
+      # if buttonParent and buttonGrid:
+      #   self.placeSettingsButton(buttonParent, buttonGrid)
+      # else:
+      #   print('cannot add settings button')
 
 
 
   def resizeEvent(self, event):
     self.setOrientation('vertical', force=True)
     self.resizeOverlay(self.size())
+
+  def placeSettingsButton(self, buttonParent, buttonGrid):
+    if self.includeSettingsWidget:
+      settingsButton = Button(buttonParent, icon='icons/applications-system', grid=buttonGrid, hPolicy='fixed', toggle=True)
+      settingsButton.toggled.connect(partial(self.toggleSettingsWidget, settingsButton))
+      settingsButton.setChecked(False)
 
 
   def toggleSettingsWidget(self, button=None):
@@ -47,7 +63,8 @@ class CcpnModule(Module):
     else:
       print('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
-  def closeModule(self):
+
+  def _closeModule(self):
     self.close()
 
   def dropEvent(self, *args):

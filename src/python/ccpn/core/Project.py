@@ -600,7 +600,7 @@ class Project(AbstractWrapperObject):
     try:
       del od[notifier]
     except KeyError:
-      self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, action)))
+      self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, target)))
 
 
   def removeNotifier(self, notifier:typing.Callable):

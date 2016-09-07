@@ -123,37 +123,37 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.spectrumGroupItem.setText(0, "SpectrumGroups")
     self.newSpectrumGroup = QtGui.QTreeWidgetItem(self.spectrumGroupItem)
     self.newSpectrumGroup.setFlags(self.newSpectrumGroup.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newSpectrumGroup.setText(0, "<New>")
+    self.newSpectrumGroup.setText(0, "<New SpectrumGroup>")
     self.samplesItem = dd['SA'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.samplesItem.setFlags(self.samplesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.samplesItem.setText(0, 'Samples')
     self.newSample = QtGui.QTreeWidgetItem(self.samplesItem)
     self.newSample.setFlags(self.newSample.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newSample.setText(0, "<New>")
+    self.newSample.setText(0, "<New Sample>")
     self.substancesItem = dd['SU'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.substancesItem.setFlags(self.substancesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.substancesItem.setText(0, "Substances")
     self.newSubstance = QtGui.QTreeWidgetItem(self.substancesItem)
     self.newSubstance.setFlags(self.newSubstance.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newSubstance.setText(0, "<New>")
+    self.newSubstance.setText(0, "<New Substance>")
     self.chainItem = dd['MC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chainItem.setFlags(self.chainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chainItem.setText(0, "Chains")
     self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
     self.newChainItem.setFlags(self.newChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newChainItem.setText(0, '<New>')
+    self.newChainItem.setText(0, '<New Chain>')
     self.nmrChainItem = dd['NC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.nmrChainItem.setFlags(self.nmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.nmrChainItem.setText(0, "NmrChains")
     self.newNmrChainItem = QtGui.QTreeWidgetItem(self.nmrChainItem)
     self.newNmrChainItem.setFlags(self.newNmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newNmrChainItem.setText(0, '<New>')
+    self.newNmrChainItem.setText(0, '<New NmrChain>')
     self.chemicalShiftListsItem = dd['CL'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.chemicalShiftListsItem.setFlags(self.chemicalShiftListsItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.chemicalShiftListsItem.setText(0, "Chemical Shift Lists")
     self.newChemicalShiftListItem = QtGui.QTreeWidgetItem(self.chemicalShiftListsItem)
     self.newChemicalShiftListItem.setFlags(self.newChemicalShiftListItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newChemicalShiftListItem.setText(0, '<New>')
+    self.newChemicalShiftListItem.setText(0, '<New ChemicalShiftList>')
     self.structuresItem = dd['SE'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.structuresItem.setFlags(self.structuresItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.structuresItem.setText(0, "Structures")
@@ -162,13 +162,13 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.dataSetsItem.setText(0, "DataSets")
     self.newDataSetItem = QtGui.QTreeWidgetItem(self.dataSetsItem)
     self.newDataSetItem.setFlags(self.newDataSetItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newDataSetItem.setText(0, '<New>')
+    self.newDataSetItem.setText(0, '<New Dataset>')
     self.notesItem = dd['NO'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.notesItem.setFlags(self.notesItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.notesItem.setText(0, "Notes")
     self.newNoteItem = QtGui.QTreeWidgetItem(self.notesItem)
     self.newNoteItem.setFlags(self.newNoteItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    self.newNoteItem.setText(0, '<New>')
+    self.newNoteItem.setText(0, '<New Note>')
     self.mousePressEvent = self._mousePressEvent
     self.dragMoveEvent = self._dragMoveEvent
     self.dragEnterEvent = self._dragEnterEvent
@@ -284,7 +284,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
                 newItem = self._addItem(sgitem, str(obj.pid))
                 newObjectItem = QtGui.QTreeWidgetItem(newItem)
                 newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-                newObjectItem.setText(0, "<New>")
+                newObjectItem.setText(0, "<New %s" % classesInSideBar[shortClassName].className)
 
             return
 
@@ -295,7 +295,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         if shortClassName in ['SA', 'NC']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)
           newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-          newObjectItem.setText(0, "<New>")
+          newObjectItem.setText(0, "<New %s" % classesInSideBar[shortClassName]._childClasses[0].className)
 
         if shortClassName == 'SP':
           newPeakListObjectItem = QtGui.QTreeWidgetItem(newItem)
@@ -316,7 +316,12 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
       else:
         for itemParent in self._findItems(parent.pid):
-          self._addItem(itemParent, obj.pid)
+          newItem = self._addItem(itemParent, obj.pid)
+
+          if shortClassName == 'NR':
+            newObjectItem = QtGui.QTreeWidgetItem(newItem)
+            newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+            newObjectItem.setText(0, "<New NmrAtom>")
           for i in range(itemParent.childCount()):
             itemParent.child(i).sortChildren(0, QtCore.Qt.AscendingOrder)
 
@@ -532,8 +537,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # This is true as of 16/2/2016, but may NOT remain true
     # (e.g. Spectrum has multiple children).
 
-    print('something mahoosive')
-
     if item.text(0) == "<New Integral List>" or item.text(0) == "<New Peak List>":
 
       if item.text(0) == "<New Peak List>":
@@ -589,13 +592,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
 
         # for i in range(item.childCount()):
-      itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
 
       if funcName is not None:
         # if (item.parent().text(0)) == 'SpectrumGroups':
         #   getattr(itemParent, funcName)('NewSpectrumGroup')
         # else:
-          getattr(itemParent, funcName)()
+          newItem = getattr(itemParent, funcName)()
+          item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
+
       else:
         info = showInfo('Not implemented yet!',
             'This function has not been implemented in the current version',

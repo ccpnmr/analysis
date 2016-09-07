@@ -304,11 +304,20 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           newIntegralListObjectItem.setFlags(newIntegralListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newIntegralListObjectItem.setText(0, "<New Integral List>")
 
+        # for child in itemParent():
+        #   child.sortChildren(0, QtCore.Qt.AscendingOrder)
+        # newItem.sortChildren(0, QtCore.Qt.AscendingOrder)
+        # itemParent.sortChildren(1, QtCore.Qt.AscendingOrder)
+        # itemParent.sortChildren(2, QtCore.Qt.AscendingOrder)
+
+
 
 
       else:
         for itemParent in self._findItems(parent.pid):
           self._addItem(itemParent, obj.pid)
+          for i in range(itemParent.childCount()):
+            itemParent.child(i).sortChildren(0, QtCore.Qt.AscendingOrder)
 
     else:
       # Object type is not in sidebar
@@ -529,6 +538,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       if item.text(0) == "<New Integral List>":
         self.project.getByPid(item.parent().text(0)).newIntegralList()
 
+      item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
+
     else:
 
       itemParent = self.project.getByPid(item.parent().text(0))
@@ -572,6 +583,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           return
         else:
           funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
+
+        # for i in range(item.childCount()):
+        item.sortChildren(0, QtCore.Qt.AscendingOrder)
       if funcName is not None:
         # if (item.parent().text(0)) == 'SpectrumGroups':
         #   getattr(itemParent, funcName)('NewSpectrumGroup')
@@ -581,3 +595,5 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         info = showInfo('Not implemented yet!',
             'This function has not been implemented in the current version',
             colourScheme=self.colourScheme)
+
+

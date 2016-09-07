@@ -28,3 +28,6 @@ def getPeakAnnotation(peak, dim):
   if len(peak.dimensionNmrAtoms) > dim:
     if len(peak.dimensionNmrAtoms[dim]) > 0:
       return peak.dimensionNmrAtoms[dim][0].pid.id
+
+def getPeakLinewidth(peak, dim):
+  return peak.lineWidths[dim]

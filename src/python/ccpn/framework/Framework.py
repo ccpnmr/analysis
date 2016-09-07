@@ -1145,8 +1145,8 @@ class Framework:
       self.project._logger.warn('Project has no Peak Lists. Peak table cannot be displayed')
       MessageDialog.showWarning('Project has no Peak Lists.', 'Peak table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
       return
-    peakList = PeakTable(self.project, selectedList=selectedList)
-    self.ui.mainWindow.moduleArea.addModule(peakList, position=position, relativeTo=relativeTo)
+    self.peakTable = PeakTable(self.project, selectedList=selectedList)
+    self.ui.mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showPeakTable()")
     self.project._logger.info("application.showPeakTable()")
 

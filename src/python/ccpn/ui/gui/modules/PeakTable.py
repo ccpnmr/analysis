@@ -27,12 +27,13 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
-from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation
+from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
 
 from ccpn.ui.gui.popups.SelectObjectsPopup import SelectObjectsPopup
 
@@ -52,27 +53,38 @@ class PeakTable(CcpnModule):
       project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
       return
 
-    self.peakList = PeakListSimple(self.mainWidget, project, selectedList=selectedList)
+    self.checkBoxDict = {}
+    self.selectionBox = GroupBox(self.settingsWidget, grid=(0, 0))
+
+    columnsLabel = Label(self.selectionBox, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
+
+    serialCheckLabel = Label(self.selectionBox, text='Serial', grid=(1, 0), hAlign='r')
+    serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self.selectionBox, grid=(1, 1), hAlign='l', checked=True)
+    assignCheckLabel = Label(self.selectionBox, text='Assign', grid=(1, 2), hAlign='r')
+    assignCheckBox = self.checkBoxDict['assign'] = CheckBox(self.selectionBox, grid=(1, 3), hAlign='l', checked=True)
+    positionCheckLabel = Label(self.selectionBox, text='Position', grid=(1, 4), hAlign='r')
+    positionCheckBox = self.checkBoxDict['position'] = CheckBox(self.selectionBox, grid=(1, 5), hAlign='l', checked=True)
+    heightCheckLabel = Label(self.selectionBox, text='Height', grid=(1, 6), hAlign='r')
+    heightCheckBox = self.checkBoxDict['height'] = CheckBox(self.selectionBox, grid=(1, 7), hAlign='l', checked=True)
+    volumeCheckLabel = Label(self.selectionBox, text='Volume', grid=(1, 8), hAlign='r')
+    volumeCheckBox = self.checkBoxDict['volume'] = CheckBox(self.selectionBox, grid=(1, 9), hAlign='l', checked=True)
+    linewidthCheckLabel = Label(self.selectionBox, text='Line Width', grid=(1, 10), hAlign='r')
+    linewidthCheckBox = self.checkBoxDict['linewidth'] = CheckBox(self.selectionBox, grid=(1, 11), hAlign='l', checked=False)
+    detailsCheckLabel = Label(self.selectionBox, text='Details', grid=(1, 12), hAlign='r')
+    detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self.selectionBox, grid=(1, 13), hAlign='l', checked=True)
+
+
+    self.peakList = PeakListSimple(self.mainWidget, project, selectedList=selectedList, columnSettings=self.checkBoxDict)
     self.layout.addWidget(self.peakList)
     self.current = project._appBase.current
     self.settingsButton = self.placeSettingsButton(buttonParent=self.peakList, buttonGrid=(0, 8))
-    # self.current.registerNotify(self.peakList._selectPeakInTable, 'peak')
+
     if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
       self.peakList.peakListPulldown.setCurrentIndex(self.peakList.peakListPulldown.findText(peakList.pid))
 
-    serialCheckLabel = Label(self.settingsWidget, text='Serial', grid=(0, 0))
-    serialCheckBox = CheckBox(self.settingsWidget, grid=(0, 1))
-    assignCheckLabel = Label(self.settingsWidget, text='Assign', grid=(0, 2))
-    assignCheckBox = CheckBox(self.settingsWidget, grid=(0, 3))
-    positionCheckLabel = Label(self.settingsWidget, text='Position', grid=(1, 0))
-    positionCheckBox = CheckBox(self.settingsWidget, grid=(1, 1))
-    heightCheckLabel = Label(self.settingsWidget, text='Height', grid=(1, 2))
-    heightCheckBox = CheckBox(self.settingsWidget, grid=(1, 3))
-    volumeCheckLabel = Label(self.settingsWidget, text='Volume', grid=(2, 0))
-    volumeCheckBox = CheckBox(self.settingsWidget, grid=(2, 1))
-    linewidthCheckLabel = Label(self.settingsWidget, text='Line Width', grid=(2, 2))
-    linewidthCheckBox = CheckBox(self.settingsWidget, grid=(2, 3))
+    for checkBox in self.checkBoxDict.values():
+      checkBox.toggled.connect(self.peakList.peakTable.updateTable)
 
   def _closeModule(self):
     """
@@ -86,13 +98,15 @@ class PeakTable(CcpnModule):
 
 class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
-  def __init__(self, parent=None, project=None,  callback=None, selectedList=None, **kw):
+  def __init__(self, parent=None, project=None,  callback=None, selectedList=None, columnSettings=None, **kw):
 
       
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
     self.project = project
+    self.columnSettings = columnSettings
+
     self.sampledDims = {}
     if not selectedList and project.peakLists:
       self.selectedList = self.project.peakLists[0]
@@ -146,8 +160,16 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
   def getExtraColumns(self, peakList):
 
-      columns = [('#', 'serial'), ('Height', lambda pk: self._getPeakHeight(pk)),
-               ('Volume', lambda pk: self._getPeakVolume(pk))]
+      columns = []
+
+      if self.columnSettings['serial'].isChecked():
+        columns.append(('#', 'serial'))
+
+      if self.columnSettings['height'].isChecked():
+        columns.append(('Height', lambda pk: self._getPeakHeight(pk)))
+
+      if self.columnSettings['volume'].isChecked():
+        columns.append(('Volume', lambda pk: self._getPeakVolume(pk)))
 
       tipTexts=['Peak serial number',
               'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
@@ -155,29 +177,41 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
               'Textual notes about the peak']
       k = 1
       numDim = peakList.spectrum.dimensionCount
-      for i in range(numDim):
-        j = i + 1
-        c = ('Assign F%d' % j, lambda pk, dim=i:getPeakAnnotation(pk, dim))
-        columns.insert(k, c)
-        tipTexts.insert(k, 'NmrAtom assignments of peak in dimension %d' % j)
-        k+=1
-      for i in range(numDim):
-        j = i + 1
 
-        sampledDim = self.sampledDims.get(i)
-        if sampledDim:
-          text = 'Sampled\n%s' % sampledDim.conditionVaried
-          tipText='Value of sampled plane'
-          unit = sampledDim
+      if self.columnSettings['assign'].isChecked():
+        for i in range(numDim):
+          j = i + 1
+          c = ('Assign F%d' % j, lambda pk, dim=i:getPeakAnnotation(pk, dim))
+          columns.insert(k, c)
+          tipTexts.insert(k, 'NmrAtom assignments of peak in dimension %d' % j)
+          k+=1
 
-        else:
-          text = 'Pos F%d' % j
-          tipText='Peak position in dimension %d' % j
-          unit = self.posUnitPulldown.currentText()
-        c = (text, lambda pk, dim=i, unit=unit:getPeakPosition(pk, dim, unit))
-        columns.insert(k, c)
-        tipTexts.insert(k, tipText)
-        k+=1
+
+      if self.columnSettings['position'].isChecked():
+        for i in range(numDim):
+          j = i + 1
+          sampledDim = self.sampledDims.get(i)
+          if sampledDim:
+            text = 'Sampled\n%s' % sampledDim.conditionVaried
+            tipText='Value of sampled plane'
+            unit = sampledDim
+
+          else:
+            text = 'Pos F%d' % j
+            tipText='Peak position in dimension %d' % j
+            unit = self.posUnitPulldown.currentText()
+          c = (text, lambda pk, dim=i, unit=unit:getPeakPosition(pk, dim, unit))
+          columns.insert(k, c)
+          tipTexts.insert(k, tipText)
+          k+=1
+
+      if self.columnSettings['linewidth'].isChecked():
+        for i in range(numDim):
+          j = i + 1
+          c = ('LW F%d (Hz)' % j, lambda pk, dim=i:getPeakLinewidth(pk, dim))
+          columns.insert(k, c)
+          tipTexts.insert(k, 'NmrAtom assignments of peak in dimension %d' % j)
+          k+=1
 
       return columns, tipTexts
 
@@ -225,10 +259,12 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
       peakList1._subtractPeakLists(self.project.getByPid(peakList))
     self.peakTable._updateSelectorContents()
 
+
   def _deleteSelectedPeaks(self):
 
     for peakObject in self.peakTable.table.getSelectedObjects():
       peakObject.delete()
+
     self._refreshTable()
 
 

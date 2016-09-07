@@ -291,10 +291,20 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         itemParent = self._typeToItem.get(shortClassName)
         newItem = self._addItem(itemParent, obj.pid)
 
-        if shortClassName in ['SP', 'SA', 'NC']:
+        if shortClassName in ['SA', 'NC']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)
           newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newObjectItem.setText(0, "<New>")
+
+        if shortClassName == 'SP':
+          newPeakListObjectItem = QtGui.QTreeWidgetItem(newItem)
+          newPeakListObjectItem.setFlags(newPeakListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+          newPeakListObjectItem.setText(0, "<New Peak List>")
+          newIntegralListObjectItem = QtGui.QTreeWidgetItem(newItem)
+          newIntegralListObjectItem.setFlags(newIntegralListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+          newIntegralListObjectItem.setText(0, "<New Integral List>")
+
+
 
       else:
         for itemParent in self._findItems(parent.pid):
@@ -512,53 +522,62 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # This is true as of 16/2/2016, but may NOT remain true
     # (e.g. Spectrum has multiple children).
 
-    itemParent = self.project.getByPid(item.parent().text(0))
+    if item.text(0) == "<New Integral List>" or item.text(0) == "<New Peak List>":
 
-    funcName = None
-    if itemParent is None:
-      # Top level object - parent is project
-      if item.parent().text(0) == 'Chains':
-        popup = CreateSequence(project=self.project)
-        popup.exec_()
-        popup.raise_()
-        return
-      elif item.parent().text(0) == 'Substances':
-        popup = SubstancePropertiesPopup(project=self.project, newSubstance = True)
-        popup.exec_()
-        popup.raise_()
-        return
-      elif item.parent().text(0) == 'SpectrumGroups':
-        popup = SpectrumGroupEditor(project=self.project, addNew=True)
-        popup.exec_()
-        popup.raise_()
-        return
-      else:
-        itemParent = self.project
-        funcName = NEW_ITEM_DICT.get(item.parent().text(0))
+      if item.text(0) == "<New Peak List>":
+        self.project.getByPid(item.parent().text(0)).newPeakList()
+      if item.text(0) == "<New Integral List>":
+        self.project.getByPid(item.parent().text(0)).newIntegralList()
 
     else:
-      # Lower level object - get parent from parentItem
-      if itemParent.shortClassName == 'DS':
-        popup = RestraintTypePopup()
-        popup.exec_()
-        popup.raise_()
-        restraintType = popup.restraintType
-        ff = NEW_ITEM_DICT.get(itemParent.shortClassName)
-        getattr(itemParent, ff)(restraintType)
-        return
-      elif itemParent.shortClassName == 'SA':
-        popup = EditSampleComponentPopup(project=self.project, sample=itemParent, newSampleComponent=True)
-        popup.exec_()
-        popup.raise_()
-        return
+
+      itemParent = self.project.getByPid(item.parent().text(0))
+
+      funcName = None
+      if itemParent is None:
+        # Top level object - parent is project
+        if item.parent().text(0) == 'Chains':
+          popup = CreateSequence(project=self.project)
+          popup.exec_()
+          popup.raise_()
+          return
+        elif item.parent().text(0) == 'Substances':
+          popup = SubstancePropertiesPopup(project=self.project, newSubstance = True)
+          popup.exec_()
+          popup.raise_()
+          return
+        elif item.parent().text(0) == 'SpectrumGroups':
+          popup = SpectrumGroupEditor(project=self.project, addNew=True)
+          popup.exec_()
+          popup.raise_()
+          return
+        else:
+          itemParent = self.project
+          funcName = NEW_ITEM_DICT.get(item.parent().text(0))
+
       else:
-        funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
-    if funcName is not None:
-      # if (item.parent().text(0)) == 'SpectrumGroups':
-      #   getattr(itemParent, funcName)('NewSpectrumGroup')
-      # else:
-        getattr(itemParent, funcName)()
-    else:
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+        # Lower level object - get parent from parentItem
+        if itemParent.shortClassName == 'DS':
+          popup = RestraintTypePopup()
+          popup.exec_()
+          popup.raise_()
+          restraintType = popup.restraintType
+          ff = NEW_ITEM_DICT.get(itemParent.shortClassName)
+          getattr(itemParent, ff)(restraintType)
+          return
+        elif itemParent.shortClassName == 'SA':
+          popup = EditSampleComponentPopup(project=self.project, sample=itemParent, newSampleComponent=True)
+          popup.exec_()
+          popup.raise_()
+          return
+        else:
+          funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
+      if funcName is not None:
+        # if (item.parent().text(0)) == 'SpectrumGroups':
+        #   getattr(itemParent, funcName)('NewSpectrumGroup')
+        # else:
+          getattr(itemParent, funcName)()
+      else:
+        info = showInfo('Not implemented yet!',
+            'This function has not been implemented in the current version',
+            colourScheme=self.colourScheme)

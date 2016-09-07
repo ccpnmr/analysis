@@ -288,7 +288,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     obj = project.getByPid(dataPid)
     if obj is not None:
       self.sideBar.raisePopup(obj, item)
-    elif item.data(0, QtCore.Qt.DisplayRole) == '<New>':
+    elif item.data(0, QtCore.Qt.DisplayRole).startswith('<New'):
       self.sideBar._createNewObject(item)
 
     else:

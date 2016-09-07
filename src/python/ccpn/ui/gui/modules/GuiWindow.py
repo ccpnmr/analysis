@@ -25,7 +25,7 @@ __version__ = "$Revision$"
 
 __author__ = 'simon'
 
-from PyQt4 import QtGui
+from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets import MessageDialog
 
@@ -95,23 +95,26 @@ class GuiWindow(DropBase):
     """
     # this trampled the menu py shortcut
     from functools import partial
-    QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll)
-    QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll)
-    QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self.deleteSelectedPeaks))
-    QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark)
-    QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks)
-    # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project))
-    QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project))
-    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current))
-    QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks)
-    QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self))
-    QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self))
-    QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self))
-    QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self))
-    QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot)
-    QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces)
-    QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace)
-    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip)
+    context = QtCore.Qt.ApplicationShortcut
+    QtGui.QShortcut(QtGui.QKeySequence("c, h"), self, self.toggleCrossHairAll, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("g, s"), self, self.toggleGridAll, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("Del"), self, partial(self.deleteSelectedPeaks), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("m, k"), self, self.createMark, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("m, c"), self, self.clearMarks, context=context)
+    # QtGui.QShortcut(QtGui.QKeySequence("f, n"), self, partial(navigateToNmrResidue, self._parent.project), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("f, p"), self, partial(navigateToPeakPosition, self._parent.project),
+                    context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("c, a"), self, partial(propagateAssignments, current=self._appBase.current),
+                    context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("c, z"), self, self._clearCurrentPeaks, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("t, u"), self, partial(self.traceScaleUp, self), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("t, d"), self, partial(self.traceScaleDown, self), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("t, h"), self, partial(self.toggleHTrace, self), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("t, v"), self, partial(self.toggleVTrace, self), context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("p, v"), self, self.setPhasingPivot, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
+    QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
 
 
 
@@ -121,16 +124,18 @@ class GuiWindow(DropBase):
 
     from functools import reduce, partial
 
+    context = QtCore.Qt.ApplicationShortcut
     userShortcuts = preferences.shortcuts
     for shortcut, function in userShortcuts.items():
 
       if function.split('(')[0] == 'runMacro':
         QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])),
-                  self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]))
+                  self, partial(self.namespace['runMacro'], function.split('(')[1].split(')')[0]), context=context)
 
       else:
         stub = self.namespace.get(function.split('.')[0])
-        QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self, reduce(getattr, function.split('.')[1:], stub))
+        QtGui.QShortcut(QtGui.QKeySequence("%s, %s" % (shortcut[0], shortcut[1])), self,
+                        reduce(getattr, function.split('.')[1:], stub), context=context)
 
   def deleteSelectedPeaks(self, parent=None):
 

@@ -290,6 +290,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
         itemParent = self._typeToItem.get(shortClassName)
         newItem = self._addItem(itemParent, obj.pid)
+        itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
 
         if shortClassName in ['SA', 'NC']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)
@@ -531,6 +532,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # This is true as of 16/2/2016, but may NOT remain true
     # (e.g. Spectrum has multiple children).
 
+    print('something mahoosive')
+
     if item.text(0) == "<New Integral List>" or item.text(0) == "<New Peak List>":
 
       if item.text(0) == "<New Peak List>":
@@ -566,6 +569,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           itemParent = self.project
           funcName = NEW_ITEM_DICT.get(item.parent().text(0))
 
+
       else:
         # Lower level object - get parent from parentItem
         if itemParent.shortClassName == 'DS':
@@ -585,7 +589,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           funcName = NEW_ITEM_DICT.get(itemParent.shortClassName)
 
         # for i in range(item.childCount()):
-        item.sortChildren(0, QtCore.Qt.AscendingOrder)
+      itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
+
       if funcName is not None:
         # if (item.parent().text(0)) == 'SpectrumGroups':
         #   getattr(itemParent, funcName)('NewSpectrumGroup')

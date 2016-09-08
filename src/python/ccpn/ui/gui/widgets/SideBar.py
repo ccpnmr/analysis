@@ -24,6 +24,8 @@ __version__ = "$Revision$"
 
 from collections import OrderedDict
 
+import json
+
 from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.DropBase import DropBase
@@ -73,10 +75,7 @@ classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
 # Anyway, how do you make a new Sample?
 # You use the <New> under sample, this comment is completely inaccurate!
 #
-# Try putting in e.g. <New PeakList>, <New SampleComponent> etc.
-# This would 1) Clutter the SideBar with unnecessary words
-#            2) Break the convention that hitting new under a list of objects or parent creates
-#               a new object of that type, or a new child, respectively.
+# Try putting in e.g. <New PeakList>, <New SampleComponent> etc. Done in version 9855.
 
 NEW_ITEM_DICT = {
 
@@ -284,7 +283,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
                 newItem = self._addItem(sgitem, str(obj.pid))
                 newObjectItem = QtGui.QTreeWidgetItem(newItem)
                 newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-                newObjectItem.setText(0, "<New %s" % classesInSideBar[shortClassName].className)
+                newObjectItem.setText(0, "<New %s>" % classesInSideBar[shortClassName].className)
 
             return
 
@@ -295,7 +294,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         if shortClassName in ['SA', 'NC']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)
           newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-          newObjectItem.setText(0, "<New %s" % classesInSideBar[shortClassName]._childClasses[0].className)
+          newObjectItem.setText(0, "<New %s>" % classesInSideBar[shortClassName]._childClasses[0].className)
 
         if shortClassName == 'SP':
           newPeakListObjectItem = QtGui.QTreeWidgetItem(newItem)
@@ -419,7 +418,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     if event.mimeData().hasUrls():
       event.accept()
     else:
-      import json
       item = self.itemAt(event.pos())
       if item:
         text = item.text(0)

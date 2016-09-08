@@ -4,7 +4,7 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
 __credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
 __license__   = "CCPN license. see http://www.ccpn.ac.uk"
-__reference__ = "Skinner et al, J. Biomol. NMR, 2016, submitted"
+__reference__ = "Skinner et al, J. Biomol. NMR, 2016, accepted"
 
 #=========================================================================================
 # Last code modification:
@@ -618,6 +618,8 @@ class Framework:
       #                                             ('enabled', True)]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
+      ("Export Spectrum Display", self.showPrintSpectrumDisplayPopup, [('shortcut', 'ed')]),
+      (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
       (),
@@ -1169,6 +1171,12 @@ class Framework:
     self.ui.mainWindow.moduleArea.addModule(restraintTable, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showRestraintTable()")
     self.project._logger.info("application.showRestraintTable()")
+
+
+  def showPrintSpectrumDisplayPopup(self):
+    from ccpn.ui.gui.popups.PrintSpectrumPopup import PrintSpectrumDisplayPopup
+    PrintSpectrumDisplayPopup(project=self.project).exec_()
+
 
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
     """

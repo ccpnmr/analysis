@@ -40,6 +40,7 @@ DoubleSpinbox::hover {
               background-color: #e4e15b;
               }
 RadioButton {
+              background-color: #2a3358;
               color: #f7ffff;
               }
 
@@ -231,6 +232,9 @@ QTextEdit {
 Dock > QWidget QScrollArea { background-color: #2a3358;
         }
 
+QDialog > QWidget QScrollArea { background-color: #2a3358;
+        }
+
 Dock > QWidget { background-color: #2a3358;
         }
 
@@ -362,3 +366,6 @@ ColorDialog {
               background-color: #2a3358;
               }
 
+
+ScrollArea { background-color: #2a3358;
+        }

@@ -90,51 +90,6 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
                                      directionCallback=self._changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)
 
-
-  def printToFile(self, path, width=800, height=800):
-
-    #generator = QtSvg.QSvgGenerator()
-    #generator.setFileName(path)
-    #generator.setSize(QtCore.QSize(1600, 1600)) # TBD
-    #generator.setViewBox(QtCore.QRect(0, 0, 1600, 1600))
-    #if title:
-    #  generator.setTitle(title)
-
-    #painter = QtGui.QPainter()
-    #painter.begin(generator)
-    #self.plotWidget.scene().render(painter)
-    #painter.end()
-    
-    nstrips = len(self.strips)
-    if nstrips == 0:
-      return
-    # with open(path, 'wt') as fp:
-    #   printer = Svg(fp, width, height) # TBD: more general
-    #
-    #   # box
-    #   printer.writeLine(0, 0, width, 0)
-    #   printer.writeLine(width, 0, width, height)
-    #   printer.writeLine(width, height, 0, height)
-    #   printer.writeLine(0, height, 0, 0)
-    #
-    #   for n, strip in enumerate(self.strips):
-    #     # TBD need to calculate offset, etc., for coords, and pass those along
-    #     if self.stripDirection == 'X':
-    #       xOutputRegion = (0, width)
-    #       yOutputRegion = (n*height/nstrips, (n+1)*height/nstrips)
-    #       if n > 0:
-    #         # strip separator
-    #         printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
-    #     else:
-    #       xOutputRegion = (n*width/nstrips, (n+1)*width/nstrips)
-    #       yOutputRegion = (0, height)
-    #       if n > 0:
-    #         # strip separator
-    #         printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
-    #     printer.startRegion(xOutputRegion, yOutputRegion)
-    #     strip.printToFile(printer)
-    #   printer.close()
-      
   def _updatePivot(self):
     """Updates pivot in all strips contained in the spectrum display."""
     for strip in self.strips:

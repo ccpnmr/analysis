@@ -33,9 +33,12 @@ from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
 
 from ccpn.core.PeakList import PeakList
 
+from ccpn.util.Svg import Svg
+
 from ccpn.framework.update.UpdatePopup import UpdatePopup
 from ccpn.ui.gui.modules.DataPlottingModule import DataPlottingModule
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
@@ -489,3 +492,63 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _resetRemoveStripAction(self, strips):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay._resetRemoveStripAction()
+
+  def printToFile(self, spectrumDisplayOrStrip=None, width=800, height=800):
+
+    current = self._appBase.current
+    if not spectrumDisplayOrStrip:
+      spectrumDisplayOrStrip = current.spectrumDisplay
+    if not spectrumDisplayOrStrip and current.strip:
+      spectrumDisplayOrStrip = current.strip.spectrumDisplay
+    if not spectrumDisplayOrStrip and self.spectrumDisplays:
+      spectrumDisplayOrStrip = self.spectrumDisplays[0]
+    if spectrumDisplayOrStrip:
+      if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
+        strips = spectrumDisplayOrStrip.strips
+        if not strips:
+          return
+
+      path = QtGui.QFileDialog.getSaveFileName(self, caption='Print to File', filter='SVG (*.svg)')
+      if not path:
+        return
+
+      xCount = yCount = 1
+      if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
+        if spectrumDisplayOrStrip.stripDirection == 'X':
+          yCount = len(strips)
+        else:
+          xCount = len(strips)
+
+      with Svg(path, xCount=xCount, yCount=yCount, width=width, height=height) as printer:
+
+        # box
+        printer.writeLine(0, 0, width, 0)
+        printer.writeLine(width, 0, width, height)
+        printer.writeLine(width, height, 0, height)
+        printer.writeLine(0, height, 0, 0)
+
+        xNumber = yNumber = 0
+        if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):
+          for n, strip in enumerate(strips):
+            if spectrumDisplayOrStrip.stripDirection == 'X':
+              xOutputRegion = (0, width)
+              yOutputRegion = (n * height / yCount, (n + 1) * height / yCount)
+              yNumber = n
+              if n > 0:
+                # strip separator
+                printer.writeLine(0, yOutputRegion[0], width, yOutputRegion[0])
+            else:
+              xOutputRegion = (n * width / xCount, (n + 1) * width / xCount)
+              yOutputRegion = (0, height)
+              xNumber = n
+              if n > 0:
+                # strip separator
+                printer.writeLine(xOutputRegion[0], 0, xOutputRegion[0], height)
+            printer.startRegion(xOutputRegion, yOutputRegion, xNumber, yNumber)
+            strip._printToFile(printer)
+        else:
+          xOutputRegion = (0, width)
+          yOutputRegion = (0, height)
+          printer.startRegion(xOutputRegion, yOutputRegion)
+          spectrumDisplayOrStrip._printToFile(printer)
+

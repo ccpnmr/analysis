@@ -47,7 +47,7 @@ class GuiStrip1d(GuiStrip):
                             spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
                             strip=self)
 
-  def printToFile(self, printer):
+  def _printToFile(self, printer):
     
     raise Exception('1D printing not enabled yet')
     

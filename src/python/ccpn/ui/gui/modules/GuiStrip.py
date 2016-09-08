@@ -184,10 +184,13 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
         axisItem = self.plotItem.axes[orientation]['item']
         axisItem.setPen(color=self.foreground)
 
-  def printToFile(self, printer):
+  def _printToFile(self, printer):
+    # CCPN INTERNAL - called in printToFile method of GuiMainWindow
 
     for spectrumView in self.spectrumViews:
       spectrumView._printToFile(printer)
+
+    # print box
 
     # print ticks and grid line
     viewRegion = self.plotWidget.viewRange()

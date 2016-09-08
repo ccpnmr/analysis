@@ -118,11 +118,16 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     # self.regionChanged()
 
 
-  def printToFile(self, printer):
+  def _printToFile(self, printer):
+    # CCPN INTERNAL - called in _printToFile method of GuipectrumViewNd
+
+    # NOTE: only valid for ND so far
 
     width = printer.width
     height = printer.height
-    scale = 0.02
+    xCount = printer.xCount
+    yCount = printer.yCount
+    scale = 0.01
     peakHalfSize = scale * max(width, height)
     strip = self.spectrumView.strip
     plotWidget = strip.plotWidget
@@ -130,11 +135,11 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     dataDims = self.spectrumView._wrappedData.spectrumView.orderedDataDims
 
     x1, x0 = viewRegion[0]  # TBD: relies on axes being backwards
-    xScale = width / (x1 - x0)
+    xScale = width / (x1 - x0) / xCount
     xTranslate = printer.x0 - x0 * xScale
 
     y1, y0 = viewRegion[1]  # TBD: relies on axes being backwards
-    yScale = width / (y1 - y0)
+    yScale = height / (y1 - y0) / yCount
     yTranslate = printer.y0 - y0 * yScale
 
     for peak in self.peakList.peaks:
@@ -155,9 +160,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
 
   def boundingRect(self):
 
-
     return NULL_RECT
-
 
   def paint(self, painter, option, widget):
 

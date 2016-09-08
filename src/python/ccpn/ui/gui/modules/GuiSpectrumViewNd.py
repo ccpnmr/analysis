@@ -487,8 +487,12 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
   def _printToFile(self, printer):
     """
-    # CCPN INTERNAL - called in printToFile method of GuiStrip
+    # CCPN INTERNAL - called in _printToFile method of GuiStrip
     """
+
+    if not self.isVisible():
+      return
+
     apiSpectrumView = self._wrappedData.spectrumView
     apiDataSource = apiSpectrumView.dataSource
   
@@ -497,7 +501,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     #  # base has not yet been set, so guess a sensible value
     #  apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
     #  apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
-    
+
     if apiSpectrumView.displayPositiveContours is True:
       posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
     else:
@@ -507,7 +511,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
     else:
       negLevels = []
-    
+
     if not posLevels and not negLevels:
       return
 
@@ -516,14 +520,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   
     xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1)
     yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
-    
+
     xTile0 = xClipPoint0 // xTotalPointCount
     xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
     yTile0 = yClipPoint0 // yTotalPointCount
     yTile1 = 1 + (yClipPoint1 // yTotalPointCount)
       
     for position, dataArray in self._getPlaneData():
-    
+
       if posLevels:
         posLevelsArray = numpy.array(posLevels, numpy.float32)
         posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
@@ -537,7 +541,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount)
                 
     for peakListView in self.peakListViews:
-      peakListView.printToFile(printer)
+      peakListView._printToFile(printer)
       
   def _printContourData(self, printer, contourData, colour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount):
     
@@ -608,18 +612,19 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # base has not yet been set, so guess a sensible value
       apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
       apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
-      
+
     if self._wrappedData.spectrumView.displayPositiveContours is True:
       posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
     else:
       posLevels = []
+
     if self._wrappedData.spectrumView.displayNegativeContours is True:
       negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
     else:
       negLevels = []
     if not posLevels and not negLevels:
       return
-      
+
     #contourDict = self.constructContours(guiStrip, posLevels, negLevels)
     try:
       self._constructContours(posLevels, negLevels)

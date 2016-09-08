@@ -804,17 +804,13 @@ class Framework:
 
     self.ui.mainWindow.processDropData(paths, dataType='urls')
 
-  def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
+  def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
-    # TODO: convert this to a save and call self.project.save()
-    if hasattr(self.project._wrappedData.root, '_temporaryDirectory'):
-      successful = self.saveProjectAs()
-    else:
-      successful = self.project.save(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
-      if not successful:
-        sys.stderr.write('==> Project save failed\n')
+    successful = self.project.save(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
+    if not successful:
+      sys.stderr.write('==> Project save failed\n')
 
-        # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
+      # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
       self.ui.mainWindow._updateWindowTitle()
       self._updateRecentFiles()
@@ -834,6 +830,15 @@ class Framework:
       #                           colourScheme=self.preferences.general.colourScheme, iconPath=saveIconPath)
 
     return successful
+
+
+  def saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
+    """Save project to newPath and return True if successful"""
+    # TODO: convert this to a save and call self.project.save()
+    if hasattr(self.project._wrappedData.root, '_temporaryDirectory'):
+      return self.saveProjectAs()
+    else:
+      return self._saveProject(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
 
 
   def _updateRecentFiles(self, oldPath=None):
@@ -862,7 +867,7 @@ class Framework:
     if newPath:
       # Next line unnecessary, but does not hurt
       newProjectPath = apiIo.addCcpnDirectorySuffix(newPath)
-      successful = self.saveProject(newPath=newProjectPath, createFallback=False)
+      successful = self._saveProject(newPath=newProjectPath, createFallback=False)
 
       if not successful:
         self.project._logger.warning("Saving project to %s aborted" % newProjectPath)

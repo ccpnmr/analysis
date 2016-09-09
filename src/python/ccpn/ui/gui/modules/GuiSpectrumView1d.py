@@ -69,8 +69,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
 
     self.plot.curve.setClickable(True)
     self.plot.sigClicked.connect(self._clicked)
-    for peakList in self.spectrum.peakLists:
-      self.strip.showPeaks(peakList)
+    # below causes a problem because wrapper not ready yet at this point
+    #for peakList in self.spectrum.peakLists:
+    #  self.strip.showPeaks(peakList)
       
     self.hPhaseTrace = None
 

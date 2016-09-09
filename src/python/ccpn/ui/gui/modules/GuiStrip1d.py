@@ -42,10 +42,11 @@ class GuiStrip1d(GuiStrip):
     self.plotWidget.plotItem.setAcceptDrops(True)
     self.spectrumIndex = 0
     self.peakItems = {}
-    for spectrumView in self.spectrumViews:  # are there ever any??
-      spectrumView.plot = self.plotWidget.plotItem.plot(spectrumView.data[0],
-                            spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
-                            strip=self)
+    # below causes a problem because wrapper not ready yet at this point
+    #for spectrumView in self.spectrumViews:
+    #  spectrumView.plot = self.plotWidget.plotItem.plot(spectrumView.data[0],
+    #                        spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
+    #                        strip=self)
 
   def _printToFile(self, printer):
     

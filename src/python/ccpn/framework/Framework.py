@@ -814,6 +814,7 @@ class Framework:
 
       # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
+    else:
       self.ui.mainWindow._updateWindowTitle()
       self._updateRecentFiles()
 

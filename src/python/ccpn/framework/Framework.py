@@ -574,7 +574,7 @@ class Framework:
       (),
       ("Summary", self.displayProjectSummary, [('enabled', False)]),
       ("Archive", self.archiveProject, [('enabled', True)]),
-      ("Backup...", self.showBackupPopup, [('enabled', False)]),
+      ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
       (),
       ("Preferences...", self.showApplicationPreferences),
       (),
@@ -589,8 +589,6 @@ class Framework:
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
       ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
-      # ("Integrate", self.showIntegrationModule, [('shortcut', 'in'),
-      #                                            ('enabled', False)]),
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
     ]
@@ -614,8 +612,6 @@ class Framework:
       ("Chemical Shift Table", self.showChemicalShiftTable, [('shortcut', 'ct')]),
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
-      # ("Integral Table", self.showIntegralTable, [('shortcut', 'it'),
-      #                                             ('enabled', True)]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
       (),
       ("Export Spectrum Display", self.showPrintSpectrumDisplayPopup, [('shortcut', 'ed')]),
@@ -641,21 +637,15 @@ class Framework:
       (),
       ("Record Macro...", self.startMacroRecord),
       ("Run", ()),
-      # ("Run...", self.runMacro, [('shortcut', 'rm')]),
       ("Run Recent", ()),
       (),
       ("Define User Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')])
     ]
                ))
 
-    # ms.append(('Plugins',   [
-    #   ("PARAssign Setup", self.showParassignSetup, [('shortcut', 'q1')]),
-    # ]
-    #            ))
     ms.append(('Plugins',   self.getPluginMenuItems()))
 
     ms.append(('Help',      [
-      ("Command...", self.showCommandHelp, [('enabled', False)]),
       ("Tutorials",([
         # Submenu
         ("Beginners Tutorial", self.showBeginnersTutorial),
@@ -668,7 +658,8 @@ class Framework:
       ("About CCPN...", self.showAboutCcpn),
       ("Show License...", self.showCcpnLicense),
       (),
-      ("Inspect Code...", self.showCodeInspectionPopup,[('enabled', False)]),
+      ("Inspect Code...", self.showCodeInspectionPopup,[('shortcut', 'gv'),
+                                                        ('enabled', False)]),
       ("Show Issues...", self.showIssuesList),
       ("Check for Updates...", self.showUpdatePopup),
       (),
@@ -926,13 +917,17 @@ class Framework:
     MessageDialog.showInfo('Project Archived',
                            'Project archived to %s' % fileName, colourScheme=self.ui.mainWindow.colourScheme)
 
-  def showBackupPopup(self):
-    from ccpn.ui.gui.popups.BackupPopup import BackupPopup
 
-    if not self.backupPopup:
-      self.backupPopup = BackupPopup(parent=self.ui.mainWindow)
-    self.backupPopup.show()
-    self.backupPopup.raise_()
+  def restoreFromArchive(self, archive=None):
+    pass
+
+  # def showBackupPopup(self):
+  #   from ccpn.ui.gui.popups.BackupPopup import BackupPopup
+  #
+  #   if not self.backupPopup:
+  #     self.backupPopup = BackupPopup(parent=self.ui.mainWindow)
+  #   self.backupPopup.show()
+  #   self.backupPopup.raise_()
 
   def showApplicationPreferences(self):
     """
@@ -1088,10 +1083,7 @@ class Framework:
 
 
   def inspectMolecule(self):
-    from ccpn.ui.gui.widgets import MessageDialog
-    info = MessageDialog.showInfo('Not implemented yet!',
-                                  'This function has not been implemented in the current version',
-                                  colourScheme=self.ui.mainWindow.colourScheme)
+    pass
 
 
   def showRefChemicalShifts(self):
@@ -1335,11 +1327,6 @@ class Framework:
 
 
 
-  def showCommandHelp(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-                                  'This function has not been implemented in the current version',
-                                  colourScheme=self.ui.mainWindow.colourScheme)
-
   def _systemOpen(self, path):
     "Open path on system"
     if 'linux' in sys.platform.lower():
@@ -1393,9 +1380,8 @@ class Framework:
     webbrowser.open(ccpnLicenceUrl)
 
   def showCodeInspectionPopup(self):
-    info = MessageDialog.showInfo('Not implemented yet!',
-                                  'This function has not been implemented in the current version',
-                                  colourScheme=self.ui.mainWindow.colourScheme)
+    # TODO: open a file browser to top of source directory
+    pass
 
   def showIssuesList(self):
     from ccpn.framework.PathsAndUrls import ccpnIssuesUrl

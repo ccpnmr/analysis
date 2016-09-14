@@ -43,6 +43,7 @@ winsep = '\\'
 CCPN_API_DIRECTORY = 'ccpnv3'
 CCPN_DIRECTORY_SUFFIX = '.ccpn'
 CCPN_BACKUP_SUFFIX = '_backup'
+CCPN_ARCHIVES_DIRECTORY = 'archives'
 
 def normalisePath(path, makeAbsolute=None):
   """

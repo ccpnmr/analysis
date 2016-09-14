@@ -850,6 +850,10 @@ class Project(AbstractWrapperObject):
     elif dataType == 'Text':
       # Special case - you return the text instead of a list of Pids
       return open(usePath).read()
+
+    elif dataType == 'Macro' and subType == ioFormats.PYTHON:
+      self._appBase.runMacro(usePath)
+
     else:
 
       funcname = '_load' + dataType

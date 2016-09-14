@@ -905,14 +905,10 @@ class Framework:
                                   colourScheme=self.ui.mainWindow.colourScheme)
 
   def archiveProject(self):
-    import datetime
     project = self.project
     apiProject = project._wrappedData.parent
-    projectPath = project.path
-    now = datetime.datetime.now().strftime('%y%m%d%H%M%S')
-    filePrefix = '%s_%s' % (os.path.basename(projectPath), now)
-    filePrefix = os.path.join(os.path.dirname(projectPath), filePrefix)
-    fileName = apiIo.packageProject(apiProject, filePrefix, includeBackups=True, includeLogs=True)
+    fileName = apiIo.packageProject(apiProject, includeBackups=True, includeLogs=True,
+                                    includeArchives=False)
 
     MessageDialog.showInfo('Project Archived',
                            'Project archived to %s' % fileName, colourScheme=self.ui.mainWindow.colourScheme)

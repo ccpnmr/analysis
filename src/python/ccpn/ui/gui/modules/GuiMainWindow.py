@@ -137,9 +137,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
 
   def getMenuAction(self, menuString, topMenuAction=None):
+    from ccpn.framework.Translation import translator
     if topMenuAction is None:
       topMenuAction = self._menuBar
     splitMenuString = menuString.split('->')
+    splitMenuString = [translator.translate(text) for text in splitMenuString]
     if len(splitMenuString) > 1:
       topMenuAction = self.getMenuAction('->'.join(splitMenuString[:-1]), topMenuAction)
     for a in topMenuAction.actions():

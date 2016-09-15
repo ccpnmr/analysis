@@ -44,7 +44,6 @@ from ccpn.ui.gui.modules.MacroEditor import MacroEditor
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
 from ccpn.ui.gui.modules.PeakTable import PeakTable
 from ccpn.ui.gui.modules.SequenceModule import SequenceModule
-from ccpn.ui.gui.popups.BackupPopup import BackupPopup
 from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
 from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 from ccpn.ui.gui.widgets import MessageDialog
@@ -83,7 +82,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self.feedbackPopup = None
     self.updatePopup = None
-    self.backupPopup = None
 
     self.backupTimer = QtCore.QTimer()
     self.connect(self.backupTimer, QtCore.SIGNAL('timeout()'), self.backupProject)
@@ -139,6 +137,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     if self.backupTimer.isActive():
       self.backupTimer.stop()
 
+  def backupProject(self):
+
+    apiIo.backupProject(self._project._wrappedData.parent)
 
   def getMenuAction(self, menuString, topMenuAction=None):
     from ccpn.framework.Translation import translator
@@ -153,10 +154,6 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         return a.menu() or a
     raise ValueError('Menu item not found.')
 
-
-  def backupProject(self):
-    
-    apiIo.backupProject(self._project._wrappedData.parent)
 
   def _setupWindow(self):
     """

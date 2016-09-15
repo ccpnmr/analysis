@@ -111,6 +111,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self._appBase._updateRecentFiles()
     self.pythonConsole.setProject(project)
     self._updateWindowTitle()
+    if hasattr(self.application.project._wrappedData.root, '_temporaryDirectory'):
+      self.getMenuAction('Project->Archive').setEnabled(False)
+    else:
+      self.getMenuAction('Project->Archive').setEnabled(True)
 
 
   def _updateWindowTitle(self):

@@ -573,7 +573,7 @@ class Framework:
       ("Redo", self.redo, [('shortcut', QKeySequence("Ctrl+y"))]),
       (),
       ("Summary", self.displayProjectSummary, [('enabled', False)]),
-      ("Archive", self.archiveProject, [('enabled', True)]),
+      ("Archive", self.archiveProject, [('enabled', False)]),
       ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
       (),
       ("Preferences...", self.showApplicationPreferences),
@@ -802,11 +802,11 @@ class Framework:
     successful = self.project.save(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
     if not successful:
       sys.stderr.write('==> Project save failed\n')
-
       # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure
 
     else:
       self.ui.mainWindow._updateWindowTitle()
+      self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
       self._updateRecentFiles()
 
       layout = self.ui.mainWindow.moduleArea.saveState()
@@ -875,11 +875,6 @@ class Framework:
 
     # NBNB TODO Consider appropriate failure handling. Is this OK?
 
-  def saveBackup(self):
-    pass
-
-  def restoreBackup(self):
-    pass
 
   def undo(self):
     self.ui.echoCommands(['application.undo()'])

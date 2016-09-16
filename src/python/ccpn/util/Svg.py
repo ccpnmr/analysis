@@ -70,6 +70,6 @@ class Svg(PrintFile):
    
     self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" clip-path="url(#cpth_%d_%d)" />\n' % (colour, self.xNumber, self.yNumber))
 
-  def writeText(self, text, x, y, colour='#000000', fontsize=10, fontfamily='Verdana'):
+  def writeText(self, text, x, y, colour='#000000', fontsize=10, fontfamily='Lucida Grande'):
     
     self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s">%s</text>\n' % (x, y, colour, fontsize, fontfamily, text))

@@ -104,7 +104,7 @@ def defineProgramArguments():
                       default=defaultLanguage)
   parser.add_argument('--interface',
                       help=('User interface, to use; one of  = (%s); default=%s' %
-                            ('|'.join(interfaces) ,defaultInterface)),
+                            ('|'.join(interfaces), defaultInterface)),
                       default=defaultInterface)
   parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true',
                                                  help='Skip loading user preferences')

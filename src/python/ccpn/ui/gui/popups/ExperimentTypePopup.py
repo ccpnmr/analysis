@@ -8,6 +8,7 @@ from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 
 from functools import partial
 
@@ -29,7 +30,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
       atomCodes = tuple(sorted(axisCodes))
       pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
       spLabel = Label(self, text=spectrum.pid, grid=(spectrumIndex, 0))
-      spPulldown = PulldownList(self, grid=(spectrumIndex, 1),
+      spPulldown = FilteringPulldownList(self, grid=(spectrumIndex, 1),
                                 callback=partial(self._setExperimentType, spectrum, atomCodes),
                                 texts=pulldownItems)
 

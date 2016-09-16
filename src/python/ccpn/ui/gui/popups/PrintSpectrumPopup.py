@@ -1,5 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
@@ -38,7 +39,7 @@ class PrintSpectrumDisplayPopup(QtGui.QDialog, Base):
 
     spectrumDisplay = self.project.getByPid(self.spectrumSelectionWidget.getDisplayToPrint())
     if self.filePathLineEdit.text():
-      spectrumDisplay.printToFile(self.filePathLineEdit.text())
+      self.project._appBase.ui.mainWindow.printToFile(spectrumDisplayOrStrip=spectrumDisplay, filePath=self.filePathLineEdit.text())
       self.accept()
     else:
       showWarning('No path specified', 'File path to save image has not been specified.')

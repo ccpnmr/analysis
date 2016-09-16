@@ -30,12 +30,14 @@ from functools import partial
 from PyQt4 import QtGui, QtCore
 
 from ccpn.core.lib import Util as ccpnUtil
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.ColourDialog import ColourDialog
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
+from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
@@ -141,12 +143,12 @@ class GeneralTab(QtGui.QWidget, Base):
     self._changes = dict()
 
     self.experimentTypes = spectrum._project._experimentTypeMap
-    nameLabel = Label(self, text="Spectrum name ", grid=(1, 0))
+    Label(self, text="Spectrum name ", grid=(1, 0))
     self.nameData = LineEdit(self, vAlign='t', grid=(1, 1))
     self.nameData.setText(spectrum.name)
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
     self.nameData.editingFinished.connect(self._queueSpectrumNameChange)
-    pathLabel = Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
+    Label(self, text="Path", vAlign='t', hAlign='l', grid=(2, 0))
     self.pathData = LineEdit(self, vAlign='t', grid=(2, 1))
     self.pathData.setValidator(FilePathValidator(parent=self.pathData, spectrum=self.spectrum))
     self.pathButton = Button(self, grid=(2, 2), callback=self._getSpectrumFile, icon='icons/applications-system')
@@ -175,14 +177,14 @@ class GeneralTab(QtGui.QWidget, Base):
     else:
       self.pathData.setText(apiDataStore.fullPath)
     self.pathData.editingFinished.connect(self._queueSetSpectrumPath)
-    chemicalShiftListLabel = Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
+    Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
     self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(3, 1), texts=[csList.pid
                                                                                         for csList in spectrum.project.chemicalShiftLists]
                                                                                        +['<New>'], callback=self._queueChemicalShiftListChange)
-    pidLabel = Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
-    pidData = Label(self, text=spectrum.pid, vAlign='t', grid=(5, 1))
+    Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
+    Label(self, text=spectrum.pid, vAlign='t', grid=(5, 1))
     if spectrum.dimensionCount == 1:
-      colourLabel = Label(self, text="Colour", vAlign='t', hAlign='l', grid=(6, 0))
+      Label(self, text="Colour", vAlign='t', hAlign='l', grid=(6, 0))
       self.colourBox = PulldownList(self, vAlign='t', hAlign='l', grid=(6, 1))
       for item in spectrumColours.items():
         pix=QtGui.QPixmap(QtCore.QSize(20, 20))
@@ -192,7 +194,7 @@ class GeneralTab(QtGui.QWidget, Base):
       self.colourBox.currentIndexChanged.connect(partial(self._changedColourComboIndex, spectrum))
       colourButton = Button(self, vAlign='t', hAlign='l', grid=(6, 2), hPolicy='fixed',
                             callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
-      spectrumTypeLabel = Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
+      Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
       spectrumType = PulldownList(self, vAlign='t', grid=(7, 1))
       spectrumType.addItems(SPECTRA)
 
@@ -201,20 +203,20 @@ class GeneralTab(QtGui.QWidget, Base):
       text = priorityNameRemapping.get(text, text)
 
       spectrumType.setCurrentIndex(spectrumType.findText(text))
-      spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
+      Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)
 
-      recordingDataLabel = Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(10, 0))
-      noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(11, 0))
+      Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(10, 0))
+      Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(11, 0))
       noiseLevelData = LineEdit(self)
       if spectrum._apiDataSource.noiseLevel is not None:
         noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.noiseLevel))
       else:
         noiseLevelData.setText('None')
     else:
-      spectrumTypeLabel = Label(self, text="Spectrum Type ", vAlign='t', hAlign='l', grid=(6, 0))
-      self.spectrumType = PulldownList(self, vAlign='t', grid=(6, 1))
+      Label(self, text="Spectrum Type ", vAlign='t', hAlign='l', grid=(6, 0))
+      self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(6, 1))
       axisCodes = []
       for isotopeCode in spectrum.isotopeCodes:
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))

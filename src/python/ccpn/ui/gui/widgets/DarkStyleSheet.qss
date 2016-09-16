@@ -2,6 +2,10 @@ CallTipWidget {color: #bec4f3;}
 
 QWidget#spectrumSelectionWidget {background-color: #2a3358;}
 
+QAbstractItemView#CompleterList {
+background-color: #f7ffff;
+}
+
 
 QColorDialog {
     background-color: #2a3358;
@@ -369,3 +373,5 @@ ColorDialog {
 
 ScrollArea { background-color: #2a3358;
         }
+
+

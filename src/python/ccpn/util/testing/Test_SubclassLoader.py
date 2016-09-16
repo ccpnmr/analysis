@@ -8,9 +8,7 @@ from ccpn.util.Path import getTopDirectory
 from ccpn.util.SubclassLoader import loadSubclasses
 
 
-
 class TestSubclassLoader(unittest.TestCase):
-
   def test(self):
     from ccpn.util.testing.SubclassLoaderTestSuperclass import Superclass
 
@@ -18,3 +16,8 @@ class TestSubclassLoader(unittest.TestCase):
     subclasses = loadSubclasses(path, baseclass=Superclass)
 
     self.assertEqual(len(subclasses), 2)
+
+
+if __name__ == '__main__':
+  c = TestSubclassLoader()
+  c.test()

@@ -6,7 +6,6 @@ import importlib
 import inspect
 
 
-
 def loadSubclasses(path: str, baseclass) -> set:
   '''
   Gather subclasses of baseclass from path

@@ -3,27 +3,9 @@ from PyQt4 import QtCore, QtGui
 from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock, VerticalLabel
-from pyqtgraph.dockarea.Container import  SplitContainer
+from pyqtgraph.dockarea.Container import SplitContainer
 from ccpn.ui.gui.widgets.Module import CcpnModule
-
-
-
-
-
-#
-# def dropEvent(self, *args):
-#   source = args[0].source()
-#
-#   if hasattr(source, 'implements') and source.implements('dock'):
-#     DockDrop.dropEvent(self, *args)
-#   else:
-#     args[0].ignore()
-#     return
-#
-#
-# CcpnModule.dropEvent = dropEvent
-
-
+from ccpn.framework.lib.Pipe import Pipe
 
 
 
@@ -44,11 +26,14 @@ PipelineBoxLabelStyle = """PipelineBoxLabel{
 
 
 class VContainer(SplitContainer):
+
   def __init__(self, area):
     SplitContainer.__init__(self, area, QtCore.Qt.Vertical)
 
+
   def type(self):
     return 'vertical'
+
 
   def updateStretch(self):
     ##Set the stretch values for this container to reflect its contents
@@ -71,11 +56,11 @@ class VContainer(SplitContainer):
     else:
         scale = self.height() / tot
 
-
     self.setSizes([int(s*scale) for s in sizes])
 
     self.setCollapsible(0, False)
     self.setCollapsible(1, False)
+
 
 
 class PipelineDropAreaOverlay(QtGui.QWidget):
@@ -86,6 +71,7 @@ class PipelineDropAreaOverlay(QtGui.QWidget):
     self.dropArea = None
     self.hide()
     self.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+
 
   def setDropArea(self, area):
     self.dropArea = area
@@ -113,6 +99,7 @@ class PipelineDropAreaOverlay(QtGui.QWidget):
     self.update()
     self.update()
 
+
   def paintEvent(self, ev):
     if self.dropArea is None:
       return
@@ -124,6 +111,7 @@ class PipelineDropAreaOverlay(QtGui.QWidget):
     p.drawRect(rgn)
 
 
+
 class PipelineDropArea(DockArea):
   def __init__(self, **kw):
     super(PipelineDropArea, self).__init__(self)
@@ -133,6 +121,11 @@ class PipelineDropArea(DockArea):
   def dragEnterEvent(self, ev):
     src = ev.source()
     ev.ignore()
+
+
+  def addPipe(self, pipe:Pipe, position='bottom'):
+    self.addDock(pipe.widget, position=position)
+
 
   def addBox(self, box=None, position='bottom', relativeTo=None, **kwds):
     """With these settings the user can close all the boxes from the label 'close box' or pop up and
@@ -184,13 +177,16 @@ class PipelineDropArea(DockArea):
     self.docks[box.name()] = box
     return box
 
+
   def makeContainer(self, typ):
     new = VContainer(self)
     new.setCollapsible(1,False)
     return new
 
+
   def apoptose(self):
     pass
+
 
   def orderedBoxes(self, obj):
     if isinstance(obj, Dock):
@@ -202,18 +198,25 @@ class PipelineDropArea(DockArea):
       return boxes
 
 
+
 class PipelineBox(Dock, DockDrop):
 
-  def __init__(self,  name:str, **kw):
-    super(PipelineBox, self).__init__(name, self)
+  def __init__(self, pipe:Pipe, **kw):
+    self.pipe = pipe
+    super(PipelineBox, self).__init__(self.pipe.METHODNAME, self)
     self.ccpnModule = False
     self.pipelineBox = True
     self.autoOrient = False
-    if name is None:
-      name = 'New Pipeline Box'
-    self._updateLabel(name)
+    self._updateLabel(self.pipe.METHODNAME)
     self.dragStyle = PipelineBoxDragStyle
     self.overlay = PipelineDropAreaOverlay(self)
+    self._setMainLayout()
+
+  def _setMainLayout(self):
+    self.mainFrame = QtGui.QFrame()
+    self.mainLayout = QtGui.QGridLayout()
+    self.mainFrame.setLayout(self.mainLayout)
+    self.layout.addWidget(self.mainFrame, 0, 0, 0, 0)
 
 
   def implements(self, name=None):
@@ -221,6 +224,7 @@ class PipelineBox(Dock, DockDrop):
       return ['PipelineBox']
     else:
       return name == 'PipelineBox'
+
 
   def _updateLabel(self, name):
     self.label.deleteLater()  # delete original Label
@@ -231,6 +235,7 @@ class PipelineBox(Dock, DockDrop):
     self.moveLabel = True
     self.orientation = 'horizontal'
 
+
   def closeBox(self):
       self.setParent(None)
       self.label.setParent(None)
@@ -239,8 +244,10 @@ class PipelineBox(Dock, DockDrop):
   def name(self):
     return self.label.name
 
+
   def rename(self, newName):
     self.label.name = newName
+
 
   def moveBoxDown(self):
     name = self.name()
@@ -256,6 +263,7 @@ class PipelineBox(Dock, DockDrop):
       self.pipelineArea.moveDock(self, 'bottom', next)
       j+=1
 
+
   def moveBoxUp(self):
     name = self.name()
     boxes = self.pipelineArea.childState(self.pipelineArea.topContainer)[1]
@@ -269,6 +277,7 @@ class PipelineBox(Dock, DockDrop):
       self.pipelineArea.moveDock(self, 'top', next)
       j = j - 1
 
+
   def startDrag(self):
     # if len(self.pipelineArea.findAll()[1].keys()) > 1:
       self.drag = QtGui.QDrag(self)
@@ -279,6 +288,7 @@ class PipelineBox(Dock, DockDrop):
       action = self.drag.exec_()
       self.updateStyle()
 
+
   def dragEnterEvent(self, ev):
     src = ev.source()
     if hasattr(src, 'implements') and src.implements('PipelineBox'):
@@ -286,17 +296,22 @@ class PipelineBox(Dock, DockDrop):
     else:
       ev.ignore()
 
+
   def dragMoveEvent(self, *args):
     DockDrop.dragMoveEvent(self, *args)
+
 
   def dragLeaveEvent(self, *args):
     DockDrop.dragLeaveEvent(self, *args)
 
+
   def dropEvent(self, *args):
     DockDrop.dropEvent(self, *args)
 
+
   def setActive(self, state):
     self.label.checkBox.setChecked(state)
+
 
   def isActive(self):
     checkBox = self.label.checkBox
@@ -304,6 +319,8 @@ class PipelineBox(Dock, DockDrop):
       return True
     else:
       return False
+
+
 
 class PipelineBoxLabel(DockLabel, VerticalLabel):
   def __init__(self, name,  *args):
@@ -317,6 +334,7 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
   def updateStyle(self):
     self.hStyle =  PipelineBoxLabelStyle
     self.setStyleSheet(self.hStyle)
+
 
   def setExtraButtons(self):
     # self.lineEdit = QtGui.QLineEdit(self)
@@ -343,11 +361,13 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     self.closeButton.setMaximumHeight(15)
     self.activeLabel.clicked.connect(self.checkActiveBox)
 
+
   def checkActiveBox(self):
     if self.checkBox.isChecked():
       self.checkBox.setChecked(False)
     else:
       self.checkBox.setChecked(True)
+
 
   def mousePressEvent(self, ev):
 
@@ -356,21 +376,10 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
       self.startedDrag = False
       ev.accept()
 
+
   def mouseDoubleClickEvent(self, ev):
     if ev.button() == QtCore.Qt.LeftButton:
       pass
-      # Action Free
-
-      # self.lineEdit.show()
-      #
-      # self.lineEdit.setText(str(self.name))
-      # self.lineEdit.editingFinished.connect(self.changeName)
-  #
-  # def changeName(self):
-  #   if self.lineEdit.isModified():
-  #     self.name = self.lineEdit.text().upper()
-  #     self.lineEdit.hide()
-
 
 
   def resizeEvent(self, ev):
@@ -386,13 +395,14 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     pos = QtCore.QPoint(ev.size().width() - 20, 0)
     self.closeButton.move(pos)
 
-
     super(DockLabel, self).resizeEvent(ev)
+
 
   def mouseMoveEvent(self, ev):
     if not self.startedDrag and (ev.pos()).manhattanLength() > QtGui.QApplication.startDragDistance():
       self.dock.startDrag()
     ev.accept()
+
 
   def paintEvent(self, ev):
     p = QtGui.QPainter(self)
@@ -404,5 +414,3 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     self.setMaximumHeight(self.hint.height())
     self.setMinimumHeight(15)
     self.setMaximumWidth(16777215)
-
-

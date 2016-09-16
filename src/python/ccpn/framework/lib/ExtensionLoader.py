@@ -4,14 +4,14 @@ from ccpn.util.SubclassLoader import loadSubclasses
 
 
 
-def getExtensions(userExtensionPath=None):
-  from ccpn.framework.PathsAndUrls import extensionPath
-  from ccpn.framework.lib.Extension import ExtensionABC
+def getPipes(userExtensionPath=None):
+  from ccpn.framework.PathsAndUrls import pipePath
+  from ccpn.framework.lib.Pipe import Pipe
 
-  loadedSubclasses = set()
-  loadedSubclasses.update(loadSubclasses(extensionPath, ExtensionABC))
+  loadedPipes = set()
+  loadedPipes.update(loadSubclasses(pipePath, Pipe))
   if userExtensionPath is not None:
-    sc = loadSubclasses(userExtensionPath, ExtensionABC)
-    loadedSubclasses.update(sc)
-  return loadedSubclasses
+    sc = loadSubclasses(userExtensionPath, Pipe)
+    loadedPipes.update(sc)
+  return loadedPipes
 

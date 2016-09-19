@@ -2,12 +2,9 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui, QtCore
 
-# from ccpn.core.lib.Experiment import EXPERIMENT_TYPES
-
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 
 from functools import partial

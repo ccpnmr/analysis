@@ -52,8 +52,7 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.util.Common import uniquify
 
-from PyQt4 import QtGui, QtCore
-from PyQt4.QtGui import QKeySequence
+from PyQt4 import QtGui
 
 _DEBUG = False
 
@@ -620,8 +619,8 @@ class Framework:
       ("Save", self.saveProject, [('shortcut', 'ps')]),
       ("Save As...", self.saveProjectAs, [('shortcut', 'sa')]),
       (),
-      ("Undo", self.undo, [('shortcut', QKeySequence("Ctrl+z"))]),
-      ("Redo", self.redo, [('shortcut', QKeySequence("Ctrl+y"))]),
+      ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
+      ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       (),
       ("Summary", self.displayProjectSummary, [('enabled', False)]),
       ("Archive", self.archiveProject, [('enabled', False)]),

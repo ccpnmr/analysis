@@ -28,6 +28,7 @@ import sys
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
+from PyQt4.QtGui import QKeySequence
 
 from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
 
@@ -247,6 +248,9 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           self._createMenu(action, menu)
       elif len(action) == 3:
         kwDict = dict(action[2])
+        for k,v in kwDict.items():
+          if (k == 'shortcut') and v.startswith('⌃'):  # Unicode U+2303, NOT the carrot on your keyboard.
+            kwDict[k] = QKeySequence('Ctrl+{}'.format(v[1:]))
         menu.addAction(Action(self, action[0], callback=action[1], **kwDict))
 
 

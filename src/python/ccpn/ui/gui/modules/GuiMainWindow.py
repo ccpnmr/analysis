@@ -83,10 +83,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     self.feedbackPopup = None
     self.updatePopup = None
 
-    self.backupTimer = QtCore.QTimer()
-    self.connect(self.backupTimer, QtCore.SIGNAL('timeout()'), self.backupProject)
-    if self._appBase.preferences.general.autoBackupEnabled:
-      self._startBackupTimer()
+    # self.backupTimer = QtCore.QTimer()
+    # self.connect(self.backupTimer, QtCore.SIGNAL('timeout()'), self.backupProject)
+    # if self._appBase.preferences.general.autoBackupEnabled:
+    #   self._startBackupTimer()
 
   def _initProject(self):
     """
@@ -123,23 +123,22 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                             self._appBase.applicationVersion, self._appBase.revision,
                                             self._project.name))
 
-  def _startBackupTimer(self):
-    """
-    #CCPN INTERNAL - called in setBackupFrequency and toggleBackup methods of BackupPopup
-    and __init__ of this class.
-    """
-    self.backupTimer.start(60000 * self._appBase.preferences.general.autoBackupFrequency)
-
-  def _stopBackupTimer(self):
-    """
-    #CCPN INTERNAL - called in toggleBackup method of BackupPopup
-    """
-    if self.backupTimer.isActive():
-      self.backupTimer.stop()
-
-  def backupProject(self):
-
-    apiIo.backupProject(self._project._wrappedData.parent)
+  # def _startBackupTimer(self):
+  #   """
+  #   #CCPN INTERNAL - called in setBackupFrequency and toggleBackup methods of BackupPopup
+  #   and __init__ of this class.
+  #   """
+  #   self.backupTimer.start(60000 * self._appBase.preferences.general.autoBackupFrequency)
+  #
+  # def _stopBackupTimer(self):
+  #   """
+  #   #CCPN INTERNAL - called in toggleBackup method of BackupPopup
+  #   """
+  #   if self.backupTimer.isActive():
+  #     self.backupTimer.stop()
+  #
+  # def backupProject(self):
+  #   apiIo.backupProject(self._project._wrappedData.parent)
 
   def getMenuAction(self, menuString, topMenuAction=None):
     from ccpn.framework.Translation import translator

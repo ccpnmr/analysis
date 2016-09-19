@@ -135,8 +135,8 @@ class Gui(Ui):
     self.mainWindow._fillMacrosMenu()
     self.mainWindow.setUserShortcuts(self.mainWindow._appBase.preferences)
 
-
     self.qtApp.start()
+
 
   def _showRegisterPopup(self):
     """Display registration popup"""

@@ -141,6 +141,34 @@ def getFramework(projectPath=None, **kw):
   return result
 
 
+
+from threading import Thread
+class AutoBackup(Thread):
+
+  def __init__(self, q, backupFunction):
+    super().__init__()
+    self.q = q
+    self.backupProject = backupFunction
+    self.waitTime = None
+
+
+  def run(self):
+    from time import sleep
+    while True:
+      if not self.q.empty():
+        waitTime = self.q.get()
+      if waitTime is None:
+        sleep(1)
+      else:
+        sleep(waitTime)
+        try:
+          print('Auto backup:')
+          self.backupProject()
+        except:
+          pass
+
+
+
 class Framework:
   """
   The Framework class is the base class for all applications.
@@ -176,6 +204,8 @@ class Framework:
     # NEF reader
     self.nefReader = CcpnNefIo.CcpnNefReader(self)
 
+    self.autoBackupThread = None
+
     # NBNB TODO The following block should maybe be moved into _getUi
     self._getUserPrefs()
     self._registrationDict = {}
@@ -186,7 +216,7 @@ class Framework:
     self.feedbackPopup = None
     self.submitMacroPopup = None
     self.updatePopup = None
-    self.backupPopup = None
+    # self.backupPopup = None
 
 
   def start(self):
@@ -208,12 +238,33 @@ class Framework:
       sys.stderr.write('==> No project, aborting ...\n')
       return
 
+    self.setAutoBackupTime(self.preferences.general.autoBackupFrequency)
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
     # self.project = project
     self.ui.start()
-    
-    project._resetUndo(debug=_DEBUG)
+    self._cleanup()
+
+
+  def setAutoBackupTime(self, time):
+    print('setting backup time to:', time, 'minutes')
+    from queue import Queue
+    q = Queue(maxsize=1)
+    if q.full():
+      q.get()
+    q.put(time * 3600)
+    if self.autoBackupThread is None:
+      self.autoBackupThread = AutoBackup(q=q, backupFunction=self.backupProject)
+      self.autoBackupThread.start()
+
+
+  def _cleanup(self):
+    self.autoBackupThread.terminate()
+    # project._resetUndo(debug=_DEBUG)
+
+
+  def backupProject(self):
+    apiIo.backupProject(self.project._wrappedData.parent)
 
 
   def _initialiseProject(self, project: Project):

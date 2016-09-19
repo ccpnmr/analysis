@@ -215,7 +215,6 @@ class Framework:
     self.feedbackPopup = None
     self.submitMacroPopup = None
     self.updatePopup = None
-    # self.backupPopup = None
 
 
   def start(self):
@@ -961,14 +960,6 @@ class Framework:
 
   def restoreFromArchive(self, archive=None):
     pass
-
-  # def showBackupPopup(self):
-  #   from ccpn.ui.gui.popups.BackupPopup import BackupPopup
-  #
-  #   if not self.backupPopup:
-  #     self.backupPopup = BackupPopup(parent=self.ui.mainWindow)
-  #   self.backupPopup.show()
-  #   self.backupPopup.raise_()
 
   def showApplicationPreferences(self):
     """

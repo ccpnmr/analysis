@@ -33,6 +33,7 @@ from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.CreateSequence import CreateSequence
 from ccpn.ui.gui.modules.NotesEditor import NotesEditor
 
+from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
@@ -287,11 +288,11 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
             return
 
+
         itemParent = self._typeToItem.get(shortClassName)
         newItem = self._addItem(itemParent, obj.pid)
         itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
-
-        if shortClassName in ['SA', 'NC']:
+        if shortClassName in ['SA', 'NC', 'DS']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)
           newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
           newObjectItem.setText(0, "<New %s>" % classesInSideBar[shortClassName]._childClasses[0].className)
@@ -299,19 +300,10 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         if shortClassName == 'SP':
           newPeakListObjectItem = QtGui.QTreeWidgetItem(newItem)
           newPeakListObjectItem.setFlags(newPeakListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-          newPeakListObjectItem.setText(0, "<New Peak List>")
+          newPeakListObjectItem.setText(0, "<New PeakList>")
           newIntegralListObjectItem = QtGui.QTreeWidgetItem(newItem)
           newIntegralListObjectItem.setFlags(newIntegralListObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-          newIntegralListObjectItem.setText(0, "<New Integral List>")
-
-        # for child in itemParent():
-        #   child.sortChildren(0, QtCore.Qt.AscendingOrder)
-        # newItem.sortChildren(0, QtCore.Qt.AscendingOrder)
-        # itemParent.sortChildren(1, QtCore.Qt.AscendingOrder)
-        # itemParent.sortChildren(2, QtCore.Qt.AscendingOrder)
-
-
-
+          newIntegralListObjectItem.setText(0, "<New IntegralList>")
 
       else:
         for itemParent in self._findItems(parent.pid):
@@ -503,9 +495,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
           colourScheme=self.colourScheme)
     elif obj.shortClassName == 'DS':
       #to be decided when we design structure
-      showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = DataSetPopup(dataSet=obj)
+      popup.exec_()
+      popup.raise_()
     elif obj.shortClassName == 'RL':
       #to be decided when we design structure
       showInfo('Not implemented yet!',

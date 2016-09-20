@@ -21,6 +21,8 @@ import json
 import os
 import platform
 import sys
+import tarfile
+import tempfile
 from functools import partial
 
 from ccpnmodel.ccpncore.api.memops import Implementation
@@ -976,6 +978,40 @@ class Framework:
 
   def restoreFromArchive(self, archive=None):
     pass
+
+  def _unpackCcpnTarfile(self, tarfilePath, outputPath=None):
+    """
+    # CCPN INTERNAL - called in loadData method of Project
+    """
+
+    if outputPath:
+      if not os.path.exists(outputPath):
+        os.makedirs(outputPath)
+      temporaryDirectory = None
+    else:
+      temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_')
+      outputPath = temporaryDirectory.name
+
+    cwd = os.getcwd()
+    try:
+      os.chdir(outputPath)
+      tp = tarfile.open(tarfilePath)
+      tp.extractall()
+
+       # look for a directory inside and assume the first found is the project directory (there should be exactly one)
+      relfiles = os.listdir('.')
+      for relfile in relfiles:
+        fullfile = os.path.join(outputPath, relfile)
+        if os.path.isdir(fullfile):
+          outputPath = fullfile
+          break
+      else:
+        raise IOError('Could not find project directory in tarfile')
+
+    finally:
+      os.chdir(cwd)
+
+    return outputPath, temporaryDirectory
 
   def showApplicationPreferences(self):
     """

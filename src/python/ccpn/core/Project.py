@@ -854,6 +854,12 @@ class Project(AbstractWrapperObject):
     elif dataType == 'Macro' and subType == ioFormats.PYTHON:
       self._appBase.runMacro(usePath)
 
+    elif dataType == 'Project' and subType == ioFormats.CCPNTARFILE:
+      projectPath, temporaryDirectory = self._appBase._unpackCcpnTarfile(usePath)
+      project = self.loadProject(projectPath, ioFormats.CCPN)
+      project._wrappedData.root._temporaryDirectory = temporaryDirectory
+      return [project]
+
     else:
 
       funcname = '_load' + dataType

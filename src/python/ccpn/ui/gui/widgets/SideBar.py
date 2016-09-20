@@ -36,6 +36,7 @@ from ccpn.ui.gui.modules.NotesEditor import NotesEditor
 from ccpn.ui.gui.popups.DataSetPopup import DataSetPopup
 from ccpn.ui.gui.popups.NmrChainPopup import NmrChainPopup
 from ccpn.ui.gui.popups.NmrResiduePopup import NmrResiduePopup
+from ccpn.ui.gui.popups.NmrAtomPopup import NmrAtomPopup
 from ccpn.ui.gui.popups.PeakListPropertiesPopup import PeakListPropertiesPopup
 from ccpn.ui.gui.popups.RestraintTypePopup import RestraintTypePopup
 from ccpn.ui.gui.popups.SpectrumPropertiesPopup import SpectrumPropertiesPopup
@@ -65,7 +66,7 @@ classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
 #                     'CL', 'SE', 'MO', 'DS',
 #                     'RL', 'NO')
 
-classesInTopLevel =('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
+classesInTopLevel = ('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
 
 # NBNB TBD FIXME
 # 1)This function (and the NEW_ITEM_DICT) it uses gets the create_new
@@ -432,12 +433,9 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'PL':
-      # popup = PeakListPropertiesPopup(peakList=obj)
-      # popup.exec_()
-      # popup.raise_()
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
+      popup = PeakListPropertiesPopup(peakList=obj)
+      popup.exec_()
+      popup.raise_()
 
     elif obj.shortClassName == 'SG':
       popup = SpectrumGroupEditor(project=self.project, spectrumGroup=obj)
@@ -462,19 +460,13 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NR':
-      # info = showInfo('Not implemented yet!',
-      #     'This function has not been implemented in the current version',
-      #     colourScheme=self.colourScheme)
       popup = NmrResiduePopup(nmrResidue=obj)
       popup.exec_()
       popup.raise_()
     elif obj.shortClassName == 'NA':
-      info = showInfo('Not implemented yet!',
-          'This function has not been implemented in the current version',
-          colourScheme=self.colourScheme)
-      # popup = NmrAtomPopup(nmrAtom=obj)
-      # popup.exec_()
-      # popup.raise_()
+      popup = NmrAtomPopup(nmrAtom=obj)
+      popup.exec_()
+      popup.raise_()
     elif obj.shortClassName == 'CL':
       info = showInfo('Not implemented yet!',
           'This function has not been implemented in the current version',

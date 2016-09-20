@@ -119,7 +119,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
 
 
   def _printToFile(self, printer):
-    # CCPN INTERNAL - called in _printToFile method of GuipectrumViewNd
+    # CCPN INTERNAL - called in _printToFile method of GuiSpectrumViewNd
 
     # NOTE: only valid for ND so far
 
@@ -690,6 +690,7 @@ class PeakNd(QtGui.QGraphicsItem):
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):
       # if self.isInPlane():
+        self.annotation.setupPeakAnnotationItem(self)
         # r, w, box = self.drawData
         r, w = self.drawData
 

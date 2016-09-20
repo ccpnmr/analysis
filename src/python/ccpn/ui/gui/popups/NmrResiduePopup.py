@@ -34,16 +34,11 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     self.residueTypePulldown.setData(CCP_CODES)
     self.residueTypePulldown.setFixedWidth(100)
 
-    # atomTypeLabel = Label(self, "Atom Type ", grid=(2, 2))
-    # self.atomTypePulldown = PulldownList(self, grid=(2, 3))
-
     leftOverLabel = Label(self, "Leftover Possibilities ", grid=(5, 0))
     leftOvers = Label(self, grid=(5, 1))
     applyButton = Button(self, grid=(6, 1), text='Apply', callback=self._assignResidue)
 
-
-
-    self._updatePopup(nmrResidue, nmrAtom)
+    self._updatePopup(nmrResidue)
 
 
   def _getResidueTypeProb(self, currentNmrResidue):
@@ -51,28 +46,24 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     preds1 = [' '.join([x[0], x[1]]) for x in predictions if not currentNmrResidue.residueType]
     predictedTypes = [x[0] for x in predictions]
     remainingResidues = [x for x in CCP_CODES if x not in predictedTypes and not currentNmrResidue.residueType]
-    print(remainingResidues, predictedTypes)
-
     possibilities = [currentNmrResidue.residueType]+preds1+remainingResidues
-
     self.residueTypePulldown.setData(possibilities)
 
 
-  def _updatePopup(self, nmrResidue, nmrAtom):
-      if nmrResidue is not None:
+  def _updatePopup(self, nmrResidue):
+    if nmrResidue is not None:
 
-        self.nmrResidueLabel.setText("NMR Residue: %s" % nmrResidue.id)
-        self.chainPulldown.setCurrentIndex(self.chainPulldown.findText(nmrResidue.nmrChain.pid))
-        chain = self.project.getByPid(self.chainPulldown.currentText())
-        sequenceCodes = ["%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
-                     for nmrResidue in chain.nmrResidues]
-        self.seqCodePulldown.setData(sequenceCodes)
-        sequenceCode = "%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
-        self.seqCodePulldown.setCurrentIndex(self.seqCodePulldown.findText(sequenceCode))
-        self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.findText(self._getCcpCodeFromNmrResidueName(nmrResidue)))
-        self._getResidueTypeProb(nmrResidue)
-        self.nmrResidue = nmrResidue
-        self.nmrAtom = nmrAtom
+      self.nmrResidueLabel.setText("NMR Residue: %s" % nmrResidue.id)
+      self.chainPulldown.setCurrentIndex(self.chainPulldown.findText(nmrResidue.nmrChain.pid))
+      chain = self.project.getByPid(self.chainPulldown.currentText())
+      sequenceCodes = ["%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
+                   for nmrResidue in chain.nmrResidues]
+      self.seqCodePulldown.setData(sequenceCodes)
+      sequenceCode = "%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
+      self.seqCodePulldown.setCurrentIndex(self.seqCodePulldown.findText(sequenceCode))
+      self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.findText(self._getCcpCodeFromNmrResidueName(nmrResidue)))
+      self._getResidueTypeProb(nmrResidue)
+      self.nmrResidue = nmrResidue
 
   def _selectNmrChain(self, item):
     chain = self.project.getByPid(self.chainPulldown.currentText())
@@ -82,7 +73,6 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     else:
       self.seqCodePulldown.setData(["%s %s" % (nmrResidue.sequenceCode, nmrResidue.residueType)
                      for nmrResidue in chain.nmrResidues])
-
     self._getResidueType(self.seqCodePulldown.currentText())
 
   def _getResidueType(self, item):
@@ -90,17 +80,6 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     for type in self.residueTypePulldown.texts:
       if type.split(' ')[0] == residueType:
         self.residueTypePulldown.setCurrentIndex(self.residueTypePulldown.texts.index(type))
-
-  def _getAtomType(self, item):
-    if item != '':
-      shiftValue = self.project.chemicalShiftLists[0].getChemicalShift(self.nmrAtom.id).value
-      residueType =  self.residueTypePulldown.currentText().split(' ')[0]
-      atomPredictions = getNmrAtomPrediction(residueType, shiftValue, self.nmrAtom.isotopeCode)
-      atomPossibilites = [' '.join([x[0][1], str(x[1])+'%']) for x in atomPredictions]
-      remainingAtoms = [x for x in ATOM_NAMES[self.nmrAtom.isotopeCode] if x not in atomPredictions or not self.nmrAtom.name]
-      self.atomTypePulldown.setData(atomPossibilites)
-      self.atomTypePulldown.addItems(remainingAtoms)
-
 
   def _getCcpCodeFromNmrResidueName(self, currentNmrResidue):
     if currentNmrResidue.residue is not None:
@@ -123,18 +102,14 @@ class NmrResiduePopup(QtGui.QDialog, Base):
     else:
       seqCode = self.seqCodePulldown.currentText().split(' ')[0]
       residueType = self.residueTypePulldown.currentText().split(' ')[0].upper()
-
-      newSeqCode = [seqCode, residueType]
+      newSeqCode = '.'.join([seqCode, residueType])
       self.nmrResidue.rename(newSeqCode)
+
     self.nmrResidueLabel.setText("NMR Residue: %s" % self.nmrResidue.id)
-    if self.parent.name() == 'ASSIGNMENT MODULE':
-      self.parent.emptyAllTablesAndLists()
-      self.parent.updateTables()
-      self.parent.updateAssignedNmrAtomsListwidgets()
-      self.parent.updateWidgetLabels()
-
-
-  def _setAtomType(self, item):
-
-    self.nmrResidue.fetchNmrAtom(name=item.split(' ')[0])
+    if self.parent:
+      if self.parent.name() == 'PEAK ASSIGNER':
+        self.parent.emptyAllTablesAndLists()
+        self.parent.updateTables()
+        self.parent.updateAssignedNmrAtomsListwidgets()
+        self.parent.updateWidgetLabels()
 

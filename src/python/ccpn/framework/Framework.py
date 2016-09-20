@@ -142,26 +142,31 @@ def getFramework(projectPath=None, **kw):
 
 
 from threading import Thread
+from time import time, sleep
 class AutoBackup(Thread):
 
-  def __init__(self, q, backupFunction):
+  def __init__(self, q, backupFunction, sleepTime=1):
     super().__init__()
+    self.sleepTime = sleepTime
     self.q = q
     self.backupProject = backupFunction
-    self.waitTime = None
+    self.startTime = None
 
 
   def run(self):
-    from time import sleep
+    self.startTime = time()
     while True:
       if not self.q.empty():
         waitTime = self.q.get()
       if waitTime is None:
-        sleep(1)
+        sleep(self.sleepTime)
+      elif waitTime == 'kill':
+        return
+      elif (time()-self.startTime) < waitTime:
+        sleep(self.sleepTime)
       else:
-        sleep(waitTime)
+        self.startTime = time()
         try:
-          print('Auto backup:')
           self.backupProject()
         except:
           pass
@@ -203,6 +208,7 @@ class Framework:
     # NEF reader
     self.nefReader = CcpnNefIo.CcpnNefReader(self)
 
+    self._backupTimerQ = None
     self.autoBackupThread = None
 
     # NBNB TODO The following block should maybe be moved into _getUi
@@ -236,7 +242,11 @@ class Framework:
       sys.stderr.write('==> No project, aborting ...\n')
       return
 
-    self.setAutoBackupTime(self.preferences.general.autoBackupFrequency)
+    if self.preferences.general.autoBackupEnabled:
+      self.setAutoBackupTime(self.preferences.general.autoBackupFrequency)
+    else:
+      self.setAutoBackupTime(None)
+
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
     # self.project = project
@@ -245,21 +255,27 @@ class Framework:
 
 
   def setAutoBackupTime(self, time):
-    print('setting backup time to:', time, 'minutes')
-    from queue import Queue
-    q = Queue(maxsize=1)
-    if q.full():
-      q.get()
-    q.put(time * 3600)
+    # TODO: Need to add logging...
+    if self._backupTimerQ is None:
+      from queue import Queue
+      self._backupTimerQ = Queue(maxsize=1)
+    if self._backupTimerQ.full():
+      self._backupTimerQ.get()
+    if isinstance(time, (float, int)):
+      self._backupTimerQ.put(time * 60)
+    else:
+      self._backupTimerQ.put(time)
     if self.autoBackupThread is None:
-      self.autoBackupThread = AutoBackup(q=q, backupFunction=self.backupProject)
+      self.autoBackupThread = AutoBackup(q=self._backupTimerQ,
+                                         backupFunction=self.backupProject)
       self.autoBackupThread.start()
 
 
   def _cleanup(self):
-    self.autoBackupThread.terminate()
+    self.setAutoBackupTime('kill')
     # project._resetUndo(debug=_DEBUG)
-
+    pass
+  
 
   def backupProject(self):
     apiIo.backupProject(self.project._wrappedData.parent)

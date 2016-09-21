@@ -357,6 +357,29 @@ class Strip(AbstractWrapperObject):
     #
     return True
 
+  def peakIsInFlankingPlane(self, peak:Peak) -> bool:
+
+    """is peak in planes flanking currently displayed planes for strip?"""
+    apiSpectrumView = self._wrappedData.findFirstSpectrumView(
+      dataSource=peak._wrappedData.peakList.dataSource)
+
+    if apiSpectrumView is None:
+      return False
+
+    orderedAxes = self.orderedAxes
+    for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
+      if zDataDim:
+        zPosition = peak.position[zDataDim.dimensionIndex]
+        # NBNB W3e do not think this should add anything - the region should be set correctly.
+        # RHF, WB
+        # zPlaneSize = zDataDim.getDefaultPlaneSize()
+        zRegion = orderedAxes[2+ii].region
+        zWidth = orderedAxes[2+ii].width
+        if zRegion[0]-zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1]+zWidth:
+          return True
+
+    return False
+
 
 # newStrip functions
 # We should NOT have any newStrip function, except possibly for FreeStrips

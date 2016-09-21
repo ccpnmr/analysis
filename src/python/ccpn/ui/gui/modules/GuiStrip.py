@@ -744,7 +744,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     if not peakListView:
       return
 
-    peaks = [peak for peak in peaks if self.peakIsInPlane(peak)]
+    peaks = [peak for peak in peaks if self.peakIsInPlane(peak) or self.peakIsInFlankingPlane(peak)]
     self.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
 
   def _resetRemoveStripAction(self):
@@ -787,7 +787,7 @@ def _axisRegionChanged(axis:'Axis'):
             for peakListView in spectrumView.peakListViews:
               if peakListView.isVisible():
                 peakList = peakListView.peakList
-                peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak)]
+                peaks = [peak for peak in peakList.peaks if strip.peakIsInPlane(peak) or strip.peakIsInFlankingPlane(peak)]
                 strip.stripFrame.guiSpectrumDisplay.showPeaks(peakListView, peaks)
 
         if len(strip.axisOrder) > 2:

@@ -737,6 +737,23 @@ class PeakNd(QtGui.QGraphicsItem):
         #   painter.setPen(QtGui.QColor('white'))
         #   painter.drawRect(-r,-r,w,w)
 
+      elif self.peakListView.spectrumView.strip.peakIsInFlankingPlane(self.peak):
+        colour = self.peakListView.symbolColour
+        pen = QtGui.QPen(QtGui.QColor(colour))
+        pen.setStyle(QtCore.Qt.DotLine)
+        painter.setPen(pen)
+        self.annotation.setupPeakAnnotationItem(self)
+        r, w = self.drawData
+
+        painter.drawLine(-r,-r,r,r)
+        painter.drawLine(-r,r,r,-r)
+
+        if self.peak.isSelected:
+          painter.drawLine(-r,-r,-r,r)
+          painter.drawLine(-r,r,r,r)
+          painter.drawLine(r,r,r,-r)
+          painter.drawLine(r,-r,-r,-r)
+
 
 ###FONT = QtGui.QFont("DejaVu Sans Mono", 9)
 ###FONT_METRIC = QtGui.QFontMetricsF(FONT)

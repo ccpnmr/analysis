@@ -244,10 +244,7 @@ class Framework:
       sys.stderr.write('==> No project, aborting ...\n')
       return
 
-    if self.preferences.general.autoBackupEnabled:
-      self.setAutoBackupTime(self.preferences.general.autoBackupFrequency)
-    else:
-      self.setAutoBackupTime(None)
+    self.updateAutoBackup()
 
     sys.stderr.write('==> Done, %s is starting\n' % self.applicationName)
 
@@ -255,6 +252,12 @@ class Framework:
     self.ui.start()
     self._cleanup()
 
+  def updateAutoBackup(self):
+
+    if self.preferences.general.autoBackupEnabled:
+      self.setAutoBackupTime(self.preferences.general.autoBackupFrequency)
+    else:
+      self.setAutoBackupTime(None)
 
   def setAutoBackupTime(self, time):
     # TODO: Need to add logging...

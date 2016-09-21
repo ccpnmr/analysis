@@ -124,6 +124,17 @@ class PreferencesPopup(QtGui.QDialog):
     self.spectrumBorderBox.toggled.connect(partial(self._toggleGeneralOptions, 'showSpectrumBorder'))
     row += 1
 
+    self.autoBackupEnabledLabel = Label(self, text="Auto Backup On: ", grid=(row, 0))
+    self.autoBackupEnabledBox = CheckBox(self, grid=(row, 1), checked=self.preferences.general.autoBackupEnabled)
+    self.autoBackupEnabledBox.toggled.connect(partial(self._toggleGeneralOptions, 'autoBackupEnabled'))
+    row += 1
+
+    self.autoBackupFrequencyLabel = Label(self, text="Auto Backup Freq (mins)", grid=(row, 0))
+    self.autoBackupFrequencyData = LineEdit(self, grid=(row, 1))
+    self.autoBackupFrequencyData.setText('%.0f' % self.preferences.general.autoBackupFrequency)
+    self.autoBackupFrequencyData.editingFinished.connect(self._setAutoBackupFrequency)
+    row += 1
+
     self.regionPaddingLabel = Label(self, text="Spectral Padding (%)", grid=(row, 0))
     self.regionPaddingData = LineEdit(self, grid=(row, 1))
     self.regionPaddingData.setText('%.0f' % (100*self.preferences.general.stripRegionPadding))
@@ -140,10 +151,10 @@ class PreferencesPopup(QtGui.QDialog):
       currentDataPath = os.path.expanduser('~')
     dialog = FileDialog(self, text='Select Data File', directory=currentDataPath, fileMode=2, acceptMode=0,
                            preferences=self.preferences.general)
-    directory = dialog.selectedFiles()[0]
-    if len(directory) > 0:
-      self.dataPathText.setText(directory)
-      self.preferences.general.dataPath = directory
+    directory = dialog.selectedFiles()
+    if directory:
+      self.dataPathText.setText(directory[0])
+      self.preferences.general.dataPath = directory[0]
 
   def _setDataPath(self):
     if self.dataPathText.isModified():
@@ -214,7 +225,7 @@ class PreferencesPopup(QtGui.QDialog):
       self.preferences.general.userPluginPath = newPath
 
   def _setExtensionFilesPath(self):
-      newPath = self.macroExtensionData.text()
+      newPath = self.extensionPathData.text()
       self.preferences.general.userExtensionPath = newPath
 
   def _changeLanguage(self, value):
@@ -236,6 +247,18 @@ class PreferencesPopup(QtGui.QDialog):
       for strip in self.project.strips:
         for spectrumView in strip.spectrumViews:
           spectrumView._setBorderItemHidden(checked)
+    elif preference == 'autoBackupEnabled':
+      application = self.project._appBase
+      application.updateAutoBackup()
+
+  def _setAutoBackupFrequency(self):
+    try:
+      frequency = int(self.autoBackupFrequencyData.text())
+    except:
+      return
+    self.preferences.general.autoBackupFrequency = frequency
+    application = self.project._appBase
+    application.updateAutoBackup()
 
   def _setRegionPadding(self):
     try:

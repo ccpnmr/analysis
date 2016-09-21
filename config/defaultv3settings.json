@@ -1,6 +1,5 @@
 {
     "general": {
-        "autoBackupOnOpen": false,
         "autoSaveOnQuit": true,
         "autoSaveLayoutOnQuit": true,
         "auxiliaryFilesPath": "~/.ccpn",

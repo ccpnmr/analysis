@@ -57,11 +57,63 @@ def _fullyAssignedPeakPercentage(peakList):
 
 def _assignableAtomCount(chain):
 
-  return len([atom for atom in chain.atoms if atom._wrappedData.chemAtom and atom._wrappedData.chemAtom.waterExchangeable])
+  # Atoms without a chemAtom are various kinds of pseudoatoms.
+  # Water exchangeable atoms are e.g. OH, NH3, guanidine.
+
+  # NB the result is counting rotating aromatic rings as fixed,
+  # but it would be too much work to fix that
+
+  count = 0
+  for atom in chain.atoms:
+    apiAtom = atom._wrappedData
+    apiChemAtom = apiAtom.chemAtom
+    if apiChemAtom is not None:
+      # Real atom, not pseudo
+      if not apiChemAtom.waterExchangeable:
+        # Not e.g. OH or NH3
+        if apiAtom.name.endswith('1') or len(apiAtom.components) != 3:
+          # Count only for the first atom in CH3, NH3 groups
+          # A bit of a hack, but should be OK i practice
+          count += 1
+  #
+  return count
+
+
+  # return len([atom for atom in chain.atoms if atom._wrappedData.chemAtom
+  #             and not atom._wrappedData.chemAtom.waterExchangeable])
 
 def _assignedAtomCount(chain):
 
-  return len([atom for atom in chain.atoms if atom.nmrAtom])
+  # NB this is not quite precise
+  # You could get miscounting if you have both stereo, non-stereo, and wildcard/pseudo
+  # NmrAtoms for the same atoms, and you could in theory get miscounts for nested
+  # pairs (like guanidinium C-(NH2)2
+  # Also e.g. Tyr/Phe HD% is counted as one resonance, whereas it is counted as
+  # two assignable atoms.
+  # But I lave teh details to someone else - this should be decent.
+
+  count = 0
+
+  nmrChain = chain.nmrChain
+  if nmrChain is not None:
+    for nmrAtom in nmrChain.nmrAtoms:
+      atom = nmrAtom.atom
+      if atom is not None:
+        nComponents = len(atom._wrappedData.components)
+        if nComponents == 2:
+          if atom.name[-1] in 'XYxy':
+            # Should be 'xy' eventually, but we shall soon change from 'XY' to 'xy'.
+            # During the transition this is safest
+            count += 1
+          else:
+            count += 2
+        else:
+          # Single atoms count as one, CH3 and NH3 groups too
+          count += 1
+  #
+  return count
+
+  # return len([atom for atom in chain.atoms if atom.nmrAtom])
 
 def _assignedAtomPercentage(chain):
 
@@ -164,3 +216,65 @@ class ProjectSummaryModule(CcpnModule):
     self.chainNumberDict = {}
     for n, chain in enumerate(self.chains):
       self.chainNumberDict[chain] = n+1
+
+def _testChainData(project):
+
+  result = []
+  result.append(['#', 'ID', '#Residue', '#Assignable', '#Assigned', 'Asigned%',
+                 '#Atoms', '#hasChemAtom', '#NmrAtoms', '#AssignedNmrAtoms',
+                 'isWaterExchangeable'])
+  for ii,chain in enumerate(project.chains):
+    result.append([ii+1, chain.id, len(chain.residues), _assignableAtomCount(chain),
+                   _assignedAtomCount(chain), _assignedAtomPercentage(chain),
+                   len(chain.atoms), len([x for x in chain.atoms if x._wrappedData.chemAtom],),
+                   len(project.nmrAtoms), len([x for x in project.nmrAtoms if x.atom]),
+                   len([x for x in chain.atoms if x._wrappedData.chemAtom
+                        and x._wrappedData.chemAtom.waterExchangeable])])
+
+  data = {'nuclei':[], 'names':[], 'assigned':[], 'chemAtom':[], 'NOchemAtom':[],
+          'exchangeable':[], 'non-exchangeable':[]}
+
+  for atom in project.atoms:
+    name = atom.name
+    data['nuclei'].append(name[0])
+    data['names'].append(name)
+    if atom.nmrAtom:
+      data['assigned'].append(name)
+    if atom._wrappedData.chemAtom:
+      data['chemAtom'].append(name)
+      if atom._wrappedData.chemAtom.waterExchangeable:
+        data['exchangeable'].append(name)
+      else:
+        data['non-exchangeable'].append(name)
+    else:
+      data['NOchemAtom'].append(name)
+
+  #
+  return result, data
+
+if __name__ == '__main__':
+
+  import os
+  import time
+  import sys
+  from collections import Counter
+  path = sys.argv[1]
+
+  from ccpn.framework.Framework import getFramework
+  path = os.path.normpath(os.path.abspath(path))
+  time1 = time.time()
+  application = getFramework()
+  application.loadProject(path)
+  project = application.project
+  time2 = time.time()
+  print ("====> Loaded %s from file in seconds %s" % (project.name, time2-time1))
+  result, data = _testChainData(project)
+  for ll in result:
+    print ('  '.join(str(x) for x in ll))
+  for tag, ll in data.items():
+    print ('Count', tag, Counter(ll))
+  time3 = time.time()
+  print ("====> Done test in seconds %s" % (time3-time2))
+
+  # Needed to clean up notifiers
+  project.delete()

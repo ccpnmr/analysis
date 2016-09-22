@@ -642,7 +642,7 @@ class Framework:
       ("Undo", self.undo, [('shortcut', '⌃z')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       ("Redo", self.redo, [('shortcut', '⌃y')]),  # Unicode U+2303, NOT the carrot on your keyboard.
       (),
-      ("Summary", self.displayProjectSummary, [('enabled', False)]),
+      ("Summary", self.displayProjectSummary),
       ("Archive", self.archiveProject, [('enabled', False)]),
       ("Restore From Archive...", self.restoreFromArchive, [('enabled', False)]),
       (),
@@ -964,10 +964,13 @@ class Framework:
   def clearLogFile(self):
     pass
 
-  def displayProjectSummary(self):
-    info = MessageDialog.showInfo('Not implemented yet',
-                                  'This function has not been implemented in the current version',
-                                  colourScheme=self.ui.mainWindow.colourScheme)
+  def displayProjectSummary(self, position:str='left', relativeTo:CcpnModule=None):
+    """
+    Displays Project summary module on left of main window.
+    """
+    from ccpn.ui.gui.modules.ProjectSummaryModule import ProjectSummaryModule
+    module = ProjectSummaryModule(self.project)
+    self.ui.mainWindow.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
 
   def archiveProject(self):
     project = self.project

@@ -90,9 +90,13 @@ def _assignedAtomCount(chain):
   # pairs (like guanidinium C-(NH2)2
   # Also e.g. Tyr/Phe HD% is counted as one resonance, whereas it is counted as
   # two assignable atoms.
-  # But I lave teh details to someone else - this should be decent.
+  # But I leave the details to someone else - this should be decent.
 
   count = 0
+
+  # Should be 'xy' eventually, but we shall soon change from 'XY' to 'xy'.
+  # During the transition this is safest
+  xyWildcards = 'XYxy'
 
   nmrChain = chain.nmrChain
   if nmrChain is not None:
@@ -101,11 +105,15 @@ def _assignedAtomCount(chain):
       if atom is not None:
         nComponents = len(atom._wrappedData.components)
         if nComponents == 2:
-          if atom.name[-1] in 'XYxy':
-            # Should be 'xy' eventually, but we shall soon change from 'XY' to 'xy'.
-            # During the transition this is safest
+          name = atom.name
+          if name[-1] in xyWildcards:
+            # Non-stereospecific, we are only assigning one, not two
+            count += 1
+          elif name[-1] == '%' and name[-2] in xyWildcards:
+            # isopropyl groups and similar
             count += 1
           else:
+            # % expressions for CH2, NH2, Val CG2, Tyr side chain, ...
             count += 2
         else:
           # Single atoms count as one, CH3 and NH3 groups too

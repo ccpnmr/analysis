@@ -166,10 +166,45 @@ class Atom(AbstractWrapperObject):
     project = self._project
     project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
 
-
-
   # Utility functions
-    
+
+  def isAssignable(self):
+    """Whether atom is assignable to"""
+
+    if not self.componentAtoms and not self.exchangesWithWater:
+      # simple atom, and not e.g. OH or NH3
+      if self.name.endswith('1') or self.isEquivalentAtomGroup == False:
+        # Count only for the first atom in equivalent groups
+        # NB the '== False' IS DELIBERATE. Values True and None must BOTH be excluded.
+        return True
+
+    return False
+
+  def assignedCount(self):
+    """How many atoms this counts as when assigned to"""
+
+    # Should be 'xy' eventually, but we shall soon change from 'XY' to 'xy'.
+    # During the transition this is safest
+    xyWildcards = 'XYxy'
+
+    count = 0
+    if len(self.componentAtoms) == 2:
+      name = self.name
+      if name[-1] in xyWildcards:
+        # Non-stereospecific, we are only assigning one, not two
+        count = 1
+      elif name[-1] == '%' and name[-2] in xyWildcards:
+        # isopropyl groups and similar
+        count = 1
+      else:
+        # % expressions for CH2, NH2, Val CG2, Tyr side chain, ...
+        count = 2
+    else:
+      # Single atoms count as one, CH3 and NH3 groups too
+      count = 1
+
+    return count
+
   # Implementation functions
 
   @classmethod

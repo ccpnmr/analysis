@@ -367,7 +367,20 @@ class Peak(AbstractWrapperObject):
     dimensionNmrAtoms[index] = value
     self.dimensionNmrAtoms = dimensionNmrAtoms
 
+  # Utility functions
+
+  def isPartlyAssigned(self):
+    """Whether peak is partly assigned"""
+
+    return any(self.dimensionNmrAtoms)
+
+  def isFullyAssigned(self):
+    """Whether peak is fully assigned"""
+
+    return all(self.dimensionNmrAtoms)
+
   # Implementation functions
+
   @classmethod
   def _getAllWrappedData(cls, parent: PeakList)-> Tuple[Nmr.Peak, ...]:
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""

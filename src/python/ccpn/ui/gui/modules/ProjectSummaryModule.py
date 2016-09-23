@@ -24,102 +24,11 @@ __version__ = "$Revision: 9852 $"
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.core.lib import Summary
+
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-
-def _percentage(count, totalCount, decimalPlaceCount=0):
-
-  if totalCount:
-    return int(round((100.0 * count) / totalCount, decimalPlaceCount))
-  else:
-    return 0
-
-# PEAKLISTS
-
-def _partlyAssignedPeakCount(peakList):
-
-  return len([peak for peak in peakList.peaks if any(peak.dimensionNmrAtoms)])
-
-def _partlyAssignedPeakPercentage(peakList):
-
-  return _percentage(_partlyAssignedPeakCount(peakList), len(peakList.peaks))
-
-def _fullyAssignedPeakCount(peakList):
-
-  return len([peak for peak in peakList.peaks if all(peak.dimensionNmrAtoms)])
-
-def _fullyAssignedPeakPercentage(peakList):
-
-  return _percentage(_fullyAssignedPeakCount(peakList), len(peakList.peaks))
-
-# CHAINS
-
-def _assignableAtomCount(chain):
-  """Counts atoms that are not marked as exchanging with water
-  Compound atoms (e.g. MB, QGB, HB%, HBx or HBy) are not counted
-  For groups of equivalent atoms only the atom name ending in '1' is counted
-  Sometimes-equivalent atom groups (rotating aromatic rings) count as squivalent
-  """
-
-  count = 0
-  for atom in chain.atoms:
-    if not atom.componentAtoms and not atom.exchangesWithWater:
-      # simple atom, and not e.g. OH or NH3
-      if atom.name.endswith('1') or atom.isEquivalentAtomGroup == False:
-        # Count only for the first atom in equivalent groups
-        # NB the '== False' IS DELIBERATE. Values True and None must BOTH be excluded.
-        count += 1
-  #
-  return count
-
-
-  # return len([atom for atom in chain.atoms if atom._wrappedData.chemAtom
-  #             and not atom._wrappedData.chemAtom.waterExchangeable])
-
-def _assignedAtomCount(chain):
-
-  # NB this is not quite precise
-  # You could get miscounting if you have both stereo, non-stereo, and wildcard/pseudo
-  # NmrAtoms for the same atoms, and you could in theory get miscounts for nested
-  # pairs (like guanidinium C-(NH2)2
-  # Also e.g. Tyr/Phe HD% is counted as one resonance, whereas it is counted as
-  # two assignable atoms.
-  # But I leave the details to someone else - this should be decent.
-
-  count = 0
-
-  # Should be 'xy' eventually, but we shall soon change from 'XY' to 'xy'.
-  # During the transition this is safest
-  xyWildcards = 'XYxy'
-
-  nmrChain = chain.nmrChain
-  if nmrChain is not None:
-    for nmrAtom in nmrChain.nmrAtoms:
-      atom = nmrAtom.atom
-      if atom is not None:
-        if len(atom.componentAtoms) == 2:
-          name = atom.name
-          if name[-1] in xyWildcards:
-            # Non-stereospecific, we are only assigning one, not two
-            count += 1
-          elif name[-1] == '%' and name[-2] in xyWildcards:
-            # isopropyl groups and similar
-            count += 1
-          else:
-            # % expressions for CH2, NH2, Val CG2, Tyr side chain, ...
-            count += 2
-        else:
-          # Single atoms count as one, CH3 and NH3 groups too
-          count += 1
-  #
-  return count
-
-  # return len([atom for atom in chain.atoms if atom.nmrAtom])
-
-def _assignedAtomPercentage(chain):
-
-  return _percentage(_assignedAtomCount(chain), _assignableAtomCount(chain))
 
 class ProjectSummaryModule(CcpnModule):
 
@@ -157,20 +66,18 @@ class ProjectSummaryModule(CcpnModule):
       Column('#', lambda peakList: self.peakListNumberDict[peakList], tipText='Number'),
       Column('Id', lambda peakList: peakList.id, tipText='PeakList id'),
       Column('Peak count', lambda peakList: len(peakList.peaks), tipText='Number of peaks in peakList'),
-      Column('Partly assigned count', _partlyAssignedPeakCount,
+      Column('Partly assigned count', Summary.partlyAssignedPeakCount,
              tipText='Number of peaks in peakList at least partially assigned'),
-      Column('Partly assigned %', _partlyAssignedPeakPercentage,
+      Column('Partly assigned %', Summary.partlyAssignedPeakPercentage,
              tipText='Percentage of peaks in peakList at least partially assigned'),
-      Column('Fully assigned count', _fullyAssignedPeakCount,
+      Column('Fully assigned count', Summary.fullyAssignedPeakCount,
              tipText='Number of peaks in peakList fully assigned'),
-      Column('Fully assigned %', _fullyAssignedPeakPercentage,
+      Column('Fully assigned %', Summary.fullyAssignedPeakPercentage,
              tipText='Percentage of peaks in peakList fully assigned'),
     ]
 
     self.peakListTable = ObjectTable(self.mainWidget, columns=columns, objects=self.peakLists, grid=(row, 0))
     row += 1
-
-    return # TEMP (below code not working and very, very slow)
 
     # CHAINS
 
@@ -181,11 +88,11 @@ class ProjectSummaryModule(CcpnModule):
       Column('#', lambda chain: self.chainNumberDict[chain], tipText='Number'),
       Column('Id', lambda chain: chain.id, tipText='Chain id'),
       Column('Residue count', lambda chain: len(chain.residues), tipText='Number of residues in chain'),
-      Column('Assignable atom count', _assignableAtomCount,
+      Column('Assignable atom count', Summary.assignableAtomCount,
              tipText='Number of atoms in chain which are assignable to'),
-      Column('Assigned atom count', _assignedAtomCount,
+      Column('Assigned atom count', Summary.assignedAtomCount,
              tipText='Number of atoms in chain which are assigned to'),
-      Column('Assigned atom %', _assignedAtomPercentage,
+      Column('Assigned atom %', Summary.assignedAtomPercentage,
              tipText='Percentage of atoms in chain which are assigned to'),
     ]
 

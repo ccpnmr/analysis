@@ -56,25 +56,20 @@ def _fullyAssignedPeakPercentage(peakList):
 # CHAINS
 
 def _assignableAtomCount(chain):
-
-  # Atoms without a chemAtom are various kinds of pseudoatoms.
-  # Water exchangeable atoms are e.g. OH, NH3, guanidine.
-
-  # NB the result is counting rotating aromatic rings as fixed,
-  # but it would be too much work to fix that
+  """Counts atoms that are not marked as exchanging with water
+  Compound atoms (e.g. MB, QGB, HB%, HBx or HBy) are not counted
+  For groups of equivalent atoms only the atom name ending in '1' is counted
+  Sometimes-equivalent atom groups (rotating aromatic rings) count as squivalent
+  """
 
   count = 0
   for atom in chain.atoms:
-    apiAtom = atom._wrappedData
-    apiChemAtom = apiAtom.chemAtom
-    if apiChemAtom is not None:
-      # Real atom, not pseudo
-      if not apiChemAtom.waterExchangeable:
-        # Not e.g. OH or NH3
-        if apiAtom.name.endswith('1') or len(apiAtom.components) != 3:
-          # Count only for the first atom in CH3, NH3 groups
-          # A bit of a hack, but should be OK i practice
-          count += 1
+    if not atom.componentAtoms and not atom.exchangesWithWater:
+      # simple atom, and not e.g. OH or NH3
+      if atom.name.endswith('1') or atom.isEquivalentAtomGroup == False:
+        # Count only for the first atom in equivalent groups
+        # NB the '== False' IS DELIBERATE. Values True and None must BOTH be excluded.
+        count += 1
   #
   return count
 
@@ -103,8 +98,7 @@ def _assignedAtomCount(chain):
     for nmrAtom in nmrChain.nmrAtoms:
       atom = nmrAtom.atom
       if atom is not None:
-        nComponents = len(atom._wrappedData.components)
-        if nComponents == 2:
+        if len(atom.componentAtoms) == 2:
           name = atom.name
           if name[-1] in xyWildcards:
             # Non-stereospecific, we are only assigning one, not two
@@ -229,15 +223,14 @@ def _testChainData(project):
 
   result = []
   result.append(['#', 'ID', '#Residue', '#Assignable', '#Assigned', 'Asigned%',
-                 '#Atoms', '#hasChemAtom', '#NmrAtoms', '#AssignedNmrAtoms',
+                 '#Atoms', '#NmrAtoms', '#AssignedNmrAtoms',
                  'isWaterExchangeable'])
   for ii,chain in enumerate(project.chains):
     result.append([ii+1, chain.id, len(chain.residues), _assignableAtomCount(chain),
                    _assignedAtomCount(chain), _assignedAtomPercentage(chain),
-                   len(chain.atoms), len([x for x in chain.atoms if x._wrappedData.chemAtom],),
+                   len(chain.atoms),
                    len(project.nmrAtoms), len([x for x in project.nmrAtoms if x.atom]),
-                   len([x for x in chain.atoms if x._wrappedData.chemAtom
-                        and x._wrappedData.chemAtom.waterExchangeable])])
+                   len([x for x in chain.atoms if x.exchangesWithWater])])
 
   data = {'nuclei':[], 'names':[], 'assigned':[], 'chemAtom':[], 'NOchemAtom':[],
           'exchangeable':[], 'non-exchangeable':[]}
@@ -250,7 +243,7 @@ def _testChainData(project):
       data['assigned'].append(name)
     if atom._wrappedData.chemAtom:
       data['chemAtom'].append(name)
-      if atom._wrappedData.chemAtom.waterExchangeable:
+      if atom.exchangesWithWater:
         data['exchangeable'].append(name)
       else:
         data['non-exchangeable'].append(name)

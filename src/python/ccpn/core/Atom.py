@@ -96,6 +96,67 @@ class Atom(AbstractWrapperObject):
     boundAtoms = (getDataObj(x) for x in boundApiAtoms)
     return tuple(sorted(x for x in boundAtoms if x is not None))
 
+  @property
+  def componentAtoms(self) -> typing.Tuple['Atom']:
+    """Atoms that are combined to make up this atom - reverse of 'compoundAtoms'
+
+    For simple atoms this is empty.
+    For wildcard atoms (e.g. HB%, QB) this gives the individual atoms that combine into atom.
+    For non-stereo atoms (e.g. HBx, HBy, HGx%) it gives the two alternative stereospecific atoms
+
+    Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13
+    and is itself a component of HGx%, HGy%, HG%, and QG"""
+    getDataObj = self._project._data2Obj.get
+    apiAtom = self._wrappedData
+    return tuple(getDataObj(x) for x in self._wrappedData.components)
+
+  @property
+  def compoundAtoms(self) -> typing.Tuple['Atom']:
+    """wildcard-, pseudo-, and nonstereo- atoms that incorporate this atom.
+     - reverse of 'componentAtoms'
+
+    Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13
+    and is itself a component of HGx%, HGy%, HG%, and QG"""
+    getDataObj = self._project._data2Obj.get
+    apiAtom = self._wrappedData
+    return tuple(getDataObj(x) for x in self._wrappedData.atomGroups)
+
+  @property
+  def exchangesWithWater(self) -> bool:
+    """True if atom exchanges with water on a msx time scale, and so is mostly unobservable.
+
+    Holds for e.g. OH atoms, NH£ groups and His side chain NH protons, but NOT for amide protons """
+
+    apiAtom = self._wrappedData
+    components = apiAtom.components
+    while components:
+      for apiAtom in components:
+        # Fastest way to get an arbitrary element from a frozen set
+        break
+      components = apiAtom.components
+    #
+    apiChemAtom = apiAtom.chemAtom
+    if apiChemAtom:
+      return apiChemAtom.waterExchangeable
+    else:
+      return False
+
+  @property
+  def isEquivalentAtomGroup(self) -> typing.Optional[bool]:
+    """Is this atom a group of equivalent atoms?
+    Values are:
+    - True  (group of equivalent atoms, e.g. H%, ALA HB%, LYS HZ%, VAL HG1% or any M pseudoatom)
+    - False (all single atoms, all xy nonstereo atoms, LEU HB%, ILE HG1%, VAL HG%,
+             or any Q non-aromatic pseudoatom)
+    - None  = sometimes equivalent (TYR and PHE HD%, HE%, CD%, CE%, QD, QE)
+    """
+    apiChemAtomSet = self._wrappedData.chemAtomSet
+    if apiChemAtomSet is None:
+      return False
+    else:
+      return apiChemAtomSet.isEquivalent
+
+
   def addInterAtomBond(self, atom:'Atom'):
     """ADVANCED Add generic bond between atoms - for creating disulfides or other crosslinks
     The bound-to atom will appear in self.boundAtoms.

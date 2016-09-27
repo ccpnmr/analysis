@@ -33,8 +33,5 @@ class Widget(QtGui.QWidget, Base):
     QtGui.QWidget.__init__(self, parent)
     self.setAcceptDrops(True)
     Base.__init__(self, **kw)
-    layout = QtGui.QGridLayout()
-    self.setLayout(layout)
-
-  # def dropEvent(self, event):
-  #   print('dropped')
+    # layout = QtGui.QGridLayout()
+    # self.setLayout(layout)

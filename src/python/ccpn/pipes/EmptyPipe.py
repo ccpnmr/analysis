@@ -6,6 +6,6 @@ import pandas as pd
 class EmptyExtension(PandasPipe):
   METHODNAME = 'Empty Extension'
 
-  def runMethod(self, dataframe:pd.DataFrame) -> pd.DataFrame:
+  def run(self, dataframe:pd.DataFrame) -> pd.DataFrame:
     print('empty')
     return dataframe

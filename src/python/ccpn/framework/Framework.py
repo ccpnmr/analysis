@@ -968,9 +968,13 @@ class Framework:
     """
     Displays Project summary module on left of main window.
     """
-    from ccpn.ui.gui.modules.ProjectSummaryModule import ProjectSummaryModule
-    module = ProjectSummaryModule(self.project)
-    self.ui.mainWindow.moduleArea.addModule(module, position=position, relativeTo=relativeTo)
+    from ccpn.ui.gui.popups.ProjectSummaryPopup import ProjectSummaryPopup
+
+    if self.ui:
+      popup = ProjectSummaryPopup(self.project, self.ui.mainWindow, modal=True)
+      popup.show()
+      popup.raise_()
+      popup.exec_()
 
   def archiveProject(self):
     project = self.project

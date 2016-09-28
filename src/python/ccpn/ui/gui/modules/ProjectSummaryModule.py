@@ -126,63 +126,122 @@ class ProjectSummaryModule(CcpnModule):
     for n, chain in enumerate(self.chains):
       self.chainNumberDict[chain] = n+1
 
-def _testChainData(project):
-
-  result = []
-  result.append(['#', 'ID', '#Residue', '#Assignable', '#Assigned', 'Asigned%',
-                 '#Atoms', '#NmrAtoms', '#AssignedNmrAtoms',
-                 'isWaterExchangeable'])
-  for ii,chain in enumerate(project.chains):
-    result.append([ii+1, chain.id, len(chain.residues), _assignableAtomCount(chain),
-                   _assignedAtomCount(chain), _assignedAtomPercentage(chain),
-                   len(chain.atoms),
-                   len(project.nmrAtoms), len([x for x in project.nmrAtoms if x.atom]),
-                   len([x for x in chain.atoms if x.exchangesWithWater])])
-
-  data = {'nuclei':[], 'names':[], 'assigned':[], 'chemAtom':[], 'NOchemAtom':[],
-          'exchangeable':[], 'non-exchangeable':[]}
-
-  for atom in project.atoms:
-    name = atom.name
-    data['nuclei'].append(name[0])
-    data['names'].append(name)
-    if atom.nmrAtom:
-      data['assigned'].append(name)
-    if atom._wrappedData.chemAtom:
-      data['chemAtom'].append(name)
-      if atom.exchangesWithWater:
-        data['exchangeable'].append(name)
-      else:
-        data['non-exchangeable'].append(name)
-    else:
-      data['NOchemAtom'].append(name)
-
-  #
-  return result, data
-
-if __name__ == '__main__':
-
-  import os
-  import time
-  import sys
-  from collections import Counter
-  path = sys.argv[1]
-
-  from ccpn.framework.Framework import getFramework
-  path = os.path.normpath(os.path.abspath(path))
-  time1 = time.time()
-  application = getFramework()
-  application.loadProject(path)
-  project = application.project
-  time2 = time.time()
-  print ("====> Loaded %s from file in seconds %s" % (project.name, time2-time1))
-  result, data = _testChainData(project)
-  for ll in result:
-    print ('  '.join(str(x) for x in ll))
-  for tag, ll in data.items():
-    print ('Count', tag, Counter(ll))
-  time3 = time.time()
-  print ("====> Done test in seconds %s" % (time3-time2))
-
-  # Needed to clean up notifiers
-  project.delete()
+# def _testChainData(project):
+#
+#   result = []
+#   result.append(['ID', '#Residue', '#Assignable', '#Assigned', 'Asigned%',
+#                  '#AllAtoms', 'SimpleAtoms', '#NmrAtoms', '#AssignedNmrAtoms'])
+#   for ii,chain in enumerate(project.chains):
+#     result.append([chain.id, len(chain.residues), Summary.assignableAtomCount(chain),
+#                    Summary.assignedAtomCount(chain), Summary.assignedAtomPercentage(chain),
+#                    len(chain.atoms), len(list(x for x in chain.atoms if not x.componentAtoms)),
+#                    len(project.nmrAtoms), len([x for x in project.nmrAtoms if x.atom])])
+#
+#   data = {}
+#
+#   for tag in ['names', 'nmrAtom', 'multiple', 'single', 'exchanging', 'inEquivalentGroup',
+#               'equivalentEndswith1', 'simple']:
+#     data[tag] = []
+#
+#
+#   print ('@~@~ nAssignable', len(list(atom for atom in project.atoms
+#                                  if atom.isEquivalentAtomGroup or not atom.componentAtoms)))
+#
+#   for atom in project.atoms:
+#     name = atom.name
+#     data['names'].append(name)
+#     if atom.nmrAtom:
+#       data['nmrAtom'].append(name)
+#     if atom.componentAtoms:
+#       data['multiple'].append(name)
+#     else:
+#       data['single'].append(name)
+#       if atom.exchangesWithWater:
+#         data['exchanging'].append(name)
+#       else:
+#         if any(x.isEquivalentAtomGroup for x in atom.compoundAtoms):
+#           data['inEquivalentGroup'].append(name)
+#           if name.endswith('1'):
+#             data['equivalentEndswith1'].append(name)
+#         else:
+#           data['simple'].append(name)
+#
+#   #
+#   return result, data
+#
+# def _countNmrAtoms(project):
+#   data = {}
+#   xyWildcards = 'XYxy'
+#
+#   for tag in ['allAssigned', 'unassigned', 'single', 'equivalent', 'equivalentLost', 'xy', 'double',
+#               'other']:
+#     data[tag] = []
+#
+#   data['xyComponents'] = set()
+#
+#   for nmrAtom in project.nmrAtoms:
+#     name = nmrAtom.name
+#     atom = nmrAtom.atom
+#     if atom is None:
+#       data['unassigned'].append(name)
+#     else:
+#       data['allAssigned'].append(name)
+#       componentAtoms = atom.componentAtoms
+#       if len(componentAtoms) < 2:
+#         data['single'].append(name)
+#       elif atom.isEquivalentAtomGroup:
+#         # CH3 group or rotating aromatic ring
+#         names =sorted(x.name for x in atom.componentAtoms)
+#         data['equivalent'].append(names[0])
+#         data['equivalentLost'].extend(names[1:])
+#
+#       elif any(x in xyWildcards for x in name):
+#         data['xy'].append(name)
+#         for ca in atom.componentAtoms:
+#           data['xyComponents'].add(ca)
+#
+#       elif componentAtoms[0].isEquivalentAtomGroup:
+#         # Isopropyl group
+#         # NB this will get us to count HG1% twice and HG2% never, but the numbers will add up
+#         names =sorted(x.name for x in componentAtoms[0].componentAtoms)
+#         data['equivalent'].append(names[0])
+#         data['equivalentLost'].extend(names[1:])
+#
+#       elif len(componentAtoms) == 2:
+#         data['double'].append(name)
+#       else:
+#         data['other'].append(name)
+#   #
+#   return data
+# if __name__ == '__main__':
+#
+#   import os
+#   import time
+#   import sys
+#   from collections import Counter
+#   path = sys.argv[1]
+#
+#   from ccpn.framework.Framework import getFramework
+#   path = os.path.normpath(os.path.abspath(path))
+#   time1 = time.time()
+#   application = getFramework()
+#   application.loadProject(path)
+#   project = application.project
+#   time2 = time.time()
+#   print ("====> Loaded %s from file in seconds %s" % (project.name, time2-time1))
+#   result, data = _testChainData(project)
+#   print('Summary data')
+#   print('Atom counting')
+#   for tag, ll in sorted(data.items()):
+#     # print ('Count', tag, Counter(ll))
+#     print(tag, len(ll))
+#   print('NmrAtom counting')
+#   for tag, ll in sorted(_countNmrAtoms(project).items()):
+#     print(tag, len(ll))
+#   for tag, ll in sorted(_countNmrAtoms(project).items()):
+#     print ('Count', tag, Counter(ll))
+#   time3 = time.time()
+#   print ("====> Done test in seconds %s" % (time3-time2))
+#
+#   # Needed to clean up notifiers
+#   project.delete()

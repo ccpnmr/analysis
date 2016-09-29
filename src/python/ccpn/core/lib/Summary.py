@@ -69,7 +69,7 @@ def assignableAtomCount(chain):
             # Only take the equivalent atom if it sends with 1
             count += 1
         else:
-          # Tom not in equivalent group
+          # Atom not in equivalent group
           count += 1
   #
   return count
@@ -79,24 +79,6 @@ def assignableAtomCount(chain):
 
 def assignedAtomCount(chain):
 
-  # NB this is not quite precise
-  # You could get miscounting if you have both stereo, non-stereo, and wildcard/pseudo
-  # NmrAtoms for the same atoms, and you could in theory get miscounts for nested
-  # pairs (like guanidinium C-(NH2)2
-  # Also e.g. Tyr/Phe HD% is counted as one resonance, whereas it is counted as
-  # two assignable atoms.
-  # But I leave the details to someone else - this should be decent.
-  #
-  # count = 0
-  #
-  # nmrChain = chain.nmrChain
-  # if nmrChain is not None:
-  #   for nmrAtom in nmrChain.nmrAtoms:
-  #     atom = nmrAtom.atom
-  #     if atom is not None:
-  #       count += atom._assignedCount()
-  #
-  # return count
   # Will soon be just 'xy', but meanwhile
   xyWildcards = 'XYxy'
 
@@ -109,7 +91,13 @@ def assignedAtomCount(chain):
         atom = nmrAtom.atom
         if atom:
 
-          if len(atom.componentAtoms) < 2:
+          componentAtoms = atom.componentAtoms
+          if componentAtoms and any(x in xyWildcards for x in nmrAtom.name):
+            # XY wildcard = count as one of the constituent atoms
+            atom = componentAtoms[0]
+          componentCount =  len(atom.componentAtoms)
+
+          if componentCount < 2:
             # Single atom
             count += 1
 
@@ -117,9 +105,10 @@ def assignedAtomCount(chain):
             #  equivalent atoms, CH3 or aromatic ring
             count += 1
 
-          elif any(x in xyWildcards for x in nmrAtom.name):
-            # xy wildcard atom, including isopropyl groups
-            count += 1
+          else:
+            # Wilcard atom, e.g. Ser HB% or Val HG% (with two components)
+            count += componentCount
+            
 
   #
   return count

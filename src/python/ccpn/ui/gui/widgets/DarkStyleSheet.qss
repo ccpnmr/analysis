@@ -1,5 +1,9 @@
 CallTipWidget {color: #bec4f3;}
 
+GroupBox#borderedGroupBox {
+border: 1px solid #bec4f3;
+}
+
 QWidget#spectrumSelectionWidget {background-color: #2a3358;}
 
 QAbstractItemView#CompleterList {

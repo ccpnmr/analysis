@@ -29,7 +29,7 @@ from ccpn.framework.Translation import translator
 
 class Label(QtGui.QLabel, Base):
 
-  def __init__(self, parent, text='', textColor=None, textSize=None, **kw):
+  def __init__(self, parent, text='', textColor=None, textSize=None, bold=False, **kw):
 
     text = translator.translate(text)
 
@@ -40,6 +40,8 @@ class Label(QtGui.QLabel, Base):
       self.setStyleSheet('QLabel {color: %s; font-size: 30pt;}' % textColor)
     if textSize and textColor:
       self.setStyleSheet('QLabel {font-size: %s;}' % textSize)
+    if bold:
+      self.setStyleSheet('QLabel {font-weight: bold;}')
     
   def get(self):
 

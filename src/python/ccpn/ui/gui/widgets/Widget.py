@@ -28,7 +28,7 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class Widget(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, **kw):
+  def __init__(self, parent=None, border=None, colourScheme=None, **kw):
 
     QtGui.QWidget.__init__(self, parent)
     self.setAcceptDrops(True)

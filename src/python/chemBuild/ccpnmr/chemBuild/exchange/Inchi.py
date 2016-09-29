@@ -345,7 +345,7 @@ def makeInchi(variant):
   inchiInput = inchi_Input(
       iatoms,   # inchi-style atoms
       istereo0D,      # stereo0D (empty)
-      "",    # command line switches
+      bytes("", 'utf-8'),    # command line switches
       nAtoms,    # natoms
       0   # num_stereo0D
       )   

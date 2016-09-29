@@ -20,7 +20,7 @@ from memops.qtgui.PulldownList import PulldownList
 from memops.qtgui.InputDialog import askString
 from memops.qtgui.Table import ObjectTable, Column
 from memops.qtgui.Tree import FileSystemTreePanel
-from memops.qtgui.MessageDialog import showYesNo
+from memops.qtgui.MessageDialog import showYesNo, showError
 
 from ccpnmr.chemBuild.general.Constants import LINK, LINKS, ELEMENTS, CCPN_MOLTYPES
 from ccpnmr.chemBuild.general.Constants import PROPERTIES_ATOM, PROPERTIES_MULTI
@@ -98,7 +98,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     fileMenu.addItem('&Quit Program', self.close)
     
     #importMenu.addItem(impCcpnProjAction)
-    importMenu.addItem('CCPN ChemComp XML file', self.importChemComp)
+    ###importMenu.addItem('CCPN ChemComp XML file', self.importChemComp)
     importMenu.addItem('MDL Molfile (v2000)', self.importMolFileV2000)
     importMenu.addItem('Mol2 (SYBYL2) file', self.importMol2)
     importMenu.addItem('PDB file', self.importPdb)
@@ -110,11 +110,15 @@ class ChemBuildMain(QtGui.QMainWindow):
     exportMenu.addItem('PDB file', self.exportPdb)
     exportMenu.addItem('InChI file', self.exportInchi)
     
+    formats = QtGui.QImageReader.supportedImageFormats()
+
     imageMenu = Menu(exportMenu, '&Image')
     imageMenu.addItem('SVG', self.exportSvg)
     imageMenu.addItem('PDF', self.exportPdf)
-    imageMenu.addItem('JPEG pixmap', self.exportJpg)
-    imageMenu.addItem('PNG pixmap', self.exportPng)
+    if [format for format in formats if format.toLower() in (b'jpg', b'jpeg')]:
+      imageMenu.addItem('JPEG pixmap', self.exportJpg)
+    if [format for format in formats if format.toLower() == b'png']:
+      imageMenu.addItem('PNG pixmap', self.exportPng)
     
     editMenu.addItem('Paste atoms', self.pasteAtoms)
     editMenu.addItem('Copy selected atoms', self.copyAtoms)
@@ -132,7 +136,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     editMenu.addItem('Flip horizontally', self.mirrorLr)
     editMenu.addItem('Flip vertically', self.mirrorUd)
     editMenu.addItem('Auto-arrange', self.minimise)
-    editMenu.addItem('Snap to Grid', self.snapToGrid)
+    ###editMenu.addItem('Snap to Grid', self.snapToGrid)
     
     viewMenu.addItem('Atom names', self.toggleAtomNames, checked=True)
     viewMenu.addItem('Charge symbols', self.toggleChargeSymbols, checked=True)
@@ -599,7 +603,7 @@ class ChemBuildMain(QtGui.QMainWindow):
   def showDoc(self):
     
     popup = WebViewPopup()
-    popup.setUrl('http://www.ccpn.ac.uk/documentation/')
+    popup.setUrl('http://www.ccpn.ac.uk/v3-software/documentation/')
     
     x = self.x()
     y = self.y()
@@ -660,25 +664,28 @@ class ChemBuildMain(QtGui.QMainWindow):
     if self.compound:
       fType = 'JPEG (*.jpg *.jpr *.jpeg)'
       dialog = QtGui.QFileDialog
-      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      filePath = dialog.getSaveFileName(self,filter=fType)
     
       if filePath:
         widget = self.compoundView
         pixmap = QtGui.QPixmap.grabWidget(widget, widget.rect())
-        pixmap.save(filePath, 'JPEG')
-
+        if not pixmap.save(filePath, 'JPEG'):
+          showError('Save', "Save failed (unknown reason)", self)
   
   def exportPng(self):
   
     if self.compound:
       fType = 'PNG (*.png)'
       dialog = QtGui.QFileDialog
-      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      filePath = dialog.getSaveFileName(self,filter=fType)
     
       if filePath:
         widget = self.compoundView
         pixmap = QtGui.QPixmap.grabWidget(widget, widget.rect())
-        pixmap.save(filePath, 'PNG')
+        if not pixmap.save(filePath, 'PNG'):
+          showError('Save', "Save failed (unknown reason)", self)
   
   def exportSvg(self):
     
@@ -696,7 +703,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       
       fType = 'SVG (*.svg)'
       dialog = QtGui.QFileDialog
-      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      filePath = dialog.getSaveFileName(self,filter=fType)
       
       if filePath:
         printer.setFileName(filePath)
@@ -719,8 +727,8 @@ class ChemBuildMain(QtGui.QMainWindow):
     
     if self.compound:
       printer = QtGui.QPrinter()
-      printer.setOutputFormat(QtGui.QPrinter.OutputFormat.PdfFormat)
-      printer.setPaperSize(QtGui.QPrinter.PageSize.A4)
+      printer.setOutputFormat(QtGui.QPrinter.PdfFormat)
+      printer.setPaperSize(QtGui.QPrinter.A4)
       oldRes = printer.resolution()
       newRes = 600.0
       fRes = oldRes/newRes
@@ -729,7 +737,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       
       fType = 'PDF (*.pdf)'
       dialog = QtGui.QFileDialog
-      filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      #filePath, filtr = dialog.getSaveFileName(self,filter=fType)
+      filePath = dialog.getSaveFileName(self,filter=fType)
       
       if filePath:
         printer.setOutputFileName(filePath)
@@ -840,7 +849,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       fType = 'XML (*.xml)'
       dialog = QtGui.QFileDialog
       msg = 'Select CCPN ChemComp XML file'
-      filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       dirName, fileName = path.split(filePath)
@@ -870,7 +880,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       fType = 'MOL2 (*.mol2)'
       dialog = QtGui.QFileDialog
       msg = 'Select Mol2 file'
-      filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       dirName, fileName = path.split(filePath)
@@ -890,7 +901,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       fType = 'PDB (*.pdb)'
       dialog = QtGui.QFileDialog
       msg = 'Select PDB file'
-      filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       
@@ -911,7 +923,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       fType = 'InChI (*.inchi)'
       dialog = QtGui.QFileDialog
       msg = 'Select or enter InChi file name'
-      filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
 
     if filePath:
       
@@ -949,7 +962,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       fType = 'Molfile (*.mol)'
       dialog = QtGui.QFileDialog
       msg = 'Select Molfile file'
-      filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      #filePath, filtr = dialog.getOpenFileName(self, msg, dir=self.userDir, filter=fType)
+      filePath = dialog.getOpenFileName(self, msg, directory=self.userDir, filter=fType)
  
     if filePath:
       dirName, fileName = path.split(filePath)
@@ -968,7 +982,8 @@ class ChemBuildMain(QtGui.QMainWindow):
         fType = 'MOL2 (*.mol2)'
         dialog = QtGui.QFileDialog
         msg = 'Select or enter Mol2 file name'
-        filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
+        #filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
+        filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
         if filePath:
           dirName, fileName = path.split(filePath)
@@ -986,7 +1001,8 @@ class ChemBuildMain(QtGui.QMainWindow):
         fType = 'Molfile (*.mol)'
         dialog = QtGui.QFileDialog
         msg = 'Select or enter Molfile name'
-        filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
+        #filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
+        filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
         if filePath:
           dirName, fileName = path.split(filePath)
@@ -1013,7 +1029,8 @@ class ChemBuildMain(QtGui.QMainWindow):
         fType = 'PDB (*.pdb)'
         dialog = QtGui.QFileDialog
         msg = 'Select or enter PDB file name'
-        filePath, filtr = dialog.getSaveFileName(self,msg, dir=self.userDir, filter=fType)
+        #filePath, filtr = dialog.getSaveFileName(self,msg, dir=self.userDir, filter=fType)
+        filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
         if filePath:
           dirName, fileName = path.split(filePath)
@@ -1031,7 +1048,8 @@ class ChemBuildMain(QtGui.QMainWindow):
         fType = 'InChI (*.inchi)'
         dialog = QtGui.QFileDialog
         msg = 'Select or enter Inchi file name'
-        filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
+        #filePath, filtr = dialog.getSaveFileName(self, msg, dir=self.userDir, filter=fType)
+        filePath = dialog.getSaveFileName(self,msg, directory=self.userDir, filter=fType)
     
         if filePath:
           dirName, fileName = path.split(filePath)
@@ -1039,6 +1057,8 @@ class ChemBuildMain(QtGui.QMainWindow):
           fileObj = open(filePath, 'w')
           fileObj.write(inchi)
           fileObj.close()
+      else:
+        showError('Save', "Conversion to inchi failed (unknown reason)", self)
 
   def exportChemComp(self):
     
@@ -1533,8 +1553,9 @@ class ChemBuildMain(QtGui.QMainWindow):
     fType = 'ChemBuild (*.pickle)'
 
     dialog = QtGui.QFileDialog
-    filePath, filtr = dialog.getSaveFileName(self, dir=self.userDir,
-                                             filter=fType)
+    #filePath, filtr = dialog.getSaveFileName(self, dir=self.userDir, filter=fType)
+    filePath = dialog.getSaveFileName(self, directory=self.userDir, filter=fType)
+
     if filePath:
       dirName, fileName = path.split(filePath)
       self.userDir = dirName
@@ -1585,7 +1606,8 @@ class ChemBuildMain(QtGui.QMainWindow):
       
       fType = 'ChemBuild (*.pickle)'
       dialog = QtGui.QFileDialog
-      filePath, filtr = dialog.getOpenFileName(self, dir=self.userDir, filter=fType)
+      #filePath, filtr = dialog.getOpenFileName(self, dir=self.userDir, filter=fType)
+      filePath = dialog.getOpenFileName(self, directory=self.userDir, filter=fType)
 
     if filePath:
       dirName, fileName = path.split(filePath)

@@ -1,0 +1,171 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>About CcpNmr ChemBuild &mdash; CcpNmr ChemBuild v0.5.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.5.0',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="#" />
+    <link rel="top" title="CcpNmr ChemBuild v0.5.0 documentation" href="index.html" />
+    <link rel="next" title="Getting Started" href="setup.html" />
+    <link rel="prev" title="CcpNmr ChemBuild Documentation" href="index.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="setup.html" title="Getting Started"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="CcpNmr ChemBuild Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CcpNmr ChemBuild v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="about-ccpnmr-chembuild">
+<h1>About CcpNmr ChemBuild<a class="headerlink" href="#about-ccpnmr-chembuild" title="Permalink to this headline">¶</a></h1>
+<p>CcpNmr ChemBuild is a graphical tool to construct chemical compound definitions for
+NMR. While there are many chemical structure drawing packages available ChemBuild was
+especially created to handle concepts like protonation variants and magnetic
+equivalence which are required for NMR resonance assignment. Several different
+chemical file formats are supported, including PDB, .mol and .mol2, but ChemBuild is
+special in its ability read and write CCPN chemical component XML files, which store
+NMR-aware information.</p>
+<p><strong>Development</strong></p>
+<p>CcpNmr ChemBuild was written by Tim Stevens using Python and PySide, the Python
+bindings to Qt. ChemBuild is the first of the &#8216;Next Generation&#8217; of CCPN applications
+that use a Qt rather than Tk based graphical interface.</p>
+<p><strong>Relationship to Other CCPN Applications</strong></p>
+<p>CcpNmr ChemBuild does not require any of the other CCPN components to be installed for
+most of its operation. However, a proper CCPN installation (which incluses the Python
+API) is required for importing and exporting CCPN ChemComp.xml files; the residue and
+compound templates used in CcpNmr Analysis and CcpNmr FormatConverter. For ChemBuild
+to use an existing CCPN installation the PYTHONPATH environment variable must be set
+appropriately.</p>
+<div class="section" id="limitations-and-future-features">
+<h2>Limitations and Future Features<a class="headerlink" href="#limitations-and-future-features" title="Permalink to this headline">¶</a></h2>
+<p>In its present incarnation ChemBuild pretty much does what you instruct it to. There
+is a degree of automation, especially with regards to defining variant compound forms
+and magnetic equivalence. However, the system is not guaranteed to create only sane
+chemistry, e.g the are no proper aromaticity or R/S chirality checks. As development
+continues this situation will improve, but for now it is up to the user to make sure
+that compounds make sense.</p>
+<p>The atom naming, which is important for NMR assignment, is currently only basic.
+Automated naming is merely sequential and does not follow any IUPAC conventions.
+Nonetheless, the atom names can be set to whatever the user desires, as long as there
+is no repetition.</p>
+<p>Labelling of chiral centres is only basic at present: R/S can be added to an atom (if
+you can work out the IUPAC priorities). In the future local chiralities, similar to
+those used by SMILES, will be settable, i.e. by having bonds go &#8216;in&#8217; or &#8216;out&#8217;.</p>
+<p>As time allows the system will be expanded to include chemical sub-graph searches to
+add classification keywords to any compound.</p>
+<p>Import and export of further chemical file formats will be added, most probably
+InChI and CML, but there is no intention to cover a vast array of formats.</p>
+<p>The &#8216;Auto-arrange&#8217; feature uses a very simple 2D force field to assist the graphical
+display and is not designed represent real conformations of the compounds. Integration
+with proper 3D molecular dynamics may occur in the future.</p>
+<p>At present ChemBuild will not export ChemCompCoord XML files; the atom coordinate
+records used by CCPN templates. This will only be introduced after better 3D molecular
+dynamics.</p>
+</div>
+<div class="section" id="bug-reporting">
+<h2>Bug Reporting<a class="headerlink" href="#bug-reporting" title="Permalink to this headline">¶</a></h2>
+<p>The currently available version is a beta test release and bug reports are welcome.
+Bug reports should be made via the <a class="reference external" href="http://www.ccpn.ac.uk/support">CCPNMR mailing list</a> at JISC.</p>
+<p>As always, please be clear in your descriptions and give enough detail for the
+developers to be able to reproduce the problem from scratch. However, as ChemBuild is
+part of the main CCPN release the bug fixing schedule will not necssarily be prompt
+and replies to small matters may not be issued. Once CcpNmr Analysis v3.0 is released
+ChemBuild will be incorporated into the main CCPN distribution and will share the same
+bug reporting mechanism.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">About CcpNmr ChemBuild</a><ul>
+<li><a class="reference external" href="#limitations-and-future-features">Limitations and Future Features</a></li>
+<li><a class="reference external" href="#bug-reporting">Bug Reporting</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="index.html"
+                                  title="previous chapter">CcpNmr ChemBuild Documentation</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="setup.html"
+                                  title="next chapter">Getting Started</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/about.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="setup.html" title="Getting Started"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="CcpNmr ChemBuild Documentation"
+             >previous</a> |</li>
+        <li><a href="index.html">CcpNmr ChemBuild v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2011, Tim Stevens.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.6.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,79 @@
+.. CcpNmr ChemBuild
+
+======================
+About CcpNmr ChemBuild
+======================
+
+CcpNmr ChemBuild is a graphical tool to construct chemical compound definitions for
+NMR. While there are many chemical structure drawing packages available ChemBuild was
+especially created to handle concepts like protonation variants and magnetic
+equivalence which are required for NMR resonance assignment. Several different
+chemical file formats are supported, including PDB, .mol and .mol2, but ChemBuild is
+special in its ability read and write CCPN chemical component XML files, which store
+NMR-aware information.
+
+**Development**
+
+CcpNmr ChemBuild was written by Tim Stevens using Python and PySide, the Python
+bindings to Qt. ChemBuild is the first of the 'Next Generation' of CCPN applications
+that use a Qt rather than Tk based graphical interface.
+
+**Relationship to Other CCPN Applications**
+
+CcpNmr ChemBuild does not require any of the other CCPN components to be installed for
+most of its operation. However, a proper CCPN installation (which incluses the Python
+API) is required for importing and exporting CCPN ChemComp.xml files; the residue and
+compound templates used in CcpNmr Analysis and CcpNmr FormatConverter. For ChemBuild
+to use an existing CCPN installation the PYTHONPATH environment variable must be set
+appropriately.
+
+Limitations and Future Features
+===============================
+
+In its present incarnation ChemBuild pretty much does what you instruct it to. There
+is a degree of automation, especially with regards to defining variant compound forms
+and magnetic equivalence. However, the system is not guaranteed to create only sane
+chemistry, e.g the are no proper aromaticity or R/S chirality checks. As development
+continues this situation will improve, but for now it is up to the user to make sure
+that compounds make sense.
+
+The atom naming, which is important for NMR assignment, is currently only basic.
+Automated naming is merely sequential and does not follow any IUPAC conventions.
+Nonetheless, the atom names can be set to whatever the user desires, as long as there
+is no repetition.
+
+Labelling of chiral centres is only basic at present: R/S can be added to an atom (if
+you can work out the IUPAC priorities). In the future local chiralities, similar to
+those used by SMILES, will be settable, i.e. by having bonds go 'in' or 'out'.
+
+As time allows the system will be expanded to include chemical sub-graph searches to
+add classification keywords to any compound.
+
+Import and export of further chemical file formats will be added, most probably  
+InChI and CML, but there is no intention to cover a vast array of formats.
+
+The 'Auto-arrange' feature uses a very simple 2D force field to assist the graphical
+display and is not designed represent real conformations of the compounds. Integration
+with proper 3D molecular dynamics may occur in the future.
+
+At present ChemBuild will not export ChemCompCoord XML files; the atom coordinate
+records used by CCPN templates. This will only be introduced after better 3D molecular
+dynamics.
+
+
+Bug Reporting
+=============
+
+The currently available version is a beta test release and bug reports are welcome.
+Bug reports should be made via the `CCPNMR mailing list`_ at JISC.
+
+As always, please be clear in your descriptions and give enough detail for the
+developers to be able to reproduce the problem from scratch. However, as ChemBuild is
+part of the main CCPN release the bug fixing schedule will not necssarily be prompt
+and replies to small matters may not be issued. Once CcpNmr Analysis v3.0 is released
+ChemBuild will be incorporated into the main CCPN distribution and will share the same
+bug reporting mechanism.
+
+
+.. _`CCPNMR mailing list`:  http://www.ccpn.ac.uk/support
+

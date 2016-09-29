@@ -1,0 +1,663 @@
+.. |add-hydrogen|  image:: ../icons/add-hydrogen.png
+   :align: bottom
+
+.. |auto-arrange|  image:: ../icons/auto-arrange.png
+   :align: bottom
+
+.. |auto-bond|   image:: ../icons/auto-bond.png
+   :align: bottom
+
+.. |charge-neg|   image:: ../icons/charge-neg.png
+   :align: bottom
+
+.. |charge-none|   image:: ../icons/charge-none.png
+   :align: bottom
+
+.. |charge-pos|   image:: ../icons/charge-pos.png
+   :align: bottom
+
+.. |checkbox|   image:: ../icons/checkbox.png
+   :align: bottom
+
+.. |delete-atom|   image:: ../icons/delete-atom.png
+   :align: bottom
+
+.. |delete-bond|   image:: ../icons/delete-bond.png
+   :align: bottom
+
+.. |dialog-cancel|  image:: ../icons/dialog-cancel.png
+   :align: bottom
+
+.. |dialog-ok|   image:: ../icons/dialog-ok.png
+   :align: bottom
+
+.. |edit-copy|   image:: ../icons/edit-copy.png
+   :align: bottom
+
+.. |edit-cut|   image:: ../icons/edit-cut.png
+   :align: bottom
+
+.. |edit-delete|   image:: ../icons/edit-delete.png
+   :align: bottom
+
+.. |edit-paste|   image:: ../icons/edit-paste.png
+   :align: bottom
+
+.. |edit-undo|   image:: ../icons/edit-undo.png
+   :align: bottom
+
+.. |exchange-hydrogen|  image:: ../icons/exchange-hydrogen.png
+   :align: bottom
+
+.. |flip-horizontal|  image:: ../icons/flip-horizontal.png
+   :align: bottom
+
+.. |flip-vertical|  image:: ../icons/flip-vertical.png
+   :align: bottom
+
+.. |link-next|   image:: ../icons/link-next.png
+   :align: bottom
+
+.. |link|   image:: ../icons/link.png
+   :align: bottom
+
+.. |link-prev|   image:: ../icons/link-prev.png
+   :align: bottom
+
+.. |list-add|   image:: ../icons/list-add.png
+   :align: bottom
+
+.. |new|    image:: ../icons/new.png
+   :align: bottom
+
+.. |nmr-equivalent|  image:: ../icons/nmr-equivalent.png
+   :align: bottom
+
+.. |nmr-no-group|  image:: ../icons/nmr-no-group.png
+   :align: bottom
+
+.. |nmr-prochiral|  image:: ../icons/nmr-prochiral.png
+   :align: bottom
+
+.. |object-flip-horizontal| image:: ../icons/object-flip-horizontal.png
+   :align: bottom
+
+.. |object-flip-vertical| image:: ../icons/object-flip-vertical.png
+   :align: bottom
+
+.. |object-rotate-left|  image:: ../icons/object-rotate-left.png
+   :align: bottom
+
+.. |object-rotate-right|  image:: ../icons/object-rotate-right.png
+   :align: bottom
+
+.. |open|   image:: ../icons/open.png
+   :align: bottom
+
+.. |save|   image:: ../icons/save.png
+   :align: bottom
+
+.. |stereo-none|   image:: ../icons/stereo-none.png
+   :align: bottom
+
+.. |stereo-R|   image:: ../icons/stereo-R.png
+   :align: bottom
+
+.. |stereo-S|   image:: ../icons/stereo-S.png
+   :align: bottom
+
+.. |toggle-aromatic|  image:: ../icons/toggle-aromatic.png
+   :align: bottom
+
+.. |valence-add|   image:: ../icons/valence-add.png
+   :align: bottom
+
+.. |valence-remove|  image:: ../icons/valence-remove.png
+   :align: bottom
+
+.. |variable-atom|  image:: ../icons/variable-atom.png
+   :align: bottom
+
+
+=====================
+Program Documentation
+=====================
+
+Main program documentation for CcpNmr ChemBuild, the CCPN chemical structure
+creation program. The graphical interface to CcpNmr ChemBuild is constructed of
+five main areas, which are described below.
+
+Main Menu
+=========
+
+The main menu at the top of the interface reproduces many of the functions that
+are available in the toolbars, albeit in a named manner, also handles import
+and export of chemical file formats.
+
+File
+~~~~
+
+The File menu contains options to load and save native ChemBuild format files.
+At present these are .pickle files (Python cPickle dumps of the ChemBuild
+internal model). Saving compounds as native ChemBuild files will not result in
+any information loss, unlike other formats which may support only a subset of
+the data. Other file formats are handled by the Import and Export options.
+
+Import
+~~~~~~
+
+These options allow the import of several chemical file formats, including CCPN
+XML (ChemComp), Molfile (v2000), Mol2 (Sybyl2) and PDB. For CCPN import, any
+separate compound variants (e.g. protonation or polymer link states) will be
+loaded. For the other formats only one chemical structure will be loaded (even
+if the format supports several).
+
+Export
+~~~~~~
+
+The current compound may be exported as various textual chemical file formats
+or as a bitmap image. If the compound has several different variant forms, with
+slightly different atoms, these will all be saved when using CCPN XML. For the
+other formats however only the currently displayed chemical structure version
+will be exported.
+
+Edit
+~~~~
+
+This menu reproduces some of the compound editing functionality that is also
+present in the toolbars. These are described in more detail in the toolbars
+section below. It is notable that atom selections can be cut and pasted using
+the regular keyboard selections.
+
+View
+~~~~
+
+These options control what is seen in the central graphical compound display.
+These options are also available in the toolbars and are described fully there.
+
+Top Toolbars
+============
+
+The top toolbars provide graphical elements that the user can click to
+manipulate the compound and its display. On most platforms the individual
+toolbars may be re-arranged within the main window (or pulled off entirely) by
+dragging (click, hold & drag) the left hand edge of the toolbar to a new
+location. Also, individual toolbars may be toggled on and off entirely by using
+the context menu; usually accessed with a right mouse click over a toolbar.
+
+File Toolbar
+~~~~~~~~~~~~
+
+The File toolbar contains options to load and save or start a new compound. 
+
+|new| Create a new, blank compound specification, saving the previous one where
+      appropriate.
+
+|open| Open an existing compound definition from a ChemBuild file (.pickle),
+       any current compound may be saved.
+
+|save| Save the current compound and all of its variant forms to a ChemBuild
+       file.
+
+Edit Toolbar
+~~~~~~~~~~~~
+
+These options perform potentially large-scale editing or transformation of the
+current compound. If the current compound has several variant forms all forms
+will be edited in a likewise manner, assuming they contain the appropriate
+atoms.
+
+|edit-copy| Copy the currently highlighted (green border) atom selection into a
+            memory cache ('clipboard') so that the atoms may be pasted into the
+            compound elsewhere.
+
+|edit-cut| Remove the current atom selection (green border) and copy it into a
+           memory cache so that it may be pasted elsewhere.
+
+|edit-paste| Paste the currently cached atom selection in to the main compound
+             display at the correct cursor location. It should be notated that
+             atom names may change from their original values if there are
+             duplications.
+
+|edit-undo| Undo the last user operations, restoring the compound to previous states.
+            Only the last 10 states can be restored.
+
+|add-hydrogen| Add hydrogen atoms to any unsatisfied valences (black dots). If
+               a subset of atoms is selected then only these will be
+               considered. Otherwise if nothing is selected all atoms will be
+               considered. Hydrogens will be named according to the heavy atom
+               that they bond to.
+
+|delete-atom| Delete the currently selected atoms (green border). Note that if
+              all the atoms within a given variant form are deleted that whole
+              version of the compound will be removed, but the other forms will
+              remain.
+
+|delete-bond| Delete the bonds that belong to the currently selected atoms. If
+              only one atom is selected then all of its bonds will be deleted.
+              If multiple atoms are selected then only the bonds that go
+              between selected atoms will be deleted. For example to delete
+              only one bond select the two atoms it lies between.
+
+|object-rotate-left| Rotate the current atom selection, or the whole compound
+                     if nothing is selected, anticlockwise about its centre.
+
+|object-rotate-right| Rotate the current atom selection, or the whole compound
+                      if nothing is selected, clockwise about its centre.
+
+|object-flip-horizontal| Flip the current atom selection, or the whole compound
+                         if nothing is selected, horizontally (left becomes
+                         right) about its centre.
+
+|object-flip-vertical| Flip the current atom selection, or the whole compound
+                       if nothing is selected, vertically (top becomes bottom)
+                       about its centre.
+
+|auto-arrange| Automatically arrange the currently selected atoms, or all atoms
+               if none are selected, to minimise atom overlap and optimise bond
+               length, thus giving a neater graphical display. If the compound
+               gets stuck in strange conformations the user may move selected
+               atoms to better positions before arranging again.
+
+|auto-bond| Automatically adds bonds to any free valences (black dots) in the
+            current atom selection, or the whole compound if nothing is
+            selected. Bonds will be added to the closest available pair of
+            atoms first and will continue linking pairs until the bond length
+            becomes significantly longer than the first bond added. The user
+            should be careful to place atoms in appropriate locations prior to
+            using this option. In general small rings are avoided and using
+            this option several times will add progressively more bonds if
+            there are still free sites (although this may make a mess).
+
+View Toolbar
+~~~~~~~~~~~~
+
+These options toggle what is displayed in the central graphical view of the
+current compound.
+
+|checkbox| *Atom Names*: toggles the display of atom names on and off.
+
+|checkbox| *properties*: toggles the display of atom properties like charge and
+           chirality.
+
+|checkbox| *Groups*: toggles the display of NMR specific groups; magnetically
+           equivalent atoms and pairs which are stereochemically ambiguous,
+           e.g. prochiral methylene hydrogens.
+
+|checkbox| *Show Stats*: toggles a background display of statistics for the
+           current compound.
+
+Properties Toolbar
+~~~~~~~~~~~~~~~~~~
+
+**Aromatic**
+
+|toggle-aromatic| Sets the selected atoms to be part of an aromatic ring. Note
+                   that this function does not yet check the sanity of such a
+                   specification. If a selected atom is already aromatic the
+                   aromatic ring will be removed. It does not matter which atom
+                   or atoms within a given ring are selected.
+
+**Charge**
+
+These options set the unit charge on atoms (+/- electron equivalents). Note
+that there is currently no notion of partial or delocalised charges within
+ChemBuild.
+
+|charge-pos| Sets the charge of the currently selected atoms to be positive. If
+             an atom already has a positive charge the charge is made more
+             positive. The appropriate extra valance slots will be added to the
+             atom for bonding, e.g. [N+] will have four bonding slots.
+
+|charge-none|  Sets the currently selected atoms to have no charge. This resets
+               the valance bonding slots to the uncharged state.
+
+|charge-neg| Sets the charge of the currently selected atoms to be negative. If
+             an atom is already negatively charged the charge will become more
+             negative. The appropriate number of valance slots will be removed,
+             e.g. [O-] will have only one bonding slot.
+
+
+
+**Valence**
+
+These options control how many bonds and atom may have. Under most
+circumstances the valence bonding slots do not need to be changed from the
+starting values, but adjustments are useful for different redox states.
+
+|valence-add| Adds an extra valence bonding slot to the currently selected
+              atoms. It is currently up to the user to create chemically sane
+              bonding states. This option can be used to create different
+              covalently bound redox states, e.g. sulfur has two slots to start
+              with but more can be added to make sulfates.
+
+|valence-remove| Remove a valence bonding slot. It is currently up to the user
+                 to create chemically sane bonding states. This option is
+                 useful for creating different covalently bound oxidation
+                 states.
+
+**Chirality**
+
+These options set stereochemistry labels for atom centres. These options will
+be expanded in the future.
+
+|stereo-R| Set the currently selected atoms to be an "R" chiral centre. It
+           should noted that this is a user label and no checks of IUPAC rules
+           are made. Some basic sanity checks are made to ensure that an atom
+           has enough bonded neighbours.
+
+
+|stereo-S| Set the currently selected atoms to be an "S" chiral centre. It
+           should noted that this is a user label and no checks of IUPAC rules
+           are made. Some basic sanity checks are made to ensure that an atom
+           has enough bonded neighbours.
+
+|stereo-none| remove any chirality labels from the selected atoms
+
+**Links**
+
+These options are used to specify how a compound may be linked as a residue
+within a (bio)polymer chain (protein, nucleic acid, saccharide). A link is
+added to a compound by replacing selected atoms with a special 'link' atom,
+which indicates where an adjacent residue is located. Usually the links replace
+hydroxyl groups or hydrogen atoms and effectively represent the dehydration
+ration that occurs when bio-polymer residues are joined. For example in protein
+amino acids links are made that replace the OH of the carboxylate group and a
+hydrogen of the amine group. Adding a link will create several different
+versions of the current compound, i.e. linked and unlinked variant forms. A
+typical bio-polymer residue will have at least four linked forms: "none" for
+the free compound, "start" for the first residue in a chain (e.g. N-terminal or
+5'), "end" for the last residue in the chain (e.g. C-terminal or 3') and
+"middle" for a internal residues. Some residues may also have extra link
+states, such as disulfide linked cysteine. Where there is no distinct beginning
+or end to a chain, i.e. for oligosaccharides, then generic links may still be
+added.
+
+|link-prev| This option replaces the currently selected H or OH to create a
+            compound variant that links to the previous residue in the
+            bio-polymer chain (following normal conventions, to N-terminus or
+            5' end). The unlinked version of the compound will not be removed
+            and is still available.
+
+|link-next| This option replaces the currently selected H or OH to create a
+            compound variant that links to the next residue in the bio-polymer
+            chain (following normal conventions, to C-terminus or 3' end). The
+            unlinked version of the compound is available and will not be
+            removed.
+
+|link| This option replaces the currently selected H or OH to create a compound
+       variant that links to another residue. The link will be named after the
+       atoms it connects. E.g. adding a side chain link to cysteine will create
+       an "SG" (sulfur gamma) link. The unlinked version of the compound is
+       available and will not be removed.
+
+**Exchange**
+
+These options are used to determine whether hydrogen atoms can exchange in
+aqueous solution, ether resulting in different protonation forms, depending on
+pH, or in atom sites that are not normally observed in NMR.
+
+|variable-atom| The currently selected hydrogen atom is set to be variable; it
+                is present in some forms of the compound but not others. This
+                results in different protonation states of the compound, i.e.
+                with and without the hydrogen, and all forms can be selected
+                (unless they have been deliberately deleted). Setting a
+                variable hydrogen means the group it is attached to is acidic
+                or basic. For example the H in carboxylic acids can be set as
+                variable to give anion and neutral forms. Likewise an H in
+                -NH3+ can be set as variable to give a neutral form. As far as
+                NMR assignment is concerned it is up to the user to choose the
+                appropriate form (dependant on pKa and pH), but several forms
+                can be present in the same compound description.
+
+|exchange-hydrogen| The currently selected hydrogen is deemed to be in 'fast
+                    exchange' with a protic solvent. This setting means that
+                    the atom is unlikely to be observed in an NMR experiment.
+                    Typical examples include hydrogens in the hydroxyl groups
+                    of serine and threonine. The bond to such a hydrogen is
+                    displayed as a dashed line in the main display. This option
+                    should not be used for a typical protein backbone amide,
+                    which may be exchangeable, but is normally observable by
+                    NMR.
+
+**NMR Groups**
+
+These options are used to connect several atoms of the same kind (usually
+hydrogens or carbons) into a grouping that has a special meaning for NMR
+resonance assignment. There are two kinds of groups that may be specified;
+magnetically equivalent and non-stereo. The first means that the atoms are
+rapidly changing locations so that all atoms in the group see the same magnetic
+environment and have the same chemical shift. This is usually the case for the
+hydrogens in methyl groups and rotationally symmetric positions in aromatic
+rings. The second group, which is often used for prochiral hydrogens, means
+that there are two atoms that are stereochemically distinct, but which cannot
+initially be distinguished in an NMR experiment (without the aid of structure
+calculations).
+
+|nmr-equivalent| The currently selected atoms (of the same kind) are deemed to
+                 be magnetically equivalent and have the same chemical shift.
+                 This kind of grouping is automatically made for methyls, but
+                 may be added for other situations, for example delta positions
+                 in the aromatic ring of Phenylalanine have equivalent carbons
+                 and equivalent hydrogens under most circumstances (where the
+                 ring flips).
+
+|nmr-prochiral| The currently selected pair of atoms, or pair of NMR equivalent
+                groups (e.g. methyls) are set to be a non-stereo group. There
+                will usually be two distinct chemical shifts, but it will not
+                be possible to unambiguously assign the stereochemistry, at
+                least initially. This grouping is automatically added for
+                methylene groups but may also be added in other situations. For
+                example the two methyl groups in Valine; pairing the two gamma
+                carbons and the two sets of methyl hydrogens. 
+
+|nmr-no-group| Removes all NMR grouping specification that may be present for
+               the selected atoms. Note that whole groups are deleted,
+               irrespective of whether all of the group's atoms were selected.
+
+Left Panel
+==========
+
+The left hand panel allows chemical elements and compound fragments to be added
+to the main display. On most computer platforms this panel can be temporarily
+removed by grabbing its right hand edge and dragging it to the left edge of the
+main window.
+
+Elements
+~~~~~~~~
+
+This section contains a list of the chemical elements commonly found in
+covalently bonded compounds. They may be added to the current molecule via
+drag-and-drop to the central area: clicking and holding the mouse cursor on an
+element, moving to the desired location in the compound and then releasing. The
+common 'organic' elements H, C, N, O, P and S may be added to a compound simply
+by pressing the corresponding key on the keyboard; the atom will be added at
+the current mouse cursor location.
+
+SMILES
+~~~~~~
+
+This section allows the user to enter a SMILES string to add a fragment or even
+a whole compound to the central display. If there is an existing compound the
+atoms added will be in a disconnected fragment.
+
+|dialog-cancel| Clears the contents of the text entry box for the SMILES string
+
+|dialog-ok| Adds the current SMILES string as a new component to the current
+            compound (in the centre of the current view). The user will need to
+            link to any existing atoms and adjust the geometry.
+
+Compound and Fragment Library
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This cascading tree panel categorises several types of molecular fragment that
+may be added to the current compound. Clicking on a category or sub-category
+opens lists of compounds and fragments. These may be added to the current
+compound by drag-and-drop; the user grabs the compound name and releases it at
+the appropriate location in the central compound display (the view may
+re-centre). The fragment may need to be further modified or linked to other
+atoms. Some fragments, such as *carboxylic acid*, *amine* and the amino acid
+*linked template* are pre-constructed with different compound forms. For
+example adding a carboxylic acid will give both protonated an unprotonated
+forms.
+
+Right Panel
+===========
+
+The right hand panel is used to control which version of a compound is
+currently displayed and to set various high level attributes such as the
+compound's name. On most computer platforms this panel can be temporarily
+removed by grabbing its left hand edge and dragging it to the right edge of the
+main window.
+
+Variant Forms
+~~~~~~~~~~~~~
+
+The drop-down menus in this section allow the user to switch the compound
+display between any of the variant forms of the compound (should any exist).
+Different variants are not constructed as separate entities, rather they appear
+automatically whenever residue links or variable atoms (i.e. protonation
+states) are added to a compound.
+
+**Protonation**
+
+This drop-down menu allows selection of the different protonation forms of a
+compound, according to the hydrogen atoms that are present or absent. The
+states that are available will be restricted to only the current polymer
+linking (see below). For example the N-terminal "start" variant of the amino
+acid alanine will have the amide protonation states listed, but not the
+carboxylate states; these are only present for the C-terminal "end" variant.
+Likewise a "middle" linked alanine will only have one neutral protonation
+state.
+
+**Polymer Linking**
+
+This menu selects the current variant of the compound to display according to
+the linear bio-polymer linking state, if any such links exist. The available
+states are "start", "middle", "end" and "none" to represent the different forms
+within a chain and the free, unlinked form. For a compound to have such entries
+requires that it has previous ("-1") and next ("+1") residue links defined by
+replacing certain atoms compared to the unlinked variant. A given kind of
+linking may be combined with other variations, selected in the other menus. For
+example "middle" lysine has protonated and unprotonated side chain forms.
+
+**Other links**
+
+This drop-down menu lists any variants caused by the presence of links other
+than those for standard linear bio-polymers. These include crosslinks in
+proteins, e.g. disulfide linked cysteine, and links in non-linear or branching
+chains, e.g. oligosaccharides. For sugar rings these links may be numerous
+given that there may be multiple combinations of different links. For example
+glucose can have [1,3], [1,4], [1,6], [1,4,6] links etc. 
+
+**Stereochemistry**
+
+This selects stereochemical form of a compound to display, e.g. alpha- or beta-
+glucose. Note that this option is little used until the chirality and
+stereochemistry capabilities of ChemBuild are improved.
+
+
+|checkbox| *Default form*: sets whether the currently viewed form of a compound
+           is the default version, within the selected bio-polymer linking. For
+           example the default version of lysine has a protonated side chain.
+           Setting this is useful when exporting to CCPN because the default
+           variant will be the one included as standard when building
+           molecules. The other forms will still be available but require extra
+           settings.
+
+
+Compound Info
+~~~~~~~~~~~~~
+
+**Name**
+
+A human readable name for the compound. This is separate from any save file
+name, but may be present internally within exported chemical files. 
+
+**Details**
+
+Comments and further description of the compound and its various forms may be
+added. These will be preserved in a CCPN export.
+
+**CCPN Code**
+
+This sets the "CcpCode" for a compound, which is the short identifying code for
+a particular type of residue. Typically these will be three-letter codes, e.g
+"His" or "ATP", but shorter and longer codes are allowed. The purpose of these
+residue codes is to provide a short, but meaningful identifier that can be used
+when constructing molecules and making NMR resonance assignments. When
+exporting to CCPN XML files the code is checked to make sure it is not already
+in use, so that there is no confusion with regards to the standard compounds.
+
+**CCPN MolType**
+
+This sets the molecule type for the compound, as used within CCPN projects. For
+most small molecules this should remain as "other". However, if the compound
+has the correct link specifications for protein, DNA, RNA or carbohydrate
+biomolecules it may use a more appropriate type. Setting protein, DNA or RNA
+molecule types will allow the compound to be entered in a standard residue
+sequence, using its CcpCode (above).
+
+
+Central Compound Display
+========================
+
+The large central area of ChemBuild is where the atoms of a chemical structure
+are displayed and assembled. This is where atoms may be moved to create
+geometries and connected via bonds. Atoms and compound fragments may be added
+by drag-and-drop from the left hand panel, added using a SMILES string or by
+using one of the H, C, N, O, P or S keys. Once displayed in the main panel the
+atoms may be selected and dragged into position. It should be noted that only
+one version of a compound will be displayed at a time. If there are other
+variants, for example protonation states, then these maybe accessed using the
+drop-down menus in the right-hand panel. For the most part changing the atoms
+in one compound variant will affect all of the other variants, as long as the
+change is valid. For example when moving an atom it is moved in all the variant
+forms it is found within. 
+
+When two atoms with free valence slots are moved close the black valence
+circles will turn green. If the atom is then released a new bond will be formed
+between the two highlighted valence slots, joining the atoms. This may be
+repeated to form double or triple bonds. Alternatively, atoms may be quickly
+bonded, if first placed in appropriate positions, by using the *auto bond*
+option described above. Also, the *auto arrange* function removes the need to
+spend significant time arranging atoms once they are bonded. The properties of
+the selected atoms, such as charge and aromaticity, may be set by selecting the
+appropriate option from the toolbars or menus. 
+
+The general mouse-driven controls that are used to build a compound are
+described below.
+
+Mouse Controls
+~~~~~~~~~~~~~~
+
+**Left-click on an atom**: selects an individual atom.
+
+**Left-click on an atom plus <Control>**: toggles atoms to add to, or remove
+from, the current selection.
+
+**Double left-click on an atom**: selects the whole fragment, following bonds
+from the current atom.
+
+**Left-click and drag in free space**: draws a green box that is used to select
+atoms.
+
+**Left-click and drag on an atom**: moves the currently selected atom or atoms,
+following the mouse cursor.
+
+**Double left-click on a bond**: if there are free valence slots, this toggles
+the bond type through single, double, triple and quadruple.
+
+**Double left-click on an atom name**: opens a box to edit the name of an atom.
+
+**Middle-click on a bond**: toggles single, double, triple and quadruple bond
+types.
+
+**Middle-wheel**: zooms the display, making the atoms appear larger or smaller.
+
+**Middle-click and drag**: if scrollbars are displayed this pans the whole
+display area.
+
+**Right-click**: opens a context menu, where many of the options already
+described for the toolbars are available.
+

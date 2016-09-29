@@ -1,0 +1,31 @@
+
+====================
+Quick-Start Examples
+====================
+
+Adding a Simple Compound: Paracetamol
+=====================================
+
+Use a SMILES string
+~~~~~~~~~~~~~~~~~~~
+
+CC(=O)Nc1ccc(cc1)O
+
+Drag and Drop Fragments
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Add Individual Atoms
+~~~~~~~~~~~~~~~~~~~~
+
+
+Adding a Polymer-aware Residue: Selenomethionine
+================================================
+
+Staring from Nothing
+~~~~~~~~~~~~~~~~~~~~
+
+C[Se]CCC(C(=O)O)N
+
+
+Starting from a Template
+~~~~~~~~~~~~~~~~~~~~~~~~

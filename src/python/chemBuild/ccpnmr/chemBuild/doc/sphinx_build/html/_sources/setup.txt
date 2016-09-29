@@ -1,0 +1,51 @@
+===============
+Getting Started
+===============
+
+Obtaining CcpNmr ChemBuild
+==========================
+
+CcpNmr ChemBuild may be downloaded from the main CCPN site at
+`http://www.ccpn.ac.uk/download/`_. New releases will be available from the
+same location. ChemBuild will also be included in the CcpNmr Analysis release
+from version 3.0.
+
+Installing and Running ChemBuild
+================================
+
+To install ChemBuild simply download the .tgz archive and unpack into your
+desired location::
+
+  tar -xvzf ChemBuild.tgz
+
+ChemBuild requires that Python and the PySide module (Qt bindings) are
+installed. The PySide module may be downloaded via the following link:
+`http://www.pyside.org/downloads/`_. For many linux distributions (e.g. Ubuntu,
+Fedora, SUSE etc) it is probably easiest to install PySide using the local
+package management system.
+
+To start CcpNmr ChemBuild, navigate to its installation directory and issue::
+
+  python ChemBuild.py
+
+Alternatively you can command line setup aliases so that the command
+'chembuild' can be run from anywhere. For example a .bashrc file might
+contain::
+
+  export CHEM_BUILD_PATH='/home/user/chemBuild'
+  alias chembuild='python $CHEM_BUILD_PATH/ChemBuild.py' 
+
+License
+=======
+
+CcpNmr ChemBuild is releases under the GNU Lesser General Public License.
+Please visit `http://www.gnu.org/copyleft/lesser.html`_ for details.
+
+.. _`http://www.ccpn.ac.uk/download/`: http://www.ccpn.ac.uk/download/
+
+.. _`http://www.pyside.org/downloads/`: http://www.pyside.org/downloads/
+
+.. _`http://www.gnu.org/copyleft/lesser.html`: http://www.gnu.org/copyleft/lesser.html
+
+Please note that this is not the same license as CcpNmr Analysis, which uses the
+CCPN license.

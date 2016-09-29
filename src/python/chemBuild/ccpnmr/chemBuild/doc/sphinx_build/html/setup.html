@@ -1,0 +1,152 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Getting Started &mdash; CcpNmr ChemBuild v0.5.0 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.5.0',
+        COLLAPSE_MODINDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="author" title="About these documents" href="about.html" />
+    <link rel="top" title="CcpNmr ChemBuild v0.5.0 documentation" href="index.html" />
+    <link rel="next" title="Program Documentation" href="chemBuildDoc.html" />
+    <link rel="prev" title="About CcpNmr ChemBuild" href="about.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="chemBuildDoc.html" title="Program Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="about.html" title="About CcpNmr ChemBuild"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">CcpNmr ChemBuild v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="obtaining-ccpnmr-chembuild">
+<h2>Obtaining CcpNmr ChemBuild<a class="headerlink" href="#obtaining-ccpnmr-chembuild" title="Permalink to this headline">¶</a></h2>
+<p>CcpNmr ChemBuild may be downloaded from the main CCPN site at
+<a class="reference external" href="http://www.ccpn.ac.uk/download/">http://www.ccpn.ac.uk/download/</a>. New releases will be available from the
+same location. ChemBuild will also be included in the CcpNmr Analysis release
+from version 3.0.</p>
+</div>
+<div class="section" id="installing-and-running-chembuild">
+<h2>Installing and Running ChemBuild<a class="headerlink" href="#installing-and-running-chembuild" title="Permalink to this headline">¶</a></h2>
+<p>To install ChemBuild simply download the .tgz archive and unpack into your
+desired location:</p>
+<div class="highlight-python"><pre>tar -xvzf ChemBuild.tgz</pre>
+</div>
+<p>ChemBuild requires that Python and the PySide module (Qt bindings) are
+installed. The PySide module may be downloaded via the following link:
+<a class="reference external" href="http://www.pyside.org/downloads/">http://www.pyside.org/downloads/</a>. For many linux distributions (e.g. Ubuntu,
+Fedora, SUSE etc) it is probably easiest to install PySide using the local
+package management system.</p>
+<p>To start CcpNmr ChemBuild, navigate to its installation directory and issue:</p>
+<div class="highlight-python"><pre>python ChemBuild.py</pre>
+</div>
+<p>Alternatively you can command line setup aliases so that the command
+&#8216;chembuild&#8217; can be run from anywhere. For example a .bashrc file might
+contain:</p>
+<div class="highlight-python"><pre>export CHEM_BUILD_PATH='/home/user/chemBuild'
+alias chembuild='python $CHEM_BUILD_PATH/ChemBuild.py'</pre>
+</div>
+</div>
+<div class="section" id="license">
+<h2>License<a class="headerlink" href="#license" title="Permalink to this headline">¶</a></h2>
+<p>CcpNmr ChemBuild is releases under the GNU Lesser General Public License.
+Please visit <a class="reference external" href="http://www.gnu.org/copyleft/lesser.html">http://www.gnu.org/copyleft/lesser.html</a> for details.</p>
+<p>Please note that this is not the same license as CcpNmr Analysis, which uses the
+CCPN license.</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+            <h3><a href="index.html">Table Of Contents</a></h3>
+            <ul>
+<li><a class="reference external" href="#">Getting Started</a><ul>
+<li><a class="reference external" href="#obtaining-ccpnmr-chembuild">Obtaining CcpNmr ChemBuild</a></li>
+<li><a class="reference external" href="#installing-and-running-chembuild">Installing and Running ChemBuild</a></li>
+<li><a class="reference external" href="#license">License</a></li>
+</ul>
+</li>
+</ul>
+
+            <h4>Previous topic</h4>
+            <p class="topless"><a href="about.html"
+                                  title="previous chapter">About CcpNmr ChemBuild</a></p>
+            <h4>Next topic</h4>
+            <p class="topless"><a href="chemBuildDoc.html"
+                                  title="next chapter">Program Documentation</a></p>
+            <h3>This Page</h3>
+            <ul class="this-page-menu">
+              <li><a href="_sources/setup.txt"
+                     rel="nofollow">Show Source</a></li>
+            </ul>
+          <div id="searchbox" style="display: none">
+            <h3>Quick search</h3>
+              <form class="search" action="search.html" method="get">
+                <input type="text" name="q" size="18" />
+                <input type="submit" value="Go" />
+                <input type="hidden" name="check_keywords" value="yes" />
+                <input type="hidden" name="area" value="default" />
+              </form>
+              <p class="searchtip" style="font-size: 90%">
+              Enter search terms or a module, class or function name.
+              </p>
+          </div>
+          <script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="chemBuildDoc.html" title="Program Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="about.html" title="About CcpNmr ChemBuild"
+             >previous</a> |</li>
+        <li><a href="index.html">CcpNmr ChemBuild v0.5.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+      &copy; Copyright 2011, Tim Stevens.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 0.6.6.
+    </div>
+  </body>
+</html>

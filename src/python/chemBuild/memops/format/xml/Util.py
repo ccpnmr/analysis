@@ -96,7 +96,6 @@ def findTopObjectPath(repositoryPath, topObject):
 
   topObjectDir = uniIo.joinPath(repositoryPath, 
                                 *topObject.packageName.split('.'))
-  print('HERE555', topObject.packageName, repositoryPath, topObjectDir)
   result = uniIo.joinPath(topObjectDir, getTopObjectFile(topObject))
   
   if not os.path.isfile(result):

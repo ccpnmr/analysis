@@ -98,13 +98,13 @@ class ChemBuildMain(QtGui.QMainWindow):
     fileMenu.addItem('&Quit Program', self.close)
     
     #importMenu.addItem(impCcpnProjAction)
-    ###importMenu.addItem('CCPN ChemComp XML file', self.importChemComp)
+    importMenu.addItem('CCPN ChemComp XML file', self.importChemComp)
     importMenu.addItem('MDL Molfile (v2000)', self.importMolFileV2000)
     importMenu.addItem('Mol2 (SYBYL2) file', self.importMol2)
     importMenu.addItem('PDB file', self.importPdb)
     importMenu.addItem('InChI file', self.importInchi)
     
-    ###exportMenu.addItem('CCPN ChemComp XML file', self.exportChemComp)
+    exportMenu.addItem('CCPN ChemComp XML file', self.exportChemComp)
     exportMenu.addItem('MDL Molfile (v2000)', self.exportMolfile)
     exportMenu.addItem('Mol2 (SYBYL2) file', self.exportMol2)
     exportMenu.addItem('PDB file', self.exportPdb)

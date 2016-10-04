@@ -183,6 +183,11 @@ class GuiPeakListView(QtGui.QGraphicsItem):
   # For notifiers - moved from core PeakListView
   def _deletedStripPeakListView(self):
 
+    from ccpn.core.IntegralList import IntegralList
+
+    if isinstance(self.peakList, IntegralList):
+      return
+
     spectrumView = self.spectrumView
     strip = spectrumView.strip
     spectrumDisplay = strip.spectrumDisplay

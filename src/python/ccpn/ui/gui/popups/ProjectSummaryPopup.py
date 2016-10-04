@@ -26,6 +26,8 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.core.lib import Summary
 
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
@@ -45,13 +47,14 @@ class ProjectSummaryPopup(QtGui.QDialog):
 
     self._setupData()
 
-    frame = Frame(self)
+    self.mainFrame = frame = Frame(self, grid=(0,0))
 
     row = 0
 
     # SPECTRA
 
-    label = Label(frame, text='Spectra', grid=(row, 0), hAlign='l')
+    self.spectrumFrame = Frame(self.mainFrame, grid=(row,0))
+    self.spectrumLabel = Label(self.spectrumFrame, text='Spectra', grid=(0, 0), hAlign='l')
     row += 1
 
     columns = [
@@ -62,12 +65,13 @@ class ProjectSummaryPopup(QtGui.QDialog):
              lambda spectrum: spectrum.chemicalShiftList.id, tipText='Spectrum chemical shiftList'),
       Column('File path', lambda spectrum: spectrum.filePath, tipText='Spectrum data file path'),
     ]
-    self.spectrumTable = ObjectTable(frame, columns=columns, objects=self.spectra, grid=(row, 0))
+    self.spectrumTable = ObjectTable(self.spectrumFrame, columns=columns, objects=self.spectra, grid=(1, 0))
     row += 1
 
     # PEAKLISTS
 
-    label = Label(frame, text='PeakLists', grid=(row, 0), hAlign='l')
+    self.peakListFrame = Frame(self.mainFrame, grid=(row,0))
+    self.peakListLabel = Label(self.peakListFrame, text='PeakLists', grid=(0, 0), hAlign='l')
     row += 1
 
     columns = [
@@ -84,12 +88,13 @@ class ProjectSummaryPopup(QtGui.QDialog):
              tipText='Percentage of peaks in peakList fully assigned'),
     ]
 
-    self.peakListTable = ObjectTable(frame, columns=columns, objects=self.peakLists, grid=(row, 0))
+    self.peakListTable = ObjectTable(self.peakListFrame, columns=columns, objects=self.peakLists, grid=(1, 0))
     row += 1
 
     # CHAINS
 
-    label = Label(frame, text='Chains', grid=(row, 0), hAlign='l')
+    self.chainFrame = Frame(self.mainFrame, grid=(row,0))
+    self.chainLabel = Label(self.chainFrame, text='Chains', grid=(0, 0), hAlign='l')
     row += 1
 
     columns = [
@@ -104,7 +109,15 @@ class ProjectSummaryPopup(QtGui.QDialog):
              tipText='Percentage of atoms in chain which are assigned to'),
     ]
 
-    self.chainTable = ObjectTable(frame, columns=columns, objects=self.chains, grid=(row, 0))
+    self.chainTable = ObjectTable(self.chainFrame, columns=columns, objects=self.chains, grid=(1, 0))
+    row += 1
+
+    # buttons
+
+    buttonFrame = Frame(self, grid=(1, 0))
+    button = Button(buttonFrame, 'Save to PDF', callback=self._saveToPdf, grid=(0, 0))
+    button = Button(buttonFrame, 'Close', callback=self.accept, grid=(0, 1))
+
     row += 1
 
   def _setupData(self):
@@ -133,3 +146,25 @@ class ProjectSummaryPopup(QtGui.QDialog):
     self.chainNumberDict = {}
     for n, chain in enumerate(self.chains):
       self.chainNumberDict[chain] = n+1
+
+  def _saveToPdf(self):
+
+    dialog = FileDialog(parent=self, fileMode=FileDialog.AnyFile, text='Specify Output File',
+                        preferences=self.parent().application.preferences.general)
+
+    path = dialog.selectedFile()
+    if not path:
+      return
+
+    printer = QtGui.QPrinter(QtGui.QPrinter.ScreenResolution)
+    printer.setPaperSize(QtGui.QPrinter.A4)
+    printer.setOrientation(QtGui.QPrinter.Landscape)
+    printer.setOutputFormat(QtGui.QPrinter.PdfFormat)
+    printer.setOutputFileName(path)
+    painter = QtGui.QPainter(printer)
+    self.spectrumFrame.render(painter)
+    printer.newPage()
+    self.peakListFrame.render(painter)
+    printer.newPage()
+    self.chainFrame.render(painter)
+    painter.end()

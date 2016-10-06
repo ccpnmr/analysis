@@ -675,7 +675,8 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     """
     Zooms both axis of strip to the specified region
     """
-    self.viewBox.autoRange()
+    padding = self._appBase.preferences.general.stripRegionPadding
+    self.viewBox.autoRange(padding=padding)
 
   def _zoomTo(self, x1:float, x2:float, y1:float, y2:float):
     self.zoomToRegion(xRegion=(x1, x2), yRegion=(y1, y2))

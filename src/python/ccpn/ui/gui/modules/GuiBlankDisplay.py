@@ -141,7 +141,8 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
       SpectrumGroupsToolBar(spectrumDisplay.module, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
 
       self._appBase.current.strip = spectrumDisplay.strips[0]
-      self._appBase.current.strip.viewBox.autoRange()
+      padding = self._appBase.preferences.general.stripRegionPadding
+      self._appBase.current.strip.viewBox.autoRange(padding=padding)
 
     self.moduleArea.guiWindow.deleteBlankDisplay()
 

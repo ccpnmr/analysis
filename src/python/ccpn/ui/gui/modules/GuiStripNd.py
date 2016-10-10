@@ -231,6 +231,9 @@ class GuiStripNd(GuiStrip):
 
   def _mouseMoved(self, positionPixel):
 
+    if self.isDeleted:
+      return
+
     GuiStrip._mouseMoved(self, positionPixel)
     self._updateTraces()
 

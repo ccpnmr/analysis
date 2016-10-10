@@ -612,6 +612,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     Updates the position of the crosshair when the mouse is moved.
     """
 
+    if self.isDeleted:
+      return
+
     # position is in pixels
 
     if self.plotWidget.sceneBoundingRect().contains(positionPixel):
@@ -644,6 +647,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     """
     Displays mouse position for both axes by axis code.
     """
+    if self.isDeleted:
+      return
+
     position = self.viewBox.mapSceneToView(pos)
     self.guiSpectrumDisplay.positionBox.setText("%s: %.3f  %s: %.3f" %
       (self.axisOrder[0], position.x(), self.axisOrder[1], position.y())

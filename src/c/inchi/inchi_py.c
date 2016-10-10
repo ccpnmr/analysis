@@ -36,22 +36,22 @@ static struct PyModuleDef moduledef = {
         NULL
 };
 
-//PyMODINIT_FUNC initlibinchi(void)
+/*PyMODINIT_FUNC initlibinchi(void)*/
 PyObject *PyInit_inchi(void)
 {
     PyObject *module;
 
     /* create the module and add the functions */
-    //module = Py_InitModule("libinchi", Inchi_methods);
+    /*module = Py_InitModule("libinchi", Inchi_methods);*/
     module = PyModule_Create(&moduledef);
 
     /* check for errors */
-    //if (module == NULL || PyErr_Occurred())
-    //    Py_FatalError("can't initialize module libinchi");
+    /*if (module == NULL || PyErr_Occurred())
+        Py_FatalError("can't initialize module libinchi");*/
     
 /*    InchiError = PyErr_NewException("libinchi.error", NULL, NULL);
-    //Py_INCREF(InchiError);
-    //PyModule_AddObject(m, "error", InchiError);*/
+    Py_INCREF(InchiError);
+    PyModule_AddObject(m, "error", InchiError);*/
 
     /* create exception object and add to module */
     ErrorObject = PyErr_NewException("inchi.error", NULL, NULL);

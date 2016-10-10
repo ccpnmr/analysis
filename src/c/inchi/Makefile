@@ -127,7 +127,7 @@ endif
 # === InChI Library compile rule =========
 
 %.o: %.c
-	$(CC) $(C_OPTIONS) $(PYTHON_INCLUDE_FLAGS) $<
+	$(CC) $(CC_FLAGS) $(C_OPTIONS) $(PYTHON_INCLUDE_FLAGS) $<
 
 # Cleaning rules
 clean:

@@ -1927,7 +1927,7 @@ class ChemBuildMain(QtGui.QMainWindow):
       self.splitter.restoreState(splitter)
 
     if prevFile:
-      prevFile = str(prevFile.toString())
+      prevFile = str(prevFile)
       if path.exists(prevFile) and path.isfile(prevFile):
         self.compoundFileName = prevFile
 
@@ -2614,7 +2614,7 @@ class CompoundTree(QtGui.QTreeWidget):
     dataStream << pixmap << anchor
 
     mimeData = QtCore.QMimeData()
-    mimeData.setText(filePath.toString())
+    mimeData.setText(filePath)
     mimeData.setData(MIMETYPE_COMPOUND, itemData)
 
     drag = QtGui.QDrag(self)

@@ -80,9 +80,8 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
     displayPid = guiSpectrumDisplay.pid
     if guiSpectrumDisplay.isGrouped:
-      print('single spectra cannot be dropped onto grouped displays')
+      print('single spectra cannot be dropped onto grouped displays. Open another Blank Display (N,D)')
       return
-
 
     for ss in pids:
       print(ss)
@@ -107,22 +106,27 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     one already in.
     '''
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-    displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
+    displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups
                                for spectrumView in guiSpectrumDisplay.spectrumViews]
 
     for spectrum in self._appBase.project.getByPid(pids[0]).spectra:
       guiSpectrumDisplay.displaySpectrum(spectrum)
 
-    spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
-                 if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
+    if len(displayedSpectrumGroups)>0:
+      spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
+                   if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
 
-    if hasattr(guiSpectrumDisplay, 'isGrouped'):
-      if len(spectrumGroups)>0:
-        spectrumGroupToolBar = guiSpectrumDisplay.strips[0].spectrumDisplay.module.children()[2].children()[-1]
-        spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
-        spectrumGroupToolBar.addWidget(spectrumGroupButton)
-        for spectrum in spectrumGroups[0].spectra:
-          guiSpectrumDisplay.displaySpectrum(spectrum)
+      if hasattr(guiSpectrumDisplay, 'isGrouped'):
+        if guiSpectrumDisplay.isGrouped:
+          if len(spectrumGroups)>0:
+            spectrumGroupToolBar = guiSpectrumDisplay.strips[0].spectrumDisplay.module.children()[2].children()[-1]
+            spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
+            spectrumGroupToolBar.addWidget(spectrumGroupButton)
+            for spectrum in spectrumGroups[0].spectra:
+              guiSpectrumDisplay.displaySpectrum(spectrum)
+        else:
+          print("SpectrumGroups cannot be displayed in a display with already spectra in it."
+                "\nSpectrumGroup's spectra are added as single item in the display  ")
 
 
   def processSamples(self, pids:Sequence[str], event):

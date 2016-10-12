@@ -3,7 +3,8 @@ import sys
 
 # hack to get v2 code to work in v3
 # so stick chemBuild on sys.path so old ccpnmr (etc.) imports work
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+### now do it in bin/chemBuild script instead
+###sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 sys.setrecursionlimit(10000)
 

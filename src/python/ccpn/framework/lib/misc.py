@@ -64,7 +64,7 @@ def _check(key=None, doDecode=True):
 
     if key is None:
         from ccpn.framework.PathsAndUrls import userPreferencesDirectory, ccpnConfigPath
-        fname = message(108, 105, 99, 101, 110, 99, 101, 75, 101, 121, 46, 116, 120, 116)
+        fname = message(108, 105, 99, 101, 110, 115, 101, 75, 101, 121, 46, 116, 120, 116)
         lfile = os.path.join(userPreferencesDirectory,fname)
         if not os.path.exists(lfile):
           lfile = os.path.join(ccpnConfigPath, fname)

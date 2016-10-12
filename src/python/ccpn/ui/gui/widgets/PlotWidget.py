@@ -105,16 +105,19 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
     If a spectrum is already plotted in a display and a group is dropped, all its spectra will be displayed except the
     one already in.
     '''
+
     guiSpectrumDisplay = self.parent.guiSpectrumDisplay
-    displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups
-                               for spectrumView in guiSpectrumDisplay.spectrumViews]
+    for spectrumView in guiSpectrumDisplay.spectrumViews:
+      if len(spectrumView.spectrum.spectrumGroups)>0:
+        displayedSpectrumGroups = [spectrumView.spectrum.spectrumGroups[0]
+                                   for spectrumView in guiSpectrumDisplay.spectrumViews]
 
-    for spectrum in self._appBase.project.getByPid(pids[0]).spectra:
-      guiSpectrumDisplay.displaySpectrum(spectrum)
+        spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
+                     if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
 
-    if len(displayedSpectrumGroups)>0:
-      spectrumGroups = [spectrumGroup for spectrumGroup in self._appBase.project.spectrumGroups
-                   if spectrumGroup not in displayedSpectrumGroups and spectrumGroup.pid == pids[0]]
+      else:
+        for spectrum in self._appBase.project.getByPid(pids[0]).spectra:
+          guiSpectrumDisplay.displaySpectrum(spectrum)
 
       if hasattr(guiSpectrumDisplay, 'isGrouped'):
         if guiSpectrumDisplay.isGrouped:

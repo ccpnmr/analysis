@@ -111,25 +111,40 @@ class Version:
 
     return '%s.%s.%s%s' % (self.major, self.minor, self.level, self.release)
 
-  def __cmp__(self, other):
-    
-    if not isinstance(other, Version):
-      return cmp(id(self), id(other))
+  # def __cmp__(self, other):
+  #
+  #   if not isinstance(other, Version):
+  #     return cmp(id(self), id(other))
+  #
+  #   result = cmp( (self.major, self.minor), (other.major, other.minor) )
+  #
+  #   if not result:
+  #     result = cmp(self.level, other.level)
+  #
+  #     if result:
+  #       if '' in (self.level, other.level):
+  #         # NB empty string compares larger than letters - special case
+  #         result = -result
+  #
+  #     else:
+  #       result = cmp(self.release, other.release)
+  #
+  #   return result
 
-    result = cmp( (self.major, self.minor), (other.major, other.minor) )
+  def __lt__(self, other):
 
-    if not result:
-      result = cmp(self.level, other.level)
+    if isinstance(other, Version):
+      # NB level '' (empty string) must compare larger than any actual value
+      # hence the 'or '!')
+      return ((self.major, self.minor, self.level or '!', self.release)
+            < (other.major, other.minor, other.level or '!', other.release))
+    else:
+      return id(self) < id(other)
 
-      if result:
-        if '' in (self.level, other.level):
-          # NB empty string compares larger than letters - special case
-          result = -result
-      
-      else:
-        result = cmp(self.release, other.release)
-    
-    return result
+  def __eq__(self, other):
+    return (isinstance(other, Version) and (self.major, self.minor, self.level, self.release) ==
+                                           (other.major, other.minor, other.level, other.release)
+           )
     
     
   def __hash__(self):

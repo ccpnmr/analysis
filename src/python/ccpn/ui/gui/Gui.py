@@ -30,7 +30,7 @@ from ccpn.ui.Ui import Ui
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core import _coreClassMap
-
+from ccpn.core.lib.SpectrumLib import getExperimentClassifications
 
 from ccpn.ui.gui.widgets.Application import Application
 from ccpn.ui.gui.widgets.SplashScreen import SplashScreen
@@ -134,6 +134,9 @@ class Gui(Ui):
     splash.finish(self.mainWindow)
     self.mainWindow._fillMacrosMenu()
     self.mainWindow.setUserShortcuts(self.mainWindow._appBase.preferences)
+    project = self.application.project
+    self.application.experimentClassifications = getExperimentClassifications(project)
+
 
     self.qtApp.start()
 

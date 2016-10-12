@@ -2,6 +2,8 @@ __author__ = 'simon1'
 
 from PyQt4 import QtGui, QtCore
 
+from ccpn.ui.gui.popups.ExperimentFilterPopup import ExperimentFilterPopup
+
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Label import Label
@@ -19,6 +21,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
     self.parent = parent
     spectra = project.spectra
     self.experimentTypes = project._experimentTypeMap
+    self.spPulldowns = []
     for spectrumIndex, spectrum in enumerate(spectra):
       axisCodes = []
       for isotopeCode in spectrum.isotopeCodes:
@@ -30,6 +33,9 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
       spPulldown = FilteringPulldownList(self, grid=(spectrumIndex, 1),
                                 callback=partial(self._setExperimentType, spectrum, atomCodes),
                                 texts=pulldownItems)
+      self.spPulldowns.append(spPulldown)
+      spButton = Button(self, grid=(spectrumIndex, 2), callback=partial(self.raiseExperimentFilterPopup, spectrum, spectrumIndex),
+                        hPolicy='fixed', icon='icons/applications-system')
 
       # Get the text that was used in the pulldown from the refExperiment
       apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
@@ -44,3 +50,11 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
   def _setExperimentType(self, spectrum, atomCodes, item):
     expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(item)
     spectrum.experimentType = expType
+
+  def raiseExperimentFilterPopup(self, spectrum, spectrumIndex):
+
+    popup = ExperimentFilterPopup(spectrum=spectrum, application=spectrum.project._appBase)
+    popup.exec_()
+    if popup.expType:
+      self.spPulldowns[spectrumIndex].select(popup.expType)
+      spectrum.experimentType = popup.expType

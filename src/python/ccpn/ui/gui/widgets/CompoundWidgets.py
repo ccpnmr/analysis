@@ -97,4 +97,7 @@ class ColourSelectionWidget(Widget):
   def colour(self):
     return list(spectrumColours.keys())[self.pulldownList.currentIndex()]
 
+  def setColour(self, value):
+    self.pulldownList.select(spectrumColours[value])
+
 

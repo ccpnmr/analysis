@@ -132,19 +132,19 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
 
     for ss in pids:
       spectrumPids = [spectrum.pid for spectrum in self._appBase.project.getByPid(ss).spectra]
-      spectrumDisplay = self.moduleArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
+      if len(spectrumPids)>0:
+        spectrumDisplay = self.moduleArea.guiWindow.createSpectrumDisplay(spectrumPids[0])
 
-      for spectrum in spectrumPids[1:]:
-        spectrumDisplay.displaySpectrum(spectrum)
-      spectrumDisplay.isGrouped = True
-      spectrumDisplay.spectrumToolBar.hide()
-      SpectrumGroupsToolBar(spectrumDisplay.module, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
+        for spectrum in spectrumPids[1:]:
+          spectrumDisplay.displaySpectrum(spectrum)
+        spectrumDisplay.isGrouped = True
+        spectrumDisplay.spectrumToolBar.hide()
+        SpectrumGroupsToolBar(spectrumDisplay.module, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
 
-      self._appBase.current.strip = spectrumDisplay.strips[0]
-      padding = self._appBase.preferences.general.stripRegionPadding
-      self._appBase.current.strip.viewBox.autoRange(padding=padding)
-
-    self.moduleArea.guiWindow.deleteBlankDisplay()
+        self._appBase.current.strip = spectrumDisplay.strips[0]
+        padding = self._appBase.preferences.general.stripRegionPadding
+        self._appBase.current.strip.viewBox.autoRange(padding=padding)
+        self.moduleArea.guiWindow.deleteBlankDisplay()
 
 
   def _closeModule(self):

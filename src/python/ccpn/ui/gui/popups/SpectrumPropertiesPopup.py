@@ -201,8 +201,7 @@ class GeneralTab(QtGui.QWidget, Base):
       # Added to account for renaming of experiments
       text = spectrumType.findText(spectrum.experimentName)
       text = priorityNameRemapping.get(text, text)
-
-      spectrumType.setCurrentIndex(spectrumType.findText(text))
+      spectrumType.setCurrentIndex(spectrumType.findText(str(text)))
       Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
       self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
       self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)

@@ -548,14 +548,15 @@ class ShowScreeningHits(CcpnModule):
     currentObjPulldown = self.pullDownHit.currentObject()
 
     if hasattr(currentObjPulldown, 'spectrum'):
-      spectrumHit = currentObjPulldown.spectrum
-      spectrumHit.scale = float(0.5)
-      spectraToDisplay[0].append(spectrumHit)
+      substanceName = currentObjPulldown.substanceName
+      substanceRefSpectrum = self.project.getByPid('SU:'+str(substanceName)+'.').referenceSpectra[0]
+      substanceRefSpectrum.scale = float(0.5)
+      spectraToDisplay[0].append(substanceRefSpectrum)
     else:
       refSpectrum = currentObjPulldown.substance.referenceSpectra[0]
       refSpectrum.scale = float(0.5)
       spectraToDisplay[0].append(refSpectrum)
-    spectraToDisplayPL = [spectrum.peakLists[0] for spectrum in spectraToDisplay[0]]
+    # spectraToDisplayPL = [spectrum.peakLists[0] for spectrum in spectraToDisplay[0]]
 
     return spectraToDisplay[0]
 

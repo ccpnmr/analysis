@@ -126,7 +126,6 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
               spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
               spectrumGroupToolBar.addWidget(spectrumGroupButton)
               for spectrum in spectrumGroups[0].spectra:
-                print(spectrum,'157 SpectrumGroup dropped on Spectrum display')
                 guiSpectrumDisplay.displaySpectrum(spectrum)
           else:
             print("SpectrumGroups cannot be displayed in a display with already spectra in it."

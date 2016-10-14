@@ -4,27 +4,6 @@ from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock, VerticalLabel
 from pyqtgraph.dockarea.Container import  SplitContainer
-from ccpn.ui.gui.widgets.Module import CcpnModule
-
-
-
-
-
-#
-# def dropEvent(self, *args):
-#   source = args[0].source()
-#
-#   if hasattr(source, 'implements') and source.implements('dock'):
-#     DockDrop.dropEvent(self, *args)
-#   else:
-#     args[0].ignore()
-#     return
-#
-#
-# CcpnModule.dropEvent = dropEvent
-
-
-
 
 
 PipelineBoxDragStyle = """Dock > QWidget {border: 1px solid #78FF00; border-radius: 1px;}"""
@@ -51,8 +30,6 @@ class VContainer(SplitContainer):
     return 'vertical'
 
   def updateStretch(self):
-    ##Set the stretch values for this container to reflect its contents
-    #print "updateStretch", self
     x = 0
     y = 0
     sizes = []
@@ -61,19 +38,15 @@ class VContainer(SplitContainer):
         y += wy
         x = max(x, wx)
         sizes.append(wy)
-        #print "  child", self.widget(i), wx, wy
     self.setStretch(x, y)
 
-    #print sizes
     tot = float(sum(sizes))
     if tot == 0:
         scale = 1.0
     else:
         scale = self.height() / tot
 
-
     self.setSizes([int(s*scale) for s in sizes])
-
     self.setCollapsible(0, False)
     self.setCollapsible(1, False)
 
@@ -92,9 +65,6 @@ class PipelineDropAreaOverlay(QtGui.QWidget):
     if area is None:
       self.hide()
     else:
-      # self.hide()
-      ## Resize overlay to just the region where drop area should be displayed.
-      ## This works around a Qt bug--can't display transparent widgets over QGLWidget
       prgn = self.parent().rect()
       rgn = QtCore.QRect(prgn)
       w = min(10, prgn.width() / 3.)
@@ -319,11 +289,6 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
     self.setStyleSheet(self.hStyle)
 
   def setExtraButtons(self):
-    # self.lineEdit = QtGui.QLineEdit(self)
-    # self.lineEdit.setMaximumHeight(15)
-    # self.lineEdit.setMinimumWidth(50)
-    # self.lineEdit.setStyleSheet("""QLineEdit {background-color: white; color:black;}""")
-    # self.lineEdit.hide()
     self.checkBox = QtGui.QCheckBox(self)
     self.checkBox.setMaximumHeight(15)
     self.checkBox.setStyleSheet("""QCheckBox {background-color: transparent;}""")
@@ -359,19 +324,6 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
   def mouseDoubleClickEvent(self, ev):
     if ev.button() == QtCore.Qt.LeftButton:
       pass
-      # Action Free
-
-      # self.lineEdit.show()
-      #
-      # self.lineEdit.setText(str(self.name))
-      # self.lineEdit.editingFinished.connect(self.changeName)
-  #
-  # def changeName(self):
-  #   if self.lineEdit.isModified():
-  #     self.name = self.lineEdit.text().upper()
-  #     self.lineEdit.hide()
-
-
 
   def resizeEvent(self, ev):
     size = ev.size().height()
@@ -385,8 +337,6 @@ class PipelineBoxLabel(DockLabel, VerticalLabel):
 
     pos = QtCore.QPoint(ev.size().width() - 20, 0)
     self.closeButton.move(pos)
-
-
     super(DockLabel, self).resizeEvent(ev)
 
   def mouseMoveEvent(self, ev):

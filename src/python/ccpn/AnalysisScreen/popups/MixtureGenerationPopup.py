@@ -104,7 +104,7 @@ class MixtureGenerationPopup(QtGui.QDialog):
                                                tipTexts=None)
     #
     self.numberLabel = Label(self, text='Select number')
-    self.numberSlider = SliderSpinBox(self, value=5, startVal=1, endVal=100, step=1, bigStep=5)
+    self.numberSlider = SliderSpinBox(self, value=2, startVal=2, endVal=100, step=1, bigStep=5)
 
     #
     self.distanceLabel = Label(self, text="Minimal distance between peaks")
@@ -119,13 +119,13 @@ class MixtureGenerationPopup(QtGui.QDialog):
     self.selectSpectraPullDown = PulldownList(self)
 
     #
-    self.replaceLabel = Label(self, text="Replace current mixtures")
-    self.replaceRadioButtons = RadioButtons(self,
-                                              texts=['Yes', 'No'],
-                                              selectedInd=0,
-                                              callback=None,
-                                              direction='v',
-                                              tipTexts=None)
+    # self.replaceLabel = Label(self, text="Replace current mixtures")
+    # self.replaceRadioButtons = RadioButtons(self,
+    #                                           texts=['Yes', 'No'],
+    #                                           selectedInd=0,
+    #                                           callback=None,
+    #                                           direction='v',
+    #                                           tipTexts=None)
 
 
     widgetsGeneralTab =  (
@@ -135,7 +135,7 @@ class MixtureGenerationPopup(QtGui.QDialog):
                          self.numberLabel,self.numberSlider,
                          self.distanceLabel,self.ppmDistance,
                          self.selectSpectraLabel, self.selectSpectraPullDown,
-                         self.replaceLabel, self.replaceRadioButtons
+                         # self.replaceLabel, self.replaceRadioButtons
                          )
 
     self._addWidgetsToTabLayout(widgetsGeneralTab, self.tabGeneralSetupLayout)
@@ -304,7 +304,7 @@ class MixtureGenerationPopup(QtGui.QDialog):
     number = self.numberSlider.getValue()
     minimalDistance = self.ppmDistance.value()
     spectra = self._getPullDownSelectionSpectra()
-    replace = str(self.replaceRadioButtons.get())
+    # replace = str(self.replaceRadioButtons.get())
     peakPicking = str(self.pickPeaksRadioButtons.get())
     noiseLevel = str(self.noiseLevelRadioButtons.get())
     threshold =  self.noiseLevelSpinbox.value()
@@ -319,7 +319,7 @@ class MixtureGenerationPopup(QtGui.QDialog):
                         ('number', number),
                         ('minimalDistance', minimalDistance),
                         ('spectra', spectra),
-                        ('replace', replace),
+                        # ('replace', replace),
                         ('peakPicking', peakPicking),
                         ('noiseLevel', noiseLevel),
                         ('threshold', threshold),

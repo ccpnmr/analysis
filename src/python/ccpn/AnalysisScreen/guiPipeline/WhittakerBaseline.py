@@ -46,7 +46,7 @@ class WhittakerBaseline(PipelineBox):
     return 'Whittaker Baseline'
 
   def applicationsSpecific(self):
-    return ['AnalysisScreen','AnalysisMetabolomics']
+    return ['AnalysisMetabolomics']
 
   def runMethod(self):
     print('Running ',  self.name())

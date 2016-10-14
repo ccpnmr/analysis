@@ -113,18 +113,18 @@ class MatchPeaksToReference(PipelineBox):
 
 
 
-  # def _stdEfficency(self, spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions):
-  #
-  #   efficiency = []
-  #   for position in matchedPositions:
-  #     for onResPeak in spectrumOnResonancePeaks:
-  #       for offResPeak in spectrumOffResonancePeaks:
-  #         if abs(offResPeak.position[0] - onResPeak.position[0]) <= 0.001 and offResPeak.position[0] == position:
-  #           differenceHeight = abs(offResPeak.height - onResPeak.height)
-  #           fullValue = ((abs(offResPeak.height - onResPeak.height))/offResPeak.height)*100
-  #           value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
-  #           efficiency.append(value)
-  #   return efficiency
+  def _stdEfficency(self, spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions):
+
+    efficiency = []
+    for position in matchedPositions:
+      for onResPeak in spectrumOnResonancePeaks:
+        for offResPeak in spectrumOffResonancePeaks:
+          if abs(offResPeak.position[0] - onResPeak.position[0]) <= 0.001 and offResPeak.position[0] == position:
+            differenceHeight = abs(offResPeak.height - onResPeak.height)
+            fullValue = ((abs(offResPeak.height - onResPeak.height))/offResPeak.height)*100
+            value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
+            efficiency.append(value)
+    return efficiency
 
   def _showHitsModule(self):
     if len(self.project.spectrumHits)>0:

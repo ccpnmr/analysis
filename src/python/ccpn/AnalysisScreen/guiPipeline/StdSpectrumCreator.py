@@ -36,7 +36,7 @@ class StdSpectrumCreator(PipelineBox):
     self.project = project
     self.saveIcon = Icon('icons/save')
     self.application = self.project._appBase
-    self.directoryPath = self.application.preferences.general.auxiliaryFilesPath + '/'
+    self.directoryPath = self.application.preferences.general.dataPath + '/'
     self._setMainLayout()
     self._createWidgets()
     self.params = params

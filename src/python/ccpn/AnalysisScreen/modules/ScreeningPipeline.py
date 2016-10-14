@@ -310,7 +310,6 @@ class MatchPeaks(QtGui.QWidget):
 
 
   def _matchPosition(self):
-    # print(self.sender().parent().parent().parent().parent().parent().parent().parent())
     for sample in self.project.samples:
       if not sample.isVirtual:
         componentList = []
@@ -341,6 +340,7 @@ class MatchPeaks(QtGui.QWidget):
                 newPeakListPosition = sampleComponent.substance.referenceSpectra[0].peakLists[1].newPeak(position=[position], height=0.00)
 
               merit = self._stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPosition)
+              print('merit = ' , merit)
               if len(merit)>0:
                 newHit.meritCode =  str(merit[0])+'%'
     self._showHitsModule()
@@ -363,6 +363,7 @@ class MatchPeaks(QtGui.QWidget):
 
 
   def _stdEfficency(self, spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions):
+    print( ' spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions')
 
     efficiency = []
     for position in matchedPositions:

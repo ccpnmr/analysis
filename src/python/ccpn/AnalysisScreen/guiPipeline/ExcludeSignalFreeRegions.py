@@ -43,7 +43,7 @@ class ExcludeSignalFreeRegions(PipelineBox):
     return 'Exclude Signal Free Regions'
 
   def applicationsSpecific(self):
-    return ['AnalysisScreen', 'AnalysisMetabolomics']
+    return [ 'AnalysisMetabolomics']
 
   def runMethod(self):
     print('Running ',  self.name())

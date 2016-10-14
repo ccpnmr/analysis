@@ -47,7 +47,7 @@ class ExcludeBaselinePoints(PipelineBox):
     print('Running ',  self.name())
 
   def applicationsSpecific(self):
-    return ['AnalysisScreen','AnalysisMetabolomics']
+    return ['AnalysisMetabolomics']
 
   def _setMainLayout(self):
     self.mainFrame = QtGui.QFrame()

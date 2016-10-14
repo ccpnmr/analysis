@@ -7,9 +7,7 @@ import numpy as np
 from collections import namedtuple
 # from math import sin, cos, pi, log
 import os
-# from numpy import argwhere
-# from scipy.ndimage import maximum_filter
-
+import decimal
 
 Peak = namedtuple('Peak', ['frequency', 'linewidth', 'intensity', 'phase'])
 Peak.__new__.__defaults__ = (0,)
@@ -127,11 +125,9 @@ def matchSTDToReference(project, minDistance):
 
       spectrumOffResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_Off_Res']
       spectrumOffResonancePeaks = [peak for peak in spectrumOffResonance[0].peakLists[0].peaks]
-      spectrumOffPeaksPosition = [peak.position[0] for peak in spectrumOffResonancePeaks]
 
       spectrumOnResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_On_Res']
       spectrumOnResonancePeaks = [peak for peak in spectrumOnResonance[0].peakLists[0].peaks]
-      spectrumOfnPeaksPosition = [peak.position[0] for peak in spectrumOnResonancePeaks]
 
       stdSpectrum = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_STD']
       stdPeakList = [peak for peak in stdSpectrum[0].peakLists[0].peaks]
@@ -154,9 +150,9 @@ def matchSTDToReference(project, minDistance):
               newPeakListPosition = sampleComponent.substance.referenceSpectra[0].peakLists[1].newPeak(
                 position=[position], height=0.00)
 
-            # merit = self._stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPosition)
-            # if len(merit) > 0:
-            #   newHit.meritCode = str(merit[0]) + '%'
+            merit = _stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPosition, minDistance)
+            if len(merit) > 0:
+              newHit.meritCode = str(merit[0]) + '%'
 
 
 def _loadSpectrumDifference(project, path, sample, SGname='SG:STD'):
@@ -175,6 +171,7 @@ def createStdDifferenceSpectrum(project, filePath):
   for sample in project.samples:
     if not sample.isVirtual:
       if len(sample.spectra) > 0:
+        # FIXME correct spectrum.comment when new exp type STD off on are ready in the api
         spectrumOffResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_Off_Res']
         spectrumOnResonance = [spectrum for spectrum in sample.spectra if spectrum.comment == 'spectrum_On_Res']
 
@@ -185,3 +182,21 @@ def createStdDifferenceSpectrum(project, filePath):
           path = filePath + '/' + sample.name + '_Std_diff'
         writeBruker(path, spectrumDiff)
         _loadSpectrumDifference(project, str(path) + '/pdata/1/1r', sample)
+
+
+def _stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions, minDistance):
+
+  efficiency = []
+  for position in matchedPositions:
+    for onResPeak in spectrumOnResonancePeaks:
+      for offResPeak in spectrumOffResonancePeaks:
+
+
+
+        if abs(offResPeak.position[0] - onResPeak.position[0]) <= float(minDistance) and offResPeak.position[0] == position:
+          differenceHeight = abs(offResPeak.height - onResPeak.height)
+          fullValue = ((abs(offResPeak.height - onResPeak.height)) / offResPeak.height) * 100
+          value = decimal.Decimal(fullValue).quantize(decimal.Decimal('.01'), rounding=decimal.ROUND_DOWN)
+          efficiency.append(value)
+
+  return efficiency

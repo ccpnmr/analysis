@@ -136,12 +136,12 @@ class MixtureAnalysis(CcpnModule):
     objRow = self.scoringTable.getCurrentObject()
     self._createButtons(objRow)
     self._displayMixture(objRow)
-    # self._displayMolecules(objRow)
-    # self._displayMixturesInfo(objRow)
-    # self._populatePullDownSelection()
-    # self._populateLeftListWidget()
-    # self.rightListWidget.clear()
-    # self._selectAnOptionState()
+    self._displayMolecules(objRow)
+    self._displayMixturesInfo(objRow)
+    self._populatePullDownSelection()
+    self._populateLeftListWidget()
+    self.rightListWidget.clear()
+    self._selectAnOptionState()
 
 
   ''' ######## ======== First Tab properties ====== ########   '''

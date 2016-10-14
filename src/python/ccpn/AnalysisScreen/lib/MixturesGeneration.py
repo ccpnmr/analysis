@@ -16,7 +16,7 @@ def _initialiseMixtures(params):
   modeNumber = _getNumber(params)
   minimalDistance= _getMinimalDistance(params)
   spectra = _getSpectra(params)
-  replaceMixtures = _getReplace(params)
+  replaceMixtures = True #_getReplace(params)
   peaksAreTopick = _getPeakPicking(params)
   noiseLevel = _getNoiseLevel(params)
   pickFilter = _getFilter(params)
@@ -55,10 +55,10 @@ def _getMinimalDistance(params):
 def _getSpectra(params):
   return params['spectra']
 
-def _getReplace(params):
-  value = params['replace']
-  if value == 'Yes':
-    return True
+# def _getReplace(params):
+#   value = params['replace']
+#   if value == 'Yes':
+#     return True
 
 def _getPeakPicking(params):
   value = params['peakPicking']

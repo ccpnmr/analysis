@@ -37,6 +37,9 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
 
 def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[NmrAtom]], autoWidth=True, widths=None):
 
+  if not nmrAtomPairs:
+    return
+
   project = spectrumDisplay.project
   project._startFunctionCommandBlock('makeStripPlot', spectrumDisplay, nmrAtomPairs, autoWidth, widths)
   try:
@@ -47,6 +50,9 @@ def makeStripPlot(spectrumDisplay:GuiSpectrumDisplay, nmrAtomPairs:List[List[Nmr
     if numberOfStrips < len(nmrAtomPairs):
       for ii in range(numberOfStrips, len(nmrAtomPairs)):
         spectrumDisplay.strips[-1].clone()
+    else:  # numberOfStrips >= len(nmrAtomPairs):  # too many strips if >
+      for ii in range(len(nmrAtomPairs), numberOfStrips):
+        spectrumDisplay.removeStrip(spectrumDisplay.strips[-1])
 
     # loop through strips and navigate to appropriate position in strip
     for ii, strip in enumerate(spectrumDisplay.strips):

@@ -168,12 +168,13 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     self.removeStripAction = removeStripAction
 
 
-  def removeStrip(self):
+  def removeStrip(self, strip=None):
     # changed 6 Jul 2016
     #self.orderedStrips[-1]._unregisterStrip()
     #self.orderedStrips[-1].delete()
     if len(self.orderedStrips) > 1:
-      strip = self._appBase.current.strip
+      if not strip:
+        strip = self._appBase.current.strip
       if strip:
         strip._unregisterStrip()
         strip.delete()

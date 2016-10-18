@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -32,6 +33,7 @@ ATOM_NAMES = {'13C': ['C', 'CA', 'CB', 'CD', 'CD*', 'CD1', 'CD2', 'CE', 'CE*', '
               'HE2', 'HE21', 'HH12', 'HH2', 'HH21', 'HH22', 'HZ', 'HZ*', 'HZ2', 'HZ3'],'15N': ['N',
               'ND1', 'NE', 'NE1', 'NE2', 'NH1', 'NH2', 'NZ']}
 
+from ccpn.util import Common as commonUtil
 
 from ccpn.core.Chain import Chain
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
@@ -41,7 +43,6 @@ from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
 
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import getSpinSystemResidueProbability, getAtomProbability, getResidueAtoms, getCcpCodes, getSpinSystemScore
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 import numpy
 
@@ -170,10 +171,11 @@ def copyPeakListAssignments(referencePeakList:PeakList, matchPeakList:PeakList):
   refAxisCodes = referencePeakList.spectrum.axisCodes
   matchAxisCodes = matchPeakList.spectrum.axisCodes
   if len(refAxisCodes) < len(matchAxisCodes):
-    mappingArray = spectrumLib._axisCodeMapIndices(refAxisCodes, matchAxisCodes)
+    mappingArray = commonUtil._axisCodeMapIndices(refAxisCodes, matchAxisCodes)
   else:
-    mappingArray = spectrumLib._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
-  refPositions = [numpy.array([peak.position[dim] for dim in mappingArray if dim is not None]) for peak in referencePeakList.peaks]
+    mappingArray = commonUtil._axisCodeMapIndices(matchAxisCodes, refAxisCodes)
+  refPositions = [numpy.array([peak.position[dim] for dim in mappingArray if dim is not None])
+                  for peak in referencePeakList.peaks]
   refLabels = [[peak.pid] for peak in referencePeakList.peaks]
   clf=RandomForestClassifier()
   clf.fit(refPositions, refLabels)

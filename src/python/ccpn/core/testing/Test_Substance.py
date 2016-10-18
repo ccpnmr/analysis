@@ -34,7 +34,7 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(substance1.smiles, ':-)')
     self.assertEqual(substance1.substanceType, 'Molecule')
 
-    substance2 = self.project.newSubstance('Cell1', substanceType='Cell', labeling='moxy',
+    substance2 = self.project.newSubstance('Cell1', substanceType='Cell', labelling='moxy',
                                                  smiles=':-)')
     # Undo and redo all operations
     self.undo.undo()
@@ -47,7 +47,7 @@ class SubstanceTest(WrapperTesting):
 
     chain1 = self.project.createChain(sequence='ACDC', compoundName='hardrock', shortName='X',
                                       molType='protein')
-    substance1 = chain1.substance
+    substance1 = chain1.substances[0]
     chain2 = substance1.createChain(shortName='Y')
     self.assertEqual(len(substance1.chains), 2)
     self.assertEqual(substance1._id, 'hardrock.')
@@ -57,12 +57,12 @@ class SubstanceTest(WrapperTesting):
     sample1 = self.project.newSample(name='S1')
     sc1 = sample1.newSampleComponent(name='hardrock')
     sample1 = self.project.newSample(name='S2')
-    sc2 = sample1.newSampleComponent(name='hardrock', labeling='adhesive')
+    sc2 = sample1.newSampleComponent(name='hardrock', labelling='adhesive')
     self.assertEqual(sc1._id, 'S1.hardrock.')
     self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
     self.assertEqual(substance1.sampleComponents, (sc1,))
     self.project.newUndoPoint()
-    substance1.rename(name='electrical', labeling='cafe')
+    substance1.rename(name='electrical', labelling='cafe')
     self.assertEqual(substance1._id, 'electrical.cafe')
     self.assertEqual(sc1._id, 'S1.electrical.cafe')
     self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
@@ -77,7 +77,7 @@ class SubstanceTest(WrapperTesting):
     self.assertEqual(sc1._id, 'S1.electrical.cafe')
     self.assertEqual(sc2._id, 'S2.hardrock.adhesive')
     self.assertEqual(substance1.sampleComponents, (sc1,))
-    substance1.rename(name='notmuch', labeling=None)
+    substance1.rename(name='notmuch', labelling=None)
     self.assertEqual(sc1._id, 'S1.notmuch.')
 
 

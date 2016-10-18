@@ -108,8 +108,8 @@ class RestraintContribution(AbstractWrapperObject):
   def additionalLowerLimit(self) -> float:
     """additionalLowerLimit of contribution
     Used for potential functions that require more than one parameter, typically for
-     parabolic-linear potentials where the additionalLowerLimit marks the transition from
-     parabolic to linear potential"""
+    parabolic-linear potentials where the additionalLowerLimit marks the transition from
+    parabolic to linear potential"""
     return self._wrappedData.additionalLowerLimit
 
   @additionalLowerLimit.setter
@@ -138,8 +138,8 @@ class RestraintContribution(AbstractWrapperObject):
   def additionalUpperLimit(self) -> float:
     """additionalUpperLimit of contribution.
     Used for potential functions that require more than one parameter, typically for
-     parabolic-linear potentials where the additionalUpperLimit marks the transition from
-     parabolic to linear potential"""
+    parabolic-linear potentials where the additionalUpperLimit marks the transition from
+    parabolic to linear potential"""
     return self._wrappedData.additionalUpperLimit
 
   @additionalUpperLimit.setter
@@ -149,7 +149,8 @@ class RestraintContribution(AbstractWrapperObject):
 
   @property
   def scale(self) -> float:
-    """scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled value """
+    """scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled
+    value """
     return self._wrappedData.scale
 
   @scale.setter
@@ -279,7 +280,7 @@ class RestraintContribution(AbstractWrapperObject):
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:Restraint)-> list:
-    """get wrappedData - all Constraint children of parent ConstraintList"""
+    """get wrappedData - all ConstraintContribution children of parent ConstraintList"""
     return parent._wrappedData.sortedContributions()
 
 # Connections to parents:

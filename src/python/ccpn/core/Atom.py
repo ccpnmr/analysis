@@ -113,7 +113,7 @@ class Atom(AbstractWrapperObject):
   @property
   def compoundAtoms(self) -> typing.Tuple['Atom']:
     """wildcard-, pseudo-, and nonstereo- atoms that incorporate this atom.
-     - reverse of 'componentAtoms'
+    - reverse of 'componentAtoms'
 
     Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13
     and is itself a component of HGx%, HGy%, HG%, and QG"""
@@ -145,9 +145,12 @@ class Atom(AbstractWrapperObject):
   def isEquivalentAtomGroup(self) -> typing.Optional[bool]:
     """Is this atom a group of equivalent atoms?
     Values are:
+
     - True  (group of equivalent atoms, e.g. H%, ALA HB%, LYS HZ%, VAL HG1% or any M pseudoatom)
+
     - False (all single atoms, all xy nonstereo atoms, LEU HB%, ILE HG1%, VAL HG%,
-             or any Q non-aromatic pseudoatom)
+      or any Q non-aromatic pseudoatom)
+
     - None  = sometimes equivalent (TYR and PHE HD%, HE%, CD%, CE%, QD, QE)
     """
     apiChemAtomSet = self._wrappedData.chemAtomSet
@@ -167,46 +170,6 @@ class Atom(AbstractWrapperObject):
     project = self._project
     project._wrappedData.molSystem.newGenericBond(atoms=(self._wrappedData, atom._wrappedData))
 
-  # Utility functions
-
-  # def _isAssignable(self):
-  #   """Whether atom is assignable to"""
-  #
-  #   ##Assignable = simple + equivalentEndswith1
-  #
-  #   if not self.componentAtoms and not self.exchangesWithWater:
-  #     # simple atom, and not e.g. OH or NH3
-  #     if self.name.endswith('1') or not any(x.isEquivalentAtomGroup for x in self.compoundAtoms):
-  #       # Count only for the first atom in equivalent groups
-  #       # NB the '== False' IS DELIBERATE. Values True and None must BOTH be excluded.
-  #       return True
-  #
-  #   return False
-  #
-  # def _assignedCount(self):
-  #   """How many atoms this counts as when assigned to"""
-  #
-  #   # Should be 'xy' eventually, but we shall soon change from 'XY' to 'xy'.
-  #   # During the transition this is safest
-  #   xyWildcards = 'XYxy'
-  #
-  #   count = 0
-  #   if len(self.componentAtoms) == 2:
-  #     name = self.name
-  #     if name[-1] in xyWildcards:
-  #       # Non-stereospecific, we are only assigning one, not two
-  #       count = 1
-  #     elif name[-1] == '%' and name[-2] in xyWildcards:
-  #       # isopropyl groups and similar
-  #       count = 1
-  #     else:
-  #       # % expressions for CH2, NH2, Val CG2, Tyr side chain, ...
-  #       count = 2
-  #   else:
-  #     # Single atoms count as one, CH3 and NH3 groups too
-  #     count = 1
-  #
-  #   return count
 
   # Implementation functions
 

@@ -19,4 +19,4 @@ class TestPhysicalChainCreation(WrapperTesting):
 
     self.assertIs(self.project.chains[0], c)
     self.assertEqual(c.pid, 'MC:A')
-    self.assertIs(c.substance, s)
+    self.assertIs(c.substances[0], s)

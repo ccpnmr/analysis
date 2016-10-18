@@ -115,7 +115,7 @@ class Data(AbstractWrapperObject):
     Use the setParameter, deleteParameter, clearParameters, and updateParameters
     methods to modify the parameters.
 
-    Dictionary alues can be anything that can be exported to JSON,
+    Dictionary values can be anything that can be exported to JSON,
     including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
     or pandas DataFrame, Series, or Panel"""
     return dict((x.name, x.value) for x in self._wrappedData.parameters)
@@ -178,7 +178,7 @@ class Data(AbstractWrapperObject):
 
   @classmethod
   def _getAllWrappedData(cls, parent:DataSet)-> list:
-    """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
+    """get wrappedData - all Data children of parent NmrConstraintStore"""
     return parent._wrappedData.sortedData()
 
 # Connections to parents:

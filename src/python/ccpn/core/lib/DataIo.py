@@ -124,8 +124,8 @@ def extractCyanaRestraints(restraintList, text):
           atomName = 'H' + atomName[1:] + '*'
         elif atomName[-1] in ('1', '2') and residueType not in ('THR', 'ILE'):
           # NB this hardwires that these methyl groups are NOT stereospecific
-          # nThat may not be correct, but ...
-          ss = 'X' if atomName[-1] == '1' else 'Y'
+          # That may not be correct, but ...
+          ss = 'x' if atomName[-1] == '1' else 'y'
           atomName = 'H' + atomName[1:-1]+ ss + '%'
         else:
           atomName = 'H' + atomName[1:] + '%'
@@ -630,14 +630,14 @@ def collapseXH3Groups(nmrChain:'NmrChain'):
 
 def convertBmrbAmbiguousAtoms(nmrChain):
   """Convert NmrAtoms with na.ccpnInternalData['ambiguityCode'] 2 or 3
-  to the 'XY' convention.
+  to the 'xy' convention.
   Names are of form 'Nabi'  or 'Nabi%' or 'NAbi*' where 'N' is a one-letter nucleus code.
   'ab' is any string that is not an integer or '@' followed by an integer
   and 'i' is 1, 2 or 3.
-  The new names will be of the form 'NabX' or 'NabY' or 'NabX%', 'NabY%'
+  The new names will be of the form 'Nabx' or 'Naby' or 'Nabx%', 'Naby%'
 
   If 'abi' for one nucleus name matches 'abi' for another nucleus name,
-  (e.g. HG1 and CG1), both will match after name substitution (to e.g. HGX and CGX)
+  (e.g. HG1 and CG1), both will match after name substitution (to e.g. HGx and CGx)
   In these cases, if ANY nucleus is ambiguous, all will be treated as ambiguous.
 
   If matching names are found for i==1, i==2, and i==3, (should not happen), no changes are made
@@ -687,9 +687,9 @@ def convertBmrbAmbiguousAtoms(nmrChain):
         if ambiguityCode in (2,3):
           # Ambiguous = set the name
           if name.endswith("''"):
-            newName = name[:-2] + 'Y'
+            newName = name[:-2] + 'y'
           else:
-            newName = name[:-1] + 'X'
+            newName = name[:-1] + 'x'
           # NB, if the name is already taken we get a nameclash
           nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)
 
@@ -700,7 +700,7 @@ def convertBmrbAmbiguousAtoms(nmrChain):
       #     xx = dd2.get('ambiguityCode')
       #     if xx in ('2','3'):
       #       # Ambiguous = set the name
-      #       newName = name[:-1] + 'Y'
+      #       newName = name[:-1] + 'y'
       #       # NB, if the name is already taken we get a nameclash
       #       print ('@~@~newName', newName)
       #       nmrAtom.assignTo(chainCode, sequenceCode, residueType, newName)
@@ -762,8 +762,8 @@ def convertBmrbAmbiguousAtoms(nmrChain):
 
         if len(ll) <= 2:
           # We now have one or two atoms for each nucleus.
-          # Rename first slot as X, second slot as Y
-          tags = 'XY'
+          # Rename first slot as x, second slot as y
+          tags = 'xy'
           for ll in dd.values():
             for ii, nmrAtom in enumerate(ll):
               if nmrAtom is not None:
@@ -779,7 +779,7 @@ def convertBmrbAmbiguousAtoms(nmrChain):
           # There are NmrAtoms with names ending all of 1,2,3
           # This is not a clear case - do nothing
           nmrChain._project._logger.info(
-            "ambigous assignments, code %s, not renamed to 'XY' name - inconsistent set: %s"
+            "ambigous assignments, code %s, not renamed to 'xy' name - inconsistent set: %s"
             % (ambiguityCode, [x for x in ll for ll in dd.values() if x is not None])
           )
 

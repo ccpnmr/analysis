@@ -226,7 +226,8 @@ class AbstractWrapperObject():
   @property
   def isDeleted(self) -> bool:
     """True if this object is deleted."""
-    return (not hasattr(self, '_wrappedData') or self._wrappedData is None)
+    return (not hasattr(self, '_wrappedData') or self._wrappedData is None
+            or not hasattr(self._project, '_data2Obj'))
 
   @property
   def ccpnInternalData(self) -> dict:
@@ -440,7 +441,7 @@ class AbstractWrapperObject():
       ll = itertools.chain(*(func(x) for x in objects))
       # objects is all wrapper objects for next child level down
       objects = [data2Obj[x] for x in ll]
-      if cls.className in ('ChemicalShift', 'Residue'):
+      if cls.className in ('ChemicalShift',):
         # These cannot be correctly sorted at the API level
         objects.sort()
     #

@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -21,8 +22,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+from ccpn.util import Common as commonUtil
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 class PeakTest(WrapperTesting):
 
@@ -37,7 +38,7 @@ class PeakTest(WrapperTesting):
     nmrAtom = nmrResidue.fetchNmrAtom(name='N')
     peak = spectrum.peakLists[0].peaks[0]
 
-    peak.assignDimension(axisCode=libSpectrum.axisCodeMatch('N', spectrum.axisCodes),
+    peak.assignDimension(axisCode=commonUtil.axisCodeMatch('N', spectrum.axisCodes),
                          value=nmrAtom)
     # shift = shiftList.findChemicalShift(nmrAtom)
     shift = shiftList.getChemicalShift(nmrAtom.id)

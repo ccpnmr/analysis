@@ -91,13 +91,19 @@ def find_all_pyfiles(topDirectory, ignoreDirs=(), ignoreFiles=()):
           else:
             yield join(root[len(packroot)+1:], fn)
 
-def importAllPyfiles(topDirectory, ignoreDirs=(),ignoreFiles=()):
+def importAllPyfiles(topDirectory, ignoreDirs=(),ignoreFiles=(), addToSysPath:str=None):
   """Test import all python files in a directory tree.
   topDirectory must be (intended to be) on the Python path"""
+
   for fn in find_all_pyfiles(topDirectory, ignoreDirs=ignoreDirs, ignoreFiles=ignoreFiles):
     modname = filename2module(fn)
     print("test import %s :" % modname)
-    subprocess.call( ('python', '-c', 'import %s' % modname) )
+    if addToSysPath:
+      subprocess.call( ('python','-t', '-c',
+                        'import sys; sys.path.append("%s"); import %s'
+                        % (addToSysPath, modname) ) )
+    else:
+      subprocess.call( ('python', '-t', '-c', 'import %s' % modname) )
 
 
 if __name__ == '__main__':

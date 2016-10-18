@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import collections
-from typing import Tuple
+import typing
 
 from ccpn.core.Project import Project
 from ccpn.core.Sample import Sample
@@ -30,7 +30,7 @@ from ccpn.core.SpectrumHit import SpectrumHit
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
 from ccpn.util import Constants
-from ccpn.util.Constants import DEFAULT_LABELING
+from ccpn.util.Constants import DEFAULT_LABELLING
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import Sample as ApiSample
 from ccpnmodel.ccpncore.api.ccp.lims.Sample import SampleComponent as ApiSampleComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -40,8 +40,8 @@ class SampleComponent(AbstractWrapperObject):
   """ A Samplecomponent indicates a Substance contained in a specific Sample,
   (e.g. protein, buffer, salt), and its  concentrations.
 
-  The Substance referred to is defined by the 'name' and 'labeling' attributes.
-  FOr this reason teh SampleCOmponent cannot be renamed. See Substance."""
+  The Substance referred to is defined by the 'name' and 'labelling' attributes.
+  For this reason the SampleComponent cannot be renamed. See Substance."""
   
   #: Short class name, for PID.
   shortClassName = 'SC'
@@ -67,14 +67,14 @@ class SampleComponent(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """id string - name.labeling"""
+    """id string - name.labelling"""
     obj =  self._wrappedData
 
     name = obj.name
-    labeling = obj.labeling
-    if labeling == DEFAULT_LABELING:
-      labeling = ''
-    return Pid.createId(name, labeling)
+    labelling = obj.labeling
+    if labelling == DEFAULT_LABELLING:
+      labelling = ''
+    return Pid.createId(name, labelling)
 
   @property
   def name(self) -> str:
@@ -82,10 +82,10 @@ class SampleComponent(AbstractWrapperObject):
     return self._wrappedData.name
 
   @property
-  def labeling(self) -> str:
-    """labeling descriptor of SampleComponent and corresponding substance """
+  def labelling(self) -> str:
+    """labelling descriptor of SampleComponent and corresponding substance """
     result = self._wrappedData.labeling
-    if result == DEFAULT_LABELING:
+    if result == DEFAULT_LABELLING:
       result = None
     #
     return result
@@ -163,10 +163,35 @@ class SampleComponent(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def spectrumHits(self) -> Tuple[SpectrumHit, ...]:
+  def spectrumHits(self) -> typing.Tuple[SpectrumHit, ...]:
     """ccpn.SpectrumHits found for SampleComponent"""
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._apiSampleComponent.sortedSpectrumHits())
+
+
+  @property
+  def isotopeCode2Fraction(self) -> typing.Dict[str,float]:
+    """{isotopeCode:fraction} dictionary giving uniform isotope percentages
+
+    isotopeCodes are of the form '12C', '13C', and all relevant isotopes for a given
+    nucleus must be entered. Fractions must add up to 1.0 for each element.
+
+    Example value:
+    {'12C':0.289, '13C':0.711, '1H':0.99985, '2H':0.00015}
+
+    NBNB the internal dictionary is returned directly without checks or encapsulation"""
+
+    result = self._wrappedData.ccpnInternalData['isotopeCode2Fraction']
+    if result is None:
+      result = self._wrappedData.ccpnInternalData['isotopeCode2Fraction'] = {}
+    #
+    return result
+
+  @isotopeCode2Fraction.setter
+  def isotopeCode2Fraction(self, value):
+    if not isinstance(value, dict):
+      raise ValueError("SampleComponent.isotopeCode2Fraction must be a dictionary")
+    self._wrappedData.ccpnInternalData['isotopeCode2Fraction'] = value
 
     
   # Implementation functions
@@ -184,7 +209,7 @@ del getter
 
 # Connections to parents:
 
-def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
+def _newSampleComponent(self:Sample, name:str, labelling:str=None, role:str=None,
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
@@ -195,16 +220,16 @@ def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
 
   # Default values for 'new' function, as used for echoing to console
   defaults = collections.OrderedDict(
-    (('name',None), ('labeling',None), ('role', None),
+    (('name',None), ('labelling',None), ('role', None),
      ('concentration',None), ('concentrationError',None), ('concentrationUnit', None),
      ('purity',None), ('comment', None),
      )
   )
 
-  for ss in (name, labeling):
+  for ss in (name, labelling):
     if ss and Pid.altCharacter in ss:
       raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
-                       (Pid.altCharacter, name, labeling))
+                       (Pid.altCharacter, name, labelling))
 
 
   if concentrationUnit not in Constants.concentrationUnits:
@@ -216,8 +241,8 @@ def _newSampleComponent(self:Sample, name:str, labeling:str=None, role:str=None,
   self._startFunctionCommandBlock('newSampleComponent', name, values=locals(), defaults=defaults,
                                   parName='newSampleComponent')
   try:
-    substance = self._project.fetchSubstance(name=name, labeling=labeling)
-    # NB - using substance._wrappedData.labeling because we need the API labeling value,
+    substance = self._project.fetchSubstance(name=name, labelling=labelling)
+    # NB - using substance._wrappedData.labelling because we need the API labelling value,
     # which is different for the default case
     obj = apiSample.newSampleComponent(name=name, labeling=substance._wrappedData.labeling,
                                        concentration=concentration,

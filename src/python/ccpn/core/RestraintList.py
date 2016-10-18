@@ -35,9 +35,9 @@ from ccpn.util.Tensor import Tensor
 
 class RestraintList(AbstractWrapperObject):
   """ An object containing Restraints. Note: the object is not a (subtype of a) Python list.
-  To access all rRstraint objects, use RestraintList.restraints.
+  To access all Restraint objects, use RestraintList.restraints.
 
-  RThe type of restraint is determined by the restraintType attribute.
+  The type of restraint is determined by the restraintType attribute.
   Typical examples are Distance, Dihedral and Rdc restraints, but can also be used to store
   measurements or derived values (Rdc, J coupling, T1, T2, Chemical Shift, ...)
   """
@@ -270,7 +270,7 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                       tensorMagnitude:float=0.0, tensorRhombicity:float=0.0,
                       tensorIsotropicValue:float=0.0, tensorChainCode:str=None,
                       tensorSequenceCode:str=None, tensorResidueType:str=None,
-                      serial=None, itemLength=None) -> RestraintList:
+                      serial=None, restraintItemLength=None) -> RestraintList:
   """Create new RestraintList of type restraintType within DataSet"""
 
 
@@ -281,7 +281,7 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
      ('comment',None), ('unit',None), ('potentialType', 'unknown'),
      ('tensorMagnitude', 0.0), ('tensorRhombicity', 0.0), ('tensorIsotropicValue', 0.0),
      ('tensorChainCode',None), ('tensorSequenceCode',None), ('tensorResidueType', None),
-     ('serial', None), ('itemLength', None),
+     ('serial', None), ('restraintItemLength', None),
     )
   )
 
@@ -292,9 +292,9 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
     # This may not be unique, but that should be handled downstream
     name = restraintType
 
-  if itemLength is None:
-    itemLength = coreConstants.constraintListType2ItemLength.get(restraintType)
-  if itemLength is None:
+  if restraintItemLength is None:
+    restraintItemLength = coreConstants.constraintListType2ItemLength.get(restraintType)
+  if restraintItemLength is None:
     raise ValueError("restraintType %s not recognised" % restraintType)
 
   self._startFunctionCommandBlock('newRestraintList', restraintType, values=locals(),
@@ -303,7 +303,7 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
     obj = self._wrappedData.newGenericConstraintList(name=name, details=comment, unit=unit,
                                                      origin=origin,
                                                      constraintType=restraintType,
-                                                     itemLength=itemLength,
+                                                     itemLength=restraintItemLength,
                                                      potentialType=potentialType,
                                                      tensorMagnitude=tensorMagnitude,
                                                      tensorRhombicity=tensorRhombicity,

@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -23,12 +24,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 from typing import Sequence, Tuple
 
+from ccpn.util import Common as commonUtil
 from ccpn.core.Peak import Peak
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundStrip as ApiBoundStrip
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
 class Strip(AbstractWrapperObject):
@@ -288,11 +289,11 @@ class Strip(AbstractWrapperObject):
     # make axis mapping indices
     if axisOrder and axisOrder != displayAxisCodes:
       # Map axes to axisOrder, and remap to original setting
-      ll = libSpectrum._axisCodeMapIndices(spectrum.axisCodes, axisOrder)
+      ll = commonUtil._axisCodeMapIndices(spectrum.axisCodes, axisOrder)
       mapIndices = [ll[axisOrder.index(x)] for x in displayAxisCodes]
     else:
       # Map axes to original display setting
-      mapIndices = libSpectrum._axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
+      mapIndices = commonUtil._axisCodeMapIndices(spectrum.axisCodes, displayAxisCodes)
 
     if mapIndices is None:
       return
@@ -408,7 +409,7 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
         newStrip.moveTo(newIndex)
 
     else:
-      mapIndices = libSpectrum._axisCodeMapIndices(strip.axisOrder, self.axisOrder)
+      mapIndices = commonUtil._axisCodeMapIndices(strip.axisOrder, self.axisOrder)
       if mapIndices is None:
         raise ValueError("Strip %s not compatible with window %s" % (strip.pid, self.pid))
       else:

@@ -247,7 +247,10 @@ class Residue(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Chain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    # NB this is not the sort we want - sorted elsewhere
+    # NB this sorts in seqId order - which is the order we want.
+    # If the seqId order does not match the sequence we have a problem anyway.
+    # NBNB the doe relies on this sorting order to handle position-specific labeling
+    # for substances
     return parent._apiChain.sortedResidues()
 
 def getter(self:Residue) -> Residue:

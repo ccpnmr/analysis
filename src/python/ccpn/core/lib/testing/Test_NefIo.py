@@ -23,7 +23,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import copy
-from ccpn.framework import Framework
+import os
+# from ccpn.framework import Framework
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 from ccpn.core.lib import CcpnNefIo
 
@@ -33,7 +34,7 @@ def test_nef_maps():
   # Check that elements in nef2CcpnMap match saveFrameOrder
   # and that all contents are present and reached from saveframes in saveFrameOrder
   copyMap = copy.deepcopy(CcpnNefIo.nef2CcpnMap)
-  for category in CcpnNefIo.saveFrameOrder:
+  for category in CcpnNefIo.saveFrameWritingOrder:
     map1 = copyMap.pop(category)
     for tag, val in map1.items():
       if val == CcpnNefIo._isALoop:
@@ -51,6 +52,8 @@ class NefIoTest(WrapperTesting):
 
   def test_nef_write_read(self):
     nefPath = self.project.path + '.out.nef'
+    if os.path.exists(nefPath):
+      os.remove(nefPath)
     CcpnNefIo.saveNefProject(self.project, nefPath)
     application = self.project._appBase
     application.loadProject(nefPath)

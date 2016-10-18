@@ -60,7 +60,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
 
   def _getWidgetsToSet(self):
     widgetsToSet = (self._initialOpitionWidgets, self._setCurrentSubstanceWidgets,
-                    self._substanceNameWidget, self.labelingWidget,
+                    self._substanceNameWidget, self.labellingWidget,
                     self._chemicalNameWidget,
                     self._smilesWidget, self._empiricalFormulaWidget,
                     self._molecularMassWidget, self._commentWidget, self._labelUserCodeWidget,
@@ -75,7 +75,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
             self.spacerLabel, self.selectInitialRadioButtons,
             self.currentSubstanceLabel, self.substancePulldownList,
             self.substanceLabel,self.nameSubstance,
-            self._substanceLabelingLabel, self.labeling,
+            self._substanceLabellingLabel, self.labelling,
             self.chemicalNameLabel,self.chemicalName,
             self.smilesLabel,self.smilesLineEdit,
             self.empiricalFormulaLabel,self.empiricalFormula,
@@ -120,11 +120,11 @@ class SubstancePropertiesPopup(QtGui.QDialog):
     if self.substance:
       self.nameSubstance.setText(self.substance.name)
 
-  def labelingWidget(self):
-    self._substanceLabelingLabel = Label(self, text="Labeling")
-    self.labeling = LineEdit(self, 'None')
+  def labellingWidget(self):
+    self._substanceLabellingLabel = Label(self, text="Labelling")
+    self.labelling = LineEdit(self, 'None')
     if self.substance:
-      self.labeling.setText(self.substance.labeling)
+      self.labelling.setText(self.substance.labelling)
 
   def _referenceSpectraWidget(self):
     self.referenceSpectraLabel = Label(self, text="Ref Spectra")
@@ -249,7 +249,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
   def _getCallBacksDict(self):
     return {
       self._changeNameSubstance: str(self.nameSubstance.text()),
-      self._labelingChanged:str(self.labeling.text()) ,
+      self._labellingChanged:str(self.labelling.text()) ,
       self._chemicalNameChanged: (str(self.chemicalName.text()),),
       self._smilesChanged: str(self.smilesLineEdit.text()),
       self._empiricalFormulaChanged: str(self.empiricalFormula.text()),
@@ -282,17 +282,17 @@ class SubstancePropertiesPopup(QtGui.QDialog):
     if selected != 'Select an option':
       substance = self.project.getByPid('SU:' + selected)
       self.nameSubstance.setText(str(substance.name)+'-Copy')
-      self.labeling.setText(str(substance.labeling))
+      self.labelling.setText(str(substance.labelling))
 
   def _changeNameSubstance(self, value):
     if value:
       if self.substance.name != value:
         self.substance.rename(name=value)
 
-  def _labelingChanged(self, value):
+  def _labellingChanged(self, value):
     if value:
-      if self.substance.labeling != value:
-        self.substance.rename(labeling=value)
+      if self.substance.labelling != value:
+        self.substance.rename(labelling=value)
 
   def _chemicalNameChanged(self, value):
     if value:
@@ -429,8 +429,8 @@ class SubstancePropertiesPopup(QtGui.QDialog):
 
   def _createNewSubstance(self):
     name = str(self.nameSubstance.text())
-    labeling = str(self.labeling.text())
-    self.substance = self.project.newSubstance(name=name, labeling=labeling)
+    labelling = str(self.labelling.text())
+    self.substance = self.project.newSubstance(name=name, labelling=labelling)
     self.createNewSubstance = False
 
   def _setValue(self):

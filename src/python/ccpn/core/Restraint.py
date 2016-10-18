@@ -36,7 +36,7 @@ class Restraint(AbstractWrapperObject):
   Most of the values are the consensus of the values in the contained
   RestraintContributions. In the normal case, where you have only one
   RestraintContribution per Restraint, you can get and set the values
-   directly from the Restraint without reference to the RestraintContributions. """
+  directly from the Restraint without reference to the RestraintContributions. """
   
   #: Short class name, for PID.
   shortClassName = 'RE'
@@ -171,8 +171,8 @@ class Restraint(AbstractWrapperObject):
   def additionalUpperLimit(self) -> float:
     """additionalUpperLimit of restraint - consensus of all contributions or None.
     Used for potential functions that require more than one parameter, typically for
-     parabolic-linear potentials where the additionalUpperLimit marks the transition from
-     parabolic to linear potential"""
+    parabolic-linear potentials where the additionalUpperLimit marks the transition from
+    parabolic to linear potential"""
     aSet = set(x.additionalUpperLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -188,8 +188,8 @@ class Restraint(AbstractWrapperObject):
   def additionalLowerLimit(self) -> float:
     """additionalLowerLimit of restraint - consensus of all contributions or None
     Used for potential functions that require more than one parameter, typically for
-     parabolic-linear potentials where the additionalLowerLimit marks the transition from
-     parabolic to linear potential"""
+    parabolic-linear potentials where the additionalLowerLimit marks the transition from
+    parabolic to linear potential"""
     aSet = set(x.additionalLowerLimit for x in self._wrappedData.contributions)
     if len(aSet) == 1:
       return aSet.pop()
@@ -292,16 +292,16 @@ def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None
   return result
 
 def createSimpleRestraint(self:RestraintList, comment:str=None, figureOfMerit:float=None,
-                        peaks:Sequence[Peak]=(),  targetValue:float=None, error:float=None,
-                        weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
-                        additionalUpperLimit:float=None, additionalLowerLimit:float=None,
-                        scale=1.0, vectorLength=None, restraintItems:Sequence=()) -> Restraint:
+                          peaks:Sequence[Peak]=(),  targetValue:float=None, error:float=None,
+                          weight:float=1.0, upperLimit:float=None,  lowerLimit:float=None,
+                          additionalUpperLimit:float=None, additionalLowerLimit:float=None,
+                          scale=1.0, vectorLength=None, restraintItems:Sequence=()) -> Restraint:
   """Create a Restraint with a single RestraintContribution within the RestraintList.
   The function takes all the information needed and creates the RestraintContribution as
-   well as the Restraint proper.
+  well as the Restraint proper.
 
-   This function should be used routinely, unless there is a need to crreate more complex
-   Restraints."""
+  This function should be used routinely, unless there is a need to create more complex
+  Restraints."""
 
   defaults = collections.OrderedDict(
     (

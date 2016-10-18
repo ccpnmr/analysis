@@ -827,7 +827,7 @@ class Spectrum(AbstractWrapperObject):
     transfertype is one of (in order of increasing priority):
     'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
     isIndirect is used where there is more than one successive transfer step;
-     it is combined with the highest-priority transferType in the transfer path.
+    it is combined with the highest-priority transferType in the transfer path.
     """
 
     result = []

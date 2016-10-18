@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -36,7 +37,6 @@ from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Window import Window as ApiWindow
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 class SpectrumDisplay(AbstractWrapperObject):
   """Spectrum display for 1D or nD spectrum"""
@@ -353,15 +353,15 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
 
   mapIndices = ()
   if axisOrder:
-    mapIndices = libSpectrum._axisCodeMapIndices(spectrumAxisCodes, axisOrder)
+    mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, axisOrder)
     if displayAxisCodes:
-      if not libSpectrum.doAxisCodesMatch(axisOrder, displayAxisCodes):
+      if not commonUtil.doAxisCodesMatch(axisOrder, displayAxisCodes):
         raise ValueError("AxisOrder %s do not match display axisCodes %s"
                          % (axisOrder, displayAxisCodes))
     else:
       displayAxisCodes = axisOrder
   elif displayAxisCodes:
-    mapIndices = libSpectrum._axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
+    mapIndices = commonUtil._axisCodeMapIndices(spectrumAxisCodes, displayAxisCodes)
   else:
     displayAxisCodes = list(spectrumAxisCodes)
     mapIndices = list(range(dataSource.numDim))

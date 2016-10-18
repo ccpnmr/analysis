@@ -4,6 +4,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -22,12 +23,12 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+import typing
+from ccpn.util import Common as commonUtil
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
 from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.Peak import Peak
 
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
-import typing
 
 def nmrAtomsForPeaks(peaks:typing.List[Peak], nmrAtoms:typing.List[NmrAtom], intraResidual:bool=False, doubleTolerance:bool=False):
     '''Get a set of nmrAtoms that fit to the dimensions of the
@@ -198,7 +199,7 @@ def sameAxisCodes(peaks:typing.List[Peak], dim:int):
         # axisCode = getAxisCodeForPeakDimension(peaks[0], dim)
         axisCode = peaks[0].peakList.spectrum.axisCodes[dim]
         for peak in peaks[1:]:
-            if not spectrumLib.axisCodesCompare(peak.peakList.spectrum.axisCodes[dim], axisCode):
+            if not commonUtil.axisCodesCompare(peak.peakList.spectrum.axisCodes[dim], axisCode):
                 return False
     return True
 

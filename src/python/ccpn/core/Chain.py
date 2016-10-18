@@ -23,10 +23,12 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import collections
+import typing
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
+from ccpn.core.Substance import SampleComponent
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
@@ -106,19 +108,21 @@ class Chain(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def substance(self) -> Optional[Substance]:
-    """Substance with sequence matching to Chain
-
-    If there are multiple matches, select labeling=='std'
-    or, failing that, the first found (sorting alphabetically on labeling)"""
+  def substances(self) -> Tuple[Substance, ...]:
+    """Substances matching to Chain (based on chain.compoundName)"""
     compoundName = self.compoundName
-    substances = [x for x in self.project.substances if x.name == compoundName]
+    return tuple(x for x in self.project.substances if x.name == compoundName)
 
-    # Select 'std' labeling if present
-    substances = [x for x in substances if x.labeling is None] or substances
+    # # Select 'std' labelling if present
+    # substances = [x for x in substances if x.labelling is None] or substances
+    #
+    # return substances[0] if substances else None
 
-    return substances[0] if substances else None
-
+  @property
+  def sampleComponents(self) -> Tuple[SampleComponent, ...]:
+    """SampleComponents matching to Chain (based on chain.compoundName)"""
+    compoundName = self.compoundName
+    return tuple(x for x in self.project.sampleComponents if x.name == compoundName)
 
   # CCPN functions
   def clone(self, shortName:str=None):
@@ -188,7 +192,7 @@ class Chain(AbstractWrapperObject):
     if molSystem is None:
       return []
     else:
-      return parent._wrappedData.molSystem.sortedChains()
+      return molSystem.sortedChains()
 
 
 
@@ -289,17 +293,27 @@ del _createChainFromSubstance
 
 def getter(self:Substance) -> Tuple[Chain, ...]:
 
-  apiSubstance = self._apiSubstance
-  apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, 'molecule') else None
-  if apiMolecule is None:
-    return ()
-  else:
-    data2Obj = self._project._data2Obj
-    return tuple(data2Obj[x]
-                 for x in self._project._wrappedData.molSystem.sortedChains()
-                 if x.molecule is apiMolecule)
+  name = self.name
+  return tuple(x for x in self._project.chains if x.compoundName == name)
+
+  # apiSubstance = self._apiSubstance
+  # apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, 'molecule') else None
+  # if apiMolecule is None:
+  #   return ()
+  # else:
+  #   data2Obj = self._project._data2Obj
+  #   return tuple(data2Obj[x]
+  #                for x in self._project._wrappedData.molSystem.sortedChains()
+  #                if x.molecule is apiMolecule)
 Substance.chains = property(getter, None, None,
-  "ccpn.Chains that correspond to the sequence of ccpn.Substance (if defined)"
+  "ccpn.Chains that correspond to ccpn.Substance (if defined)"
+)
+
+def getter(self:SampleComponent) -> Tuple[Chain, ...]:
+  name = self.name
+  return tuple(x for x in self._project.chains if x.compoundName == name)
+SampleComponent.chains = property(getter, None, None,
+  "ccpn.Chains that correspond to ccpn.SampleComponent (if defined)"
 )
 
 del getter

@@ -22,7 +22,8 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 from collections import OrderedDict
-from typing import Tuple, Optional, Sequence
+# from typing import Tuple, Optional, Sequence, Dict
+import typing
 
 from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
@@ -31,7 +32,7 @@ from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Spectrum import Spectrum
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib import Pid
-from ccpn.util.Constants import DEFAULT_LABELING
+from ccpn.util.Constants import DEFAULT_LABELLING
 from ccpnmodel.ccpncore.api.ccp.lims.RefSampleComponent import AbstractComponent as ApiRefComponent
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Util as coreUtil
@@ -44,7 +45,7 @@ _apiClassNameMap = {
 
 class Substance(AbstractWrapperObject):
   """A Substance is a chemical entity or material that can be added to a Sample.
-  Substances are defined by their name and labeling attributes (labeling defaults to None).
+  Substances are defined by their name and labelling attributes (labelling defaults to None).
   Renaming a Substance will also rename all SampleComponents and SpectrumHits associated with
   it, so as to preserve the link between the objects.
 
@@ -83,14 +84,14 @@ class Substance(AbstractWrapperObject):
     
   @property
   def _key(self) -> str:
-    """id string - name.labeling"""
+    """id string - name.labelling"""
     obj =  self._wrappedData
 
     name = obj.name
-    labeling = obj.labeling
-    if labeling == DEFAULT_LABELING:
-      labeling = ''
-    return Pid.createId(name, labeling)
+    labelling = obj.labeling
+    if labelling == DEFAULT_LABELLING:
+      labelling = ''
+    return Pid.createId(name, labelling)
 
   @property
   def name(self) -> str:
@@ -98,10 +99,10 @@ class Substance(AbstractWrapperObject):
     return self._wrappedData.name
 
   @property
-  def labeling(self) -> str:
-    """labeling descriptor of Substance (default is 'std')"""
+  def labelling(self) -> str:
+    """labelling descriptor of Substance (default is 'std')"""
     result = self._wrappedData.labeling
-    if result == DEFAULT_LABELING:
+    if result == DEFAULT_LABELLING:
       result = None
     #
     return result
@@ -122,13 +123,14 @@ class Substance(AbstractWrapperObject):
     - Material is a mixture, like fetal calf serum, growth medium, or standard buffer,
 
     - Composite is multiple components in fixed ratio, like a protein-ligand or multiprotein
-    complex, or (technically) a Cell containing a particular plasmid.
+      complex, or (technically) a Cell containing a particular plasmid.
+
     """
     result = self._wrappedData.className
     return _apiClassNameMap.get(result, result)
 
   @property
-  def synonyms(self) -> Tuple[str, ...]:
+  def synonyms(self) -> typing.Tuple[str, ...]:
     """Synonyms for Substance name"""
     return self._wrappedData.synonyms
 
@@ -138,7 +140,7 @@ class Substance(AbstractWrapperObject):
     self._wrappedData.synonyms = value
 
   @property
-  def userCode(self) -> Optional[str]:
+  def userCode(self) -> typing.Optional[str]:
     """User-defined compound code"""
     return self._wrappedData.userCode
 
@@ -147,7 +149,7 @@ class Substance(AbstractWrapperObject):
     self._wrappedData.userCode = value
 
   @property
-  def smiles(self) -> Optional[str]:
+  def smiles(self) -> typing.Optional[str]:
     """Smiles string - for substances that have one"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.smiles if hasattr(apiRefComponent, 'smiles') else None
@@ -162,7 +164,7 @@ class Substance(AbstractWrapperObject):
       raise TypeError( "%s type Substance has no attribute 'smiles'" %_apiClassNameMap.get(ss, ss))
 
   @property
-  def inChi(self) -> Optional[str]:
+  def inChi(self) -> typing.Optional[str]:
     """inChi string - for substances that have one"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.inChi if hasattr(apiRefComponent, 'inChi') else None
@@ -177,7 +179,7 @@ class Substance(AbstractWrapperObject):
       raise TypeError( "%s type Substance has no attribute 'inChi'" %_apiClassNameMap.get(ss, ss))
 
   @property
-  def casNumber(self) -> Optional[str]:
+  def casNumber(self) -> typing.Optional[str]:
     """CAS number string - for substances that have one"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.casNum if hasattr(apiRefComponent, 'casNum') else None
@@ -193,7 +195,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def empiricalFormula(self) -> Optional[str]:
+  def empiricalFormula(self) -> typing.Optional[str]:
     """Empirical molecular formula string - for substances that have one"""
     apiRefComponent = self._wrappedData
     return (apiRefComponent.empiricalFormula if hasattr(apiRefComponent, 'empiricalFormula')
@@ -210,7 +212,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def sequenceString(self) -> Optional[str]:
+  def sequenceString(self) -> typing.Optional[str]:
     """Molecular sequence string - set by the createPolymerSubstance function. Substances
     created by this function can be used to generate matching chains with the
     substance.createChain function
@@ -221,7 +223,7 @@ class Substance(AbstractWrapperObject):
     return apiRefComponent.seqString if hasattr(apiRefComponent, 'seqString') else None
 
   @property
-  def molecularMass(self) -> Optional[float]:
+  def molecularMass(self) -> typing.Optional[float]:
     """Molecular mass - for substances that have one"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.molecularMass if hasattr(apiRefComponent, 'molecularMass') else None
@@ -237,7 +239,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def atomCount(self) -> Optional[int]:
+  def atomCount(self) -> int:
     """Number of atoms in the molecule - for Molecular substances"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.atomCount if hasattr(apiRefComponent, 'atomCount') else None
@@ -253,7 +255,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def bondCount(self) -> Optional[int]:
+  def bondCount(self) -> int:
     """Number of bonds in the molecule - for Molecular substances"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.bondCount if hasattr(apiRefComponent, 'bondCount') else None
@@ -269,7 +271,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def ringCount(self) -> Optional[int]:
+  def ringCount(self) -> int:
     """Number of rings in the molecule - for Molecular substances"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.ringCount if hasattr(apiRefComponent, 'ringCount') else None
@@ -285,7 +287,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def hBondDonorCount(self) -> Optional[int]:
+  def hBondDonorCount(self) -> int:
     """Number of hydrogen bond donors in the molecule - for Molecular substances"""
     apiRefComponent = self._wrappedData
     return apiRefComponent.hBondDonorCount if hasattr(apiRefComponent, 'hBondDonorCount') else None
@@ -301,7 +303,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def hBondAcceptorCount(self) -> Optional[int]:
+  def hBondAcceptorCount(self) -> int:
     """Number of hydrogen bond acceptors in the molecule - for Molecular substances"""
     apiRefComponent = self._wrappedData
     return (apiRefComponent.hBondAcceptorCount if hasattr(apiRefComponent, 'hBondAcceptorCount')
@@ -318,7 +320,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def polarSurfaceArea(self) -> Optional[float]:
+  def polarSurfaceArea(self) -> typing.Optional[float]:
     """Polar surface area (in square Angstrom) of the molecule - for Molecular substances"""
     apiRefComponent = self._wrappedData
     return (apiRefComponent.polarSurfaceArea if hasattr(apiRefComponent, 'polarSurfaceArea')
@@ -335,7 +337,7 @@ class Substance(AbstractWrapperObject):
                        %_apiClassNameMap.get(ss, ss))
 
   @property
-  def logPartitionCoefficient(self) -> Optional[float]:
+  def logPartitionCoefficient(self) -> typing.Optional[float]:
     """Logarithm of the octanol-water partition coefficient (logP) - for Molecular substances"""
     apiRefComponent = self._wrappedData
     return (apiRefComponent.logPartitionCoefficient
@@ -360,24 +362,154 @@ class Substance(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
+  @property
+  def specificAtomLabelling(self) -> typing.Dict[str,typing.Dict[str,float]]:
+    """Site-specific labelling for all chains matching Substance
+    in the form of (atomId:{isotopeCode:fraction}} dictionary.
+    Note that changing the labelling for a site in one chain
+    simultaneously affects the matching site in other matching chains.
+    To modify this attribute use the functions setSpecificAtomLabelling,
+    removeSpecificAtomLabelling, clearSpecificAtomLabelling,
+    updateSpecificAtomLabelling
+
+    Example value (for two chains where the numbering of B is offset 200 from chain A):
+
+      | {'A.11.ALA.CB':{'12C':0.32, '13C':0.68},
+      | 'B.211.ALA.CB':{'12C':0.32, '13C':0.68},}"""
+
+    result = {}
+    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    if dd:
+      for chain in self.chains:
+        # NBNB this relies on residues being sorted by seqId, and so being
+        # in sequence order
+        residues = chain.residues
+        for tt, labellingDict in dd.items():
+          residueIndex, atomName = tt
+          residue = residues [residueIndex]
+          atom = residue.getAtom(atomName)
+          result[atom._id] = labellingDict.copy()
+    #
+    return result
+
+  def setSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom'], isotopeLabels:dict):
+    """Set isotopeLabels dict as labelling for atom designated by atomId.
+
+    NBNB labelling is set for the matching atom in all chains that match the Substance
+    also if the other chains have a different numbering.
+
+    isotopeLabels must be a dictionary of the form (e.g.) {'12C':0.32, '13C':0.68}
+    where the atom fractions add up to 1.0 and the isotope COdes cover the possibilities
+    for the atom."""
+
+    if isinstance(atom, str):
+      # Get Atom from id or Pid
+      ll = atom.split(Pid.PREFIXSEP, 1)
+      atom = self._project.getAtom(ll[-1])
+    if atom is None:
+      raise ValueError("Atom with ID %s does not exist" % atom)
+
+    if atom.residue.chain not in self.chains:
+      raise ValueError("Atom %s and its chain do not match the Substance" % atomId)
+
+    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    if dd is None:
+      dd =  self.ccpnInternalData['_specificAtomLabelling'] = {}
+
+    residue = atom.residue
+    residueIndex = residue.chain.residues.index(residue)
+    dd[(residueIndex, atom.name)] = isotopeLabels
+
+  def removeSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']):
+    """Remove specificAtomLabelling for atom designated by atomId
+
+    NBNB labelling is removed for the matching atom in all chains that match the Substance
+    also if the other chains have a different numbering."""
+
+    if isinstance(atom, str):
+      # Get Atom from id or Pid
+      ll = atom.split(Pid.PREFIXSEP, 1)
+      atom = self._project.getAtom(ll[-1])
+    if atom is None:
+      raise ValueError("Atom with ID %s does not exist" % atom)
+
+    if atom.residue.chain not in self.chains:
+      raise ValueError("Atom %s and its chain do not match the Substance" % atomId)
+
+    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    if dd is None:
+      dd =  self.ccpnInternalData['_specificAtomLabelling'] = {}
+
+    residue = atom.residue
+    residueIndex = residue.chain.residues.index(residue)
+    del dd[(residueIndex, atom.name)]
+
+  def getSpecificAtomLabelling(self, atom:typing.Union[str, 'Atom']) -> typing.Dict[str,float]:
+    """Get specificAtomLabelling dictionary for atom.
+    atom may be an Atom object, an atomId or an atom Pid
+
+    returns dictionary of the form e.g.
+    {'12C':0.32, '13C':0.68}"""
+
+    if isinstance(atom, str):
+      # Get Atom from id or Pid
+      ll = atom.split(Pid.PREFIXSEP, 1)
+      atom = self._project.getAtom(ll[-1])
+    if atom is None:
+      raise ValueError("Atom with ID %s does not exist" % atom)
+
+    if atom.residue.chain not in self.chains:
+      raise ValueError("Atom %s and its chain do not match the Substance" % atom)
+
+    dd = self.ccpnInternalData.get('_specificAtomLabelling')
+    if dd:
+      residue = atom.residue
+      residueIndex = residue.chain.residues.index(residue)
+      return dd.get((residueIndex, atom.name))
+
+
+  def clearSpecificAtomLabelling(self):
+    """Clear specificAtomLabelling"""
+    self.ccpnInternalData['_specificAtomLabelling'] = {}
+
+
+  def updateSpecificAtomLabelling(self, dictionary:typing.Dict[str,typing.Dict[str,float]]):
+    """Update Site-specific labelling for all chains matching Substance.
+    The input must be an (atomId:{isotopeCode:fraction}} dictionary.
+    Note that changing the labelling for a site in one chain
+    simultaneously affects the matching site in other matching chains,
+    So you should only update teh labeling for one chain.
+
+    Example value (for two chains where the numbering of B is offset 200 from chain A):
+
+      {'A.11.ALA.CB':{'12C':0.32, '13C':0.68},}
+
+      which will also affect 'B.211.ALA.CB' (if it exists)"""
+
+    for atomId, dd in dictionary.items():
+      self.setSpecificAtomLabelling(atomId, dd)
+
 
   @property
-  def sampleComponents(self) -> Tuple[SampleComponent, ...]:
+  def sampleComponents(self) -> typing.Tuple[SampleComponent, ...]:
     """SampleComponents that correspond to Substance"""
-    name = self.name
-    apiLabeling = self.labeling
-    if apiLabeling is None:
-      apiLabeling = DEFAULT_LABELING
-    apiSampleStore = self._project._apiNmrProject.sampleStore
-    data2Obj = self._project._data2Obj
-    return tuple(data2Obj[x]
-                 for y in apiSampleStore.sortedSamples()
-                 for x in y.sortedSampleComponents()
-                 if x.name == name and x.labeling == apiLabeling)
+    relativeId = self._key
+    return tuple(x for x in self._project.sampleComponents if x._key == relativeId)
+
+    # name = self.name
+    # apiLabeling = self.labelling
+    # if apiLabeling is None:
+    #   apiLabeling = DEFAULT_LABELLING
+    # apiSampleStore = self._project._apiNmrProject.sampleStore
+    # data2Obj = self._project._data2Obj
+    # return tuple(data2Obj[x]
+    #              for y in apiSampleStore.sortedSamples()
+    #              for x in y.sortedSampleComponents()
+    #              if x.name == name and x.labeling == apiLabeling)
 
 
   @property
-  def referenceSpectra(self) -> Tuple[Spectrum, ...]:
+  def referenceSpectra(self) -> typing.Tuple[Spectrum, ...]:
     """Reference Spectra acquired for Substance.
     There should be only one reference spectrum for each experiment type"""
 
@@ -397,10 +529,10 @@ class Substance(AbstractWrapperObject):
 
 
   # Implementation functions
-  def rename(self, name:str=None, labeling:str=None):
-    """Rename Substance, changing its name and/or labeling and Pid, and rename
+  def rename(self, name:str=None, labelling:str=None):
+    """Rename Substance, changing its name and/or labelling and Pid, and rename
     SampleComponents and SpectrumHits with matching names. If name is None, the existing value w
-    ill be used. Labeling 'None'  means 'Natural abundance'"""
+    ill be used. Labelling 'None'  means 'Natural abundance'"""
 
     oldName = self.name
     if name is None:
@@ -408,14 +540,14 @@ class Substance(AbstractWrapperObject):
     elif Pid.altCharacter in name:
       raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
 
-    oldLabeling = self.labeling
-    apiLabeling = labeling
-    if labeling is None:
-      apiLabeling = DEFAULT_LABELING
-    elif  Pid.altCharacter in labeling:
-        raise ValueError("Character %s not allowed in ccpn.Sample.labeling" % Pid.altCharacter)
+    oldLabelling = self.labelling
+    apiLabeling = labelling
+    if labelling is None:
+      apiLabeling = DEFAULT_LABELLING
+    elif  Pid.altCharacter in labelling:
+        raise ValueError("Character %s not allowed in ccpn.Sample.labelling" % Pid.altCharacter)
 
-    self._startFunctionCommandBlock('rename', name, labeling)
+    self._startFunctionCommandBlock('rename', name, labelling)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -450,8 +582,8 @@ class Substance(AbstractWrapperObject):
         undo.decreaseBlocking()
       self._project._appBase._endCommandBlock()
 
-    undo.newItem(self.rename, self.rename, undoArgs=(oldName,oldLabeling),
-                 redoArgs=(name, labeling,))
+    undo.newItem(self.rename, self.rename, undoArgs=(oldName,oldLabelling),
+                 redoArgs=(name, labelling,))
 
 
   @classmethod
@@ -465,11 +597,11 @@ class Substance(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newSubstance(self:Project, name:str, labeling:str=None, substanceType:str='Molecule',
+def _newSubstance(self:Project, name:str, labelling:str=None, substanceType:str='Molecule',
                   userCode:str=None, smiles:str=None, inChi:str=None, casNumber:str=None,
                   empiricalFormula:str=None, molecularMass:float=None, comment:str=None,
-                  synonyms:Sequence[str]=(), atomCount:int=None, bondCount:int=None,
-                  ringCount:int=None, hBondDonorCount:int=None, hBondAcceptorCount:int=None,
+                  synonyms:typing.Sequence[str]=(), atomCount:int=0, bondCount:int=0,
+                  ringCount:int=0, hBondDonorCount:int=0, hBondAcceptorCount:int=0,
                   polarSurfaceArea:float=None, logPartitionCoefficient:float=None
                  ) -> Substance:
   """Create new substance WITHOUT storing the sequence internally
@@ -477,32 +609,32 @@ def _newSubstance(self:Project, name:str, labeling:str=None, substanceType:str='
 
   ADVANCED alternatives are 'Cell' and 'Material'"""
 
-  if labeling is None:
-    apiLabeling = DEFAULT_LABELING
+  if labelling is None:
+    apiLabeling = DEFAULT_LABELLING
   else:
-    apiLabeling = labeling
+    apiLabeling = labelling
 
   # Default values for 'new' function, as used for echoing to console
   defaults = OrderedDict(
-    (('labeling',None), ('substanceType', 'Molecule'),
+    (('labelling',None), ('substanceType', 'Molecule'),
      ('userCode',None), ('smiles',None), ('inChi', None),
      ('casNumber',None), ('empiricalFormula',None), ('molecularMass', None),
-     ('comment',None), ('synonyms',()), ('atomCount', None),
-     ('bondCount',None), ('ringCount',None), ('hBondDonorCount', None),
-     ('hBondAcceptorCount',None), ('polarSurfaceArea',None), ('logPartitionCoefficient', None)
+     ('comment',None), ('synonyms',()), ('atomCount', 0),
+     ('bondCount',0), ('ringCount',0), ('hBondDonorCount', 0),
+     ('hBondAcceptorCount',0), ('polarSurfaceArea',None), ('logPartitionCoefficient', None)
     )
   )
 
-  for ss in (name, labeling):
+  for ss in (name, labelling):
     if ss and Pid.altCharacter in ss:
       raise ValueError("Character %s not allowed in ccpn.Substance id: %s.%s" %
-                       (Pid.altCharacter, name, labeling))
+                       (Pid.altCharacter, name, labelling))
 
   apiNmrProject = self._wrappedData
   apiComponentStore = apiNmrProject.sampleStore.refSampleComponentStore
 
   if apiComponentStore.findFirstComponent(name=name, labeling=apiLabeling) is not None:
-    raise ValueError("Substance %s.%s already exists" % (name, labeling))
+    raise ValueError("Substance %s.%s already exists" % (name, labelling))
 
   else:
     oldSubstance = apiComponentStore.findFirstComponent(name=name)
@@ -553,7 +685,7 @@ def _newSubstance(self:Project, name:str, labeling:str=None, substanceType:str='
 Project.newSubstance = _newSubstance
 del _newSubstance
 
-def _fetchNefSubstance(self:Project, sequence:Sequence[dict], name:str=None):
+def _fetchNefSubstance(self:Project, sequence:typing.Sequence[dict], name:str=None):
   """Fetch Substance that matches sequence of NEF rows and/or name"""
 
   defaults = {'name':None}
@@ -584,16 +716,17 @@ def _fetchNefSubstance(self:Project, sequence:Sequence[dict], name:str=None):
 Project.fetchNefSubstance = _fetchNefSubstance
 del _fetchNefSubstance
 
-def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labeling:str=None,
-              userCode:str=None, smiles:str=None, synonyms:Sequence[str]=(),comment:str=None,
-              startNumber:int=1, molType:str=None, isCyclic:bool=False) -> Substance:
+def _createPolymerSubstance(self:Project, sequence:typing.Sequence[str], name:str,
+                            labelling:str=None, userCode:str=None, smiles:str=None,
+                            synonyms:typing.Sequence[str]=(),comment:str=None,
+                            startNumber:int=1, molType:str=None, isCyclic:bool=False) -> Substance:
   """Make new Substance from sequence of residue codes, using default linking and variants
 
   NB: For more complex substances, you must use advanced, API-level commands.
 
   :param Sequence sequence: string of one-letter codes or sequence of residueNames
   :param str name: name of new substance
-  :param str labeling: labeling for new substance. Optional - None means 'natural abundance'
+  :param str labelling: labelling for new substance. Optional - None means 'natural abundance'
   :param str userCode: user code for new substance (optional)
   :param str smiles: smiles string for new substance (optional)
   :param Sequence[str] synonyms: synonyms for Substance name
@@ -604,14 +737,14 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
   """
 
-  if labeling is None:
-    apiLabeling = DEFAULT_LABELING
+  if labelling is None:
+    apiLabeling = DEFAULT_LABELLING
   else:
-    apiLabeling = labeling
+    apiLabeling = labelling
 
   defaults = OrderedDict(
     (
-      ('labeling', None), ('userCode', None), ('smiles', None),
+      ('labelling', None), ('userCode', None), ('smiles', None),
       ('synonyms', ()), ('comment', None), ('startNumber', 1), ('molType', None),
       ('isCyclic', False)
     )
@@ -624,7 +757,7 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 
   elif apiNmrProject.sampleStore.refSampleComponentStore.findFirstComponent(name=name,
         labeling=apiLabeling) is not None:
-    raise ValueError("Substance %s.%s already exists" % (name, labeling))
+    raise ValueError("Substance %s.%s already exists" % (name, labelling))
 
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
     raise ValueError("Molecule name %s is already in use for API Molecule")
@@ -656,16 +789,16 @@ def _createPolymerSubstance(self:Project, sequence:Sequence[str], name:str, labe
 Project.createPolymerSubstance = _createPolymerSubstance
 del _createPolymerSubstance
 
-def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
-  """get or create Substance with given name and labeling."""
+def _fetchSubstance(self:Project, name:str, labelling:str=None) -> Substance:
+  """get or create Substance with given name and labelling."""
 
 
-  if labeling is None:
-    apiLabeling = DEFAULT_LABELING
+  if labelling is None:
+    apiLabeling = DEFAULT_LABELLING
   else:
-    apiLabeling = labeling
+    apiLabeling = labelling
 
-  values = {'labeling':labeling}
+  values = {'labelling':labelling}
 
   apiRefComponentStore= self._apiNmrProject.sampleStore.refSampleComponentStore
   apiResult = apiRefComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
@@ -675,7 +808,7 @@ def _fetchSubstance(self:Project, name:str, labeling:str=None) -> Substance:
     if apiResult:
       result = self._data2Obj[apiResult]
     else:
-      result = self.newSubstance(name=name, labeling=labeling)
+      result = self.newSubstance(name=name, labelling=labelling)
   finally:
     self._project._appBase._endCommandBlock()
   return result
@@ -684,14 +817,18 @@ Project.fetchSubstance = _fetchSubstance
 del _fetchSubstance
 
 
-def getter(self:SampleComponent) -> Optional[Substance]:
-  apiRefComponentStore = self._parent._apiSample.sampleStore.refSampleComponentStore
-  apiComponent = apiRefComponentStore.findFirstComponent(name=self.name,
-                                                         labeling=self.labeling or DEFAULT_LABELING)
-  if apiComponent is None:
-    return None
-  else:
-    return self._project._data2Obj[apiComponent]
+def getter(self:SampleComponent) -> typing.Optional[Substance]:
+
+  return self._project.getSubstance(self._key)
+
+  # relativeId = '.'.join(Pid.remapSeparators(self.na) for x in (self))
+  # apiRefComponentStore = self._parent._apiSample.sampleStore.refSampleComponentStore
+  # apiComponent = apiRefComponentStore.findFirstComponent(name=self.name,
+  #                                                        labeling=self.labelling or DEFAULT_LABELLING)
+  # if apiComponent is None:
+  #   return None
+  # else:
+  #   return self._project._data2Obj[apiComponent]
 #
 SampleComponent.substance = property(getter, None, None,
                                      "Substance corresponding to SampleComponent")

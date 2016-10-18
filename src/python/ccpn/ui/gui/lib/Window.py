@@ -1,13 +1,13 @@
 __author__ = 'simon1'
 
-from ccpn.core.ChemicalShift import ChemicalShift
-from ccpn.core.NmrAtom import NmrAtom
-from ccpn.core.Peak import Peak
-from ccpn.core.Project import Project
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
-import typing
-from ccpn.ui.gui.modules.GuiStrip import GuiStrip
-from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
+# from ccpn.core.ChemicalShift import ChemicalShift
+# from ccpn.core.NmrAtom import NmrAtom
+# from ccpn.core.Peak import Peak
+# from ccpn.core.Project import Project
+# from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
+# import typing
+# from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+# from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 MODULE_DICT = {
   'SEQUENCE GRAPH'           : 'showSequenceGraph',

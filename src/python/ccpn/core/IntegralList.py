@@ -132,16 +132,19 @@ class IntegralList(AbstractWrapperObject):
 
 # Connections to parents:
 
-def _newIntegralList(self:Spectrum, title:str=None, comment:str=None) -> IntegralList:
+def _newIntegralList(self:Spectrum, title:str=None, symbolColour:str=None,
+                     textColour:str=None, comment:str=None) -> IntegralList:
   """Create new IntegralList within Spectrum"""
 
-  defaults = collections.OrderedDict((('title', None), ('comment', None)))
+  defaults = collections.OrderedDict((('title', None), ('comment', None),
+                                      ('symbolColour',None), ('textColour',None)))
 
   apiDataSource = self._wrappedData
   self._startFunctionCommandBlock('newIntegralList', values=locals(), defaults=defaults,
                                   parName='newIntegralList')
   try:
-    obj = apiDataSource.newPeakList(name=title, details=comment, dataType='Integral')
+    obj = apiDataSource.newPeakList(name=title, details=comment, dataType='Integral',
+                                    symbolColour=symbolColour, textColour=textColour)
   finally:
     self._project._appBase._endCommandBlock()
   return self._project._data2Obj.get(obj)

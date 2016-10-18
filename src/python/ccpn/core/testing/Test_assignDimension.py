@@ -1,8 +1,8 @@
+from ccpn.util import Common as commonUtil
+
 __author__ = 'simon1'
 
 from ccpn.core.testing.WrapperTesting import WrapperTesting
-
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as libSpectrum
 
 
 class Test_makeNmrAtom(WrapperTesting):
@@ -94,7 +94,7 @@ class Test_chemicalShift(WrapperTesting):
 
   def test_assignDimension(self):
     peaks = self.peakList.pickPeaksNd([[7.0, 7.2], [111.75, 112.2]])
-    peaks[0].assignDimension(axisCode=libSpectrum.axisCodeMatch('N', self.spectrum.axisCodes),
+    peaks[0].assignDimension(axisCode=commonUtil.axisCodeMatch('N', self.spectrum.axisCodes),
                              value=self.atom)
     # Undo and redo all operations
     self.assertIsNotNone(self.shiftList.getChemicalShift(self.atom.id))

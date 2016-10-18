@@ -51,7 +51,7 @@ class LoggingTest(CoreTesting):
 
     logLine = logLines[0].rstrip()
     n = logLine.rindex(':')
-    msg = logLine[n+1:]
+    msg = logLine[n+1:].strip()
 
     assert msg == message1, '"%s" versus "%s"' % (msg, message1)
 

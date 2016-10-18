@@ -548,8 +548,7 @@ class Framework:
   #########################################    Start setup Menus      ############################
 
   def setupMenus(self):
-    '''
-    Setup the menu specification.
+    """Setup the menu specification.
 
     The menus are specified by a list of lists (actually, an iterable of iterables, but the term
     ‘list’ will be used here to mean any iterable).  Framework provides 7 menus: Project, Spectrum,
@@ -560,71 +559,72 @@ class Framework:
     Menu specification lists are composed of two items, the first being a string which is the menu’s
     title, the second is a list of sub-menu items.  Each item can be zero, two or three items long.
     A zero-length list indicates a separator.  If the list is length two and the second item is a
-    list, then it specifies a sub-menu in a recursive manner.  If the list is length two and the second
-    item is callable, it specifies a menu action with the first item specifying the label and the second
-    the callable that is triggered when the menu item is selected.  If the list is length three, it is
-    treated as a menu item specification, with the third item a list of keyword, value pairs.
+    list, then it specifies a sub-menu in a recursive manner.  If the list is length two and the
+    second item is callable, it specifies a menu action with the first item specifying the label
+    and the second the callable that is triggered when the menu item is selected.  If the list is
+    length three, it is treated as a menu item specification, with the third item a list of keyword,
+    value pairs.
 
     The examples below may make this more clear…
 
     Create a menu called ‘Test’ with two items and a separator:
 
     | - Test
-        |- Item One
-        |- ------
-        |- Item Two
+    |   | - Item One
+    |   | - ------
+    |   | - Item Two
 
     Where clicking on ‘Item One’ calls method self.itemOneMethod and clicking on ‘Item Two’
     calls self.itemTwoMethod
 
-        def setupMenus(self):
-          menuSpec = (‘Test’, [(‘Item One’, self.itemOneMethod),
-                               (),
-                               (‘Item Two’, self.itemTwoMethod),
-                              ]
-          self.addApplicationMenuSpec(menuSpec)
+    |    def setupMenus(self):
+    |      menuSpec = (‘Test’, [(‘Item One’, self.itemOneMethod),
+    |                           (),
+    |                           (‘Item Two’, self.itemTwoMethod),
+    |                          ]
+    |      self.addApplicationMenuSpec(menuSpec)
 
     
     More complicated menus are possible.  For example, to create the following menu
 
     | - Test
-        |- Item A     ia
-        |- ------
-        |- Submenu B
-           |- Item B1
-           |- Item B2
-        |- Item C     id
+    |   | - Item A     ia
+    |   | - ------
+    |   | - Submenu B
+    |      | - Item B1
+    |      | - Item B2
+    |   | - Item C     id
 
     where Item A can be activated using the two-key shortcut ‘ia’,
     Submenu B contains two static menu items, B1 and B2
     Submenu item B2 is checkable, but not checked by default
     Item C is disabled by default and has a shortcut of ‘ic’
 
-        def setupMenus(self):
-          subMenuSpecB = [(‘Item B1’, self.itemB1),
-                          (‘Item B2’, self.itemB2, [(‘checkable’, True),
-                                                    (‘checked’, False)])
-                         ]
-
-          menuSpec = (‘Test’, [(‘Item A’, self.itemA, [(‘shortcut’, ‘ia’)]),
-                               (),
-                               (‘Submenu B’, subMenuB),
-                               (‘Item C’, self.itemA, [(‘shortcut’, ‘ic’),
-                                                       (‘enabled’, False)]),
-                              ]
-          self.addApplicationMenuSpec(menuSpec)
+    |   def setupMenus(self):
+    |     subMenuSpecB = [(‘Item B1’, self.itemB1),
+    |                     (‘Item B2’, self.itemB2, [(‘checkable’, True),
+    |                                               (‘checked’, False)])
+    |                    ]
+    |
+    |     menuSpec = (‘Test’, [(‘Item A’, self.itemA, [(‘shortcut’, ‘ia’)]),
+    |                          (),
+    |                          (‘Submenu B’, subMenuB),
+    |                          (‘Item C’, self.itemA, [(‘shortcut’, ‘ic’),
+    |                                                  (‘enabled’, False)]),
+    |                         ]
+    |     self.addApplicationMenuSpec(menuSpec)
 
 
     If we’re using the PyQt GUI, we can get the Qt action representing Item B2 somewhere in our code
     (for example, to change the checked status,) via:
 
-        action = application.ui.mainWindow.getMenuAction(‘Test->Submenu B->Item B2’)
-        action.setChecked(True)
+    |   action = application.ui.mainWindow.getMenuAction(‘Test->Submenu B->Item B2’)
+    |   action.setChecked(True)
 
     To see how to add items dynamically, see clearRecentProjects in this class and
     _fillRecentProjectsMenu in GuiMainWindow
 
-    '''
+    """
     self._menuSpec = ms = []
     # TODO: remove QKeySequence
 
@@ -802,7 +802,7 @@ class Framework:
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:
         sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
-        project = self._loafNefFile(path)
+        project = self._loadNefFile(path)
         project._resetUndo(debug=_DEBUG)
       #
       return project
@@ -810,7 +810,7 @@ class Framework:
     else:
       sys.stderr.write('==> Could not recognise "%s" as a project\n' % path)
 
-  def _loafNefFile(self, path:str) -> Project:
+  def _loadNefFile(self, path:str) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
     # mainWindow = None

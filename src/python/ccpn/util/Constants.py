@@ -28,8 +28,8 @@ amountUnits = ('L', 'g', 'mole')
 #  Units allowed for concentrations (e.g. SampleComponents)
 concentrationUnits = ('Molar', 'g/L', 'L/L', 'mol/mol', 'g/g')
 
-# Default name for natural abundance labeling - given as None externally
-DEFAULT_LABELING = '_NATURAL_ABUNDANCE'
+# Default name for natural abundance labelling - given as None externally
+DEFAULT_LABELLING = '_NATURAL_ABUNDANCE'
 
 # Default parameters - 10Hz/pt, 0.1ppm/point for 1H; 10 Hz/pt, 1ppm/pt for 13C
 # NB this is in order to give simple numbers. it does NOT match the gyromagnetic ratios

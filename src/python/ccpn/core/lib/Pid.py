@@ -276,6 +276,9 @@ class Pid(str):
 
          return PREFIXSEP in text and text[0] != PREFIXSEP
 
+    # NBNB having a property called 'str' confuses Sphinx.
+    # It is probably a bad idea on general grounds
+
     @property
     def str(self):
         """
@@ -398,8 +401,7 @@ class Pid(str):
     #end def
 
     def modify(self, index:int, newId:object, type:str=None) -> 'Pid':
-        """
-        Return new pid with position index modified by newId
+        """Return new pid with position index modified by newId
         """
         # parts = self._split()
         # if index+1 >= len(parts):

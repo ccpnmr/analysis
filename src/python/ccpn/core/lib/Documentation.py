@@ -65,7 +65,7 @@ def refreshSphinxDocumentation():
   precommand = ['sphinx-apidoc']
   # documentation target - filled in below
   precommand.extend(('-o', 'output TBD'))
-  # PUt module documentation before submodule documentation:
+  # Put module documentation before submodule documentation:
   precommand.append('--module-first')
   # Project name header:
   precommand.extend(('-A', Version.authors))

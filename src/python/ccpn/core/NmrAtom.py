@@ -35,7 +35,7 @@ from ccpn.core.lib.Util import AtomIdTuple
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 from ccpnmodel.ccpncore.lib import Constants
 from ccpnmodel.ccpncore.lib import Util as modelUtil
-from ccpnmodel.ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
+from ccpn.util.Common import name2IsotopeCode
 
 
 class NmrAtom(AbstractWrapperObject):
@@ -105,6 +105,15 @@ class NmrAtom(AbstractWrapperObject):
   def serial(self) -> int:
     """NmrAtom serial number - set at creation and unchangeable"""
     return self._wrappedData.serial
+
+  @property
+  def comment(self) -> str:
+    """Free-form text comment"""
+    return self._wrappedData.details
+
+  @comment.setter
+  def comment(self, value:str):
+    self._wrappedData.details = value
 
   @property
   def atom(self) -> Atom:
@@ -345,7 +354,8 @@ Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned
 del getter
 del setter
     
-def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom:
+def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None,
+                comment:str=None) -> NmrAtom:
   """Create new NmrAtom within NmrResidue. If name is None, use default name
   (of form e.g. 'H@211', 'N@45', ...)"""
   nmrProject = self._project._wrappedData
@@ -397,6 +407,8 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None) -> NmrAtom
   dd = {'resonanceGroup':resonanceGroup, 'isotopeCode':isotopeCode}
   if serial is None:
     dd['name'] = name
+  if comment is None:
+    dd['details'] = name
 
   self._startFunctionCommandBlock('newNmrAtom', values=locals(), defaults=defaults,
                                   parName='newNmrAtom')
@@ -422,7 +434,7 @@ def _fetchNmrAtom(self:NmrResidue, name:str):
   # resonanceGroup = self._wrappedData
   self._startFunctionCommandBlock('fetchNmrAtom', name, parName='newNmrAtom')
   try:
-    self.getNmrAtom(name.translate(Pid.remapSeparators))
+    # self.getNmrAtom(name.translate(Pid.remapSeparators))
     result = (self.getNmrAtom(name.translate(Pid.remapSeparators)) or
               self.newNmrAtom(name=name))
     # result = (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or

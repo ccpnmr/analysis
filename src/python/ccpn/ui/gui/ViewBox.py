@@ -45,6 +45,7 @@ By Mouse button:
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -66,9 +67,9 @@ import sys
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 from pyqtgraph.Point import Point
+from  ccpn.util import Common as commonUtil
 
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 from ccpn.util.Logging import getLogger
 logger = getLogger()
@@ -516,7 +517,7 @@ class ViewBox(pg.ViewBox):
             stripAxisCodes = self.current.strip.axisCodes
             sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
 
-            remapIndices = spectrumLib._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+            remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
             for n, axisCode in enumerate(spectrumAxisCodes):
               # idx = stripAxisCodes.index(axisCode)
               idx = remapIndices[n]

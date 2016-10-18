@@ -1,6 +1,6 @@
+from ccpn.util import Common as commonUtil
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 import typing
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 
@@ -30,7 +30,8 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
             strip.resetAxisRange(stripAxisIndex)
           if widths[ii] == 'default' and stripAxisIndex < 2:
             # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
-            if spectrumLib.name2IsotopeCode(axisCode) == '13C' or spectrumLib.name2IsotopeCode(axisCode) == '15N':
+            if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
+                commonUtil.name2IsotopeCode(axisCode) == '15N'):
               strip.orderedAxes[stripAxisIndex].width = 5
             else:
               strip.orderedAxes[stripAxisIndex].width = 0.5
@@ -43,7 +44,7 @@ def matchAxesAndNmrAtoms(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom]):
   for axis in strip.orderedAxes:
     shiftDict[axis.code] = []
     for atom in nmrAtoms:
-      if atom._apiResonance.isotopeCode == spectrumLib.name2IsotopeCode(axis.code):
+      if atom._apiResonance.isotopeCode == commonUtil.name2IsotopeCode(axis.code):
         shift = shiftList.getChemicalShift(atom.id)
         if shift is not None and isPositionWithinfBounds(strip, shift, axis):
           shiftDict[axis.code].append(shift)

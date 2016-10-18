@@ -3,6 +3,7 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -26,15 +27,15 @@ import collections
 import numpy
 from numpy import argwhere
 from scipy.ndimage import maximum_filter, minimum_filter
+from ccpn.util import Common as commonUtil
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import PeakList as ApiPeakList
 
 from ccpnmodel.ccpncore.lib import Util as modelUtil
-from ccpnmodel.ccpncore.lib.CopyData import copySubTree
+# from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import fitExistingPeakList
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 from ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList import pickNewPeaks
 
 class PeakList(AbstractWrapperObject):
@@ -386,7 +387,7 @@ class PeakList(AbstractWrapperObject):
 
     codes = list(positionCodeDict.keys())
     positions = [positionCodeDict[code] for code in codes]
-    axisCodeMapping = spectrumLib._axisCodeMapIndices(codes, self.spectrum.axisCodes)
+    axisCodeMapping = commonUtil._axisCodeMapIndices(codes, self.spectrum.axisCodes)
     tolerances = self.spectrum.assignmentTolerances
     limits = self.spectrum.spectrumLimits
     selectedRegion = []

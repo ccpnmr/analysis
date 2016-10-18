@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 
 import collections
 import typing
+import operator
 
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
@@ -222,8 +223,8 @@ class NmrChain(AbstractWrapperObject):
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
-    """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
-    return parent._wrappedData.sortedNmrChains()
+    """get wrappedData (Nmr.DataSources) for all NmrChain children of parent Project"""
+    return sorted(parent._wrappedData.nmrChains, key=operator.attrgetter('code'))
 
 
 def getter(self:Chain) -> NmrChain:

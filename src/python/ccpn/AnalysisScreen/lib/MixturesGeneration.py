@@ -121,7 +121,7 @@ def _createSamples(project, mixtures, minDistance):
     sample = project.newSample(name=str(mixtureName))
     sample.isVirtual = True
     # for compoundName in compoundNames:
-    #   newSampleComponent = sample.newSampleComponent(name=(str(compoundName)+'-1'), labeling='H')
+    #   newSampleComponent = sample.newSampleComponent(name=(str(compoundName)+'-1'), labelling='H')
 
     _setMixtureScores(mixtureCompounds, sample)
     _setSampleComponentScores(project, sample, mixtureCompounds, minDistance)

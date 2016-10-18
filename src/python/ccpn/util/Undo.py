@@ -320,7 +320,7 @@ class Undo(deque):
         raise
       self.clear()
     finally:
-      # Addded by Rasmus March 2015. Surely we need to reset self._blocked?
+      # Added by Rasmus March 2015. Surely we need to reset self._blocked?
       self._blocked = False
 
   def clear(self):

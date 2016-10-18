@@ -24,41 +24,40 @@ __version__ = "$Revision$"
 import datetime
 import json
 import os
-import sys
 from functools import partial
 
 from PyQt4 import QtGui, QtCore
 from PyQt4.QtGui import QKeySequence
 
-from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
-
-from ccpn.core.PeakList import PeakList
+# from ccpn.AnalysisAssign.modules.AtomSelector import AtomSelector
+#
+# from ccpn.core.PeakList import PeakList
 
 from ccpn.util.Svg import Svg
 
-from ccpn.framework.update.UpdatePopup import UpdatePopup
-from ccpn.ui.gui.modules.DataPlottingModule import DataPlottingModule
-from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
+# from ccpn.framework.update.UpdatePopup import UpdatePopup
+# from ccpn.ui.gui.modules.DataPlottingModule import DataPlottingModule
+# from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 from ccpn.ui.gui.modules.GuiWindow import GuiWindow
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
-from ccpn.ui.gui.modules.NotesEditor import NotesEditor
-from ccpn.ui.gui.modules.PeakTable import PeakTable
-from ccpn.ui.gui.modules.SequenceModule import SequenceModule
-from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
-from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
+# from ccpn.ui.gui.modules.NotesEditor import NotesEditor
+# from ccpn.ui.gui.modules.PeakTable import PeakTable
+# from ccpn.ui.gui.modules.SequenceModule import SequenceModule
+# from ccpn.ui.gui.popups.FeedbackPopup import FeedbackPopup
+# from ccpn.ui.gui.popups.PreferencesPopup import PreferencesPopup
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.Action import Action
-from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
-from ccpn.ui.gui.widgets.Module import CcpnModule
+# from ccpn.ui.gui.widgets.CcpnWebView import CcpnWebView
+# from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.IpythonConsole import IpythonConsole
 from ccpn.ui.gui.widgets.Menu import Menu, MenuBar
 from ccpn.ui.gui.widgets.SideBar import SideBar
-from ccpnmodel.ccpncore.lib.Io import Api as apiIo
-from ccpn.util import Path
+# from ccpnmodel.ccpncore.lib.Io import Api as apiIo
+# from ccpn.util import Path
 from ccpn.util.Common import uniquify
-from ccpn.framework.Translation import translator
+# from ccpn.framework.Translation import translator
 
 
 class GuiMainWindow(QtGui.QMainWindow, GuiWindow):

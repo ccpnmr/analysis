@@ -802,7 +802,7 @@ class NmrResidue(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
     if parent.isConnected:
-      # for conected NmrChains you keep the order
+      # for connected NmrChains you keep the order
       return parent._wrappedData.resonanceGroups
     else:
       ll = list((x.sequenceCode, x) for x in parent._wrappedData.resonanceGroups)
@@ -848,7 +848,8 @@ del setter
 
 def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:str=None,
                    comment:str=None) -> NmrResidue:
-  """Create new NmrResidue within NmrChain"""
+  """Create new NmrResidue within NmrChain.
+  If NmrChain is connected, append the new NmrResidue to the end of the stretch."""
 
   originalSequenceCode = sequenceCode
 

@@ -26,10 +26,9 @@ import datetime
 from typing import Sequence, Optional
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
-from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import NmrConstraintStore as ApiNmrConstraintStore
 from ccpnmodel.ccpncore.api.ccp.nmr.NmrConstraint import FixedResonance as ApiFixedResonance
-from ccpnmodel.ccpncore.lib.spectrum.Spectrum import name2IsotopeCode
+from ccpn.util.Common import name2IsotopeCode
 from ccpn.core.lib import Pid
 
 
@@ -172,14 +171,15 @@ class DataSet(AbstractWrapperObject):
 
 def _newDataSet(self:Project, title:str=None, programName:str=None, programVersion:str=None,
                 dataPath:str=None, creationDate:datetime.datetime=None, uuid:str=None,
-                comment:str=None, serial:int=None) -> DataSet:
+                comment:str=None) -> DataSet:
+                # comment:str=None, serial:int=None) -> DataSet:
   """Create new DataSet"""
 
   defaults = collections.OrderedDict((('title', None), ('programName', None),
                                      ('programVersion', None), ('dataPath', None),
-                                     ('creationDate', None), ('uuid', None), ('comment', None),
-                                      ('serial',None))
-  )
+                                     ('creationDate', None), ('uuid', None), ('comment', None)
+                                      # ('serial',None)
+  ))
   
   nmrProject = self._wrappedData
   self._startFunctionCommandBlock('newDataSet', values=locals(), defaults=defaults,
@@ -195,13 +195,13 @@ def _newDataSet(self:Project, title:str=None, programName:str=None, programVersi
                                                                      uuid=uuid,
                                                                      details=comment)
     result = self._data2Obj.get(newApiNmrConstraintStore)
-    if serial is not None:
-      try:
-        modelUtil.resetSerial(newApiNmrConstraintStore, serial, 'nmrConstraintStores')
-      except ValueError:
-        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
-                                     %(result, serial))
-      result._finaliseAction('rename')
+    # if serial is not None:
+    #   try:
+    #     modelUtil.resetSerial(newApiNmrConstraintStore, serial, 'nmrConstraintStores')
+    #   except ValueError:
+    #     self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+    #                                  %(result, serial))
+    #   result._finaliseAction('rename')
   finally:
     self._project._appBase._endCommandBlock()
   return result

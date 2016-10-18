@@ -108,7 +108,7 @@ def assignedAtomCount(chain):
           else:
             # Wilcard atom, e.g. Ser HB% or Val HG% (with two components)
             count += componentCount
-            
+
 
   #
   return count

@@ -26,23 +26,11 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
 from ccpn.core.Project import Project
-# from ccpn.core.Spectrum import Spectrum
-
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import DataSource as ApiDataSource
-
-# from ccpn.core.lib.Pid import Pid
 from typing import Sequence
-
 from ccpn.ui.gui.widgets.Icon import Icon
-
 from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
-# from ccpn.ui.gui.modules.spectrumItems import GuiPeakListView
-# from ccpn.ui.gui.modules.GuiStrip1d import GuiStrip1d
-# from ccpn.ui.gui.widgets.VerticalLabel import VerticalLabel
-
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import SpectrumView as ApiSpectrumView
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripSpectrumView as ApiStripSpectrumView
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import StripPeakListView as ApiStripPeakListView
 
 
 

@@ -21,24 +21,17 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-# from ccpn.core.lib.spectrum import Spectrum
 
 __author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 
+import typing
 from ccpn.ui.gui.widgets import MessageDialog
-
-
-# from pyqtgraph.modulearea import DockArea
 from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
-# from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
-
 from ccpn.core.lib.AssignmentLib import propagateAssignments
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
-import typing
 from ccpn.ui.gui.lib.SpectrumDisplay import navigateToPeakPosition
-
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
 

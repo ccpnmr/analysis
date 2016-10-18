@@ -337,7 +337,7 @@ class Project(AbstractWrapperObject):
     obj.rename(*names)
 
   def execute(self, pid, funcName, *params, **kwparams):
-    """Get the object identified by pid, execute object.funcName(*params, **kwparams)
+    """Get the object identified by pid, execute object.funcName(\*params, \*\*kwparams)
     and return the result"""
 
     # NBNB TODO - probably not useful - remove?
@@ -571,7 +571,7 @@ class Project(AbstractWrapperObject):
                         notifier:typing.Callable):
     """register copy of notifier for a new className and target.
     Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
-     interface matches the action"""
+    interface matches the action"""
     if target in self._notifierActions:
       tt = (className, target)
     else:
@@ -636,8 +636,11 @@ class Project(AbstractWrapperObject):
     """Execute accumulated notifiers and resume immediate notifier execution"""
     return
     # TODO suspension temporarily disabled
-    self._notificationSuspension -= 1
-    if self._notificationSuspension <= 0:
+    if self._notificationSuspension > 1:
+      self._notificationSuspension -= 1
+    else:
+      # Should not be necessary, but in this way we never get below 0 no matter what errors happen
+      self._notificationSuspension = 0
       scheduledNotifiers = set()
       executeNotifications = []
       pendingNotifications = self._pendingNotifications
@@ -828,7 +831,7 @@ class Project(AbstractWrapperObject):
 
   # Library functions
 
-  def loadData(self, path:str) -> (list,None):
+  def loadData(self, path:str) -> typing.Optional[typing.List]:
     """Load data from path, determining type first."""
 
     dataType, subType, usePath = ioFormats.analyseUrl(path)

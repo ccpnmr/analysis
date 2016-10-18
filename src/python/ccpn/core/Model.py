@@ -205,7 +205,7 @@ del _newModel
 
 # Notifiers:
 
-# Must be done with API notifiers as it rewuires a predelete notifier.
+# Must be done with API notifiers as it requires a predelete notifier.
 def _flushCachedData(project:Project, apiModel:ApiModel):
   """Flush cached data to ensure up-to-date data are saved"""
   structureEnsemble = project._data2Obj[apiModel].structureEnsemble

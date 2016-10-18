@@ -68,9 +68,9 @@ class SortingData(WrapperTesting):
                    '#11+1',  '#105', '@-11', '@-2', '@-1', '@0', '@1', '@2', '@11', '@-', '@@a',
                    '@A']
 
-  atomNames =  ['C', 'C@2', 'CA', 'CB', 'CD', 'CD1', 'CD2', 'CD%', 'CD*','CDX', 'CDY',
+  atomNames =  ['C', 'C@2', 'CA', 'CB', 'CD', 'CD1', 'CD2', 'CD%', 'CD*','CDx', 'CDy',
                 'H', 'H1', 'H2', 'H3', 'H#', 'H%', 'H*',  'H@1', 'H@2', 'H@15', 'HG', 'HG1', 'HG1%',
-                'HG2', 'HG3', 'HG%', 'HG*', 'HGX', 'HGY', ]
+                'HG2', 'HG3', 'HG%', 'HG*', 'HGx', 'HGy', ]
 
   tuples = [(1,'a'), ('1', 'b')]
 

@@ -208,7 +208,7 @@ class FloatArrayEntry(FloatEntry):
     texts = [FloatEntry.convertInput(self, x) for x in values]
     return SEPARATOR.join(texts)
 
-class LabeledEntry(Frame):
+class LabelledEntry(Frame):
 
   def __init__(self, parent, labelText, entryText='', callback=None, maxLength=32,  tipText=None, **kw):  
     
@@ -234,7 +234,7 @@ class LabeledEntry(Frame):
 
     self.entry.set(text)
 
-class LabeledIntEntry(LabeledEntry):
+class LabelledIntEntry(LabelledEntry):
 
   def __init__(self, parent, labelText, entryText='', callback=None,
                minValue=-MAXINT, maxValue=MAXINT,  tipText=None, **kw):  
@@ -246,7 +246,7 @@ class LabeledIntEntry(LabeledEntry):
                           maxValue, tipText=tipText, grid=(0,1))
 
 
-class LabeledFloatEntry(LabeledEntry):
+class LabelledFloatEntry(LabelledEntry):
 
   def __init__(self, parent, labelText, entryText='', callback=None,
                minValue=-MAXINT, maxValue=MAXINT, decimals=4, tipText=None, **kw):  
@@ -283,11 +283,11 @@ if __name__ == '__main__':
   e = FloatArrayEntry(window, [1,2,4], callback, decimals=2)
   e.set([1e12, -0.7e-5, 9.75])
   
-  LabeledEntry(window, 'Text:', 'Initial val', callback)
+  LabelledEntry(window, 'Text:', 'Initial val', callback)
   
-  LabeledIntEntry(window, 'Int:', 0, callback)
+  LabelledIntEntry(window, 'Int:', 0, callback)
   
-  LabeledFloatEntry(window, 'Float:', 0.7295, callback, decimals=8)
+  LabelledFloatEntry(window, 'Float:', 0.7295, callback, decimals=8)
   
   window.show()
   

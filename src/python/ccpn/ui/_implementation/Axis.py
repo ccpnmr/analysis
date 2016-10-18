@@ -154,7 +154,8 @@ def getter(self) -> Tuple[Axis, ...]:
   return tuple(ff(apiStrip.findFirstStripAxis(axis=x)) for x in apiStrip.orderedAxes)
 def setter(self, value:Sequence):
   value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
-  self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
+  #self._wrappedData.orderedAxes = tuple(x._wrappedData.axis for x in value)
+  self._wrappedData.axisOrder = tuple(x.code for x in value)
 Strip.orderedAxes = property(getter, setter, None,
                              "Axes in display order (X, Y, Z1, Z2, ...) ")
 del getter

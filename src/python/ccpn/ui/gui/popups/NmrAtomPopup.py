@@ -8,7 +8,7 @@ from ccpn.ui.gui.widgets.MessageDialog import showWarning
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
-from ccpnmodel.ccpncore.lib.spectrum.Spectrum import isotopeCode2Nucleus
+from ccpn.util.Common import isotopeCode2Nucleus
 
 from ccpn.framework.Framework import getFramework
 

@@ -23,8 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
-# from ccpn.core.lib.spectrum import Spectrum
-
 spectrumName = 'HSQC-115'
 
 class SpectrumTest(WrapperTesting):

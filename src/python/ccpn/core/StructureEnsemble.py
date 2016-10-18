@@ -34,7 +34,6 @@ from ccpn.core.lib import Pid
 from ccpn.util import Common as commonUtil
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Atom as ApiCoordAtom
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import StructureEnsemble as ApiStructureEnsemble
-from ccpnmodel.ccpncore.lib.spectrum import Spectrum as spectrumLib
 
 NaN = float('NaN')
 
@@ -86,8 +85,10 @@ class StructureEnsemble(AbstractWrapperObject):
   @property
   def atomIds(self) -> Tuple[str, ...]:
     """Tuple of atom id ('chainCode.sequenceCode.residueType.atomName' for atoms making up
-    structure ensemble
-    The atom IDs and their order is the same for all Models in the ensemble."""
+    structure ensemble. Note that the identifier uses IUPAC atom names and Coordinate-linked
+    chain and sequence specifiers, which may not match the Chains.
+    The atom IDs and their order is the same for all Models in the ensemble.
+    """
     result = []
     residue = None
     for atom in self._wrappedData.orderedAtoms:
@@ -388,7 +389,7 @@ class StructureEnsemble(AbstractWrapperObject):
                          % atomId)
 
       if coordResidue.findFirstAtom(name=name) is None:
-        elementName = spectrumLib.name2ElementSymbol(name) or 'Unknown'
+        elementName = commonUtil.name2ElementSymbol(name) or 'Unknown'
         coordResidue.newAtom(name=name, elementName=elementName)
 
       else:
@@ -532,7 +533,7 @@ class StructureEnsemble(AbstractWrapperObject):
           useResidue = useChain.newResidue(seqCode=seqCode, seqInsertCode=seqInsertCode,
                                            code3Letter=residueType)
         newAtom = useResidue.newAtom(name=name,
-                                     elementName=spectrumLib.name2ElementSymbol(name) or 'Unknown')
+                                     elementName=commonUtil.name2ElementSymbol(name) or 'Unknown')
 
         # reset data arrays
         for tag in _DATA_ARRAY_TAGS:
@@ -627,6 +628,7 @@ def _newStructureEnsemble(self:Project, ensembleId:int=None, comment:str=None) -
     newApiStructureEnsemble = nmrProject.root.newStructureEnsemble(molSystem=nmrProject.molSystem,
                                                            ensembleId=ensembleId, details=comment)
   finally:
+    self._project._appBase._endCommandBlock()
     return self._data2Obj.get(newApiStructureEnsemble)
     
     

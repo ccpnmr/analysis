@@ -96,9 +96,8 @@ class TestExistingSubstancesWithSameNameReused(WrapperTesting):
 
   def test_createChainFromExistingSubstance(self):
     physicalChain = self.project.createChain('acd', molType='protein')
-    newPhysicalChain = physicalChain.substance.createChain()
-
-    self.assertIs(physicalChain.substance, newPhysicalChain.substance)
+    newPhysicalChain = physicalChain.substances[0].createChain()
+    self.assertEquals(physicalChain.substances, newPhysicalChain.substances)
     self.assertIsNot(physicalChain, newPhysicalChain)
 
 
@@ -112,7 +111,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.labelling, None)
     self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Molecule')
     self.assertIs(s.project, self.project)
@@ -122,18 +121,18 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.referenceSpectra, ())
     self.assertEqual(s.sampleComponents, ())
 
-    self.assertIsNone(s.atomCount)
-    self.assertIsNone(s.bondCount)
+    self.assertEqual(s.atomCount, 0)
+    self.assertEqual(s.bondCount, 0)
     self.assertIsNone(s.casNumber)
     self.assertIsNone(s.comment)
     self.assertIsNone(s.logPartitionCoefficient)
     self.assertIsNone(s.empiricalFormula)
-    self.assertIsNone(s.hBondAcceptorCount)
+    self.assertEqual(s.hBondAcceptorCount, 0)
     self.assertIsNone(s.molecularMass)
-    self.assertIsNone(s.hBondDonorCount)
+    self.assertEqual(s.hBondDonorCount, 0)
     self.assertIsNone(s.inChi)
     self.assertIsNone(s.polarSurfaceArea)
-    self.assertIsNone(s.ringCount)
+    self.assertEqual(s.ringCount, 0)
     self.assertIsNone(s.sequenceString)
     self.assertIsNone(s.smiles)
     self.assertIsNone(s.userCode)
@@ -155,7 +154,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.labelling, None)
     self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Molecule')
     self.assertIs(s.project, self.project)
@@ -165,18 +164,18 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.referenceSpectra, ())
     self.assertEqual(s.sampleComponents, ())
 
-    self.assertIsNone(s.atomCount)
-    self.assertIsNone(s.bondCount)
+    self.assertEqual(s.atomCount, 0)
+    self.assertEqual(s.bondCount, 0)
     self.assertIsNone(s.casNumber)
     self.assertIsNone(s.comment)
     self.assertIsNone(s.logPartitionCoefficient)
     self.assertIsNone(s.empiricalFormula)
-    self.assertIsNone(s.hBondAcceptorCount)
+    self.assertEqual(s.hBondAcceptorCount, 0)
     self.assertIsNone(s.molecularMass)
-    self.assertIsNone(s.hBondDonorCount)
+    self.assertEqual(s.hBondDonorCount, 0)
     self.assertIsNone(s.inChi)
     self.assertIsNone(s.polarSurfaceArea)
-    self.assertIsNone(s.ringCount)
+    self.assertEqual(s.ringCount, 0)
     self.assertIsNone(s.sequenceString)
     self.assertIsNone(s.smiles)
     self.assertIsNone(s.userCode)
@@ -193,11 +192,11 @@ class SubstanceProperties(WrapperTesting):
                                   inChi='1/C2H6O/c1-2-3/h3H,2H2,1H3')
     self.assertEqual(s.inChi, '1/C2H6O/c1-2-3/h3H,2H2,1H3')
 
-  def test_MoleculeSubstanceWithLabelingProperties(self):
+  def test_MoleculeSubstanceWithLabellingProperties(self):
     s = self.project.newSubstance('test substance',
                                   substanceType='Molecule',
-                                  labeling='anything')
-    self.assertEqual(s.labeling, 'anything')
+                                  labelling='anything')
+    self.assertEqual(s.labelling, 'anything')
 
   def test_MoleculeSubstanceWithCasNumberProperties(self):
     s = self.project.newSubstance('test substance',
@@ -290,7 +289,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.labelling, None)
     self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Material')
     self.assertIs(s.project, self.project)
@@ -318,7 +317,7 @@ class SubstanceProperties(WrapperTesting):
 
   @unittest.skip
   def test_bareCellSubstanceProperties(self):
-    # name, labeling, usercode, synonyms, details
+    # name, labelling, usercode, synonyms, details
     s = self.project.newSubstance('test substance', substanceType='Cell')
 
     self.assertEqual(s.pid, 'SU:test substance.')
@@ -326,7 +325,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.labelling, None)
     self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Cell')
     self.assertIs(s.project, self.project)
@@ -361,7 +360,7 @@ class SubstanceProperties(WrapperTesting):
     self.assertEqual(s.shortClassName, 'SU')
     self.assertEqual(s.className, 'Substance')
     self.assertEqual(s.name, 'test substance')
-    self.assertEqual(s.labeling, None)
+    self.assertEqual(s.labelling, None)
     self.assertEqual(s.id, 'test substance.')
     self.assertEqual(s.substanceType, 'Composite')
     self.assertIs(s.project, self.project)
@@ -396,12 +395,12 @@ class SubstanceProperties(WrapperTesting):
   #   s = self.project.createPolymerSubstance('acd', name='test polymer substance', molType='protein')
   #   self.assertEqual(s.molType, 'protein')
 
-  def test_PolymerSubstanceWithLabelingProperties(self):
+  def test_PolymerSubstanceWithLabellingProperties(self):
     s = self.project.createPolymerSubstance('acd',
                                             name='test polymer substance',
                                             molType='protein',
-                                            labeling='H')
-    self.assertEqual(s.labeling, 'H')
+                                            labelling='H')
+    self.assertEqual(s.labelling, 'H')
 
   def test_PolymerSubstanceWithUserCodeProperties(self):
     s = self.project.createPolymerSubstance('acd',

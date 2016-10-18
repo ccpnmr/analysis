@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-09-28 15:09:25 +0100 (Wed, 28 Sep 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9763 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-09-28 15:09:25 +0100 (Wed, 28 Sep 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9901 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -145,6 +145,71 @@
     <span class="n">boundAtoms</span> <span class="o">=</span> <span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundApiAtoms</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">boundAtoms</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">))</span>
 
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">componentAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Atoms that are combined to make up this atom - reverse of &#39;compoundAtoms&#39;</span>
+
+<span class="sd">    For simple atoms this is empty.</span>
+<span class="sd">    For wildcard atoms (e.g. HB%, QB) this gives the individual atoms that combine into atom.</span>
+<span class="sd">    For non-stereo atoms (e.g. HBx, HBy, HGx%) it gives the two alternative stereospecific atoms</span>
+
+<span class="sd">    Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13</span>
+<span class="sd">    and is itself a component of HGx%, HGy%, HG%, and QG&quot;&quot;&quot;</span>
+    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">components</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">compoundAtoms</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;Atom&#39;</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;wildcard-, pseudo-, and nonstereo- atoms that incorporate this atom.</span>
+<span class="sd">    - reverse of &#39;componentAtoms&#39;</span>
+
+<span class="sd">    Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13</span>
+<span class="sd">    and is itself a component of HGx%, HGy%, HG%, and QG&quot;&quot;&quot;</span>
+    <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
+    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">atomGroups</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">exchangesWithWater</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;True if atom exchanges with water on a msx time scale, and so is mostly unobservable.</span>
+
+<span class="sd">    Holds for e.g. OH atoms, NH£ groups and His side chain NH protons, but NOT for amide protons &quot;&quot;&quot;</span>
+
+    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">components</span>
+    <span class="k">while</span> <span class="n">components</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">apiAtom</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
+        <span class="c1"># Fastest way to get an arbitrary element from a frozen set</span>
+        <span class="k">break</span>
+      <span class="n">components</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">components</span>
+    <span class="c1">#</span>
+    <span class="n">apiChemAtom</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">chemAtom</span>
+    <span class="k">if</span> <span class="n">apiChemAtom</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">apiChemAtom</span><span class="o">.</span><span class="n">waterExchangeable</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">False</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">isEquivalentAtomGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Is this atom a group of equivalent atoms?</span>
+<span class="sd">    Values are:</span>
+
+<span class="sd">    - True  (group of equivalent atoms, e.g. H%, ALA HB%, LYS HZ%, VAL HG1% or any M pseudoatom)</span>
+
+<span class="sd">    - False (all single atoms, all xy nonstereo atoms, LEU HB%, ILE HG1%, VAL HG%,</span>
+<span class="sd">      or any Q non-aromatic pseudoatom)</span>
+
+<span class="sd">    - None  = sometimes equivalent (TYR and PHE HD%, HE%, CD%, CE%, QD, QE)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">apiChemAtomSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">chemAtomSet</span>
+    <span class="k">if</span> <span class="n">apiChemAtomSet</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># NB isEquivalent is None for symmetric aromatic rings. We return True for that</span>
+      <span class="k">return</span> <span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span> <span class="o">!=</span> <span class="bp">False</span>
+
+
 <div class="viewcode-block" id="Atom.addInterAtomBond"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Atom.Atom.addInterAtomBond">[docs]</a>  <span class="k">def</span> <span class="nf">addInterAtomBond</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">atom</span><span class="p">:</span><span class="s1">&#39;Atom&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;ADVANCED Add generic bond between atoms - for creating disulfides or other crosslinks</span>
 <span class="sd">    The bound-to atom will appear in self.boundAtoms.</span>
@@ -155,9 +220,6 @@
     <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">newGenericBond</span><span class="p">(</span><span class="n">atoms</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">atom</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">))</span></div>
 
 
-
-  <span class="c1"># Utility functions</span>
-    
   <span class="c1"># Implementation functions</span>
 
   <span class="nd">@classmethod</span>

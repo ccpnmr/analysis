@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9763 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9798 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -84,9 +84,9 @@
 
 <div class="viewcode-block" id="RestraintList"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.DataSet.RestraintList">[docs]</a><span class="k">class</span> <span class="nc">RestraintList</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot; An object containing Restraints. Note: the object is not a (subtype of a) Python list.</span>
-<span class="sd">  To access all rRstraint objects, use RestraintList.restraints.</span>
+<span class="sd">  To access all Restraint objects, use RestraintList.restraints.</span>
 
-<span class="sd">  RThe type of restraint is determined by the restraintType attribute.</span>
+<span class="sd">  The type of restraint is determined by the restraintType attribute.</span>
 <span class="sd">  Typical examples are Distance, Dihedral and Rdc restraints, but can also be used to store</span>
 <span class="sd">  measurements or derived values (Rdc, J coupling, T1, T2, Chemical Shift, ...)</span>
 <span class="sd">  &quot;&quot;&quot;</span>
@@ -319,7 +319,7 @@
                       <span class="n">tensorMagnitude</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">tensorRhombicity</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span>
                       <span class="n">tensorIsotropicValue</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">tensorChainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                       <span class="n">tensorSequenceCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tensorResidueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                      <span class="n">serial</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">itemLength</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintList</span><span class="p">:</span>
+                      <span class="n">serial</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">restraintItemLength</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">RestraintList</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Create new RestraintList of type restraintType within DataSet&quot;&quot;&quot;</span>
 
 
@@ -330,7 +330,7 @@
      <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;potentialType&#39;</span><span class="p">,</span> <span class="s1">&#39;unknown&#39;</span><span class="p">),</span>
      <span class="p">(</span><span class="s1">&#39;tensorMagnitude&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorRhombicity&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorIsotropicValue&#39;</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
      <span class="p">(</span><span class="s1">&#39;tensorChainCode&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorSequenceCode&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;tensorResidueType&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
-     <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;itemLength&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+     <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;restraintItemLength&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
     <span class="p">)</span>
   <span class="p">)</span>
 
@@ -341,9 +341,9 @@
     <span class="c1"># This may not be unique, but that should be handled downstream</span>
     <span class="n">name</span> <span class="o">=</span> <span class="n">restraintType</span>
 
-  <span class="k">if</span> <span class="n">itemLength</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">itemLength</span> <span class="o">=</span> <span class="n">coreConstants</span><span class="o">.</span><span class="n">constraintListType2ItemLength</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">restraintType</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">itemLength</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">restraintItemLength</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">restraintItemLength</span> <span class="o">=</span> <span class="n">coreConstants</span><span class="o">.</span><span class="n">constraintListType2ItemLength</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">restraintType</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">restraintItemLength</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;restraintType </span><span class="si">%s</span><span class="s2"> not recognised&quot;</span> <span class="o">%</span> <span class="n">restraintType</span><span class="p">)</span>
 
   <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newRestraintList&#39;</span><span class="p">,</span> <span class="n">restraintType</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span>
@@ -352,7 +352,7 @@
     <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newGenericConstraintList</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">,</span>
                                                      <span class="n">origin</span><span class="o">=</span><span class="n">origin</span><span class="p">,</span>
                                                      <span class="n">constraintType</span><span class="o">=</span><span class="n">restraintType</span><span class="p">,</span>
-                                                     <span class="n">itemLength</span><span class="o">=</span><span class="n">itemLength</span><span class="p">,</span>
+                                                     <span class="n">itemLength</span><span class="o">=</span><span class="n">restraintItemLength</span><span class="p">,</span>
                                                      <span class="n">potentialType</span><span class="o">=</span><span class="n">potentialType</span><span class="p">,</span>
                                                      <span class="n">tensorMagnitude</span><span class="o">=</span><span class="n">tensorMagnitude</span><span class="p">,</span>
                                                      <span class="n">tensorRhombicity</span><span class="o">=</span><span class="n">tensorRhombicity</span><span class="p">,</span>

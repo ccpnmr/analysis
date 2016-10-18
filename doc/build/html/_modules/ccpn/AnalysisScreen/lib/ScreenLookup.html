@@ -1,0 +1,335 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisScreen.lib.ScreenLookup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisScreen.lib.ScreenLookup</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Formats</span> <span class="k">as</span> <span class="n">ioFormats</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+<span class="c1">######################### Excel Headers ##################</span>
+<span class="sd">&#39;&#39;&#39; The excel headers for sample, sampleComponents, substances properties are named as the appear on the wrapper.</span>
+<span class="sd">Changing these will fail to set the attribute&#39;&#39;&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;REFERENCES PAGE&#39;&#39;&#39;</span>
+<span class="n">GROUP_NAME</span> <span class="o">=</span> <span class="s1">&#39;groupName&#39;</span>
+<span class="n">EXP_TYPE</span> <span class="o">=</span> <span class="s1">&#39;expType&#39;</span>
+<span class="n">SPECTRUM_NAME</span> <span class="o">=</span> <span class="s1">&#39;spectrumName&#39;</span>
+<span class="c1">### Substance properties: # do not change these names</span>
+<span class="n">comment</span>  <span class="o">=</span> <span class="s1">&#39;comment&#39;</span>
+<span class="n">smiles</span> <span class="o">=</span> <span class="s1">&#39;smiles&#39;</span>
+<span class="n">synonyms</span> <span class="o">=</span> <span class="s1">&#39;synonyms&#39;</span>
+<span class="n">stereoInfo</span> <span class="o">=</span> <span class="s1">&#39;stereoInfo&#39;</span>
+<span class="n">molecularMass</span> <span class="o">=</span> <span class="s1">&#39;molecularMass&#39;</span>
+<span class="n">empiricalFormula</span> <span class="o">=</span> <span class="s1">&#39;empiricalFormula&#39;</span>
+<span class="n">atomCount</span> <span class="o">=</span> <span class="s1">&#39;atomCount&#39;</span>
+<span class="n">hBondAcceptorCount</span> <span class="o">=</span> <span class="s1">&#39;hBondAcceptorCount&#39;</span>
+<span class="n">hBondDonorCount</span> <span class="o">=</span> <span class="s1">&#39;hBondDonorCount&#39;</span>
+<span class="n">bondCount</span> <span class="o">=</span> <span class="s1">&#39;bondCount&#39;</span>
+<span class="n">ringCount</span> <span class="o">=</span> <span class="s1">&#39;ringCount&#39;</span>
+<span class="n">polarSurfaceArea</span> <span class="o">=</span> <span class="s1">&#39;polarSurfaceArea&#39;</span>
+<span class="n">logPartitionCoefficient</span> <span class="o">=</span> <span class="s1">&#39;logPartitionCoefficient&#39;</span>
+<span class="n">userCode</span> <span class="o">=</span> <span class="s1">&#39;userCode&#39;</span>
+<span class="n">sequenceString</span> <span class="o">=</span> <span class="s1">&#39;sequenceString&#39;</span>
+<span class="n">casNumber</span> <span class="o">=</span> <span class="s1">&#39;casNumber&#39;</span>
+
+<span class="sd">&#39;&#39;&#39;SAMPLES PAGE&#39;&#39;&#39;</span>
+<span class="n">SAMPLE_NAME</span> <span class="o">=</span> <span class="s1">&#39;sampleName&#39;</span>
+<span class="n">SPECTRUM_1H</span> <span class="o">=</span> <span class="s1">&#39;spectrum_1H&#39;</span>
+<span class="n">SPECTRUM_OFF_RESONANCE</span> <span class="o">=</span> <span class="s1">&#39;spectrum_Off_Res&#39;</span>
+<span class="n">SPECTRUM_ON_RESONANCE</span> <span class="o">=</span> <span class="s1">&#39;spectrum_On_Res&#39;</span>
+<span class="n">SPECTRUM_STD</span> <span class="o">=</span> <span class="s1">&#39;spectrumName_STD&#39;</span>
+<span class="n">SPECTRUM_WLOGSY</span> <span class="o">=</span> <span class="s1">&#39;spectrum_WLogsy&#39;</span>
+<span class="c1">### other sample properties # do not change these names</span>
+<span class="n">SAMPLE_COMPONENTS</span> <span class="o">=</span> <span class="s1">&#39;referenceComponents&#39;</span>
+<span class="n">pH</span> <span class="o">=</span> <span class="s1">&#39;pH&#39;</span>
+<span class="n">ionicStrength</span> <span class="o">=</span> <span class="s1">&#39;ionicStrength&#39;</span>
+<span class="n">amount</span> <span class="o">=</span> <span class="s1">&#39;amount&#39;</span>
+<span class="n">amountUnit</span> <span class="o">=</span> <span class="s1">&#39;amountUnit&#39;</span>
+<span class="n">isHazardous</span> <span class="o">=</span> <span class="s1">&#39;isHazardous&#39;</span>
+<span class="n">creationDate</span> <span class="o">=</span> <span class="s1">&#39;creationDate&#39;</span>
+<span class="n">batchIdentifier</span> <span class="o">=</span> <span class="s1">&#39;batchIdentifier&#39;</span>
+<span class="n">plateIdentifier</span> <span class="o">=</span> <span class="s1">&#39;plateIdentifier&#39;</span>
+<span class="n">rowNumber</span> <span class="o">=</span> <span class="s1">&#39;rowNumber&#39;</span>
+<span class="n">columnNumber</span> <span class="o">=</span> <span class="s1">&#39;columnNumber&#39;</span>
+
+<span class="n">SPECTRUM_GROUPS</span> <span class="o">=</span> <span class="p">{</span>
+                  <span class="s1">&#39;referencesSG&#39;</span> <span class="p">:</span><span class="s1">&#39;References&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;offResSG&#39;</span> <span class="p">:</span> <span class="s1">&#39;OFF_RES&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;onResSG&#39;</span> <span class="p">:</span> <span class="s1">&#39;ON_RES&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;stdSG&#39;</span> <span class="p">:</span><span class="s1">&#39;STD&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;oneHNoTargetSG&#39;</span><span class="p">:</span> <span class="s1">&#39;1H-Target&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;oneHPlusTargetSG&#39;</span> <span class="p">:</span><span class="s1">&#39;1H+Target&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;wLNoTargetSG&#39;</span> <span class="p">:</span> <span class="s1">&#39;WL-Target&#39;</span><span class="p">,</span>
+                  <span class="s1">&#39;wLPlusTargetSG&#39;</span> <span class="p">:</span> <span class="s1">&#39;WL+Target&#39;</span>
+                  <span class="p">}</span>
+
+
+<span class="n">SAMPLE_PROPERTIES</span> <span class="o">=</span>  <span class="p">[</span><span class="n">comment</span><span class="p">,</span> <span class="n">pH</span><span class="p">,</span> <span class="n">ionicStrength</span><span class="p">,</span>  <span class="n">amount</span> <span class="p">,</span> <span class="n">amountUnit</span><span class="p">,</span><span class="n">isHazardous</span><span class="p">,</span><span class="n">creationDate</span><span class="p">,</span> <span class="n">batchIdentifier</span><span class="p">,</span>
+                      <span class="n">plateIdentifier</span><span class="p">,</span><span class="n">rowNumber</span><span class="p">,</span><span class="n">columnNumber</span><span class="p">]</span>
+
+<span class="n">SUBSTANCE_PROPERTIES</span> <span class="o">=</span>  <span class="p">[</span><span class="n">comment</span><span class="p">,</span><span class="n">smiles</span><span class="p">,</span><span class="n">synonyms</span><span class="p">,</span><span class="n">stereoInfo</span><span class="p">,</span><span class="n">molecularMass</span><span class="p">,</span><span class="n">empiricalFormula</span><span class="p">,</span><span class="n">atomCount</span><span class="p">,</span>
+                         <span class="n">hBondAcceptorCount</span><span class="p">,</span><span class="n">hBondDonorCount</span><span class="p">,</span><span class="n">bondCount</span><span class="p">,</span><span class="n">ringCount</span><span class="p">,</span><span class="n">polarSurfaceArea</span><span class="p">,</span>
+                         <span class="n">logPartitionCoefficient</span><span class="p">,</span><span class="n">userCode</span><span class="p">,]</span>
+
+<span class="n">EXP_TYPES</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([(</span><span class="n">SPECTRUM_1H</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">SPECTRUM_OFF_RESONANCE</span> <span class="p">,</span><span class="s1">&#39;STD.H&#39;</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">SPECTRUM_ON_RESONANCE</span> <span class="p">,</span><span class="s1">&#39;STD.H&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">SPECTRUM_STD</span> <span class="p">,</span><span class="s1">&#39;STD.H&#39;</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">SPECTRUM_WLOGSY</span><span class="p">,</span><span class="s1">&#39;Water-LOGSY.H&#39;</span><span class="p">),])</span>
+
+
+<span class="k">def</span> <span class="nf">_loadScreenLookupFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">subType</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">CSV</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Not implemented yet&#39;</span><span class="p">)</span>
+
+  <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">XLS</span><span class="p">:</span>
+    <span class="n">ScreenExcelReader</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ScreenExcelReader"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader">[docs]</a><span class="k">class</span> <span class="nc">ScreenExcelReader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">createDataFrames</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">createSpectrumGroups</span><span class="p">()</span>
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getWorkingDirectoryPath</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">dataPath</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">brukerDirs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getBrukerTopDirs</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fullBrukerFilePaths</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFullBrukerFilePaths</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brukerDirs</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">createReferencesDataDicts</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">initialiseParsingSamples</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ScreenExcelReader.createDataFrames"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createDataFrames">[docs]</a>  <span class="k">def</span> <span class="nf">createDataFrames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">referencesDataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;References&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">referencesDataFrame</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;Empty&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplesDataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pandasFile</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;Samples&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplesDataFrame</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;Empty&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.getWorkingDirectoryPath"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getWorkingDirectoryPath">[docs]</a>  <span class="k">def</span> <span class="nf">getWorkingDirectoryPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">xlsLookupPath</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">xlsLookupPath</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.getBrukerTopDirs"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getBrukerTopDirs">[docs]</a>  <span class="k">def</span> <span class="nf">getBrukerTopDirs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">dirs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span><span class="p">))</span>
+    <span class="n">excludedFiles</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.DS_Store&#39;</span><span class="p">,</span> <span class="s1">&#39;.xls&#39;</span><span class="p">)</span>
+    <span class="n">brukerDirs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dir</span> <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">dir</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">excludedFiles</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">brukerDirs</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.getFullBrukerFilePaths"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getFullBrukerFilePaths">[docs]</a>  <span class="k">def</span> <span class="nf">getFullBrukerFilePaths</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">brukerDirs</span><span class="p">):</span>
+    <span class="n">fullPaths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">spectrumName</span> <span class="ow">in</span> <span class="n">brukerDirs</span><span class="p">:</span>
+      <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">directoryPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">spectrumName</span>
+      <span class="k">for</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="s1">&#39;1r&#39;</span><span class="p">:</span>
+            <span class="n">fullPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+            <span class="n">fullPaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fullPath</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">fullPaths</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.createReferencesDataDicts"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createReferencesDataDicts">[docs]</a>  <span class="k">def</span> <span class="nf">createReferencesDataDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">referencesDataDicts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">spectrumName</span><span class="p">,</span> <span class="n">spectrumPath</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">brukerDirs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fullBrukerFilePaths</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">referencesDataFrame</span><span class="p">[</span><span class="n">SPECTRUM_NAME</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+          <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">referencesDataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+              <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SPECTRUM_NAME</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">):</span>
+                  <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">spectrumPath</span><span class="p">)</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">setRefSpectrumProperties</span><span class="p">(</span><span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+                  <span class="n">dataDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">data</span><span class="p">}</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">createNewSubstance</span><span class="p">(</span><span class="n">dataDict</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.initialiseParsingSamples"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.initialiseParsingSamples">[docs]</a>  <span class="k">def</span> <span class="nf">initialiseParsingSamples</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">createSamplesDataDicts</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">samplesDataDict</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplesDataDicts</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">getSampleSpectra</span><span class="p">(</span><span class="n">samplesDataDict</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.setRefSpectrumProperties"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.setRefSpectrumProperties">[docs]</a>  <span class="k">def</span> <span class="nf">setRefSpectrumProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrum</span><span class="p">):</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="s1">&#39;H&#39;</span>
+    <span class="n">referenceSpectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:References&#39;</span><span class="p">)</span>
+    <span class="n">referenceSpectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.createSamplesDataDicts"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createSamplesDataDicts">[docs]</a>  <span class="k">def</span> <span class="nf">createSamplesDataDicts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplesDataDicts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">samplesDataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">SAMPLE_NAME</span><span class="p">:</span>
+          <span class="n">sample</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newSample</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+          <span class="n">dataDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sample</span><span class="p">:</span> <span class="n">data</span><span class="p">}</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_setWrapperProperties</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">SAMPLE_PROPERTIES</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">addSampleComponents</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">samplesDataDicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataDict</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.addSampleComponents"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.addSampleComponents">[docs]</a>  <span class="k">def</span> <span class="nf">addSampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">sampleComponents</span> <span class="o">=</span> <span class="p">[[</span><span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
+                        <span class="n">header</span> <span class="o">==</span> <span class="n">SAMPLE_COMPONENTS</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sampleComponents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+      <span class="n">sampleComponent</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;-1&#39;</span><span class="p">))</span>
+      <span class="n">sampleComponent</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="s1">&#39;Compound&#39;</span></div>
+
+
+<div class="viewcode-block" id="ScreenExcelReader.getSampleSpectra"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getSampleSpectra">[docs]</a>  <span class="k">def</span> <span class="nf">getSampleSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">samplesDataDict</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">sample</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">samplesDataDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">for</span> <span class="n">spectrumNameHeader</span><span class="p">,</span> <span class="n">experimentType</span> <span class="ow">in</span> <span class="n">EXP_TYPES</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSpectrum</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">spectrumNameHeader</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">spectrum</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">spectrumNameHeader</span> <span class="o">==</span> <span class="n">SPECTRUM_OFF_RESONANCE</span><span class="p">:</span>
+            <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">SPECTRUM_OFF_RESONANCE</span>
+          <span class="k">if</span> <span class="n">spectrumNameHeader</span> <span class="o">==</span> <span class="n">SPECTRUM_ON_RESONANCE</span><span class="p">:</span>
+            <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">SPECTRUM_ON_RESONANCE</span>
+          <span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">=</span> <span class="n">experimentType</span>
+          <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSpectrumGroups</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.setSpectrumGroups"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.setSpectrumGroups">[docs]</a>  <span class="k">def</span> <span class="nf">setSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+
+    <span class="n">withTarget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDFValue</span><span class="p">(</span><span class="s1">&#39;with_Target&#39;</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">withTarget</span> <span class="o">==</span> <span class="s1">&#39;Yes&#39;</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">oneHPlusTargetSG</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">oneHNoTargetSG</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+
+      <span class="k">elif</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">==</span> <span class="s1">&#39;STD.H&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">withTarget</span> <span class="o">==</span> <span class="s1">&#39;Yes&#39;</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="n">SPECTRUM_OFF_RESONANCE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">offResSG</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+          <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="n">SPECTRUM_ON_RESONANCE</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">onResSG</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+          <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="n">SPECTRUM_STD</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stdSG</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+
+      <span class="k">elif</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">==</span> <span class="s1">&#39;Water-LOGSY.H&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">withTarget</span> <span class="o">==</span> <span class="s1">&#39;Yes&#39;</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">wLPlusTargetSG</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">wLNoTargetSG</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">spectrum</span><span class="p">,)</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.getSpectrum"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getSpectrum">[docs]</a>  <span class="k">def</span> <span class="nf">getSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">header</span><span class="p">):</span>
+      <span class="n">spectrumName</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                  <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="n">header</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">brukerDir</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])]</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFullBrukerFilePaths</span><span class="p">(</span><span class="n">brukerDir</span><span class="p">)</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.createSpectrumGroups"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createSpectrumGroups">[docs]</a>  <span class="k">def</span> <span class="nf">createSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">SPECTRUM_GROUPS</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
+
+<div class="viewcode-block" id="ScreenExcelReader.createNewSubstance"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createNewSubstance">[docs]</a>  <span class="k">def</span> <span class="nf">createNewSubstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataDict</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+      <span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_setWrapperProperties</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">SUBSTANCE_PROPERTIES</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_setWrapperProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrapperObject</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">):</span>
+    <span class="k">for</span> <span class="nb">property</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">property</span> <span class="o">==</span> <span class="s1">&#39;synonyms&#39;</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getDFValue</span><span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">),))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="nb">property</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDFValue</span><span class="p">(</span><span class="nb">property</span><span class="p">,</span> <span class="n">dataframe</span><span class="p">))</span>
+
+<div class="viewcode-block" id="ScreenExcelReader.getDFValue"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getDFValue">[docs]</a>  <span class="k">def</span> <span class="nf">getDFValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

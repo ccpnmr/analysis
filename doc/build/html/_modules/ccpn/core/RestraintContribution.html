@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9798 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -157,8 +157,8 @@
   <span class="k">def</span> <span class="nf">additionalLowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;additionalLowerLimit of contribution</span>
 <span class="sd">    Used for potential functions that require more than one parameter, typically for</span>
-<span class="sd">     parabolic-linear potentials where the additionalLowerLimit marks the transition from</span>
-<span class="sd">     parabolic to linear potential&quot;&quot;&quot;</span>
+<span class="sd">    parabolic-linear potentials where the additionalLowerLimit marks the transition from</span>
+<span class="sd">    parabolic to linear potential&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">additionalLowerLimit</span>
 
   <span class="nd">@additionalLowerLimit.setter</span>
@@ -187,8 +187,8 @@
   <span class="k">def</span> <span class="nf">additionalUpperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;additionalUpperLimit of contribution.</span>
 <span class="sd">    Used for potential functions that require more than one parameter, typically for</span>
-<span class="sd">     parabolic-linear potentials where the additionalUpperLimit marks the transition from</span>
-<span class="sd">     parabolic to linear potential&quot;&quot;&quot;</span>
+<span class="sd">    parabolic-linear potentials where the additionalUpperLimit marks the transition from</span>
+<span class="sd">    parabolic to linear potential&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">additionalUpperLimit</span>
 
   <span class="nd">@additionalUpperLimit.setter</span>
@@ -198,7 +198,8 @@
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">scale</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled value &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled</span>
+<span class="sd">    value &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">scale</span>
 
   <span class="nd">@scale.setter</span>
@@ -328,7 +329,7 @@
   <span class="c1"># Implementation functions</span>
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">Restraint</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;get wrappedData - all Constraint children of parent ConstraintList&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;get wrappedData - all ConstraintContribution children of parent ConstraintList&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedContributions</span><span class="p">()</span></div>
 
 <span class="c1"># Connections to parents:</span>

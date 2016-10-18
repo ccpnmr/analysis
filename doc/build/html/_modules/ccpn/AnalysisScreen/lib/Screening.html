@@ -56,9 +56,7 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
 <span class="c1"># from math import sin, cos, pi, log</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="c1"># from numpy import argwhere</span>
-<span class="c1"># from scipy.ndimage import maximum_filter</span>
-
+<span class="kn">import</span> <span class="nn">decimal</span>
 
 <span class="n">Peak</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;frequency&#39;</span><span class="p">,</span> <span class="s1">&#39;linewidth&#39;</span><span class="p">,</span> <span class="s1">&#39;intensity&#39;</span><span class="p">,</span> <span class="s1">&#39;phase&#39;</span><span class="p">])</span>
 <span class="n">Peak</span><span class="o">.</span><span class="n">__new__</span><span class="o">.</span><span class="n">__defaults__</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,)</span>
@@ -92,39 +90,36 @@
   <span class="k">return</span> <span class="n">spectrum</span></div>
 
 
-<div class="viewcode-block" id="matchedPosition"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.Screening.matchedPosition">[docs]</a><span class="k">def</span> <span class="nf">matchedPosition</span><span class="p">(</span><span class="n">stdPeaks</span><span class="p">,</span> <span class="n">componentPeaks</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">minimumMatches</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="matchedPosition"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.Screening.matchedPosition">[docs]</a><span class="k">def</span> <span class="nf">matchedPosition</span><span class="p">(</span><span class="n">samplePeaks</span><span class="p">,</span> <span class="n">componentPeaks</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.005</span><span class="p">,</span> <span class="n">minimumMatches</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
   <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">  Matches peaks from the std spectrum ( Std off resonance -  Std on resonance) to a given reference component.</span>
+<span class="sd">  Matches peak positions from the sample spectrum to a given reference component.</span>
 
 <span class="sd">  &#39;&#39;&#39;</span>
-  <span class="c1">#</span>
-  <span class="c1"># stdArray = np.array(stdPeaks)</span>
-  <span class="c1"># componentArray = np.array(componentPeaks)</span>
-  <span class="c1">#</span>
-  <span class="c1">#</span>
-  <span class="c1"># diff_STD_Comp = abs(componentArray - stdArray)</span>
-  <span class="c1"># pos = [i for i in diff_STD_Comp if i &lt;= tolerance]</span>
-  <span class="c1"># matchedPositions = []</span>
-  <span class="c1"># for i in range(len(pos)):</span>
-  <span class="c1">#     matchedPos = np.argsort(diff_STD_Comp)[i]</span>
-  <span class="c1">#     matchedPositions.append(componentPeaks[matchedPos])</span>
-  <span class="c1"># if len(matchedPositions)&gt;=minimumMatches:</span>
-  <span class="c1">#   return  matchedPositions</span>
-  <span class="c1">#</span>
 
-  <span class="sd">&#39;&#39;&#39;&#39;&#39;&#39;</span>
-
-  <span class="n">matchedPositions</span> <span class="o">=</span> <span class="p">[</span><span class="n">stdPosition</span> <span class="k">for</span> <span class="n">componentPosition</span> <span class="ow">in</span> <span class="n">componentPeaks</span>
-                            <span class="k">for</span> <span class="n">stdPosition</span> <span class="ow">in</span> <span class="n">stdPeaks</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">stdPosition</span><span class="o">-</span><span class="n">componentPosition</span><span class="p">)</span><span class="o">&lt;=</span><span class="n">tolerance</span><span class="p">]</span>
+  <span class="n">matchedPositions</span> <span class="o">=</span> <span class="p">[</span><span class="n">samplePosition</span> <span class="k">for</span> <span class="n">componentPosition</span> <span class="ow">in</span> <span class="n">componentPeaks</span>
+                      <span class="k">for</span> <span class="n">samplePosition</span> <span class="ow">in</span> <span class="n">samplePeaks</span> <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">samplePosition</span> <span class="o">-</span> <span class="n">componentPosition</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">tolerance</span><span class="p">]</span>
   <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matchedPositions</span><span class="p">)</span><span class="o">&gt;=</span><span class="n">minimumMatches</span><span class="p">:</span>
-   <span class="k">return</span> <span class="n">matchedPositions</span></div>
+   <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">matchedPositions</span><span class="p">))</span></div>
 
-<div class="viewcode-block" id="createStdDifferenceSpectrum"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.Screening.createStdDifferenceSpectrum">[docs]</a><span class="k">def</span> <span class="nf">createStdDifferenceSpectrum</span><span class="p">(</span><span class="n">stdOffResonance</span><span class="p">,</span> <span class="n">stdOnResonance</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_subtractTwoSpectra</span><span class="p">(</span><span class="n">stdOffResonance</span><span class="p">,</span> <span class="n">stdOnResonance</span><span class="p">):</span>
   <span class="n">stdOffResonanceArray</span> <span class="o">=</span> <span class="n">stdOffResonance</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">get1dSpectrumData</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
   <span class="n">stdOnResonanceArray</span> <span class="o">=</span> <span class="n">stdOnResonance</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">get1dSpectrumData</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
 
   <span class="n">stdDifference</span> <span class="o">=</span> <span class="n">stdOffResonanceArray</span> <span class="o">-</span> <span class="n">stdOnResonanceArray</span>
-  <span class="k">return</span> <span class="n">stdDifference</span></div>
+  <span class="k">return</span> <span class="n">stdDifference</span>
+
+<div class="viewcode-block" id="getPeakPositions"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.Screening.getPeakPositions">[docs]</a><span class="k">def</span> <span class="nf">getPeakPositions</span><span class="p">(</span><span class="n">spectrum</span><span class="p">):</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No peakList found&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getSampleSpectraByExpType"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.Screening.getSampleSpectraByExpType">[docs]</a><span class="k">def</span> <span class="nf">getSampleSpectraByExpType</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">expType</span><span class="p">):</span>
+  <span class="n">spectra</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">expType</span><span class="p">):</span>
+      <span class="n">spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">spectra</span></div>
 
 
 
@@ -170,11 +165,90 @@
 
   <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">procDir</span><span class="p">,</span> <span class="n">realFileName</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
       <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;&lt;i4&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tobytes</span><span class="p">())</span></div>
-<span class="c1">#</span>
-<span class="c1"># def stdEfficency(self, spectrumOffResonance, spectrumOnResonance, stdDifferenceSpectrum):</span>
-<span class="c1">#</span>
-<span class="c1">#   for peak in spectrumOffResonance:</span>
 
+
+<div class="viewcode-block" id="matchSTDToReference"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.Screening.matchSTDToReference">[docs]</a><span class="k">def</span> <span class="nf">matchSTDToReference</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
+      <span class="n">componentList</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="n">spectrumOffResonance</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="s1">&#39;spectrum_Off_Res&#39;</span><span class="p">]</span>
+      <span class="n">spectrumOffResonancePeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">spectrumOffResonance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
+
+      <span class="n">spectrumOnResonance</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="s1">&#39;spectrum_On_Res&#39;</span><span class="p">]</span>
+      <span class="n">spectrumOnResonancePeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">spectrumOnResonance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
+
+      <span class="n">stdSpectrum</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="s1">&#39;spectrum_STD&#39;</span><span class="p">]</span>
+      <span class="n">stdPeakList</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">stdSpectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
+      <span class="n">stdPosition</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">stdPeakList</span><span class="p">]</span>
+
+      <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
+        <span class="n">componentPeakList</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
+        <span class="n">componentPosition</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">componentPeakList</span><span class="p">]</span>
+        <span class="n">componentDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">sampleComponent</span><span class="p">:</span> <span class="n">componentPosition</span><span class="p">}</span>
+        <span class="n">componentList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">componentDict</span><span class="p">)</span>
+        <span class="n">newPeakList</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">()</span>
+
+      <span class="k">for</span> <span class="n">components</span> <span class="ow">in</span> <span class="n">componentList</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">sampleComponent</span><span class="p">,</span> <span class="n">peakPositions</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+          <span class="n">match</span> <span class="o">=</span> <span class="n">matchedPosition</span><span class="p">(</span><span class="n">stdPosition</span><span class="p">,</span> <span class="n">peakPositions</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">minDistance</span><span class="p">),</span>
+                                  <span class="n">minimumMatches</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># self.minimumPeaksBox.value())</span>
+          <span class="k">if</span> <span class="n">match</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">newHit</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">newSpectrumHit</span><span class="p">(</span><span class="n">substanceName</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">match</span><span class="p">:</span>
+              <span class="n">newPeakListPosition</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span>
+                <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="n">position</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.00</span><span class="p">)</span>
+
+            <span class="n">merit</span> <span class="o">=</span> <span class="n">_stdEfficency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">stdPosition</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">newHit</span><span class="o">.</span><span class="n">meritCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">merit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;%&#39;</span></div>
+
+
+<span class="k">def</span> <span class="nf">_loadSpectrumDifference</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">SGname</span><span class="o">=</span><span class="s1">&#39;SG:STD&#39;</span><span class="p">):</span>
+  <span class="n">newSpectrumStd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;spectrum_STD&#39;</span>
+  <span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+  <span class="n">spectrumName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
+  <span class="k">print</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+  <span class="n">spectrumGroupSTD</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">SGname</span><span class="p">)</span>
+  <span class="n">spectrumGroupSTD</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
+  <span class="k">print</span><span class="p">(</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;created and loaded in the project&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="createStdDifferenceSpectrum"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.lib.html#ccpn.AnalysisScreen.lib.Screening.createStdDifferenceSpectrum">[docs]</a><span class="k">def</span> <span class="nf">createStdDifferenceSpectrum</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">filePath</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># FIXME correct spectrum.comment when new exp type STD off on are ready in the api</span>
+        <span class="n">spectrumOffResonance</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="s1">&#39;spectrum_Off_Res&#39;</span><span class="p">]</span>
+        <span class="n">spectrumOnResonance</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">comment</span> <span class="o">==</span> <span class="s1">&#39;spectrum_On_Res&#39;</span><span class="p">]</span>
+
+        <span class="n">spectrumDiff</span> <span class="o">=</span> <span class="n">_subtractTwoSpectra</span><span class="p">(</span><span class="n">spectrumOffResonance</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">spectrumOnResonance</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">filePath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+          <span class="n">path</span> <span class="o">=</span> <span class="n">filePath</span> <span class="o">+</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_Std&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">path</span> <span class="o">=</span> <span class="n">filePath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_Std_diff&#39;</span>
+        <span class="n">writeBruker</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">spectrumDiff</span><span class="p">)</span>
+        <span class="n">_loadSpectrumDifference</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/pdata/1/1r&#39;</span><span class="p">,</span> <span class="n">sample</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_stdEfficency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">matchedPositions</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">):</span>
+
+  <span class="n">efficiency</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">matchedPositions</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">onResPeak</span> <span class="ow">in</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">offResPeak</span> <span class="ow">in</span> <span class="n">spectrumOffResonancePeaks</span><span class="p">:</span>
+
+
+
+        <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">offResPeak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">onResPeak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;=</span> <span class="nb">float</span><span class="p">(</span><span class="n">minDistance</span><span class="p">)</span> <span class="ow">and</span> <span class="n">offResPeak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">position</span><span class="p">:</span>
+          <span class="n">differenceHeight</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">offResPeak</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">onResPeak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+          <span class="n">fullValue</span> <span class="o">=</span> <span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">offResPeak</span><span class="o">.</span><span class="n">height</span> <span class="o">-</span> <span class="n">onResPeak</span><span class="o">.</span><span class="n">height</span><span class="p">))</span> <span class="o">/</span> <span class="n">offResPeak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span>
+          <span class="n">value</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">fullValue</span><span class="p">)</span><span class="o">.</span><span class="n">quantize</span><span class="p">(</span><span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="s1">&#39;.01&#39;</span><span class="p">),</span> <span class="n">rounding</span><span class="o">=</span><span class="n">decimal</span><span class="o">.</span><span class="n">ROUND_DOWN</span><span class="p">)</span>
+          <span class="n">efficiency</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">efficiency</span>
 </pre></div>
 
           </div>

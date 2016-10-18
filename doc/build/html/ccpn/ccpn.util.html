@@ -155,6 +155,32 @@ location of the repository.</p>
 <span id="ccpn-util-common-module"></span><h2>ccpn.util.Common module<a class="headerlink" href="#module-ccpn.util.Common" title="Permalink to this headline">¶</a></h2>
 <p>Miscellaneous common utilities</p>
 <dl class="function">
+<dt id="ccpn.util.Common.axisCodeMapping">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodeMapping</code><span class="sig-paren">(</span><em>axisCodes: Sequence[str], refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodeMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodeMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>get {axisCode:refAxisCode} mapping dictionary
+all axisCodes must match, or dictionary will be empty
+NB a series of single-letter axisCodes (e.g. &#8216;N&#8217;, &#8216;HCN&#8217;) can be passed in as a string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.axisCodeMatch">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodeMatch</code><span class="sig-paren">(</span><em>axisCode: str, refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodeMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodeMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get refAxisCode that best matches axisCode</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.axisCodesCompare">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodesCompare</code><span class="sig-paren">(</span><em>code: str</em>, <em>code2: str</em>, <em>mismatch: int = 0</em><span class="sig-paren">)</span> &rarr; int<a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodesCompare"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodesCompare" title="Permalink to this definition">¶</a></dt>
+<dd><p>Score code, code2 for matching. Score is length of common prefix, or &#8216;mismatch&#8217; if None</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.checkIsotope">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">checkIsotope</code><span class="sig-paren">(</span><em>text: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#checkIsotope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.checkIsotope" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert string to most probable isotope code - defaulting to &#8216;1H</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Common.convertStringToFileName">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">convertStringToFileName</code><span class="sig-paren">(</span><em>fileNameString</em>, <em>validChars='abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-.+'</em>, <em>defaultChar='_'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#convertStringToFileName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.convertStringToFileName" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -163,6 +189,12 @@ location of the repository.</p>
 <dt id="ccpn.util.Common.dictionaryProduct">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">dictionaryProduct</code><span class="sig-paren">(</span><em>dict1: dict</em>, <em>dict2: dict</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/util/Common.html#dictionaryProduct"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.dictionaryProduct" title="Permalink to this definition">¶</a></dt>
 <dd><p>multiply input {a:x}, {b:y} to result {(a,b):x*y} dictionary</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.doAxisCodesMatch">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">doAxisCodesMatch</code><span class="sig-paren">(</span><em>axisCodes: Sequence[str], refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; bool<a class="reference internal" href="../_modules/ccpn/util/Common.html#doAxisCodesMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.doAxisCodesMatch" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return True if axisCodes match refAxisCodes else False</p>
 </dd></dl>
 
 <dl class="function">
@@ -208,6 +240,23 @@ Uses sum of relative (relTolerance) and absolute (absTolerance) difference</p>
 <dt id="ccpn.util.Common.isWindowsOS">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">isWindowsOS</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#isWindowsOS"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.isWindowsOS" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.isotopeCode2Nucleus">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">isotopeCode2Nucleus</code><span class="sig-paren">(</span><em>isotopeCode: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#isotopeCode2Nucleus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.isotopeCode2Nucleus" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.name2ElementSymbol">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">name2ElementSymbol</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#name2ElementSymbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2ElementSymbol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get standard element symbol matching name or axisCode</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Common.name2IsotopeCode">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">name2IsotopeCode</code><span class="sig-paren">(</span><em>name: str = None</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#name2IsotopeCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2IsotopeCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get standard isotope code matching name or axisCode string</p>
+</dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.parseSequenceCode">
@@ -466,6 +515,36 @@ If no suitable location is found, superdirectory is returned as None</p>
 <dd></dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.util.PrintFile">
+<span id="ccpn-util-printfile-module"></span><h2>ccpn.util.PrintFile module<a class="headerlink" href="#module-ccpn.util.PrintFile" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.util.PrintFile.PrintFile">
+<em class="property">class </em><code class="descclassname">ccpn.util.PrintFile.</code><code class="descname">PrintFile</code><span class="sig-paren">(</span><em>path</em>, <em>xCount=1</em>, <em>yCount=1</em>, <em>width=800</em>, <em>height=800</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/PrintFile.html#PrintFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.PrintFile.PrintFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">abc.ABC</span></code></p>
+<dl class="method">
+<dt id="ccpn.util.PrintFile.PrintFile.startRegion">
+<code class="descname">startRegion</code><span class="sig-paren">(</span><em>xOutputRegion</em>, <em>yOutputRegion</em>, <em>xNumber=0</em>, <em>yNumber=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/PrintFile.html#PrintFile.startRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.PrintFile.PrintFile.startRegion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.PrintFile.PrintFile.writeLine">
+<code class="descname">writeLine</code><span class="sig-paren">(</span><em>x1</em>, <em>y1</em>, <em>x2</em>, <em>y2</em>, <em>colour='#000000'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/PrintFile.html#PrintFile.writeLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.PrintFile.PrintFile.writeLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.PrintFile.PrintFile.writePolyline">
+<code class="descname">writePolyline</code><span class="sig-paren">(</span><em>polyline</em>, <em>colour='#000000'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/PrintFile.html#PrintFile.writePolyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.PrintFile.PrintFile.writePolyline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.PrintFile.PrintFile.writeText">
+<code class="descname">writeText</code><span class="sig-paren">(</span><em>text</em>, <em>x</em>, <em>y</em>, <em>colour='#000000'</em>, <em>fontsize=10</em>, <em>fontfamily='Verdana'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/PrintFile.html#PrintFile.writeText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.PrintFile.PrintFile.writeText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.util.Register">
 <span id="ccpn-util-register-module"></span><h2>ccpn.util.Register module<a class="headerlink" href="#module-ccpn.util.Register" title="Permalink to this headline">¶</a></h2>
 <p>Module Documentation here</p>
@@ -561,6 +640,48 @@ If <em>what</em> is a sequence of strings, only docstrings of a type in <em>what
 <dd><p>Return a listener that will modify doc strings from their  Python annotations.
 If <em>what</em> is a sequence of strings, only docstrings of a type in <em>what</em> will be processed.</p>
 <p>In the first version it adds type and  modifiability annotation to properties</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.util.SubclassLoader">
+<span id="ccpn-util-subclassloader-module"></span><h2>ccpn.util.SubclassLoader module<a class="headerlink" href="#module-ccpn.util.SubclassLoader" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ccpn.util.SubclassLoader.loadSubclasses">
+<code class="descclassname">ccpn.util.SubclassLoader.</code><code class="descname">loadSubclasses</code><span class="sig-paren">(</span><em>path: str</em>, <em>baseclass</em><span class="sig-paren">)</span> &rarr; set<a class="reference internal" href="../_modules/ccpn/util/SubclassLoader.html#loadSubclasses"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.SubclassLoader.loadSubclasses" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gather subclasses of baseclass from path</p>
+<p>This attempts to import any file in the directory that doesn&#8217;t start with a period or underscore,
+Then checks each class definition in that imported module for subclasses of the specified baseclass
+and finally returns the set of all classes it found.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.util.Svg">
+<span id="ccpn-util-svg-module"></span><h2>ccpn.util.Svg module<a class="headerlink" href="#module-ccpn.util.Svg" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.util.Svg.Svg">
+<em class="property">class </em><code class="descclassname">ccpn.util.Svg.</code><code class="descname">Svg</code><span class="sig-paren">(</span><em>path</em>, <em>xCount=1</em>, <em>yCount=1</em>, <em>width=800</em>, <em>height=800</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Svg.html#Svg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Svg.Svg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.PrintFile.PrintFile" title="ccpn.util.PrintFile.PrintFile"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.PrintFile.PrintFile</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.util.Svg.Svg.startRegion">
+<code class="descname">startRegion</code><span class="sig-paren">(</span><em>xOutputRegion</em>, <em>yOutputRegion</em>, <em>xNumber=0</em>, <em>yNumber=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Svg.html#Svg.startRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Svg.Svg.startRegion" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Svg.Svg.writeLine">
+<code class="descname">writeLine</code><span class="sig-paren">(</span><em>x1</em>, <em>y1</em>, <em>x2</em>, <em>y2</em>, <em>colour='#000000'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Svg.html#Svg.writeLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Svg.Svg.writeLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Svg.Svg.writePolyline">
+<code class="descname">writePolyline</code><span class="sig-paren">(</span><em>polyline</em>, <em>colour='#000000'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Svg.html#Svg.writePolyline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Svg.Svg.writePolyline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Svg.Svg.writeText">
+<code class="descname">writeText</code><span class="sig-paren">(</span><em>text</em>, <em>x</em>, <em>y</em>, <em>colour='#000000'</em>, <em>fontsize=10</em>, <em>fontfamily='Lucida Grande'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Svg.html#Svg.writeText"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Svg.Svg.writeText" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </div>
@@ -754,6 +875,95 @@ NB setting either parameter to 0 removes the undo stack.</p>
 </dd></dl>
 
 </div>
+<div class="section" id="module-ccpn.util.Update">
+<span id="ccpn-util-update-module"></span><h2>ccpn.util.Update module<a class="headerlink" href="#module-ccpn.util.Update" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.util.Update.UpdateAgent">
+<em class="property">class </em><code class="descclassname">ccpn.util.Update.</code><code class="descname">UpdateAgent</code><span class="sig-paren">(</span><em>version</em>, <em>showError=None</em>, <em>showInfo=None</em>, <em>askPassword=None</em>, <em>serverUser=None</em>, <em>server='http://www2.ccpn.ac.uk/'</em>, <em>serverDbRoot='ccpNmrUpdate'</em>, <em>serverDbFile='__UpdateData.db'</em>, <em>serverDownloadScript='cgi-bin/update/downloadFile'</em>, <em>serverUploadScript='cgi-bin/updateadmin/uploadFile'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.addFiles">
+<code class="descname">addFiles</code><span class="sig-paren">(</span><em>filePaths</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.addFiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.addFiles" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.diffUpdates">
+<code class="descname">diffUpdates</code><span class="sig-paren">(</span><em>updateFiles=None</em>, <em>write=&lt;built-in method write of _io.TextIOWrapper object&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.diffUpdates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.diffUpdates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.fetchUpdateDb">
+<code class="descname">fetchUpdateDb</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.fetchUpdateDb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.fetchUpdateDb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch list of updates from server.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.haveWriteAccess">
+<code class="descname">haveWriteAccess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.haveWriteAccess"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.haveWriteAccess" title="Permalink to this definition">¶</a></dt>
+<dd><p>See if can write files to local installation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.installChosen">
+<code class="descname">installChosen</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.installChosen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.installChosen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Download chosen server files to local installation.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.installUpdates">
+<code class="descname">installUpdates</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.installUpdates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.installUpdates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.isUpdateDifferent">
+<code class="descname">isUpdateDifferent</code><span class="sig-paren">(</span><em>filePath</em>, <em>fileHashCode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.isUpdateDifferent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.isUpdateDifferent" title="Permalink to this definition">¶</a></dt>
+<dd><p>See if local file is different from server file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateAgent.resetFromServer">
+<code class="descname">resetFromServer</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateAgent.resetFromServer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateAgent.resetFromServer" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.Update.UpdateFile">
+<em class="property">class </em><code class="descclassname">ccpn.util.Update.</code><code class="descname">UpdateFile</code><span class="sig-paren">(</span><em>installLocation</em>, <em>serverDbRoot</em>, <em>filePath</em>, <em>fileServerTime=None</em>, <em>fileStoredAs=None</em>, <em>fileHashCode=None</em>, <em>shouldInstall=True</em>, <em>shouldCommit=False</em>, <em>isNew=False</em>, <em>serverDownloadScript=None</em>, <em>serverUploadScript=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateFile.commitUpdate">
+<code class="descname">commitUpdate</code><span class="sig-paren">(</span><em>serverUser</em>, <em>serverPassword</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateFile.commitUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateFile.commitUpdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.Update.UpdateFile.installUpdate">
+<code class="descname">installUpdate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#UpdateFile.installUpdate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.UpdateFile.installUpdate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Update.calcHashCode">
+<code class="descclassname">ccpn.util.Update.</code><code class="descname">calcHashCode</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#calcHashCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.calcHashCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Update.downloadFile">
+<code class="descclassname">ccpn.util.Update.</code><code class="descname">downloadFile</code><span class="sig-paren">(</span><em>serverScript</em>, <em>serverDbRoot</em>, <em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#downloadFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.downloadFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Update.installUpdates">
+<code class="descclassname">ccpn.util.Update.</code><code class="descname">installUpdates</code><span class="sig-paren">(</span><em>version</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#installUpdates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.installUpdates" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.Update.lastModifiedTime">
+<code class="descclassname">ccpn.util.Update.</code><code class="descname">lastModifiedTime</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Update.html#lastModifiedTime"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Update.lastModifiedTime" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
 <div class="section" id="module-ccpn.util.Url">
 <span id="ccpn-util-url-module"></span><h2>ccpn.util.Url module<a class="headerlink" href="#module-ccpn.util.Url" title="Permalink to this headline">¶</a></h2>
 <p>Utilities for Url handling</p>
@@ -827,7 +1037,7 @@ codebases, and allows more flexibility.</p>
 
 <dl class="function">
 <dt id="ccpn.util.recursive_import.importAllPyfiles">
-<code class="descclassname">ccpn.util.recursive_import.</code><code class="descname">importAllPyfiles</code><span class="sig-paren">(</span><em>topDirectory</em>, <em>ignoreDirs=()</em>, <em>ignoreFiles=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/recursive_import.html#importAllPyfiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.recursive_import.importAllPyfiles" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.recursive_import.</code><code class="descname">importAllPyfiles</code><span class="sig-paren">(</span><em>topDirectory</em>, <em>ignoreDirs=()</em>, <em>ignoreFiles=()</em>, <em>addToSysPath: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/recursive_import.html#importAllPyfiles"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.recursive_import.importAllPyfiles" title="Permalink to this definition">¶</a></dt>
 <dd><p>Test import all python files in a directory tree.
 topDirectory must be (intended to be) on the Python path</p>
 </dd></dl>
@@ -876,13 +1086,17 @@ topDirectory must be (intended to be) on the Python path</p>
 <li><a class="reference internal" href="#module-ccpn.util.OrderedSet">ccpn.util.OrderedSet module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Path">ccpn.util.Path module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Phasing">ccpn.util.Phasing module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.PrintFile">ccpn.util.PrintFile module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Register">ccpn.util.Register module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Sorting">ccpn.util.Sorting module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.SphinxExtensions">ccpn.util.SphinxExtensions module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.SubclassLoader">ccpn.util.SubclassLoader module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.Svg">ccpn.util.Svg module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Tensor">ccpn.util.Tensor module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Ticks">ccpn.util.Ticks module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Time">ccpn.util.Time module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Undo">ccpn.util.Undo module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.Update">ccpn.util.Update module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.Url">ccpn.util.Url module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.jsonIo">ccpn.util.jsonIo module</a></li>
 <li><a class="reference internal" href="#module-ccpn.util.recursive_import">ccpn.util.recursive_import module</a></li>

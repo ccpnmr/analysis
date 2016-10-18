@@ -224,15 +224,16 @@ all of which should be self-explanatory.</p>
 <li class="toctree-l1"><a class="reference internal" href="ccpn.core.lib.html">ccpn.core.lib package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.AssignmentLib">ccpn.core.lib.AssignmentLib module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-ccpnnefio-module">ccpn.core.lib.CcpnNefIo module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.CcpnNefIo">ccpn.core.lib.CcpnNefIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.CcpnSorting">ccpn.core.lib.CcpnSorting module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-dataio-module">ccpn.core.lib.DataIo module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Documentation">ccpn.core.lib.Documentation module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-labelinglib-module">ccpn.core.lib.LabelingLib module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.LabellingLib">ccpn.core.lib.LabellingLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.MoleculeLib">ccpn.core.lib.MoleculeLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-pid-module">ccpn.core.lib.Pid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.RestraintLib">ccpn.core.lib.RestraintLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.SpectrumLib">ccpn.core.lib.SpectrumLib module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Summary">ccpn.core.lib.Summary module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
 </ul>
 </li>
@@ -269,6 +270,50 @@ Atoms that are covalently bound to this Atom</p>
 <dt id="ccpn.core.Atom.Atom.className">
 <code class="descname">className</code><em class="property"> = 'Atom'</em><a class="headerlink" href="#ccpn.core.Atom.Atom.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Atom.Atom.componentAtoms">
+<code class="descname">componentAtoms</code><a class="headerlink" href="#ccpn.core.Atom.Atom.componentAtoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[Atom]</em>, <em>immutable</em> - 
+Atoms that are combined to make up this atom - reverse of &#8216;compoundAtoms&#8217;</p>
+<p>For simple atoms this is empty.
+For wildcard atoms (e.g. HB%, QB) this gives the individual atoms that combine into atom.
+For non-stereo atoms (e.g. HBx, HBy, HGx%) it gives the two alternative stereospecific atoms</p>
+<p>Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13
+and is itself a component of HGx%, HGy%, HG%, and QG</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Atom.Atom.compoundAtoms">
+<code class="descname">compoundAtoms</code><a class="headerlink" href="#ccpn.core.Atom.Atom.compoundAtoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[Atom]</em>, <em>immutable</em> - 
+wildcard-, pseudo-, and nonstereo- atoms that incorporate this atom.
+- reverse of &#8216;componentAtoms&#8217;</p>
+<p>Compound atoms may be nested - e.g. Valine HG1% has the components HG11, HG12, HG13
+and is itself a component of HGx%, HGy%, HG%, and QG</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Atom.Atom.exchangesWithWater">
+<code class="descname">exchangesWithWater</code><a class="headerlink" href="#ccpn.core.Atom.Atom.exchangesWithWater" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>bool</em>, <em>immutable</em> - 
+True if atom exchanges with water on a msx time scale, and so is mostly unobservable.</p>
+<p>Holds for e.g. OH atoms, NH£ groups and His side chain NH protons, but NOT for amide protons</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Atom.Atom.isEquivalentAtomGroup">
+<code class="descname">isEquivalentAtomGroup</code><a class="headerlink" href="#ccpn.core.Atom.Atom.isEquivalentAtomGroup" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>bool=None</em>, <em>immutable</em> - 
+Is this atom a group of equivalent atoms?
+Values are:</p>
+<ul class="simple">
+<li>True  (group of equivalent atoms, e.g. H%, ALA HB%, LYS HZ%, VAL HG1% or any M pseudoatom)</li>
+<li>False (all single atoms, all xy nonstereo atoms, LEU HB%, ILE HG1%, VAL HG%,
+or any Q non-aromatic pseudoatom)</li>
+<li>None  = sometimes equivalent (TYR and PHE HD%, HE%, CD%, CE%, QD, QE)</li>
+</ul>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Atom.Atom.name">
@@ -424,6 +469,13 @@ Free-form text comment.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.core.Chain.Chain.complexes">
+<code class="descname">complexes</code><a class="headerlink" href="#ccpn.core.Chain.Chain.complexes" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[ccpn.core.Complex.Complex, ...]</em>, <em>mutable</em> - 
+Complexes that contain Chain</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.compoundName">
 <code class="descname">compoundName</code><a class="headerlink" href="#ccpn.core.Chain.Chain.compoundName" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>immutable</em> - 
@@ -477,6 +529,13 @@ The role of the chain in a molecular complex or sample - free text. Could be &#8
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.core.Chain.Chain.sampleComponents">
+<code class="descname">sampleComponents</code><a class="headerlink" href="#ccpn.core.Chain.Chain.sampleComponents" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[ccpn.core.SampleComponent.SampleComponent, ...]</em>, <em>immutable</em> - 
+SampleComponents matching to Chain (based on chain.compoundName)</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.shortClassName">
 <code class="descname">shortClassName</code><em class="property"> = 'MC'</em><a class="headerlink" href="#ccpn.core.Chain.Chain.shortClassName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Short class name, for PID.</p>
@@ -490,12 +549,10 @@ short form of name</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Chain.Chain.substance">
-<code class="descname">substance</code><a class="headerlink" href="#ccpn.core.Chain.Chain.substance" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>ccpn.core.Substance.Substance=None</em>, <em>immutable</em> - 
-Substance with sequence matching to Chain</p>
-<p>If there are multiple matches, select labeling==&#8217;std&#8217;
-or, failing that, the first found (sorting alphabetically on labeling)</p>
+<dt id="ccpn.core.Chain.Chain.substances">
+<code class="descname">substances</code><a class="headerlink" href="#ccpn.core.Chain.Chain.substances" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[ccpn.core.Substance.Substance, ...]</em>, <em>immutable</em> - 
+Substances matching to Chain (based on chain.compoundName)</p>
 </dd></dl>
 
 </dd></dl>
@@ -661,19 +718,38 @@ Measurement unit of ChemicalShiftList. Should always be &#8216;ppm&#8217;</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-ccpn.core.Complex">
-<span id="ccpn-core-complex-module"></span><h2>ccpn.core.Complex module<a class="headerlink" href="#module-ccpn.core.Complex" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<div class="section" id="ccpn-core-complex-module">
+<h2>ccpn.core.Complex module<a class="headerlink" href="#ccpn-core-complex-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.core.Complex"></span><dl class="class">
 <dt id="ccpn.core.Complex.Complex">
 <em class="property">class </em><code class="descclassname">ccpn.core.Complex.</code><code class="descname">Complex</code><a class="reference internal" href="../_modules/ccpn/core/Complex.html#Complex"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Complex.Complex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
 <p>A group of Chains, which can be used as a single object to describe a
 molecular complex.</p>
-<p>NB NOT YET IMPLEMENTED</p>
+<dl class="attribute">
+<dt id="ccpn.core.Complex.Complex.chains">
+<code class="descname">chains</code><a class="headerlink" href="#ccpn.core.Complex.Complex.chains" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[ccpn.core.Chain.Chain, ...]</em>, <em>mutable</em> - 
+Chains that make up Complex.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Complex.Complex.className">
 <code class="descname">className</code><em class="property"> = 'Complex'</em><a class="headerlink" href="#ccpn.core.Complex.Complex.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Complex.Complex.name">
+<code class="descname">name</code><a class="headerlink" href="#ccpn.core.Complex.Complex.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+Name of Complex, part of identifier</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Complex.Complex.rename">
+<code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Complex.html#Complex.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Complex.Complex.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename Complex, changing its name and Pid</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Complex.Complex.shortClassName">
@@ -750,7 +826,7 @@ Keyword-value dictionary of parameters.
 NB the value is a copy - modifying it will not modify the actual data.
 Use the setParameter, deleteParameter, clearParameters, and updateParameters
 methods to modify the parameters.</p>
-<p>Dictionary alues can be anything that can be exported to JSON,
+<p>Dictionary values can be anything that can be exported to JSON,
 including OrderedDict, numpy.ndarray, ccpn.util.Tensor,
 or pandas DataFrame, Series, or Panel</p>
 </dd></dl>
@@ -883,7 +959,7 @@ multiple calculations that do not have intermediate DataSets stored</p>
 
 <dl class="method">
 <dt id="ccpn.core.DataSet.DataSet.newRestraintList">
-<code class="descname">newRestraintList</code><span class="sig-paren">(</span><em>restraintType</em>, <em>name: str = None</em>, <em>origin: str = None</em>, <em>comment: str = None</em>, <em>unit: str = None</em>, <em>potentialType: str = 'unknown'</em>, <em>tensorMagnitude: float = 0.0</em>, <em>tensorRhombicity: float = 0.0</em>, <em>tensorIsotropicValue: float = 0.0</em>, <em>tensorChainCode: str = None</em>, <em>tensorSequenceCode: str = None</em>, <em>tensorResidueType: str = None</em>, <em>serial=None</em>, <em>itemLength=None</em><span class="sig-paren">)</span> &rarr; ccpn.core.RestraintList.RestraintList<a class="headerlink" href="#ccpn.core.DataSet.DataSet.newRestraintList" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newRestraintList</code><span class="sig-paren">(</span><em>restraintType</em>, <em>name: str = None</em>, <em>origin: str = None</em>, <em>comment: str = None</em>, <em>unit: str = None</em>, <em>potentialType: str = 'unknown'</em>, <em>tensorMagnitude: float = 0.0</em>, <em>tensorRhombicity: float = 0.0</em>, <em>tensorIsotropicValue: float = 0.0</em>, <em>tensorChainCode: str = None</em>, <em>tensorSequenceCode: str = None</em>, <em>tensorResidueType: str = None</em>, <em>serial=None</em>, <em>restraintItemLength=None</em><span class="sig-paren">)</span> &rarr; ccpn.core.RestraintList.RestraintList<a class="headerlink" href="#ccpn.core.DataSet.DataSet.newRestraintList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new RestraintList of type restraintType within DataSet</p>
 </dd></dl>
 
@@ -1289,6 +1365,13 @@ Chemical shifts belonging to NmrAtom</p>
 <code class="descname">className</code><em class="property"> = 'NmrAtom'</em><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="attribute">
+<dt id="ccpn.core.NmrAtom.NmrAtom.comment">
+<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.comment" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>mutable</em> - 
+Free-form text comment</p>
+</dd></dl>
+
 <dl class="method">
 <dt id="ccpn.core.NmrAtom.NmrAtom.deassign">
 <code class="descname">deassign</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrAtom.html#NmrAtom.deassign"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.deassign" title="Permalink to this definition">¶</a></dt>
@@ -1437,7 +1520,8 @@ NmrResidues belonging to NmrChain that are NOT defined relative to another NmrRe
 <dl class="method">
 <dt id="ccpn.core.NmrChain.NmrChain.newNmrResidue">
 <code class="descname">newNmrResidue</code><span class="sig-paren">(</span><em>sequenceCode: int | str = None</em>, <em>residueType: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrResidue.NmrResidue<a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.newNmrResidue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new NmrResidue within NmrChain</p>
+<dd><p>Create new NmrResidue within NmrChain.
+If NmrChain is connected, append the new NmrResidue to the end of the stretch.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1623,7 +1707,7 @@ Illegal for offset NmrResidues</p>
 
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.newNmrAtom">
-<code class="descname">newNmrAtom</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>isotopeCode: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrAtom.NmrAtom<a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.newNmrAtom" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newNmrAtom</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>isotopeCode: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrAtom.NmrAtom<a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.newNmrAtom" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new NmrAtom within NmrResidue. If name is None, use default name
 (of form e.g. <a class="reference external" href="mailto:'H&#37;&#52;&#48;211">'H<span>&#64;</span>211</a>&#8216;, <a class="reference external" href="mailto:'N&#37;&#52;&#48;45">'N<span>&#64;</span>45</a>&#8216;, ...)</p>
 </dd></dl>
@@ -1928,6 +2012,18 @@ height of Peak</p>
 height error of Peak</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Peak.Peak.isFullyAssigned">
+<code class="descname">isFullyAssigned</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.isFullyAssigned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.isFullyAssigned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether peak is fully assigned</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Peak.Peak.isPartlyAssigned">
+<code class="descname">isPartlyAssigned</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.isPartlyAssigned"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.isPartlyAssigned" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether peak is partly assigned</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Peak.Peak.lineWidths">
 <code class="descname">lineWidths</code><a class="headerlink" href="#ccpn.core.Peak.Peak.lineWidths" title="Permalink to this definition">¶</a></dt>
@@ -2068,12 +2164,12 @@ PeakListViews showing Spectrum</p>
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaks1d">
 <code class="descname">pickPeaks1d</code><span class="sig-paren">(</span><em>dataRange</em>, <em>intensityRange=None</em>, <em>size: int = 3</em>, <em>mode: str = 'wrap'</em><span class="sig-paren">)</span> &rarr; List[Peak]<a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1d" title="Permalink to this definition">¶</a></dt>
-<dd><p>Pick 1D peaks form data1d float array</p>
+<dd><p>Pick 1D peaks from a dataRange (E.G selection in ViewBox)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaks1dFiltered">
-<code class="descname">pickPeaks1dFiltered</code><span class="sig-paren">(</span><em>size: int = 9</em>, <em>mode: str = 'wrap'</em>, <em>ignoredRegions=None</em>, <em>noiseThreshold=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1dFiltered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1dFiltered" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaks1dFiltered</code><span class="sig-paren">(</span><em>size: int = 9</em>, <em>mode: str = 'wrap'</em>, <em>ignoredRegions=None</em>, <em>noiseThreshold=None</em>, <em>negativePeaks=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaks1dFiltered"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaks1dFiltered" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pick 1D peaks form data in  self.spectrum</p>
 </dd></dl>
 
@@ -2244,7 +2340,7 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.createPolymerSubstance">
-<code class="descname">createPolymerSubstance</code><span class="sig-paren">(</span><em>sequence: Sequence[str], name: str, labeling: str = None, userCode: str = None, smiles: str = None, synonyms: Sequence[str] = (), comment: str = None, startNumber: int = 1, molType: str = None, isCyclic: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.createPolymerSubstance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">createPolymerSubstance</code><span class="sig-paren">(</span><em>sequence: Sequence[str], name: str, labelling: str = None, userCode: str = None, smiles: str = None, synonyms: Sequence[str] = (), comment: str = None, startNumber: int = 1, molType: str = None, isCyclic: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.createPolymerSubstance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make new Substance from sequence of residue codes, using default linking and variants</p>
 <p>NB: For more complex substances, you must use advanced, API-level commands.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -2254,7 +2350,7 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>sequence</strong> (<em>Sequence</em>) &#8211; string of one-letter codes or sequence of residueNames</li>
 <li><strong>name</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; name of new substance</li>
-<li><strong>labeling</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; labeling for new substance. Optional - None means &#8216;natural abundance&#8217;</li>
+<li><strong>labelling</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; labelling for new substance. Optional - None means &#8216;natural abundance&#8217;</li>
 <li><strong>userCode</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; user code for new substance (optional)</li>
 <li><strong>smiles</strong> (<a class="reference internal" href="ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.str" title="ccpn.core.lib.Pid.Pid.str"><em>str</em></a>) &#8211; smiles string for new substance (optional)</li>
 <li><strong>synonyms</strong> (<em>Sequence[str]</em>) &#8211; synonyms for Substance name</li>
@@ -2298,15 +2394,14 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 <dt id="ccpn.core.Project.Project.duplicateNotifier">
 <code class="descname">duplicateNotifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.duplicateNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.duplicateNotifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>register copy of notifier for a new className and target.
-Intended for onceOnly=True notifiers. It is up to the user to make sure the calling</p>
-<blockquote>
-<div>interface matches the action</div></blockquote>
+Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
+interface matches the action</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.execute">
 <code class="descname">execute</code><span class="sig-paren">(</span><em>pid</em>, <em>funcName</em>, <em>*params</em>, <em>**kwparams</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.execute"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.execute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the object identified by pid, execute object.funcName(<a href="#id1"><span class="problematic" id="id2">*</span></a>params, <a href="#id3"><span class="problematic" id="id4">**</span></a>kwparams)
+<dd><p>Get the object identified by pid, execute object.funcName(*params, **kwparams)
 and return the result</p>
 </dd></dl>
 
@@ -2325,8 +2420,8 @@ and return the result</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.fetchSubstance">
-<code class="descname">fetchSubstance</code><span class="sig-paren">(</span><em>name: str</em>, <em>labeling: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.fetchSubstance" title="Permalink to this definition">¶</a></dt>
-<dd><p>get or create Substance with given name and labeling.</p>
+<code class="descname">fetchSubstance</code><span class="sig-paren">(</span><em>name: str</em>, <em>labelling: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.fetchSubstance" title="Permalink to this definition">¶</a></dt>
+<dd><p>get or create Substance with given name and labelling.</p>
 </dd></dl>
 
 <dl class="method">
@@ -2571,7 +2666,7 @@ and return the result</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.loadData">
-<code class="descname">loadData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.loadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.loadData" title="Permalink to this definition">¶</a></dt>
+<code class="descname">loadData</code><span class="sig-paren">(</span><em>path: str</em><span class="sig-paren">)</span> &rarr; List[T]=None<a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.loadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.loadData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load data from path, determining type first.</p>
 </dd></dl>
 
@@ -2619,8 +2714,14 @@ name of Project</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Project.Project.newComplex">
+<code class="descname">newComplex</code><span class="sig-paren">(</span><em>name: str</em>, <em>chains=()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Complex.Complex<a class="headerlink" href="#ccpn.core.Project.Project.newComplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Complex</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Project.Project.newDataSet">
-<code class="descname">newDataSet</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>programName: str = None</em>, <em>programVersion: str = None</em>, <em>dataPath: str = None</em>, <em>creationDate: datetime.datetime = None</em>, <em>uuid: str = None</em>, <em>comment: str = None</em>, <em>serial: int = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.DataSet.DataSet<a class="headerlink" href="#ccpn.core.Project.Project.newDataSet" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newDataSet</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>programName: str = None</em>, <em>programVersion: str = None</em>, <em>dataPath: str = None</em>, <em>creationDate: datetime.datetime = None</em>, <em>uuid: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.DataSet.DataSet<a class="headerlink" href="#ccpn.core.Project.Project.newDataSet" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new DataSet</p>
 </dd></dl>
 
@@ -2677,7 +2778,7 @@ Use Project.loadData or Project.createDummySpectrum instead</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newSubstance">
-<code class="descname">newSubstance</code><span class="sig-paren">(</span><em>name: str</em>, <em>labeling: str = None</em>, <em>substanceType: str = 'Molecule'</em>, <em>userCode: str = None</em>, <em>smiles: str = None</em>, <em>inChi: str = None</em>, <em>casNumber: str = None</em>, <em>empiricalFormula: str = None</em>, <em>molecularMass: float = None</em>, <em>comment: str = None</em>, <em>synonyms: Sequence[str] = ()</em>, <em>atomCount: int = None</em>, <em>bondCount: int = None</em>, <em>ringCount: int = None</em>, <em>hBondDonorCount: int = None</em>, <em>hBondAcceptorCount: int = None</em>, <em>polarSurfaceArea: float = None</em>, <em>logPartitionCoefficient: float = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.newSubstance" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newSubstance</code><span class="sig-paren">(</span><em>name: str</em>, <em>labelling: str = None</em>, <em>substanceType: str = 'Molecule'</em>, <em>userCode: str = None</em>, <em>smiles: str = None</em>, <em>inChi: str = None</em>, <em>casNumber: str = None</em>, <em>empiricalFormula: str = None</em>, <em>molecularMass: float = None</em>, <em>comment: str = None</em>, <em>synonyms: Sequence[str] = ()</em>, <em>atomCount: int = 0</em>, <em>bondCount: int = 0</em>, <em>ringCount: int = 0</em>, <em>hBondDonorCount: int = 0</em>, <em>hBondAcceptorCount: int = 0</em>, <em>polarSurfaceArea: float = None</em>, <em>logPartitionCoefficient: float = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Substance.Substance<a class="headerlink" href="#ccpn.core.Project.Project.newSubstance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new substance WITHOUT storing the sequence internally
 (and hence not suitable for making chains). SubstanceType defaults to &#8216;Molecule&#8217;.</p>
 <p>ADVANCED alternatives are &#8216;Cell&#8217; and &#8216;Material&#8217;</p>
@@ -3220,18 +3321,16 @@ Residue sequence code and id (e.g. &#8216;1&#8217;, &#8216;127B&#8217;)</p>
 <p>Restraint. The type is defined in the containing RestraintList.</p>
 <p>Most of the values are the consensus of the values in the contained
 RestraintContributions. In the normal case, where you have only one
-RestraintContribution per Restraint, you can get and set the values</p>
-<blockquote>
-<div>directly from the Restraint without reference to the RestraintContributions.</div></blockquote>
+RestraintContribution per Restraint, you can get and set the values
+directly from the Restraint without reference to the RestraintContributions.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Restraint.Restraint.additionalLowerLimit">
 <code class="descname">additionalLowerLimit</code><a class="headerlink" href="#ccpn.core.Restraint.Restraint.additionalLowerLimit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 additionalLowerLimit of restraint - consensus of all contributions or None
-Used for potential functions that require more than one parameter, typically for</p>
-<blockquote>
-<div>parabolic-linear potentials where the additionalLowerLimit marks the transition from
-parabolic to linear potential</div></blockquote>
+Used for potential functions that require more than one parameter, typically for
+parabolic-linear potentials where the additionalLowerLimit marks the transition from
+parabolic to linear potential</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3239,10 +3338,9 @@ parabolic to linear potential</div></blockquote>
 <code class="descname">additionalUpperLimit</code><a class="headerlink" href="#ccpn.core.Restraint.Restraint.additionalUpperLimit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 additionalUpperLimit of restraint - consensus of all contributions or None.
-Used for potential functions that require more than one parameter, typically for</p>
-<blockquote>
-<div>parabolic-linear potentials where the additionalUpperLimit marks the transition from
-parabolic to linear potential</div></blockquote>
+Used for potential functions that require more than one parameter, typically for
+parabolic-linear potentials where the additionalUpperLimit marks the transition from
+parabolic to linear potential</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3357,12 +3455,10 @@ weight of restraint - consensus of all contributions or None</p>
 <dt id="ccpn.core.Restraint.createSimpleRestraint">
 <code class="descclassname">ccpn.core.Restraint.</code><code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><em>self: ccpn.core.RestraintList.RestraintList</em>, <em>comment: str = None</em>, <em>figureOfMerit: float = None</em>, <em>peaks: Sequence[ccpn.core.Peak.Peak] = ()</em>, <em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale=1.0</em>, <em>vectorLength=None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Restraint.Restraint<a class="reference internal" href="../_modules/ccpn/core/Restraint.html#createSimpleRestraint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Restraint.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Restraint with a single RestraintContribution within the RestraintList.
-The function takes all the information needed and creates the RestraintContribution as</p>
-<blockquote>
-<div><p>well as the Restraint proper.</p>
-<p>This function should be used routinely, unless there is a need to crreate more complex
+The function takes all the information needed and creates the RestraintContribution as
+well as the Restraint proper.</p>
+<p>This function should be used routinely, unless there is a need to create more complex
 Restraints.</p>
-</div></blockquote>
 </dd></dl>
 
 </div>
@@ -3388,10 +3484,9 @@ Example value: (&#8216;A.127.ALA.HA&#8217;,&#8217;A.130.SER.H&#8217;)</p>
 <code class="descname">additionalLowerLimit</code><a class="headerlink" href="#ccpn.core.RestraintContribution.RestraintContribution.additionalLowerLimit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 additionalLowerLimit of contribution
-Used for potential functions that require more than one parameter, typically for</p>
-<blockquote>
-<div>parabolic-linear potentials where the additionalLowerLimit marks the transition from
-parabolic to linear potential</div></blockquote>
+Used for potential functions that require more than one parameter, typically for
+parabolic-linear potentials where the additionalLowerLimit marks the transition from
+parabolic to linear potential</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3399,10 +3494,9 @@ parabolic to linear potential</div></blockquote>
 <code class="descname">additionalUpperLimit</code><a class="headerlink" href="#ccpn.core.RestraintContribution.RestraintContribution.additionalUpperLimit" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 additionalUpperLimit of contribution.
-Used for potential functions that require more than one parameter, typically for</p>
-<blockquote>
-<div>parabolic-linear potentials where the additionalUpperLimit marks the transition from
-parabolic to linear potential</div></blockquote>
+Used for potential functions that require more than one parameter, typically for
+parabolic-linear potentials where the additionalUpperLimit marks the transition from
+parabolic to linear potential</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3460,7 +3554,8 @@ restraint items of contribution - given as a tuple of tuples of AtomId (not Pid)
 <dt id="ccpn.core.RestraintContribution.RestraintContribution.scale">
 <code class="descname">scale</code><a class="headerlink" href="#ccpn.core.RestraintContribution.RestraintContribution.scale" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
-scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled value</p>
+scaling factor (relevant mainly for RDC) to be multiplied with targetValue to get scaled
+value</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3508,8 +3603,8 @@ weight of contribution</p>
 <em class="property">class </em><code class="descclassname">ccpn.core.RestraintList.</code><code class="descname">RestraintList</code><span class="sig-paren">(</span><em>project</em>, <em>wrappedData</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/RestraintList.html#RestraintList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
 <p>An object containing Restraints. Note: the object is not a (subtype of a) Python list.
-To access all rRstraint objects, use RestraintList.restraints.</p>
-<p>RThe type of restraint is determined by the restraintType attribute.
+To access all Restraint objects, use RestraintList.restraints.</p>
+<p>The type of restraint is determined by the restraintType attribute.
 Typical examples are Distance, Dihedral and Rdc restraints, but can also be used to store
 measurements or derived values (Rdc, J coupling, T1, T2, Chemical Shift, ...)</p>
 <dl class="attribute">
@@ -3528,12 +3623,10 @@ Free-form text comment</p>
 <dt id="ccpn.core.RestraintList.RestraintList.createSimpleRestraint">
 <code class="descname">createSimpleRestraint</code><span class="sig-paren">(</span><em>comment: str = None</em>, <em>figureOfMerit: float = None</em>, <em>peaks: Sequence[ccpn.core.Peak.Peak] = ()</em>, <em>targetValue: float = None</em>, <em>error: float = None</em>, <em>weight: float = 1.0</em>, <em>upperLimit: float = None</em>, <em>lowerLimit: float = None</em>, <em>additionalUpperLimit: float = None</em>, <em>additionalLowerLimit: float = None</em>, <em>scale=1.0</em>, <em>vectorLength=None</em>, <em>restraintItems: Sequence[T_co] = ()</em><span class="sig-paren">)</span> &rarr; ccpn.core.Restraint.Restraint<a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.createSimpleRestraint" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a Restraint with a single RestraintContribution within the RestraintList.
-The function takes all the information needed and creates the RestraintContribution as</p>
-<blockquote>
-<div><p>well as the Restraint proper.</p>
-<p>This function should be used routinely, unless there is a need to crreate more complex
+The function takes all the information needed and creates the RestraintContribution as
+well as the Restraint proper.</p>
+<p>This function should be used routinely, unless there is a need to create more complex
 Restraints.</p>
-</div></blockquote>
 </dd></dl>
 
 <dl class="attribute">
@@ -3795,7 +3888,7 @@ actual sample name</p>
 
 <dl class="method">
 <dt id="ccpn.core.Sample.Sample.newSampleComponent">
-<code class="descname">newSampleComponent</code><span class="sig-paren">(</span><em>name: str</em>, <em>labeling: str = None</em>, <em>role: str = None</em>, <em>concentration: float = None</em>, <em>concentrationError: float = None</em>, <em>concentrationUnit: str = None</em>, <em>purity: float = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.SampleComponent.SampleComponent<a class="headerlink" href="#ccpn.core.Sample.Sample.newSampleComponent" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newSampleComponent</code><span class="sig-paren">(</span><em>name: str</em>, <em>labelling: str = None</em>, <em>role: str = None</em>, <em>concentration: float = None</em>, <em>concentrationError: float = None</em>, <em>concentrationUnit: str = None</em>, <em>purity: float = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.SampleComponent.SampleComponent<a class="headerlink" href="#ccpn.core.Sample.Sample.newSampleComponent" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new SampleComponent within Sample</p>
 <p>Automatically creates the corresponding Substance if the name is not already taken</p>
 </dd></dl>
@@ -3872,8 +3965,15 @@ SpectrumHits that were found using Sample</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
 <p>A Samplecomponent indicates a Substance contained in a specific Sample,
 (e.g. protein, buffer, salt), and its  concentrations.</p>
-<p>The Substance referred to is defined by the &#8216;name&#8217; and &#8216;labeling&#8217; attributes.
-FOr this reason teh SampleCOmponent cannot be renamed. See Substance.</p>
+<p>The Substance referred to is defined by the &#8216;name&#8217; and &#8216;labelling&#8217; attributes.
+For this reason the SampleComponent cannot be renamed. See Substance.</p>
+<dl class="attribute">
+<dt id="ccpn.core.SampleComponent.SampleComponent.chains">
+<code class="descname">chains</code><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.chains" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[ccpn.core.Chain.Chain, ...]</em>, <em>immutable</em> - 
+ccpn.Chains that correspond to ccpn.SampleComponent (if defined)</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.SampleComponent.SampleComponent.className">
 <code class="descname">className</code><em class="property"> = 'SampleComponent'</em><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.className" title="Permalink to this definition">¶</a></dt>
@@ -3907,10 +4007,22 @@ Unit of SampleComponent.concentration, one of: &#8216;Molar&#8217;, &#8216;g/L&#
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.SampleComponent.SampleComponent.labeling">
-<code class="descname">labeling</code><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.labeling" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.SampleComponent.SampleComponent.isotopeCode2Fraction">
+<code class="descname">isotopeCode2Fraction</code><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.isotopeCode2Fraction" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Dict[str, float]</em>, <em>mutable</em> - 
+{isotopeCode:fraction} dictionary giving uniform isotope percentages</p>
+<p>isotopeCodes are of the form &#8216;12C&#8217;, &#8216;13C&#8217;, and all relevant isotopes for a given
+nucleus must be entered. Fractions must add up to 1.0 for each element.</p>
+<p>Example value:
+{&#8216;12C&#8217;:0.289, &#8216;13C&#8217;:0.711, &#8216;1H&#8217;:0.99985, &#8216;2H&#8217;:0.00015}</p>
+<p>NBNB the internal dictionary is returned directly without checks or encapsulation</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.SampleComponent.SampleComponent.labelling">
+<code class="descname">labelling</code><a class="headerlink" href="#ccpn.core.SampleComponent.SampleComponent.labelling" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>immutable</em> - 
-labeling descriptor of SampleComponent and corresponding substance</p>
+labelling descriptor of SampleComponent and corresponding substance</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4230,9 +4342,8 @@ the spectrum dimensions.</p>
 The dimensions are dimension numbers (one-origin]
 transfertype is one of (in order of increasing priority):
 &#8216;onebond&#8217;, &#8216;Jcoupling&#8217;, &#8216;Jmultibond&#8217;, &#8216;relayed&#8217;, &#8216;relayed-alternate&#8217;, &#8216;through-space&#8217;
-isIndirect is used where there is more than one successive transfer step;</p>
-<blockquote>
-<div>it is combined with the highest-priority transferType in the transfer path.</div></blockquote>
+isIndirect is used where there is more than one successive transfer step;
+it is combined with the highest-priority transferType in the transfer path.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4282,7 +4393,7 @@ level multiplier for negative contours</p>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.newIntegralList">
-<code class="descname">newIntegralList</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.IntegralList.IntegralList<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newIntegralList" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newIntegralList</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>symbolColour: str = None</em>, <em>textColour: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.IntegralList.IntegralList<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newIntegralList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new IntegralList within Spectrum</p>
 </dd></dl>
 
@@ -4904,7 +5015,8 @@ Coordinate data to be added later</p>
 <code class="descname">atomIds</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.atomIds" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[str, ...]</em>, <em>immutable</em> - 
 Tuple of atom id (&#8216;chainCode.sequenceCode.residueType.atomName&#8217; for atoms making up
-structure ensemble
+structure ensemble. Note that the identifier uses IUPAC atom names and Coordinate-linked
+chain and sequence specifiers, which may not match the Chains.
 The atom IDs and their order is the same for all Models in the ensemble.</p>
 </dd></dl>
 
@@ -5080,7 +5192,7 @@ The residue IDs and their order is the same for all Models in the ensemble.</p>
 <em class="property">class </em><code class="descclassname">ccpn.core.Substance.</code><code class="descname">Substance</code><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
 <p>A Substance is a chemical entity or material that can be added to a Sample.
-Substances are defined by their name and labeling attributes (labeling defaults to None).
+Substances are defined by their name and labelling attributes (labelling defaults to None).
 Renaming a Substance will also rename all SampleComponents and SpectrumHits associated with
 it, so as to preserve the link between the objects.</p>
 <p>The most common case (by far) is substanceType &#8216;Molecule&#8217;, which corresponds to a chemical entity,
@@ -5094,14 +5206,14 @@ Materials are used to describe chemical mixtures, such as fetal calf serum, alga
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.atomCount">
 <code class="descname">atomCount</code><a class="headerlink" href="#ccpn.core.Substance.Substance.atomCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int=None</em>, <em>mutable</em> - 
+<dd><p>- <em>int</em>, <em>mutable</em> - 
 Number of atoms in the molecule - for Molecular substances</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.bondCount">
 <code class="descname">bondCount</code><a class="headerlink" href="#ccpn.core.Substance.Substance.bondCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int=None</em>, <em>mutable</em> - 
+<dd><p>- <em>int</em>, <em>mutable</em> - 
 Number of bonds in the molecule - for Molecular substances</p>
 </dd></dl>
 
@@ -5116,13 +5228,19 @@ CAS number string - for substances that have one</p>
 <dt id="ccpn.core.Substance.Substance.chains">
 <code class="descname">chains</code><a class="headerlink" href="#ccpn.core.Substance.Substance.chains" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[ccpn.core.Chain.Chain, ...]</em>, <em>immutable</em> - 
-ccpn.Chains that correspond to the sequence of ccpn.Substance (if defined)</p>
+ccpn.Chains that correspond to ccpn.Substance (if defined)</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.className">
 <code class="descname">className</code><em class="property"> = 'Substance'</em><a class="headerlink" href="#ccpn.core.Substance.Substance.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Substance.Substance.clearSpecificAtomLabelling">
+<code class="descname">clearSpecificAtomLabelling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.clearSpecificAtomLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.clearSpecificAtomLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clear specificAtomLabelling</p>
+</dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.comment">
@@ -5144,17 +5262,26 @@ Free-form text comment</p>
 Empirical molecular formula string - for substances that have one</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Substance.Substance.getSpecificAtomLabelling">
+<code class="descname">getSpecificAtomLabelling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.getSpecificAtomLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.getSpecificAtomLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get specificAtomLabelling dictionary for atom.
+atom may be an Atom object, an atomId or an atom Pid</p>
+<p>returns dictionary of the form e.g.
+{&#8216;12C&#8217;:0.32, &#8216;13C&#8217;:0.68}</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.hBondAcceptorCount">
 <code class="descname">hBondAcceptorCount</code><a class="headerlink" href="#ccpn.core.Substance.Substance.hBondAcceptorCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int=None</em>, <em>mutable</em> - 
+<dd><p>- <em>int</em>, <em>mutable</em> - 
 Number of hydrogen bond acceptors in the molecule - for Molecular substances</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.hBondDonorCount">
 <code class="descname">hBondDonorCount</code><a class="headerlink" href="#ccpn.core.Substance.Substance.hBondDonorCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int=None</em>, <em>mutable</em> - 
+<dd><p>- <em>int</em>, <em>mutable</em> - 
 Number of hydrogen bond donors in the molecule - for Molecular substances</p>
 </dd></dl>
 
@@ -5166,10 +5293,10 @@ inChi string - for substances that have one</p>
 </dd></dl>
 
 <dl class="attribute">
-<dt id="ccpn.core.Substance.Substance.labeling">
-<code class="descname">labeling</code><a class="headerlink" href="#ccpn.core.Substance.Substance.labeling" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.core.Substance.Substance.labelling">
+<code class="descname">labelling</code><a class="headerlink" href="#ccpn.core.Substance.Substance.labelling" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>immutable</em> - 
-labeling descriptor of Substance (default is &#8216;std&#8217;)</p>
+labelling descriptor of Substance (default is &#8216;std&#8217;)</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5209,17 +5336,25 @@ There should be only one reference spectrum for each experiment type</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Substance.Substance.removeSpecificAtomLabelling">
+<code class="descname">removeSpecificAtomLabelling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.removeSpecificAtomLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.removeSpecificAtomLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove specificAtomLabelling for atom designated by atomId</p>
+<p>NBNB labelling is removed for the matching atom in all chains that match the Substance
+also if the other chains have a different numbering.</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Substance.Substance.rename">
-<code class="descname">rename</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>labeling: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename Substance, changing its name and/or labeling and Pid, and rename
+<code class="descname">rename</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>labelling: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.rename" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rename Substance, changing its name and/or labelling and Pid, and rename
 SampleComponents and SpectrumHits with matching names. If name is None, the existing value w
-ill be used. Labeling &#8216;None&#8217;  means &#8216;Natural abundance&#8217;</p>
+ill be used. Labelling &#8216;None&#8217;  means &#8216;Natural abundance&#8217;</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.ringCount">
 <code class="descname">ringCount</code><a class="headerlink" href="#ccpn.core.Substance.Substance.ringCount" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int=None</em>, <em>mutable</em> - 
+<dd><p>- <em>int</em>, <em>mutable</em> - 
 Number of rings in the molecule - for Molecular substances</p>
 </dd></dl>
 
@@ -5241,6 +5376,17 @@ substance.createChain function</p>
 for other molecules to a comma-separated tuple of three-letter codes</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Substance.Substance.setSpecificAtomLabelling">
+<code class="descname">setSpecificAtomLabelling</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.setSpecificAtomLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.setSpecificAtomLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set isotopeLabels dict as labelling for atom designated by atomId.</p>
+<p>NBNB labelling is set for the matching atom in all chains that match the Substance
+also if the other chains have a different numbering.</p>
+<p>isotopeLabels must be a dictionary of the form (e.g.) {&#8216;12C&#8217;:0.32, &#8216;13C&#8217;:0.68}
+where the atom fractions add up to 1.0 and the isotope COdes cover the possibilities
+for the atom.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.shortClassName">
 <code class="descname">shortClassName</code><em class="property"> = 'SU'</em><a class="headerlink" href="#ccpn.core.Substance.Substance.shortClassName" title="Permalink to this definition">¶</a></dt>
@@ -5255,6 +5401,26 @@ Smiles string - for substances that have one</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.core.Substance.Substance.specificAtomLabelling">
+<code class="descname">specificAtomLabelling</code><a class="headerlink" href="#ccpn.core.Substance.Substance.specificAtomLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Dict[str, Dict[str, float]]</em>, <em>immutable</em> - 
+Site-specific labelling for all chains matching Substance
+in the form of (atomId:{isotopeCode:fraction}} dictionary.
+Note that changing the labelling for a site in one chain
+simultaneously affects the matching site in other matching chains.
+To modify this attribute use the functions setSpecificAtomLabelling,
+removeSpecificAtomLabelling, clearSpecificAtomLabelling,
+updateSpecificAtomLabelling</p>
+<p>Example value (for two chains where the numbering of B is offset 200 from chain A):</p>
+<blockquote>
+<div><div class="line-block">
+<div class="line">{&#8216;A.11.ALA.CB&#8217;:{&#8216;12C&#8217;:0.32, &#8216;13C&#8217;:0.68},</div>
+<div class="line">&#8216;B.211.ALA.CB&#8217;:{&#8216;12C&#8217;:0.32, &#8216;13C&#8217;:0.68},}</div>
+</div>
+</div></blockquote>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.core.Substance.Substance.substanceType">
 <code class="descname">substanceType</code><a class="headerlink" href="#ccpn.core.Substance.Substance.substanceType" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>immutable</em> - 
@@ -5263,9 +5429,9 @@ Category of substance: Molecule, Cell, Material, or Composite</p>
 <li>Molecule is a single molecule, including plasmids</li>
 <li>Cell is a cell,</li>
 <li>Material is a mixture, like fetal calf serum, growth medium, or standard buffer,</li>
-<li>Composite is multiple components in fixed ratio, like a protein-ligand or multiprotein</li>
+<li>Composite is multiple components in fixed ratio, like a protein-ligand or multiprotein
+complex, or (technically) a Cell containing a particular plasmid.</li>
 </ul>
-<p>complex, or (technically) a Cell containing a particular plasmid.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5273,6 +5439,21 @@ Category of substance: Molecule, Cell, Material, or Composite</p>
 <code class="descname">synonyms</code><a class="headerlink" href="#ccpn.core.Substance.Substance.synonyms" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[str, ...]</em>, <em>mutable</em> - 
 Synonyms for Substance name</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Substance.Substance.updateSpecificAtomLabelling">
+<code class="descname">updateSpecificAtomLabelling</code><span class="sig-paren">(</span><em>dictionary: Dict[str, Dict[str, float]]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Substance.html#Substance.updateSpecificAtomLabelling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Substance.Substance.updateSpecificAtomLabelling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update Site-specific labelling for all chains matching Substance.
+The input must be an (atomId:{isotopeCode:fraction}} dictionary.
+Note that changing the labelling for a site in one chain
+simultaneously affects the matching site in other matching chains,
+So you should only update teh labeling for one chain.</p>
+<p>Example value (for two chains where the numbering of B is offset 200 from chain A):</p>
+<blockquote>
+<div><p>{&#8216;A.11.ALA.CB&#8217;:{&#8216;12C&#8217;:0.32, &#8216;13C&#8217;:0.68},}</p>
+<p>which will also affect &#8216;B.211.ALA.CB&#8217; (if it exists)</p>
+</div></blockquote>
 </dd></dl>
 
 <dl class="attribute">
@@ -5309,7 +5490,7 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-chain-module">ccpn.core.Chain module</a></li>
 <li><a class="reference internal" href="#ccpn-core-chemicalshift-module">ccpn.core.ChemicalShift module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.ChemicalShiftList">ccpn.core.ChemicalShiftList module</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.Complex">ccpn.core.Complex module</a></li>
+<li><a class="reference internal" href="#ccpn-core-complex-module">ccpn.core.Complex module</a></li>
 <li><a class="reference internal" href="#ccpn-core-data-module">ccpn.core.Data module</a></li>
 <li><a class="reference internal" href="#ccpn-core-dataset-module">ccpn.core.DataSet module</a></li>
 <li><a class="reference internal" href="#ccpn-core-integral-module">ccpn.core.Integral module</a></li>

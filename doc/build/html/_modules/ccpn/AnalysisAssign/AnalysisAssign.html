@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-11 19:28:58 +0100 (Thu, 11 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 14:00:56 +0100 (Tue, 18 Oct 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: skinnersp $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-11 19:28:58 +0100 (Thu, 11 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9785 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 14:00:56 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9951 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -110,6 +110,15 @@
                           <span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">addApplicationMenuSpec</span><span class="p">(</span><span class="n">menuSpec</span><span class="p">)</span></div>
 
+  <span class="c1"># overrides superclass</span>
+  <span class="k">def</span> <span class="nf">_closeExtraWindows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="c1"># remove links to modules when closing them</span>
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;sequenceGraph&#39;</span><span class="p">,</span> <span class="s1">&#39;backboneModule&#39;</span><span class="p">,</span> <span class="s1">&#39;sidechainAssignmentModule&#39;</span><span class="p">):</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+        <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+
+    <span class="n">Framework</span><span class="o">.</span><span class="n">_closeExtraWindows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
   <span class="c1"># def initGraphics(self):</span>
   <span class="c1">#   &quot;&quot;&quot;Set up graphics system after loading&quot;&quot;&quot;</span>
@@ -179,26 +188,26 @@
 
 <div class="viewcode-block" id="Assign.showSequenceGraph"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showSequenceGraph">[docs]</a>  <span class="k">def</span> <span class="nf">showSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.</span>
+<span class="sd">    Displays sequence graph at the bottom of the screen, relative to another module if nextTo is specified.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.SequenceGraph</span> <span class="kn">import</span> <span class="n">SequenceGraph</span>
 
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;assigner&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;sequenceGraph&#39;</span><span class="p">):</span>
       <span class="k">return</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span> <span class="o">=</span> <span class="n">SequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sequenceGraph</span> <span class="o">=</span> <span class="n">SequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;backboneModule&#39;</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequenceGraph</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">relativeTo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequenceGraph</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequenceGraph</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showSequenceGraph()&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showSequenceGraph()&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">assigner</span></div>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sequenceGraph</span></div>
 
 
-<div class="viewcode-block" id="Assign.showPickAndAssignModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showPickAndAssignModule">[docs]</a>  <span class="k">def</span> <span class="nf">showPickAndAssignModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Assign.showPickAndAssignModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showPickAndAssignModule">[docs]</a>  <span class="k">def</span> <span class="nf">showPickAndAssignModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.PickAndAssignModule</span> <span class="kn">import</span> <span class="n">PickAndAssignModule</span>
 
     <span class="sd">&quot;&quot;&quot;Displays Pick and Assign module.&quot;&quot;&quot;</span>
@@ -225,8 +234,8 @@
     <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
     <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showBackboneAssignmentModule()&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showBackboneAssignmentModule()&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;assigner&#39;</span><span class="p">):</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assigner</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;sequenceGraph&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">_connectSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequenceGraph</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">backboneModule</span></div>
 
@@ -237,7 +246,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.SideChainAssignmentModule</span> <span class="kn">import</span> <span class="n">SideChainAssignmentModule</span>
 
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;backboneModule&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;sidechainAssignmentModule&#39;</span><span class="p">):</span>
       <span class="k">return</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">sidechainAssignmentModule</span> <span class="o">=</span> <span class="n">SideChainAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
@@ -246,8 +255,6 @@
     <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sidechainAssignmentModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span>
     <span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.showSidechainAssignmentModule()&quot;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.showSidechainAssignmentModule()&quot;</span><span class="p">)</span>
-    <span class="c1"># if hasattr(self, &#39;assigner&#39;):</span>
-    <span class="c1">#   self.backboneModule._connectSequenceGraph(self.assigner)</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sidechainAssignmentModule</span></div>
 

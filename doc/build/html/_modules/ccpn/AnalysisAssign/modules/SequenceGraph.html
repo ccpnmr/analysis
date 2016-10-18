@@ -107,6 +107,7 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">setTextInteractionFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">TextSelectableByMouse</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">connectedAtoms</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouseDoubleClickEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mouseDoubleClickEvent</span>
     <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
       <span class="n">colour1</span> <span class="o">=</span> <span class="s1">&#39;#F7FFFF&#39;</span>
       <span class="n">colour2</span> <span class="o">=</span> <span class="s1">&#39;#BEC4F3&#39;</span>
@@ -122,12 +123,15 @@
     <span class="k">else</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">setDefaultTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour1</span><span class="p">))</span>
 
-<div class="viewcode-block" id="GuiNmrAtom.mouseDoubleClickEvent"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mouseDoubleClickEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_mouseDoubleClickEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CCPN INTERNAL - re-implementation of double click event to raise modifyAssignmentModule</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="p">,</span> <span class="s1">&#39;maModule&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="p">,</span> <span class="s1">&#39;modifyAssignmentsModule&#39;</span><span class="p">):</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">showModifyAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span></div></div>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span></div>
 
 <div class="viewcode-block" id="GuiNmrResidue"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrResidue">[docs]</a><span class="k">class</span> <span class="nc">GuiNmrResidue</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="p">):</span>
 
@@ -150,12 +154,14 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">())</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mousePressEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mouseMoveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mouseMoveEvent</span>
 
   <span class="k">def</span> <span class="nf">_update</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="GuiNmrResidue.mouseMoveEvent"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrResidue.mouseMoveEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_mouseMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">buttons</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">LeftButton</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -173,13 +179,11 @@
           <span class="k">pass</span>
           <span class="c1"># self.close()</span>
         <span class="k">else</span><span class="p">:</span>
-          <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+          <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<div class="viewcode-block" id="GuiNmrResidue.mousePressEvent"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrResidue.mousePressEvent">[docs]</a>  <span class="k">def</span> <span class="nf">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span>
-    <span class="c1"># print(self.nmrResidue.project._appBase.current.guiNmrResidue)</span>
-    <span class="c1"># print(self.nmrResidue)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setSelected</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
 
 
 
@@ -286,6 +290,7 @@
         <span class="k">return</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">clearAllItems</span><span class="p">()</span>
       <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;fragment&#39;</span><span class="p">:</span>
+
         <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">nmrChainPid</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
           <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span><span class="p">:</span>
@@ -297,6 +302,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_showBackboneAssignments</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="SequenceGraph.resetSequenceGraph"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.resetSequenceGraph">[docs]</a>  <span class="k">def</span> <span class="nf">resetSequenceGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># self.project._appBase._startCommandBlock(&#39;application.sequenceGraph.setNmrChainDisplay()&#39;)</span>
+    <span class="c1"># try:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrChainPulldown</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;NC:@-&#39;</span><span class="p">)</span></div>
+    <span class="c1"># self.setNmrChainDisplay(&#39;NC:@-&#39;)</span>
+    <span class="c1"># finally:</span>
+    <span class="c1">#   self.project._appBase._endCommandBlock()</span>
 
 <div class="viewcode-block" id="SequenceGraph.addNmrChainToPulldown"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.addNmrChainToPulldown">[docs]</a>  <span class="k">def</span> <span class="nf">addNmrChainToPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrChain</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrChainPulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span></div>
@@ -312,9 +326,9 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">updateNmrResidueTable</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="SequenceGraph.closeModule"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.closeModule">[docs]</a>  <span class="k">def</span> <span class="nf">closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;assigner&#39;</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s1">&#39;sequenceGraph&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 <div class="viewcode-block" id="SequenceGraph.disconnectNextNmrResidue"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.disconnectNextNmrResidue">[docs]</a>  <span class="k">def</span> <span class="nf">disconnectNextNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">disconnectNext</span><span class="p">()</span>
@@ -336,7 +350,7 @@
 
 <div class="viewcode-block" id="SequenceGraph.clearAllItems"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.clearAllItems">[docs]</a>  <span class="k">def</span> <span class="nf">clearAllItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Removes all displayed residues in the assigner and resets items count to zero.</span>
+<span class="sd">    Removes all displayed residues in the sequence graph and resets items count to zero.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
@@ -401,7 +415,7 @@
 
 <div class="viewcode-block" id="SequenceGraph.addResidue"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisAssign.modules.html#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.addResidue">[docs]</a>  <span class="k">def</span> <span class="nf">addResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">direction</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">atomSpacing</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Takes an Nmr Residue and a direction, either &#39;-1 or &#39;+1&#39;, and adds a residue to the assigner</span>
+<span class="sd">    Takes an Nmr Residue and a direction, either &#39;-1 or &#39;+1&#39;, and adds a residue to the sequence graph</span>
 <span class="sd">    corresponding to the Nmr Residue.</span>
 <span class="sd">    Nmr Residue name displayed beneath CA of residue drawn and residue type predictions displayed</span>
 <span class="sd">    beneath Nmr Residue name</span>
@@ -411,12 +425,14 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span> <span class="o">=</span> <span class="n">atomSpacing</span>
     <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">]</span>
 
-    <span class="n">residueAtoms</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;H&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
-                    <span class="s2">&quot;N&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">]),</span>
+    <span class="n">residueAtoms</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;H&quot;</span><span class="p">:</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                    <span class="s2">&quot;N&quot;</span><span class="p">:</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">]),</span>
                     <span class="s2">&quot;CA&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">]),</span>
                     <span class="s2">&quot;CB&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">,</span> <span class="o">-</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">]),</span>
                     <span class="s2">&quot;CO&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">atomSpacing</span><span class="p">])</span>
                     <span class="p">}</span>
+    <span class="k">if</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="s1">&#39;GLY&#39;</span><span class="p">:</span>
+      <span class="k">del</span> <span class="n">residueAtoms</span><span class="p">[</span><span class="s1">&#39;CB&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueCount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">residueAtoms</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
@@ -424,7 +440,6 @@
         <span class="k">else</span><span class="p">:</span>
           <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">None</span>
         <span class="n">atoms</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createGuiNmrAtom</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="p">)</span>
-
       <span class="bp">self</span><span class="o">.</span><span class="n">guiResiduesShown</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atoms</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">predictedStretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
 
@@ -451,8 +466,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">predictedStretch</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_assembleResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">atoms</span><span class="p">)</span>
-
-
 
     <span class="bp">self</span><span class="o">.</span><span class="n">residueCount</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
@@ -503,8 +516,12 @@
         <span class="n">lineColour</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
       <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
         <span class="n">lineColour</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-      <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">addResidue</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;+1&#39;</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">:</span>
+          <span class="n">newNmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residue</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">residue</span><span class="o">.</span><span class="n">atoms</span><span class="p">:</span>
+            <span class="n">newNmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atom</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addResidue</span><span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;+1&#39;</span><span class="p">)</span>
       <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">guiResiduesShown</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ii</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
           <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>

@@ -65,7 +65,7 @@
   <span class="n">modeNumber</span> <span class="o">=</span> <span class="n">_getNumber</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
   <span class="n">minimalDistance</span><span class="o">=</span> <span class="n">_getMinimalDistance</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
   <span class="n">spectra</span> <span class="o">=</span> <span class="n">_getSpectra</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-  <span class="n">replaceMixtures</span> <span class="o">=</span> <span class="n">_getReplace</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+  <span class="n">replaceMixtures</span> <span class="o">=</span> <span class="bp">True</span> <span class="c1">#_getReplace(params)</span>
   <span class="n">peaksAreTopick</span> <span class="o">=</span> <span class="n">_getPeakPicking</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
   <span class="n">noiseLevel</span> <span class="o">=</span> <span class="n">_getNoiseLevel</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
   <span class="n">pickFilter</span> <span class="o">=</span> <span class="n">_getFilter</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
@@ -104,10 +104,10 @@
 <span class="k">def</span> <span class="nf">_getSpectra</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
   <span class="k">return</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;spectra&#39;</span><span class="p">]</span>
 
-<span class="k">def</span> <span class="nf">_getReplace</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
-  <span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;replace&#39;</span><span class="p">]</span>
-  <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;Yes&#39;</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">True</span>
+<span class="c1"># def _getReplace(params):</span>
+<span class="c1">#   value = params[&#39;replace&#39;]</span>
+<span class="c1">#   if value == &#39;Yes&#39;:</span>
+<span class="c1">#     return True</span>
 
 <span class="k">def</span> <span class="nf">_getPeakPicking</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
   <span class="n">value</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="s1">&#39;peakPicking&#39;</span><span class="p">]</span>
@@ -170,7 +170,7 @@
     <span class="n">sample</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newSample</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">mixtureName</span><span class="p">))</span>
     <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="c1"># for compoundName in compoundNames:</span>
-    <span class="c1">#   newSampleComponent = sample.newSampleComponent(name=(str(compoundName)+&#39;-1&#39;), labeling=&#39;H&#39;)</span>
+    <span class="c1">#   newSampleComponent = sample.newSampleComponent(name=(str(compoundName)+&#39;-1&#39;), labelling=&#39;H&#39;)</span>
 
     <span class="n">_setMixtureScores</span><span class="p">(</span><span class="n">mixtureCompounds</span><span class="p">,</span> <span class="n">sample</span><span class="p">)</span>
     <span class="n">_setSampleComponentScores</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">mixtureCompounds</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
@@ -214,7 +214,7 @@
 
   <span class="k">for</span> <span class="n">compound</span> <span class="ow">in</span> <span class="n">mixtureCompounds</span><span class="p">:</span>
     <span class="n">compoundName</span><span class="p">,</span> <span class="n">compoundPeakList</span> <span class="o">=</span> <span class="n">compound</span>
-    <span class="n">newSampleComponent</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">compoundName</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;-1&#39;</span><span class="p">),</span> <span class="n">labeling</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+    <span class="n">newSampleComponent</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">compoundName</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;-1&#39;</span><span class="p">))</span>
     <span class="n">compoundsToCompare</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">mixtureCompounds</span> <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">compoundName</span><span class="p">]</span>
     <span class="n">overlaped</span> <span class="o">=</span> <span class="n">calculateOverlapCount</span><span class="p">(</span><span class="n">compoundPeakList</span><span class="p">,</span> <span class="n">compoundsToCompare</span><span class="p">,</span> <span class="n">minDist</span><span class="p">)</span>
 

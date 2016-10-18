@@ -112,6 +112,14 @@ ccpn.util.Phasing module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.PrintFile module
+--------------------------
+
+.. automodule:: ccpn.util.PrintFile
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.Register module
 -------------------------
 
@@ -132,6 +140,22 @@ ccpn.util.SphinxExtensions module
 ---------------------------------
 
 .. automodule:: ccpn.util.SphinxExtensions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.SubclassLoader module
+-------------------------------
+
+.. automodule:: ccpn.util.SubclassLoader
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Svg module
+--------------------
+
+.. automodule:: ccpn.util.Svg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -164,6 +188,14 @@ ccpn.util.Undo module
 ---------------------
 
 .. automodule:: ccpn.util.Undo
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.Update module
+-----------------------
+
+.. automodule:: ccpn.util.Update
     :members:
     :undoc-members:
     :show-inheritance:

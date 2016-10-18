@@ -67,9 +67,72 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">PipelineBox</span><span class="p">,</span> <span class="n">PipelineDropArea</span>
 
 <span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
 <span class="n">Qkeys</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span>
+
+
+<div class="viewcode-block" id="StdSpectrumCreatorBox"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.ScreeningPipeline.StdSpectrumCreatorBox">[docs]</a><span class="k">class</span> <span class="nc">StdSpectrumCreatorBox</span><span class="p">(</span><span class="n">PipelineBox</span><span class="p">,):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">pipelineArea</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">StdSpectrumCreatorBox</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="n">PipelineBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">pipelineArea</span><span class="o">=</span><span class="n">pipelineArea</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">auxiliaryFilesPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createWidgets</span><span class="p">()</span>
+
+
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">createButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;create new spectrum&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_createSpectrumDifference</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pullDownOffRes</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SG:STD_OFF_Res&#39;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pullDownOnRes</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SG:STD_ON_Res&#39;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lineEditPath</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pullDownOffRes</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pullDownOnRes</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lineEditPath</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">createButton</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span> <span class="p">)</span>
+
+
+
+  <span class="k">def</span> <span class="nf">_createSpectrumDifference</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
+
+        <span class="n">spectrumDiff</span> <span class="o">=</span> <span class="n">createStdDifferenceSpectrum</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEditPath</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">):</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">newFilePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEditPath</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">+</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_Std_diff&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">newFilePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lineEditPath</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_Std_diff&#39;</span>
+        <span class="n">writeBruker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newFilePath</span><span class="p">,</span> <span class="n">spectrumDiff</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_loadSpectrumDifference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newFilePath</span> <span class="o">+</span> <span class="s1">&#39;/pdata/1/1r&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_loadSpectrumDifference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">SGname</span><span class="o">=</span><span class="s1">&#39;SG:STD_DIFF&#39;</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">spectrumName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">spectrumName</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_Std_diff-1&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">):</span>
+          <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
+          <span class="n">spectrumGroupSTD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">SGname</span><span class="p">)</span>
+          <span class="n">spectrumGroupSTD</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
+          <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;created and loaded in the project&#39;</span><span class="p">)</span></div>
+
+
 
 <div class="viewcode-block" id="StdSpectrumCreator"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.modules.html#ccpn.AnalysisScreen.modules.ScreeningPipeline.StdSpectrumCreator">[docs]</a><span class="k">class</span> <span class="nc">StdSpectrumCreator</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
 
@@ -101,7 +164,7 @@
         <span class="n">writeBruker</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newFilePath</span><span class="p">,</span> <span class="n">spectrumDiff</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_loadSpectrumDifference</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newFilePath</span> <span class="o">+</span> <span class="s1">&#39;/pdata/1/1r&#39;</span><span class="p">)</span>
 
-  <span class="k">def</span> <span class="nf">_loadSpectrumDifference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">_loadSpectrumDifference</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">SGname</span><span class="o">=</span><span class="s1">&#39;SG:STD_DIFF&#39;</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
     <span class="n">spectrumName</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -110,9 +173,10 @@
       <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">sample</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">spectrumName</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_Std_diff-1&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
           <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
-          <span class="n">spectrumGroupSTD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SG:STD_DIFF&#39;</span><span class="p">)</span>
+          <span class="n">spectrumGroupSTD</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">SGname</span><span class="p">)</span>
           <span class="n">spectrumGroupSTD</span><span class="o">.</span><span class="n">spectra</span> <span class="o">+=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">],)</span>
           <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumStd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s1">&#39;created and loaded in the project&#39;</span><span class="p">)</span></div>
+
 
 
 
@@ -246,9 +310,7 @@
 
   <span class="k">def</span> <span class="nf">_pickPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="s1">&#39;minScore&#39;</span><span class="p">):</span>
-        <span class="k">pass</span>
-      <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
          <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pickPeaks1dFiltered</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">ignoredRegions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">noiseThreshold</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">:</span>
@@ -258,9 +320,7 @@
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
       <span class="n">samplesData</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="s1">&#39;minScore&#39;</span><span class="p">):</span>
-          <span class="k">pass</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
           <span class="n">samplesData</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">)</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">])</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">samplePullDown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">samplesData</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -299,11 +359,8 @@
 
 
   <span class="k">def</span> <span class="nf">_matchPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># print(self.sender().parent().parent().parent().parent().parent().parent().parent())</span>
     <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
-      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="s1">&#39;minScore&#39;</span><span class="p">):</span>
-        <span class="k">pass</span>
-      <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">sample</span><span class="o">.</span><span class="n">isVirtual</span><span class="p">:</span>
         <span class="n">componentList</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">spectrumOffResonancePeaks</span> <span class="o">=</span> <span class="p">[</span><span class="n">peak</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span><span class="p">]</span>
@@ -332,6 +389,7 @@
                 <span class="n">newPeakListPosition</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span><span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="n">position</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.00</span><span class="p">)</span>
 
               <span class="n">merit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stdEfficency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">stdPosition</span><span class="p">)</span>
+              <span class="k">print</span><span class="p">(</span><span class="s1">&#39;merit = &#39;</span> <span class="p">,</span> <span class="n">merit</span><span class="p">)</span>
               <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merit</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
                 <span class="n">newHit</span><span class="o">.</span><span class="n">meritCode</span> <span class="o">=</span>  <span class="nb">str</span><span class="p">(</span><span class="n">merit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;%&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_showHitsModule</span><span class="p">()</span>
@@ -339,12 +397,7 @@
 
 
   <span class="k">def</span> <span class="nf">_showHitsModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="c1"># self.screeningSettingModule.close()</span>
     <span class="n">showScreeningHits</span> <span class="o">=</span> <span class="n">ShowScreeningHits</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
-    <span class="c1"># if self._appBase.ui.mainWindow is not None:</span>
-    <span class="c1">#   self.mainWindow = self._appBase.ui.mainWindow</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#   self.mainWindow = self._appBase._mainWindow</span>
     <span class="n">showScreeningHitsModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="n">showScreeningHits</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
     <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">createSpectrumDisplay</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
@@ -359,6 +412,7 @@
 
 
   <span class="k">def</span> <span class="nf">_stdEfficency</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">matchedPositions</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span> <span class="s1">&#39; spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions&#39;</span><span class="p">)</span>
 
     <span class="n">efficiency</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">matchedPositions</span><span class="p">:</span>

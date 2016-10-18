@@ -91,7 +91,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-09-06 14:22:17 +0100 (Tue, 06 Sep 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -102,8 +102,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9763 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-09-06 14:22:17 +0100 (Tue, 06 Sep 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9845 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -876,7 +876,7 @@
 <span class="sd">    transfertype is one of (in order of increasing priority):</span>
 <span class="sd">    &#39;onebond&#39;, &#39;Jcoupling&#39;, &#39;Jmultibond&#39;, &#39;relayed&#39;, &#39;relayed-alternate&#39;, &#39;through-space&#39;</span>
 <span class="sd">    isIndirect is used where there is more than one successive transfer step;</span>
-<span class="sd">     it is combined with the highest-priority transferType in the transfer path.</span>
+<span class="sd">    it is combined with the highest-priority transferType in the transfer path.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1035,9 +1035,11 @@
   <span class="k">return</span> <span class="n">result</span>
 
 <span class="k">def</span> <span class="nf">_spectrumMakeFirstPeakList</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">dataSource</span><span class="p">:</span><span class="n">Nmr</span><span class="o">.</span><span class="n">DataSource</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;Add PeakList if none is present. For notifiers.&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Add PeakList if none is present - also IntegralList for 1D. For notifiers.&quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">findFirstPeakList</span><span class="p">(</span><span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;Peak&#39;</span><span class="p">):</span>
     <span class="n">dataSource</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">numDim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">dataSource</span><span class="o">.</span><span class="n">findFirstPeakList</span><span class="p">(</span><span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;Integral&#39;</span><span class="p">):</span>
+    <span class="n">dataSource</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">(</span><span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;Integral&#39;</span><span class="p">)</span>
 <span class="n">Project</span><span class="o">.</span><span class="n">_setupApiNotifier</span><span class="p">(</span><span class="n">_spectrumMakeFirstPeakList</span><span class="p">,</span> <span class="n">Nmr</span><span class="o">.</span><span class="n">DataSource</span><span class="p">,</span> <span class="s1">&#39;postInit&#39;</span><span class="p">)</span>
 <span class="k">del</span> <span class="n">_spectrumMakeFirstPeakList</span>
 

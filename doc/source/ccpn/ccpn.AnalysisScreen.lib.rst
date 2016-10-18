@@ -9,18 +9,18 @@ ccpn.AnalysisScreen.lib package
 Submodules
 ----------
 
-ccpn.AnalysisScreen.lib.MixtureGeneration module
-------------------------------------------------
-
-.. automodule:: ccpn.AnalysisScreen.lib.MixtureGeneration
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 ccpn.AnalysisScreen.lib.MixturesGeneration module
 -------------------------------------------------
 
 .. automodule:: ccpn.AnalysisScreen.lib.MixturesGeneration
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.AnalysisScreen.lib.ScreenLookup module
+-------------------------------------------
+
+.. automodule:: ccpn.AnalysisScreen.lib.ScreenLookup
     :members:
     :undoc-members:
     :show-inheritance:

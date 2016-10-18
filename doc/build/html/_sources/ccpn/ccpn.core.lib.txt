@@ -49,10 +49,10 @@ ccpn.core.lib.Documentation module
     :undoc-members:
     :show-inheritance:
 
-ccpn.core.lib.LabelingLib module
---------------------------------
+ccpn.core.lib.LabellingLib module
+---------------------------------
 
-.. automodule:: ccpn.core.lib.LabelingLib
+.. automodule:: ccpn.core.lib.LabellingLib
     :members:
     :undoc-members:
     :show-inheritance:
@@ -85,6 +85,14 @@ ccpn.core.lib.SpectrumLib module
 --------------------------------
 
 .. automodule:: ccpn.core.lib.SpectrumLib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.lib.Summary module
+----------------------------
+
+.. automodule:: ccpn.core.lib.Summary
     :members:
     :undoc-members:
     :show-inheritance:

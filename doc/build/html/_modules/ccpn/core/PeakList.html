@@ -52,7 +52,8 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:23:19 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-09-07 17:56:38 +0100 (Wed, 07 Sep 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -62,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: skinnersp $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:23:19 +0100 (Fri, 05 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9764 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-09-07 17:56:38 +0100 (Wed, 07 Sep 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9857 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -74,16 +75,16 @@
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">import</span> <span class="nn">numpy</span>
 <span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">argwhere</span>
-<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">maximum_filter</span>
+<span class="kn">from</span> <span class="nn">scipy.ndimage</span> <span class="kn">import</span> <span class="n">maximum_filter</span><span class="p">,</span> <span class="n">minimum_filter</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">PeakList</span> <span class="k">as</span> <span class="n">ApiPeakList</span>
 
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">modelUtil</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.CopyData</span> <span class="kn">import</span> <span class="n">copySubTree</span>
+<span class="c1"># from ccpnmodel.ccpncore.lib.CopyData import copySubTree</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList</span> <span class="kn">import</span> <span class="n">fitExistingPeakList</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">spectrumLib</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib._ccp.nmr.Nmr.PeakList</span> <span class="kn">import</span> <span class="n">pickNewPeaks</span>
 
 <div class="viewcode-block" id="PeakList"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList">[docs]</a><span class="k">class</span> <span class="nc">PeakList</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -220,31 +221,36 @@
 
 
 
-    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;pickPeaksNd&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
-    <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
-    <span class="k">try</span><span class="p">:</span>
-      <span class="c1"># if len(positions[0]) != self.spectrum.dimensionCount:</span>
-      <span class="n">positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">positions</span><span class="p">))))</span>
-      <span class="n">startPoint</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="n">endPoint</span> <span class="o">=</span> <span class="p">[]</span>
-      <span class="n">dataDims</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">sortedDataDims</span><span class="p">()</span>
-      <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span>
-      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">dataDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataDims</span><span class="p">):</span>
-        <span class="c1"># -1 below because points start at 1 in data model</span>
-        <span class="n">position0</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="n">position1</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span>
-        <span class="n">position0</span><span class="p">,</span> <span class="n">position1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">position0</span><span class="p">,</span> <span class="n">position1</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">position0</span><span class="p">,</span> <span class="n">position1</span><span class="p">)</span>
-        <span class="c1"># want integer grid points above position0 and below position1</span>
-        <span class="c1"># add 1 to position0 because above</span>
-        <span class="c1"># add 1 to position1 because doing start &lt;= x &lt; end not &lt;= end</span>
-        <span class="c1"># yes, this negates -1 above but they are for different reasons</span>
-        <span class="n">position0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">position0</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">position1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">position1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">startPoint</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">position0</span><span class="p">))</span>
-        <span class="n">endPoint</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">position1</span><span class="p">))</span>
-
+    <span class="c1"># if len(positions[0]) != self.spectrum.dimensionCount:</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">positions</span><span class="p">))))</span>
+    <span class="n">startPoint</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">endPoint</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span>
+    <span class="n">dataDims</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">sortedDataDims</span><span class="p">()</span>
+    <span class="n">aliasingLimits</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span>
+    <span class="n">apiPeaks</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">dataDim</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataDims</span><span class="p">):</span>
+      <span class="n">aliasingLimit0</span><span class="p">,</span> <span class="n">aliasingLimit1</span> <span class="o">=</span> <span class="n">aliasingLimits</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+      <span class="n">value0</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
+      <span class="n">value1</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
+      <span class="n">value0</span><span class="p">,</span> <span class="n">value1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">value1</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">value1</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">value1</span> <span class="o">&lt;</span> <span class="n">aliasingLimit0</span> <span class="ow">or</span> <span class="n">value0</span> <span class="o">&gt;</span> <span class="n">aliasingLimit1</span><span class="p">:</span>
+        <span class="k">break</span>  <span class="c1"># completely outside aliasing region</span>
+      <span class="n">value0</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">value0</span><span class="p">,</span> <span class="n">aliasingLimit0</span><span class="p">)</span>
+      <span class="n">value1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">value1</span><span class="p">,</span> <span class="n">aliasingLimit1</span><span class="p">)</span>
+      <span class="c1"># -1 below because points start at 1 in data model</span>
+      <span class="n">position0</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">value0</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+      <span class="n">position1</span> <span class="o">=</span> <span class="n">dataDim</span><span class="o">.</span><span class="n">primaryDataDimRef</span><span class="o">.</span><span class="n">valueToPoint</span><span class="p">(</span><span class="n">value1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+      <span class="n">position0</span><span class="p">,</span> <span class="n">position1</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">position0</span><span class="p">,</span> <span class="n">position1</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">position0</span><span class="p">,</span> <span class="n">position1</span><span class="p">)</span>
+      <span class="c1"># want integer grid points above position0 and below position1</span>
+      <span class="c1"># add 1 to position0 because above</span>
+      <span class="c1"># add 1 to position1 because doing start &lt;= x &lt; end not &lt;= end</span>
+      <span class="c1"># yes, this negates -1 above but they are for different reasons</span>
+      <span class="n">position0</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">position0</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">position1</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">position1</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">startPoint</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">position0</span><span class="p">))</span>
+      <span class="n">endPoint</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">dataDim</span><span class="o">.</span><span class="n">dim</span><span class="p">,</span> <span class="n">position1</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
       <span class="n">startPoints</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">startPoint</span><span class="p">)]</span>
       <span class="n">endPoints</span> <span class="o">=</span> <span class="p">[</span><span class="n">point</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">point</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">endPoint</span><span class="p">)]</span>
       <span class="c1"># print(isoOrdering, startPoint, startPoints, endPoint, endPoints)</span>
@@ -252,27 +258,30 @@
       <span class="n">posLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">positiveContourBase</span> <span class="k">if</span> <span class="n">doPos</span> <span class="k">else</span> <span class="bp">None</span>
       <span class="n">negLevel</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">negativeContourBase</span> <span class="k">if</span> <span class="n">doNeg</span> <span class="k">else</span> <span class="bp">None</span>
 
-      <span class="n">apiPeaks</span> <span class="o">=</span> <span class="n">pickNewPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span><span class="p">,</span> <span class="n">startPoint</span><span class="o">=</span><span class="n">startPoints</span><span class="p">,</span> <span class="n">endPoint</span><span class="o">=</span><span class="n">endPoints</span><span class="p">,</span>
-                     <span class="n">posLevel</span><span class="o">=</span><span class="n">posLevel</span><span class="p">,</span> <span class="n">negLevel</span><span class="o">=</span><span class="n">negLevel</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="n">fitMethod</span><span class="p">,</span> <span class="n">excludedRegions</span><span class="o">=</span><span class="n">excludedRegions</span><span class="p">,</span>
+      <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_undo</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;pickPeaksNd&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+      <span class="c1"># undo.increaseBlocking()</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">apiPeaks</span> <span class="o">=</span> <span class="n">pickNewPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span><span class="p">,</span> <span class="n">startPoint</span><span class="o">=</span><span class="n">startPoints</span><span class="p">,</span> <span class="n">endPoint</span><span class="o">=</span><span class="n">endPoints</span><span class="p">,</span>
+                       <span class="n">posLevel</span><span class="o">=</span><span class="n">posLevel</span><span class="p">,</span> <span class="n">negLevel</span><span class="o">=</span><span class="n">negLevel</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="n">fitMethod</span><span class="p">,</span> <span class="n">excludedRegions</span><span class="o">=</span><span class="n">excludedRegions</span><span class="p">,</span>
                      <span class="n">excludedDiagonalDims</span><span class="o">=</span><span class="n">excludedDiagonalDims</span><span class="p">,</span> <span class="n">excludedDiagonalTransform</span><span class="o">=</span><span class="n">excludedDiagonalTransform</span><span class="p">)</span>
 
-      <span class="n">data2ObjDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
+      <span class="k">finally</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+        <span class="c1"># undo.decreaseBlocking()</span>
 
-    <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
-      <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
-
+    <span class="n">data2ObjDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">data2ObjDict</span><span class="p">[</span><span class="n">apiPeak</span><span class="p">]</span> <span class="k">for</span> <span class="n">apiPeak</span> <span class="ow">in</span> <span class="n">apiPeaks</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
       <span class="n">peak</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">result</span></div>
 
-  <span class="c1"># def pickPeaks1d(self:&#39;PeakList&#39;, spectrumView, size:int=3, mode:str=&#39;wrap&#39;):</span>
 <div class="viewcode-block" id="PeakList.pickPeaks1d"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.pickPeaks1d">[docs]</a>  <span class="k">def</span> <span class="nf">pickPeaks1d</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataRange</span><span class="p">,</span> <span class="n">intensityRange</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;wrap&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="s1">&#39;Peak&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Pick 1D peaks form data1d float array</span>
+<span class="sd">    Pick 1D peaks from a dataRange (E.G selection in ViewBox)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">suspendNotification</span><span class="p">()</span>
@@ -289,16 +298,16 @@
         <span class="k">return</span> <span class="n">peaks</span>
       <span class="n">maxFilter</span> <span class="o">=</span> <span class="n">maximum_filter</span><span class="p">(</span><span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
       <span class="n">boolsMax</span> <span class="o">=</span> <span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">maxFilter</span>
-      <span class="k">if</span> <span class="n">intensityRange</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> 
-        <span class="n">spectrum</span><span class="o">.</span><span class="n">estimateNoise</span><span class="p">()</span><span class="o">*</span><span class="mi">10</span>
-        <span class="k">if</span> <span class="n">selectedData</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">threshold</span><span class="p">:</span>
-          <span class="k">return</span> <span class="n">peaks</span>
-        <span class="n">boolsVal</span> <span class="o">=</span> <span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">threshold</span>
-        <span class="n">boolsPeak</span> <span class="o">=</span> <span class="n">boolsVal</span> <span class="o">&amp;</span> <span class="n">boolsMax</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">boolsPeak</span> <span class="o">=</span> <span class="n">boolsMax</span>
-      <span class="n">indices</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">boolsPeak</span><span class="p">)</span> <span class="c1"># True positional indices</span>
-      <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
+      <span class="n">indices</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">boolsMax</span><span class="p">)</span>
+
+      <span class="n">minFilter</span> <span class="o">=</span> <span class="n">minimum_filter</span><span class="p">(</span><span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+      <span class="n">boolsMin</span> <span class="o">=</span> <span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">minFilter</span>
+      <span class="n">negBoolsPeak</span> <span class="o">=</span> <span class="n">boolsMin</span>
+      <span class="n">indicesMin</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">negBoolsPeak</span><span class="p">)</span>
+
+      <span class="n">fullIndices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">indicesMin</span><span class="p">)</span>  <span class="c1"># True positional indices</span>
+
+      <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">fullIndices</span><span class="p">:</span>
         <span class="n">peakPosition</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">selectedData</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">position</span><span class="p">])]</span>
         <span class="n">height</span> <span class="o">=</span> <span class="n">selectedData</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">position</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">intensityRange</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">intensityRange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">height</span> <span class="o">&lt;=</span> <span class="n">intensityRange</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
@@ -311,50 +320,47 @@
 
 
 <div class="viewcode-block" id="PeakList.pickPeaks1dFiltered"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.pickPeaks1dFiltered">[docs]</a>  <span class="k">def</span> <span class="nf">pickPeaks1dFiltered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;wrap&#39;</span><span class="p">,</span> <span class="n">ignoredRegions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                          <span class="n">noiseThreshold</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                          <span class="n">noiseThreshold</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">negativePeaks</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Pick 1D peaks form data in  self.spectrum</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-      <span class="p">(</span> <span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="s1">&#39;wrap&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;ignoredRegions&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;noiseThreshold&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
-      <span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;mode&#39;</span><span class="p">,</span> <span class="s1">&#39;wrap&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;ignoredRegions&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;noiseThreshold&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;pickPeaks1dFiltered&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">)</span>
     <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
-      <span class="k">if</span> <span class="ow">not</span> <span class="n">ignoredRegions</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">ignoredRegions</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">ignoredRegions</span> <span class="o">=</span> <span class="p">[[</span><span class="o">-</span><span class="mf">20.1</span><span class="p">,</span><span class="o">-</span><span class="mf">19.1</span><span class="p">]]</span>
-
       <span class="n">peaks</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span>
-
       <span class="n">data</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_apiDataSource</span><span class="o">.</span><span class="n">get1dSpectrumData</span><span class="p">()</span>
-
-
       <span class="n">ppmValues</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-      <span class="k">if</span> <span class="n">noiseThreshold</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">noiseThreshold</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">noiseThreshold</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">noiseThreshold</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">estimateNoise</span><span class="p">()</span><span class="o">*</span><span class="mi">5</span>
-
       <span class="n">masks</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">region</span> <span class="ow">in</span> <span class="n">ignoredRegions</span><span class="p">:</span>
-
         <span class="n">mask</span> <span class="o">=</span> <span class="p">(</span><span class="n">ppmValues</span> <span class="o">&gt;</span> <span class="n">region</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">|</span> <span class="p">(</span><span class="n">ppmValues</span> <span class="o">&lt;</span> <span class="n">region</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
         <span class="n">masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
-
       <span class="n">fullmask</span> <span class="o">=</span> <span class="p">[</span><span class="nb">all</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="k">for</span> <span class="n">mask</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">masks</span><span class="p">)]</span>
       <span class="n">newArray2</span> <span class="o">=</span> <span class="p">(</span><span class="n">numpy</span><span class="o">.</span><span class="n">ma</span><span class="o">.</span><span class="n">MaskedArray</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">mask</span><span class="o">=</span><span class="n">numpy</span><span class="o">.</span><span class="n">logical_not</span><span class="p">((</span><span class="n">fullmask</span><span class="p">,</span> <span class="n">fullmask</span><span class="p">))))</span>
 
       <span class="k">if</span> <span class="p">(</span><span class="n">newArray2</span><span class="o">.</span><span class="n">size</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">noiseThreshold</span><span class="p">):</span>
-       <span class="k">return</span> <span class="n">peaks</span>
-      <span class="n">boolsVal</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">noiseThreshold</span>
+        <span class="k">return</span> <span class="n">peaks</span>
+
+      <span class="n">posBoolsVal</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">noiseThreshold</span>
       <span class="n">maxFilter</span> <span class="o">=</span> <span class="n">maximum_filter</span><span class="p">(</span><span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
-
-
       <span class="n">boolsMax</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">maxFilter</span>
-      <span class="n">boolsPeak</span> <span class="o">=</span> <span class="n">boolsVal</span> <span class="o">&amp;</span> <span class="n">boolsMax</span>
-      <span class="n">indices</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">boolsPeak</span><span class="p">)</span> <span class="c1"># True positional indices</span>
+      <span class="n">boolsPeak</span> <span class="o">=</span> <span class="n">posBoolsVal</span> <span class="o">&amp;</span> <span class="n">boolsMax</span>
+      <span class="n">indices</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">boolsPeak</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">negativePeaks</span><span class="p">:</span>
+        <span class="n">minFilter</span> <span class="o">=</span> <span class="n">minimum_filter</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">size</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">)</span>
+        <span class="n">boolsMin</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">minFilter</span>
+        <span class="n">negBoolsVal</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="n">noiseThreshold</span>
+        <span class="n">negBoolsPeak</span> <span class="o">=</span> <span class="n">negBoolsVal</span> <span class="o">&amp;</span> <span class="n">boolsMin</span>
+        <span class="n">indicesMin</span> <span class="o">=</span> <span class="n">argwhere</span><span class="p">(</span><span class="n">negBoolsPeak</span><span class="p">)</span>
+        <span class="n">indices</span> <span class="o">=</span> <span class="n">numpy</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">indicesMin</span><span class="p">)</span>
+
       <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
         <span class="n">peakPosition</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">newArray2</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">position</span><span class="p">])]</span>
         <span class="n">height</span> <span class="o">=</span> <span class="n">newArray2</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">position</span><span class="p">]</span>
@@ -364,7 +370,6 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
 
     <span class="k">return</span> <span class="n">peaks</span></div>
-
 
 
 <div class="viewcode-block" id="PeakList.subtractPeakLists"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.subtractPeakLists">[docs]</a>  <span class="k">def</span> <span class="nf">subtractPeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList2</span><span class="p">:</span><span class="s1">&#39;PeakList&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PeakList&#39;</span><span class="p">:</span>
@@ -431,7 +436,7 @@
 
     <span class="n">codes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">positionCodeDict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
     <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="n">positionCodeDict</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">codes</span><span class="p">]</span>
-    <span class="n">axisCodeMapping</span> <span class="o">=</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">_axisCodeMapIndices</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
+    <span class="n">axisCodeMapping</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">_axisCodeMapIndices</span><span class="p">(</span><span class="n">codes</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">)</span>
     <span class="n">tolerances</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span>
     <span class="n">limits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumLimits</span>
     <span class="n">selectedRegion</span> <span class="o">=</span> <span class="p">[]</span>

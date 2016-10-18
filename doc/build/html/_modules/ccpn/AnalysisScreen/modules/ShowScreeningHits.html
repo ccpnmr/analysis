@@ -64,7 +64,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
 <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CompoundView</span> <span class="kn">import</span> <span class="n">CompoundView</span><span class="p">,</span> <span class="n">Variant</span><span class="p">,</span> <span class="n">importSmiles</span>
-<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Window</span> <span class="kn">import</span> <span class="n">navigateToNmrResidue</span><span class="p">,</span> <span class="n">navigateToPeakPosition</span>
+<span class="c1"># from ccpn.ui.gui.lib.Window import navigateToNmrResidue, navigateToPeakPosition</span>
 
 <span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
 <span class="n">Qkeys</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QKeySequence</span>
@@ -74,7 +74,7 @@
     <span class="nb">super</span><span class="p">(</span><span class="n">ShowScreeningHits</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
     <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Hit Analysis&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span>
+    <span class="c1"># self.setFixedHeight(300)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span> <span class="o">=</span> <span class="n">parent</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">moduleArea</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span>
@@ -189,7 +189,7 @@
     <span class="sd">&#39;&#39;&#39; Documentation &#39;&#39;&#39;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">listWidgetsHitDetails</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QListWidget</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">listWidgetsHitDetails</span><span class="o">.</span><span class="n">setMaximumSize</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
+    <span class="c1"># self.listWidgetsHitDetails.setMaximumSize(400,200)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">listWidgetsHitDetails</span><span class="o">.</span><span class="n">setMinimumSize</span><span class="p">(</span><span class="mi">200</span><span class="p">,</span><span class="mi">200</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">hitDetailsGroupLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">listWidgetsHitDetails</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
@@ -369,9 +369,12 @@
     <span class="sd">&#39;&#39;&#39; Documentation &#39;&#39;&#39;</span>
 
     <span class="n">currentObjPulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pullDownHit</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">currentObjPulldown</span><span class="p">,</span> <span class="s1">&#39;substanceName&#39;</span><span class="p">):</span>
-      <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SU:&#39;</span><span class="o">+</span><span class="n">currentObjPulldown</span><span class="o">.</span><span class="n">substanceName</span><span class="o">+</span><span class="s1">&#39;.H&#39;</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">substance</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">currentObjPulldown</span><span class="p">,</span> <span class="s1">&#39;spectrum&#39;</span><span class="p">):</span>
+      <span class="n">spectrumHit</span> <span class="o">=</span> <span class="n">currentObjPulldown</span>
+      <span class="n">substanceName</span> <span class="o">=</span> <span class="n">spectrumHit</span><span class="o">.</span><span class="n">substanceName</span>
+      <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SU:&#39;</span><span class="o">+</span><span class="n">substanceName</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">substance</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">substance</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">sampleComponent</span> <span class="o">=</span> <span class="n">currentObjPulldown</span>
       <span class="k">return</span> <span class="n">sampleComponent</span>
@@ -444,12 +447,13 @@
 
   <span class="k">def</span> <span class="nf">_hitTableCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="nb">object</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Documentation &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.SpectrumDisplay</span> <span class="kn">import</span> <span class="n">navigateToPeakPosition</span>
 
     <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPullDownObj</span><span class="p">()</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">peaks</span>
     <span class="c1"># displayed = self.project.getByPid(&#39;GD:user.View.1D:H&#39;)</span>
     <span class="n">displayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_parent</span>
-    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
-      <span class="n">navigateToPeakPosition</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">peak</span><span class="o">=</span><span class="n">peak</span><span class="p">,</span> <span class="n">selectedDisplays</span><span class="o">=</span><span class="p">[</span><span class="n">displayed</span><span class="o">.</span><span class="n">pid</span><span class="p">],</span> <span class="n">markPositions</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="c1"># for peak in peaks:</span>
+    <span class="c1">#   navigateToPeakPosition(self.project, peak=peak, selectedDisplays=[displayed.pid], markPositions=True)</span>
 
 
   <span class="k">def</span> <span class="nf">_moveNextRow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -585,22 +589,23 @@
     <span class="sd">&#39;&#39;&#39; return sample spectra and spectrum from the hit pulldown&#39;&#39;&#39;</span>
     <span class="n">spectraToDisplay</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">sampleSpectraToDisplay</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pullDownHit</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">]</span>
+    <span class="n">sampleSpectraToDisplay</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">pullDownHit</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span><span class="o">.</span><span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">experimentType</span> <span class="o">!=</span> <span class="s1">&#39;Water-LOGSY.H&#39;</span><span class="p">]</span>
 
     <span class="n">sampleSpectraToDisplay</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span>  <span class="nb">float</span><span class="p">(</span><span class="mf">0.03125</span><span class="p">)</span>
 
     <span class="n">spectraToDisplay</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sampleSpectraToDisplay</span><span class="p">)</span>
     <span class="n">currentObjPulldown</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pullDownHit</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">currentObjPulldown</span><span class="p">,</span> <span class="s1">&#39;substanceName&#39;</span><span class="p">):</span>
-      <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SU:&#39;</span><span class="o">+</span><span class="n">currentObjPulldown</span><span class="o">.</span><span class="n">substanceName</span><span class="o">+</span><span class="s1">&#39;.H&#39;</span><span class="p">)</span>
-      <span class="n">referenceSpectrum</span> <span class="o">=</span> <span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="n">referenceSpectrum</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
-      <span class="n">spectraToDisplay</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">referenceSpectrum</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">currentObjPulldown</span><span class="p">,</span> <span class="s1">&#39;spectrum&#39;</span><span class="p">):</span>
+      <span class="n">substanceName</span> <span class="o">=</span> <span class="n">currentObjPulldown</span><span class="o">.</span><span class="n">substanceName</span>
+      <span class="n">substanceRefSpectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SU:&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">substanceName</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">substanceRefSpectrum</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
+      <span class="n">spectraToDisplay</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">substanceRefSpectrum</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">refSpectrum</span> <span class="o">=</span> <span class="n">currentObjPulldown</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
       <span class="n">refSpectrum</span><span class="o">.</span><span class="n">scale</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>
       <span class="n">spectraToDisplay</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refSpectrum</span><span class="p">)</span>
-    <span class="n">spectraToDisplayPL</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectraToDisplay</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+    <span class="c1"># spectraToDisplayPL = [spectrum.peakLists[0] for spectrum in spectraToDisplay[0]]</span>
 
     <span class="k">return</span> <span class="n">spectraToDisplay</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 

@@ -62,76 +62,102 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-ccpn.AnalysisScreen.lib.MixtureGeneration">
-<span id="ccpn-analysisscreen-lib-mixturegeneration-module"></span><h2>ccpn.AnalysisScreen.lib.MixtureGeneration module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.MixtureGeneration" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisScreen.lib.MixtureGeneration.</code><code class="descname">ObjectClustering</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#ObjectClustering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering.getNComponentsPerSample">
-<code class="descname">getNComponentsPerSample</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#ObjectClustering.getNComponentsPerSample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering.getNComponentsPerSample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering.getNSamples">
-<code class="descname">getNSamples</code><span class="sig-paren">(</span><em>n</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#ObjectClustering.getNSamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering.getNSamples" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering.initialiseClusters">
-<code class="descname">initialiseClusters</code><span class="sig-paren">(</span><em>spectra</em>, <em>clustercount</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#ObjectClustering.initialiseClusters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.ObjectClustering.initialiseClusters" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.allCombinations">
-<code class="descclassname">ccpn.AnalysisScreen.lib.MixtureGeneration.</code><code class="descname">allCombinations</code><span class="sig-paren">(</span><em>ss</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#allCombinations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.allCombinations" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.bestMatch">
-<code class="descclassname">ccpn.AnalysisScreen.lib.MixtureGeneration.</code><code class="descname">bestMatch</code><span class="sig-paren">(</span><em>spectra</em>, <em>minimalOverlap</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#bestMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.bestMatch" title="Permalink to this definition">¶</a></dt>
-<dd><p>This function creates all possible clusters. From one cluster with one mixture with all spectra
-until a cluster with the maximum number of mixtures with at least 2 spectra in each.
-The minimum score is calculated for each spectrum in each mixture. Each cluster is given the minimum score of the mixture.
-:return: cluster with less mixtures (higher num of spectra inside) with best score</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.createSample">
-<code class="descclassname">ccpn.AnalysisScreen.lib.MixtureGeneration.</code><code class="descname">createSample</code><span class="sig-paren">(</span><em>cluster</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#createSample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.createSample" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.scoring">
-<code class="descclassname">ccpn.AnalysisScreen.lib.MixtureGeneration.</code><code class="descname">scoring</code><span class="sig-paren">(</span><em>spectrum</em>, <em>mixtureSpectra</em>, <em>minimalOverlap=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#scoring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.scoring" title="Permalink to this definition">¶</a></dt>
-<dd><p>The score is given by the distance of the best resolved peak to its closest neighbour. value =  Distance in ppm to
-closest peak. Smaller is the distance and consequently lower the score and more overlapped is that component to its neighbour.
-func used:
-- empty: returns a new array of given shape and type, without initializing entries. Parameters: shape and type
-- nanmin: returns minimum of an array or minimum along an axis, ignoring any NaNs.
-- ufunc.outer(A, B) applies the ufunc op to all pairs (a, b) with a in A and b in B
-- fabs: returns the absolute values</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.MixtureGeneration.setupSamples">
-<code class="descclassname">ccpn.AnalysisScreen.lib.MixtureGeneration.</code><code class="descname">setupSamples</code><span class="sig-paren">(</span><em>spectra=None</em>, <em>mode: str = None</em>, <em>n: int = None</em>, <em>minimalOverlap: float = None</em>, <em>mixtureName: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixtureGeneration.html#setupSamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixtureGeneration.setupSamples" title="Permalink to this definition">¶</a></dt>
-<dd><p>Analyses the peak positions in experiments (should be one reference experiment per component) and suggests samples with
-low overlap of at least one peak in each sample. ignoredRegions can be used to specify parts of the spectra that should
-be ignored. mode can be &#8216;nSamples&#8217; or &#8216;nComponentsPerSample&#8217; to choose if n is the number of wanted samples or the
-number of components in each sample.</p>
-</dd></dl>
-
-</div>
 <div class="section" id="module-ccpn.AnalysisScreen.lib.MixturesGeneration">
 <span id="ccpn-analysisscreen-lib-mixturesgeneration-module"></span><h2>ccpn.AnalysisScreen.lib.MixturesGeneration module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.MixturesGeneration" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.MixturesGeneration.getCompounds">
 <code class="descclassname">ccpn.AnalysisScreen.lib.MixturesGeneration.</code><code class="descname">getCompounds</code><span class="sig-paren">(</span><em>spectra</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/MixturesGeneration.html#getCompounds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.MixturesGeneration.getCompounds" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.AnalysisScreen.lib.ScreenLookup">
+<span id="ccpn-analysisscreen-lib-screenlookup-module"></span><h2>ccpn.AnalysisScreen.lib.ScreenLookup module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.ScreenLookup" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader">
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisScreen.lib.ScreenLookup.</code><code class="descname">ScreenExcelReader</code><span class="sig-paren">(</span><em>project</em>, <em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.addSampleComponents">
+<code class="descname">addSampleComponents</code><span class="sig-paren">(</span><em>sample</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.addSampleComponents"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.addSampleComponents" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createDataFrames">
+<code class="descname">createDataFrames</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.createDataFrames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createDataFrames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createNewSubstance">
+<code class="descname">createNewSubstance</code><span class="sig-paren">(</span><em>dataDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.createNewSubstance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createNewSubstance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createReferencesDataDicts">
+<code class="descname">createReferencesDataDicts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.createReferencesDataDicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createReferencesDataDicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createSamplesDataDicts">
+<code class="descname">createSamplesDataDicts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.createSamplesDataDicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createSamplesDataDicts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createSpectrumGroups">
+<code class="descname">createSpectrumGroups</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.createSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.createSpectrumGroups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getBrukerTopDirs">
+<code class="descname">getBrukerTopDirs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.getBrukerTopDirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getBrukerTopDirs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getDFValue">
+<code class="descname">getDFValue</code><span class="sig-paren">(</span><em>header</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.getDFValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getDFValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getFullBrukerFilePaths">
+<code class="descname">getFullBrukerFilePaths</code><span class="sig-paren">(</span><em>brukerDirs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.getFullBrukerFilePaths"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getFullBrukerFilePaths" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getSampleSpectra">
+<code class="descname">getSampleSpectra</code><span class="sig-paren">(</span><em>samplesDataDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.getSampleSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getSampleSpectra" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getSpectrum">
+<code class="descname">getSpectrum</code><span class="sig-paren">(</span><em>data</em>, <em>header</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.getSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getWorkingDirectoryPath">
+<code class="descname">getWorkingDirectoryPath</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.getWorkingDirectoryPath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.getWorkingDirectoryPath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.initialiseParsingSamples">
+<code class="descname">initialiseParsingSamples</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.initialiseParsingSamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.initialiseParsingSamples" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.setRefSpectrumProperties">
+<code class="descname">setRefSpectrumProperties</code><span class="sig-paren">(</span><em>spectrum</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.setRefSpectrumProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.setRefSpectrumProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.setSpectrumGroups">
+<code class="descname">setSpectrumGroups</code><span class="sig-paren">(</span><em>sample</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/ScreenLookup.html#ScreenExcelReader.setSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.ScreenExcelReader.setSpectrumGroups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="data">
+<dt id="ccpn.AnalysisScreen.lib.ScreenLookup.casNumber">
+<code class="descclassname">ccpn.AnalysisScreen.lib.ScreenLookup.</code><code class="descname">casNumber</code><em class="property"> = 'casNumber'</em><a class="headerlink" href="#ccpn.AnalysisScreen.lib.ScreenLookup.casNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>SAMPLES PAGE</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.AnalysisScreen.lib.Screening">
@@ -168,7 +194,7 @@ number of components in each sample.</p>
 
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.Screening.createStdDifferenceSpectrum">
-<code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">createStdDifferenceSpectrum</code><span class="sig-paren">(</span><em>stdOffResonance</em>, <em>stdOnResonance</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#createStdDifferenceSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.createStdDifferenceSpectrum" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">createStdDifferenceSpectrum</code><span class="sig-paren">(</span><em>project</em>, <em>filePath</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#createStdDifferenceSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.createStdDifferenceSpectrum" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -177,14 +203,29 @@ number of components in each sample.</p>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="ccpn.AnalysisScreen.lib.Screening.getPeakPositions">
+<code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">getPeakPositions</code><span class="sig-paren">(</span><em>spectrum</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#getPeakPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.getPeakPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.AnalysisScreen.lib.Screening.getSampleSpectraByExpType">
+<code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">getSampleSpectraByExpType</code><span class="sig-paren">(</span><em>sample</em>, <em>expType</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#getSampleSpectraByExpType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.getSampleSpectraByExpType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.Screening.lorentzian">
 <code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">lorentzian</code><span class="sig-paren">(</span><em>points</em>, <em>center</em>, <em>linewidth</em>, <em>intensity=1</em>, <em>phase=0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#lorentzian"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.lorentzian" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="ccpn.AnalysisScreen.lib.Screening.matchSTDToReference">
+<code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">matchSTDToReference</code><span class="sig-paren">(</span><em>project</em>, <em>minDistance</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#matchSTDToReference"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.matchSTDToReference" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.Screening.matchedPosition">
-<code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">matchedPosition</code><span class="sig-paren">(</span><em>stdPeaks</em>, <em>componentPeaks</em>, <em>tolerance: float = 0.005</em>, <em>minimumMatches: int = 1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#matchedPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.matchedPosition" title="Permalink to this definition">¶</a></dt>
-<dd><p>Matches peaks from the std spectrum ( Std off resonance -  Std on resonance) to a given reference component.</p>
+<code class="descclassname">ccpn.AnalysisScreen.lib.Screening.</code><code class="descname">matchedPosition</code><span class="sig-paren">(</span><em>samplePeaks</em>, <em>componentPeaks</em>, <em>tolerance: float = 0.005</em>, <em>minimumMatches: int = 1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/Screening.html#matchedPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.Screening.matchedPosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matches peak positions from the sample spectrum to a given reference component.</p>
 </dd></dl>
 
 <dl class="function">
@@ -313,8 +354,8 @@ number of components in each sample.</p>
   <ul>
 <li><a class="reference internal" href="#">ccpn.AnalysisScreen.lib package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.MixtureGeneration">ccpn.AnalysisScreen.lib.MixtureGeneration module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.MixturesGeneration">ccpn.AnalysisScreen.lib.MixturesGeneration module</a></li>
+<li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.ScreenLookup">ccpn.AnalysisScreen.lib.ScreenLookup module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.Screening">ccpn.AnalysisScreen.lib.Screening module</a></li>
 <li><a class="reference internal" href="#module-ccpn.AnalysisScreen.lib.SimulatedAnnealing">ccpn.AnalysisScreen.lib.SimulatedAnnealing module</a></li>
 </ul>

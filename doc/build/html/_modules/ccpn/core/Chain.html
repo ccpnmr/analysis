@@ -53,7 +53,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -64,18 +64,20 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-05 11:02:08 +0100 (Fri, 05 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9763 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9798 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">SampleComponent</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolSystem</span> <span class="kn">import</span> <span class="n">Chain</span> <span class="k">as</span> <span class="n">ApiChain</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule</span> <span class="kn">import</span> <span class="n">Molecule</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.lims</span> <span class="kn">import</span> <span class="n">Sample</span>
@@ -155,19 +157,21 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">substance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Substance</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Substance with sequence matching to Chain</span>
-
-<span class="sd">    If there are multiple matches, select labeling==&#39;std&#39;</span>
-<span class="sd">    or, failing that, the first found (sorting alphabetically on labeling)&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">substances</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Substance</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Substances matching to Chain (based on chain.compoundName)&quot;&quot;&quot;</span>
     <span class="n">compoundName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundName</span>
-    <span class="n">substances</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">compoundName</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">compoundName</span><span class="p">)</span>
 
-    <span class="c1"># Select &#39;std&#39; labeling if present</span>
-    <span class="n">substances</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">substances</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">labeling</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">]</span> <span class="ow">or</span> <span class="n">substances</span>
+    <span class="c1"># # Select &#39;std&#39; labelling if present</span>
+    <span class="c1"># substances = [x for x in substances if x.labelling is None] or substances</span>
+    <span class="c1">#</span>
+    <span class="c1"># return substances[0] if substances else None</span>
 
-    <span class="k">return</span> <span class="n">substances</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">substances</span> <span class="k">else</span> <span class="bp">None</span>
-
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SampleComponent</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;SampleComponents matching to Chain (based on chain.compoundName)&quot;&quot;&quot;</span>
+    <span class="n">compoundName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundName</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">sampleComponents</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">compoundName</span><span class="p">)</span>
 
   <span class="c1"># CCPN functions</span>
 <div class="viewcode-block" id="Chain.clone"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Chain.Chain.clone">[docs]</a>  <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
@@ -237,13 +241,13 @@
     <span class="k">if</span> <span class="n">molSystem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">sortedChains</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">sortedChains</span><span class="p">()</span></div>
 
 
 
 <span class="k">def</span> <span class="nf">_createChain</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">compoundName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">startNumber</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                 <span class="n">isCyclic</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chain</span><span class="p">:</span>
+                 <span class="n">startNumber</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">molType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isCyclic</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                 <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chain</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Create new chain from sequence of residue codes</span>
 
 <span class="sd">  Automatically creates the corresponding polymer Substance if the compoundName is not already taken</span>
@@ -338,17 +342,27 @@
 
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Substance</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Chain</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 
-  <span class="n">apiSubstance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiSubstance</span>
-  <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">apiSubstance</span><span class="o">.</span><span class="n">molecule</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiSubstance</span><span class="p">,</span> <span class="s1">&#39;molecule&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
-  <span class="k">if</span> <span class="n">apiMolecule</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="k">return</span> <span class="p">()</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span>
-                 <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span><span class="o">.</span><span class="n">sortedChains</span><span class="p">()</span>
-                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">molecule</span> <span class="ow">is</span> <span class="n">apiMolecule</span><span class="p">)</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">chains</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">compoundName</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
+
+  <span class="c1"># apiSubstance = self._apiSubstance</span>
+  <span class="c1"># apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, &#39;molecule&#39;) else None</span>
+  <span class="c1"># if apiMolecule is None:</span>
+  <span class="c1">#   return ()</span>
+  <span class="c1"># else:</span>
+  <span class="c1">#   data2Obj = self._project._data2Obj</span>
+  <span class="c1">#   return tuple(data2Obj[x]</span>
+  <span class="c1">#                for x in self._project._wrappedData.molSystem.sortedChains()</span>
+  <span class="c1">#                if x.molecule is apiMolecule)</span>
 <span class="n">Substance</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
-  <span class="s2">&quot;ccpn.Chains that correspond to the sequence of ccpn.Substance (if defined)&quot;</span>
+  <span class="s2">&quot;ccpn.Chains that correspond to ccpn.Substance (if defined)&quot;</span>
+<span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">SampleComponent</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Chain</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">chains</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">compoundName</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
+<span class="n">SampleComponent</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
+  <span class="s2">&quot;ccpn.Chains that correspond to ccpn.SampleComponent (if defined)&quot;</span>
 <span class="p">)</span>
 
 <span class="k">del</span> <span class="n">getter</span>

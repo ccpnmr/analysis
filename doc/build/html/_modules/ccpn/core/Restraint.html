@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-18 06:32:18 +0100 (Mon, 18 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9684 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9798 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -85,7 +85,7 @@
 <span class="sd">  Most of the values are the consensus of the values in the contained</span>
 <span class="sd">  RestraintContributions. In the normal case, where you have only one</span>
 <span class="sd">  RestraintContribution per Restraint, you can get and set the values</span>
-<span class="sd">   directly from the Restraint without reference to the RestraintContributions. &quot;&quot;&quot;</span>
+<span class="sd">  directly from the Restraint without reference to the RestraintContributions. &quot;&quot;&quot;</span>
   
   <span class="c1">#: Short class name, for PID.</span>
   <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;RE&#39;</span>
@@ -220,8 +220,8 @@
   <span class="k">def</span> <span class="nf">additionalUpperLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;additionalUpperLimit of restraint - consensus of all contributions or None.</span>
 <span class="sd">    Used for potential functions that require more than one parameter, typically for</span>
-<span class="sd">     parabolic-linear potentials where the additionalUpperLimit marks the transition from</span>
-<span class="sd">     parabolic to linear potential&quot;&quot;&quot;</span>
+<span class="sd">    parabolic-linear potentials where the additionalUpperLimit marks the transition from</span>
+<span class="sd">    parabolic to linear potential&quot;&quot;&quot;</span>
     <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">additionalUpperLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
@@ -237,8 +237,8 @@
   <span class="k">def</span> <span class="nf">additionalLowerLimit</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;additionalLowerLimit of restraint - consensus of all contributions or None</span>
 <span class="sd">    Used for potential functions that require more than one parameter, typically for</span>
-<span class="sd">     parabolic-linear potentials where the additionalLowerLimit marks the transition from</span>
-<span class="sd">     parabolic to linear potential&quot;&quot;&quot;</span>
+<span class="sd">    parabolic-linear potentials where the additionalLowerLimit marks the transition from</span>
+<span class="sd">    parabolic to linear potential&quot;&quot;&quot;</span>
     <span class="n">aSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">additionalLowerLimit</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">contributions</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">aSet</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
       <span class="k">return</span> <span class="n">aSet</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
@@ -341,16 +341,16 @@
   <span class="k">return</span> <span class="n">result</span>
 
 <div class="viewcode-block" id="createSimpleRestraint"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Restraint.createSimpleRestraint">[docs]</a><span class="k">def</span> <span class="nf">createSimpleRestraint</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">RestraintList</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">figureOfMerit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">peaks</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Peak</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>  <span class="n">targetValue</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">weight</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="n">lowerLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">additionalUpperLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                        <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">vectorLength</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">restraintItems</span><span class="p">:</span><span class="n">Sequence</span><span class="o">=</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
+                          <span class="n">peaks</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="n">Peak</span><span class="p">]</span><span class="o">=</span><span class="p">(),</span>  <span class="n">targetValue</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">error</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                          <span class="n">weight</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">upperLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>  <span class="n">lowerLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                          <span class="n">additionalUpperLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">additionalLowerLimit</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                          <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">vectorLength</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">restraintItems</span><span class="p">:</span><span class="n">Sequence</span><span class="o">=</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">Restraint</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Create a Restraint with a single RestraintContribution within the RestraintList.</span>
 <span class="sd">  The function takes all the information needed and creates the RestraintContribution as</span>
-<span class="sd">   well as the Restraint proper.</span>
+<span class="sd">  well as the Restraint proper.</span>
 
-<span class="sd">   This function should be used routinely, unless there is a need to crreate more complex</span>
-<span class="sd">   Restraints.&quot;&quot;&quot;</span>
+<span class="sd">  This function should be used routinely, unless there is a need to create more complex</span>
+<span class="sd">  Restraints.&quot;&quot;&quot;</span>
 
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
     <span class="p">(</span>

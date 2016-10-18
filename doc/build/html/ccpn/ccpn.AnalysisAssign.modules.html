@@ -81,9 +81,9 @@ to peak dimensions</p>
 <dt id="ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule">
 <em class="property">class </em><code class="descclassname">ccpn.AnalysisAssign.modules.BackboneAssignmentModule.</code><code class="descname">BackboneAssignmentModule</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/BackboneAssignmentModule.html#BackboneAssignmentModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Module.CcpnModule</span></code></p>
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule.closeModule">
-<code class="descname">closeModule</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/BackboneAssignmentModule.html#BackboneAssignmentModule.closeModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule.closeModule" title="Permalink to this definition">¶</a></dt>
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.BackboneAssignmentModule.BackboneAssignmentModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -126,6 +126,11 @@ to peak dimensions</p>
 <dt id="ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule">
 <em class="property">class </em><code class="descclassname">ccpn.AnalysisAssign.modules.PickAndAssignModule.</code><code class="descname">PickAndAssignModule</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>name='Pick And Assign'</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/PickAndAssignModule.html#PickAndAssignModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Module.CcpnModule</span></code>, <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -156,11 +161,6 @@ to peak dimensions</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QGraphicsTextItem</span></code></p>
 <p>A graphical object specifying the position and name of an atom when created by the Assigner.
 Can be linked to a Nmr Atom.</p>
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mouseDoubleClickEvent">
-<code class="descname">mouseDoubleClickEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#GuiNmrAtom.mouseDoubleClickEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mouseDoubleClickEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -169,16 +169,6 @@ Can be linked to a Nmr Atom.</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QGraphicsTextItem</span></code></p>
 <p>Object linking residues displayed in Assigner and Nmr Residues. Contains functionality for drag and
 drop assignment in conjunction with the Sequence Module.</p>
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrResidue.mouseMoveEvent">
-<code class="descname">mouseMoveEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#GuiNmrResidue.mouseMoveEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrResidue.mouseMoveEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrResidue.mousePressEvent">
-<code class="descname">mousePressEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#GuiNmrResidue.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrResidue.mousePressEvent" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
 </dd></dl>
 
 <dl class="class">
@@ -195,7 +185,7 @@ Nmr Residues.</p>
 <dl class="method">
 <dt id="ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.addResidue">
 <code class="descname">addResidue</code><span class="sig-paren">(</span><em>nmrResidue: ccpn.core.NmrResidue.NmrResidue</em>, <em>direction: str</em>, <em>atomSpacing=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#SequenceGraph.addResidue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.addResidue" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes an Nmr Residue and a direction, either &#8216;-1 or &#8216;+1&#8217;, and adds a residue to the assigner
+<dd><p>Takes an Nmr Residue and a direction, either &#8216;-1 or &#8216;+1&#8217;, and adds a residue to the sequence graph
 corresponding to the Nmr Residue.
 Nmr Residue name displayed beneath CA of residue drawn and residue type predictions displayed
 beneath Nmr Residue name</p>
@@ -209,13 +199,8 @@ beneath Nmr Residue name</p>
 <dl class="method">
 <dt id="ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.clearAllItems">
 <code class="descname">clearAllItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#SequenceGraph.clearAllItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.clearAllItems" title="Permalink to this definition">¶</a></dt>
-<dd><p>Removes all displayed residues in the assigner and resets items count to zero.</p>
+<dd><p>Removes all displayed residues in the sequence graph and resets items count to zero.</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.closeModule">
-<code class="descname">closeModule</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#SequenceGraph.closeModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.closeModule" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.disconnectNextNmrResidue">
@@ -245,6 +230,11 @@ positions in the Sequence Module if it is displayed.</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.resetSequenceGraph">
+<code class="descname">resetSequenceGraph</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#SequenceGraph.resetSequenceGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.resetSequenceGraph" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.setMode">
 <code class="descname">setMode</code><span class="sig-paren">(</span><em>mode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#SequenceGraph.setMode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.SequenceGraph.setMode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -269,24 +259,11 @@ positions in the Sequence Module if it is displayed.</p>
 <em class="property">class </em><code class="descclassname">ccpn.AnalysisAssign.modules.SideChainAssignmentModule.</code><code class="descname">SideChainAssignmentModule</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SideChainAssignmentModule.html#SideChainAssignmentModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule" title="ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.AnalysisAssign.modules.PickAndAssignModule.PickAndAssignModule</span></code></a></p>
 <dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.has_duplicates">
-<code class="descname">has_duplicates</code><span class="sig-paren">(</span><em>seq</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SideChainAssignmentModule.html#SideChainAssignmentModule.has_duplicates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.has_duplicates" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.mediateRefresh">
-<code class="descname">mediateRefresh</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SideChainAssignmentModule.html#SideChainAssignmentModule.mediateRefresh"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.mediateRefresh" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.sortNmrAtomPairs">
 <code class="descname">sortNmrAtomPairs</code><span class="sig-paren">(</span><em>nmrAtomPairs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SideChainAssignmentModule.html#SideChainAssignmentModule.sortNmrAtomPairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.sortNmrAtomPairs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.updateModules">
-<code class="descname">updateModules</code><span class="sig-paren">(</span><em>nmrAtom</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SideChainAssignmentModule.html#SideChainAssignmentModule.updateModules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SideChainAssignmentModule.SideChainAssignmentModule.updateModules" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><p>Sorts pairs of NmrAtoms into &#8216;greek&#8217; order. Used in _startAssignmentFromPairs to pass correctly
+ordered lists to makeStripPlot so strips are in the correct order.</p>
+</dd></dl>
 
 </dd></dl>
 

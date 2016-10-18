@@ -71,7 +71,7 @@
 <span class="c1">#=========================================================================================</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
@@ -79,7 +79,7 @@
 <span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
-<span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">DEFAULT_LABELING</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Constants</span> <span class="kn">import</span> <span class="n">DEFAULT_LABELLING</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.lims.Sample</span> <span class="kn">import</span> <span class="n">Sample</span> <span class="k">as</span> <span class="n">ApiSample</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.lims.Sample</span> <span class="kn">import</span> <span class="n">SampleComponent</span> <span class="k">as</span> <span class="n">ApiSampleComponent</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
@@ -89,8 +89,8 @@
   <span class="sd">&quot;&quot;&quot; A Samplecomponent indicates a Substance contained in a specific Sample,</span>
 <span class="sd">  (e.g. protein, buffer, salt), and its  concentrations.</span>
 
-<span class="sd">  The Substance referred to is defined by the &#39;name&#39; and &#39;labeling&#39; attributes.</span>
-<span class="sd">  FOr this reason teh SampleCOmponent cannot be renamed. See Substance.&quot;&quot;&quot;</span>
+<span class="sd">  The Substance referred to is defined by the &#39;name&#39; and &#39;labelling&#39; attributes.</span>
+<span class="sd">  For this reason the SampleComponent cannot be renamed. See Substance.&quot;&quot;&quot;</span>
   
   <span class="c1">#: Short class name, for PID.</span>
   <span class="n">shortClassName</span> <span class="o">=</span> <span class="s1">&#39;SC&#39;</span>
@@ -116,14 +116,14 @@
     
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;id string - name.labeling&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;id string - name.labelling&quot;&quot;&quot;</span>
     <span class="n">obj</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
     <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">labeling</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">labeling</span>
-    <span class="k">if</span> <span class="n">labeling</span> <span class="o">==</span> <span class="n">DEFAULT_LABELING</span><span class="p">:</span>
-      <span class="n">labeling</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">)</span>
+    <span class="n">labelling</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">labeling</span>
+    <span class="k">if</span> <span class="n">labelling</span> <span class="o">==</span> <span class="n">DEFAULT_LABELLING</span><span class="p">:</span>
+      <span class="n">labelling</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -131,10 +131,10 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">labeling</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;labeling descriptor of SampleComponent and corresponding substance &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">labelling</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;labelling descriptor of SampleComponent and corresponding substance &quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">labeling</span>
-    <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="n">DEFAULT_LABELING</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="n">DEFAULT_LABELLING</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span>
@@ -212,10 +212,35 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">spectrumHits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SpectrumHit</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">spectrumHits</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">SpectrumHit</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;ccpn.SpectrumHits found for SampleComponent&quot;&quot;&quot;</span>
     <span class="n">ff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiSampleComponent</span><span class="o">.</span><span class="n">sortedSpectrumHits</span><span class="p">())</span>
+
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">isotopeCode2Fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="nb">float</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;{isotopeCode:fraction} dictionary giving uniform isotope percentages</span>
+
+<span class="sd">    isotopeCodes are of the form &#39;12C&#39;, &#39;13C&#39;, and all relevant isotopes for a given</span>
+<span class="sd">    nucleus must be entered. Fractions must add up to 1.0 for each element.</span>
+
+<span class="sd">    Example value:</span>
+<span class="sd">    {&#39;12C&#39;:0.289, &#39;13C&#39;:0.711, &#39;1H&#39;:0.99985, &#39;2H&#39;:0.00015}</span>
+
+<span class="sd">    NBNB the internal dictionary is returned directly without checks or encapsulation&quot;&quot;&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span><span class="p">[</span><span class="s1">&#39;isotopeCode2Fraction&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span><span class="p">[</span><span class="s1">&#39;isotopeCode2Fraction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+  <span class="nd">@isotopeCode2Fraction.setter</span>
+  <span class="k">def</span> <span class="nf">isotopeCode2Fraction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;SampleComponent.isotopeCode2Fraction must be a dictionary&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">ccpnInternalData</span><span class="p">[</span><span class="s1">&#39;isotopeCode2Fraction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     
   <span class="c1"># Implementation functions</span>
@@ -233,7 +258,7 @@
 
 <span class="c1"># Connections to parents:</span>
 
-<span class="k">def</span> <span class="nf">_newSampleComponent</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Sample</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">labeling</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+<span class="k">def</span> <span class="nf">_newSampleComponent</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Sample</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">labelling</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">role</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">concentration</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">concentrationError</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                        <span class="n">concentrationUnit</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">purity</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                       <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SampleComponent</span><span class="p">:</span>
@@ -244,16 +269,16 @@
 
   <span class="c1"># Default values for &#39;new&#39; function, as used for echoing to console</span>
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(</span>
-    <span class="p">((</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;labeling&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+    <span class="p">((</span><span class="s1">&#39;name&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;labelling&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
      <span class="p">(</span><span class="s1">&#39;concentration&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;concentrationError&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;concentrationUnit&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
      <span class="p">(</span><span class="s1">&#39;purity&#39;</span><span class="p">,</span><span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
      <span class="p">)</span>
   <span class="p">)</span>
 
-  <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.SampleComponent id: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                       <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="p">))</span>
+                       <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">))</span>
 
 
   <span class="k">if</span> <span class="n">concentrationUnit</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">concentrationUnits</span><span class="p">:</span>
@@ -265,8 +290,8 @@
   <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newSampleComponent&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
                                   <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newSampleComponent&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
-    <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">labeling</span><span class="p">)</span>
-    <span class="c1"># NB - using substance._wrappedData.labeling because we need the API labeling value,</span>
+    <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="o">=</span><span class="n">labelling</span><span class="p">)</span>
+    <span class="c1"># NB - using substance._wrappedData.labelling because we need the API labelling value,</span>
     <span class="c1"># which is different for the default case</span>
     <span class="n">obj</span> <span class="o">=</span> <span class="n">apiSample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="n">substance</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">labeling</span><span class="p">,</span>
                                        <span class="n">concentration</span><span class="o">=</span><span class="n">concentration</span><span class="p">,</span>

@@ -83,7 +83,6 @@
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">Atom</span> <span class="k">as</span> <span class="n">ApiCoordAtom</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolStructure</span> <span class="kn">import</span> <span class="n">StructureEnsemble</span> <span class="k">as</span> <span class="n">ApiStructureEnsemble</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span> <span class="k">as</span> <span class="n">spectrumLib</span>
 
 <span class="n">NaN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
 
@@ -135,8 +134,10 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">atomIds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Tuple of atom id (&#39;chainCode.sequenceCode.residueType.atomName&#39; for atoms making up</span>
-<span class="sd">    structure ensemble</span>
-<span class="sd">    The atom IDs and their order is the same for all Models in the ensemble.&quot;&quot;&quot;</span>
+<span class="sd">    structure ensemble. Note that the identifier uses IUPAC atom names and Coordinate-linked</span>
+<span class="sd">    chain and sequence specifiers, which may not match the Chains.</span>
+<span class="sd">    The atom IDs and their order is the same for all Models in the ensemble.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">residue</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">orderedAtoms</span><span class="p">:</span>
@@ -437,7 +438,7 @@
                          <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
 
       <span class="k">if</span> <span class="n">coordResidue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">elementName</span> <span class="o">=</span> <span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;Unknown&#39;</span>
+        <span class="n">elementName</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;Unknown&#39;</span>
         <span class="n">coordResidue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">elementName</span><span class="o">=</span><span class="n">elementName</span><span class="p">)</span>
 
       <span class="k">else</span><span class="p">:</span>
@@ -581,7 +582,7 @@
           <span class="n">useResidue</span> <span class="o">=</span> <span class="n">useChain</span><span class="o">.</span><span class="n">newResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">seqInsertCode</span><span class="p">,</span>
                                            <span class="n">code3Letter</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
         <span class="n">newAtom</span> <span class="o">=</span> <span class="n">useResidue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
-                                     <span class="n">elementName</span><span class="o">=</span><span class="n">spectrumLib</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">)</span>
+                                     <span class="n">elementName</span><span class="o">=</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">)</span>
 
         <span class="c1"># reset data arrays</span>
         <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_DATA_ARRAY_TAGS</span><span class="p">:</span>
@@ -676,6 +677,7 @@
     <span class="n">newApiStructureEnsemble</span> <span class="o">=</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">newStructureEnsemble</span><span class="p">(</span><span class="n">molSystem</span><span class="o">=</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">molSystem</span><span class="p">,</span>
                                                            <span class="n">ensembleId</span><span class="o">=</span><span class="n">ensembleId</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newApiStructureEnsemble</span><span class="p">)</span>
     
     

@@ -84,7 +84,7 @@
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr</span> <span class="kn">import</span> <span class="n">Nmr</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">modelUtil</span>
-<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.spectrum.Spectrum</span> <span class="kn">import</span> <span class="n">name2IsotopeCode</span>
+<span class="kn">from</span> <span class="nn">ccpn.util.Common</span> <span class="kn">import</span> <span class="n">name2IsotopeCode</span>
 
 
 <div class="viewcode-block" id="NmrAtom"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrAtom.NmrAtom">[docs]</a><span class="k">class</span> <span class="nc">NmrAtom</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -154,6 +154,15 @@
   <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;NmrAtom serial number - set at creation and unchangeable&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Free-form text comment&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span>
+
+  <span class="nd">@comment.setter</span>
+  <span class="k">def</span> <span class="nf">comment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">atom</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Atom</span><span class="p">:</span>
@@ -394,7 +403,8 @@
 <span class="k">del</span> <span class="n">getter</span>
 <span class="k">del</span> <span class="n">setter</span>
     
-<span class="k">def</span> <span class="nf">_newNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrAtom</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_newNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrAtom</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Create new NmrAtom within NmrResidue. If name is None, use default name</span>
 <span class="sd">  (of form e.g. &#39;H@211&#39;, &#39;N@45&#39;, ...)&quot;&quot;&quot;</span>
   <span class="n">nmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span>
@@ -446,6 +456,8 @@
   <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;resonanceGroup&#39;</span><span class="p">:</span><span class="n">resonanceGroup</span><span class="p">,</span> <span class="s1">&#39;isotopeCode&#39;</span><span class="p">:</span><span class="n">isotopeCode</span><span class="p">}</span>
   <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
     <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
+  <span class="k">if</span> <span class="n">comment</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
 
   <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
                                   <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
@@ -471,7 +483,7 @@
   <span class="c1"># resonanceGroup = self._wrappedData</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;fetchNmrAtom&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newNmrAtom&#39;</span><span class="p">)</span>
   <span class="k">try</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+    <span class="c1"># self.getNmrAtom(name.translate(Pid.remapSeparators))</span>
     <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span> <span class="ow">or</span>
               <span class="bp">self</span><span class="o">.</span><span class="n">newNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">))</span>
     <span class="c1"># result = (self._project._data2Obj.get(resonanceGroup.findFirstResonance(name=name)) or</span>

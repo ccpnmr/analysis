@@ -872,7 +872,9 @@ class Spectrum(AbstractWrapperObject):
       raise Exception('Currently this method only works for 1D spectra')
       
     if self._intensities is None:
-      self._intensities = self.scale * self.getSliceData()
+      self._intensities = self.getSliceData()
+      if self._intensities is not None:
+        self._intensities *= self.scale
       
     return self._intensities
 

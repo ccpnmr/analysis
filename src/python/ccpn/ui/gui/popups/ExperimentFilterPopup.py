@@ -13,7 +13,8 @@ from ccpn.ui.gui.widgets.RadioButton import RadioButton
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
 class ExperimentFilterPopup(QtGui.QDialog, Base):
-  def __init__(self, spectrum=None, parent=None, application=None, **kw):
+  def __init__(self, spectrum=None, parent=None, application=None,
+               title:str='Experiment Type Filter', **kw):
     super(ExperimentFilterPopup, self).__init__(parent)
     Base.__init__(self, **kw)
 
@@ -36,22 +37,22 @@ class ExperimentFilterPopup(QtGui.QDialog, Base):
     # filter by transfer technique
     self.anyCheckbox = RadioButton(filterBox, grid=(0, 0), callback=self.updateChoices)
     Label(filterBox, grid=(0, 1), hAlign='l', text='Any')
-    self.relayedCheckBox = RadioButton(filterBox, grid=(0, 2), callback=self.updateChoices)
-    Label(filterBox, grid=(0, 3), hAlign='l', text='relayed')
-    self.relaxationCheckBox = RadioButton(filterBox, grid=(0, 4), callback=self.updateChoices)
-    Label(filterBox, grid=(0, 5), hAlign='l', text='relaxation')
-    self.jResolvedCheckBox = RadioButton(filterBox, grid=(0, 6), callback=self.updateChoices)
-    Label(filterBox, grid=(0, 7), hAlign='l', text='J resolved')
+    self.throughSpaceCheckbox = RadioButton(filterBox, grid=(0, 2), callback=self.updateChoices)
+    Label(filterBox, grid=(0, 3), hAlign='l', text='through space')
+    self.relayedCheckBox = RadioButton(filterBox, grid=(0, 4), callback=self.updateChoices)
+    Label(filterBox, grid=(0, 5), hAlign='l', text='relayed')
+    self.relaxationCheckBox = RadioButton(filterBox, grid=(0, 6), callback=self.updateChoices)
+    Label(filterBox, grid=(0, 7), hAlign='l', text='relaxation')
     self.mqCheckBox = RadioButton(filterBox, grid=(1, 0), callback=self.updateChoices)
-    mqLabel = Label(filterBox, grid=(1, 1), hAlign='l', text='MQ')
-    self.projectedCheckBox = RadioButton(filterBox, grid=(1, 2), callback=self.updateChoices)
-    Label(filterBox, grid=(1, 3), hAlign='l', text='projection')
-    self.quantificationCheckBox = RadioButton(filterBox, grid=(1, 4), callback=self.updateChoices)
-    Label(filterBox, grid=(1, 5), hAlign='l', text='quantification')
-    self.throughSpaceCheckbox = RadioButton(filterBox, grid=(1, 6), callback=self.updateChoices)
-    Label(filterBox, grid=(1, 7), hAlign='l', text='through space')
+    Label(filterBox, grid=(1, 1), hAlign='l', text='MQ')
+    self.quantificationCheckBox = RadioButton(filterBox, grid=(1, 2), callback=self.updateChoices)
+    Label(filterBox, grid=(1, 3), hAlign='l', text='quantification')
+    self.jResolvedCheckBox = RadioButton(filterBox, grid=(1, 4), callback=self.updateChoices)
+    Label(filterBox, grid=(1, 5), hAlign='l', text='J resolved')
+    self.projectedCheckBox = RadioButton(filterBox, grid=(1, 6), callback=self.updateChoices)
+    Label(filterBox, grid=(1, 7), hAlign='l', text='projection')
     self.noneOfTheAboveCheckbox = RadioButton(filterBox, grid=(2, 0), callback=self.updateChoices)
-    Label(filterBox, 'None of the Above', grid=(2, 1), gridSpan=(1, 2))
+    Label(filterBox, 'None of the Above', grid=(2, 1), gridSpan=(1, 3))
 
     if not spectrum.experimentType:
       self.anyCheckbox.setChecked(True)
@@ -83,6 +84,8 @@ class ExperimentFilterPopup(QtGui.QDialog, Base):
     self.buttonBox = ButtonList(self, grid=(4, 3), texts=['Close', 'Apply'],
                            callbacks=[self.close, self._setExperimentType])
 
+    self.setWindowTitle(title)
+
 
   def _setExperimentType(self):
     expType = self.experimentPulldown.currentText()
@@ -106,25 +109,34 @@ class ExperimentFilterPopup(QtGui.QDialog, Base):
       detectionNuclei.extend(['15N', '19F', '23Na', '79Br'])
 
     if self.anyCheckbox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects
+       if x.acquisitionNucleus in detectionNuclei]
     if self.noneOfTheAboveCheckbox.isChecked():
       [filteredExperimentObjects.add(x) for x in self.objects if not x.isThroughSpace and
        not x.isRelayed and not x.isRelaxation and not x.isJResolved and not x.isMultipleQuantum
-       and not x.isProjection and not x.isQuantification and x.acquisitionNucleus is detectionNuclei]
+       and not x.isProjection and not x.isQuantification
+       and x.acquisitionNucleus in detectionNuclei]
     if self.throughSpaceCheckbox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.isThroughSpace and x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects if x.isThroughSpace
+       and x.acquisitionNucleus in detectionNuclei]
     if self.relayedCheckBox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.isRelayed and x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects if x.isRelayed
+       and x.acquisitionNucleus in detectionNuclei]
     if self.relaxationCheckBox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.isRelaxation and x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects if x.isRelaxation
+       and x.acquisitionNucleus in detectionNuclei]
     if self.jResolvedCheckBox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.isJResolved and x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects if x.isJResolved
+       and x.acquisitionNucleus in detectionNuclei]
     if self.mqCheckBox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.isMultipleQuantum and x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects if x.isMultipleQuantum
+       and x.acquisitionNucleus in detectionNuclei]
     if self.projectedCheckBox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.isProjection and x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects if x.isProjection
+       and x.acquisitionNucleus in detectionNuclei]
     if self.quantificationCheckBox.isChecked():
-      [filteredExperimentObjects.add(x) for x in self.objects if x.isQuantification and x.acquisitionNucleus in detectionNuclei]
+      [filteredExperimentObjects.add(x) for x in self.objects if x.isQuantification
+       and x.acquisitionNucleus in detectionNuclei]
 
     texts = []
     objects = []

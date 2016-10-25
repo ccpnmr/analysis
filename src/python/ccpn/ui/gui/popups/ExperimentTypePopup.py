@@ -12,7 +12,7 @@ from ccpn.ui.gui.widgets.FilteringPulldownList import FilteringPulldownList
 from functools import partial
 
 class ExperimentTypePopup(QtGui.QDialog, Base):
-  def __init__(self, parent=None, project=None, **kw):
+  def __init__(self, parent=None, project=None, title:str='Experiment Type Selection', **kw):
 
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
@@ -34,7 +34,9 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
                                 callback=partial(self._setExperimentType, spectrum, atomCodes),
                                 texts=pulldownItems)
       self.spPulldowns.append(spPulldown)
-      spButton = Button(self, grid=(spectrumIndex, 2), callback=partial(self.raiseExperimentFilterPopup, spectrum, spectrumIndex),
+      spButton = Button(self, grid=(spectrumIndex, 2),
+                        callback=partial(self.raiseExperimentFilterPopup,
+                                         spectrum, spectrumIndex, atomCodes),
                         hPolicy='fixed', icon='icons/applications-system')
 
       # Get the text that was used in the pulldown from the refExperiment
@@ -46,15 +48,18 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
     self.buttonBox = Button(self, grid=(len(project.spectra)+1, 1), text='Close',
                            callback=self.accept)
 
+    self.setWindowTitle(title)
+
 
   def _setExperimentType(self, spectrum, atomCodes, item):
     expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(item)
     spectrum.experimentType = expType
 
-  def raiseExperimentFilterPopup(self, spectrum, spectrumIndex):
+  def raiseExperimentFilterPopup(self, spectrum, spectrumIndex, atomCodes):
 
     popup = ExperimentFilterPopup(spectrum=spectrum, application=spectrum.project._appBase)
     popup.exec_()
     if popup.expType:
       self.spPulldowns[spectrumIndex].select(popup.expType)
-      spectrum.experimentType = popup.expType
+      expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(popup.expType)
+      spectrum.experimentType = expType

@@ -1,6 +1,6 @@
 """
 This widget is based on the CcpNmr ChemBuild.
-Copyright Tim Stevens, University of Cambridge December 2010-2012
+Credits to Tim Stevens, University of Cambridge December 2010-2012
 """
 
 

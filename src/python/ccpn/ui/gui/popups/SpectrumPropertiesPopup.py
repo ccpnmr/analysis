@@ -183,39 +183,49 @@ class GeneralTab(QtGui.QWidget, Base):
                                                                                        +['<New>'], callback=self._queueChemicalShiftListChange)
     Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
     Label(self, text=spectrum.pid, vAlign='t', grid=(5, 1))
+
+    Label(self, text="Sample", vAlign='t', hAlign='l', grid=(6, 0))
+    self.samplesPulldownList = PulldownList(self,texts=['None'], objects=[None], vAlign='t', grid=(6, 1))
+    for sample in spectrum.project.samples:
+      self.samplesPulldownList.addItem(sample.name, sample)
+    if spectrum.sample is not None:
+      self.samplesPulldownList.select(spectrum.sample.name)
+    self.samplesPulldownList.activated[str].connect(self._queueSampleChange)
+
+
     if spectrum.dimensionCount == 1:
-      Label(self, text="Colour", vAlign='t', hAlign='l', grid=(6, 0))
-      self.colourBox = PulldownList(self, vAlign='t', hAlign='l', grid=(6, 1))
+      Label(self, text="Colour", vAlign='t', hAlign='l', grid=(7, 0))
+      self.colourBox = PulldownList(self, vAlign='t', hAlign='l', grid=(7, 1))
       for item in spectrumColours.items():
         pix=QtGui.QPixmap(QtCore.QSize(20, 20))
         pix.fill(QtGui.QColor(item[0]))
         self.colourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
       self.colourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.sliceColour))
       self.colourBox.currentIndexChanged.connect(partial(self._changedColourComboIndex, spectrum))
-      colourButton = Button(self, vAlign='t', hAlign='l', grid=(6, 2), hPolicy='fixed',
+      colourButton = Button(self, vAlign='t', hAlign='l', grid=(7, 2), hPolicy='fixed',
                             callback=partial(self._queueSetSpectrumColour, spectrum), icon='icons/colours')
-      Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(7, 0))
-      spectrumType = PulldownList(self, vAlign='t', grid=(7, 1))
+      Label(self, text="Experiment Type ", vAlign='t', hAlign='l', grid=(8, 0))
+      spectrumType = PulldownList(self, vAlign='t', grid=(8, 1))
       spectrumType.addItems(SPECTRA)
 
       # Added to account for renaming of experiments
       text = spectrumType.findText(spectrum.experimentName)
       text = priorityNameRemapping.get(text, text)
       spectrumType.setCurrentIndex(spectrumType.findText(str(text)))
-      Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(8, 0))
-      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(8, 1))
+      Label(self, text='Spectrum Scaling', vAlign='t', hAlign='l', grid=(9, 0))
+      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', hAlign='l', grid=(9, 1))
       self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)
 
-      Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(10, 0))
-      Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(11, 0))
+      Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(11, 0))
+      Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(12, 0))
       noiseLevelData = LineEdit(self)
       if spectrum._apiDataSource.noiseLevel is not None:
         noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.noiseLevel))
       else:
         noiseLevelData.setText('None')
     else:
-      Label(self, text="Spectrum Type ", vAlign='t', hAlign='l', grid=(6, 0))
-      self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(6, 1))
+      Label(self, text="Spectrum Type ", vAlign='t', hAlign='l', grid=(7, 0))
+      self.spectrumType = FilteringPulldownList(self, vAlign='t', grid=(7, 1))
       axisCodes = []
       for isotopeCode in spectrum.isotopeCodes:
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
@@ -233,11 +243,11 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrumType.currentIndexChanged.connect(self._queueSetSpectrumType)
       self.spectrumType.setMinimumWidth(self.pathData.width()*1.95)
       self.spectrumType.setFixedHeight(25)
-      spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(8, 0))
-      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', grid=(8, 1))
+      spectrumScalingLabel = Label(self, text='Spectrum Scaling', vAlign='t', grid=(9, 0))
+      self.spectrumScalingData = LineEdit(self, text=str(self.spectrum.scale), vAlign='t', grid=(9, 1))
       self.spectrumScalingData.editingFinished.connect(self._queueSpectrumScaleChange)
-      noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(9, 0))
-      noiseLevelData = LineEdit(self, vAlign='t', grid=(9, 1))
+      noiseLevelLabel = Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(10, 0))
+      noiseLevelData = LineEdit(self, vAlign='t', grid=(10, 1))
 
 
       if spectrum._apiDataSource.noiseLevel is None:
@@ -295,6 +305,16 @@ class GeneralTab(QtGui.QWidget, Base):
     self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')\n
                                   spectrum.chemicalShiftList = chemicalShiftList""")
 
+
+  def _queueSampleChange(self):
+    self._changes['sampleSpectrum'] = partial(self._changeSampleSpectrum, self.samplesPulldownList.currentObject())
+
+  def _changeSampleSpectrum(self, sample):
+    if sample is not None:
+      sample.spectra += (self.spectrum,)
+    else:
+      if self.spectrum.sample is not None:
+        self.spectrum.sample = None
 
   def _queueSetSpectrumType(self, value):
     self._changes['spectrumType'] = partial(self._setSpectrumType, value)

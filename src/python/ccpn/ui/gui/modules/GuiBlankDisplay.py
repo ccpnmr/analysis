@@ -115,8 +115,7 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
       for sp in spectrumPids[1:]:
         spectrumDisplay.displaySpectrum(sp)
       self.moduleArea.guiWindow.deleteBlankDisplay()
-      self.moduleArea.window().pythonConsole.writeCommand('spectrum', 'application.createSpectrumDisplay',
-                                                        'sample', pid=ss)
+
     self.moduleArea.guiWindow.deleteBlankDisplay()
 
   def processSpectrum(self, spectrum:(Spectrum,Pid), event):
@@ -139,9 +138,13 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
           spectrumDisplay.displaySpectrum(spectrum)
         spectrumDisplay.isGrouped = True
         spectrumDisplay.spectrumToolBar.hide()
-        SpectrumGroupsToolBar(spectrumDisplay.module, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
 
         self._appBase.current.strip = spectrumDisplay.strips[0]
+
+        spectrumGroupsToolBar = SpectrumGroupsToolBar(spectrumDisplay.module, self._appBase.project, spectrumDisplay.strips[0],ss, grid=(0, 0))
+
+        spectrumDisplay.strips[0].spectrumViews[0].spectrumGroupsToolBar = spectrumGroupsToolBar
+
         padding = self._appBase.preferences.general.stripRegionPadding
         self._appBase.current.strip.viewBox.autoRange(padding=padding)
         self.moduleArea.guiWindow.deleteBlankDisplay()

@@ -84,7 +84,6 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
       return
 
     for ss in pids:
-      print(ss)
       guiSpectrumDisplay.displaySpectrum(ss)
       # self._appBase.mainWindow.pythonConsole.writeCompoundCommand(['spectrum', 'module'],
       #                            'module.displaySpectrum', 'spectrum', [ss, displayPid])
@@ -122,9 +121,10 @@ class PlotWidget(DropBase, pg.PlotWidget, Base):
         if hasattr(guiSpectrumDisplay, 'isGrouped'):
           if guiSpectrumDisplay.isGrouped:
             if len(spectrumGroups)>0:
-              spectrumGroupToolBar = guiSpectrumDisplay.strips[0].spectrumDisplay.module.children()[2].children()[-1]
+
+              spectrumGroupsToolBar = guiSpectrumDisplay.strips[0].spectrumViews[0].spectrumGroupsToolBar
               spectrumGroupButton = SpectrumGroupsWidget(self, self._appBase.project, guiSpectrumDisplay.strips[0], pids[0])
-              spectrumGroupToolBar.addWidget(spectrumGroupButton)
+              spectrumGroupsToolBar.addWidget(spectrumGroupButton)
               for spectrum in spectrumGroups[0].spectra:
                 guiSpectrumDisplay.displaySpectrum(spectrum)
           else:

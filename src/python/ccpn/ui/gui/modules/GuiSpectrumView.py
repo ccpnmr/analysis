@@ -53,6 +53,7 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     GuiBase.__init__(self, self._project._appBase)
 
     self._apiDataSource = self._wrappedData.spectrumView.dataSource
+    self.spectrumGroupsToolBar = None
 
     action = self.strip.spectrumDisplay.spectrumActionDict.get(self._apiDataSource)
     if action and not action.isChecked():

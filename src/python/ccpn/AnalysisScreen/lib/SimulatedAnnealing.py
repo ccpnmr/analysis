@@ -1,45 +1,17 @@
+#  Part of the Simulated Annealing algorithm is inspired by NMRmix.
+#  As pubblished in J.L. Stark, et al. NMRmix: a tool for the optimization of compound mixtures in 1D (1)H NMR ligand affinity screens
+#  J Proteome Res, 15 (2016), pp. 1360–1368
 
 import math
 import random
-import numpy as np
 import copy
-from collections import OrderedDict
 
-# from matplotlib import pyplot as plt
-
-
-mix1 = {}
-
-
-# peaksDistance = 0.01
-
-# Macro to get compounds and pickLists
-# compounds = []
-# for peakList in project.peakLists:
-#   name, space, value = str(peakList.id).partition('-')
-#   compound = [name, [peak.position[0] for peak in peakList.peaks]]
-#   compounds.append(compound)
-# print(compounds)
-
-maxSteps = 1000
-refineMaxSteps = 1000
-startTemp = 1000.0
-refineStartTemp = 0.5
-finalTemp = 0.1
-
-
-cooling = 'linear'
-refineCooling = 'linear'
-scoreScale = 1000
-iterations = 2
-    # self.nMixturesToMix = 2 not in use now, by default is two
 
 def generatePeakPositions(numberOfPeaks, ppmStart, ppmEnd):
   peakPositions = []
   for x in range(numberOfPeaks):
     peakPositions.append(random.uniform(ppmStart, ppmEnd))
   return sorted(peakPositions)
-
 
 def randomDictMixtures(name, compounds, nMixtures):
   mixturesDict = {}
@@ -52,8 +24,7 @@ def randomDictMixtures(name, compounds, nMixtures):
       mixturesDict.update({key:value})
   return mixturesDict
 
-# print(randomDictMixtures('Mixture', compounds, 18))
-#
+
 def generateSimpleCompounds(numb, numberOfPeaks, ppmStart, ppmEnd):
   compounds = []
   for i in range(numb):
@@ -80,6 +51,7 @@ def scoreMixture(mixture, minDist):
         score += scoreCompound(compoundA[1], compoundB[1], minDist=minDist)
   return score
 
+
 def calculateTotalScore(mixturesDict, peaksDistance=0.01):
   score = 0
   for mixture in mixturesDict:
@@ -94,15 +66,12 @@ def getAllOverlappedPositions(mixtures, minDist):
       compoundName, compoundPeakList = compound
       compoundsToCompare = [c[1] for c in compounds if c[0] != compoundName]
       overlaped = calculateOverlapCount(compoundPeakList, compoundsToCompare, minDist )
-
-
       if overlaped is None:
         print(compoundName, 'No Overlapped peaks found')
       else:
         score = len(overlaped) / len(compoundPeakList)
-        print(compoundName, ' --> Counts',len(list(set(overlaped))), ' --> Overlapped positions:', overlaped, 'score: -->', score)
-    print(mixtureName)
-    print('====================')
+        # print(compoundName, ' --> Counts',len(list(set(overlaped))), ' --> Overlapped positions:', overlaped, 'score: -->', score)
+
 
 def getOverlappedCount(mixtureCompounds, minDist=0.01):
     totalOverlapped  = 0
@@ -114,7 +83,6 @@ def getOverlappedCount(mixtureCompounds, minDist=0.01):
         print(compoundName, 'No Overlapped peaks found')
         continue
       else:
-        print(compoundName, ' --> Counts',len(list(set(overlaped))))
         totalOverlapped += len(list(set(overlaped)))
     return totalOverlapped
 
@@ -127,13 +95,10 @@ def getMixtureInfo(mixture, minDist):
 
     if overlaped is None:
       print(compoundName, 'No Overlapped peaks found')
-
     else:
       score = len(overlaped) / len(compoundPeakList)
-
       print(compoundName, ' --> Counts',len(list(set(overlaped))), ' --> Overlapped positions:', overlaped, 'score: -->', score)
 
-  print('====================')
 
 def calculateOverlapCount(compoundA, mixture, minimalOverlap):
   for compound in mixture:
@@ -141,14 +106,13 @@ def calculateOverlapCount(compoundA, mixture, minimalOverlap):
     if len(overlaped)>0:
       return overlaped
 
+
 def _calculateSingleCompoundScore(compoundA, mixture, minimalOverlap):
   for mix, compounds in mixture.items():
     print(mix)
     for compound in compounds:
       overlaped = [peakA for peak in compound[1] for peakA in compoundA[1] if abs(peak - peakA) <= 0.01]
-
       scoring = len(overlaped) / len(compoundA[1])
-      print(scoring, compound[0])
 
 def findBestMixtures(mixturesSteps):
   bestMixturesStep = list(mixturesSteps.items())
@@ -158,17 +122,11 @@ def findBestMixtures(mixturesSteps):
 
 def mixTwoMixturesDict(mixtures):
   mixturesList = list(mixtures.items())
-  # To use random.sample needs to be a List
   sampledMixtures = random.sample(mixturesList, 2)
-
   mixturesToMix = dict(sampledMixtures)
-
   swaps = []
   for i, mixture in enumerate(list(mixturesToMix.values())):
-
     randInt = random.randint(0, len((mixture)[i]) - 1)
-
-
     pick = list(mixturesToMix.values())[i][randInt]
     list(mixturesToMix.values())[i].remove(pick)
     swaps.append(pick)
@@ -181,30 +139,28 @@ def mixTwoMixturesDict(mixtures):
   return dict(mixedMixtures)
 
 
-
-def linearCooling(startTemp=1000.0, finalTemp = 0.1, maxSteps = 1000):
-  # print('starting Linear Cooling')
-  tempsteps = (startTemp - finalTemp) / maxSteps  # 1)
+def getLinearSteps(startTemp=1000.0, finalTemp = 0.1, maxSteps = 1000):
+  tSteps = (startTemp - finalTemp) / maxSteps  # 1)
   temp = startTemp
   while True:
     yield temp
-    temp -= tempsteps
+    temp -= tSteps
 
-def exponentialCooling(startTemp=1000.0, finalTemp = 0.1, maxSteps = 100):
-  alphaTemp = math.exp((math.log(finalTemp / startTemp)) / maxSteps)
+def getExponentialSteps(startTemp=1000.0, finalTemp = 0.1, maxSteps = 100):
+  aTemp = math.exp((math.log(finalTemp / startTemp)) / maxSteps)
   temp = startTemp
   while True:
     yield temp
-    temp *=  alphaTemp
+    temp *=  aTemp
 
 def runCooling(type, startTemp=1000.0, finalTemp = 0.1, maxSteps = 1000):
   if type == 'exponential':
-    coolingSchedule = exponentialCooling(startTemp, finalTemp, maxSteps)
+    coolingSchedule = getExponentialSteps(startTemp, finalTemp, maxSteps)
   elif type == 'Linear':
-    coolingSchedule = linearCooling(startTemp, finalTemp, maxSteps)
+    coolingSchedule = getLinearSteps(startTemp, finalTemp, maxSteps)
   else:
     print('Cooling type not implemented yet, Used linear instead')
-    coolingSchedule = linearCooling()
+    coolingSchedule = getLinearSteps()
   return coolingSchedule
 
 def getProbability(scoreDiff, currentTemp, tempK):
@@ -221,8 +177,8 @@ def getProbability(scoreDiff, currentTemp, tempK):
 #   # plt.ylim(ymax=1)
 #   # plt.show()
 
-def annealMixtures(mixtures, coolingMethod='Linear', startTemp=1000, finalTemp=0.01,
-                   maxSteps=1000, tempK=200, minDistance=0.01):
+def annealling(mixtures, coolingMethod='Linear', startTemp=1000, finalTemp=0.01,
+               maxSteps=1000, tempK=200, minDistance=0.01):
   mixturesSteps = {}
   coolingSchedule = runCooling(coolingMethod, startTemp, finalTemp, maxSteps)
   currScore = calculateTotalScore(mixtures,minDistance)
@@ -236,7 +192,6 @@ def annealMixtures(mixtures, coolingMethod='Linear', startTemp=1000, finalTemp=0
     scores.append(newScore)
     if newScore == 0:
       return copyNewMixtures
-
     elif newScore <= currScore:
       mixtures = newMixtures
       currScore = newScore
@@ -248,7 +203,6 @@ def annealMixtures(mixtures, coolingMethod='Linear', startTemp=1000, finalTemp=0
         currScore = newScore
         mixturesSteps.update({newScore: copyNewMixtures})
     step += 1
-    # print('STEP:',step)
     if step > maxSteps:
       break
 
@@ -260,35 +214,27 @@ def iterateAnnealing(mixtures, startTemp=1000, finalTemp=0.01, maxSteps=1000, te
   bestIteration = {} #score:mixture
   startingScore = calculateTotalScore(mixtures, minDistance)
   copyMixtures = copy.deepcopy(mixtures)
-  print('startingScore',startingScore)
   if startingScore == 0:
-    # showScoresPerMixture(mixtures,minDistance)
     return mixtures
   i = 0
   while  i <= nIterations:
-    newMixtures = annealMixtures(mixtures,coolingMethod=coolingMethod, startTemp=startTemp, finalTemp=finalTemp,
-                                 maxSteps=maxSteps, tempK=tempK, minDistance=minDistance)
+    newMixtures = annealling(mixtures, coolingMethod=coolingMethod, startTemp=startTemp, finalTemp=finalTemp,
+                             maxSteps=maxSteps, tempK=tempK, minDistance=minDistance)
     copyNewMixtures = copy.deepcopy(newMixtures)
     if newMixtures:
       currScore = calculateTotalScore(newMixtures,minDistance)
       if currScore == 0:
-        # showScoresPerMixture(copyNewMixtures,minDistance)
         return copyNewMixtures
       if currScore <= startingScore:
-        print(currScore, 'Step Score')
         bestIteration.update({currScore: copyNewMixtures})
         startingScore = currScore
       i += 1
-    # print('Best bestIteration', bestIteration)
     if len(bestIteration)>0:
       bestMixtures = findBestMixtures(bestIteration)
-      print(calculateTotalScore(bestMixtures,minDistance), 'Best Score')
-      # showScoresPerMixture(bestMixtures,minDistance)
       return bestMixtures
     else:
       print('No Better Iteration found, original mixtures are returned')
       sc = calculateTotalScore(copyMixtures, minDistance)
-      print('startingScore', sc)
       return copyMixtures
 
 
@@ -298,11 +244,9 @@ def showScoresPerMixture(mixtures,minDistance):
     scoring.append(str(mixtureName)+ '  score: ' + str(scoreMixture(mixCompounds, minDistance)))
   return scoring
 
-    # overlappedPositions = [posA for posB in spectrumBpositions for posA in compounds if abs(posA - posB) < 0.01]
 
 def greedyMixtures(compounds, maxSize, minDistance, maxPeaksOverlapped=None):
   mixtures = [[]] * len(compounds)
-
   for compound in compounds:
     compoundMixtured = False
     mixtureCount = 0

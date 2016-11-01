@@ -875,9 +875,11 @@
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newProject</span><span class="p">(</span><span class="n">dataBlock</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">+=</span> <span class="mi">1</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">shiftAveraging</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nefReader</span><span class="o">.</span><span class="n">importNewProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">shiftAveraging</span> <span class="o">=</span> <span class="bp">True</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">-=</span> <span class="mi">1</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
 
@@ -1183,9 +1185,9 @@
     <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
 
 
-  <span class="c1">###################################################################################################################</span>
+  <span class="c1">################################################################################################</span>
   <span class="c1">## MENU callbacks:  Molecule</span>
-  <span class="c1">###################################################################################################################</span>
+  <span class="c1">################################################################################################</span>
 <div class="viewcode-block" id="Framework.showMoleculePopup"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.showMoleculePopup">[docs]</a>
   <span class="k">def</span> <span class="nf">showMoleculePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>

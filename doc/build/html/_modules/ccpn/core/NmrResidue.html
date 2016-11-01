@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9798 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -156,12 +156,15 @@
   <span class="k">def</span> <span class="nf">residueType</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Residue type string (e.g. &#39;ALA&#39;). Part of id. Use self.assignTo or</span>
 <span class="sd">    self.rename to reset the residueType&quot;&quot;&quot;</span>
-    <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-    <span class="n">apiResidue</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span>
-    <span class="k">if</span> <span class="n">apiResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">apiResidue</span><span class="o">.</span><span class="n">code3Letter</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="c1"># # The below is unnecessary - apiResidue is derived using self.residueType</span>
+    <span class="c1"># apiResonanceGroup = self._wrappedData</span>
+    <span class="c1"># apiResidue = apiResonanceGroup.assignedResidue</span>
+    <span class="c1"># if apiResidue is None:</span>
+    <span class="c1">#   return apiResonanceGroup.residueType or &#39;&#39;</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   return apiResidue.code3Letter</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">relativeOffset</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
@@ -181,12 +184,20 @@
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">residue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Residue</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Residue to which NmrResidue is assigned&quot;&quot;&quot;</span>
-    <span class="n">residue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">assignedResidue</span>
-    <span class="k">return</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">residue</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">residue</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
 
   <span class="nd">@residue.setter</span>
   <span class="k">def</span> <span class="nf">residue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Residue</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">value</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="n">tt</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">((</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">assignTo</span><span class="p">(</span><span class="n">chainCode</span><span class="o">=</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sequenceCode</span><span class="o">=</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">residueType</span><span class="o">=</span><span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">residueType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueType</span>
+      <span class="k">if</span> <span class="n">residueType</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">residueType</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">offsetNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -350,7 +361,7 @@
         <span class="c1"># offset residue: no-op</span>
         <span class="k">return</span>
 
-      <span class="k">elif</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="c1"># Assigned residue with successor residue - error</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s2"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
@@ -524,7 +535,7 @@
         <span class="c1"># offset residue: no-op</span>
         <span class="k">return</span>
 
-      <span class="k">elif</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="c1"># Assigned residue with successor residue - error</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s2"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
@@ -572,7 +583,7 @@
         <span class="c1"># offset residue: no-op</span>
         <span class="k">return</span>
 
-      <span class="k">elif</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="c1"># Assigned residue with successor residue - error</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Assigned NmrResidue </span><span class="si">%s</span><span class="s2"> cannot be disconnected&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="p">)</span>
 
@@ -659,7 +670,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="NmrResidue.rename"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrResidue.rename">[docs]</a>  <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Rename NmrResidue. changing its sequenceCode, residiueType, or both.</span>
+    <span class="sd">&quot;&quot;&quot;Rename NmrResidue. changing its sequenceCode, residueType, or both.</span>
 
 <span class="sd">    The value is a dot-separated string `sequenceCode`.`residueType`.</span>
 <span class="sd">    Values like None, &#39;abc&#39;, or &#39;abc.&#39; will set the residueType to None.</span>
@@ -679,10 +690,11 @@
       <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">residueType</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">None</span>
 
-    <span class="c1"># Check if name is free</span>
-    <span class="k">if</span> <span class="n">sequenceCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">previous</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
-      <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="ow">and</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">:</span>
+      <span class="c1"># Check if name is free</span>
+      <span class="n">partialId</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getObjectsByPartialId</span><span class="p">(</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="n">idStartsWith</span><span class="o">=</span><span class="n">partialId</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">ll</span> <span class="o">!=</span> <span class="p">[</span><span class="bp">self</span><span class="p">]:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot rename </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> - assignment already exists&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
     <span class="c1">#</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
@@ -750,48 +762,58 @@
     <span class="p">)</span>
 
     <span class="n">oldPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">longPid</span>
+    <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="n">clearUndo</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="n">undo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonanceGroup</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
-
+    <span class="n">undo</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;assignTo&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
                                     <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;mergedNmrResidue&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
 
       <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="k">if</span> <span class="n">sequenceCode</span> <span class="k">else</span> <span class="bp">None</span>
-      <span class="n">apiResonanceGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResonanceGroup</span>
+      <span class="c1"># apiResonanceGroup = self._apiResonanceGroup</span>
 
-      <span class="c1"># Keep old values to go back to previous state</span>
+      <span class="c1"># oldNmrChain =  apiResonanceGroup.nmrChain</span>
+      <span class="c1"># oldSequenceCode = apiResonanceGroup.sequenceCode</span>
+      <span class="c1"># oldResidueType = apiResonanceGroup.residueType</span>
 
-      <span class="n">oldNmrChain</span> <span class="o">=</span>  <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">nmrChain</span>
-      <span class="n">oldSequenceCode</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span>
-      <span class="n">oldResidueType</span> <span class="o">=</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span>
-
-      <span class="c1"># set missing parameters to existing values</span>
-      <span class="n">chainCode</span> <span class="o">=</span> <span class="n">chainCode</span> <span class="ow">or</span> <span class="n">oldNmrChain</span><span class="o">.</span><span class="n">code</span>
-      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span> <span class="ow">or</span> <span class="n">oldSequenceCode</span>
-
+      <span class="c1"># Check for illegal separators in input values</span>
       <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
           <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.NmrResidue id: </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
                            <span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">))</span>
-      <span class="n">newNmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">chainCode</span><span class="p">)</span>
-      <span class="n">newApiResonanceGroup</span> <span class="o">=</span> <span class="n">newNmrChain</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span>
-        <span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
 
-      <span class="k">if</span> <span class="n">newApiResonanceGroup</span> <span class="ow">is</span> <span class="n">apiResonanceGroup</span><span class="p">:</span>
+      <span class="c1"># Keep old values to go back to previous state</span>
+      <span class="n">oldChainCode</span><span class="p">,</span> <span class="n">oldSequenceCode</span><span class="p">,</span> <span class="n">oldResidueType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+      <span class="n">oldResidueType</span> <span class="o">=</span> <span class="n">oldResidueType</span> <span class="ow">or</span> <span class="bp">None</span>
+
+      <span class="c1"># set missing parameters to existing or default values</span>
+      <span class="n">chainCode</span> <span class="o">=</span> <span class="n">chainCode</span> <span class="ow">or</span> <span class="n">oldChainCode</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span> <span class="ow">or</span> <span class="n">oldSequenceCode</span>
+      <span class="n">residueType</span> <span class="o">=</span> <span class="n">residueType</span> <span class="ow">or</span> <span class="bp">None</span>
+
+      <span class="n">partialId</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">)</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getObjectsByPartialId</span><span class="p">(</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="n">idStartsWith</span><span class="o">=</span><span class="n">partialId</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="c1"># There can only ever be one match</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+
+      <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
         <span class="c1"># We are reassigning to self - either a no-op or resetting the residueType</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span>
-        <span class="k">if</span> <span class="n">residueType</span> <span class="ow">and</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="o">!=</span> <span class="n">residueType</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">residueType</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueType</span> <span class="o">!=</span> <span class="n">residueType</span><span class="p">:</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">resetResidueType</span><span class="p">(</span><span class="n">residueType</span><span class="p">)</span>
 
-      <span class="k">elif</span> <span class="n">newApiResonanceGroup</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">elif</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="c1"># we are moving to new, free assignment</span>
         <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span>
+        <span class="n">newNmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">chainCode</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
           <span class="c1"># NB Complex resetting sequence necessary</span>
-          <span class="c1"># # in case we are setting an offset and illegal sequenceCode</span>
+          <span class="c1"># in case we are setting an offset and illegal sequenceCode</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c1"># To guarantee against clashes</span>
           <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">directNmrChain</span> <span class="o">=</span> <span class="n">newNmrChain</span><span class="o">.</span><span class="n">_apiNmrChain</span> <span class="c1"># Only directNmrChain is settable</span>
            <span class="c1"># Now we can (re)set - will throw error for e.g. illegal offset values</span>
@@ -808,17 +830,17 @@
           <span class="p">)</span>
           <span class="k">raise</span>
 
-
       <span class="k">else</span><span class="p">:</span>
         <span class="c1">#We are assigning to an existing NmrResidue</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newApiResonanceGroup</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">mergeToExisting</span><span class="p">:</span>
           <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New assignment clash with existing assignment,&quot;</span>
                            <span class="s2">&quot; and merging is disallowed&quot;</span><span class="p">)</span>
 
-        <span class="c1"># Move or merge the NmrAtoms across and delete the current NmrResidue</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">residueType</span> <span class="ow">or</span> <span class="n">newApiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="n">residueType</span><span class="p">:</span>
-          <span class="k">for</span> <span class="n">resonance</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">resonances</span><span class="p">:</span>
+        <span class="n">newApiResonanceGroup</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">residueType</span> <span class="ow">or</span> <span class="n">result</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="n">residueType</span><span class="p">:</span>
+          <span class="c1"># Move or merge the NmrAtoms across and delete the current NmrResidue</span>
+          <span class="k">for</span> <span class="n">resonance</span> <span class="ow">in</span> <span class="n">apiResonanceGroup</span><span class="o">.</span><span class="n">resonances</span><span class="p">:</span>
             <span class="n">newResonance</span> <span class="o">=</span> <span class="n">newApiResonanceGroup</span><span class="o">.</span><span class="n">findFirstResonance</span><span class="p">(</span><span class="n">implName</span><span class="o">=</span><span class="n">resonance</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">newResonance</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
               <span class="n">resonance</span><span class="o">.</span><span class="n">resonanceGroup</span> <span class="o">=</span> <span class="n">newApiResonanceGroup</span>
@@ -833,7 +855,7 @@
           <span class="c1"># We cannot reassign if it involves changing residueType on an existing NmrResidue</span>
           <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot assign to </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">: NR:</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> already exists&quot;</span>
           <span class="o">%</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">,</span>
-             <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">newApiResonanceGroup</span><span class="o">.</span><span class="n">residueType</span><span class="p">))</span>
+             <span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">residueType</span><span class="p">))</span>
       <span class="c1">#</span>
       <span class="k">if</span> <span class="n">clearUndo</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Merging NmrAtoms from </span><span class="si">%s</span><span class="s2"> into </span><span class="si">%s</span><span class="s2">. Merging is NOT undoable.&quot;</span>
@@ -859,26 +881,28 @@
 
 
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Residue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrResidue</span><span class="p">:</span>
-  <span class="n">apiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="n">apiNmrProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_wrappedData</span>
-  <span class="n">apiNmrChain</span> <span class="o">=</span> <span class="n">apiNmrProject</span><span class="o">.</span><span class="n">findFirstNmrChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">apiResidue</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
-  <span class="k">if</span> <span class="n">apiNmrChain</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">apiNmrChain</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">apiResidue</span><span class="o">.</span><span class="n">seqCode</span><span class="p">,</span>
-                                              <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">apiResidue</span><span class="o">.</span><span class="n">seqInsertCode</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">None</span><span class="p">,</span>
-                                              <span class="n">relativeOffset</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-  <span class="k">return</span> <span class="bp">None</span>
+  <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+
+  <span class="c1"># apiResidue = self._wrappedData</span>
+  <span class="c1"># apiNmrProject = self._project._wrappedData</span>
+  <span class="c1"># apiNmrChain = apiNmrProject.findFirstNmrChain(code=apiResidue.chain.code)</span>
+  <span class="c1"># if apiNmrChain is not None:</span>
+  <span class="c1">#   obj = apiNmrChain.findFirstResonanceGroup(seqCode=apiResidue.seqCode,</span>
+  <span class="c1">#                                             seqInsertCode=apiResidue.seqInsertCode.strip() or None,</span>
+  <span class="c1">#                                             relativeOffset=None)</span>
+  <span class="c1">#   if obj is not None:</span>
+  <span class="c1">#     return self._project._data2Obj.get(obj)</span>
+  <span class="c1"># return None</span>
 
 <span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Residue</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">):</span>
   <span class="n">oldValue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span>
   <span class="k">if</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="n">value</span><span class="p">:</span>
     <span class="k">return</span>
   <span class="k">elif</span> <span class="n">oldValue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">oldValue</span><span class="o">.</span><span class="n">_apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="bp">None</span>
-
+    <span class="n">oldValue</span><span class="o">.</span><span class="n">assignTo</span><span class="p">()</span>
+  <span class="c1">#</span>
   <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-    <span class="n">value</span><span class="o">.</span><span class="n">_apiResonanceGroup</span><span class="o">.</span><span class="n">assignedResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_apiResidue</span>
+    <span class="n">value</span><span class="o">.</span><span class="n">residue</span> <span class="o">=</span> <span class="bp">self</span>
 <span class="n">Residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="n">setter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="s2">&quot;NmrResidue to which Residue is assigned&quot;</span><span class="p">)</span>
 
 
@@ -925,22 +949,28 @@
     <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">:</span>
 
       <span class="c1"># Check the sequenceCode is not taken already</span>
-      <span class="n">previous</span> <span class="o">=</span> <span class="bp">None</span>
-      <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span> <span class="ow">in</span> <span class="n">sequenceCode</span><span class="p">:</span>
-        <span class="c1"># sequenceCode contains &#39;.&#39; - check against remapped sequenceCode</span>
-        <span class="n">matchString</span> <span class="o">=</span> <span class="n">sequenceCode</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span>
-        <span class="k">for</span> <span class="n">nr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">nr</span><span class="o">.</span><span class="n">_id</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">matchString</span><span class="p">):</span>
-            <span class="n">previous</span> <span class="o">=</span> <span class="n">nr</span>
-            <span class="k">break</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># No &#39;.&#39; - can check in API directly (faster)</span>
-        <span class="n">obj0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">obj0</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">obj0</span><span class="p">]</span>
-      <span class="k">if</span> <span class="n">previous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">partialId</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getObjectsByPartialId</span><span class="p">(</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="n">idStartsWith</span><span class="o">=</span><span class="n">partialId</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">ll</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Existing </span><span class="si">%s</span><span class="s2"> clashes with id </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
-                         <span class="p">(</span><span class="n">previous</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+                         <span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+      <span class="c1"># # Superseded as the code was too slow</span>
+      <span class="c1"># previous = None</span>
+      <span class="c1"># if Pid.IDSEP in sequenceCode:</span>
+      <span class="c1">#   # sequenceCode contains &#39;.&#39; - check against remapped sequenceCode</span>
+      <span class="c1">#   matchString = sequenceCode.translate(Pid.remapSeparators) + &#39;.&#39;</span>
+      <span class="c1">#   for nr in self.nmrResidues:</span>
+      <span class="c1">#     if nr._id.startswith(matchString):</span>
+      <span class="c1">#       previous = nr</span>
+      <span class="c1">#       break</span>
+      <span class="c1"># else:</span>
+      <span class="c1">#   # No &#39;.&#39; - can check in API directly (faster)</span>
+      <span class="c1">#   obj0 = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)</span>
+      <span class="c1">#   if obj0 is not None:</span>
+      <span class="c1">#     previous = self._project._data2Obj[obj0]</span>
+      <span class="c1"># if previous is not None:</span>
+      <span class="c1">#   raise ValueError(&quot;Existing %s clashes with id %s.%s.%s&quot; %</span>
+      <span class="c1">#                    (previous.longPid, self.shortName, sequenceCode,residueType or &#39;&#39;))</span>
 
       <span class="c1"># Handle reserved names</span>
       <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span> <span class="ow">and</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
@@ -1008,12 +1038,22 @@
       <span class="c1"># Make new NmrResidue always</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># First see if we have it already</span>
-      <span class="c1"># Should not be necessary, but it is an easy mistake to pass it as integer instead of string</span>
-      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+      <span class="c1"># First see if we have the sequenceCode already</span>
+      <span class="n">partialId</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">))</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">getObjectsByPartialId</span><span class="p">(</span><span class="n">className</span><span class="o">=</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="n">idStartsWith</span><span class="o">=</span><span class="n">partialId</span><span class="p">)</span>
 
-      <span class="n">apiResult</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">findFirstResonanceGroup</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">)</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">apiResult</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiResult</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="c1"># there can never be more than one</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+
+      <span class="c1"># Code below superseded as it was extremely slow</span>
+      <span class="c1"># # Should not be necessary, but it is an easy mistake to pass it as integer instead of string</span>
+      <span class="c1"># sequenceCode = str(sequenceCode)</span>
+      <span class="c1">#</span>
+      <span class="c1"># apiResult = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)</span>
+      <span class="c1"># result = apiResult and self._project._data2Obj[apiResult]</span>
 
       <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="c1"># NB - if this cannot be created we get the error from newNmrResidue</span>

@@ -55,7 +55,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-20 19:23:16 +0100 (Sat, 20 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,8 +66,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-20 19:23:16 +0100 (Sat, 20 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9804 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -851,7 +851,8 @@
             <span class="n">val</span> <span class="o">=</span> <span class="n">sf</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrLoop</span><span class="p">):</span>
               <span class="c1"># This is a loop:</span>
-              <span class="k">for</span> <span class="n">looptag</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">val</span><span class="o">.</span><span class="n">columns</span><span class="p">):</span>
+              <span class="k">for</span> <span class="n">looptag</span> <span class="ow">in</span> <span class="n">val</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="c1"># NB val.columns is a tuple (encapsulation) and will not change during the loop</span>
                 <span class="k">if</span> <span class="n">looptag</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">prefix</span><span class="p">):</span>
                   <span class="n">val</span><span class="o">.</span><span class="n">removeColumn</span><span class="p">(</span><span class="n">looptag</span><span class="p">,</span> <span class="n">removeData</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
@@ -1195,6 +1196,15 @@
       <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;ccpn_restraint_list&#39;</span>
       <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_restraint&#39;</span>
 
+
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">itemLength</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">multipleAttributes</span> <span class="o">=</span> <span class="n">OD</span><span class="p">((</span>
+      <span class="p">(</span><span class="s1">&#39;chainCodes&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;chain_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+      <span class="p">(</span><span class="s1">&#39;sequenceCodes&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;sequence_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+      <span class="p">(</span><span class="s1">&#39;residueTypes&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;residue_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+      <span class="p">(</span><span class="s1">&#39;atomNames&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;atom_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+    <span class="p">))</span>
+
     <span class="n">name</span> <span class="o">=</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">name</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">singleDataSet</span><span class="p">:</span>
       <span class="c1"># If there are multiple DataSets, add the dataSet serial for disambiguation</span>
@@ -1235,16 +1245,17 @@
       <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">contribution</span><span class="o">.</span><span class="n">restraintItems</span><span class="p">:</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
         <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
 
         <span class="c1"># NBNB TBD FIXME Using the PID, as we do here, you are remapping &#39;.&#39; to &#39;^&#39;</span>
         <span class="c1"># NBNB reconsider!!!</span>
 
         <span class="c1"># Set individual parts of assignment one by one.</span>
         <span class="c1"># NB _set command takes care of varying number of items</span>
-        <span class="n">assignments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item</span><span class="p">)))</span>
-        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="s1">&#39;chain_code&#39;</span><span class="p">,</span> <span class="s1">&#39;sequence_code&#39;</span><span class="p">,</span> <span class="s1">&#39;residue_name&#39;</span><span class="p">,</span> <span class="s1">&#39;atom_name&#39;</span><span class="p">,)):</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">assignments</span><span class="p">[</span><span class="n">ii</span><span class="p">]])</span>
+        <span class="n">assignments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">attrName</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">((</span><span class="s1">&#39;chainCodes&#39;</span><span class="p">,</span> <span class="s1">&#39;sequenceCodes&#39;</span><span class="p">,</span> <span class="s1">&#39;residueTypes&#39;</span><span class="p">,</span> <span class="s1">&#39;atomNames&#39;</span><span class="p">,)):</span>
+          <span class="k">for</span> <span class="n">jj</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="n">attrName</span><span class="p">]):</span>
+            <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">assignments</span><span class="p">[</span><span class="n">jj</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span> <span class="ow">or</span> <span class="bp">None</span>
         <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s1">&#39;nef_dihedral_restraint_list&#39;</span><span class="p">:</span>
           <span class="n">row</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">RestraintLib</span><span class="o">.</span><span class="n">dihedralName</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
     <span class="c1">#</span>
@@ -1312,7 +1323,6 @@
     <span class="n">result</span><span class="p">[</span><span class="s1">&#39;ccpn_sample&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">sample</span><span class="p">)</span>
 
 
-    <span class="c1"># NBNB TBD FIXME assumes ppm unit and Frequency dimensions for now</span>
     <span class="c1"># Will give wrong values for Hz or pointNumber units, and</span>
     <span class="c1"># Will fill in all None for non-Frequency dimensions</span>
     <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;nef_spectrum_dimension&#39;</span>
@@ -1337,6 +1347,8 @@
       <span class="n">data</span><span class="p">[</span><span class="s1">&#39;is_acquisition&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span> <span class="o">==</span> <span class="n">acquisitionAxisCode</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;@~@~ write &#39;</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pid</span><span class="p">,</span> <span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
       <span class="n">rowdata</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ii</span><span class="p">])</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
       <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
       <span class="n">row</span><span class="p">[</span><span class="s1">&#39;dimension_id&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ii</span> <span class="o">+</span> <span class="mi">1</span>
@@ -1382,6 +1394,20 @@
       <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">removeNameEndings</span><span class="p">):</span>
         <span class="n">loop</span><span class="o">.</span><span class="n">removeColumn</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
 
+    <span class="c1"># Get name map for per-dimension attributes</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">multipleAttributes</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;position_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;positionError&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;position_uncertainty_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;chainCodes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;chain_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;sequenceCodes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;sequence_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;residueTypes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;residue_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;atomNames&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;atom_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;slopes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;slopes_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;lowerLimits&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;lower_limits_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;upperLimits&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;upper_limits_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+    <span class="p">}</span>
+
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
       <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">peak</span><span class="p">)</span>
@@ -1392,26 +1418,46 @@
           <span class="c1"># Make one row per assignment</span>
           <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
           <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+          <span class="n">row</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+          <span class="n">values</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span>
+          <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]):</span>
+            <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+          <span class="n">values</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">positionError</span>
+          <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;positionError&#39;</span><span class="p">]):</span>
+            <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
           <span class="c1"># NB the row._set function will set position_1, position_2 etc.</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;position_uncertainty&#39;</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">positionError</span><span class="p">)</span>
+          <span class="c1"># row._set(&#39;position&#39;, peak.position)</span>
+          <span class="c1"># row._set(&#39;position_uncertainty&#39;, peak.positionError)</span>
 
           <span class="c1"># Add the assignments</span>
-          <span class="n">ll</span> <span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">_idTuple</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">)))</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;chain_code&#39;</span><span class="p">,</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">,</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;residue_name&#39;</span><span class="p">,</span> <span class="n">ll</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
-          <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;atom_name&#39;</span><span class="p">,</span> <span class="n">ll</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+          <span class="n">ll</span> <span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">x</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">x</span><span class="o">.</span><span class="n">_idTuple</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">)</span>
+          <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">attrName</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+              <span class="p">(</span><span class="s1">&#39;chainCodes&#39;</span><span class="p">,</span> <span class="s1">&#39;sequenceCodes&#39;</span><span class="p">,</span> <span class="s1">&#39;residueTypes&#39;</span><span class="p">,</span> <span class="s1">&#39;atomNames&#39;</span><span class="p">)</span>
+          <span class="p">):</span>
+            <span class="n">tags</span> <span class="o">=</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="n">attrName</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">jj</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ll</span><span class="p">):</span>
+              <span class="n">row</span><span class="p">[</span><span class="n">tags</span><span class="p">[</span><span class="n">jj</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">None</span> <span class="k">if</span> <span class="n">val</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+          <span class="c1"># # Add the assignments</span>
+          <span class="c1"># ll =list(zip(*(x._idTuple if x else (None, None, None, None) for x in tt)))</span>
+          <span class="c1"># row._set(&#39;chain_code&#39;, ll[0])</span>
+          <span class="c1"># row._set(&#39;sequence_code&#39;, ll[1])</span>
+          <span class="c1"># row._set(&#39;residue_name&#39;, ll[2])</span>
+          <span class="c1"># row._set(&#39;atom_name&#39;, ll[3])</span>
 
       <span class="k">else</span><span class="p">:</span>
         <span class="c1"># No assignments - just make one unassigned row</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
         <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
-        <span class="c1"># NB the row._set function will set position_1, position_2 etc.</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;position_uncertainty&#39;</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">positionError</span><span class="p">)</span>
+        <span class="n">row</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]):</span>
+          <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">positionError</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;positionError&#39;</span><span class="p">]):</span>
+          <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="c1"># # NB the row._set function will set position_1, position_2 etc.</span>
+        <span class="c1"># row._set(&#39;position&#39;, peak.position)</span>
+        <span class="c1"># row._set(&#39;position_uncertainty&#39;, peak.positionError)</span>
 
 
     <span class="k">if</span> <span class="n">exportCompleteSpectrum</span> <span class="ow">and</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumHits</span><span class="p">:</span>
@@ -1442,10 +1488,17 @@
       <span class="k">for</span> <span class="n">integral</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">integrals</span><span class="p">:</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">integral</span><span class="p">))</span>
         <span class="n">row</span><span class="p">[</span><span class="s1">&#39;integral_serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">serial</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;slopes&#39;</span><span class="p">,</span> <span class="n">integral</span><span class="o">.</span><span class="n">slopes</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span><span class="n">integral</span><span class="o">.</span><span class="n">slopes</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;slopes&#39;</span><span class="p">]):</span>
+          <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">values</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
         <span class="n">lowerlimits</span><span class="p">,</span><span class="n">upperLimits</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">integral</span><span class="o">.</span><span class="n">limits</span><span class="p">)</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;lower_limits&#39;</span><span class="p">,</span> <span class="n">lowerlimits</span><span class="p">)</span>
-        <span class="n">row</span><span class="o">.</span><span class="n">_set</span><span class="p">(</span><span class="s1">&#39;upper_limits&#39;</span><span class="p">,</span> <span class="n">upperLimits</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;lowerLimits&#39;</span><span class="p">]):</span>
+          <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">lowerlimits</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;upperLimits&#39;</span><span class="p">]):</span>
+          <span class="n">row</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">upperLimits</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="c1"># row._set(&#39;slopes&#39;, integral.slopes)</span>
+        <span class="c1"># row._set(&#39;lower_limits&#39;, lowerlimits)</span>
+        <span class="c1"># row._set(&#39;upper_limits&#39;, upperLimits)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;ccpn_integral_list&#39;</span><span class="p">]</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;ccpn_integral&#39;</span><span class="p">]</span>
@@ -1704,6 +1757,10 @@
     <span class="c1"># Map for resolving crosslinks in NEF file</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">frameCode2Object</span> <span class="o">=</span> <span class="p">{}</span>
 
+    <span class="c1"># Map for speeding up restraint reading</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dataSet2ItemMap</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueMap</span> <span class="o">=</span> <span class="bp">None</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">defaultDataSetSerial</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">defaultNmrChain</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mainDataSetSerial</span> <span class="o">=</span> <span class="bp">None</span>
@@ -1714,6 +1771,10 @@
     <span class="n">nmrDataExtent</span> <span class="o">=</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">parseNefFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="n">dataBlocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nmrDataExtent</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">dataBlock</span> <span class="o">=</span> <span class="n">dataBlocks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Initialise afresh for every file read</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_dataSet2ItemMap</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueMap</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">dataBlock</span></div>
 
@@ -1867,9 +1928,11 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
 
-    <span class="n">defaultChainCode</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+    <span class="n">defaultChainCode</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">chainData</span><span class="p">:</span>
-      <span class="c1"># Replace chainCode None with actual chainCode</span>
+      <span class="n">defaultChainCode</span> <span class="o">=</span> <span class="s1">&#39;A&#39;</span>
+      <span class="c1"># Replace chainCode None with default chainCode</span>
+      <span class="c1">#Selecting the first calue that is not already taken.</span>
       <span class="k">while</span> <span class="n">defaultChainCode</span> <span class="ow">in</span> <span class="n">chainData</span><span class="p">:</span>
         <span class="n">defaultChainCode</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">defaultChainCode</span><span class="p">)</span>
       <span class="n">chainData</span><span class="p">[</span><span class="n">defaultChainCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">chainData</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
@@ -2142,6 +2205,8 @@
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="n">string2ItemMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataSet2ItemMap</span><span class="p">[</span><span class="n">restraintList</span><span class="o">.</span><span class="n">dataSet</span><span class="p">]</span>
+
     <span class="c1"># set itemLength if not passed in:</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">itemLength</span><span class="p">:</span>
       <span class="n">itemLength</span> <span class="o">=</span> <span class="n">coreConstants</span><span class="o">.</span><span class="n">constraintListType2ItemLength</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">restraintList</span><span class="o">.</span><span class="n">restraintType</span><span class="p">)</span>
@@ -2150,7 +2215,18 @@
     <span class="n">map2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="n">contributionTags</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">map2</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
     <span class="n">restraints</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">assignTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;chain_code&#39;</span><span class="p">,</span> <span class="s1">&#39;sequence_code&#39;</span><span class="p">,</span> <span class="s1">&#39;residue_name&#39;</span><span class="p">,</span> <span class="s1">&#39;atom_name&#39;</span><span class="p">)</span>
+    <span class="c1"># assignTags = (&#39;chain_code&#39;, &#39;sequence_code&#39;, &#39;residue_name&#39;, &#39;atom_name&#39;)</span>
+
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">itemLength</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">multipleAttributes</span> <span class="o">=</span> <span class="n">OD</span><span class="p">((</span>
+      <span class="p">(</span><span class="s1">&#39;chainCodes&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;chain_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+      <span class="p">(</span><span class="s1">&#39;sequenceCodes&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;sequence_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+      <span class="p">(</span><span class="s1">&#39;residueTypes&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;residue_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+      <span class="p">(</span><span class="s1">&#39;atomNames&#39;</span><span class="p">,</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;atom_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">))),</span>
+    <span class="p">))</span>
+
+    <span class="n">parametersFromLoopRow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromLoopRow</span>
+    <span class="n">defaultChainCode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChainCode</span>
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
 
       <span class="c1"># get or make restraint</span>
@@ -2173,7 +2249,7 @@
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">restraint</span><span class="p">)</span>
 
       <span class="c1"># Get or make restraintContribution</span>
-      <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromLoopRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">map2</span><span class="p">)</span>
+      <span class="n">parameters</span> <span class="o">=</span> <span class="n">parametersFromLoopRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">map2</span><span class="p">)</span>
       <span class="n">combinationId</span> <span class="o">=</span> <span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;combinationId&#39;</span><span class="p">)</span>
       <span class="n">nonAssignmentValues</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">contributionTags</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">combinationId</span><span class="p">:</span>
@@ -2186,15 +2262,19 @@
           <span class="n">valuesToContribution</span><span class="p">[</span><span class="n">nonAssignmentValues</span><span class="p">]</span> <span class="o">=</span> <span class="n">contribution</span>
 
       <span class="c1"># Add item</span>
-      <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="n">tag</span><span class="p">)[:</span><span class="n">itemLength</span><span class="p">]</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">assignTags</span><span class="p">]</span>
+      <span class="c1"># ll = [row._get(tag)[:itemLength] for tag in assignTags]</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
       <span class="c1"># Reset missing chain codes to default</span>
-      <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultChainCode</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+      <span class="c1"># ll[0] = [x or defaultChainCode for x in ll[0]]</span>
 
       <span class="n">idStrings</span> <span class="o">=</span> <span class="p">[]</span>
       <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">ll</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">defaultChainCode</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="c1"># ChainCode missing - replace with default chain code</span>
+          <span class="n">item</span> <span class="o">=</span> <span class="p">(</span><span class="n">defaultChainCode</span><span class="p">,)</span> <span class="o">+</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
         <span class="n">idStrings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">item</span><span class="p">))</span>
       <span class="k">try</span><span class="p">:</span>
-        <span class="n">contribution</span><span class="o">.</span><span class="n">addRestraintItem</span><span class="p">(</span><span class="n">idStrings</span><span class="p">)</span>
+        <span class="n">contribution</span><span class="o">.</span><span class="n">addRestraintItem</span><span class="p">(</span><span class="n">idStrings</span><span class="p">,</span> <span class="n">string2ItemMap</span><span class="p">)</span>
       <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Cannot Add restraintItem </span><span class="si">%s</span><span class="s2">. Identical to previous. Skipping&quot;</span> <span class="o">%</span> <span class="n">idStrings</span><span class="p">)</span>
 
@@ -2273,6 +2353,13 @@
         <span class="n">storageParameters</span><span class="p">[</span><span class="s1">&#39;numPoints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">pointCounts</span>
         <span class="n">spectrum</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">addDataStore</span><span class="p">(</span><span class="n">filePath</span><span class="p">,</span> <span class="o">**</span><span class="n">storageParameters</span><span class="p">)</span>
 
+    <span class="c1"># Load CCPN dimensions before peaks</span>
+    <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_spectrum_dimension&#39;</span>
+    <span class="c1"># Those are treated elsewhere</span>
+    <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">loopName</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">loop</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">load_ccpn_spectrum_dimension</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">loop</span><span class="p">)</span>
+
     <span class="c1"># Make PeakLst</span>
     <span class="n">peakList</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">(</span><span class="o">**</span><span class="n">peakListParameters</span><span class="p">)</span>
 
@@ -2281,7 +2368,7 @@
 
     <span class="c1"># Load remaining loops, with spectrum as parent</span>
     <span class="k">for</span> <span class="n">loopName</span> <span class="ow">in</span> <span class="n">loopNames</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">loopName</span> <span class="ow">not</span> <span class="ow">in</span>  <span class="p">(</span><span class="s1">&#39;nef_spectrum_dimension&#39;</span><span class="p">,</span> <span class="s1">&#39;nef_peak&#39;</span><span class="p">,</span>
+      <span class="k">if</span> <span class="n">loopName</span> <span class="ow">not</span> <span class="ow">in</span>  <span class="p">(</span><span class="s1">&#39;nef_spectrum_dimension&#39;</span><span class="p">,</span> <span class="s1">&#39;ccpn_spectrum_dimension&#39;</span><span class="p">,</span> <span class="s1">&#39;nef_peak&#39;</span><span class="p">,</span>
                            <span class="s1">&#39;nef_spectrum_dimension_transfer&#39;</span><span class="p">):</span>
         <span class="c1"># Those are treated elsewhere</span>
         <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">loopName</span><span class="p">)</span>
@@ -2380,7 +2467,28 @@
 
     <span class="c1"># Set main values</span>
     <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-      <span class="nb">setattr</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">tag</span> <span class="o">!=</span> <span class="s1">&#39;referencePoints&#39;</span><span class="p">:</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;@~@~ ccpnDimLoop&#39;</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">spectrum</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="n">referencePoints</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;referencePoints&#39;</span><span class="p">)</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">referencePoints</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">spectrumReferences</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumReferences</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">spectrumReference</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">spectrumReferences</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">spectrumReference</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+          <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">point</span> <span class="o">=</span> <span class="n">referencePoints</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+          <span class="n">points</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+          <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumReference</span><span class="o">.</span><span class="n">point2Value</span><span class="p">(</span><span class="n">point</span><span class="p">))</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">referencePoints</span> <span class="o">=</span> <span class="n">points</span>
+    <span class="n">spectrum</span><span class="o">.</span><span class="n">referenceValues</span> <span class="o">=</span> <span class="n">values</span>
+
+
+
 
     <span class="c1"># set storage attributes</span>
     <span class="n">value</span> <span class="o">=</span> <span class="n">extras</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dimension_is_complex&#39;</span><span class="p">)</span>
@@ -2472,6 +2580,14 @@
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
+    <span class="c1"># Get name map for per-dimension attributes</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">multipleAttributes</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="s1">&#39;slopes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;slopes_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;lowerLimits&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;lower_limits_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;upperLimits&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;upper_limits_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+    <span class="p">}</span>
+
     <span class="n">serial2creatorFunc</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span><span class="n">x</span><span class="o">.</span><span class="n">newIntegral</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">integralLists</span><span class="p">)</span>
 
     <span class="n">mapping</span> <span class="o">=</span> <span class="n">nef2CcpnMap</span><span class="p">[</span><span class="n">loop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
@@ -2480,9 +2596,12 @@
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromLoopRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">map2</span><span class="p">)</span>
       <span class="n">integral</span> <span class="o">=</span> <span class="n">serial2creatorFunc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;integral_list_serial&#39;</span><span class="p">]](</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
-      <span class="n">integral</span><span class="o">.</span><span class="n">slopes</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;slopes&#39;</span><span class="p">)</span>
-      <span class="n">lowerLimits</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;lower_limits&#39;</span><span class="p">)</span>
-      <span class="n">upperLimits</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;upper_limits&#39;</span><span class="p">)</span>
+      <span class="n">integral</span><span class="o">.</span><span class="n">slopes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;slopes&#39;</span><span class="p">])</span>
+      <span class="n">lowerLimits</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;lowerLimits&#39;</span><span class="p">])</span>
+      <span class="n">upperLimits</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;upperLimits&#39;</span><span class="p">])</span>
+      <span class="c1"># integral.slopes = row._get(&#39;slopes&#39;)</span>
+      <span class="c1"># lowerLimits = row._get(&#39;lower_limits&#39;)</span>
+      <span class="c1"># upperLimits = row._get(&#39;upper_limits&#39;)</span>
       <span class="n">integral</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">((</span><span class="n">lowerLimits</span><span class="p">,</span> <span class="n">upperLimits</span><span class="p">))</span>
       <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;integral_serial&#39;</span><span class="p">],</span> <span class="s1">&#39;integrals&#39;</span><span class="p">)</span>
       <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">integral</span><span class="p">)</span>
@@ -2498,7 +2617,20 @@
 
     <span class="n">mapping</span> <span class="o">=</span> <span class="n">nef2CcpnMap</span><span class="p">[</span><span class="n">loop</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
     <span class="n">map2</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Get name map for per-dimension attributes</span>
+    <span class="nb">max</span> <span class="o">=</span> <span class="n">dimensionCount</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">multipleAttributes</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;position_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;positionError&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;position_uncertainty_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;chainCodes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;chain_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;sequenceCodes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;sequence_code_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;residueTypes&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;residue_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+      <span class="s1">&#39;atomNames&#39;</span><span class="p">:</span><span class="nb">tuple</span><span class="p">(</span><span class="s1">&#39;atom_name_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ii</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="p">)),</span>
+    <span class="p">}</span>
+
     <span class="n">peaks</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">assignedNmrAtoms</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
 
@@ -2510,25 +2642,42 @@
       <span class="c1"># TODO check if peak parameters are the same for all rows, and do something about it</span>
       <span class="c1"># For now we simply use the first row that appears</span>
       <span class="k">if</span> <span class="n">peak</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;position&#39;</span><span class="p">)[:</span><span class="n">dimensionCount</span><span class="p">]</span>
-        <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;positionError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;position_uncertainty&#39;</span><span class="p">)[:</span><span class="n">dimensionCount</span><span class="p">]</span>
+        <span class="c1"># start of a new peak</span>
+
+        <span class="c1"># finalise last peak</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">assignedNmrAtoms</span><span class="p">:</span>
+          <span class="c1"># There is a peak in result, and the peak has assignments to set</span>
+          <span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">assignedNmrAtoms</span> <span class="o">=</span> <span class="n">assignedNmrAtoms</span>
+          <span class="n">assignedNmrAtoms</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+
+        <span class="c1"># make new peak  multipleAttributes</span>
+        <span class="c1"># parameters[&#39;position&#39;] = row._get(&#39;position&#39;)[:dimensionCount]</span>
+        <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">])</span>
+        <span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;positionError&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;positionError&#39;</span><span class="p">])</span>
+        <span class="c1"># parameters[&#39;positionError&#39;] = row._get(&#39;position_uncertainty&#39;)[:dimensionCount]</span>
         <span class="n">peak</span> <span class="o">=</span> <span class="n">peakList</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
         <span class="n">peaks</span><span class="p">[</span><span class="n">serial</span><span class="p">]</span> <span class="o">=</span> <span class="n">peak</span>
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
 
       <span class="c1"># Add assignment</span>
-      <span class="n">chainCodes</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;chain_code&#39;</span><span class="p">)[:</span><span class="n">dimensionCount</span><span class="p">]</span>
-      <span class="n">sequenceCodes</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">)[:</span><span class="n">dimensionCount</span><span class="p">]</span>
-      <span class="n">residueTypes</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;residue_name&#39;</span><span class="p">)[:</span><span class="n">dimensionCount</span><span class="p">]</span>
-      <span class="n">atomNames</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">_get</span><span class="p">(</span><span class="s1">&#39;atom_name&#39;</span><span class="p">)[:</span><span class="n">dimensionCount</span><span class="p">]</span>
+      <span class="n">chainCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;chainCodes&#39;</span><span class="p">])</span>
+      <span class="n">sequenceCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;sequenceCodes&#39;</span><span class="p">])</span>
+      <span class="n">residueTypes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;residueTypes&#39;</span><span class="p">])</span>
+      <span class="n">atomNames</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">multipleAttributes</span><span class="p">[</span><span class="s1">&#39;atomNames&#39;</span><span class="p">])</span>
+      <span class="c1"># chainCodes = row._get(&#39;chain_code&#39;)[:dimensionCount]</span>
+      <span class="c1"># sequenceCodes = row._get(&#39;sequence_code&#39;)[:dimensionCount]</span>
+      <span class="c1"># residueTypes = row._get(&#39;residue_name&#39;)[:dimensionCount]</span>
+      <span class="c1"># atomNames = row._get(&#39;atom_name&#39;)[:dimensionCount]</span>
       <span class="n">assignments</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">(</span><span class="n">chainCodes</span><span class="p">,</span> <span class="n">sequenceCodes</span><span class="p">,</span> <span class="n">residueTypes</span><span class="p">,</span> <span class="n">atomNames</span><span class="p">)</span>
       <span class="n">nmrAtoms</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">foundAssignment</span> <span class="o">=</span> <span class="bp">False</span>
       <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">assignments</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">x</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tt</span><span class="p">):</span>
           <span class="c1"># No assignment</span>
           <span class="n">nmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">tt</span><span class="p">[</span><span class="mi">3</span><span class="p">]:</span>
           <span class="c1"># Enough for an assignment - make it</span>
+          <span class="n">foundAssignment</span> <span class="o">=</span> <span class="bp">True</span>
           <span class="n">nmrResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">produceNmrResidue</span><span class="p">(</span><span class="o">*</span><span class="n">tt</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span>
           <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">produceNmrAtom</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
           <span class="n">nmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span>
@@ -2537,8 +2686,14 @@
           <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Uninterpretable Peak assignment for peak </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">. Set to None&quot;</span>
                        <span class="o">%</span> <span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="n">tt</span><span class="p">))</span>
           <span class="n">nmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">peak</span><span class="o">.</span><span class="n">addAssignment</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">foundAssignment</span><span class="p">:</span>
+        <span class="n">assignedNmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtoms</span><span class="p">)</span>
+
+    <span class="c1"># finalise last peak</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="n">assignedNmrAtoms</span><span class="p">:</span>
+      <span class="c1"># There is a peak in result, and the peak has assignments to set</span>
+      <span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">assignedNmrAtoms</span> <span class="o">=</span> <span class="n">assignedNmrAtoms</span>
+      <span class="n">assignedNmrAtoms</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
   <span class="c1">#</span>
@@ -2943,6 +3098,11 @@
 <div class="viewcode-block" id="CcpnNefReader.produceNmrResidue"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrResidue">[docs]</a>  <span class="k">def</span> <span class="nf">produceNmrResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chainCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">residueType</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get NmrResidue, correcting for possible errors&quot;&quot;&quot;</span>
 
+    <span class="n">inputTuple</span> <span class="o">=</span> <span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">inputTuple</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">result</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sequenceCode</span><span class="p">:</span>
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot produce NmrResidue for sequenceCode: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">))</span>
 
@@ -2954,11 +3114,9 @@
     <span class="n">rt</span> <span class="o">=</span> <span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
     <span class="n">cc</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">shortName</span>
 
-    <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
-
     <span class="k">try</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
-      <span class="k">return</span> <span class="n">result</span>
+      <span class="c1"># return result</span>
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
       <span class="c1"># This can happen legitimately, e.g. for offset residues</span>
       <span class="c1"># Further processing needed.</span>
@@ -2981,7 +3139,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">previous</span><span class="o">.</span><span class="n">residueType</span><span class="p">:</span>
               <span class="n">result</span> <span class="o">=</span> <span class="n">previous</span>
               <span class="n">result</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">residueType</span> <span class="o">=</span> <span class="n">residueType</span>
-              <span class="k">return</span> <span class="n">result</span>
+              <span class="c1"># return result</span>
           <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Deal with it below</span>
             <span class="k">pass</span>
@@ -2999,22 +3157,27 @@
         <span class="k">if</span> <span class="n">mainNmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
           <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">result</span>
+            <span class="c1"># return result</span>
           <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Handle lower down</span>
             <span class="k">pass</span>
 
     <span class="c1"># If e get here, we could not make an NmrResidue that matched the input</span>
     <span class="c1"># Make with modified sequenceCode</span>
-    <span class="n">newSequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span>
-    <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
-      <span class="k">try</span><span class="p">:</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">newSequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
-      <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-        <span class="n">newSequenceCode</span> <span class="o">=</span> <span class="s1">&#39;`</span><span class="si">%s</span><span class="s1">`&#39;</span> <span class="o">%</span> <span class="n">newSequenceCode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;New NmrResidue:</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> name caused an error.  Renamed </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span>
-                     <span class="o">%</span> <span class="p">(</span><span class="n">cc</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">rt</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">newSequenceCode</span><span class="p">,</span> <span class="n">rt</span><span class="p">))</span></div>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">newSequenceCode</span> <span class="o">=</span> <span class="n">sequenceCode</span>
+      <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">result</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">newSequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
+          <span class="c1"># return result</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+          <span class="n">newSequenceCode</span> <span class="o">=</span> <span class="s1">&#39;`</span><span class="si">%s</span><span class="s1">`&#39;</span> <span class="o">%</span> <span class="n">newSequenceCode</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;New NmrResidue:</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> name caused an error.  Renamed </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">cc</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">rt</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">newSequenceCode</span><span class="p">,</span> <span class="n">rt</span><span class="p">))</span>
+    <span class="c1">#</span>
+    <span class="c1"># Result cannot have been in map, so put it there</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_nmrResidueMap</span><span class="p">[</span><span class="n">inputTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="CcpnNefReader.produceNmrAtom"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.produceNmrAtom">[docs]</a>  <span class="k">def</span> <span class="nf">produceNmrAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">isotopeCode</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get NmrAtom from NmrResidue and name, correcting for possible errors&quot;&quot;&quot;</span>
@@ -3064,15 +3227,18 @@
       <span class="n">serial</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">serial</span>
       <span class="n">dataSet</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Data_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">serial</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">defaultDataSetSerial</span> <span class="o">=</span> <span class="n">serial</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_dataSet2ItemMap</span><span class="p">[</span><span class="n">dataSet</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">_getTempItemMap</span><span class="p">()</span>
 
     <span class="k">else</span><span class="p">:</span>
-      <span class="c1"># take or create dataset matching serial</span>
+      <span class="c1"># take or create dataSet matching serial</span>
       <span class="n">dataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">serial</span><span class="p">))</span>
       <span class="k">if</span> <span class="n">dataSet</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">dataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newDataSet</span><span class="p">()</span>
         <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">dataSet</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;nmrConstraintStores&#39;</span><span class="p">)</span>
         <span class="n">dataSet</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
         <span class="n">dataSet</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Data_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">serial</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataSet2ItemMap</span><span class="p">[</span><span class="n">dataSet</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataSet</span><span class="o">.</span><span class="n">_getTempItemMap</span><span class="p">()</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">dataSet</span></div></div>
 
@@ -3366,6 +3532,7 @@
   <span class="n">application</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
   <span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
+  <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
   <span class="n">time2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
   <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;====&gt; Loaded </span><span class="si">%s</span><span class="s2"> from NEF file in seconds </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">time2</span><span class="o">-</span><span class="n">time1</span><span class="p">))</span>
   <span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">outPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span><span class="p">)</span>
@@ -3377,102 +3544,102 @@
   <span class="k">return</span> <span class="n">outPath</span>
 
 
-<span class="k">def</span> <span class="nf">_extractVariantsTable</span><span class="p">(</span><span class="n">aa_variants_cif</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Read aa-variants.cif file contents and return variants mapping table string&quot;&quot;&quot;</span>
-
-  <span class="n">lineformat</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%-15s</span><span class="s2">    </span><span class="si">%-12s</span><span class="s2">    </span><span class="si">%-7s</span><span class="s2">    </span><span class="si">%-15s</span><span class="s2">&quot;</span>
-  <span class="n">lines</span> <span class="o">=</span><span class="p">[</span><span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;MMCIF_code&#39;</span><span class="p">,</span> <span class="s2">&quot;residue_name&quot;</span><span class="p">,</span> <span class="s2">&quot;linking&quot;</span><span class="p">,</span> <span class="s2">&quot;residue_variant&quot;</span><span class="p">)]</span>
-
-  <span class="c1">#</span>
-  <span class="c1"># &#39;LL&#39;</span>
-  <span class="c1"># linkingMap = {</span>
-  <span class="c1">#   &#39;LL&#39;:&#39;middle&#39;,</span>
-  <span class="c1">#   &#39;LEO2&#39;:&#39;end&#39;, # deprotonated</span>
-  <span class="c1">#   &#39;LEO2H&#39;:&#39;end&#39;, # deprotonated</span>
-  <span class="c1">#   &#39;LFOH&#39;:&#39;single&#39;, # neutral</span>
-  <span class="c1">#   &#39;LFZW&#39;:&#39;single&#39;, # zwitter</span>
-  <span class="c1">#   &#39;LSN3&#39;:&#39;start&#39;, # protonated</span>
-  <span class="c1">#</span>
-  <span class="c1"># }</span>
-
-  <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
-
-  <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">open</span><span class="p">(</span><span class="n">aa_variants_cif</span><span class="p">):</span>
-
-    <span class="n">hxt</span> <span class="o">=</span> <span class="bp">False</span>
-
-    <span class="k">if</span> <span class="s1">&#39;data_&#39;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-      <span class="n">ll</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">pass</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">ll2</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">lnk</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
-        <span class="n">linking</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
-        <span class="k">if</span> <span class="n">lnk</span> <span class="o">==</span> <span class="s1">&#39;LL&#39;</span><span class="p">:</span>
-          <span class="n">linking</span> <span class="o">=</span> <span class="s1">&#39;middle&#39;</span>
-        <span class="k">elif</span> <span class="n">lnk</span> <span class="o">==</span> <span class="s1">&#39;LEO2&#39;</span><span class="p">:</span>
-          <span class="n">linking</span> <span class="o">=</span> <span class="s1">&#39;end&#39;</span>
-        <span class="k">elif</span> <span class="n">lnk</span> <span class="o">==</span> <span class="s1">&#39;LEO2H&#39;</span><span class="p">:</span>
-          <span class="n">linking</span> <span class="o">=</span> <span class="s1">&#39;end&#39;</span>
-          <span class="n">hxt</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="k">elif</span> <span class="n">lnk</span> <span class="o">==</span> <span class="s1">&#39;LFZW&#39;</span><span class="p">:</span>
-          <span class="n">linking</span> <span class="o">=</span> <span class="s1">&#39;single&#39;</span>
-        <span class="k">elif</span> <span class="n">lnk</span> <span class="o">==</span> <span class="s1">&#39;LFOH&#39;</span><span class="p">:</span>
-          <span class="n">linking</span> <span class="o">=</span> <span class="s1">&#39;single&#39;</span>
-          <span class="n">ll2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-H3&#39;</span><span class="p">)</span>
-          <span class="n">hxt</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="k">elif</span> <span class="n">lnk</span> <span class="o">==</span> <span class="s1">&#39;LSN3&#39;</span><span class="p">:</span>
-          <span class="n">linking</span> <span class="o">=</span> <span class="s1">&#39;start&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING, not recognised&#39;</span><span class="p">,</span> <span class="n">ll</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
-          <span class="n">var</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
-          <span class="k">if</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
-            <span class="n">ll2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="n">var</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;NB Ignoring MMcif variant </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">var</span><span class="p">)</span>
-
-        <span class="c1"># Sort before further treatment, to make sure &#39;+&#39; markers come at the end</span>
-        <span class="n">ll2</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-
-        <span class="c1"># Special handling for ASP and GLU - where default is side chain deprotonated</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;ASP&#39;</span><span class="p">:</span>
-          <span class="k">if</span> <span class="s1">&#39;-HD2&#39;</span> <span class="ow">in</span> <span class="n">ll2</span><span class="p">:</span>
-            <span class="n">ll2</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;-HD2&#39;</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">ll2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;+HD2&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;GLU&#39;</span><span class="p">:</span>
-          <span class="k">if</span> <span class="s1">&#39;-HE2&#39;</span> <span class="ow">in</span> <span class="n">ll2</span><span class="p">:</span>
-            <span class="n">ll2</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;-HE2&#39;</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">ll2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;+HE2&#39;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;HIS&#39;</span><span class="p">:</span>
-          <span class="k">if</span> <span class="s1">&#39;-HE2&#39;</span> <span class="ow">in</span> <span class="n">ll2</span><span class="p">:</span>
-            <span class="n">ll2</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;-HE2&#39;</span><span class="p">)</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="n">ll2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;+HE2&#39;</span><span class="p">)</span>
-
-        <span class="c1"># NBNB</span>
-
-        <span class="k">if</span> <span class="n">hxt</span><span class="p">:</span>
-          <span class="n">ll2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;+HXT&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">ll2</span><span class="p">:</span>
-          <span class="n">variant</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll2</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-          <span class="n">variant</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span>
-        <span class="n">ss</span> <span class="o">=</span> <span class="n">lineformat</span> <span class="o">%</span> <span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span> <span class="n">name</span><span class="p">,</span> <span class="n">linking</span><span class="p">,</span> <span class="n">variant</span><span class="p">)</span>
-
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
-
-  <span class="c1">#</span>
-  <span class="k">print</span> <span class="p">(</span><span class="n">Counter</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>
-
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+<span class="c1"># def _extractVariantsTable(aa_variants_cif:str)-&gt; str:</span>
+<span class="c1">#   &quot;&quot;&quot;Read aa-variants.cif file contents and return variants mapping table string&quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   lineformat = &quot;%-15s    %-12s    %-7s    %-15s&quot;</span>
+<span class="c1">#   lines =[lineformat % (&#39;MMCIF_code&#39;, &quot;residue_name&quot;, &quot;linking&quot;, &quot;residue_variant&quot;)]</span>
+<span class="c1">#</span>
+<span class="c1">#   #</span>
+<span class="c1">#   # &#39;LL&#39;</span>
+<span class="c1">#   # linkingMap = {</span>
+<span class="c1">#   #   &#39;LL&#39;:&#39;middle&#39;,</span>
+<span class="c1">#   #   &#39;LEO2&#39;:&#39;end&#39;, # deprotonated</span>
+<span class="c1">#   #   &#39;LEO2H&#39;:&#39;end&#39;, # deprotonated</span>
+<span class="c1">#   #   &#39;LFOH&#39;:&#39;single&#39;, # neutral</span>
+<span class="c1">#   #   &#39;LFZW&#39;:&#39;single&#39;, # zwitter</span>
+<span class="c1">#   #   &#39;LSN3&#39;:&#39;start&#39;, # protonated</span>
+<span class="c1">#   #</span>
+<span class="c1">#   # }</span>
+<span class="c1">#</span>
+<span class="c1">#   names = []</span>
+<span class="c1">#</span>
+<span class="c1">#   for line in open(aa_variants_cif):</span>
+<span class="c1">#</span>
+<span class="c1">#     hxt = False</span>
+<span class="c1">#</span>
+<span class="c1">#     if &#39;data_&#39; in line:</span>
+<span class="c1">#       ll = line.strip().split(&#39;_&#39;)</span>
+<span class="c1">#       if len(ll) == 2:</span>
+<span class="c1">#         pass</span>
+<span class="c1">#       else:</span>
+<span class="c1">#         name = ll[1]</span>
+<span class="c1">#         names.append(name)</span>
+<span class="c1">#         ll2 = []</span>
+<span class="c1">#         lnk = ll[2]</span>
+<span class="c1">#         linking = &#39;.&#39;</span>
+<span class="c1">#         if lnk == &#39;LL&#39;:</span>
+<span class="c1">#           linking = &#39;middle&#39;</span>
+<span class="c1">#         elif lnk == &#39;LEO2&#39;:</span>
+<span class="c1">#           linking = &#39;end&#39;</span>
+<span class="c1">#         elif lnk == &#39;LEO2H&#39;:</span>
+<span class="c1">#           linking = &#39;end&#39;</span>
+<span class="c1">#           hxt = True</span>
+<span class="c1">#         elif lnk == &#39;LFZW&#39;:</span>
+<span class="c1">#           linking = &#39;single&#39;</span>
+<span class="c1">#         elif lnk == &#39;LFOH&#39;:</span>
+<span class="c1">#           linking = &#39;single&#39;</span>
+<span class="c1">#           ll2.append(&#39;-H3&#39;)</span>
+<span class="c1">#           hxt = True</span>
+<span class="c1">#         elif lnk == &#39;LSN3&#39;:</span>
+<span class="c1">#           linking = &#39;start&#39;</span>
+<span class="c1">#         else:</span>
+<span class="c1">#           print(&#39;WARNING, not recognised&#39;, ll)</span>
+<span class="c1">#</span>
+<span class="c1">#         if len(ll) &gt; 3:</span>
+<span class="c1">#           var = ll[3]</span>
+<span class="c1">#           if var[0] == &#39;D&#39;:</span>
+<span class="c1">#             ll2.append(&#39;-&#39;+var[1:])</span>
+<span class="c1">#           else:</span>
+<span class="c1">#             print (&quot;NB Ignoring MMcif variant %s&quot; % var)</span>
+<span class="c1">#</span>
+<span class="c1">#         # Sort before further treatment, to make sure &#39;+&#39; markers come at the end</span>
+<span class="c1">#         ll2.sort()</span>
+<span class="c1">#</span>
+<span class="c1">#         # Special handling for ASP and GLU - where default is side chain deprotonated</span>
+<span class="c1">#         if name == &#39;ASP&#39;:</span>
+<span class="c1">#           if &#39;-HD2&#39; in ll2:</span>
+<span class="c1">#             ll2.remove(&#39;-HD2&#39;)</span>
+<span class="c1">#           else:</span>
+<span class="c1">#             ll2.append(&#39;+HD2&#39;)</span>
+<span class="c1">#         elif name == &#39;GLU&#39;:</span>
+<span class="c1">#           if &#39;-HE2&#39; in ll2:</span>
+<span class="c1">#             ll2.remove(&#39;-HE2&#39;)</span>
+<span class="c1">#           else:</span>
+<span class="c1">#             ll2.append(&#39;+HE2&#39;)</span>
+<span class="c1">#         elif name == &#39;HIS&#39;:</span>
+<span class="c1">#           if &#39;-HE2&#39; in ll2:</span>
+<span class="c1">#             ll2.remove(&#39;-HE2&#39;)</span>
+<span class="c1">#           else:</span>
+<span class="c1">#             ll2.append(&#39;+HE2&#39;)</span>
+<span class="c1">#</span>
+<span class="c1">#         # NBNB</span>
+<span class="c1">#</span>
+<span class="c1">#         if hxt:</span>
+<span class="c1">#           ll2.append(&#39;+HXT&#39;)</span>
+<span class="c1">#         if ll2:</span>
+<span class="c1">#           variant = &#39;,&#39;.join(ll2)</span>
+<span class="c1">#         else:</span>
+<span class="c1">#           variant = &#39;.&#39;</span>
+<span class="c1">#         ss = lineformat % (&#39;_&#39;.join(ll[1:]), name, linking, variant)</span>
+<span class="c1">#</span>
+<span class="c1">#         lines.append(ss)</span>
+<span class="c1">#</span>
+<span class="c1">#   #</span>
+<span class="c1">#   print (Counter(names))</span>
+<span class="c1">#</span>
+<span class="c1">#   #</span>
+<span class="c1">#   return &#39;\n&#39;.join(lines)</span>
 
 
 
@@ -3481,11 +3648,11 @@
   <span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
   <span class="c1"># _testNefIo(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(path)</span>
-  <span class="c1"># nefpath = _exportToNef(path)</span>
-  <span class="c1"># _testNefIo(nefpath)</span>
+  <span class="n">nefpath</span> <span class="o">=</span> <span class="n">_exportToNef</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="n">_testNefIo</span><span class="p">(</span><span class="n">nefpath</span><span class="p">)</span>
   <span class="c1"># nefpath = _exportToNef(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
   <span class="c1"># _testNefIo(nefpath, skipPrefixes=(&#39;ccpn&#39;,))</span>
-  <span class="k">print</span><span class="p">(</span><span class="n">_extractVariantsTable</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+  <span class="c1"># print(_extractVariantsTable(path))</span>
 </pre></div>
 
           </div>

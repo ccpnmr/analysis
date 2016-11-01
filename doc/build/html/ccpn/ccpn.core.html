@@ -1777,7 +1777,7 @@ May be 0. Is None for residues that are not offset.</p>
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename NmrResidue. changing its sequenceCode, residiueType, or both.</p>
+<dd><p>Rename NmrResidue. changing its sequenceCode, residueType, or both.</p>
 <p>The value is a dot-separated string <cite>sequenceCode</cite>.`residueType`.
 Values like None, &#8216;abc&#8217;, or &#8216;abc.&#8217; will set the residueType to None.
 Values like None or &#8216;.abc&#8217; will set the sequenceCode to None,
@@ -2524,6 +2524,14 @@ and return the result</p>
 <dt id="ccpn.core.Project.Project.getNote">
 <code class="descname">getNote</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Note.Note<a class="headerlink" href="#ccpn.core.Project.Project.getNote" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get contained &#8216;ccpn.core.Note.Note object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.getObjectsByPartialId">
+<code class="descname">getObjectsByPartialId</code><span class="sig-paren">(</span><em>className: str</em>, <em>idStartsWith: str</em><span class="sig-paren">)</span> &rarr; List[ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject]<a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.getObjectsByPartialId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.getObjectsByPartialId" title="Permalink to this definition">¶</a></dt>
+<dd><p>get objects from class name / shortName and the start of the ID.</p>
+<p>The function does NOT interrogate the API level, which makes it faster in a
+number fo cases, e.g. for NmrResidues</p>
 </dd></dl>
 
 <dl class="method">
@@ -3474,9 +3482,15 @@ Simple restraints will have only contribution, whereas more complex restraints
 can have multiple contributions with different parameters and possibly logical relationships</p>
 <dl class="method">
 <dt id="ccpn.core.RestraintContribution.RestraintContribution.addRestraintItem">
-<code class="descname">addRestraintItem</code><span class="sig-paren">(</span><em>restraintItem: Sequence[str]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/RestraintContribution.html#RestraintContribution.addRestraintItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.RestraintContribution.RestraintContribution.addRestraintItem" title="Permalink to this definition">¶</a></dt>
+<code class="descname">addRestraintItem</code><span class="sig-paren">(</span><em>restraintItem: Sequence[str], _string2Item: Dict[KT, VT] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/RestraintContribution.html#RestraintContribution.addRestraintItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.RestraintContribution.RestraintContribution.addRestraintItem" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a restraint item, given as aa tuple of atomId (NOT Pid).
 Example value: (&#8216;A.127.ALA.HA&#8217;,&#8217;A.130.SER.H&#8217;)</p>
+<p>The optional _string2Item dictionary speeds up the generation of many restraintItems
+in a single operation. It must be initialised with DataSet._getTempItemMap(),
+and serves only for a single DataSet.
+On principle it must be used for a closed set of operations and then discarded,
+since it is a cache of underlying FixedResonance objects
+which are in theory mutable (don&#8217;t ask)</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4347,6 +4361,13 @@ it is combined with the highest-priority transferType in the transfer path.</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.core.Spectrum.Spectrum.mainSpectrumReferences">
+<code class="descname">mainSpectrumReferences</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.mainSpectrumReferences" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>List[ccpn.core.SpectrumReference.SpectrumReference=None]</em>, <em>immutable</em> - 
+Main SpectrumReference for each dimension (value is None for non-frequency dimensions</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.measurementTypes">
 <code class="descname">measurementTypes</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.measurementTypes" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[str=None, ...]</em>, <em>mutable</em> - 
@@ -4453,6 +4474,8 @@ first order phase correction (or None) per dimension. Always None for sampled di
 <code class="descname">pointCounts</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.pointCounts" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[int, ...]</em>, <em>mutable</em> - 
 Number active of points per dimension</p>
+<p>NB, Changing the pointCounts will keep the spectralWidths (after Fourier transformation)
+constant.</p>
 <p>NB for FidDataDims more points than these may be stored (see totalPointCount).</p>
 </dd></dl>
 
@@ -4651,6 +4674,8 @@ NMR tube spinning rate (in Hz).</p>
 Total number of points per dimension</p>
 <p>NB for FidDataDims and SampledDataDims these are the stored points,
 for FreqDataDims these are the points after transformation before cutting down.</p>
+<p>NB, changing the totalPointCount will <em>not</em> modify the resolution (or dwell time),
+so the implied total width will change.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4929,6 +4954,12 @@ Type of NMR measurement referred to by this reference. Legal values are:
 minimum possible peak frequency (in ppm) for this reference</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.SpectrumReference.SpectrumReference.point2Value">
+<code class="descname">point2Value</code><span class="sig-paren">(</span><em>point: float</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#SpectrumReference.point2Value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.point2Value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Axis (ppm) value corresponding to point</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.SpectrumReference.SpectrumReference.referencePoint">
 <code class="descname">referencePoint</code><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.referencePoint" title="Permalink to this definition">¶</a></dt>
@@ -4977,7 +5008,18 @@ Absolute frequency at carrier (or at splitting 0.0). In MHz or dimensionless.</p
 Spectrum containing spectrumReference.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.SpectrumReference.SpectrumReference.value2Point">
+<code class="descname">value2Point</code><span class="sig-paren">(</span><em>value: float</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#SpectrumReference.value2Point"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.SpectrumReference.value2Point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Point number (float) corresponding to (ppm) value</p>
 </dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.SpectrumReference.getter">
+<code class="descclassname">ccpn.core.SpectrumReference.</code><code class="descname">getter</code><span class="sig-paren">(</span><em>self: ccpn.core.Spectrum.Spectrum</em><span class="sig-paren">)</span> &rarr; List[ccpn.core.SpectrumReference.SpectrumReference=None]<a class="reference internal" href="../_modules/ccpn/core/SpectrumReference.html#getter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumReference.getter" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="ccpn-core-structureensemble-module">

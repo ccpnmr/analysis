@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-09-20 17:07:37 +0100 (Tue, 20 Sep 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -62,9 +62,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-09-20 17:07:37 +0100 (Tue, 20 Sep 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9886 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -1013,7 +1013,25 @@
       <span class="s2">&quot;CCPN molecule named </span><span class="si">%s</span><span class="s2"> already exists. New molecule has been named </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
       <span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="n">result</span><span class="p">))</span>
     <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">result</span></div>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="Project.getObjectsByPartialId"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.getObjectsByPartialId">[docs]</a>  <span class="k">def</span> <span class="nf">getObjectsByPartialId</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
+                            <span class="n">idStartsWith</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">AbstractWrapperObject</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;get objects from class name / shortName and the start of the ID.</span>
+
+<span class="sd">    The function does NOT interrogate the API level, which makes it faster in a</span>
+<span class="sd">    number fo cases, e.g. for NmrResidues&quot;&quot;&quot;</span>
+
+    <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
+      <span class="c1"># NB the _pid2Obj entry is set in the object init.</span>
+      <span class="c1"># The relevant dictionary may therefore be missing if no object has yet been created</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">idStartsWith</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div></div>
 </pre></div>
 
           </div>

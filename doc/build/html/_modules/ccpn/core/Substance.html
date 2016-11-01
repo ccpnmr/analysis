@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-21 13:43:34 +0100 (Thu, 21 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-21 13:43:34 +0100 (Thu, 21 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9742 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -774,14 +774,23 @@
 <span class="sd">  NB: For more complex substances, you must use advanced, API-level commands.</span>
 
 <span class="sd">  :param Sequence sequence: string of one-letter codes or sequence of residueNames</span>
+
 <span class="sd">  :param str name: name of new substance</span>
+
 <span class="sd">  :param str labelling: labelling for new substance. Optional - None means &#39;natural abundance&#39;</span>
+
 <span class="sd">  :param str userCode: user code for new substance (optional)</span>
+
 <span class="sd">  :param str smiles: smiles string for new substance (optional)</span>
+
 <span class="sd">  :param Sequence[str] synonyms: synonyms for Substance name</span>
+
 <span class="sd">  :param str comment: comment for new substance (optional)</span>
+
 <span class="sd">  :param int startNumber: number of first residue in sequence</span>
+
 <span class="sd">  :param str molType: molType (&#39;protein&#39;,&#39;DNA&#39;, &#39;RNA&#39;). Required only if sequence is a string.</span>
+
 <span class="sd">  :param bool isCyclic: Should substance created be cyclic?</span>
 
 <span class="sd">  &quot;&quot;&quot;</span>

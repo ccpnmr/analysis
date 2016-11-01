@@ -242,8 +242,8 @@
 <div class="section" id="module-ccpn.AnalysisScreen.lib.SimulatedAnnealing">
 <span id="ccpn-analysisscreen-lib-simulatedannealing-module"></span><h2>ccpn.AnalysisScreen.lib.SimulatedAnnealing module<a class="headerlink" href="#module-ccpn.AnalysisScreen.lib.SimulatedAnnealing" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealMixtures">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">annealMixtures</code><span class="sig-paren">(</span><em>mixtures</em>, <em>coolingMethod='Linear'</em>, <em>startTemp=1000</em>, <em>finalTemp=0.01</em>, <em>maxSteps=1000</em>, <em>tempK=200</em>, <em>minDistance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#annealMixtures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealMixtures" title="Permalink to this definition">¶</a></dt>
+<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealling">
+<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">annealling</code><span class="sig-paren">(</span><em>mixtures</em>, <em>coolingMethod='Linear'</em>, <em>startTemp=1000</em>, <em>finalTemp=0.01</em>, <em>maxSteps=1000</em>, <em>tempK=200</em>, <em>minDistance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#annealling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.annealling" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -254,11 +254,6 @@
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore">
 <code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">calculateTotalScore</code><span class="sig-paren">(</span><em>mixturesDict</em>, <em>peaksDistance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#calculateTotalScore"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.calculateTotalScore" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.exponentialCooling">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">exponentialCooling</code><span class="sig-paren">(</span><em>startTemp=1000.0</em>, <em>finalTemp=0.1</em>, <em>maxSteps=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#exponentialCooling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.exponentialCooling" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -279,6 +274,16 @@
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getAllOverlappedPositions">
 <code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">getAllOverlappedPositions</code><span class="sig-paren">(</span><em>mixtures</em>, <em>minDist</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getAllOverlappedPositions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getAllOverlappedPositions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getExponentialSteps">
+<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">getExponentialSteps</code><span class="sig-paren">(</span><em>startTemp=1000.0</em>, <em>finalTemp=0.1</em>, <em>maxSteps=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getExponentialSteps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getExponentialSteps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.getLinearSteps">
+<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">getLinearSteps</code><span class="sig-paren">(</span><em>startTemp=1000.0</em>, <em>finalTemp=0.1</em>, <em>maxSteps=1000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#getLinearSteps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.getLinearSteps" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
@@ -304,11 +309,6 @@
 <dl class="function">
 <dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing">
 <code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">iterateAnnealing</code><span class="sig-paren">(</span><em>mixtures</em>, <em>startTemp=1000</em>, <em>finalTemp=0.01</em>, <em>maxSteps=1000</em>, <em>tempK=200</em>, <em>coolingMethod='linear'</em>, <em>nIterations=1</em>, <em>minDistance=0.01</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#iterateAnnealing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.iterateAnnealing" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="function">
-<dt id="ccpn.AnalysisScreen.lib.SimulatedAnnealing.linearCooling">
-<code class="descclassname">ccpn.AnalysisScreen.lib.SimulatedAnnealing.</code><code class="descname">linearCooling</code><span class="sig-paren">(</span><em>startTemp=1000.0</em>, <em>finalTemp=0.1</em>, <em>maxSteps=1000</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisScreen/lib/SimulatedAnnealing.html#linearCooling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisScreen.lib.SimulatedAnnealing.linearCooling" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">

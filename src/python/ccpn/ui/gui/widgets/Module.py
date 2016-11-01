@@ -15,8 +15,10 @@ class CcpnModule(Module):
 
   includeSettingsWidget = False
 
-  def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, **kw):
+  def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closeFunc=None, **kw):
     super(CcpnModule, self).__init__(name, self)
+    self.closeFunc = closeFunc
+
     self.label.hide()
     self.label = CcpnModuleLabel(name.upper(), self)
     self.label.show()
@@ -63,8 +65,11 @@ class CcpnModule(Module):
     else:
       print('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
-
   def _closeModule(self):
+
+    if self.closeFunc:
+      self.closeFunc()
+
     self.close()
 
   def dropEvent(self, *args):

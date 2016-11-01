@@ -1309,6 +1309,22 @@ class Framework:
     if self.current.strip is not None:
       self.current.strip.resetZoom()
 
+  def _findMenuAction(self, menubarText, menuText):
+
+    # not sure if this function will be needed more widely or just in console context
+
+    for menuBarAction in self.ui.mainWindow._menuBar.actions():
+      if menuBarAction.text() == menubarText:
+        break
+    else:
+      return None
+
+    for menuAction in menuBarAction.menu().actions():
+      if menuAction.text() == menuText:
+        return menuAction
+
+    return None
+
   def toggleConsole(self):
     """
     Toggles whether python console is displayed at bottom of the main window.
@@ -1320,7 +1336,9 @@ class Framework:
       else:
         self.ui.mainWindow.moduleArea.moveModule(self.ui.mainWindow.pythonConsoleModule, 'bottom', None)
     else:
-      self.ui.mainWindow.pythonConsoleModule = CcpnModule(name='Python Console')
+      action = self._findMenuAction('View', 'Python Console')
+      closeFunc = action.trigger if action else None
+      self.ui.mainWindow.pythonConsoleModule = CcpnModule(name='Python Console', closeFunc=closeFunc)
       self.ui.mainWindow.pythonConsoleModule.layout.addWidget(self.ui.mainWindow.pythonConsole)
       self.ui.mainWindow.moduleArea.addModule(self.ui.mainWindow.pythonConsoleModule, 'bottom')
 

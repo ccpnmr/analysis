@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple, Optional
+from typing import Sequence, Tuple, Optional, List
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -228,6 +228,13 @@ class SpectrumReference(AbstractWrapperObject):
   def isAcquisition(self, value):
     self._wrappedData.dataDim.expDim.isAquisition = value
 
+  def point2Value(self, point:float) -> float:
+    """Axis (ppm) value corresponding to point"""
+    return self._wrappedData.pointToValue(point)
+
+  def value2Point(self, value:float) -> float:
+    """ Point number (float) corresponding to (ppm) value"""
+    return self._wrappedData.value2Point(value)
 
   # Implementation functions
 
@@ -269,6 +276,13 @@ def _newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:fl
 
 Spectrum.newSpectrumReference = _newSpectrumReference
 del _newSpectrumReference
+
+def getter(self:Spectrum) -> List[Optional[SpectrumReference]]:
+  data2Obj = self._project._data2Obj
+  return list(data2Obj.get(x) if x else None for x in self._mainDataDimRefs())
+Spectrum.mainSpectrumReferences = property(getter, None, None,
+    "Main SpectrumReference for each dimension (value is None for non-frequency dimensions"
+    )
 
 # Notifiers:
 def _isAcquisitionHasChanged(project:Project, apiExpDim:Nmr.ExpDim):

@@ -118,8 +118,7 @@ class NmrAtom(AbstractWrapperObject):
   @property
   def atom(self) -> Atom:
     """Atom to which NmrAtom is assigned. NB resetting the atom will rename the NmrAtom"""
-    atom = self._wrappedData.atom
-    return None if atom is None else self._project._data2Obj.get(atom)
+    return self._project.getAtom(self._id)
 
   @atom.setter
   def atom(self, value:Atom):
@@ -332,12 +331,7 @@ class NmrAtom(AbstractWrapperObject):
     return sorted(parent._wrappedData.resonances, key=operator.attrgetter('name'))
 
 def getter(self:Atom) -> NmrAtom:
-  nmrResidue = self.residue.nmrResidue
-  if nmrResidue is None:
-    return None
-  else:
-    obj = nmrResidue._wrappedData.findFirstResonance(name=self._wrappedData.name)
-    return None if obj is None else self._project._data2Obj.get(obj)
+  return self._project.getNmrAtom(self._id)
 
 def setter(self:Atom, value:NmrAtom):
   oldValue = self.nmrAtom

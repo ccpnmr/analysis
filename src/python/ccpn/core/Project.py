@@ -965,3 +965,21 @@ class Project(AbstractWrapperObject):
       (name,result))
     #
     return result
+
+
+  def getObjectsByPartialId(self, className:str,
+                            idStartsWith:str) -> typing.List[AbstractWrapperObject]:
+    """get objects from class name / shortName and the start of the ID.
+
+    The function does NOT interrogate the API level, which makes it faster in a
+    number fo cases, e.g. for NmrResidues"""
+
+    dd = self._pid2Obj.get(className)
+    if dd:
+      # NB the _pid2Obj entry is set in the object init.
+      # The relevant dictionary may therefore be missing if no object has yet been created
+      result = [tt[1] for tt in dd.items() if tt[0].startswith(idStartsWith)]
+    else:
+      result = None
+    #
+    return result

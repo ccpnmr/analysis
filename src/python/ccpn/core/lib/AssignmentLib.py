@@ -295,6 +295,11 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
   Determines location of a set of NmrResidues in the specified chain using residue type
   predictions.
   """
+
+
+  # TODO NBNB rename variables so api level objects have .api...' names
+  # Also consider moving to ccpnmodel, or refactoring. NBNB
+
   nmrProject = project._wrappedData
   spinSystems = [nmrResidue._wrappedData for nmrResidue in nmrResidues]
   chain = chain._wrappedData

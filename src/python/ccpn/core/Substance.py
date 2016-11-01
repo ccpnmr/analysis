@@ -725,14 +725,23 @@ def _createPolymerSubstance(self:Project, sequence:typing.Sequence[str], name:st
   NB: For more complex substances, you must use advanced, API-level commands.
 
   :param Sequence sequence: string of one-letter codes or sequence of residueNames
+
   :param str name: name of new substance
+
   :param str labelling: labelling for new substance. Optional - None means 'natural abundance'
+
   :param str userCode: user code for new substance (optional)
+
   :param str smiles: smiles string for new substance (optional)
+
   :param Sequence[str] synonyms: synonyms for Substance name
+
   :param str comment: comment for new substance (optional)
+
   :param int startNumber: number of first residue in sequence
+
   :param str molType: molType ('protein','DNA', 'RNA'). Required only if sequence is a string.
+
   :param bool isCyclic: Should substance created be cyclic?
 
   """

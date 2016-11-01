@@ -352,6 +352,9 @@ class Spectrum(AbstractWrapperObject):
   def pointCounts(self) -> Tuple[int, ...]:
     """Number active of points per dimension
 
+    NB, Changing the pointCounts will keep the spectralWidths (after Fourier transformation)
+    constant.
+
     NB for FidDataDims more points than these may be stored (see totalPointCount)."""
     result = []
     for dataDim in self._wrappedData.sortedDataDims():
@@ -365,13 +368,30 @@ class Spectrum(AbstractWrapperObject):
   def pointCounts(self, value:Sequence):
     apiDataSource = self._wrappedData
     if len(value) == apiDataSource.numDim:
+      dataDimRefs = self._mainDataDimRefs()
       for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
-        if hasattr(dataDim, 'numPointsValid'):
-          dataDim.numPointsValid = value[ii]
+        val = value[ii]
+        className = dataDim.className
+        if className == 'SampledDataDim':
+          # No sweep width to worry about. Up to programmer to make sure sampled values match.
+          dataDim.numPoints = val
+        elif  className == 'FidDataDim':
+          #Number of points refers to time domain, independent of sweep width
+          dataDim.numPointsValid = val
+        elif className == 'FreqDataDim':
+          # Changing the number of points may NOT change the spectralWidth
+          relativeVal = val / dataDim.numPoints
+          dataDim.numPoints = val
+          dataDim.valuePerPoint /= relativeVal
+          dataDimRef = dataDimRefs[ii]
+          if dataDimRef is not None:
+            # This will work if we are changing to a different factor of two in pointCount.
+            # If we are making an arbitrary change, the referencing is not reliable anyway.
+            dataDimRef.refPoint = ((dataDimRef.refPoint -1) * relativeVal) + 1
         else:
-          dataDim.numPoints = value[ii]
+          raise TypeError("API DataDim object with unknown className:", className)
     else:
-      raise ValueError("pointCount value must have length %s, was %s" %
+      raise ValueError("pointCounts value must have length %s, was %s" %
                        (apiDataSource.numDim, value))
 
   @property
@@ -379,7 +399,10 @@ class Spectrum(AbstractWrapperObject):
     """Total number of points per dimension
 
     NB for FidDataDims and SampledDataDims these are the stored points,
-    for FreqDataDims these are the points after transformation before cutting down."""
+    for FreqDataDims these are the points after transformation before cutting down.
+
+    NB, changing the totalPointCount will *not* modify the resolution (or dwell time),
+    so the implied total width will change."""
     result = []
     for dataDim in self._wrappedData.sortedDataDims():
       if hasattr(dataDim, 'numPointsOrig'):

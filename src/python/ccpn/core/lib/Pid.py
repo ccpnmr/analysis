@@ -285,6 +285,9 @@ class Pid(str):
         Convenience: return as string rather than object;
         allows to do things as obj.asPid.str rather then str(obj.asPid)
         """
+
+        # TODO CLashes with Python str class. Strongly recommends changing to e.g. asString
+
         return str(self)
 
     # Removed as they cause un-string-like behaviour.

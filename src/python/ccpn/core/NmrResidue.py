@@ -107,12 +107,15 @@ class NmrResidue(AbstractWrapperObject):
   def residueType(self) -> str:
     """Residue type string (e.g. 'ALA'). Part of id. Use self.assignTo or
     self.rename to reset the residueType"""
-    apiResonanceGroup = self._wrappedData
-    apiResidue = apiResonanceGroup.assignedResidue
-    if apiResidue is None:
-      return apiResonanceGroup.residueType or ''
-    else:
-      return apiResidue.code3Letter
+    return self._wrappedData.residueType or ''
+
+    # # The below is unnecessary - apiResidue is derived using self.residueType
+    # apiResonanceGroup = self._wrappedData
+    # apiResidue = apiResonanceGroup.assignedResidue
+    # if apiResidue is None:
+    #   return apiResonanceGroup.residueType or ''
+    # else:
+    #   return apiResidue.code3Letter
 
   @property
   def relativeOffset(self) -> Optional[int]:
@@ -132,12 +135,20 @@ class NmrResidue(AbstractWrapperObject):
   @property
   def residue(self) -> Residue:
     """Residue to which NmrResidue is assigned"""
-    residue = self._wrappedData.assignedResidue
-    return None if residue is None else self._project._data2Obj.get(residue)
+    return self._project.getResidue(self._id)
 
   @residue.setter
   def residue(self, value:Residue):
-    self._wrappedData.assignedResidue = None if value is None else value._wrappedData
+    if value:
+      tt = tuple((x or None) for x in value._id.split('.'))
+      self.assignTo(chainCode=tt[0], sequenceCode=tt[1], residueType=tt[2])
+    else:
+      residueType = self.residueType
+      if residueType:
+        self.rename('.' + residueType)
+      else:
+        self.rename(None)
+
 
   @property
   def offsetNmrResidues(self) -> Tuple['NmrResidue', ...]:
@@ -301,7 +312,7 @@ class NmrResidue(AbstractWrapperObject):
         # offset residue: no-op
         return
 
-      elif apiResonanceGroup.assignedResidue is not None:
+      elif self.residue is not None:
         # Assigned residue with successor residue - error
         raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
 
@@ -475,7 +486,7 @@ class NmrResidue(AbstractWrapperObject):
         # offset residue: no-op
         return
 
-      elif apiResonanceGroup.assignedResidue is not None:
+      elif self.residue is not None:
         # Assigned residue with successor residue - error
         raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
 
@@ -523,7 +534,7 @@ class NmrResidue(AbstractWrapperObject):
         # offset residue: no-op
         return
 
-      elif apiResonanceGroup.assignedResidue is not None:
+      elif self.residue is not None:
         # Assigned residue with successor residue - error
         raise ValueError("Assigned NmrResidue %s cannot be disconnected" % self)
 
@@ -610,7 +621,7 @@ class NmrResidue(AbstractWrapperObject):
       self._project._appBase._endCommandBlock()
 
   def rename(self, value:str=None):
-    """Rename NmrResidue. changing its sequenceCode, residiueType, or both.
+    """Rename NmrResidue. changing its sequenceCode, residueType, or both.
 
     The value is a dot-separated string `sequenceCode`.`residueType`.
     Values like None, 'abc', or 'abc.' will set the residueType to None.
@@ -630,10 +641,11 @@ class NmrResidue(AbstractWrapperObject):
       if len(ll) > 1:
         residueType = ll[1] or None
 
-    # Check if name is free
-    if sequenceCode is not None:
-      previous = apiResonanceGroup.nmrChain.findFirstResonanceGroup(sequenceCode=sequenceCode)
-      if previous is not self._wrappedData and previous is not None:
+    if sequenceCode:
+      # Check if name is free
+      partialId = '%s.%s.' % (self._parent._id, sequenceCode.translate(Pid.remapSeparators))
+      ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
+      if ll and ll != [self]:
         raise ValueError("Cannot rename %s to %s - assignment already exists" % (self, value))
     #
     self._startFunctionCommandBlock('rename', value)
@@ -701,48 +713,58 @@ class NmrResidue(AbstractWrapperObject):
     )
 
     oldPid = self.longPid
+    apiResonanceGroup = self._wrappedData
     clearUndo = False
-    undo = self._apiResonanceGroup.root._undo
-
+    undo = apiResonanceGroup.root._undo
 
     self._startFunctionCommandBlock('assignTo', values=locals(), defaults=defaults,
                                     parName='mergedNmrResidue')
     try:
 
       sequenceCode = str(sequenceCode) if sequenceCode else None
-      apiResonanceGroup = self._apiResonanceGroup
+      # apiResonanceGroup = self._apiResonanceGroup
 
-      # Keep old values to go back to previous state
+      # oldNmrChain =  apiResonanceGroup.nmrChain
+      # oldSequenceCode = apiResonanceGroup.sequenceCode
+      # oldResidueType = apiResonanceGroup.residueType
 
-      oldNmrChain =  apiResonanceGroup.nmrChain
-      oldSequenceCode = apiResonanceGroup.sequenceCode
-      oldResidueType = apiResonanceGroup.residueType
-
-      # set missing parameters to existing values
-      chainCode = chainCode or oldNmrChain.code
-      sequenceCode = sequenceCode or oldSequenceCode
-
+      # Check for illegal separators in input values
       for ss in (chainCode, sequenceCode, residueType):
         if ss and Pid.altCharacter in ss:
           raise ValueError("Character %s not allowed in ccpn.NmrResidue id: %s.%s.%s" %
                            (Pid.altCharacter, chainCode, sequenceCode, residueType))
-      newNmrChain = self._project.fetchNmrChain(chainCode)
-      newApiResonanceGroup = newNmrChain._wrappedData.findFirstResonanceGroup(
-        sequenceCode=sequenceCode)
 
-      if newApiResonanceGroup is apiResonanceGroup:
+      # Keep old values to go back to previous state
+      oldChainCode, oldSequenceCode, oldResidueType = self._id.split('.')
+      oldResidueType = oldResidueType or None
+
+      # set missing parameters to existing or default values
+      chainCode = chainCode or oldChainCode
+      sequenceCode = sequenceCode or oldSequenceCode
+      residueType = residueType or None
+
+      partialId = '%s.%s.' % (chainCode, sequenceCode)
+      ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
+      if ll:
+        # There can only ever be one match
+        result = ll[0]
+      else:
+        result = None
+
+      if result is self:
         # We are reassigning to self - either a no-op or resetting the residueType
         result = self
-        if residueType and apiResonanceGroup.residueType != residueType:
+        if residueType and self.residueType != residueType:
           apiResonanceGroup.resetResidueType(residueType)
 
-      elif newApiResonanceGroup is None:
+      elif result is None:
         # we are moving to new, free assignment
         result = self
+        newNmrChain = self._project.fetchNmrChain(chainCode)
 
         try:
           # NB Complex resetting sequence necessary
-          # # in case we are setting an offset and illegal sequenceCode
+          # in case we are setting an offset and illegal sequenceCode
           apiResonanceGroup.sequenceCode = None    # To guarantee against clashes
           apiResonanceGroup.directNmrChain = newNmrChain._apiNmrChain # Only directNmrChain is settable
            # Now we can (re)set - will throw error for e.g. illegal offset values
@@ -759,17 +781,17 @@ class NmrResidue(AbstractWrapperObject):
           )
           raise
 
-
       else:
         #We are assigning to an existing NmrResidue
-        result = self._project._data2Obj[newApiResonanceGroup]
         if not mergeToExisting:
           raise ValueError("New assignment clash with existing assignment,"
                            " and merging is disallowed")
 
-        # Move or merge the NmrAtoms across and delete the current NmrResidue
-        if not residueType or newApiResonanceGroup.residueType == residueType:
-          for resonance in self._wrappedData.resonances:
+        newApiResonanceGroup = result._wrappedData
+
+        if not residueType or result.residueType == residueType:
+          # Move or merge the NmrAtoms across and delete the current NmrResidue
+          for resonance in apiResonanceGroup.resonances:
             newResonance = newApiResonanceGroup.findFirstResonance(implName=resonance.name)
             if newResonance is None:
               resonance.resonanceGroup = newApiResonanceGroup
@@ -784,7 +806,7 @@ class NmrResidue(AbstractWrapperObject):
           # We cannot reassign if it involves changing residueType on an existing NmrResidue
           raise ValueError("Cannot assign to %s.%s.%s: NR:%s.%s.%s already exists"
           % (chainCode, sequenceCode, residueType,
-             chainCode, sequenceCode, newApiResonanceGroup.residueType))
+             chainCode, sequenceCode, result.residueType))
       #
       if clearUndo:
         self._project._logger.warning("Merging NmrAtoms from %s into %s. Merging is NOT undoable."
@@ -810,26 +832,28 @@ class NmrResidue(AbstractWrapperObject):
 
 
 def getter(self:Residue) -> NmrResidue:
-  apiResidue = self._wrappedData
-  apiNmrProject = self._project._wrappedData
-  apiNmrChain = apiNmrProject.findFirstNmrChain(code=apiResidue.chain.code)
-  if apiNmrChain is not None:
-    obj = apiNmrChain.findFirstResonanceGroup(seqCode=apiResidue.seqCode,
-                                              seqInsertCode=apiResidue.seqInsertCode.strip() or None,
-                                              relativeOffset=None)
-    if obj is not None:
-      return self._project._data2Obj.get(obj)
-  return None
+  return self._project.getNmrResidue(self._id)
+
+  # apiResidue = self._wrappedData
+  # apiNmrProject = self._project._wrappedData
+  # apiNmrChain = apiNmrProject.findFirstNmrChain(code=apiResidue.chain.code)
+  # if apiNmrChain is not None:
+  #   obj = apiNmrChain.findFirstResonanceGroup(seqCode=apiResidue.seqCode,
+  #                                             seqInsertCode=apiResidue.seqInsertCode.strip() or None,
+  #                                             relativeOffset=None)
+  #   if obj is not None:
+  #     return self._project._data2Obj.get(obj)
+  # return None
 
 def setter(self:Residue, value:NmrResidue):
   oldValue = self.nmrResidue
   if oldValue is value:
     return
   elif oldValue is not None:
-    oldValue._apiResonanceGroup.assignedResidue = None
-
+    oldValue.assignTo()
+  #
   if value is not None:
-    value._apiResonanceGroup.assignedResidue = self._apiResidue
+    value.residue = self
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
 
@@ -876,22 +900,28 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
     if sequenceCode:
 
       # Check the sequenceCode is not taken already
-      previous = None
-      if Pid.IDSEP in sequenceCode:
-        # sequenceCode contains '.' - check against remapped sequenceCode
-        matchString = sequenceCode.translate(Pid.remapSeparators) + '.'
-        for nr in self.nmrResidues:
-          if nr._id.startswith(matchString):
-            previous = nr
-            break
-      else:
-        # No '.' - can check in API directly (faster)
-        obj0 = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
-        if obj0 is not None:
-          previous = self._project._data2Obj[obj0]
-      if previous is not None:
+      partialId = '%s.%s.' % (self._id, sequenceCode.translate(Pid.remapSeparators))
+      ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
+      if ll:
         raise ValueError("Existing %s clashes with id %s.%s.%s" %
-                         (previous.longPid, self.shortName, sequenceCode,residueType or ''))
+                         (ll[0].longPid, self.shortName, sequenceCode,residueType or ''))
+      # # Superseded as the code was too slow
+      # previous = None
+      # if Pid.IDSEP in sequenceCode:
+      #   # sequenceCode contains '.' - check against remapped sequenceCode
+      #   matchString = sequenceCode.translate(Pid.remapSeparators) + '.'
+      #   for nr in self.nmrResidues:
+      #     if nr._id.startswith(matchString):
+      #       previous = nr
+      #       break
+      # else:
+      #   # No '.' - can check in API directly (faster)
+      #   obj0 = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+      #   if obj0 is not None:
+      #     previous = self._project._data2Obj[obj0]
+      # if previous is not None:
+      #   raise ValueError("Existing %s clashes with id %s.%s.%s" %
+      #                    (previous.longPid, self.shortName, sequenceCode,residueType or ''))
 
       # Handle reserved names
       if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
@@ -959,12 +989,22 @@ def _fetchNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None,
       # Make new NmrResidue always
       result = self.newNmrResidue(sequenceCode=None, residueType=residueType)
     else:
-      # First see if we have it already
-      # Should not be necessary, but it is an easy mistake to pass it as integer instead of string
-      sequenceCode = str(sequenceCode)
+      # First see if we have the sequenceCode already
+      partialId = '%s.%s.' % (self._id, str(sequenceCode).translate(Pid.remapSeparators))
+      ll = self._project.getObjectsByPartialId(className='NmrResidue', idStartsWith=partialId)
 
-      apiResult = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
-      result = apiResult and self._project._data2Obj[apiResult]
+      if ll:
+        # there can never be more than one
+        result = ll[0]
+      else:
+        result = None
+
+      # Code below superseded as it was extremely slow
+      # # Should not be necessary, but it is an easy mistake to pass it as integer instead of string
+      # sequenceCode = str(sequenceCode)
+      #
+      # apiResult = self._wrappedData.findFirstResonanceGroup(sequenceCode=sequenceCode)
+      # result = apiResult and self._project._data2Obj[apiResult]
 
       if result is None:
         # NB - if this cannot be created we get the error from newNmrResidue

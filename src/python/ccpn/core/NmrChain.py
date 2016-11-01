@@ -125,8 +125,7 @@ class NmrChain(AbstractWrapperObject):
   @property
   def chain(self) -> Chain:
     """Chain to which NmrChain is assigned"""
-    chain = self._wrappedData.chain
-    return None if chain is None else self._project._data2Obj.get(chain)
+    return self._project.getChain(self._id)
 
   @chain.setter
   def chain(self, value:Chain):
@@ -228,8 +227,7 @@ class NmrChain(AbstractWrapperObject):
 
 
 def getter(self:Chain) -> NmrChain:
-  obj = self._project._wrappedData.findFirstNmrChain(code=self._wrappedData.code)
-  return None if obj is None else self._project._data2Obj.get(obj)
+  return self._project.getNmrChain(self._id)
 
 def setter(self:Chain, value:NmrChain):
   if value is None:

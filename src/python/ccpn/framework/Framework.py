@@ -825,9 +825,11 @@ class Framework:
     project = self.newProject(dataBlock.name)
     self._echoBlocking += 1
     self.project._undo.increaseBlocking()
+    self.project._wrappedData.shiftAveraging = False
     try:
       self.nefReader.importNewProject(project, dataBlock)
     finally:
+      self.project._wrappedData.shiftAveraging = True
       self._echoBlocking -= 1
       self.project._undo.decreaseBlocking()
 
@@ -1133,9 +1135,9 @@ class Framework:
     popup.exec_()
 
 
-  ###################################################################################################################
+  ################################################################################################
   ## MENU callbacks:  Molecule
-  ###################################################################################################################
+  ################################################################################################
 
   def showMoleculePopup(self):
     """

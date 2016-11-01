@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import collections
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, Dict
 
 from ccpn.core.Project import Project
 from ccpn.core.Restraint import Restraint
@@ -233,9 +233,16 @@ class RestraintContribution(AbstractWrapperObject):
         # make new items
         func(resonances=tuple(fetchFixedResonance(x) for x in ll))
 
-  def addRestraintItem(self, restraintItem:Sequence[str]):
+  def addRestraintItem(self, restraintItem:Sequence[str],  _string2Item:Dict=None):
     """Add a restraint item, given as aa tuple of atomId (NOT Pid).
-    Example value: ('A.127.ALA.HA','A.130.SER.H')"""
+    Example value: ('A.127.ALA.HA','A.130.SER.H')
+
+    The optional _string2Item dictionary speeds up the generation of many restraintItems
+    in a single operation. It must be initialised with DataSet._getTempItemMap(),
+    and serves only for a single DataSet.
+    On principle it must be used for a closed set of operations and then discarded,
+    since it is a cache of underlying FixedResonance objects
+    which are in theory mutable (don't ask)"""
 
     itemLength = self._wrappedData.constraint.parentList.itemLength
     if len(restraintItem) != itemLength:
@@ -244,19 +251,29 @@ class RestraintContribution(AbstractWrapperObject):
     apiContribution = self._wrappedData
 
     fetchFixedResonance = self._parent._parent._parent._fetchFixedResonance
+    resonances = []
+    if _string2Item is None:
+      for ss in restraintItem:
+        resonance = fetchFixedResonance(ss)
+        resonances.append(resonance)
+    else:
+      for ss in restraintItem:
+        resonance = _string2Item.get(ss)
+        if resonance is None:
+          resonance = fetchFixedResonance(ss, checkUniqueness=False)
+          _string2Item[ss] = resonance
+        resonances.append(resonance)
+
     if itemLength == 1:
       # make new item
-      resonance = fetchFixedResonance(restraintItem[0])
+      resonance = resonances[0]
       if apiContribution.findFirstItem(resonance=resonance) is None:
-        apiContribution.newSingleAtomItem(
-          resonance=fetchFixedResonance(restraintItem[0])
-        )
+        apiContribution.newSingleAtomItem(resonance=resonance)
       else:
         raise ValueError("Cannot add RestraintItem due to clash with pre-existing item: %s"
                          % restraintItem)
 
     elif itemLength == 4:
-      resonances = tuple(fetchFixedResonance(x) for x in restraintItem)
       if apiContribution.findFirstItem(resonances=resonances) is None:
         apiContribution.newFourAtomItem(
           resonances=resonances
@@ -266,7 +283,6 @@ class RestraintContribution(AbstractWrapperObject):
                          % restraintItem)
     else:
       # Assume length 2
-      resonances = tuple(fetchFixedResonance(x) for x in restraintItem)
       if apiContribution.findFirstItem(resonances=resonances) is None:
         apiContribution.newAtomPairItem(
           resonances=resonances

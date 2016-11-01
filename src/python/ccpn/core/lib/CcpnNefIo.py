@@ -802,7 +802,8 @@ def convert2NefString(project:Project, skipPrefixes:Sequence=()):
             val = sf[tag]
             if isinstance(val, StarIo.NmrLoop):
               # This is a loop:
-              for looptag in list(val.columns):
+              for looptag in val.columns:
+                # NB val.columns is a tuple (encapsulation) and will not change during the loop
                 if looptag.startswith(prefix):
                   val.removeColumn(looptag, removeData=True)
 
@@ -1146,6 +1147,15 @@ class CcpnNefWriter:
       category = 'ccpn_restraint_list'
       loopName = 'ccpn_restraint'
 
+
+    max = itemLength + 1
+    multipleAttributes = OD((
+      ('chainCodes',tuple('chain_code_%s' % ii for ii in range(1, max))),
+      ('sequenceCodes',tuple('sequence_code_%s' % ii for ii in range(1, max))),
+      ('residueTypes',tuple('residue_name_%s' % ii for ii in range(1, max))),
+      ('atomNames',tuple('atom_name_%s' % ii for ii in range(1, max))),
+    ))
+
     name = restraintList.name
     if not singleDataSet:
       # If there are multiple DataSets, add the dataSet serial for disambiguation
@@ -1186,16 +1196,17 @@ class CcpnNefWriter:
       for item in contribution.restraintItems:
         row = loop.newRow(rowdata)
         index += 1
-        row._set('index', index)
+        row['index'] = index
 
         # NBNB TBD FIXME Using the PID, as we do here, you are remapping '.' to '^'
         # NBNB reconsider!!!
 
         # Set individual parts of assignment one by one.
         # NB _set command takes care of varying number of items
-        assignments = list(zip(*(x.split('.') for x in item)))
-        for ii,tag in enumerate(('chain_code', 'sequence_code', 'residue_name', 'atom_name',)):
-          row._set(tag, [x or None for x in assignments[ii]])
+        assignments = list(x.split('.') for x in item)
+        for ii,attrName in enumerate(('chainCodes', 'sequenceCodes', 'residueTypes', 'atomNames',)):
+          for jj, tag in enumerate(multipleAttributes[attrName]):
+            row[tag] = assignments[jj][ii] or None
         if category == 'nef_dihedral_restraint_list':
           row['name'] = RestraintLib.dihedralName(project, item)
     #
@@ -1263,7 +1274,6 @@ class CcpnNefWriter:
     result['ccpn_sample'] = self.ccpn2SaveFrameName.get(spectrum.sample)
 
 
-    # NBNB TBD FIXME assumes ppm unit and Frequency dimensions for now
     # Will give wrong values for Hz or pointNumber units, and
     # Will fill in all None for non-Frequency dimensions
     loopName = 'nef_spectrum_dimension'
@@ -1333,6 +1343,20 @@ class CcpnNefWriter:
       if any(tag.endswith(x) for x in removeNameEndings):
         loop.removeColumn(tag)
 
+    # Get name map for per-dimension attributes
+    max = spectrum.dimensionCount + 1
+    multipleAttributes = {
+      'position':tuple('position_%s' % ii for ii in range(1, max)),
+      'positionError':tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
+      'chainCodes':tuple('chain_code_%s' % ii for ii in range(1, max)),
+      'sequenceCodes':tuple('sequence_code_%s' % ii for ii in range(1, max)),
+      'residueTypes':tuple('residue_name_%s' % ii for ii in range(1, max)),
+      'atomNames':tuple('atom_name_%s' % ii for ii in range(1, max)),
+      'slopes':tuple('slopes_%s' % ii for ii in range(1, max)),
+      'lowerLimits':tuple('lower_limits_%s' % ii for ii in range(1, max)),
+      'upperLimits':tuple('upper_limits_%s' % ii for ii in range(1, max)),
+    }
+
     index = 0
     for peak in peakList.peaks:
       rowdata = self._loopRowData(loopName, peak)
@@ -1343,26 +1367,46 @@ class CcpnNefWriter:
           # Make one row per assignment
           row = loop.newRow(rowdata)
           index += 1
-          row._set('index', index)
+          row['index'] = index
+          values = peak.position
+          for ii, tag in enumerate(multipleAttributes['position']):
+            row[tag] = values[ii]
+          values = peak.positionError
+          for ii, tag in enumerate(multipleAttributes['positionError']):
+            row[tag] = values[ii]
           # NB the row._set function will set position_1, position_2 etc.
-          row._set('position', peak.position)
-          row._set('position_uncertainty', peak.positionError)
+          # row._set('position', peak.position)
+          # row._set('position_uncertainty', peak.positionError)
 
           # Add the assignments
-          ll =list(zip(*(x._idTuple if x else (None, None, None, None) for x in tt)))
-          row._set('chain_code', ll[0])
-          row._set('sequence_code', ll[1])
-          row._set('residue_name', ll[2])
-          row._set('atom_name', ll[3])
+          ll =list(x if x is None else x._idTuple for x in tt)
+          for ii, attrName in enumerate(
+              ('chainCodes', 'sequenceCodes', 'residueTypes', 'atomNames')
+          ):
+            tags = multipleAttributes[attrName]
+            for jj,val in enumerate(ll):
+              row[tags[jj]] = None if val is None else val[ii]
+          # # Add the assignments
+          # ll =list(zip(*(x._idTuple if x else (None, None, None, None) for x in tt)))
+          # row._set('chain_code', ll[0])
+          # row._set('sequence_code', ll[1])
+          # row._set('residue_name', ll[2])
+          # row._set('atom_name', ll[3])
 
       else:
         # No assignments - just make one unassigned row
         row = loop.newRow(rowdata)
         index += 1
-        row._set('index', index)
-        # NB the row._set function will set position_1, position_2 etc.
-        row._set('position', peak.position)
-        row._set('position_uncertainty', peak.positionError)
+        row['index'] = index
+        values = peak.position
+        for ii, tag in enumerate(multipleAttributes['position']):
+          row[tag] = values[ii]
+        values = peak.positionError
+        for ii, tag in enumerate(multipleAttributes['positionError']):
+          row[tag] = values[ii]
+        # # NB the row._set function will set position_1, position_2 etc.
+        # row._set('position', peak.position)
+        # row._set('position_uncertainty', peak.positionError)
 
 
     if exportCompleteSpectrum and spectrum.spectrumHits:
@@ -1393,10 +1437,17 @@ class CcpnNefWriter:
       for integral in spectrum.integrals:
         row = loop.newRow(self._loopRowData(loopName, integral))
         row['integral_serial'] = integral.serial
-        row._set('slopes', integral.slopes)
+        values =integral.slopes
+        for ii, tag in enumerate(multipleAttributes['slopes']):
+          row[tag] = values[ii]
         lowerlimits,upperLimits = zip(integral.limits)
-        row._set('lower_limits', lowerlimits)
-        row._set('upper_limits', upperLimits)
+        for ii, tag in enumerate(multipleAttributes['lowerLimits']):
+          row[tag] = lowerlimits[ii]
+        for ii, tag in enumerate(multipleAttributes['upperLimits']):
+          row[tag] = upperLimits[ii]
+        # row._set('slopes', integral.slopes)
+        # row._set('lower_limits', lowerlimits)
+        # row._set('upper_limits', upperLimits)
     else:
       del result['ccpn_integral_list']
       del result['ccpn_integral']
@@ -1655,6 +1706,10 @@ class CcpnNefReader:
     # Map for resolving crosslinks in NEF file
     self.frameCode2Object = {}
 
+    # Map for speeding up restraint reading
+    self._dataSet2ItemMap = None
+    self._nmrResidueMap = None
+
     self.defaultDataSetSerial = None
     self.defaultNmrChain = None
     self.mainDataSetSerial = None
@@ -1665,6 +1720,10 @@ class CcpnNefReader:
     nmrDataExtent = StarIo.parseNefFile(path)
     dataBlocks = list(nmrDataExtent.values())
     dataBlock = dataBlocks[0]
+
+    # Initialise afresh for every file read
+    self._dataSet2ItemMap = {}
+    self._nmrResidueMap = {}
     #
     return dataBlock
 
@@ -1734,8 +1793,8 @@ class CcpnNefReader:
     else:
       self.preloadAssignmentData(dataBlock)
 
-    t1 = time.time()
-    print ('@~@~ NEF load starting frames', t1-t0)
+    # t1 = time.time()
+    # print ('@~@~ NEF load starting frames', t1-t0)
 
     for sf_category, saveFrames in saveframeOrderedDict.items():
       for saveFrame in saveFrames:
@@ -1761,12 +1820,16 @@ class CcpnNefReader:
             print("WARNING - unused tags in saveframe %s: %s" % (saveFrameName, extraTags))
             # TODO put here function that stashes data in object, or something
             # ues newObject here
-          t2 = time.time()
-          print('@~@~ loaded', saveFrameName, t2-t1)
-          t1 = t2
+          # t2 = time.time()
+          # print('@~@~ loaded', saveFrameName, t2-t1)
+          # t1 = t2
 
     # Put metadata in main dataset
     self.updateMetaData(metaDataFrame)
+
+
+    t2 = time.time()
+    print('Loaded NEF file, time = ', t2-t0)
 
     for msg in self.warnings:
       print ('====> ', msg)
@@ -1818,9 +1881,11 @@ class CcpnNefReader:
       else:
         ll.append(row)
 
-    defaultChainCode = 'A'
+    defaultChainCode = None
     if None in chainData:
-      # Replace chainCode None with actual chainCode
+      defaultChainCode = 'A'
+      # Replace chainCode None with default chainCode
+      #Selecting the first calue that is not already taken.
       while defaultChainCode in chainData:
         defaultChainCode = commonUtil.incrementName(defaultChainCode)
       chainData[defaultChainCode] = chainData.pop(None)
@@ -2093,6 +2158,8 @@ class CcpnNefReader:
 
     result = []
 
+    string2ItemMap = self._dataSet2ItemMap[restraintList.dataSet]
+
     # set itemLength if not passed in:
     if not itemLength:
       itemLength = coreConstants.constraintListType2ItemLength.get(restraintList.restraintType)
@@ -2101,7 +2168,18 @@ class CcpnNefReader:
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
     contributionTags = sorted(map2.values())
     restraints = {}
-    assignTags = ('chain_code', 'sequence_code', 'residue_name', 'atom_name')
+    # assignTags = ('chain_code', 'sequence_code', 'residue_name', 'atom_name')
+
+    max = itemLength + 1
+    multipleAttributes = OD((
+      ('chainCodes',tuple('chain_code_%s' % ii for ii in range(1, max))),
+      ('sequenceCodes',tuple('sequence_code_%s' % ii for ii in range(1, max))),
+      ('residueTypes',tuple('residue_name_%s' % ii for ii in range(1, max))),
+      ('atomNames',tuple('atom_name_%s' % ii for ii in range(1, max))),
+    ))
+
+    parametersFromLoopRow = self._parametersFromLoopRow
+    defaultChainCode = self.defaultChainCode
     for row in loop.data:
 
       # get or make restraint
@@ -2124,7 +2202,7 @@ class CcpnNefReader:
         result.append(restraint)
 
       # Get or make restraintContribution
-      parameters = self._parametersFromLoopRow(row, map2)
+      parameters = parametersFromLoopRow(row, map2)
       combinationId = parameters.get('combinationId')
       nonAssignmentValues = tuple(parameters.get(tag) for tag in contributionTags)
       if combinationId:
@@ -2137,15 +2215,19 @@ class CcpnNefReader:
           valuesToContribution[nonAssignmentValues] = contribution
 
       # Add item
-      ll = [row._get(tag)[:itemLength] for tag in assignTags]
+      # ll = [row._get(tag)[:itemLength] for tag in assignTags]
+      ll = [list(row.get(x) for x in y) for y in multipleAttributes.values()]
       # Reset missing chain codes to default
-      ll[0] = [x or self.defaultChainCode for x in ll[0]]
+      # ll[0] = [x or defaultChainCode for x in ll[0]]
 
       idStrings = []
       for item in zip(*ll):
+        if defaultChainCode is not None and item[0] is None:
+          # ChainCode missing - replace with default chain code
+          item = (defaultChainCode,) + item[1:]
         idStrings.append(Pid.IDSEP.join(('' if x is None else str(x)) for x in item))
       try:
-        contribution.addRestraintItem(idStrings)
+        contribution.addRestraintItem(idStrings, string2ItemMap)
       except ValueError:
         self.warning("Cannot Add restraintItem %s. Identical to previous. Skipping" % idStrings)
 
@@ -2224,6 +2306,13 @@ class CcpnNefReader:
         storageParameters['numPoints'] = spectrum.pointCounts
         spectrum._wrappedData.addDataStore(filePath, **storageParameters)
 
+    # Load CCPN dimensions before peaks
+    loopName = 'ccpn_spectrum_dimension'
+    # Those are treated elsewhere
+    loop = saveFrame.get(loopName)
+    if loop:
+      self.load_ccpn_spectrum_dimension(spectrum, loop)
+
     # Make PeakLst
     peakList = spectrum.newPeakList(**peakListParameters)
 
@@ -2232,7 +2321,7 @@ class CcpnNefReader:
 
     # Load remaining loops, with spectrum as parent
     for loopName in loopNames:
-      if loopName not in  ('nef_spectrum_dimension', 'nef_peak',
+      if loopName not in  ('nef_spectrum_dimension', 'ccpn_spectrum_dimension', 'nef_peak',
                            'nef_spectrum_dimension_transfer'):
         # Those are treated elsewhere
         loop = saveFrame.get(loopName)
@@ -2331,7 +2420,27 @@ class CcpnNefReader:
 
     # Set main values
     for tag, value in params.items():
-      setattr(spectrum, tag, value)
+      if tag != 'referencePoints':
+        setattr(spectrum, tag, value)
+
+    referencePoints = params.get('referencePoints')
+    points = []
+    values = []
+    if referencePoints is not None:
+      spectrumReferences = spectrum.spectrumReferences
+      for ii, spectrumReference in enumerate(spectrumReferences):
+        if spectrumReference is None:
+          points.append(None)
+          values.append(None)
+        else:
+          point = referencePoints[ii]
+          points.append(point)
+          values.append(spectrumReference.point2Value(point))
+    spectrum.referencePoints = points
+    spectrum.referenceValues = values
+
+
+
 
     # set storage attributes
     value = extras.get('dimension_is_complex')
@@ -2423,6 +2532,14 @@ class CcpnNefReader:
 
     result = []
 
+    # Get name map for per-dimension attributes
+    max = spectrum.dimensionCount + 1
+    multipleAttributes = {
+      'slopes':tuple('slopes_%s' % ii for ii in range(1, max)),
+      'lowerLimits':tuple('lower_limits_%s' % ii for ii in range(1, max)),
+      'upperLimits':tuple('upper_limits_%s' % ii for ii in range(1, max)),
+    }
+
     serial2creatorFunc = dict((x.serial,x.newIntegral) for x in spectrum.integralLists)
 
     mapping = nef2CcpnMap[loop.name]
@@ -2431,9 +2548,12 @@ class CcpnNefReader:
     for row in loop.data:
       parameters = self._parametersFromLoopRow(row, map2)
       integral = serial2creatorFunc[row['integral_list_serial']](**parameters)
-      integral.slopes = row._get('slopes')
-      lowerLimits = row._get('lower_limits')
-      upperLimits = row._get('upper_limits')
+      integral.slopes = tuple(row.get(x) for x in multipleAttributes['slopes'])
+      lowerLimits = tuple(row.get(x) for x in multipleAttributes['lowerLimits'])
+      upperLimits = tuple(row.get(x) for x in multipleAttributes['upperLimits'])
+      # integral.slopes = row._get('slopes')
+      # lowerLimits = row._get('lower_limits')
+      # upperLimits = row._get('upper_limits')
       integral.limits = zip((lowerLimits, upperLimits))
       modelUtil.resetSerial(integral, row['integral_serial'], 'integrals')
       result.append(integral)
@@ -2449,7 +2569,20 @@ class CcpnNefReader:
 
     mapping = nef2CcpnMap[loop.name]
     map2 = dict(item for item in mapping.items() if item[1] and '.' not in item[1])
+
+    # Get name map for per-dimension attributes
+    max = dimensionCount + 1
+    multipleAttributes = {
+      'position':tuple('position_%s' % ii for ii in range(1, max)),
+      'positionError':tuple('position_uncertainty_%s' % ii for ii in range(1, max)),
+      'chainCodes':tuple('chain_code_%s' % ii for ii in range(1, max)),
+      'sequenceCodes':tuple('sequence_code_%s' % ii for ii in range(1, max)),
+      'residueTypes':tuple('residue_name_%s' % ii for ii in range(1, max)),
+      'atomNames':tuple('atom_name_%s' % ii for ii in range(1, max)),
+    }
+
     peaks = {}
+    assignedNmrAtoms = []
 
     for row in loop.data:
 
@@ -2461,25 +2594,42 @@ class CcpnNefReader:
       # TODO check if peak parameters are the same for all rows, and do something about it
       # For now we simply use the first row that appears
       if peak is None:
-        parameters['position'] = row._get('position')[:dimensionCount]
-        parameters['positionError'] = row._get('position_uncertainty')[:dimensionCount]
+        # start of a new peak
+
+        # finalise last peak
+        if result and assignedNmrAtoms:
+          # There is a peak in result, and the peak has assignments to set
+          result[-1].assignedNmrAtoms = assignedNmrAtoms
+          assignedNmrAtoms.clear()
+
+        # make new peak  multipleAttributes
+        # parameters['position'] = row._get('position')[:dimensionCount]
+        parameters['position'] = tuple(row.get(x) for x in multipleAttributes['position'])
+        parameters['positionError'] = tuple(row.get(x) for x in multipleAttributes['positionError'])
+        # parameters['positionError'] = row._get('position_uncertainty')[:dimensionCount]
         peak = peakList.newPeak(**parameters)
         peaks[serial] = peak
         result.append(peak)
 
       # Add assignment
-      chainCodes = row._get('chain_code')[:dimensionCount]
-      sequenceCodes = row._get('sequence_code')[:dimensionCount]
-      residueTypes = row._get('residue_name')[:dimensionCount]
-      atomNames = row._get('atom_name')[:dimensionCount]
+      chainCodes = tuple(row.get(x) for x in multipleAttributes['chainCodes'])
+      sequenceCodes = tuple(row.get(x) for x in multipleAttributes['sequenceCodes'])
+      residueTypes = tuple(row.get(x) for x in multipleAttributes['residueTypes'])
+      atomNames = tuple(row.get(x) for x in multipleAttributes['atomNames'])
+      # chainCodes = row._get('chain_code')[:dimensionCount]
+      # sequenceCodes = row._get('sequence_code')[:dimensionCount]
+      # residueTypes = row._get('residue_name')[:dimensionCount]
+      # atomNames = row._get('atom_name')[:dimensionCount]
       assignments = zip(chainCodes, sequenceCodes, residueTypes, atomNames)
       nmrAtoms = []
+      foundAssignment = False
       for tt in assignments:
         if all(x is None for x in tt):
           # No assignment
           nmrAtoms.append(None)
         elif tt[1] and tt[3]:
           # Enough for an assignment - make it
+          foundAssignment = True
           nmrResidue = self.produceNmrResidue(*tt[:3])
           nmrAtom = self.produceNmrAtom(nmrResidue, tt[3])
           nmrAtoms.append(nmrAtom)
@@ -2488,8 +2638,14 @@ class CcpnNefReader:
           self.warning("Uninterpretable Peak assignment for peak %s: %s. Set to None"
                        % (peak.serial, tt))
           nmrAtoms.append(None)
-      else:
-        peak.addAssignment(nmrAtoms)
+      if foundAssignment:
+        assignedNmrAtoms.append(nmrAtoms)
+
+    # finalise last peak
+    if result and assignedNmrAtoms:
+      # There is a peak in result, and the peak has assignments to set
+      result[-1].assignedNmrAtoms = assignedNmrAtoms
+      assignedNmrAtoms.clear()
     #
     return result
   #
@@ -2894,6 +3050,11 @@ class CcpnNefReader:
   def produceNmrResidue(self, chainCode:str=None, sequenceCode:str=None, residueType:str=None):
     """Get NmrResidue, correcting for possible errors"""
 
+    inputTuple = (chainCode, sequenceCode, residueType)
+    result = self._nmrResidueMap.get(inputTuple)
+    if result is not None:
+      return result
+
     if not sequenceCode:
       raise ValueError("Cannot produce NmrResidue for sequenceCode: %s" % repr(sequenceCode))
 
@@ -2905,11 +3066,9 @@ class CcpnNefReader:
     rt = residueType or ''
     cc = nmrChain.shortName
 
-    result = None
-
     try:
       result = nmrChain.fetchNmrResidue(sequenceCode, residueType)
-      return result
+      # return result
     except ValueError:
       # This can happen legitimately, e.g. for offset residues
       # Further processing needed.
@@ -2932,7 +3091,7 @@ class CcpnNefReader:
             if not previous.residueType:
               result = previous
               result._wrappedData.residueType = residueType
-              return result
+              # return result
           except ValueError:
             # Deal with it below
             pass
@@ -2950,22 +3109,27 @@ class CcpnNefReader:
         if mainNmrResidue is not None:
           try:
             result = nmrChain.fetchNmrResidue(sequenceCode, residueType)
-            return result
+            # return result
           except ValueError:
             # Handle lower down
             pass
 
     # If e get here, we could not make an NmrResidue that matched the input
     # Make with modified sequenceCode
-    newSequenceCode = sequenceCode
-    while True:
-      try:
-        result = nmrChain.fetchNmrResidue(newSequenceCode, residueType)
-        return result
-      except ValueError:
-        newSequenceCode = '`%s`' % newSequenceCode
-        self.warning("New NmrResidue:%s.%s.%s name caused an error.  Renamed %s.%s.%s"
-                     % (cc, sequenceCode, rt, cc, newSequenceCode, rt))
+    if result is None:
+      newSequenceCode = sequenceCode
+      while True:
+        try:
+          result = nmrChain.fetchNmrResidue(newSequenceCode, residueType)
+          # return result
+        except ValueError:
+          newSequenceCode = '`%s`' % newSequenceCode
+          self.warning("New NmrResidue:%s.%s.%s name caused an error.  Renamed %s.%s.%s"
+                       % (cc, sequenceCode, rt, cc, newSequenceCode, rt))
+    #
+    # Result cannot have been in map, so put it there
+    self._nmrResidueMap[inputTuple] = result
+    return result
 
   def produceNmrAtom(self, nmrResidue:NmrResidue, name:str, isotopeCode=None):
     """Get NmrAtom from NmrResidue and name, correcting for possible errors"""
@@ -3015,15 +3179,18 @@ class CcpnNefReader:
       serial = dataSet.serial
       dataSet.title = 'Data_%s' % serial
       self.defaultDataSetSerial = serial
+      self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
 
     else:
-      # take or create dataset matching serial
+      # take or create dataSet matching serial
       dataSet = self.project.getDataSet(str(serial))
       if dataSet is None:
         dataSet = self.project.newDataSet()
         modelUtil.resetSerial(dataSet._wrappedData, serial, 'nmrConstraintStores')
         dataSet._finaliseAction('rename')
         dataSet.title = 'Data_%s' % serial
+
+        self._dataSet2ItemMap[dataSet] = dataSet._getTempItemMap()
     #
     return dataSet
 
@@ -3317,6 +3484,7 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
   application.loadProject(path)
 
   project = application.project
+  spectrum = project.spectra[0]
   time2 = time.time()
   print ("====> Loaded %s from NEF file in seconds %s" % (project.name, time2-time1))
   saveNefProject(project, outPath, overwriteExisting=True, skipPrefixes=skipPrefixes)
@@ -3328,102 +3496,102 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
   return outPath
 
 
-def _extractVariantsTable(aa_variants_cif:str)-> str:
-  """Read aa-variants.cif file contents and return variants mapping table string"""
-
-  lineformat = "%-15s    %-12s    %-7s    %-15s"
-  lines =[lineformat % ('MMCIF_code', "residue_name", "linking", "residue_variant")]
-
-  #
-  # 'LL'
-  # linkingMap = {
-  #   'LL':'middle',
-  #   'LEO2':'end', # deprotonated
-  #   'LEO2H':'end', # deprotonated
-  #   'LFOH':'single', # neutral
-  #   'LFZW':'single', # zwitter
-  #   'LSN3':'start', # protonated
-  #
-  # }
-
-  names = []
-
-  for line in open(aa_variants_cif):
-
-    hxt = False
-
-    if 'data_' in line:
-      ll = line.strip().split('_')
-      if len(ll) == 2:
-        pass
-      else:
-        name = ll[1]
-        names.append(name)
-        ll2 = []
-        lnk = ll[2]
-        linking = '.'
-        if lnk == 'LL':
-          linking = 'middle'
-        elif lnk == 'LEO2':
-          linking = 'end'
-        elif lnk == 'LEO2H':
-          linking = 'end'
-          hxt = True
-        elif lnk == 'LFZW':
-          linking = 'single'
-        elif lnk == 'LFOH':
-          linking = 'single'
-          ll2.append('-H3')
-          hxt = True
-        elif lnk == 'LSN3':
-          linking = 'start'
-        else:
-          print('WARNING, not recognised', ll)
-
-        if len(ll) > 3:
-          var = ll[3]
-          if var[0] == 'D':
-            ll2.append('-'+var[1:])
-          else:
-            print ("NB Ignoring MMcif variant %s" % var)
-
-        # Sort before further treatment, to make sure '+' markers come at the end
-        ll2.sort()
-
-        # Special handling for ASP and GLU - where default is side chain deprotonated
-        if name == 'ASP':
-          if '-HD2' in ll2:
-            ll2.remove('-HD2')
-          else:
-            ll2.append('+HD2')
-        elif name == 'GLU':
-          if '-HE2' in ll2:
-            ll2.remove('-HE2')
-          else:
-            ll2.append('+HE2')
-        elif name == 'HIS':
-          if '-HE2' in ll2:
-            ll2.remove('-HE2')
-          else:
-            ll2.append('+HE2')
-
-        # NBNB
-
-        if hxt:
-          ll2.append('+HXT')
-        if ll2:
-          variant = ','.join(ll2)
-        else:
-          variant = '.'
-        ss = lineformat % ('_'.join(ll[1:]), name, linking, variant)
-
-        lines.append(ss)
-
-  #
-  print (Counter(names))
-
-  #
-  return '\n'.join(lines)
+# def _extractVariantsTable(aa_variants_cif:str)-> str:
+#   """Read aa-variants.cif file contents and return variants mapping table string"""
+#
+#   lineformat = "%-15s    %-12s    %-7s    %-15s"
+#   lines =[lineformat % ('MMCIF_code', "residue_name", "linking", "residue_variant")]
+#
+#   #
+#   # 'LL'
+#   # linkingMap = {
+#   #   'LL':'middle',
+#   #   'LEO2':'end', # deprotonated
+#   #   'LEO2H':'end', # deprotonated
+#   #   'LFOH':'single', # neutral
+#   #   'LFZW':'single', # zwitter
+#   #   'LSN3':'start', # protonated
+#   #
+#   # }
+#
+#   names = []
+#
+#   for line in open(aa_variants_cif):
+#
+#     hxt = False
+#
+#     if 'data_' in line:
+#       ll = line.strip().split('_')
+#       if len(ll) == 2:
+#         pass
+#       else:
+#         name = ll[1]
+#         names.append(name)
+#         ll2 = []
+#         lnk = ll[2]
+#         linking = '.'
+#         if lnk == 'LL':
+#           linking = 'middle'
+#         elif lnk == 'LEO2':
+#           linking = 'end'
+#         elif lnk == 'LEO2H':
+#           linking = 'end'
+#           hxt = True
+#         elif lnk == 'LFZW':
+#           linking = 'single'
+#         elif lnk == 'LFOH':
+#           linking = 'single'
+#           ll2.append('-H3')
+#           hxt = True
+#         elif lnk == 'LSN3':
+#           linking = 'start'
+#         else:
+#           print('WARNING, not recognised', ll)
+#
+#         if len(ll) > 3:
+#           var = ll[3]
+#           if var[0] == 'D':
+#             ll2.append('-'+var[1:])
+#           else:
+#             print ("NB Ignoring MMcif variant %s" % var)
+#
+#         # Sort before further treatment, to make sure '+' markers come at the end
+#         ll2.sort()
+#
+#         # Special handling for ASP and GLU - where default is side chain deprotonated
+#         if name == 'ASP':
+#           if '-HD2' in ll2:
+#             ll2.remove('-HD2')
+#           else:
+#             ll2.append('+HD2')
+#         elif name == 'GLU':
+#           if '-HE2' in ll2:
+#             ll2.remove('-HE2')
+#           else:
+#             ll2.append('+HE2')
+#         elif name == 'HIS':
+#           if '-HE2' in ll2:
+#             ll2.remove('-HE2')
+#           else:
+#             ll2.append('+HE2')
+#
+#         # NBNB
+#
+#         if hxt:
+#           ll2.append('+HXT')
+#         if ll2:
+#           variant = ','.join(ll2)
+#         else:
+#           variant = '.'
+#         ss = lineformat % ('_'.join(ll[1:]), name, linking, variant)
+#
+#         lines.append(ss)
+#
+#   #
+#   print (Counter(names))
+#
+#   #
+#   return '\n'.join(lines)
 
 
 
@@ -3432,8 +3600,8 @@ if __name__ == '__main__':
   path = sys.argv[1]
   # _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)
-  # nefpath = _exportToNef(path)
-  # _testNefIo(nefpath)
+  nefpath = _exportToNef(path)
+  _testNefIo(nefpath)
   # nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(nefpath, skipPrefixes=('ccpn',))
-  print(_extractVariantsTable(path))
+  # print(_extractVariantsTable(path))

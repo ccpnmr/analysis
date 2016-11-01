@@ -165,6 +165,10 @@ class ObjectAssigner(QtGui.QWidget, Base):
     residueType = nmrAtom.nmrResidue.residueType
     atomType = nmrAtom.name
     if not nmrAtom.nmrResidue.assignedResidue:
+
+      # TODO NBNB probably BROKEN!
+      # TODO wrapper NmrResidue has no attribute assignedResidue!
+
       self.chainPulldowns[dim].setData([chain.id for chain in self.project.nmrChains])
       # self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
       self.chainPulldowns[dim].setCallback(partial(self.setNmrChain))

@@ -145,8 +145,11 @@ class DataSet(AbstractWrapperObject):
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
     return parent._wrappedData.sortedNmrConstraintStores()
 
-  def _fetchFixedResonance(self, assignment:str) -> ApiFixedResonance:
-    """Fetch FixedResonance matching assignment string, creating anew if needed."""
+  def _fetchFixedResonance(self, assignment:str, checkUniqueness:bool=True) -> ApiFixedResonance:
+    """Fetch FixedResonance matching assignment string, creating anew if needed.
+
+    If checkUniqueness is False the uniqueness of FixedResonance assignments will
+    not be checked. NB, the odd duplicate should not be a major problem."""
 
     apiNmrConstraintStore = self._wrappedData
 
@@ -160,11 +163,30 @@ class DataSet(AbstractWrapperObject):
       'residueType':tt[2],
       'name':tt[3]
     }
-    result = apiNmrConstraintStore.findFirstFixedResonance(**dd)
+
+    if checkUniqueness:
+      result = apiNmrConstraintStore.findFirstFixedResonance(**dd)
+    else:
+      result = None
 
     if result is None:
       dd['isotopeCode'] = name2IsotopeCode(tt[3]) or '?'
       result = apiNmrConstraintStore.newFixedResonance(**dd)
+    #
+    return result
+
+  def _getTempItemMap(self) -> dict:
+    """Get itemString:FixedResonance map, used as optional input for
+    RestraintContribution.addRestraintItem(), as a faster alternative to
+    calling _fetchFixedResonance (above). No other uses expected.
+    Since FixedResonances are in principle mutable, this map should
+    be used for a single series of creation operations (making or loading
+    a set of restraint lists) and then discarded."""
+
+    result = {}
+    for fx in self._wrappedData.fixedResonances:
+      ss = '.'.join(x or '' for x in (fx.chainCode, fx,sequenceCode, fx.residueType, fx.name))
+      result[ss] = fx
     #
     return result
 

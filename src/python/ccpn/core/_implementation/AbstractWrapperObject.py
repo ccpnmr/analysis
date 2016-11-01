@@ -188,9 +188,11 @@ class AbstractWrapperObject():
     """Python 2 behaviour - objects equal only to themselves."""
     return self is not other
 
-  def __hash__(self):
-    """Python 2 behaviour - objects equal only to themselves."""
-    return hash(id(self))
+  __hash__ = object.__hash__
+
+  # def __hash__(self):
+  #   """Python 2 behaviour - objects equal only to themselves."""
+  #   return hash(id(self))
   
   # CCPN properties
 

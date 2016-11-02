@@ -1,10 +1,13 @@
+import typing
+
 from ccpn.util import Common as commonUtil
 from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.NmrAtom import NmrAtom
-import typing
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
+from ccpn.ui.gui.lib import Window
 
-def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typing.List[str]=None, widths:typing.List[float]=None):
+def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typing.List[str]=None,
+                              widths:typing.List[float]=None):
   """
   Takes a strip, a list of positions and optionally, a parallel list of axisCodes.
   Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates
@@ -101,3 +104,6 @@ def navigateToNmrAtomsInStrip(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom], w
     else:
       positions.append('')
   navigateToPositionInStrip(strip, positions, widths=widths)
+  if markPositions:
+    Window.markPositions(strip.project, list(shiftDict.keys()), list(shiftDict.values()))
+

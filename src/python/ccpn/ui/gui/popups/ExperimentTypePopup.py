@@ -28,12 +28,14 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
         axisCodes.append(''.join([char for char in isotopeCode if not char.isdigit()]))
 
       atomCodes = tuple(sorted(axisCodes))
-      pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
+      self.pulldownItems = list(self.experimentTypes[spectrum.dimensionCount].get(atomCodes).keys())
       spLabel = Label(self, text=spectrum.pid, grid=(spectrumIndex, 0))
-      spPulldown = FilteringPulldownList(self, grid=(spectrumIndex, 1),
+      self.spPulldown = FilteringPulldownList(self, grid=(spectrumIndex, 1),
                                 callback=partial(self._setExperimentType, spectrum, atomCodes),
-                                texts=pulldownItems)
-      self.spPulldowns.append(spPulldown)
+                                texts=self.pulldownItems)
+      self.spPulldown.lineEdit().editingFinished.connect(partial(self.editedExpTypeChecker, self.spPulldown, self.pulldownItems))
+      # self.spPulldown._completer.setCompletionMode(QtGui.QCompleter.InlineCompletion &~  QtGui.QCompleter.UnfilteredPopupCompletion)
+      self.spPulldowns.append(self.spPulldown)
       spButton = Button(self, grid=(spectrumIndex, 2),
                         callback=partial(self.raiseExperimentFilterPopup,
                                          spectrum, spectrumIndex, atomCodes),
@@ -43,7 +45,7 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
       apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
       text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
       text = priorityNameRemapping.get(text, text)
-      spPulldown.setCurrentIndex(spPulldown.findText(text))
+      self.spPulldown.setCurrentIndex(self.spPulldown.findText(text))
 
     self.buttonBox = Button(self, grid=(len(project.spectra)+1, 1), text='Close',
                            callback=self.accept)
@@ -62,4 +64,18 @@ class ExperimentTypePopup(QtGui.QDialog, Base):
     if popup.expType:
       self.spPulldowns[spectrumIndex].select(popup.expType)
       expType = self.experimentTypes[spectrum.dimensionCount].get(atomCodes).get(popup.expType)
-      spectrum.experimentType = expType
+
+      if expType is not None:
+        spectrum.experimentType = expType
+
+  def editedExpTypeChecker(self, pulldown, items):
+    if not pulldown.currentText() in items:
+      if pulldown.currentText():
+        msg = ' (ExpTypeNotFound!)'
+        if not msg in pulldown.currentText():
+          pulldown.lineEdit().setText(pulldown.currentText() + msg)
+          pulldown.lineEdit().selectAll()
+
+  def keyPressEvent(self, KeyEvent):
+    if KeyEvent.key() == QtCore.Qt.Key_Return:
+      return

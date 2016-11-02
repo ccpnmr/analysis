@@ -11,8 +11,8 @@ from PyQt4 import QtGui
 class GuiTableGenerator(QtGui.QWidget, Base):
 
 
-  def __init__(self, parent, objectLists, actionCallback, columns=None, getColumnsFunction=None, selector=None, tipTexts=None,
-               objectType=None, multiSelect=False, unitPulldown=None, selectionCallback=None, **kw):
+  def __init__(self, parent, objectLists, actionCallback, columns=None, getColumnsFunction=None, selector=None,
+               tipTexts=None, objectType=None, multiSelect=False, unitPulldown=None, selectionCallback=None, **kw):
 
       QtGui.QWidget.__init__(self, parent)
       Base.__init__(self, **kw)
@@ -40,6 +40,7 @@ class GuiTableGenerator(QtGui.QWidget, Base):
         self.selector = selector
         self.selector.setCallback(self._changeObjectList)
         self._updateSelectorContents()
+
 
 
 
@@ -118,10 +119,12 @@ class GuiTableGenerator(QtGui.QWidget, Base):
     """
 
     if self.objectList is not None:
-      self.objectLists = list(set(self.objectLists))
+      self.objectLists = sorted(set(self.objectLists))
       texts = ['%s' % objectList.pid for objectList in self.objectLists]
 
       self.selector.setData(texts=texts, objects=self.objectLists)
+      if hasattr(self.selector, 'select'): # wb104: PulldownList has this but not sure if other users do
+        self.selector.select(self.objectList)
     if not self.objectList.shortClassName == 'PL':
      if '<All>' not in self.selector.texts:
        self.selector.addItem('<All>')

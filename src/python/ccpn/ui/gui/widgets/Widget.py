@@ -28,10 +28,11 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class Widget(QtGui.QWidget, Base):
 
-  def __init__(self, parent=None, border=None, colourScheme=None, **kw):
+  def __init__(self, parent=None, border=None, colourScheme=None, setLayout=False, **kw):
 
     QtGui.QWidget.__init__(self, parent)
     self.setAcceptDrops(True)
     Base.__init__(self, **kw)
-    # layout = QtGui.QGridLayout()
-    # self.setLayout(layout)
+    if setLayout:
+      layout = QtGui.QGridLayout()
+      self.setLayout(layout)

@@ -3,7 +3,6 @@ __author__ = 'simon1'
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
-from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation
 
 
 from PyQt4 import QtGui

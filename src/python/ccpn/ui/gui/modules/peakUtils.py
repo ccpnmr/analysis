@@ -24,10 +24,9 @@ def getPeakPosition(peak, dim, unit='ppm'):
 
     return '%7.2f' % float(value)
 
-def getPeakAnnotation(peak, dim):
+def getPeakAnnotation(peak, dim, separator=', '):
   if len(peak.dimensionNmrAtoms) > dim:
-    if len(peak.dimensionNmrAtoms[dim]) > 0:
-      return peak.dimensionNmrAtoms[dim][0].pid.id
+    return separator.join([dna.pid.id for dna in peak.dimensionNmrAtoms[dim]])
 
 def getPeakLinewidth(peak, dim):
   return peak.lineWidths[dim]

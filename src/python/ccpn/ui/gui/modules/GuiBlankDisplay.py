@@ -154,5 +154,8 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
     """
     Re-implementation of closeModule function from CcpnModule.
     """
-    self._appBase.project._logger.info('Cannot close blank display')
+    if self.window().spectrumDisplays:
+      CcpnModule._closeModule(self)
+    else:
+      self._appBase.project._logger.info('Cannot close blank display')
 

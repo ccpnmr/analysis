@@ -290,15 +290,17 @@ class ViewBox(pg.ViewBox):
     self.menu.navigateToMenu.clear()
     if self.current.peak:
       for spectrumDisplay in self.current.project.spectrumDisplays:
-        if len(list(set(spectrumDisplay.strips[0].axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
+        strip = spectrumDisplay.strips[0]
+        if len(list(set(strip.axisCodes) & set(self.current.peak.peakList.spectrum.axisCodes))) <= 2:
           self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPeakPosition, self.current.project,
                                                                         self.current.peak, [spectrumDisplay.pid]))
     else:
       for spectrumDisplay in self.current.project.spectrumDisplays:
         axisCodes = self.current.strip.axisCodes
-        if len(list(set(spectrumDisplay.strips[0].axisCodes) & set(self.current.strip.axisCodes))) <= 2:
-          self.menu.navigateToMenu.addAction(spectrumDisplay.pid, partial(navigateToPositionInStrip, self.current.cursorPosition,
-                                                                        axisCodes))
+        strip = spectrumDisplay.strips[0]
+        if len(list(set(strip.axisCodes) & set(axisCodes))) <= 2:
+          self.menu.navigateToMenu.addAction(spectrumDisplay.pid,
+                partial(navigateToPositionInStrip, strip, self.current.cursorPosition, axisCodes))
     self.menu.popup(QtCore.QPoint(position.x(), position.y()))
 
   def _getMenu(self):

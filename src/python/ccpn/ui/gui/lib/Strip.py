@@ -16,10 +16,11 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
   if not axisCodes:
     axisCodes = strip.axisCodes
 
-
-  axisCodeMapping = [code for code in axisCodes if code in strip.axisCodes]
-  for ii, axisCode in enumerate(strip.axisCodes):
-    stripAxisIndex = axisCodeMapping.index(axisCode)
+  for ii, axisCode in enumerate(axisCodes):
+    try:
+      stripAxisIndex = strip.axisCodes.index(axisCode)
+    except ValueError as e:
+      continue
     if positions[ii]:
       strip.orderedAxes[stripAxisIndex].position = positions[ii]
     if widths:

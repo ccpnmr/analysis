@@ -37,7 +37,8 @@ def decode(key, string):
 
 cyphers = {}
 cyphers['3.0.a3'] = [1468679340.425289, 1468679340.423687]
-cyphers['3.0.b1'] = [1468679340.425723, 1468679340.426897, 1476254863.630204]
+cyphers['3.0.b1'] = [1468679340.425723, 1468679340.426897, 1476254863.630204, 1478253122.381794]
+cyphers['3.0.b2'] = [1478253122.382449]
 
 def _check(key=None, doDecode=True):
     from ccpn.framework.Version import applicationVersion

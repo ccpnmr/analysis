@@ -29,6 +29,7 @@ from PyQt4 import QtGui, QtCore
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
+from ccpn.core.Spectrum import Spectrum
 
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.widgets.Label import Label
@@ -283,6 +284,15 @@ def _deletedPeak(peak:Peak):
 
   for spectrumView in peak.peakList.spectrum.spectrumViews:
     spectrumView.strip.spectrumDisplay._deletedPeak(peak)
+
+def _spectrumHasChanged(spectrum:Spectrum):
+  project = spectrum.project
+  apiDataSource = spectrum._wrappedData
+  for spectrumDisplay in project.spectrumDisplays:
+    action = spectrumDisplay.spectrumActionDict.get(apiDataSource)
+    if action: # spectrum might not be in all displays
+      # update toolbar button name
+      action.setText(spectrum.name)
 
 def _deletedSpectrumView(project:Project, apiSpectrumView):
   """tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers"""

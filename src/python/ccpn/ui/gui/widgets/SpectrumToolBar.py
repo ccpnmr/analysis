@@ -46,16 +46,23 @@ class SpectrumToolBar(ToolBar):
     if event.button() == QtCore.Qt.RightButton:
       button = self.childAt(event.pos())
       menu = self._createContextMenu(button)
-      menu.popup(event.globalPos())
+      if menu:
+        menu.popup(event.globalPos())
 
   def _createContextMenu(self, button:QtGui.QToolButton):
     """
     Creates a context menu containing a command to delete the spectrum from the display and its
     button from the toolbar.
     """
+    if not button:
+      return None
     contextMenu = Menu('', self, isFloatWidget=True)
     peakListViews = self.widget.peakListViews
-    key = [key for key, value in self.widget.spectrumActionDict.items() if value == button.actions()[0]][0]
+    action = button.actions()[0]
+    keys = [key for key, value in self.widget.spectrumActionDict.items() if value is action]
+    if not keys: # if you click on >> button which shows more spectra
+      return None
+    key = keys[0]
     for peakListView in peakListViews:
       if peakListView.spectrumView._apiDataSource == key:
         action = contextMenu.addAction(peakListView.peakList.id)

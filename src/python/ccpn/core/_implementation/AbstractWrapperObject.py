@@ -442,7 +442,9 @@ class AbstractWrapperObject():
       # data is iterator of wrapped data for children starting from all parents
       ll = itertools.chain(*(func(x) for x in objects))
       # objects is all wrapper objects for next child level down
-      objects = [data2Obj[x] for x in ll]
+      # NB this may sometimes (during undo/redo) get called when not all objects
+      # are finalised - hence the test if y is None
+      objects = [y for y in (data2Obj.get(x) for x in ll) if y is not None]
       if cls.className in ('ChemicalShift',):
         # These cannot be correctly sorted at the API level
         objects.sort()

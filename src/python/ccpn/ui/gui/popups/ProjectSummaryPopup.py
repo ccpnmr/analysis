@@ -156,6 +156,9 @@ class ProjectSummaryPopup(QtGui.QDialog):
     if not path:
       return
 
+    if not path.lower().endswith('.pdf'):
+      path += '.pdf'
+
     printer = QtGui.QPrinter(QtGui.QPrinter.ScreenResolution)
     printer.setPaperSize(QtGui.QPrinter.A4)
     printer.setOrientation(QtGui.QPrinter.Landscape)

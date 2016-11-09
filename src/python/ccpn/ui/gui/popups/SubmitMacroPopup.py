@@ -88,7 +88,7 @@ class SubmitMacroPopup(QtGui.QDialog):
 
   def _submitMacro(self):
 
-    application = self.parent.application
+    application = self.parent().application
     logger = application.project._logger
     
     filePath = self.pathEntry.get()

@@ -90,7 +90,7 @@ class PeakTable(CcpnModule):
     """
     Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks
     """
-    self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peak')
+    #self.current.unRegisterNotify(self.peakList._selectPeakInTable, 'peak')
     self.peakList._deregisterNotifiers()
     self.close()
 

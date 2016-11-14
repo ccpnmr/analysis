@@ -236,6 +236,8 @@ class Framework:
     else:
       project = self.newProject()
 
+    self._updateCheckableMenuItems()
+
     if not self._checkRegistration():
       return
 
@@ -546,6 +548,29 @@ class Framework:
 
 
   #########################################    Start setup Menus      ############################
+
+  def _updateCheckableMenuItems(self):
+    # This has to be kept in sync with menu items below which are checkable,
+    # and also with MODULE_DICT keys
+    # The code is terrible because Qt has no easy way to get hold of menus / actions
+
+    topMenu = self.ui.mainWindow.menuBar().findChildren(QtGui.QMenu)[0]
+    topActionDict = {}
+    for topAction in topMenu.actions():
+      mainActionDict = {}
+      for mainAction in topAction.menu().actions():
+        mainActionDict[mainAction.text()] = mainAction
+      topActionDict[topAction.text()] = mainActionDict
+
+    openModuleKeys = set(self.ui.mainWindow.moduleArea.modules.keys())
+    for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
+                                               ('PYTHON CONSOLE', 'View', 'Python Console')):
+      if key in openModuleKeys:
+        mainActionDict = topActionDict.get(topActionText) # should always exist but play safe
+        if mainActionDict:
+          mainAction = mainActionDict.get(mainActionText)
+          if mainAction:
+            mainAction.setChecked(True)
 
   def setupMenus(self):
     """Setup the menu specification.

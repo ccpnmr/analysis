@@ -177,10 +177,14 @@ class GeneralTab(QtGui.QWidget, Base):
     else:
       self.pathData.setText(apiDataStore.fullPath)
     self.pathData.editingFinished.connect(self._queueSetSpectrumPath)
+    try:
+      index = spectrum.project.chemicalShiftLists.index(spectrum.chemicalShiftList)
+    except:
+      index = 0
     Label(self, text="Chemical Shift List ", vAlign='t', hAlign='l', grid=(3, 0))
-    self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(3, 1), texts=[csList.pid
-                                                                                        for csList in spectrum.project.chemicalShiftLists]
-                                                                                       +['<New>'], callback=self._queueChemicalShiftListChange)
+    self.chemicalShiftListPulldown = PulldownList(self, vAlign='t', grid=(3, 1), index=index,
+                        texts=[csList.pid for csList in spectrum.project.chemicalShiftLists]+['<New>'],
+                        callback=self._queueChemicalShiftListChange)
     Label(self, text="PID ", vAlign='t', hAlign='l', grid=(5, 0))
     Label(self, text=spectrum.pid, vAlign='t', grid=(5, 1))
 
@@ -294,7 +298,7 @@ class GeneralTab(QtGui.QWidget, Base):
     self.chemicalShiftListPulldown.setData(self.chemicalShiftListPulldown.texts)
     self.chemicalShiftListPulldown.setCurrentIndex(insertionIndex)
     self.spectrum.chemicalShiftList = newChemicalShiftList
-    self._writeLoggingMessage("""newChemicalShiftList = project.newChemicalShiftList()\n
+    self._writeLoggingMessage("""newChemicalShiftList = project.newChemicalShiftList()
                                 spectrum.chemicalShiftList = newChemicalShiftList""")
     self.pythonConsole.writeConsoleCommand('spectrum.chemicalShiftList = chemicalShiftList', chemicalShiftList=newChemicalShiftList, spectrum=self.spectrum)
     self.logger.info('spectrum.chemicalShiftList = chemicalShiftList')
@@ -302,8 +306,8 @@ class GeneralTab(QtGui.QWidget, Base):
   def _setChemicalShiftList(self, item):
     self.spectrum.chemicalShiftList = self.spectrum.project.getByPid(item)
     self.pythonConsole.writeConsoleCommand('spectrum.newChemicalShiftList = chemicalShiftList', chemicalShiftList=self.spectrum.chemicalShiftList, spectrum=self.spectrum)
-    self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')\n
-                                  spectrum.chemicalShiftList = chemicalShiftList""")
+    self._writeLoggingMessage("""chemicalShiftList = project.getByPid('%s')
+                                  spectrum.chemicalShiftList = chemicalShiftList""" % self.spectrum.chemicalShiftList.pid)
 
 
   def _queueSampleChange(self):

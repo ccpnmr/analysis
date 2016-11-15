@@ -29,12 +29,15 @@ from ccpn.ui.gui.widgets.Base import Base
 
 class TextEditor(QtGui.QTextEdit, Base):
 
+  font = 'Monaco'
+  fontSize = 12
+
   def __init__(self, parent=None, filename=None, **kw):
     super(TextEditor, self).__init__(parent)
     Base.__init__(self, **kw)
-    #font = QFont("Courier", 11)
-    #self.setFont(font)
+
     self.filename = filename
+    self.setFont(QtGui.QFont(TextEditor.font, TextEditor.fontSize))
     # if self.filename is not None:
     #
     #   fileData = self.filename.read()

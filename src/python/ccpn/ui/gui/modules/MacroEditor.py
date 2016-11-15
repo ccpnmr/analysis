@@ -17,28 +17,36 @@ class MacroEditor(DropBase, CcpnModule):
 
   def __init__(self, parent, mainWindow, name, showRecordButtons=False):
     CcpnModule.__init__(self, name=name)
-    widget = QtGui.QWidget()
+
     self.parent = parent
     self.mainWindow = mainWindow
     self.parent.addModule(self)
     self.preferences = self.mainWindow.preferences
-    self.textBox = TextEditor()
-    widgetLayout = QtGui.QGridLayout()
-    widget.setLayout(widgetLayout)
+    # macro selection
     self.label1 = Label(self, 'Macro Name')
     self.lineEdit1 = LineEdit(self)
-    self.button = Button(self, '...', callback=self._openMacroFile)
-    widget.layout().addWidget(self.label1, 0, 0, 1, 1)
+    self.button = Button(self, 'Select...', callback=self._openMacroFile)
+    # macro editing area
+    self.textBox = TextEditor()
+
+    # layouts
+    #widget = QtGui.QWidget()
+    widget = self.mainWidget
+    widgetLayout = QtGui.QGridLayout()
+    widget.setLayout(widgetLayout)
+    widget.layout().addWidget(self.label1,    0, 0, 1, 1)
     widget.layout().addWidget(self.lineEdit1, 0, 1, 1, 3)
-    widget.layout().addWidget(self.button, 0, 4, 1, 1)
-    widget.layout().addWidget(self.textBox, 2, 0, 1, 5)
-    # if self.note.text is not None:
+    widget.layout().addWidget(self.button,    0, 4, 1, 1)
+    widget.layout().addWidget(self.textBox,   1, 0, 1, 5)
+
     self.buttonBox = ButtonList(self, texts=['Start', 'Stop', 'Close', 'Save Macro'],
                                 callbacks=[self._startMacroRecord, self._stopMacroRecord, self._reject, self._saveMacro])
-    widget.layout().addWidget(self.buttonBox, 3, 3, 1, 2)
-    self.layout.addWidget(widget)
     self.buttonBox.buttons[1].setDisabled(True)
     self.buttonBox.buttons[0].setEnabled(True)
+    widget.layout().addWidget(self.buttonBox, 2, 3, 1, 2)
+
+#    self.layout().setSpacing(1)
+    self.layout.addWidget(widget)
 
     if showRecordButtons is False:
       self.buttonBox.buttons[0].hide()
@@ -89,6 +97,7 @@ class MacroEditor(DropBase, CcpnModule):
     filePath = dialog.selectedFile()
     if filePath:
       with open(filePath, 'r') as f:
+        self.textBox.clear()
         for line in f.readlines():
           self.textBox.insertPlainText(line)
         self.macroFile = f

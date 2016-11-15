@@ -231,7 +231,7 @@ QLineEdit {
 QTextEdit {
         background-color: #f7ffff;
         color: #122043;
-        margin: 0px 4px 4px 4px;
+        margin: 0px 0px 0px 0px;
         border: 1px solid #182548;
         font-size: 1.5em;
         }

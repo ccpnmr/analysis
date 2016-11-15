@@ -180,7 +180,7 @@ class Framework:
   The Framework class is the base class for all applications.
   """
 
-  def __init__(self, applicationName, applicationVersion, args):
+  def __init__(self, applicationName, applicationVersion, args=Arguments()):
 
     self.args = args
     self.applicationName = applicationName
@@ -731,7 +731,7 @@ class Framework:
       ("New from Log...", self.newMacroFromLog),
       (),
       ("Record Macro...", self.startMacroRecord),
-      ("Run", ()),
+      ("Run...", self.runMacro),
       ("Run Recent", ()),
       (),
       ("Define User Shortcuts...", self.defineUserShortcuts, [('shortcut', 'du')])

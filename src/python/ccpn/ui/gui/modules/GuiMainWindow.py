@@ -308,7 +308,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     TODO: make sure that running a macro adds it to the prefs and calls this function
     """
 
-    runMacrosMenu = self.getMenuAction('Macro->Run')
+    runMacrosMenu = self.getMenuAction('Macro->Run Recent')
     runMacrosMenu.clear()
 
     from ccpn.framework.PathsAndUrls import macroPath as ccpnMacroPath

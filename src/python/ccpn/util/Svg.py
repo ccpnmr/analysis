@@ -53,8 +53,11 @@ class Svg(PrintFile):
 '''.format(self.x0, self.x1, self.y0, self.y1, self.xNumber, self.yNumber))
 
   def writeLine(self, x1, y1, x2, y2, colour='#000000'):
-    
-    self.fp.write('<line x1="%s" y1="%s" x2="%s" y2="%s" style="fill:none;stroke:%s;stroke-width:1" />\n' % (x1, y1, x2, y2, colour))
+
+    if self.xNumber is not None and self.yNumber is not None:
+      self.fp.write('<line x1="%s" y1="%s" x2="%s" y2="%s" style="fill:none;stroke:%s;stroke-width:1" clip-path="url(#cpth_%d_%d)" />\n' % (x1, y1, x2, y2, colour, self.xNumber, self.yNumber))
+    else:
+      self.fp.write('<line x1="%s" y1="%s" x2="%s" y2="%s" style="fill:none;stroke:%s;stroke-width:1" />\n' % (x1, y1, x2, y2, colour))
 
   def writePolyline(self, polyline, colour='#000000'):
 
@@ -68,8 +71,14 @@ class Svg(PrintFile):
     (x, y) = polyline[0] # close loop
     self.fp.write('%s,%s' % (x, self.height-y))
    
-    self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" clip-path="url(#cpth_%d_%d)" />\n' % (colour, self.xNumber, self.yNumber))
+    if self.xNumber is not None and self.yNumber is not None:
+      self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" clip-path="url(#cpth_%d_%d)" />\n' % (colour, self.xNumber, self.yNumber))
+    else:
+      self.fp.write('" style="fill:none;stroke:%s;stroke-width:0.3" />\n' % (colour,))
 
   def writeText(self, text, x, y, colour='#000000', fontsize=10, fontfamily='Lucida Grande'):
     
-    self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s">%s</text>\n' % (x, y, colour, fontsize, fontfamily, text))
+    if self.xNumber is not None and self.yNumber is not None:
+      self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s" clip-path="url(#cpth_%d_%d)">%s</text>\n' % (x, y, colour, fontsize, fontfamily, self.xNumber, self.yNumber, text))
+    else:
+      self.fp.write('<text x="%s" y="%s" fill="%s" font-family="%s" font-size="%s">%s</text>\n' % (x, y, colour, fontsize, fontfamily, text))

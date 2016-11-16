@@ -34,6 +34,9 @@ class PrintFile(ABC):
     self.width = width
     self.height = height
 
+    self.xNumber = None
+    self.yNumber = None
+
   def __enter__(self):
     self.fp = open(self.path, 'wt')
 

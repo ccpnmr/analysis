@@ -472,7 +472,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     for spectrumDisplay in self.spectrumDisplays:
       spectrumDisplay._resetRemoveStripAction()
 
-  def printToFile(self, spectrumDisplayOrStrip=None, width=800, height=800):
+  def printToFile(self, spectrumDisplayOrStrip=None, path=None, width=800, height=800):
 
     current = self._appBase.current
     if not spectrumDisplayOrStrip:
@@ -487,9 +487,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         if not strips:
           return
 
-      path = QtGui.QFileDialog.getSaveFileName(self, caption='Print to File', filter='SVG (*.svg)')
       if not path:
-        return
+        path = QtGui.QFileDialog.getSaveFileName(self, caption='Print to File', filter='SVG (*.svg)')
+        if not path:
+          return
 
       xCount = yCount = 1
       if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):

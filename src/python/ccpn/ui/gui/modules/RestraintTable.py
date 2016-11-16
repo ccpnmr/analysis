@@ -53,7 +53,7 @@ class RestraintTable(CcpnModule):
     self.restraintTable = GuiTableGenerator(self, restraintLists,
                                                 actionCallback=self._callback, columns=columns,
                                                 selector=self.restraintListPulldown,
-                                                tipTexts=tipTexts)
+                                                tipTexts=tipTexts, objectType='restraints')
 
     newLabel = Label(self, '', grid=(2, 0))
 

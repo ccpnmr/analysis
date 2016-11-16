@@ -42,7 +42,7 @@ class ChemicalShiftTable(CcpnModule):
     self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists,
                                                 actionCallback=self._callback, columns=columns,
                                                 selector=self.chemicalShiftListPulldown,
-                                                tipTexts=tipTexts)
+                                                tipTexts=tipTexts, objectType='chemicalShifts')
 
     newLabel = Label(self, '', grid=(2, 0))
 
@@ -110,7 +110,7 @@ class NmrAtomShiftTable(ChemicalShiftTable):
     self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists,
                                                 actionCallback=self._callback, columns=columns,
                                                 selector=self.chemicalShiftListPulldown,
-                                                tipTexts=tipTexts)
+                                                tipTexts=tipTexts, objectType='chemicalShifts')
     newLabel = Label(self, '', grid=(2, 0))
 
     self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)

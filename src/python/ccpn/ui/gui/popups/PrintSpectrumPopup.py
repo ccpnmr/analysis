@@ -39,7 +39,7 @@ class PrintSpectrumDisplayPopup(QtGui.QDialog, Base):
 
     spectrumDisplay = self.project.getByPid(self.spectrumSelectionWidget.getDisplayToPrint())
     if self.filePathLineEdit.text():
-      self.project._appBase.ui.mainWindow.printToFile(spectrumDisplayOrStrip=spectrumDisplay, filePath=self.filePathLineEdit.text())
+      self.project._appBase.ui.mainWindow.printToFile(spectrumDisplayOrStrip=spectrumDisplay, path=self.filePathLineEdit.text())
       self.accept()
     else:
       showWarning('No path specified', 'File path to save image has not been specified.')

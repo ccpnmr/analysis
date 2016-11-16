@@ -26,6 +26,8 @@ import numpy
 import os
 
 from OpenGL import GL
+from OpenGL.error import GLError
+
 from PyQt4 import QtCore, QtGui
 
 import pyqtgraph as pg
@@ -590,8 +592,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       return
 
     self.okDataFile = True
-        
-    self._drawContours(painter)
+
+    try:
+      self._drawContours(painter)
+    except GLError:  # invalid framebuffer operation
+      pass
 
   def boundingRect(self):  # seems necessary to have
       
@@ -630,6 +635,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self._constructContours(posLevels, negLevels)
     except FileNotFoundError:
       self._project._logger.warning("No data file found for %s" % self)
+      return
 
     posColour = Colour.scaledRgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
     negColour = Colour.scaledRgba(self._getColour('negativeContourColour')) # and assumes these attributes are set

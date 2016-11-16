@@ -109,6 +109,10 @@ def defineProgramArguments():
                       default=defaultInterface)
   parser.add_argument('--skip-user-preferences', dest='skipUserPreferences', action='store_true',
                                                  help='Skip loading user preferences')
+  parser.add_argument('--dark', dest='darkColourScheme', action='store_true',
+                                                 help='Use dark colour scheme')
+  parser.add_argument('--light', dest='lightColourScheme', action='store_true',
+                                                 help='Use dark colour scheme')
   parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
   parser.add_argument('projectPath', nargs='?', help='Project path')
 
@@ -193,16 +197,17 @@ class Framework:
 
     self.useFileLogger = not self.args.nologging
 
-    self.current = None
+    self.current      = None
 
-    self.preferences = None
-    self.styleSheet = None
+    self.preferences  = None  # intialised by self._getUserPrefs
+    self.styleSheet   = None  # intialised by self.getStyleSheet
+    self.colourScheme = None  # intialised by self.getStyleSheet
 
     # Necessary as attribute is queried during initialisation:
-    self._mainWindow = None
+    self._mainWindow  = None
 
     # This is needed to make project available in NoUi (if nothing else)
-    self.project = None
+    self.project      = None
 
     # Blocking level for command echo and logging
     self._echoBlocking = 0
@@ -210,14 +215,14 @@ class Framework:
     # NEF reader
     self.nefReader = CcpnNefIo.CcpnNefReader(self)
 
-    self._backupTimerQ = None
+    self._backupTimerQ    = None
     self.autoBackupThread = None
 
     # NBNB TODO The following block should maybe be moved into _getUi
     self._getUserPrefs()
     self._registrationDict = {}
     self._setLanguage()
-    self.styleSheet = self.getStyleSheet(self.preferences)
+    self.styleSheet = self.getStyleSheet()
     self.ui = self._getUI()
     self.setupMenus()
     self.feedbackPopup = None
@@ -332,18 +337,27 @@ class Framework:
     return ui
 
 
-  def getStyleSheet(self, preferences=None):
-    if preferences is None:
-      preferences = self.preferences
+  def getStyleSheet(self):
+    """return Stylesheet as determined by arguments --dark, --light or preferences
+    """
+    colourScheme = None
+    if self.args.darkColourScheme:
+      colourScheme ='Dark'
+    elif self.args.lightColourScheme:
+      colourScheme = 'Light'
+    else:
+      colourScheme = self.preferences.general.colourScheme
 
-    colourScheme = preferences.general.colourScheme
-    colourScheme = metaUtil.upperFirst(colourScheme)
+    if colourScheme is None:
+      raise RuntimeError('invalid colourScheme')
+
+    self.colourScheme = metaUtil.upperFirst(colourScheme)
 
     styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                   '%sStyleSheet.qss' % colourScheme)).read()
+                                   '%sStyleSheet.qss' % self.colourScheme)).read()
     if platform.system() == 'Linux':
       additions = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                    '%sAdditionsLinux.qss' % colourScheme)).read()
+                                    '%sAdditionsLinux.qss' % self.colourScheme)).read()
       styleSheet += additions
     return styleSheet
 

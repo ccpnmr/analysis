@@ -125,7 +125,7 @@ class SamplePropertiesPopup(QtGui.QDialog):
       self.sampleAmountLineEdit.setText(str(self.sample.amount))
 
   def _setsampleIonicStrengthWidgets(self):
-    self.ionicStrengthLabel = Label(self, text='ionic Strengt')
+    self.ionicStrengthLabel = Label(self, text='Ionic Strength')
     self.ionicStrengthLineEdit = LineEdit(self)
     self.ionicStrengthLineEdit.setFixedHeight(25)
     self.ionicStrengthLineEdit.setAlignment(QtCore.Qt.AlignLeft | QtCore.Qt.AlignVCenter)

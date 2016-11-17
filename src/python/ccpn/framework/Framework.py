@@ -1441,7 +1441,7 @@ class Framework:
     Displays macro editor with additional buttons for recording a macro.
     """
     self.macroEditor = MacroEditor(self.ui.mainWindow.moduleArea, self, "Macro Editor", showRecordButtons=True)
-    self.uipyinWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
+    self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.startMacroRecord()")
     self.project._logger.info("application.startMacroRecord()")
 
 

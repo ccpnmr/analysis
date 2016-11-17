@@ -1468,11 +1468,6 @@ class Framework:
     # self._fillRecentMacrosMenu()
     self.ui.mainWindow.pythonConsole._runMacro(macroFile)
 
-  def defineShortcut(self):
-    info = MessageDialog.showInfo('Not implemented yet',
-                                  'This function has not been implemented in the current version',
-                                  colourScheme=self.ui.mainWindow.colourScheme)
-
 
   ###################################################################################################################
   ## MENU callbacks:  Help

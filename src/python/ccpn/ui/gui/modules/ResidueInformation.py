@@ -77,7 +77,7 @@ class ResidueInformation(CcpnModule, Base):
         if item is not None:
           item.widget().deleteLater()
 
-    j = 0
+    j = 0  # why was this introduced (it's not altered below)?
     for i in range(len(foundResidues)):
 
       if foundResidues[j+i][0] is not None:
@@ -88,14 +88,14 @@ class ResidueInformation(CcpnModule, Base):
           label1.setStyleSheet(stylesheet)
 
         self.residueWidget.layout().addWidget(label1, j+i, 0)
-      if len(foundResidues[j+1]) > 1:
+      if len(foundResidues[j+i]) > 1:
         label2 = Label(self, text=foundResidues[j+i][1].id,
                        hAlign='c')
         if foundResidues[j+i][1].nmrResidue is not None:
           label2.setStyleSheet(stylesheet)
         label2.setMaximumHeight(30)
         self.residueWidget.layout().addWidget(label2, j+i, 1)
-      if len(foundResidues[j+1]) > 2:
+      if len(foundResidues[j+i]) > 2:
         label3 = Label(self, text=foundResidues[j+i][2].id,
                        hAlign='c')
         if foundResidues[j+i][2].nmrResidue is not None:

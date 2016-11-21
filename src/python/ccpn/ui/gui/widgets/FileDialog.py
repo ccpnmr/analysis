@@ -55,9 +55,11 @@ class FileDialog(QtGui.QFileDialog):
 
     self.setFileMode(fileMode)
     self.setAcceptMode(acceptMode)
-    self.useNative = preferences.useNative
-    if preferences:
+    if preferences is None:
+      self.useNative = False
 
+    if preferences:
+      self.useNative = preferences.useNative
       if preferences.colourScheme == 'dark':
         self.setStyleSheet("""
                            QFileDialog QWidget {
@@ -93,6 +95,9 @@ class FileDialog(QtGui.QFileDialog):
       return files[0]
     else:
       return None
+
+
+
 
 
 

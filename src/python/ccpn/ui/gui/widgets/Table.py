@@ -498,7 +498,6 @@ class ObjectTable(QtGui.QTableView, Base):
 
 
   def findExportFormats(self, path):
-
     formatTypes = OrderedDict([
                                ('.xlsx', self.dataFrameToExcel),
                                ('.csv', self.dataFrameToCsv),
@@ -512,9 +511,7 @@ class ObjectTable(QtGui.QTableView, Base):
        return
     else:
       try:
-        selectNameFilter = self.saveDialog.selectedNameFilter()
-        path = str(path) + selectNameFilter
-        self.findExportFormats(path)
+        self.findExportFormats(str(path) + self.saveDialog.selectedNameFilter())
       except:
         print('Format file not supported')
 
@@ -528,8 +525,7 @@ class ObjectTable(QtGui.QTableView, Base):
     dataFrame.to_csv(path, sep='\t')
 
   def dataFrameToJson(self, dataFrame, path):
-    dataFrame.to_json(path, orient = 'columns')
-
+    dataFrame.to_json(path, orient = 'split')
 
   def tableToDataFrame(self):
     from pandas import DataFrame

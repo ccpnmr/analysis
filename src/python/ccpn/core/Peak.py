@@ -25,6 +25,7 @@ import collections
 import operator
 
 from ccpn.util import Undo
+from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.SpectrumReference import SpectrumReference
@@ -183,7 +184,7 @@ class Peak(AbstractWrapperObject):
 
   @property
   def boxWidths(self) -> Tuple[Optional[float], ...]:
-    """The full width of the peak footprint in points for eqach dimension,
+    """The full width of the peak footprint in points for each dimension,
     i.e. the width of the area that should be considered for integration, fitting, etc. ."""
     return tuple(x.boxWidth for x in self._wrappedData.sortedPeakDims())
 
@@ -379,16 +380,38 @@ class Peak(AbstractWrapperObject):
 
     return all(self.dimensionNmrAtoms)
 
-  def _copyTo(self, newPeakList:PeakList) -> 'Peak':
+  def copyTo(self, targetPeakList:PeakList) -> 'Peak':
     """Make (and return) a copy of the Peak in newPeakList"""
+
+    singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
+                       'annotation', 'comment', 'serial']
+    dimensionValueTags = ['position', 'positionError', 'boxWidths', 'lineWidths', ]
+
     peakList = self._parent
+    dimensionCount = peakList.spectrum.dimensionCount
 
-    if peakList.spectrum.dimensionCount != newPeakList.spectrum.dimensionCount:
+    if dimensionCount != targetPeakList.spectrum.dimensionCount:
       raise ValueError("Cannot copy %sD %s to %sD %s"
-                       % (peakList.spectrum.dimensionCount, self.longPid,
-                          newPeakList.spectrum.dimensionCount, newPeakList.longPid))
+                       % (dimensionCount, self.longPid,
+                          targetPeakList.spectrum.dimensionCount, targetPeakList.longPid))
 
-    # NBNB TODO - not completed yet
+    dimensionMapping = commonUtil._axisCodeMapIndices(peakList.spectrum.axisCodes,
+                                                      targetPeakList.spectrum.axisCodes)
+    if dimensionMapping is None:
+      raise ValueError("%s axisCodes %s not compatible with target axisCodes %s"
+                       % (self, peakList.spectrum.axisCodes, targetPeakList.spectrum.axisCodes))
+
+    params = dict ((tag, getattr(self, tag)) for tag in singleValueTags)
+    for tag in dimensionValueTags:
+      value = getattr(self, tag)
+      params[tag] = [value[dimensionMapping[ii]] for ii in range(dimensionCount)]
+    newPeak = targetPeakList.newPeak(**params)
+
+    assignments = self.assignedNmrAtoms
+    if assignments:
+      newPeak.assignedNmrAtoms = assignments
+    #
+    return newPeak
 
   # Implementation functions
 
@@ -400,9 +423,10 @@ class Peak(AbstractWrapperObject):
 # Connections to parents:
 def _newPeak(self:PeakList,height:float=None, volume:float=None,
              heightError:float=None, volumeError:float=None,
-            figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
-            position:Sequence[float]=(), positionError:Sequence[float]=(),
-            pointPosition:Sequence[float]=(), serial:int=None) -> Peak:
+             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,
+             position:Sequence[float]=(), positionError:Sequence[float]=(),
+             pointPosition: Sequence[float] = (), boxWidths:Sequence[float]=(),
+             lineWidths:Sequence[float] = (), serial:int=None) -> Peak:
   """Create new Peak within peakList
 
   NB you must create the peak before you can assign it. The assignment attributes are:
@@ -416,7 +440,8 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
   defaults = collections.OrderedDict(
     (('height', None), ('volume', None), ('heightError', None), ('volumeError', None),
      ('figureOfMerit', 1.0), ('annotation', None), ('comment', None), ('position', ()),
-      ('positionError', ()),('pointPosition', ()), ('serial', None),
+      ('positionError', ()),('pointPosition', ()), ('boxWidths', ()), ('lineWidths', ()),
+     ('serial', None),
     )
   )
 
@@ -449,6 +474,12 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
     if positionError:
       for ii,peakDim in enumerate(apiPeakDims):
         peakDim.valueError = positionError[ii]
+    if boxWidths:
+      for ii,peakDim in enumerate(apiPeakDims):
+        peakDim.boxWidth = boxWidths[ii]
+    if lineWidths:
+      for ii,peakDim in enumerate(apiPeakDims):
+        peakDim.lineWidth = lineWidths[ii]
 
   finally:
     self._project._appBase._endCommandBlock()

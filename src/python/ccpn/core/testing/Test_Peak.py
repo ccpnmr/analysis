@@ -49,3 +49,59 @@ class PeakTest(WrapperTesting):
     self.assertTrue(shift is not None)
     self.assertTrue(shift.value is not None)
 
+
+class PeakTest2(WrapperTesting):
+  # Path of project to load (None for new project
+  projectPath = 'CCPN_H1GI_clean_extended.nef'
+
+  singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
+                     'annotation', 'comment']
+  dimensionValueTags = ['position', 'positionError', 'boxWidths', 'lineWidths', 'assignedNmrAtoms']
+
+  # NBNB TODO We still need a case where axisCOdes are not in the same order (e.g. HNC<->HCN)
+
+  # def test_Peak_copy_intra(self):
+  #   ccconhPeakList = self.project.getPeakList('CCCONH-172.1')
+  #   peak1 = ccconhPeakList.getPeak(260)
+  #   peak2 = peak1.copyTo(ccconhPeakList)
+  #
+  #   tags = self.singleValueTags + self.dimensionValueTags
+  #   print ('Peak1:', peak1)
+  #   for tag in tags:
+  #     print ("- ", tag, getattr(peak1, tag))
+  #   print ('Peak2:', peak2)
+  #   for tag in tags:
+  #     print ("- ", tag, getattr(peak2, tag))
+
+
+  def test_Peak_copy_exo_1(self):
+    peakList1 = self.project.getPeakList('3dNOESY-182.3')
+    peak1 = peakList1.getPeak(1110)
+    peak2 = peak1.copyTo(peakList1)
+
+    self.assertIs(peak1._parent, peakList1)
+    self.assertIs(peak2._parent, peakList1)
+
+    tags = self.singleValueTags + self.dimensionValueTags
+
+    for tag in tags:
+      self.assertEquals((tag, getattr(peak1, tag)), (tag, getattr(peak2, tag)))
+    self.assertEquals(('serial', peak2.serial), ('serial', 1131))
+
+
+  def test_Peak_copy_exo_2(self):
+    peakList1 = self.project.getPeakList('3dNOESY-182.3')
+    peakList2 = self.project.getPeakList('3dTOCSY-181.1')
+    peak1 = peakList1.getPeak(1110)
+    peak3 = peak1.copyTo(peakList2)
+
+    tags = self.singleValueTags + self.dimensionValueTags
+
+    self.assertIs(peak1._parent, peakList1)
+    self.assertIs(peak3._parent, peakList2)
+
+    for tag in tags:
+      self.assertEquals((tag, getattr(peak1, tag)), (tag, getattr(peak3, tag)))
+    self.assertEquals(('serial', peak1.serial), ('serial', peak3.serial))
+
+

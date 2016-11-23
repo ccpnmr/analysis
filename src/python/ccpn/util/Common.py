@@ -39,8 +39,6 @@ from functools import total_ordering
 from ccpn.util import Path, Constants
 from ccpnmodel.ccpncore.lib import Constants as coreLibConstants
 
-STANDARD_ISOTOPES = set(x for x in Constants.DEFAULT_ISOTOPE_DICT.values() if x is not None)
-
 # Max value used for random integer. Set to be expressible as a signed 32-bit integer.
 maxRandomInt =  2000000000
 
@@ -261,61 +259,112 @@ def getUuid(programName, timeStamp=None):
 
 
 def name2IsotopeCode(name:str=None) -> str:
-  """Get standard isotope code matching name or axisCode string"""
+  """Get standard isotope code matching atom name or axisCode string
+
+  """
   if not name:
     return None
 
-  for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):
-    if name.startswith(tag):
-      return val
-  else:
-    return None
+  result = Constants.DEFAULT_ISOTOPE_DICT.get(name[0])
+  if result is None:
+    if name[0].isdigit():
+      ss = name.title()
+      for key in Constants.isotopeRecords:
+        if ss.startswith(key):
+          if name[:len(key)].isupper():
+            result = key
+          break
+    else:
+      result = Constants.DEFAULT_ISOTOPE_DICT.get(name[:2])
+  #
+  return result
 
 
 def isotopeCode2Nucleus(isotopeCode:str=None):
   if not isotopeCode:
     return None
 
-  for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):
-    if val == isotopeCode:
-      return tag
-  else:
+  record = Constants.isotopeRecords.get(isotopeCode)
+  if record is None:
     return None
+  else:
+    return record.symbol.upper()
+
+  # for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):
+  #   if val == isotopeCode:
+  #     return tag
+  # else:
+  #   return None
 
 
 def name2ElementSymbol(name:str) -> str:
-  """Get standard element symbol matching name or axisCode"""
-  for tag in reversed(sorted(Constants.DEFAULT_ISOTOPE_DICT)):
-    # Reversed looping guarantees that the longer of two matches will be chosen
-    if name.startswith(tag):
-      result = tag
-      break
-  else:
-    result = None
+  """Get standard element symbol matching name or axisCode
+
+  NB, the first letter takes precedence, so e.g. 'CD' returns 'C' (carbon)
+  rather than 'CD' (Cadmium)"""
+
+  # NB, We deliberately do NOT use 'value in Constants.DEFAULT_ISOTOPE_DICT'
+  # We want to avoid elements that are in the dict but have value None.
+  if not name:
+    return None
+  elif Constants.DEFAULT_ISOTOPE_DICT.get(name[0]) is not None:
+    return name[0]
+  elif Constants.DEFAULT_ISOTOPE_DICT.get(name[:2]) is not None:
+    return name[:2]
+  elif name[0].isdigit():
+    ss = name.title()
+    for key,record in Constants.isotopeRecords.items():
+      if ss.startswith(key):
+        if name[:len(key)].isupper():
+          return record.symbol.upper()
+        break
   #
-  return result
+  return None
+
+  # for tag in reversed(sorted(Constants.DEFAULT_ISOTOPE_DICT)):
+  #   # Reversed looping guarantees that the longer of two matches will be chosen
+  #   if name.startswith(tag):
+  #     result = tag
+  #     break
+  # else:
+  #   result = None
+  # #
+  # return result
 
 
 def checkIsotope(text:str) -> str:
-  """Convert string to most probable isotope code - defaulting to '1H"""
+  """Convert isotope specifier string to most probable isotope code - defaulting to '1H'
 
-  text = text.strip()
+  This function is intended for external format isotope specifications, *not* for
+  axisCodes or atom names, hence the difference to name2ElementSymbol.
+  """
+  defaultIsotope = '1H'
+  name = text.strip().upper()
 
-  if not text:
-    return '1H'
+  if not name:
+    return defaultIsotope
 
-  if text in STANDARD_ISOTOPES:
-    return text
+  if name in Constants.isotopeRecords:
+    # Superfluous but should speed things up
+    return name
 
-  if text in Constants.DEFAULT_ISOTOPE_DICT:
-    return Constants.DEFAULT_ISOTOPE_DICT[text]
+  for isotopeCode in Constants.isotopeRecords:
+    # NB checking this first means that e.g. 'H13C' returns '13C' rather than '1H'
+    if isotopeCode.upper() in name:
+      return isotopeCode
 
-  for isotope in STANDARD_ISOTOPES:
-    if isotope in text:
-      return isotope
+  # NB order of checking means that e.g. 'CA' returns Calcium rather than Carbon
+  result =  (Constants.DEFAULT_ISOTOPE_DICT.get(name[:2])
+             or Constants.DEFAULT_ISOTOPE_DICT.get(name[0]))
 
-  else:
-    return name2IsotopeCode(text) or '1H'
+  if result is None:
+    if name == 'D':
+      # special case
+      result  = '2H'
+    else:
+      result = defaultIsotope
+  #
+  return result
 
 
 def axisCodeMatch(axisCode:str, refAxisCodes:Sequence[str])->str:
@@ -363,7 +412,7 @@ def _axisCodeMapIndices(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->li
   # find best mapping
   maxScore = sum(len(x) for x in axisCodes)
   bestscore = -1
-  result = None
+  results = None
   values = list(range(len(axisCodes))) + [None] * lenDifference
   for permutation in itertools.permutations(values):
     score = 0
@@ -372,10 +421,48 @@ def _axisCodeMapIndices(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->li
         score += matches[jj][ii]
     if score > bestscore:
       bestscore = score
-      result = permutation
-    if score >= maxScore:
+      results = [permutation]
+    elif score == maxScore:
       # it cannot get any higher
-      break
+      results.append(permutation)
+  #
+  if results:
+    # Pick the first of the equally good matches as the default answer
+    result = results[0]
+    if len(results) > 1:
+      # Multiple matches - try to select on pairs of bound atoms
+      # NB we do not need to be rigorous as this is only used to resolve ambiguity
+      # NB this is necessary to do a correct match of e.g. Hc, Ch, H to Hc, Hc1, Ch1
+      boundCodeDicts = []
+      for tryCodes in axisCodes, refAxisCodes:
+        boundCodes = {}
+        boundCodeDicts.append(boundCodes)
+        for ii, code in enumerate(tryCodes):
+          if len(code) > 1:
+            for jj in range(ii+1, len(tryCodes)):
+              code2 = tryCodes[jj]
+              if len(code2) > 1:
+                if (code[0].isupper() and code[0].lower() == code2[1] and
+                    code2[0].isupper() and code2[0].lower() == code[1] and
+                    code[2:] == code2[2:]):
+                  # Matches pair of bound atoms - e.g. Hc1, Ch1
+                  boundCodes[tryCodes.index(code)] = tryCodes.index(code2)
+                  boundCodes[tryCodes.index(code2)] = tryCodes.index(code)
+
+      if boundCodeDicts[0] and boundCodeDicts[1]:
+        # bound pairs on both sides - check for matching pairs
+        bestscore = -1
+        for permutation in results:
+          score = 0
+          for idx1, idx2 in boundCodeDicts[1].items():
+            target = permutation[idx1]
+            if target is not None and target ==  boundCodeDicts[0].get(permutation[idx2]):
+              score += 1
+          if score > bestscore:
+            bestscore = score
+            result = permutation
+  else:
+    result = None
   #
   return result
 

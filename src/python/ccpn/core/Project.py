@@ -399,6 +399,9 @@ class Project(AbstractWrapperObject):
     # This should disappear under refactoring
     from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import priorityNameRemapping
 
+    # NBNB TODO FIXME fetchIsotopeRefExperimentMap should be merged with
+    # getExpClassificationDict output - we should NOT have two parallel dictionaries
+
     result = self._implExperimentTypeMap
     if result is None:
       result = OrderedDict()
@@ -497,8 +500,8 @@ class Project(AbstractWrapperObject):
 
   # New notifier system (Free for use in application code):
 
-  def registerNotifier(self, className:str, target:str, func:typing.Callable,
-                       parameterDict:dict={}, onceOnly:bool=False) -> typing.Callable:
+  def registerNotifier(self, className:str, target:str, func:typing.Callable[..., None],
+                       parameterDict:dict={}, onceOnly:bool=False) -> typing.Callable[..., None]:
     """
     Register notifiers to be triggered when data change
 
@@ -568,7 +571,7 @@ class Project(AbstractWrapperObject):
     return notifier
 
   def duplicateNotifier(self,  className:str, target:str,
-                        notifier:typing.Callable):
+                        notifier:typing.Callable[..., None]):
     """register copy of notifier for a new className and target.
     Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
     interface matches the action"""
@@ -588,7 +591,7 @@ class Project(AbstractWrapperObject):
       raise ValueError("Unknown notifier: %s" % notifier)
 
 
-  def unRegisterNotifier(self,  className:str, target:str, notifier:typing.Callable):
+  def unRegisterNotifier(self,  className:str, target:str, notifier:typing.Callable[..., None]):
     """Unregister the notifier from this className, and target"""
     if target in self._notifierActions:
       tt = (className, target)
@@ -603,7 +606,7 @@ class Project(AbstractWrapperObject):
       self._logger.warning("Attempt to unregister unknown notifier %s for %s" % (notifier, (className, target)))
 
 
-  def removeNotifier(self, notifier:typing.Callable):
+  def removeNotifier(self, notifier:typing.Callable[..., None]):
     """Unregister the the notifier from all places where it appears."""
     found = False
     for od in self._context2Notifiers.values():

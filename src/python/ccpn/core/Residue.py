@@ -113,17 +113,28 @@ class Residue(AbstractWrapperObject):
         assert linkString == 'middle', ("Illegal API linking value for linear polymer: %s"
                                         % linkString)
 
-         # NBNB TBD FIXME - This does (MAY?) not deal properly with capped residues
-
         nextResidue = self.nextResidue
         previousResidue = self.previousResidue
         if previousResidue is None:
           if nextResidue is None:
             return 'single'
-          else:
-            return 'break'
         elif nextResidue is None:
-          return 'break'
+          chainResidues = self.chain.residues
+          if self is chainResidues[-1]:
+            # Last residue in chain
+            return 'middle'
+          else:
+            nextInLine = chainResidues[chainResidues.index(self) + 1]
+            if nextInLine._wrappedData.linking in ('start', 'none'):
+              # Next in chain is start or non-linear
+              return 'middle'
+            altSelf = nextInLine.previousResidue
+            if (altSelf and altSelf._wrappedData.seqId > nextInLine.seqId
+              and altSelf._wrappedData.linking == 'middle'):
+              # Next residue is cyclic (start of)
+              return 'middle'
+            else:
+              return 'break'
         else:
 
           # NBNB The detection of 'cyclic' only works if residues are given in
@@ -141,7 +152,7 @@ class Residue(AbstractWrapperObject):
 
     else:
       # All other types have linking 'non-linear' in the wrapper
-      return 'nonlinear'
+      return 'single'
     return self._wrappedData.linking
     
   @linking.setter

@@ -75,9 +75,10 @@ class ExperimentFilterPopup(QtGui.QDialog, Base):
     self.texts = []
     self.objects = []
     for k,v in self.experimentNames.items():
-      self.objects.append([x for x in self.classifications if x.name == v][0])
+      # ll = [x for x in self.classifications if x.name == v]
+      ll = [x for x in self.classifications if x.synonym == k]
+      self.objects.append(ll[0])
       self.texts.append(k)
-
 
     self.updateChoices()
 

@@ -33,16 +33,36 @@ class TestNmrAtomCreation(WrapperTesting):
     #                   'setDirectNmrChain': [], 'addResonance': [],
     #                   'setResonances': [],'setResidueType': [],'setAssignedResidue': [], 'setSequenceCode': []})
 
-  def test_deassign(self):
+  def test_deassign_unknown(self):
     nmrAtom = self.nmrResidue.fetchNmrAtom(name='churl')
     self.assertEquals(nmrAtom.pid, 'NA:@2.@1..churl')
+    self.assertEquals(nmrAtom.isotopeCode, '?')
+    nmrAtom.deassign()
+    self.assertEquals(nmrAtom.pid, 'NA:@2.@1..?@1')
+
+  def test_deassign_carbon(self):
+    nmrAtom = self.nmrResidue.fetchNmrAtom(name='Churl')
+    self.assertEquals(nmrAtom.pid, 'NA:@2.@1..Churl')
+    self.assertEquals(nmrAtom.isotopeCode, '13C')
     nmrAtom.deassign()
     self.assertEquals(nmrAtom.pid, 'NA:@2.@1..C@1')
 
+  def test_deassign_calcium(self):
+    nmrAtom = self.nmrResidue.newNmrAtom(name='Carl', isotopeCode='43Ca')
+    self.assertEquals(nmrAtom.pid, 'NA:@2.@1..Carl')
+    self.assertEquals(nmrAtom.isotopeCode, '43Ca')
+    nmrAtom.deassign()
+    self.assertEquals(nmrAtom.pid, 'NA:@2.@1..CA@1')
 
   def test_CreateAnonymousNmrAtomWithHIsotopeCode(self):
     a = self.nmrResidue.newNmrAtom(isotopeCode='1H')
     self.assertEqual(a.pid, 'NA:@2.@1..H@1')
+
+
+  def test_CreateAnonymousNmrAtomWith2HIsotopeCode(self):
+    a = self.nmrResidue.newNmrAtom(isotopeCode='2H')
+    self.assertEqual(a.pid, 'NA:@2.@1..H@1')
+    self.assertEquals(a.isotopeCode, '2H')
 
 
   def test_CreateAnonymousNmrAtomWithCIsotopeCode(self):
@@ -59,13 +79,23 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.isotopeCode, '1H')
 
   def test_CreateNmrAtomWithDeuteriumName(self):
-    a = self.nmrResidue.newNmrAtom(name='D')
-    self.assertEqual(a.pid, 'NA:@2.@1..D')
+    a = self.nmrResidue.newNmrAtom(name='2H')
+    self.assertEqual(a.pid, 'NA:@2.@1..2H')
     self.assertEqual(a.isotopeCode, '2H')
 
+  def test_CreateNmrAtomWithCDName(self):
+    a = self.nmrResidue.newNmrAtom(name='CD')
+    self.assertEqual(a.pid, 'NA:@2.@1..CD')
+    self.assertEqual(a.isotopeCode, '13C')
+
+  def test_CreateCadmiumNmrAtom(self):
+    a = self.nmrResidue.newNmrAtom(name='CD', isotopeCode='113Cd')
+    self.assertEqual(a.pid, 'NA:@2.@1..CD')
+    self.assertEqual(a.isotopeCode, '113Cd')
+
   def test_CreateNmrAtomWithTritiumName(self):
-    a = self.nmrResidue.newNmrAtom(name='T')
-    self.assertEqual(a.pid, 'NA:@2.@1..T')
+    a = self.nmrResidue.newNmrAtom(name='3H')
+    self.assertEqual(a.pid, 'NA:@2.@1..3H')
     self.assertEqual(a.isotopeCode, '3H')
 
   def test_CreateNmrAtomWithCarbonName(self):
@@ -88,19 +118,14 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.pid, 'NA:@2.@1..F')
     self.assertEqual(a.isotopeCode, '19F')
 
-  def test_CreateNmrAtomWithSiliconName(self):
-    a = self.nmrResidue.newNmrAtom(name='Si')
-    self.assertEqual(a.pid, 'NA:@2.@1..Si')
-    self.assertEqual(a.isotopeCode, '29Si')
-
   def test_CreateNmrAtomWithPhosphorusName(self):
     a = self.nmrResidue.newNmrAtom(name='P')
     self.assertEqual(a.pid, 'NA:@2.@1..P')
     self.assertEqual(a.isotopeCode, '31P')
 
   def test_CreateNmrAtomWithBromineName(self):
-    a = self.nmrResidue.newNmrAtom(name='Br')
-    self.assertEqual(a.pid, 'NA:@2.@1..Br')
+    a = self.nmrResidue.newNmrAtom(name='79BR')
+    self.assertEqual(a.pid, 'NA:@2.@1..79BR')
     self.assertEqual(a.isotopeCode, '79Br')
 
   def test_CreateNmrAtomWithArbitraryHydrogenName(self):
@@ -109,13 +134,13 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.isotopeCode, '1H')
 
   def test_CreateNmrAtomWithArbitraryDeuteriumName(self):
-    a = self.nmrResidue.newNmrAtom(name='D_arbitrary')
-    self.assertEqual(a.pid, 'NA:@2.@1..D_arbitrary')
+    a = self.nmrResidue.newNmrAtom(name='2H_arbitrary')
+    self.assertEqual(a.pid, 'NA:@2.@1..2H_arbitrary')
     self.assertEqual(a.isotopeCode, '2H')
 
   def test_CreateNmrAtomWithArbitraryTritiumName(self):
-    a = self.nmrResidue.newNmrAtom(name='T_arbitrary')
-    self.assertEqual(a.pid, 'NA:@2.@1..T_arbitrary')
+    a = self.nmrResidue.newNmrAtom(name='3H_arbitrary')
+    self.assertEqual(a.pid, 'NA:@2.@1..3H_arbitrary')
     self.assertEqual(a.isotopeCode, '3H')
 
   def test_CreateNmrAtomWithArbitraryCarbonName(self):
@@ -138,9 +163,14 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.pid, 'NA:@2.@1..F_arbitrary')
     self.assertEqual(a.isotopeCode, '19F')
 
-  def test_CreateNmrAtomWithArbitrarySiliconName(self):
-    a = self.nmrResidue.newNmrAtom(name='Si_arbitrary')
-    self.assertEqual(a.pid, 'NA:@2.@1..Si_arbitrary')
+  def test_CreateNmrAtomWithArbitrarySulphurName(self):
+    a = self.nmrResidue.newNmrAtom(name='SI_arbitrary')
+    self.assertEqual(a.pid, 'NA:@2.@1..SI_arbitrary')
+    self.assertEqual(a.isotopeCode, '33S')
+
+  def test_CreateArbitrarySiliconNmrAtom(self):
+    a = self.nmrResidue.newNmrAtom(name='SI_arbitrary', isotopeCode='29Si')
+    self.assertEqual(a.pid, 'NA:@2.@1..SI_arbitrary')
     self.assertEqual(a.isotopeCode, '29Si')
 
   def test_CreateNmrAtomWithArbitraryPhosphorusName(self):
@@ -148,9 +178,14 @@ class TestNmrAtomCreation(WrapperTesting):
     self.assertEqual(a.pid, 'NA:@2.@1..P_arbitrary')
     self.assertEqual(a.isotopeCode, '31P')
 
+  def test_CreateNmrAtomWithArbitraryBoronName(self):
+    a = self.nmrResidue.newNmrAtom(name='BR_arbitrary')
+    self.assertEqual(a.pid, 'NA:@2.@1..BR_arbitrary')
+    self.assertEqual(a.isotopeCode, '11B')
+
   def test_CreateNmrAtomWithArbitraryBromineName(self):
-    a = self.nmrResidue.newNmrAtom(name='Br_arbitrary')
-    self.assertEqual(a.pid, 'NA:@2.@1..Br_arbitrary')
+    a = self.nmrResidue.newNmrAtom(name='79BR_arbitrary')
+    self.assertEqual(a.pid, 'NA:@2.@1..79BR_arbitrary')
     self.assertEqual(a.isotopeCode, '79Br')
 
   def test_CreateNmrAtomWithArbitraryNameAndXenonIsotopeCode(self):

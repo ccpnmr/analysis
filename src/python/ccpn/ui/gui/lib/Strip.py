@@ -82,7 +82,8 @@ def isPositionWithinfBounds(strip:'GuiStrip', shift:ChemicalShift, axis:object):
   else:
     return min(minima) < shift.value <= max(maxima)
 
-def navigateToNmrAtomsInStrip(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom], widths=None, markPositions:bool=False):
+def navigateToNmrAtomsInStrip(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom], widths=None,
+                              markPositions:bool=False):
   """
   Takes an NmrResidue and optional spectrum displays and strips and navigates the strips
   and spectrum displays to the positions specified by the peak.

@@ -24,12 +24,18 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+# import typing
+from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype import getExpClassificationDict
 
 MagnetisationTransferTuple = collections.namedtuple('MagnetisationTransferTuple',
   ['dimension1', 'dimension2', 'transferType', 'isIndirect']
 )
 
-def getExperimentClassifications(project):
+def getExperimentClassifications(project:Project) -> dict:
+  """
+  Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.
+  """
   return getExpClassificationDict(project._wrappedData)
+
 

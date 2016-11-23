@@ -16,7 +16,7 @@ MODULE_DICT = {
   'BACKBONE ASSIGNMENT'      : 'showBackboneAssignmentModule',
   'SIDECHAIN ASSIGNMENT'     : 'showSidechainAssignmentModule',
   'CHEMICAL SHIFT TABLE'     : 'showChemicalShiftTable',
-  'MACRO EDITOR'             : 'editMacro',
+  # 'MACRO EDITOR'             : 'editMacro',
   'NMR RESIDUE TABLE'        : 'showNmrResidueTable',
   'PEAK LIST'                : 'showPeakTable',
   'PICK AND ASSIGN'          : 'showPickAndAssignModule',
@@ -24,10 +24,10 @@ MODULE_DICT = {
   'RESIDUE INFORMATION'      : 'showResidueInformation',
   'SEQUENCE'                 : 'toggleSequenceModule',
   'PARASSIGN SETUP'          : 'showParassignSetup',
-  'API DOCUMENTATION'        : 'showApiDocumentation',
+  # 'API DOCUMENTATION'        : 'showApiDocumentation',
   'PYTHON CONSOLE'           : 'toggleConsole',
   'BLANK DISPLAY'            : 'addBlankDisplay',
-  'NOTES EDITOR'             : 'showNotesEditor'
+  # 'NOTES EDITOR'             : 'showNotesEditor'
                }
 
 LINE_COLOURS = {

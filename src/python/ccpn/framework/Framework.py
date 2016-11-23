@@ -222,7 +222,7 @@ class Framework:
     self._getUserPrefs()
     self._registrationDict = {}
     self._setLanguage()
-    self.styleSheet = self.getStyleSheet()
+    self.styleSheet = None
     self.ui = self._getUI()
     self.setupMenus()
     self.feedbackPopup = None
@@ -325,6 +325,7 @@ class Framework:
 
   def _getUI(self):
     if self.args.interface == 'Gui':
+      self.styleSheet = self.getStyleSheet()
       from ccpn.ui.gui.Gui import Gui
       ui = Gui(self)
     else:
@@ -597,7 +598,12 @@ class Framework:
     # and also with MODULE_DICT keys
     # The code is terrible because Qt has no easy way to get hold of menus / actions
 
-    topMenu = self.ui.mainWindow.menuBar().findChildren(QtGui.QMenu)[0]
+    mainWindow = self.ui.mainWindow
+    if mainWindow is None:
+      # We have a UI with no mainWindow - nothing to do.
+      return
+
+    topMenu = mainWindow.menuBar().findChildren(QtGui.QMenu)[0]
     topActionDict = {}
     for topAction in topMenu.actions():
       mainActionDict = {}
@@ -605,7 +611,7 @@ class Framework:
         mainActionDict[mainAction.text()] = mainAction
       topActionDict[topAction.text()] = mainActionDict
 
-    openModuleKeys = set(self.ui.mainWindow.moduleArea.modules.keys())
+    openModuleKeys = set(mainWindow.moduleArea.modules.keys())
     for key, topActionText, mainActionText in (('SEQUENCE', 'Molecules', 'Show Sequence'),
                                                ('PYTHON CONSOLE', 'View', 'Python Console')):
       if key in openModuleKeys:
@@ -869,7 +875,7 @@ class Framework:
         project._resetUndo(debug=_DEBUG)
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:
-        sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
+        sys.stderr.write('==> Loading %s NEF project "%s"\n' % (subType, path))
         project = self._loadNefFile(path)
         project._resetUndo(debug=_DEBUG)
       #

@@ -40,7 +40,7 @@ class TestLabellingBasic(WrapperTesting):
     self.assertEqual(len(self.project.substances), 1)
 
     sc = self.sample.newSampleComponent('typewriter')
-    self.assertEqual(sc.pid, 'SC:test sample.typewriter')
+    self.assertEqual(sc.pid, 'SC:test sample.typewriter.')
     self.assertEqual(len(self.project.sampleComponents), 1)
     self.assertEqual(len(self.project.substances), 1)
     self.assertIs(self.project.sampleComponents[0], sc)

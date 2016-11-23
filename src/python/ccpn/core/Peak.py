@@ -379,6 +379,17 @@ class Peak(AbstractWrapperObject):
 
     return all(self.dimensionNmrAtoms)
 
+  def _copyTo(self, newPeakList:PeakList) -> 'Peak':
+    """Make (and return) a copy of the Peak in newPeakList"""
+    peakList = self._parent
+
+    if peakList.spectrum.dimensionCount != newPeakList.spectrum.dimensionCount:
+      raise ValueError("Cannot copy %sD %s to %sD %s"
+                       % (peakList.spectrum.dimensionCount, self.longPid,
+                          newPeakList.spectrum.dimensionCount, newPeakList.longPid))
+
+    # NBNB TODO - not completed yet
+
   # Implementation functions
 
   @classmethod
@@ -387,7 +398,6 @@ class Peak(AbstractWrapperObject):
     return parent._wrappedData.sortedPeaks()
 
 # Connections to parents:
-
 def _newPeak(self:PeakList,height:float=None, volume:float=None,
              heightError:float=None, volumeError:float=None,
             figureOfMerit:float=1.0, annotation:str=None, comment:str=None,

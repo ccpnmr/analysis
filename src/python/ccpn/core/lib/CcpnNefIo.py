@@ -35,6 +35,7 @@ from typing import List, Union, Optional, Sequence, Tuple
 from ccpn.core.lib import Pid
 from ccpn.core import _importOrder
 from ccpn.util import Common as commonUtil
+from ccpn.util import Constants
 from ccpn.util import jsonIo
 from ccpn.util.nef import Specification
 from ccpn.util.nef import StarIo
@@ -156,6 +157,7 @@ nef2CcpnMap = {
     ('residue_name','residueType'),
     ('linking','linking'),
     ('residue_variant','residueVariant'),
+    ('cis_peptide',None),
     ('ccpn_comment','comment'),
     ('ccpn_chain_role','chain.role'),
     ('ccpn_compound_name','chain.compoundName'),
@@ -649,6 +651,7 @@ nef2CcpnMap = {
     ('sequence_code','nmrResidue.sequenceCode'),
     ('serial',None),
     ('name','name'),
+    ('isotopeCode','isotopeCode'),
     ('comment','details'),
   )),
 
@@ -787,7 +790,7 @@ def convert2NefString(project:Project, skipPrefixes:Sequence=()):
   dataBlock = converter.exportProject()
 
   # Delete tags starting with certain prefixes.
-  # NB designed to strip out 'ccpn' tags to make output comaprison easier
+  # NB designed to strip out 'ccpn' tags to make output comparison easier
   for prefix in skipPrefixes:
     # Could be done faster, but this is a rare operation
     for sftag in list(dataBlock.keys()):
@@ -927,7 +930,7 @@ class CcpnNefWriter:
 
     # NBNB TBD FIXME add proper values for format version from specification file
     result['format_name'] = 'nmr_exchange_format'
-    result['format_version'] = '0.99'
+    result['format_version'] = '1.0'
     # format_version=None
     result['coordinate_file_name'] = coordinateFileName
     if headObject.className == 'Project':
@@ -1061,7 +1064,7 @@ class CcpnNefWriter:
         rowdata.update(zip(atomCols, shift.nmrAtom._idTuple))
         isotope,element = commonUtil.splitIntFromChars(shift.nmrAtom.isotopeCode)
         if isotope is not None:
-          rowdata['element'] = element
+          rowdata['element'] = element.upper()
           rowdata['isotope_number'] = isotope
         loop.newRow(rowdata)
     else:
@@ -1672,7 +1675,6 @@ class CcpnNefWriter:
             # as is the case e.g. for (PeakList.)spectrum._wrappedData.dataStore.headerSize'
             # where the dataStore is sometimes None
             sys.stderr.write("Could not get %s from %s\n" % (itemvalue, wrapperObj))
-            raise
         else:
           # This is a loop
           assert itemvalue == _isALoop, "Invalid item specifier in Nef2CcpnMap: %s" % (itemvalue,)
@@ -1885,7 +1887,7 @@ class CcpnNefReader:
     if None in chainData:
       defaultChainCode = 'A'
       # Replace chainCode None with default chainCode
-      #Selecting the first calue that is not already taken.
+      # Selecting the first value that is not already taken.
       while defaultChainCode in chainData:
         defaultChainCode = commonUtil.incrementName(defaultChainCode)
       chainData[defaultChainCode] = chainData.pop(None)
@@ -2056,8 +2058,14 @@ class CcpnNefReader:
                                           'atom_name'))
       element = row.get('element')
       isotope = row.get('isotope_number')
-      if element and isotope:
-        isotopeCode = '%s%s' % (isotope, element)
+      if element:
+        if isotope:
+          isotopeCode = '%s%s' % (isotope, element.title())
+        else:
+          isotopeCode = Constants.DEFAULT_ISOTOPE_DICT.get(element.upper())
+      elif isotope:
+        element = commonUtil.name2ElementSymbol(tt[3])
+        isotopeCode = '%s%s' % (isotope, element.title())
       else:
         isotopeCode = None
       try:
@@ -2296,6 +2304,7 @@ class CcpnNefReader:
 
       spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
                                 transferData=transferData)
+
 
       # Make data storage object
       filePath = saveFrame.get('ccpn_spectrum_file_path')
@@ -3137,6 +3146,19 @@ class CcpnNefReader:
     if not name:
       raise ValueError("Cannot produce NmrAtom for atom name: %s" % repr(name))
 
+    if isotopeCode:
+      prefix = isotopeCode.upper()
+      if not name.startswith(prefix):
+        prefix = commonUtil.isotopeCode2Nucleus(isotopeCode)
+        if prefix is None:
+          self.warning("Ignoring unsupported isotopeCode: %s for NmrAtom:%s.%s"
+                       % (isotopeCode, nmrResidue._id, name))
+        elif not name.startswith(prefix):
+          newName = '%s@%s' % (prefix, name)
+          self.warning("NmrAtom name %s does not match isotopeCode %s - renamed to %s"
+                       % (isotopeCode, name, newName))
+          name = newName
+
     newName = name
     while True:
       nmrAtom = nmrResidue.getNmrAtom(newName.translate(Pid.remapSeparators))
@@ -3149,8 +3171,22 @@ class CcpnNefReader:
       elif isotopeCode in (None, nmrAtom.isotopeCode):
         # We must ensure that the isotopeCodes match
         return nmrAtom
+      else:
+        # IsotopeCode mismatch. Try to
+        if prefix == isotopeCode.upper():
+          # Something wrong here.
+          raise ValueError("Clash between NmrAtom %s (%s) and %s (%s) in %s"
+                           % (nmrAtom.name, nmrAtom.isotopeCode, newName, isotopeCode, nmrResidue))
+        else:
+          newName = isotopeCode.upper() + newName[len(prefix):]
+          continue
 
-      newName = '`%s`' % newName
+      # If we get here there was an error. Change name and try again
+      tt = newName.rsplit('_', 1)
+      if len(tt) == 2 and tt[1].isdigit():
+        newName = '%s_%s' % (tt[0], int(tt[1]) + 1)
+      else:
+        newName += '_1'
       self.warning("New NmrAtom:%s.%s name caused an error.  Renamed %s.%s"
                    % (nmrResidue._id, name, nmrResidue._id, newName))
 
@@ -3369,9 +3405,6 @@ def makeNefAxisCodes(isotopeCodes:Sequence[str], dimensionIds:List[int],
   nuclei = [commonUtil.splitIntFromChars(x)[1] for x in isotopeCodes]
   dimensionToNucleus = dict((zip(dimensionIds, nuclei)))
   dimensionToAxisCode = dimensionToNucleus.copy()
-  acquisitionAtEnd = False
-  if acquisitionAxisIndex is not None:
-    acquisitionAtEnd = acquisitionAxisIndex >= 0.5*len(isotopeCodes)
 
   oneBondConnections = {}
   for startNuc in 'FH':
@@ -3387,17 +3420,26 @@ def makeNefAxisCodes(isotopeCodes:Sequence[str], dimensionIds:List[int],
           dimensionToAxisCode[dim1] = nuc1 + nuc2.lower()
           dimensionToAxisCode[dim2] = nuc2 + nuc1.lower()
 
-  result = []
-  if acquisitionAtEnd:
-    # reverse, because acquisition end of dimensions should
-    # be the one WITHOUT number suffixes
-    dimensionIds.reverse()
+  resultMap = {}
+  acquisitionAtEnd = False
+  if acquisitionAxisIndex is not None:
+    acquisitionAtEnd = acquisitionAxisIndex >= 0.5*len(isotopeCodes)
+    # if acquisitionAtEnd:
+    #   # reverse, because acquisition end of dimensions should
+    #   # be the one WITHOUT number suffixes
+    #   dimensionIds.reverse()
+
+    # Put acquisition axis first, to make sure it gets the lowest number
+    # even if it is not teh first to start with.
+    acquisitionAxisId = dimensionIds[acquisitionAxisIndex]
+    dimensionIds.remove(acquisitionAxisId)
+    dimensionIds.insert(0, acquisitionAxisId)
   for dim in dimensionIds:
     axisCode = dimensionToAxisCode[dim]
-    if axisCode in result:
+    if axisCode in resultMap.values():
       ii = 0
       ss = axisCode
-      while ss in result:
+      while ss in resultMap.values():
         ii += 1
         ss = '%s%s' % (axisCode, ii)
       otherDim = oneBondConnections.get(dim)
@@ -3407,13 +3449,15 @@ def makeNefAxisCodes(isotopeCodes:Sequence[str], dimensionIds:List[int],
         # NB not well tested, but better than leaving in a known error.
         ss = '%s%s' % (dimensionToAxisCode[otherDim], ii)
         if otherDim < dim:
-          result[otherDim - 1] = ss
+          resultMap[otherDim] = ss
         dimensionToAxisCode[otherDim] = ss
 
-    result.append(axisCode)
+    resultMap[dim] = axisCode
+  dimensionIds.sort()
   if acquisitionAtEnd:
     # put result back in dimension order
-    result.reverse()
+    dimensionIds.reverse()
+  result = list(resultMap[ii] for ii in dimensionIds)
   #
   return result
 
@@ -3600,8 +3644,8 @@ if __name__ == '__main__':
   path = sys.argv[1]
   # _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)
-  nefpath = _exportToNef(path)
-  _testNefIo(nefpath)
-  # nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
-  # _testNefIo(nefpath, skipPrefixes=('ccpn',))
+  # nefpath = _exportToNef(path)
+  # _testNefIo(nefpath)
+  nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
+  _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

@@ -279,6 +279,8 @@ class Pid(str):
     # NBNB having a property called 'str' confuses Sphinx.
     # It is probably a bad idea on general grounds
 
+
+    # NBNB TODO function name 'str' confuses Sphinx documentation and is bad for, Change it?
     @property
     def str(self):
         """
@@ -403,6 +405,7 @@ class Pid(str):
 
     #end def
 
+    # NBNB TODO parameter name 'type' clashes with built-in and confuses Sphinx documentation
     def modify(self, index:int, newId:object, type:str=None) -> 'Pid':
         """Return new pid with position index modified by newId
         """

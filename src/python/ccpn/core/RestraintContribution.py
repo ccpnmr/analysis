@@ -158,12 +158,12 @@ class RestraintContribution(AbstractWrapperObject):
     self._wrappedData.scale = value
 
   @property
-  def isDistanceDependent(self) -> float:
+  def isDistanceDependent(self) -> bool:
     """Does targetValue depend on a variable distance (where this is relevant, e.g. for Rdc) """
     return self._wrappedData.isDistanceDependent
 
   @isDistanceDependent.setter
-  def isDistanceDependent(self, value:float):
+  def isDistanceDependent(self, value:bool):
     self._wrappedData.isDistanceDependent = value
 
   @property

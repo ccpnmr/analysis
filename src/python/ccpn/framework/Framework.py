@@ -470,31 +470,60 @@ class Framework:
     Restore layout of modules from previous save after graphics have been set up.
     """
     import yaml, os
+
+    containers, modules = self.ui.mainWindow.moduleArea.findAll()
+    keysSeen = set()
+
+    # At this point, the spectrum windows (modules) have been created but not the other ones
+    # These other ones have keys in MODULE_DICT
+    # If the key is not in that dict then it is not needed, so remove
+    # This means, for example, that Assign-specific modules are removed from Screen
+    # If the key has already been seen then also remove
+    # This is because PyQtGraph does not like duplicate keys when it restores the state
+    # The code below assumes some knowledge of how PyQtGraph stores the state in terms of layout
+
+    # Remaining problem: windows might be off screen
+
+    def _analyseContents(contents):
+      """function internal to _initLayout"""
+      contentToRemove = []
+      for content in contents:
+         if isinstance(content, (tuple, list)):
+          if content:
+            if content[0] == 'dock':
+              key = content[1]
+              if key in keysSeen or not modules.get(key):  # if modules.get(key) then module exists already
+                if key in keysSeen or key not in MODULE_DICT or not hasattr(self, MODULE_DICT[key]):
+                  contentToRemove.append(content)
+                else:
+                  keysSeen.add(key)
+                  func = getattr(self, MODULE_DICT[key])
+                  func()
+            else:
+              _analyseContents(content)
+
+      contentToRemove.reverse()  # not needed, but delete from end
+      for content in contentToRemove:
+        contents.remove(content)
+
     if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
       with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
         layout = yaml.load(f)
-      typ, contents, state = layout['main']
 
-      # TODO: When UI has a main window, change the call below (then move the whole function!)
-      containers, modules = self.ui.mainWindow.moduleArea.findAll()
-      flatten = lambda *n: (e for a in n
-        for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))
-      flatContents = list(flatten(contents))
-      for item in flatContents:
-        if item in list(MODULE_DICT.keys()):
-          obj = modules.get(item)
-          if not obj:
-            func = getattr(self, MODULE_DICT[item])
-            func()
-      for s in layout['float']:
-        typ, contents, state = s[0]['main']
-        containers, modules = self.ui.mainWindow.moduleArea.findAll()
-        for item in contents:
-          if item[0] == 'dock':
-            obj = modules.get(item[1])
-            if not obj:
-              func = getattr(self, MODULE_DICT[item[1]])
-              func()
+      typ, contents, state = layout['main']  # main window
+      _analyseContents(contents)
+
+      floatLayoutsToRemove = []
+      for floatLayout in layout['float']:  # floating windows
+        typ, contents, state = floatLayout[0]['main']
+        _analyseContents(contents)
+        if not contents:
+          floatLayoutsToRemove.append(floatLayout)
+
+      floatLayoutsToRemove.reverse()  # not needed, but delete from end
+      for floatLayout in floatLayoutsToRemove:
+        layout['float'].remove(floatLayout)
+
       self.ui.mainWindow.moduleArea.restoreState(layout)
 
 

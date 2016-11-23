@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-02 14:23:31 +0000 (Wed, 02 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-02 14:23:31 +0000 (Wed, 02 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9970 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -100,7 +100,7 @@
     <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Atom Selector&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">orientation</span> <span class="o">=</span> <span class="s1">&#39;vertical&#39;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">moveLabel</span> <span class="o">=</span> <span class="bp">False</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickAndAssignWidget</span> <span class="o">=</span> <span class="n">Widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">setLayout</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="c1"># self.pickAndAssignWidget.setMaximumSize(500, 300)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
 
@@ -131,7 +131,7 @@
     <span class="n">nmrResidueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Current NmrResidue:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">currentNmrResidueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">offsetLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Offset:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">offsetSelector</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateFromOffset</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">offsetSelector</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridLine</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateWidget</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">offsetSelector</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="s1">&#39;-1&#39;</span><span class="p">,</span> <span class="s1">&#39;+1&#39;</span><span class="p">])</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">offsetSelector</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">offsetLabel</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
@@ -146,13 +146,11 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">unRegisterNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_updateWidget</span><span class="p">,</span> <span class="s1">&#39;nmrResidues&#39;</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
-  <span class="k">def</span> <span class="nf">_updateFromOffset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_updateWidget</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">])</span>
-
   <span class="k">def</span> <span class="nf">_updateWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidues</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidues</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrResidues</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">:</span>
       <span class="n">nmrResidues</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">currentNmrResidueLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">nmrResidues</span> <span class="ow">and</span> <span class="n">nmrResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">currentNmrResidueLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton1</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_createBackBoneButtons</span><span class="p">()</span>
     <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">radioButton2</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>

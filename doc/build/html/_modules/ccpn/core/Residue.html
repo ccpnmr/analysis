@@ -169,10 +169,23 @@
         <span class="k">if</span> <span class="n">previousResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
           <span class="k">if</span> <span class="n">nextResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">&#39;single&#39;</span>
-          <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;break&#39;</span>
         <span class="k">elif</span> <span class="n">nextResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">return</span> <span class="s1">&#39;break&#39;</span>
+          <span class="n">chainResidues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span>
+          <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">chainResidues</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="c1"># Last residue in chain</span>
+            <span class="k">return</span> <span class="s1">&#39;middle&#39;</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">nextInLine</span> <span class="o">=</span> <span class="n">chainResidues</span><span class="p">[</span><span class="n">chainResidues</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">nextInLine</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">linking</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">):</span>
+              <span class="c1"># Next in chain is start or non-linear</span>
+              <span class="k">return</span> <span class="s1">&#39;middle&#39;</span>
+            <span class="n">altSelf</span> <span class="o">=</span> <span class="n">nextInLine</span><span class="o">.</span><span class="n">previousResidue</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">altSelf</span> <span class="ow">and</span> <span class="n">altSelf</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">seqId</span> <span class="o">&gt;</span> <span class="n">nextInLine</span><span class="o">.</span><span class="n">seqId</span>
+              <span class="ow">and</span> <span class="n">altSelf</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">linking</span> <span class="o">==</span> <span class="s1">&#39;middle&#39;</span><span class="p">):</span>
+              <span class="c1"># Next residue is cyclic (start of)</span>
+              <span class="k">return</span> <span class="s1">&#39;middle&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="k">return</span> <span class="s1">&#39;break&#39;</span>
         <span class="k">else</span><span class="p">:</span>
 
           <span class="c1"># NBNB The detection of &#39;cyclic&#39; only works if residues are given in</span>
@@ -190,7 +203,7 @@
 
     <span class="k">else</span><span class="p">:</span>
       <span class="c1"># All other types have linking &#39;non-linear&#39; in the wrapper</span>
-      <span class="k">return</span> <span class="s1">&#39;nonlinear&#39;</span>
+      <span class="k">return</span> <span class="s1">&#39;single&#39;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">linking</span>
     
   <span class="nd">@linking.setter</span>

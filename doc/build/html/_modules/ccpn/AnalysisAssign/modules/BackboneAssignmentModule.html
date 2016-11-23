@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-09-08 14:28:38 +0100 (Thu, 08 Sep 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-07 14:40:28 +0000 (Mon, 07 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: skinnersp $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-09-08 14:28:38 +0100 (Thu, 08 Sep 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9864 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-07 14:40:28 +0000 (Mon, 07 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9976 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -110,7 +110,6 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">numberOfMatches</span> <span class="o">=</span> <span class="mi">5</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrChains</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span> <span class="o">=</span> <span class="n">NmrResidueTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_startAssignment</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
@@ -119,11 +118,11 @@
     <span class="c1"># place button for settings widget and add widgets to settings widget</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">placeSettingsButton</span><span class="p">(</span><span class="n">buttonParent</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="p">,</span> <span class="n">buttonGrid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
     <span class="n">modules</span> <span class="o">=</span> <span class="p">[</span><span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">]</span>
-    <span class="n">modules</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;  &#39;</span><span class="p">)</span>
+    <span class="n">modules</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="c1"># just so that can select proper items (list only updated when pulldown selection changed)</span>
     <span class="n">modulesLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Selected Modules&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modulePulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectMatchModule</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">modulePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">modules</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleList</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">moduleList</span> <span class="o">=</span> <span class="n">ListWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
     <span class="n">chemicalShiftListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Chemical Shift List&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_setupShiftDicts</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="n">shiftlist</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">shiftlist</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">])</span>
@@ -131,6 +130,7 @@
 
     <span class="c1"># register notifiers for updating of pulldown lists and NmrResidueTable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateNmrResidueTable</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateNmrChainPulldown</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateNmrChainPulldown</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updateNmrChainList</span><span class="p">)</span>
 
@@ -173,16 +173,21 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">selector</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">updateTable</span><span class="p">()</span>
 
+  <span class="k">def</span> <span class="nf">_matchModules</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 
-  <span class="k">def</span> <span class="nf">_selectMatchModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">moduleList</span><span class="o">.</span><span class="n">item</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">moduleList</span><span class="o">.</span><span class="n">count</span><span class="p">())]</span>
+
+  <span class="k">def</span> <span class="nf">_selectMatchModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Call back to assign modules as match modules in reponse to a signal from the modulePulldown</span>
 <span class="sd">    above. Adds the item to a list containing match modules and adds the Pid of the module to the</span>
 <span class="sd">    moduleList ListWidget object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">moduleList</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>  <span class="c1"># blank row</span>
+      <span class="k">return</span>
 
+    <span class="k">if</span> <span class="n">text</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matchModules</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">moduleList</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_startAssignment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -235,7 +240,7 @@
       <span class="n">mainWindow</span><span class="o">.</span><span class="n">clearMarks</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">updateTable</span><span class="p">()</span>
       <span class="n">selectedDisplays</span> <span class="o">=</span> <span class="p">[</span><span class="n">display</span> <span class="k">for</span> <span class="n">display</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span>
-                          <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span><span class="p">]</span>
+                          <span class="k">if</span> <span class="n">display</span><span class="o">.</span><span class="n">pid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matchModules</span><span class="p">()]</span>
 
 
       <span class="c1"># If NmrResidue is a -1 offset NmrResidue, set queryShifts as value from self.interShifts dictionary</span>
@@ -361,7 +366,7 @@
         <span class="n">iNmrResidue</span> <span class="o">=</span> <span class="n">matchResidue</span>
       <span class="n">nmrAtomPairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">iNmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;N&#39;</span><span class="p">),</span> <span class="n">iNmrResidue</span><span class="o">.</span><span class="n">fetchNmrAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)))</span>
 
-    <span class="k">for</span> <span class="n">modulePid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">matchModules</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">modulePid</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_matchModules</span><span class="p">():</span>
       <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">modulePid</span><span class="p">)</span>
       <span class="n">makeStripPlot</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">nmrAtomPairs</span><span class="p">)</span>
 

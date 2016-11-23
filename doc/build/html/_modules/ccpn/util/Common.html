@@ -88,8 +88,6 @@
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Constants</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">coreLibConstants</span>
 
-<span class="n">STANDARD_ISOTOPES</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">values</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
-
 <span class="c1"># Max value used for random integer. Set to be expressible as a signed 32-bit integer.</span>
 <span class="n">maxRandomInt</span> <span class="o">=</span>  <span class="mi">2000000000</span>
 
@@ -310,61 +308,112 @@
 
 
 <div class="viewcode-block" id="name2IsotopeCode"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2IsotopeCode">[docs]</a><span class="k">def</span> <span class="nf">name2IsotopeCode</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Get standard isotope code matching name or axisCode string&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Get standard isotope code matching atom name or axisCode string</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
     <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="k">for</span> <span class="n">tag</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
-      <span class="k">return</span> <span class="n">val</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">None</span></div>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+          <span class="k">if</span> <span class="n">name</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">key</span>
+          <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="isotopeCode2Nucleus"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.isotopeCode2Nucleus">[docs]</a><span class="k">def</span> <span class="nf">isotopeCode2Nucleus</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">isotopeCode</span><span class="p">:</span>
     <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="k">for</span> <span class="n">tag</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-    <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">isotopeCode</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">tag</span>
+  <span class="n">record</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">None</span>
   <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="bp">None</span></div>
+    <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+
+  <span class="c1"># for tag,val in sorted(Constants.DEFAULT_ISOTOPE_DICT.items()):</span>
+  <span class="c1">#   if val == isotopeCode:</span>
+  <span class="c1">#     return tag</span>
+  <span class="c1"># else:</span>
+  <span class="c1">#   return None</span>
 
 
 <div class="viewcode-block" id="name2ElementSymbol"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.name2ElementSymbol">[docs]</a><span class="k">def</span> <span class="nf">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Get standard element symbol matching name or axisCode&quot;&quot;&quot;</span>
-  <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="p">)):</span>
-    <span class="c1"># Reversed looping guarantees that the longer of two matches will be chosen</span>
-    <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">tag</span><span class="p">):</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">tag</span>
-      <span class="k">break</span>
-  <span class="k">else</span><span class="p">:</span>
-    <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="sd">&quot;&quot;&quot;Get standard element symbol matching name or axisCode</span>
+
+<span class="sd">  NB, the first letter takes precedence, so e.g. &#39;CD&#39; returns &#39;C&#39; (carbon)</span>
+<span class="sd">  rather than &#39;CD&#39; (Cadmium)&quot;&quot;&quot;</span>
+
+  <span class="c1"># NB, We deliberately do NOT use &#39;value in Constants.DEFAULT_ISOTOPE_DICT&#39;</span>
+  <span class="c1"># We want to avoid elements that are in the dict but have value None.</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">None</span>
+  <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="k">elif</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span>
+  <span class="k">elif</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">title</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">record</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span><span class="o">.</span><span class="n">isupper</span><span class="p">():</span>
+          <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">break</span>
   <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">result</span></div>
+  <span class="k">return</span> <span class="bp">None</span></div>
+
+  <span class="c1"># for tag in reversed(sorted(Constants.DEFAULT_ISOTOPE_DICT)):</span>
+  <span class="c1">#   # Reversed looping guarantees that the longer of two matches will be chosen</span>
+  <span class="c1">#   if name.startswith(tag):</span>
+  <span class="c1">#     result = tag</span>
+  <span class="c1">#     break</span>
+  <span class="c1"># else:</span>
+  <span class="c1">#   result = None</span>
+  <span class="c1"># #</span>
+  <span class="c1"># return result</span>
 
 
 <div class="viewcode-block" id="checkIsotope"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.checkIsotope">[docs]</a><span class="k">def</span> <span class="nf">checkIsotope</span><span class="p">(</span><span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-  <span class="sd">&quot;&quot;&quot;Convert string to most probable isotope code - defaulting to &#39;1H&quot;&quot;&quot;</span>
+  <span class="sd">&quot;&quot;&quot;Convert isotope specifier string to most probable isotope code - defaulting to &#39;1H&#39;</span>
 
-  <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="sd">  This function is intended for external format isotope specifications, *not* for</span>
+<span class="sd">  axisCodes or atom names, hence the difference to name2ElementSymbol.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">defaultIsotope</span> <span class="o">=</span> <span class="s1">&#39;1H&#39;</span>
+  <span class="n">name</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
-    <span class="k">return</span> <span class="s1">&#39;1H&#39;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">defaultIsotope</span>
 
-  <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">STANDARD_ISOTOPES</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">text</span>
+  <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="p">:</span>
+    <span class="c1"># Superfluous but should speed things up</span>
+    <span class="k">return</span> <span class="n">name</span>
 
-  <span class="k">if</span> <span class="n">text</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="p">[</span><span class="n">text</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">isotopeCode</span> <span class="ow">in</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="p">:</span>
+    <span class="c1"># NB checking this first means that e.g. &#39;H13C&#39; returns &#39;13C&#39; rather than &#39;1H&#39;</span>
+    <span class="k">if</span> <span class="n">isotopeCode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">name</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">isotopeCode</span>
 
-  <span class="k">for</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">STANDARD_ISOTOPES</span><span class="p">:</span>
-    <span class="k">if</span> <span class="n">isotope</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">isotope</span>
+  <span class="c1"># NB order of checking means that e.g. &#39;CA&#39; returns Calcium rather than Carbon</span>
+  <span class="n">result</span> <span class="o">=</span>  <span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+             <span class="ow">or</span> <span class="n">Constants</span><span class="o">.</span><span class="n">DEFAULT_ISOTOPE_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
-  <span class="k">else</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;1H&#39;</span></div>
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;D&#39;</span><span class="p">:</span>
+      <span class="c1"># special case</span>
+      <span class="n">result</span>  <span class="o">=</span> <span class="s1">&#39;2H&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">defaultIsotope</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
 
 
 <div class="viewcode-block" id="axisCodeMatch"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.axisCodeMatch">[docs]</a><span class="k">def</span> <span class="nf">axisCodeMatch</span><span class="p">(</span><span class="n">axisCode</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">str</span><span class="p">:</span>
@@ -412,7 +461,7 @@
   <span class="c1"># find best mapping</span>
   <span class="n">maxScore</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">)</span>
   <span class="n">bestscore</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-  <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="n">results</span> <span class="o">=</span> <span class="bp">None</span>
   <span class="n">values</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">)))</span> <span class="o">+</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="n">lenDifference</span>
   <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">permutations</span><span class="p">(</span><span class="n">values</span><span class="p">):</span>
     <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
@@ -421,10 +470,48 @@
         <span class="n">score</span> <span class="o">+=</span> <span class="n">matches</span><span class="p">[</span><span class="n">jj</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">bestscore</span><span class="p">:</span>
       <span class="n">bestscore</span> <span class="o">=</span> <span class="n">score</span>
-      <span class="n">result</span> <span class="o">=</span> <span class="n">permutation</span>
-    <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;=</span> <span class="n">maxScore</span><span class="p">:</span>
+      <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">permutation</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="n">score</span> <span class="o">==</span> <span class="n">maxScore</span><span class="p">:</span>
       <span class="c1"># it cannot get any higher</span>
-      <span class="k">break</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">permutation</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+    <span class="c1"># Pick the first of the equally good matches as the default answer</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">results</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="c1"># Multiple matches - try to select on pairs of bound atoms</span>
+      <span class="c1"># NB we do not need to be rigorous as this is only used to resolve ambiguity</span>
+      <span class="c1"># NB this is necessary to do a correct match of e.g. Hc, Ch, H to Hc, Hc1, Ch1</span>
+      <span class="n">boundCodeDicts</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">tryCodes</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">:</span>
+        <span class="n">boundCodes</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">boundCodeDicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">boundCodes</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">code</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tryCodes</span><span class="p">):</span>
+          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">code</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ii</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">tryCodes</span><span class="p">)):</span>
+              <span class="n">code2</span> <span class="o">=</span> <span class="n">tryCodes</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+              <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">code2</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">code2</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>
+                    <span class="n">code2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isupper</span><span class="p">()</span> <span class="ow">and</span> <span class="n">code2</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span>
+                    <span class="n">code</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">==</span> <span class="n">code2</span><span class="p">[</span><span class="mi">2</span><span class="p">:]):</span>
+                  <span class="c1"># Matches pair of bound atoms - e.g. Hc1, Ch1</span>
+                  <span class="n">boundCodes</span><span class="p">[</span><span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code2</span><span class="p">)</span>
+                  <span class="n">boundCodes</span><span class="p">[</span><span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code2</span><span class="p">)]</span> <span class="o">=</span> <span class="n">tryCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># bound pairs on both sides - check for matching pairs</span>
+        <span class="n">bestscore</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">for</span> <span class="n">permutation</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+          <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="k">for</span> <span class="n">idx1</span><span class="p">,</span> <span class="n">idx2</span> <span class="ow">in</span> <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">permutation</span><span class="p">[</span><span class="n">idx1</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">target</span> <span class="o">==</span>  <span class="n">boundCodeDicts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">permutation</span><span class="p">[</span><span class="n">idx2</span><span class="p">]):</span>
+              <span class="n">score</span> <span class="o">+=</span> <span class="mi">1</span>
+          <span class="k">if</span> <span class="n">score</span> <span class="o">&gt;</span> <span class="n">bestscore</span><span class="p">:</span>
+            <span class="n">bestscore</span> <span class="o">=</span> <span class="n">score</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">permutation</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span>
 

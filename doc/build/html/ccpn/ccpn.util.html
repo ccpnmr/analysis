@@ -177,7 +177,9 @@ NB a series of single-letter axisCodes (e.g. &#8216;N&#8217;, &#8216;HCN&#8217;)
 <dl class="function">
 <dt id="ccpn.util.Common.checkIsotope">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">checkIsotope</code><span class="sig-paren">(</span><em>text: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#checkIsotope"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.checkIsotope" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convert string to most probable isotope code - defaulting to &#8216;1H</p>
+<dd><p>Convert isotope specifier string to most probable isotope code - defaulting to &#8216;1H&#8217;</p>
+<p>This function is intended for external format isotope specifications, <em>not</em> for
+axisCodes or atom names, hence the difference to name2ElementSymbol.</p>
 </dd></dl>
 
 <dl class="function">
@@ -250,12 +252,14 @@ Uses sum of relative (relTolerance) and absolute (absTolerance) difference</p>
 <dt id="ccpn.util.Common.name2ElementSymbol">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">name2ElementSymbol</code><span class="sig-paren">(</span><em>name: str</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#name2ElementSymbol"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2ElementSymbol" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get standard element symbol matching name or axisCode</p>
+<p>NB, the first letter takes precedence, so e.g. &#8216;CD&#8217; returns &#8216;C&#8217; (carbon)
+rather than &#8216;CD&#8217; (Cadmium)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="ccpn.util.Common.name2IsotopeCode">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">name2IsotopeCode</code><span class="sig-paren">(</span><em>name: str = None</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/Common.html#name2IsotopeCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.name2IsotopeCode" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get standard isotope code matching name or axisCode string</p>
+<dd><p>Get standard isotope code matching atom name or axisCode string</p>
 </dd></dl>
 
 <dl class="function">
@@ -302,6 +306,72 @@ into an (integer,string) tuple</p>
 <div class="section" id="module-ccpn.util.Constants">
 <span id="ccpn-util-constants-module"></span><h2>ccpn.util.Constants module<a class="headerlink" href="#module-ccpn.util.Constants" title="Permalink to this headline">¶</a></h2>
 <p>Constants used in the program core, including enumerations of allowed values</p>
+<dl class="class">
+<dt id="ccpn.util.Constants.IsotopeRecord">
+<em class="property">class </em><code class="descclassname">ccpn.util.Constants.</code><code class="descname">IsotopeRecord</code><span class="sig-paren">(</span><em>isotopeCode</em>, <em>elementNumber</em>, <em>massNumber</em>, <em>isRadioactive</em>, <em>symbol</em>, <em>name</em>, <em>spin</em>, <em>gFactor</em>, <em>abundance</em>, <em>quadrupoleMoment</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.abundance">
+<code class="descname">abundance</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.abundance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 8</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.elementNumber">
+<code class="descname">elementNumber</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.elementNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.gFactor">
+<code class="descname">gFactor</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.gFactor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.isRadioactive">
+<code class="descname">isRadioactive</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.isRadioactive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.isotopeCode">
+<code class="descname">isotopeCode</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.isotopeCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.massNumber">
+<code class="descname">massNumber</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.massNumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.name">
+<code class="descname">name</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.quadrupoleMoment">
+<code class="descname">quadrupoleMoment</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.quadrupoleMoment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 9</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.spin">
+<code class="descname">spin</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.spin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.Constants.IsotopeRecord.symbol">
+<code class="descname">symbol</code><a class="headerlink" href="#ccpn.util.Constants.IsotopeRecord.symbol" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-ccpn.util.Graph">
 <span id="ccpn-util-graph-module"></span><h2>ccpn.util.Graph module<a class="headerlink" href="#module-ccpn.util.Graph" title="Permalink to this headline">¶</a></h2>

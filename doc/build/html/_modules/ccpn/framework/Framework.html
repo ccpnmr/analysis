@@ -158,6 +158,10 @@
                       <span class="n">default</span><span class="o">=</span><span class="n">defaultInterface</span><span class="p">)</span>
   <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--skip-user-preferences&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;skipUserPreferences&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
                                                  <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Skip loading user preferences&#39;</span><span class="p">)</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--dark&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;darkColourScheme&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                                                 <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Use dark colour scheme&#39;</span><span class="p">)</span>
+  <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--light&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;lightColourScheme&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                                                 <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Use dark colour scheme&#39;</span><span class="p">)</span>
   <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--nologging&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;nologging&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Do not log information to a file&#39;</span><span class="p">)</span>
   <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;projectPath&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Project path&#39;</span><span class="p">)</span>
 
@@ -229,7 +233,7 @@
 <span class="sd">  The Framework class is the base class for all applications.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
 
-  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">applicationVersion</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="n">Arguments</span><span class="p">()):</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">args</span> <span class="o">=</span> <span class="n">args</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">applicationName</span> <span class="o">=</span> <span class="n">applicationName</span>
@@ -242,16 +246,17 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">useFileLogger</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">nologging</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span>      <span class="o">=</span> <span class="bp">None</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="bp">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">styleSheet</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span>  <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># intialised by self._getUserPrefs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">styleSheet</span>   <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># intialised by self.getStyleSheet</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># intialised by self.getStyleSheet</span>
 
     <span class="c1"># Necessary as attribute is queried during initialisation:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_mainWindow</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_mainWindow</span>  <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># This is needed to make project available in NoUi (if nothing else)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span>      <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># Blocking level for command echo and logging</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_echoBlocking</span> <span class="o">=</span> <span class="mi">0</span>
@@ -259,14 +264,14 @@
     <span class="c1"># NEF reader</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">nefReader</span> <span class="o">=</span> <span class="n">CcpnNefIo</span><span class="o">.</span><span class="n">CcpnNefReader</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_backupTimerQ</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_backupTimerQ</span>    <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupThread</span> <span class="o">=</span> <span class="bp">None</span>
 
     <span class="c1"># NBNB TODO The following block should maybe be moved into _getUi</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_getUserPrefs</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_setLanguage</span><span class="p">()</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">styleSheet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">styleSheet</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getUI</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">setupMenus</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">feedbackPopup</span> <span class="o">=</span> <span class="bp">None</span>
@@ -284,6 +289,8 @@
 
     <span class="k">else</span><span class="p">:</span>
       <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newProject</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updateCheckableMenuItems</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_checkRegistration</span><span class="p">():</span>
       <span class="k">return</span>
@@ -369,6 +376,7 @@
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">interface</span> <span class="o">==</span> <span class="s1">&#39;Gui&#39;</span><span class="p">:</span>
       <span class="kn">from</span> <span class="nn">ccpn.ui.gui.Gui</span> <span class="kn">import</span> <span class="n">Gui</span>
       <span class="n">ui</span> <span class="o">=</span> <span class="n">Gui</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">styleSheet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getStyleSheet</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="kn">from</span> <span class="nn">ccpn.ui.Ui</span> <span class="kn">import</span> <span class="n">NoUi</span>
       <span class="n">ui</span> <span class="o">=</span> <span class="n">NoUi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -379,18 +387,27 @@
     <span class="k">return</span> <span class="n">ui</span>
 
 
-<div class="viewcode-block" id="Framework.getStyleSheet"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.getStyleSheet">[docs]</a>  <span class="k">def</span> <span class="nf">getStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">preferences</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">preferences</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span>
+<div class="viewcode-block" id="Framework.getStyleSheet"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.getStyleSheet">[docs]</a>  <span class="k">def</span> <span class="nf">getStyleSheet</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;return Stylesheet as determined by arguments --dark, --light or preferences</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">darkColourScheme</span><span class="p">:</span>
+      <span class="n">colourScheme</span> <span class="o">=</span><span class="s1">&#39;Dark&#39;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">lightColourScheme</span><span class="p">:</span>
+      <span class="n">colourScheme</span> <span class="o">=</span> <span class="s1">&#39;Light&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">colourScheme</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span>
 
-    <span class="n">colourScheme</span> <span class="o">=</span> <span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span>
-    <span class="n">colourScheme</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">colourScheme</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;invalid colourScheme&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">colourScheme</span><span class="p">)</span>
 
     <span class="n">styleSheet</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getPathToImport</span><span class="p">(</span><span class="s1">&#39;ccpn.ui.gui.widgets&#39;</span><span class="p">),</span>
-                                   <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">StyleSheet.qss&#39;</span> <span class="o">%</span> <span class="n">colourScheme</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                                   <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">StyleSheet.qss&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">platform</span><span class="o">.</span><span class="n">system</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Linux&#39;</span><span class="p">:</span>
       <span class="n">additions</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getPathToImport</span><span class="p">(</span><span class="s1">&#39;ccpn.ui.gui.widgets&#39;</span><span class="p">),</span>
-                                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">AdditionsLinux.qss&#39;</span> <span class="o">%</span> <span class="n">colourScheme</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">AdditionsLinux.qss&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">))</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
       <span class="n">styleSheet</span> <span class="o">+=</span> <span class="n">additions</span>
     <span class="k">return</span> <span class="n">styleSheet</span></div>
 
@@ -596,6 +613,34 @@
 
   <span class="c1">#########################################    Start setup Menus      ############################</span>
 
+  <span class="k">def</span> <span class="nf">_updateCheckableMenuItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># This has to be kept in sync with menu items below which are checkable,</span>
+    <span class="c1"># and also with MODULE_DICT keys</span>
+    <span class="c1"># The code is terrible because Qt has no easy way to get hold of menus / actions</span>
+
+    <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+    <span class="k">if</span> <span class="n">mainWindow</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># We have a UI with no mainWindow - nothing to do.</span>
+      <span class="k">return</span>
+
+    <span class="n">topMenu</span> <span class="o">=</span> <span class="n">mainWindow</span><span class="o">.</span><span class="n">menuBar</span><span class="p">()</span><span class="o">.</span><span class="n">findChildren</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">topActionDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">topAction</span> <span class="ow">in</span> <span class="n">topMenu</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+      <span class="n">mainActionDict</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">mainAction</span> <span class="ow">in</span> <span class="n">topAction</span><span class="o">.</span><span class="n">menu</span><span class="p">()</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+        <span class="n">mainActionDict</span><span class="p">[</span><span class="n">mainAction</span><span class="o">.</span><span class="n">text</span><span class="p">()]</span> <span class="o">=</span> <span class="n">mainAction</span>
+      <span class="n">topActionDict</span><span class="p">[</span><span class="n">topAction</span><span class="o">.</span><span class="n">text</span><span class="p">()]</span> <span class="o">=</span> <span class="n">mainActionDict</span>
+
+    <span class="n">openModuleKeys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">topActionText</span><span class="p">,</span> <span class="n">mainActionText</span> <span class="ow">in</span> <span class="p">((</span><span class="s1">&#39;SEQUENCE&#39;</span><span class="p">,</span> <span class="s1">&#39;Molecules&#39;</span><span class="p">,</span> <span class="s1">&#39;Show Sequence&#39;</span><span class="p">),</span>
+                                               <span class="p">(</span><span class="s1">&#39;PYTHON CONSOLE&#39;</span><span class="p">,</span> <span class="s1">&#39;View&#39;</span><span class="p">,</span> <span class="s1">&#39;Python Console&#39;</span><span class="p">)):</span>
+      <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">openModuleKeys</span><span class="p">:</span>
+        <span class="n">mainActionDict</span> <span class="o">=</span> <span class="n">topActionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">topActionText</span><span class="p">)</span> <span class="c1"># should always exist but play safe</span>
+        <span class="k">if</span> <span class="n">mainActionDict</span><span class="p">:</span>
+          <span class="n">mainAction</span> <span class="o">=</span> <span class="n">mainActionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mainActionText</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">mainAction</span><span class="p">:</span>
+            <span class="n">mainAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
 <div class="viewcode-block" id="Framework.setupMenus"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.setupMenus">[docs]</a>  <span class="k">def</span> <span class="nf">setupMenus</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Setup the menu specification.</span>
 
@@ -756,7 +801,7 @@
       <span class="p">(</span><span class="s2">&quot;New from Log...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">newMacroFromLog</span><span class="p">),</span>
       <span class="p">(),</span>
       <span class="p">(</span><span class="s2">&quot;Record Macro...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startMacroRecord</span><span class="p">),</span>
-      <span class="p">(</span><span class="s2">&quot;Run&quot;</span><span class="p">,</span> <span class="p">()),</span>
+      <span class="p">(</span><span class="s2">&quot;Run...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">runMacro</span><span class="p">),</span>
       <span class="p">(</span><span class="s2">&quot;Run Recent&quot;</span><span class="p">,</span> <span class="p">()),</span>
       <span class="p">(),</span>
       <span class="p">(</span><span class="s2">&quot;Define User Shortcuts...&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">defineUserShortcuts</span><span class="p">,</span> <span class="p">[(</span><span class="s1">&#39;shortcut&#39;</span><span class="p">,</span> <span class="s1">&#39;du&#39;</span><span class="p">)])</span>
@@ -851,7 +896,7 @@
         <span class="n">project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">_DEBUG</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initialiseProject</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
       <span class="k">elif</span> <span class="n">subType</span> <span class="o">==</span> <span class="n">ioFormats</span><span class="o">.</span><span class="n">NEF</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Loading </span><span class="si">%s</span><span class="s1"> project &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subType</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;==&gt; Loading </span><span class="si">%s</span><span class="s1"> NEF project &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">subType</span><span class="p">,</span> <span class="n">path</span><span class="p">))</span>
         <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loadNefFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">project</span><span class="o">.</span><span class="n">_resetUndo</span><span class="p">(</span><span class="n">debug</span><span class="o">=</span><span class="n">_DEBUG</span><span class="p">)</span>
       <span class="c1">#</span>
@@ -1358,6 +1403,22 @@
   <span class="k">def</span> <span class="nf">resetZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span></div>
       <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">resetZoom</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_findMenuAction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">menubarText</span><span class="p">,</span> <span class="n">menuText</span><span class="p">):</span>
+
+    <span class="c1"># not sure if this function will be needed more widely or just in console context</span>
+
+    <span class="k">for</span> <span class="n">menuBarAction</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">_menuBar</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">menuBarAction</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">menubarText</span><span class="p">:</span>
+        <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">for</span> <span class="n">menuAction</span> <span class="ow">in</span> <span class="n">menuBarAction</span><span class="o">.</span><span class="n">menu</span><span class="p">()</span><span class="o">.</span><span class="n">actions</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">menuAction</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">menuText</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">menuAction</span>
+
+    <span class="k">return</span> <span class="bp">None</span>
 <div class="viewcode-block" id="Framework.toggleConsole"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.toggleConsole">[docs]</a>
   <span class="k">def</span> <span class="nf">toggleConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -1370,7 +1431,9 @@
       <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">moveModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="n">CcpnModule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Python Console&#39;</span><span class="p">)</span>
+      <span class="n">action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findMenuAction</span><span class="p">(</span><span class="s1">&#39;View&#39;</span><span class="p">,</span> <span class="s1">&#39;Python Console&#39;</span><span class="p">)</span>
+      <span class="n">closeFunc</span> <span class="o">=</span> <span class="n">action</span><span class="o">.</span><span class="n">trigger</span> <span class="k">if</span> <span class="n">action</span> <span class="k">else</span> <span class="bp">None</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span> <span class="o">=</span> <span class="n">CcpnModule</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Python Console&#39;</span><span class="p">,</span> <span class="n">closeFunc</span><span class="o">=</span><span class="n">closeFunc</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="p">)</span></div>
       <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsoleModule</span><span class="p">,</span> <span class="s1">&#39;bottom&#39;</span><span class="p">)</span>
 
@@ -1434,7 +1497,7 @@
 <span class="sd">    Displays macro editor with additional buttons for recording a macro.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">macroEditor</span> <span class="o">=</span> <span class="n">MacroEditor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Macro Editor&quot;</span><span class="p">,</span> <span class="n">showRecordButtons</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">uipyinWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.startMacroRecord()&quot;</span><span class="p">)</span></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;application.startMacroRecord()&quot;</span><span class="p">)</span></div>
     <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;application.startMacroRecord()&quot;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Framework.defineUserShortcuts"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.defineUserShortcuts">[docs]</a>
@@ -1460,11 +1523,6 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">recentMacros</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">macroFile</span><span class="p">)</span>
     <span class="c1"># self._fillRecentMacrosMenu()</span></div>
     <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">_runMacro</span><span class="p">(</span><span class="n">macroFile</span><span class="p">)</span>
-<div class="viewcode-block" id="Framework.defineShortcut"><a class="viewcode-back" href="../../../ccpn/ccpn.framework.html#ccpn.framework.Framework.Framework.defineShortcut">[docs]</a>
-  <span class="k">def</span> <span class="nf">defineShortcut</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="n">info</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet&#39;</span><span class="p">,</span>
-                                  <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span></div>
-                                  <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
 
 
   <span class="c1">###################################################################################################################</span>

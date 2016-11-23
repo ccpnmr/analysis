@@ -454,17 +454,23 @@ class DimensionsTab(QtGui.QWidget, Base):
       Label(self, text="Dimension Type ", grid=(4, 0), vAlign='t', hAlign='l')
       Label(self, text=spectrum.dimensionTypes[i], grid=(4, i+1), vAlign='t', hAlign='l')
       Label(self, text="Spectrum Width (ppm) ", grid=(5, 0), vAlign='t', hAlign='l')
-      Label(self, text=str("%.3f" % spectrum.spectralWidths[i]), grid=(5, i+1), vAlign='t', hAlign='l')
+      Label(self, text=str("%.3f" % (spectrum.spectralWidths[i] or 0.0)), grid=(5, i+1),
+            vAlign='t', hAlign='l')
       Label(self, text="Spectral Width (Hz) ", grid=(6, 0), vAlign='t', hAlign='l')
-      Label(self, text=str("%.3f" % spectrum.spectralWidthsHz[i]), grid=(6, i+1), vAlign='t', hAlign='l')
+      Label(self, text=str("%.3f" % (spectrum.spectralWidthsHz[i] or 0.0)), grid=(6, i+1),
+            vAlign='t', hAlign='l')
 
       Label(self, text="Referencing (ppm) ", grid=(7, 0), vAlign='t', hAlign='l')
-      spectralReferencingData = LineEdit(self, text=str("%.3f" % spectrum.referenceValues[i]), grid=(7, i+1), vAlign='t', hAlign='l')
+      spectralReferencingData = LineEdit(self,
+                                         text=str("%.3f" % (spectrum.referenceValues[i] or 0.0)),
+                                         grid=(7, i+1), vAlign='t', hAlign='l')
       spectralReferencingData.editingFinished.connect(partial(self._queueSetDimensionReferencing,
                                                               spectralReferencingData.text, i))
 
       Label(self, text="Referencing (points)", grid=(8, 0), vAlign='t', hAlign='l')
-      spectralReferencingDataPoints = LineEdit(self, text=str("%.3f" % spectrum.referencePoints[i]), grid=(8, i+1), vAlign='t', hAlign='l')
+      spectralReferencingDataPoints = LineEdit(self,
+                                               text=str("%.3f" % (spectrum.referencePoints[i] or 0.0)),
+                                               grid=(8, i+1), vAlign='t', hAlign='l')
       spectralReferencingDataPoints.editingFinished.connect(partial(self._queueSetPointDimensionReferencing,
                                                                     spectralReferencingDataPoints.text, i))
 
@@ -473,7 +479,7 @@ class DimensionsTab(QtGui.QWidget, Base):
       spectralAssignmentToleranceData.editingFinished.connect(partial(self._queueSetAssignmentTolerances,
                                                                       spectralAssignmentToleranceData.text, i))
       if spectrum.assignmentTolerances[i] is not None:
-        spectralAssignmentToleranceData.setText(str("%.3f" % spectrum.assignmentTolerances[i]))
+        spectralAssignmentToleranceData.setText(str("%.3f" % (spectrum.assignmentTolerances[i] or 0.0)))
 
   def _writeLoggingMessage(self, command):
     self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)

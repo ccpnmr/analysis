@@ -865,6 +865,9 @@ def _refreshPeakPosition(peak:Peak):
     if peakItem:
       dataDims = peakListView.spectrumView._wrappedData.spectrumView.orderedDataDims
       xPpm = peak.position[dataDims[0].dimensionIndex]
-      yPpm = peak.position[dataDims[1].dimensionIndex]
-      peakItem.setPos(xPpm, yPpm)
+      if peakListView.spectrumView.spectrum.dimensionCount > 1:
+        yPpm = peak.position[dataDims[1].dimensionIndex]
+        peakItem.setPos(xPpm, yPpm)
+      else:
+        peakItem.setPos(xPpm, peak.height)
 Peak._refreshPeakPosition = _refreshPeakPosition

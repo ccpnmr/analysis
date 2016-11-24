@@ -670,6 +670,8 @@ def _peaksVisibleInStrip(peaks, strip):
 
   peakListToDimsMap = {}
   for spectrumView in strip.spectrumViews:
+    if spectrumView.spectrum.dimensionCount == 1: # skip 1D peakLists
+      continue
     orderedDataDims = spectrumView._wrappedData.spectrumView.orderedDataDims[:2]
     dims = tuple([dataDim.dim for dataDim in orderedDataDims])
     peakLists = [peakListView.peakList for peakListView in spectrumView.peakListViews if peakListView.isVisible()]

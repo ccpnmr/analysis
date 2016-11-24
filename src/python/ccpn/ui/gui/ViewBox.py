@@ -608,9 +608,37 @@ class ViewBox(pg.ViewBox):
                     peak.isSelected = True
                     self.current.addPeak(peak)
 
+    elif shiftMiddleMouse(event):
+
+      event.accept()
+
+      peaks, peakListToDimsMap = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
+      if not peaks:
+        return
+
+      startPoint = Point(event.buttonDownPos())
+      endPoint = Point(event.pos())
+      startPosition = self.childGroup.mapFromParent(startPoint)
+      endPosition = self.childGroup.mapFromParent(endPoint)
+      deltaPosition = endPosition - startPosition
+      deltaPosition = deltaPosition.x(), deltaPosition.y()
+      for peak in peaks:
+        if not hasattr(peak, 'startPosition'):
+          peak.startPosition = peak.position
+        dims = peakListToDimsMap[peak.peakList]
+        position = list(peak.startPosition)
+        for n, dim in enumerate(dims):
+          position[dim-1] += deltaPosition[n]
+        peak.position = position
+
+      if event.isFinish():
+        for peak in peaks:
+          if hasattr(peak, 'startPosition'):
+            delattr(peak, 'startPosition')
+
     elif middleMouse(event) or \
-         shiftLeftMouse(event)or shiftMiddleMouse(event) or shiftRightMouse(event):
-      # Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
+         shiftLeftMouse(event) or shiftRightMouse(event):
+      # Middle-drag, shift-left-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
       event.accept()
       if not event.isFinish():
         # not isFinish() is not the same as isStart() in behavior; The latter will fire for every move, the former only
@@ -630,10 +658,24 @@ class ViewBox(pg.ViewBox):
       event.ignore()
 
   def _setView(self, point1, point2):
-      ax = QtCore.QRectF(point1, point2)
-      ax = self.childGroup.mapRectFromParent(ax)
-      self.showAxRect(ax)
-      # This was copied from pyqtgraph viewbox, but appears a oddly
-      # implemented zoom stack, which could amount to a memory leak
-      #self.axHistoryPointer += 1
-      #self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
+    ax = QtCore.QRectF(point1, point2)
+    ax = self.childGroup.mapRectFromParent(ax)
+    self.showAxRect(ax)
+    # This was copied from pyqtgraph viewbox, but appears a oddly
+    # implemented zoom stack, which could amount to a memory leak
+    #self.axHistoryPointer += 1
+    #self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
+
+def _peaksVisibleInStrip(peaks, strip):
+
+  peakListToDimsMap = {}
+  for spectrumView in strip.spectrumViews:
+    orderedDataDims = spectrumView._wrappedData.spectrumView.orderedDataDims[:2]
+    dims = tuple([dataDim.dim for dataDim in orderedDataDims])
+    peakLists = [peakListView.peakList for peakListView in spectrumView.peakListViews if peakListView.isVisible()]
+    for peakList in peakLists:
+      peakListToDimsMap[peakList] = dims
+
+  peaks = [peak for peak in peaks if peak.peakList in peakListToDimsMap.keys()]
+
+  return peaks, peakListToDimsMap

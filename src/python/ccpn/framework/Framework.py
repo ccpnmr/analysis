@@ -1338,7 +1338,10 @@ class Framework:
 
   def showPrintSpectrumDisplayPopup(self):
     from ccpn.ui.gui.popups.PrintSpectrumPopup import PrintSpectrumDisplayPopup
-    PrintSpectrumDisplayPopup(project=self.project).exec_()
+    if len(self.project.spectrumDisplays) == 0:
+      MessageDialog.showWarning('', 'No Spectrum Display found')
+    else:
+      PrintSpectrumDisplayPopup(project=self.project).exec_()
 
 
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):

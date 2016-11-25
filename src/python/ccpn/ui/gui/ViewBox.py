@@ -609,6 +609,7 @@ class ViewBox(pg.ViewBox):
                     self.current.addPeak(peak)
 
     elif controlMiddleMouse(event):
+      # Control(Cmd)+middle drag: move a selected peak
 
       event.accept()
 

@@ -608,12 +608,14 @@ class ViewBox(pg.ViewBox):
                     peak.isSelected = True
                     self.current.addPeak(peak)
 
-    elif shiftMiddleMouse(event):
+    elif controlMiddleMouse(event):
 
       event.accept()
 
       peaks, peakListToDimsMap = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
       if not peaks:
+        return
+      if len(peaks) != 1:
         return
 
       startPoint = Point(event.buttonDownPos())
@@ -622,23 +624,25 @@ class ViewBox(pg.ViewBox):
       endPosition = self.childGroup.mapFromParent(endPoint)
       deltaPosition = endPosition - startPosition
       deltaPosition = deltaPosition.x(), deltaPosition.y()
-      for peak in peaks:
-        if not hasattr(peak, 'startPosition'):
-          peak.startPosition = peak.position
-        dims = peakListToDimsMap[peak.peakList]
-        position = list(peak.startPosition)
-        for n, dim in enumerate(dims):
-          position[dim-1] += deltaPosition[n]
-        peak.position = position
-
-      if event.isFinish():
+      try:
         for peak in peaks:
-          if hasattr(peak, 'startPosition'):
-            delattr(peak, 'startPosition')
+          if not hasattr(peak, 'startPosition'):
+            peak.startPosition = peak.position
+          dims = peakListToDimsMap[peak.peakList]
+          position = list(peak.startPosition)
+          for n, dim in enumerate(dims):
+            position[dim-1] += deltaPosition[n]
+          peak.position = position
+
+      finally: # play safe so put in finally block
+        if event.isFinish():
+          for peak in peaks:
+            if hasattr(peak, 'startPosition'):
+              delattr(peak, 'startPosition')
 
     elif middleMouse(event) or \
-         shiftLeftMouse(event) or shiftRightMouse(event):
-      # Middle-drag, shift-left-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
+         shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):
+      # Middle-drag, shift-left-drag, shift-middle-drag, shift-right-drag: draws a zooming box and zooms the viewbox.
       event.accept()
       if not event.isFinish():
         # not isFinish() is not the same as isStart() in behavior; The latter will fire for every move, the former only
@@ -678,6 +682,31 @@ def _peaksVisibleInStrip(peaks, strip):
     for peakList in peakLists:
       peakListToDimsMap[peakList] = dims
 
-  peaks = [peak for peak in peaks if peak.peakList in peakListToDimsMap.keys()]
+  # TBD: strip.positions and strip.widths not kept up to sync with plotWidget,
+  # so need to go via plotWidget for now in x, y
+  positions = strip.positions
+  widths = strip.widths
+  viewRange = strip.plotWidget.viewRange()
+  positions0 = [viewRange[0][0], viewRange[1][0]]
+  positions1 = [viewRange[0][1], viewRange[1][1]]
+  for n, position in enumerate(positions):
+    if n >= 2:
+      positions0.append(positions[n] - 0.5*widths[n])
+      positions1.append(positions[n] + 0.5*widths[n])
 
-  return peaks, peakListToDimsMap
+  # the above
+  peaksVisible = []
+  for peak in peaks:
+    if peak.peakList in peakListToDimsMap.keys():
+      for n, dataDim in enumerate(spectrumView._wrappedData.spectrumView.orderedDataDims):
+        if hasattr(peak, 'startPosition'):
+          startPosition = peak.startPosition
+        else:
+          startPosition = peak.position
+        peakPosition = startPosition[dataDim.dim-1]
+        if peakPosition < positions0[n] or peakPosition > positions1[n]:
+          break
+      else:
+        peaksVisible.append(peak)
+
+  return peaksVisible, peakListToDimsMap

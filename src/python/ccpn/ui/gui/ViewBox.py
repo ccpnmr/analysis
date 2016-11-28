@@ -613,7 +613,7 @@ class ViewBox(pg.ViewBox):
 
       event.accept()
 
-      peaks, peakListToDimsMap = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
+      peaks, peakListToIndicesDict = _peaksVisibleInStrip(self.current.peaks, self.current.strip)
       if not peaks:
         return
       if len(peaks) != 1:
@@ -629,10 +629,10 @@ class ViewBox(pg.ViewBox):
         for peak in peaks:
           if not hasattr(peak, 'startPosition'):
             peak.startPosition = peak.position
-          dims = peakListToDimsMap[peak.peakList]
+          indices = peakListToIndicesDict[peak.peakList]
           position = list(peak.startPosition)
-          for n, dim in enumerate(dims):
-            position[dim-1] += deltaPosition[n]
+          for n, index in enumerate(indices):
+            position[index] += deltaPosition[n]
           peak.position = position
 
       finally: # play safe so put in finally block
@@ -673,15 +673,14 @@ class ViewBox(pg.ViewBox):
 
 def _peaksVisibleInStrip(peaks, strip):
 
-  peakListToDimsMap = {}
+  peakListToIndicesDict = {}
   for spectrumView in strip.spectrumViews:
     if spectrumView.spectrum.dimensionCount == 1: # skip 1D peakLists
       continue
-    orderedDataDims = spectrumView._wrappedData.spectrumView.orderedDataDims[:2]
-    dims = tuple([dataDim.dim for dataDim in orderedDataDims])
+    indices = spectrumView._displayOrderSpectrumDimensionIndices[:2]
     peakLists = [peakListView.peakList for peakListView in spectrumView.peakListViews if peakListView.isVisible()]
     for peakList in peakLists:
-      peakListToDimsMap[peakList] = dims
+      peakListToIndicesDict[peakList] = indices
 
   # TBD: strip.positions and strip.widths not kept up to sync with plotWidget,
   # so need to go via plotWidget for now in x, y
@@ -695,19 +694,18 @@ def _peaksVisibleInStrip(peaks, strip):
       positions0.append(positions[n] - 0.5*widths[n])
       positions1.append(positions[n] + 0.5*widths[n])
 
-  # the above
   peaksVisible = []
   for peak in peaks:
-    if peak.peakList in peakListToDimsMap.keys():
-      for n, dataDim in enumerate(spectrumView._wrappedData.spectrumView.orderedDataDims):
+    if peak.peakList in peakListToIndicesDict.keys():
+      for n, index in enumerate(peakListToIndicesDict[peak.peakList]):
         if hasattr(peak, 'startPosition'):
           startPosition = peak.startPosition
         else:
           startPosition = peak.position
-        peakPosition = startPosition[dataDim.dim-1]
+        peakPosition = startPosition[index]
         if peakPosition < positions0[n] or peakPosition > positions1[n]:
           break
       else:
         peaksVisible.append(peak)
 
-  return peaksVisible, peakListToDimsMap
+  return peaksVisible, peakListToIndicesDict

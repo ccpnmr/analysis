@@ -89,7 +89,7 @@ class StructureEnsembleTesting2(WrapperTesting):
                                             'A.10.ASN. OD1', 'A.10.ASN. ND2'])
     self.assertTrue(self.project.save())
     # loadedProject = core.loadProject(self.project.path)
-    loadedProject = Framework.getFramework(projectPath=self.project.path).project
+    loadedProject = Framework.createFramework(projectPath=self.project.path).project
     try:
       ensemble = loadedProject.structureEnsembles[0]
       self.assertEqual( len(ensemble.models), 1)
@@ -161,7 +161,7 @@ class StructureEnsembleTesting2(WrapperTesting):
 
     self.assertTrue(self.project.save())
     # loadedProject = core.loadProject(self.project.path)
-    loadedProject = Framework.getFramework(projectPath=self.project.path).project
+    loadedProject = Framework.createFramework(projectPath=self.project.path).project
     try:
       ensemble = loadedProject.structureEnsembles[0]
       self.assertEqual(ensemble.atomIds, ['A.1.ALA.H', 'B.2.TRP.CE2', 'B.5.GLX.CA', 'A.-1.VAL.HG2%'])

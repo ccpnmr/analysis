@@ -35,7 +35,7 @@ class NoteTest(WrapperTesting):
     self.project.newNote(text='Balaclava')
     self.assertTrue(self.project.save())
     # loadedProject = core.loadProject(self.project.path)
-    loadedProject = Framework.getFramework(projectPath=self.project.path).project
+    loadedProject = Framework.createFramework(projectPath=self.project.path).project
     loadedProject.delete()
 
   def test_rename_note(self):

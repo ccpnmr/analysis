@@ -45,7 +45,7 @@ class WrapperTesting(unittest.TestCase):
     projectPath = self.projectPath
     if projectPath is not None:
       projectPath = os.path.join(TEST_PROJECTS_PATH, projectPath)
-    self.framework = Framework.getFramework(projectPath=projectPath)
+    self.framework = Framework.createFramework(projectPath=projectPath)
     self.project = self.framework.project
 
     self.project._resetUndo(debug=True)

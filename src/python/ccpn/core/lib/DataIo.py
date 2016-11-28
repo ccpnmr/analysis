@@ -77,9 +77,9 @@ def importInsightRestraints(project, dataPath, restraintType='Distance'):
   extractInsightRestraints(restraintList, text)
 
 def getProject(projectPath):
-  from ccpn.framework.Framework import getFramework
+  from ccpn.framework.Framework import createFramework
   projectPath = os.path.normpath(os.path.abspath(projectPath))
-  application = getFramework()
+  application = createFramework()
   application.loadProject(projectPath)
   project = application.project
   #
@@ -830,8 +830,8 @@ def loadDocrProject(name, projectPath:str, bmrbEntryPath:str, casdDirectory=None
   """
 
   # Get project
-  from ccpn.framework.Framework import getFramework
-  application = getFramework()
+  from ccpn.framework.Framework import createFramework
+  application = createFramework()
   project = application.loadProject(projectPath)
 
   # Save project with new name - done now to get right name and path for further operations

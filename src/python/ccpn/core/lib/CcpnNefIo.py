@@ -3494,10 +3494,10 @@ def _exportToNef(path:str, skipPrefixes:Sequence[str]=()):
   else:
     outPath = path + '.nef'
 
-  from ccpn.framework.Framework import getFramework
+  from ccpn.framework.Framework import createFramework
   path = os.path.normpath(os.path.abspath(path))
   time1 = time.time()
-  application = getFramework()
+  application = createFramework()
   application.loadProject(path)
   project = application.project
   time2 = time.time()
@@ -3513,7 +3513,7 @@ def _exportToNef(path:str, skipPrefixes:Sequence[str]=()):
 
 def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
 
-  from ccpn.framework.Framework import getFramework
+  from ccpn.framework.Framework import createFramework
 
   path = os.path.normpath(os.path.abspath(path))
 
@@ -3523,7 +3523,7 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
     raise ValueError("File name does not end in '.nef': %s" % path)
 
   time1 = time.time()
-  application = getFramework()
+  application = createFramework()
   application.nefReader.testing = True
   application.loadProject(path)
 

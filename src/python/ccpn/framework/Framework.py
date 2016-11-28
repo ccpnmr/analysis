@@ -137,7 +137,7 @@ class Arguments:
     for tag, val in kw.items():
       setattr(self, tag, val)
 
-def getFramework(projectPath=None, **kw):
+def createFramework(projectPath=None, **kw):
 
   args = Arguments(projectPath=projectPath, **kw)
   result = Framework('CcpNmr', Version.applicationVersion, args)

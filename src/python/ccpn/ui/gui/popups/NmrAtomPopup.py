@@ -10,16 +10,18 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpnmodel.ccpncore.lib.assignment.ChemicalShift import PROTEIN_ATOM_NAMES
 from ccpn.util.Common import isotopeCode2Nucleus
 
-from ccpn.framework.Framework import getFramework
+###from ccpn.framework.Framework import getFramework  # see note below
 
 class NmrAtomPopup(QtGui.QDialog, Base):
   def __init__(self, parent=None, nmrAtom=None, **kw):
+    # WARNING: above says nmrAtom can be None but code below assumes it is not None
     super(NmrAtomPopup, self).__init__(parent)
     Base.__init__(self, **kw)
-    application = getFramework()
-    self.colourScheme = application.preferences.general.colourScheme
     self.nmrAtom = nmrAtom
     self.project = nmrAtom.project
+    ###application = getFramework() # this does not work, it creates a new Framework
+    application = self.project._appBase
+    self.colourScheme = application.preferences.general.colourScheme
     self.nmrAtomLabel = Label(self, "NmrAtom: %s " % self.nmrAtom.id, grid=(0, 0))
     self.nmrAtomNameLabel = Label(self, "NmrAtom name", grid=(1, 0))
     self.nmrAtomNamePulldown = PulldownList(self, grid=(1, 1))
@@ -34,8 +36,9 @@ class NmrAtomPopup(QtGui.QDialog, Base):
     applyButton = Button(self, grid=(6, 1), text='Apply', callback=self.applyChanges)
     applyButton = Button(self, grid=(6, 2), text='Close', callback=self.reject)
     isotopeCode = nmrAtom.isotopeCode
-    if isotopeCode:
-      atomNames = sorted(set([x for x in PROTEIN_ATOM_NAMES.values() for x in x if x.startswith(isotopeCode2Nucleus(isotopeCode))]))
+    nucleus = isotopeCode2Nucleus(isotopeCode)
+    if nucleus:
+      atomNames = sorted(set([x for x in PROTEIN_ATOM_NAMES.values() for x in x if x.startswith(nucleus)]))
     else:
       atomNames = sorted(set([x for x in PROTEIN_ATOM_NAMES.values() for x in x]))
 

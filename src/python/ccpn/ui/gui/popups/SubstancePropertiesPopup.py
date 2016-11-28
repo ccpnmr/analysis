@@ -17,7 +17,7 @@ MASS_UNIT = ['µg','kg','g','mg', 'ng', 'pg']
 SAMPLE_STATES = ['Liquid', 'Solid', 'Ordered', 'Powder', 'Crystal', 'Other']
 SUBSTANCE_TYPE =  ['Molecule', 'Cell', 'Material', 'Composite ', 'Other']
 
-
+SEP = ', '
 
 class SubstancePropertiesPopup(QtGui.QDialog):
 
@@ -139,7 +139,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
     self.chemicalNameLabel = Label(self, text="Chemical Names")
     self.chemicalName = LineEdit(self)
     if self.substance:
-      self.chemicalName.setText(str(self.substance.synonyms,))
+      self.chemicalName.setText(SEP.join(self.substance.synonyms))
 
 
   def _smilesWidget(self):
@@ -238,9 +238,16 @@ class SubstancePropertiesPopup(QtGui.QDialog):
 
   def _setPerformButtonWidgets(self):
     self.spacerLabel = Label(self, text="")
-    self.buttonBox = ButtonList(self, callbacks=[self._hideExtraSettings, self._showMoreSettings,
-                                                 self.reject,self._applyChanges, self._okButton],
-                                texts=['Less','More','Cancel', 'Apply', 'Ok'])
+    callbacks = [self._hideExtraSettings, self._showMoreSettings, self.reject, self._okButton]
+    texts = ['Less', 'More', 'Cancel', 'Ok']
+    if 0: # not self.createNewSubstance:
+      # Apply doesn't really work when creating new substance
+      # Pulldown list is not updated
+      # But more seriously you end up editing existing substance instead of creating new ones
+      # Actually, it doesn't even really make sense even for editing since you can only edit the one clicked upon
+      callbacks.insert(-1, self._applyChanges)
+      texts.insert(-1, 'Apply')
+    self.buttonBox = ButtonList(self, callbacks=callbacks, texts=texts)
     self._hideExtraSettings()
 
 
@@ -250,7 +257,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
     return {
       self._changeNameSubstance: str(self.nameSubstance.text()),
       self._labellingChanged:str(self.labelling.text()) ,
-      self._chemicalNameChanged: (str(self.chemicalName.text()),),
+      self._chemicalNameChanged: SEP.join(self.chemicalName.text()),
       self._smilesChanged: str(self.smilesLineEdit.text()),
       self._empiricalFormulaChanged: str(self.empiricalFormula.text()),
       self._molecularMassChanged: self.molecularMass.text(),
@@ -440,6 +447,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
   def _applyChanges(self):
     if self.createNewSubstance:
       self._createNewSubstance()
+
     self._setValue()
 
   def _okButton(self):

@@ -38,9 +38,9 @@ class NmrAtomPopup(QtGui.QDialog, Base):
     isotopeCode = nmrAtom.isotopeCode
     nucleus = isotopeCode2Nucleus(isotopeCode)
     if nucleus:
-      atomNames = sorted(set([x for x in PROTEIN_ATOM_NAMES.values() for x in x if x.startswith(nucleus)]))
+      atomNames = sorted(set([y for x in PROTEIN_ATOM_NAMES.values() for y in x if y.startswith(nucleus)]))
     else:
-      atomNames = sorted(set([x for x in PROTEIN_ATOM_NAMES.values() for x in x]))
+      atomNames = sorted(set([y for x in PROTEIN_ATOM_NAMES.values() for y in x]))
 
     self.nmrAtomNamePulldown.setData(texts=atomNames)
 

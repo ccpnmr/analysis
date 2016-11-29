@@ -24,9 +24,25 @@ __version__ = "$Revision$"
 
 import typing
 from collections import OrderedDict
+from ccpn.util import Common as commonUtil
 from ccpn.core.Atom import Atom
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
+
+def _incrementedSequenceCode(sequenceCode, seqOffset):
+  """get sequenceCode of Residue or NmrResidue incremented by seqOffset.
+
+  Will raise ValueError if residue.seqCode is not set (i.e. there is no sequence number"""
+  code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+  sequenceCode = None
+  if code is not None:
+    code += seqOffset
+    if offset is None:
+      sequenceCode = '%s%s'% (code, ss or '')
+    else:
+      sequenceCode = '%s%s%+d'% (code, ss or '', offset)
+  #
+  return sequenceCode
 
 
 def duplicateAtomBonds(chainMap:typing.Dict[Chain,Chain]):
@@ -73,7 +89,7 @@ def duplicateAtomBonds(chainMap:typing.Dict[Chain,Chain]):
 
 def extraBoundAtomPairs(project:Project, selectSequential:bool=None) -> typing.List[typing.Tuple[Atom, Atom]]:
   """Get pairs of bound Atoms whose bonds are NOT defined through the residue topology.
-  The result and each individualnatom pair are both sorted
+  The result and each individual atom pair are both sorted
 
   Returns sequential bond pairs if selectSequential is True,
   non-sequential bond pairs if selectSequential is False,

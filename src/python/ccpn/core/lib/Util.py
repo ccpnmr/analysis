@@ -78,7 +78,7 @@ def expandDollarFilePath(project:'Project', filePath:str) -> str:
 def commandParameterString(*params, values:dict=None, defaults:dict=None):
   """Make  parameter string to insert into function call string.
 
-  params are positional parameters in order, values are keyword prameters.
+  params are positional parameters in order, values are keyword parameters.
   If the defaults dictionary is passed in,
   only parameters in defaults are added to the string, and only if the value differs from the
   default. This allows you to pass in values=locals(). The order of keyword parameters

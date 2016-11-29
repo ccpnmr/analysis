@@ -25,6 +25,7 @@ __version__ = "$Revision$"
 import collections
 import typing
 
+from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
@@ -181,6 +182,38 @@ class Chain(AbstractWrapperObject):
       self._apiChain.renameChain(value)
       self._finaliseAction('rename')
       self._finaliseAction('change')
+    finally:
+      self._project._appBase._endCommandBlock()
+
+  def incrementResidueAssignments(self, increment:int, firstSeqCode:int=None,
+                                  lastSeqCode:int=None):
+    """Change all residues with sequence number part of sequenceCode
+    in range firstSeqCode - lastSeqCode (inclusive) by offset
+
+    if firstSeqCode (lastSeqCode) is None, there is no lower (upper) limit
+
+    NB Will rename residues one by one, and stop on error."""
+
+    # Must be here to avoid circular imports
+    from ccpn.core.lib import MoleculeLib
+
+    residues = self.residues
+    if increment > 0:
+      residues.reverse()
+
+    self._startFunctionCommandBlock('incrementResidueAssignments', increment, firstSeqCode,
+                                    values={'lastSeqCode':lastSeqCode})
+    try:
+      for residue in residues:
+        sequenceCode = residue.sequenceCode
+        code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+        # assert offset is None
+        if code is not None:
+          if ((firstSeqCode is None or code >= firstSeqCode)
+              and (lastSeqCode is None or code <= lastSeqCode)):
+            newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, increment)
+            residue.rename(newSequenceCode)
+
     finally:
       self._project._appBase._endCommandBlock()
 

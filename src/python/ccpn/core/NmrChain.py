@@ -25,6 +25,8 @@ import collections
 import typing
 import operator
 
+from ccpn.util import Common as commonUtil
+from ccpn.core.lib import MoleculeLib
 from ccpn.core.Chain import Chain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
@@ -218,6 +220,35 @@ class NmrChain(AbstractWrapperObject):
       apiNmrChain.delete()
     finally:
      self._project._appBase._endCommandBlock()
+
+  def incrementNmrResidueAssignments(self, increment:int, firstSeqCode:int=None,
+                              lastSeqCode:int=None):
+    """Change all residues with sequence number part of sequenceCode
+    in range firstSeqCode - lastSeqCode (inclusive) by offset
+
+    if firstSeqCode (lastSeqCode) is None, there is no lower (upper) limit
+
+    NB Will rename residues one by one, and stop on error."""
+
+    residues = self.nmrResidues
+    if increment > 0:
+      residues.reverse()
+
+    self._startFunctionCommandBlock('incrementResidueAssignments', increment,
+                                    values={'firstSeqCode':firstSeqCode, 'lastSeqCode':lastSeqCode})
+    try:
+      for residue in residues:
+        sequenceCode = residue.sequenceCode
+        code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
+        if offset is None and code is not None:
+          # offset residues are handled with their mainResidues
+          if ((firstSeqCode is None or code >= firstSeqCode)
+              and (lastSeqCode is None or code <= lastSeqCode)):
+            newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, increment)
+            residue.rename('%s.%s' % (newSequenceCode, residue.residueType or ''))
+
+    finally:
+      self._project._appBase._endCommandBlock()
 
 
   @classmethod

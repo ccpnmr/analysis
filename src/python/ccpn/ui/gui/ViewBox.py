@@ -617,6 +617,8 @@ class ViewBox(pg.ViewBox):
       if not peaks:
         return
       if len(peaks) != 1:
+        if event.isFinish():
+          logger.warn('Can only move one peak at a time')
         return
 
       startPoint = Point(event.buttonDownPos())
@@ -626,13 +628,13 @@ class ViewBox(pg.ViewBox):
       deltaPosition = endPosition - startPosition
       deltaPosition = deltaPosition.x(), deltaPosition.y()
 
+      project = peaks[0].project
+      undo = project._undo
+
       if not hasattr(peaks[0], 'startPosition'):
         # start of move
-        project = peaks[0].project
-        undo = project._undo
         undo.newWaypoint()
         undo.increaseBlocking()
-        project.blankNotification()
 
       try:
         for peak in peaks:
@@ -645,23 +647,17 @@ class ViewBox(pg.ViewBox):
           peak.position = position
 
       finally:
-        try:
+        if event.isFinish():
+          undo.decreaseBlocking()
           for peak in peaks:
+            if hasattr(peak, 'startPosition'):
+              undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
+                           redoArgs=[peak, 'position', peak.position])
+              delattr(peak, 'startPosition')
             project._modifiedApiObject(peak._wrappedData)
             project._appBase.ui.echoCommands(
-              ("project.getByPid(%s).position = %s"% (peak.pid, peak.position),)
+              ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
             )
-        finally:
-          undo.decreaseBlocking()
-          try:
-            if event.isFinish():
-              for peak in peaks:
-                if hasattr(peak, 'startPosition'):
-                  undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
-                               redoArgs=[peak, 'position', peak.position])
-                  delattr(peak, 'startPosition')
-          finally:
-            project.unblankNotification()
 
       # try:
       #   for peak in peaks:

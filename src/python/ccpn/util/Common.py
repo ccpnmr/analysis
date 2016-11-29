@@ -33,6 +33,7 @@ import datetime
 import os
 import random
 import sys
+import typing
 from collections import abc as collectionClasses
 from functools import total_ordering
 
@@ -169,7 +170,7 @@ def parseSequenceCode(value):
 
   tt = coreLibConstants.sequenceCodePattern.match(value.strip()).groups()
 
-  if not tt[0] and not tt[1]:
+  if tt[0] is None and not tt[1]:
     # special case: entire string matches offset modifier and is misread
     return None, tt[2], None
   else:
@@ -388,6 +389,21 @@ def axisCodeMapping(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->dict:
       indx = mapIndices[ii]
       if indx is not None:
         result[axisCodes[indx]] = refAxisCode
+  #
+  return result
+
+def reorder(values:typing.Sequence, axisCodes:typing.Sequence[str],
+            refAxisCodes:typing.Sequence[str]) -> list:
+  """reorder values in axisCode order to refAxisCode order, by matching axisCodes
+
+  NB, the result will be the length of refAxisCodes, with additional Nones inserted
+  if this is longer than the values.
+
+  NB if there are multiple matches possible, one is chosen by heuristics"""
+  if len(values) != len(axisCodes):
+    raise ValueError("Length mismatch between %s and %s" % (values, axisCodes))
+  remapping = _axisCodeMapIndices(axisCodes, refAxisCodes)
+  result = list(values[x] for x in remapping)
   #
   return result
 

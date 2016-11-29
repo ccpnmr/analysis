@@ -322,6 +322,27 @@ class PeakList(AbstractWrapperObject):
 
     return peaks
 
+  def copyTo(self, targetSpectrum:Spectrum, **kwargs) -> 'PeakList':
+    """Make (and return) a copy of the PeakList attached to targetSpectrum
+
+    Peaklist attributes can be passed in as keyword arguments"""
+
+    singleValueTags = ['isSimulated', 'symbolColour', 'symbolStyle', 'textColour', 'textColour',
+                       'title', 'comment']
+
+    params = dict(((tag, getattr(self, tag)) for tag in singleValueTags))
+    params['comment'] = "Copy of %s\n" % self.longPid + (params['comment'] or '')
+    for key, val in kwargs.items():
+      if key in singleValueTags:
+        params[key] = val
+      else:
+        raise ValueError("PeakList has no attribute %s" % key)
+    newPeakList = targetSpectrum.newPeakList(**params)
+    for peak in self.peaks:
+      peak.copyTo(newPeakList)
+    #
+    return newPeakList
+
 
   def subtractPeakLists(self, peakList2:'PeakList') -> 'PeakList':
     """
@@ -402,23 +423,34 @@ class PeakList(AbstractWrapperObject):
     peaks = self.pickPeaksNd(regionToPick, doPos=doPos, doNeg=doNeg)
     return peaks
 
+  def reorderValues(self, values, newAxisCodeOrder):
+    """Reorder values in spectrum dimension order to newAxisCodeOrder
+    by matching newAxisCodeOrder to spectrum axis code order"""
+    return commonUtil.reorder(values, self._parent.axisCodes, newAxisCodeOrder)
+
 
 
 # Connections to parents:
 
 def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
-             isSimulated:bool=False, serial:int=None) -> PeakList:
+                 isSimulated:bool=False, symbolStyle:str=None, symbolColour:str=None,
+                 textColour:str=None, serial:int=None) -> PeakList:
   """Create new empty PeakList within Spectrum"""
 
   defaults = collections.OrderedDict((('title', None), ('comment', None), ('isSimulated', False),
-                                      ('serial', None)))
+                                        ('serial', None), ('symbolStyle', None), (
+                                        'symbolColour', None),('textColour', None),
+                                      )
+                                     )
 
   apiDataSource = self._wrappedData
   self._startFunctionCommandBlock('newPeakList', values=locals(), defaults=defaults,
                                   parName='newPeakList')
   result = None
   try:
-    obj = apiDataSource.newPeakList(name=title, details=comment, isSimulated=isSimulated)
+    obj = apiDataSource.newPeakList(name=title, details=comment, isSimulated=isSimulated,
+                                    symbolStyle=symbolStyle, symbolColour=symbolColour,
+                                    textColour=textColour)
     result = self._project._data2Obj.get(obj)
     if serial is not None:
       try:

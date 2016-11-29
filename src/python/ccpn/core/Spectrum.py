@@ -63,6 +63,7 @@ __version__ = "$Revision$"
 import numpy
 import operator
 from typing import Sequence, Tuple, Optional
+from ccpn.util import Common as commonUtil
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
@@ -981,6 +982,12 @@ class Spectrum(AbstractWrapperObject):
 
   def projectedToFile(self, path:str, xDim:int=1, yDim:int=2, method:str='max', format:str=Formats.NMRPIPE):
     return self._apiDataSource.projectedToFile(path, xDim, yDim, method, format)
+
+  def reorderValues(self, values, newAxisCodeOrder):
+    """Reorder values in spectrum dimension order to newAxisCodeOrder
+    by matching newAxisCodeOrder to spectrum axis code order"""
+    return commonUtil.reorder(values, self.axisCodes, newAxisCodeOrder)
+
 
 
 def _newSpectrum(self:Project, name:str) -> Spectrum:

@@ -381,7 +381,7 @@ class Peak(AbstractWrapperObject):
     return all(self.dimensionNmrAtoms)
 
   def copyTo(self, targetPeakList:PeakList) -> 'Peak':
-    """Make (and return) a copy of the Peak in newPeakList"""
+    """Make (and return) a copy of the Peak in targetPeakList"""
 
     singleValueTags = ['height', 'volume', 'heightError', 'volumeError', 'figureOfMerit',
                        'annotation', 'comment', 'serial']
@@ -407,11 +407,18 @@ class Peak(AbstractWrapperObject):
       params[tag] = [value[dimensionMapping[ii]] for ii in range(dimensionCount)]
     newPeak = targetPeakList.newPeak(**params)
 
-    assignments = self.assignedNmrAtoms
+    assignments = []
+    for assignment in self.assignedNmrAtoms:
+      assignments.append([assignment[dimensionMapping[ii]] for ii in range(dimensionCount)])
     if assignments:
       newPeak.assignedNmrAtoms = assignments
     #
     return newPeak
+
+  def reorderValues(self, values, newAxisCodeOrder):
+    """Reorder values in spectrum dimension order to newAxisCodeOrder
+    by matching newAxisCodeOrder to spectrum axis code order"""
+    return commonUtil.reorder(values, self._parent._parent.axisCodes, newAxisCodeOrder)
 
   # Implementation functions
 

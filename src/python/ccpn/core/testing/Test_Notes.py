@@ -28,7 +28,7 @@ from ccpn.core.testing.WrapperTesting import WrapperTesting
 
 class NoteTest(WrapperTesting):
 
-  # Path of project to load (None for new project
+  # Path of project to load (None for new project)
   projectPath = None
 
   def test_make_and_save_note(self):

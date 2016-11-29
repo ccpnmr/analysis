@@ -625,6 +625,15 @@ class ViewBox(pg.ViewBox):
       endPosition = self.childGroup.mapFromParent(endPoint)
       deltaPosition = endPosition - startPosition
       deltaPosition = deltaPosition.x(), deltaPosition.y()
+
+      if not hasattr(peaks[0], 'startPosition'):
+        # start of move
+        project = peaks[0].project
+        undo = project._undo
+        undo.newWaypoint()
+        undo.increaseBlocking()
+        project.blankNotification()
+
       try:
         for peak in peaks:
           if not hasattr(peak, 'startPosition'):
@@ -635,11 +644,40 @@ class ViewBox(pg.ViewBox):
             position[index] += deltaPosition[n]
           peak.position = position
 
-      finally: # play safe so put in finally block
-        if event.isFinish():
+      finally:
+        try:
           for peak in peaks:
-            if hasattr(peak, 'startPosition'):
-              delattr(peak, 'startPosition')
+            project._modifiedApiObject(peak._wrappedData)
+            project._appBase.ui.echoCommands(
+              ("project.getByPid(%s).position = %s"% (peak.pid, peak.position),)
+            )
+        finally:
+          undo.decreaseBlocking()
+          try:
+            if event.isFinish():
+              for peak in peaks:
+                if hasattr(peak, 'startPosition'):
+                  undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
+                               redoArgs=[peak, 'position', peak.position])
+                  delattr(peak, 'startPosition')
+          finally:
+            project.unblankNotification()
+
+      # try:
+      #   for peak in peaks:
+      #     if not hasattr(peak, 'startPosition'):
+      #       peak.startPosition = peak.position
+      #     indices = peakListToIndicesDict[peak.peakList]
+      #     position = list(peak.startPosition)
+      #     for n, index in enumerate(indices):
+      #       position[index] += deltaPosition[n]
+      #     peak.position = position
+      #
+      # finally: # play safe so put in finally block
+      #   if event.isFinish():
+      #     for peak in peaks:
+      #       if hasattr(peak, 'startPosition'):
+      #         delattr(peak, 'startPosition')
 
     elif middleMouse(event) or \
          shiftLeftMouse(event) or shiftMiddleMouse(event) or shiftRightMouse(event):

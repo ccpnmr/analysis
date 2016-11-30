@@ -18,7 +18,8 @@
         "showSpectrumBorder": true,
         "autoBackupEnabled": false,
         "autoBackupFrequency": 30,
-        "stripRegionPadding": 0.0
+        "stripRegionPadding": 0.0,
+        "peakDropFactor": 0.1
     },
     "recentMacros": [
 

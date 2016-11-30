@@ -500,7 +500,7 @@ class ViewBox(pg.ViewBox):
           for n in orderedAxes[2:]:
             selectedRegion.append((n.region[0], n.region[1]))
 
-
+        minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
         for spectrumView in self.current.strip.spectrumViews:
           if not spectrumView.isVisible():
             continue
@@ -527,7 +527,7 @@ class ViewBox(pg.ViewBox):
             newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
                                             doPos=apiSpectrumView.spectrumView.displayPositiveContours,
                                             doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
-                                            fitMethod='gaussian')
+                                            fitMethod='gaussian', minDropfactor=minDropfactor)
           else:
             # 1D's
             y0 = startPosition.y()

@@ -141,6 +141,12 @@ class PreferencesPopup(QtGui.QDialog):
     self.regionPaddingData.editingFinished.connect(self._setRegionPadding)
     row += 1
 
+    self.dropFactorLabel = Label(self, text="Peak Picking Drop (%)", grid=(row, 0))
+    self.dropFactorData = LineEdit(self, grid=(row, 1))
+    self.dropFactorData.setText('%.0f' % (100*self.preferences.general.peakDropFactor))
+    self.dropFactorData.editingFinished.connect(self._setDropFactor)
+    row += 1
+
     buttonBox = Button(self, grid=(row, 1), text='Save', callback=self.accept)
     row += 1
 
@@ -266,6 +272,13 @@ class PreferencesPopup(QtGui.QDialog):
     except:
       return
     self.preferences.general.stripRegionPadding = padding
+
+  def _setDropFactor(self):
+    try:
+      dropFactor = 0.01*float(self.dropFactorData.text())
+    except:
+      return
+    self.preferences.general.peakDropFactor = dropFactor
 
   def _toggleSpectralOptions(self, preference, checked):
     self.preferences.spectra[preference] = str(checked)

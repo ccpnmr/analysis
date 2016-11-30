@@ -156,7 +156,8 @@ class PeakList(AbstractWrapperObject):
   def pickPeaksNd(self, positions:Sequence[float]=None,
                   doPos:bool=True, doNeg:bool=True,
                   fitMethod:str='gaussian', excludedRegions=None,
-                  excludedDiagonalDims=None, excludedDiagonalTransform=None):
+                  excludedDiagonalDims=None, excludedDiagonalTransform=None,
+                  minDropfactor:float=0.1):
 
     # TODO NBNB Add doc string and put type annotation on all parameters
 
@@ -215,8 +216,9 @@ class PeakList(AbstractWrapperObject):
       # undo.increaseBlocking()
       try:
         apiPeaks = pickNewPeaks(self._apiPeakList, startPoint=startPoints, endPoint=endPoints,
-                       posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod, excludedRegions=excludedRegions,
-                     excludedDiagonalDims=excludedDiagonalDims, excludedDiagonalTransform=excludedDiagonalTransform)
+                                posLevel=posLevel, negLevel=negLevel, fitMethod=fitMethod,
+                                excludedRegions=excludedRegions, excludedDiagonalDims=excludedDiagonalDims,
+                                excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
 
       finally:
         self._project._appBase._endCommandBlock()

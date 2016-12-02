@@ -240,11 +240,11 @@ class SubstancePropertiesPopup(QtGui.QDialog):
     self.spacerLabel = Label(self, text="")
     callbacks = [self._hideExtraSettings, self._showMoreSettings, self.reject, self._okButton]
     texts = ['Less', 'More', 'Cancel', 'Ok']
-    if 0: # not self.createNewSubstance:
+    if not self.createNewSubstance:
       # Apply doesn't really work when creating new substance
+      # (So after the apply, does the next apply/ok affect the just created substance or is a new one created??)
       # Pulldown list is not updated
       # But more seriously you end up editing existing substance instead of creating new ones
-      # Actually, it doesn't even really make sense even for editing since you can only edit the one clicked upon
       callbacks.insert(-1, self._applyChanges)
       texts.insert(-1, 'Apply')
     self.buttonBox = ButtonList(self, callbacks=callbacks, texts=texts)
@@ -257,7 +257,7 @@ class SubstancePropertiesPopup(QtGui.QDialog):
     return {
       self._changeNameSubstance: str(self.nameSubstance.text()),
       self._labellingChanged:str(self.labelling.text()) ,
-      self._chemicalNameChanged: SEP.join(self.chemicalName.text()),
+      self._chemicalNameChanged: [name.strip() for name in self.chemicalName.text().split(SEP.strip()) if name.strip()],
       self._smilesChanged: str(self.smilesLineEdit.text()),
       self._empiricalFormulaChanged: str(self.empiricalFormula.text()),
       self._molecularMassChanged: self.molecularMass.text(),

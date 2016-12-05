@@ -23,7 +23,7 @@ import platform
 import sys
 import tarfile
 import tempfile
-from functools import partial
+# from functools import partial
 
 from ccpnmodel.ccpncore.api.memops import Implementation
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo

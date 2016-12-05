@@ -49,7 +49,7 @@ def duplicateAtomBonds(chainMap:typing.Dict[Chain,Chain]):
   """Duplicate atom-atom bonds within source chains to target chains,
   skipping those that already exist.
 
-  Input is a map from source chains to corresponding trget chains.
+  Input is a map from source chains to corresponding target chains.
 
   Atoms are mapped on matching Pids (with different chain codes"""
   if not chainMap:

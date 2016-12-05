@@ -74,11 +74,11 @@ class SpectrumWidget:
         self.hLine.setPos(mousePoint.y())
 
 
-class CustomViewBox(pg.ViewBox):
-
-  def __init__(self, *args, **kwds):
-        pg.ViewBox.__init__(self, *args, **kwds)
-        self.setMenuDisabled()
+# class CustomViewBox(pg.ViewBox):
+#
+#   def __init__(self, *args, **kwds):
+#         pg.ViewBox.__init__(self, *args, **kwds)
+#         self.setMenuDisabled()
 
 
   def mouseClickEvent(self, event):

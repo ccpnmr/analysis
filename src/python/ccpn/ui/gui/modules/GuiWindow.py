@@ -27,6 +27,9 @@ __author__ = 'simon'
 from PyQt4 import QtCore, QtGui
 
 import typing
+
+from ccpn.core.lib import PeakLib
+
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 from ccpn.core.lib.AssignmentLib import propagateAssignments
@@ -108,10 +111,7 @@ class GuiWindow(DropBase):
     QtGui.QShortcut(QtGui.QKeySequence("p, r"), self, self.removePhasingTraces, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("p, t"), self, self.newPhasingTrace, context=context)
     QtGui.QShortcut(QtGui.QKeySequence("w, 1"), self, self.getCurrentPositionAndStrip, context=context)
-
-
-
-
+    QtGui.QShortcut(QtGui.QKeySequence("r, p"), self, self.refitCurrentPeaks, context=context)
 
   def setUserShortcuts(self, preferences=None):
 
@@ -166,6 +166,38 @@ class GuiWindow(DropBase):
     current.cursorPosition = cursorPosition
     return current.strip, current.cursorPosition
 
+
+  def _getPeaksParams(self, peaks):
+    params = []
+    for peak in peaks:
+      params.append((peak.height, peak.position, peak.lineWidths))
+    return params
+
+  def _setPeaksParams(self, peaks, params):
+    for n, peak in enumerate(peaks):
+      height, position, lineWidths = params[n]
+      peak.height = height
+      peak.position = position
+      peak.lineWidths = lineWidths
+
+  def refitCurrentPeaks(self):
+    peaks = self._appBase.current.peaks
+    if not peaks:
+      return
+
+    project = peaks[0].project
+    undo = project._undo
+
+    undo.newWaypoint()
+    undo.increaseBlocking()
+
+    currentParams = self._getPeaksParams(peaks)
+    try:
+      PeakLib.refitPeaks(peaks)
+    finally:
+      undo.decreaseBlocking()
+      undo.newItem(self._setPeaksParams, self._setPeaksParams, undoArgs=[peaks, currentParams],
+                   redoArgs=[peaks, self._getPeaksParams(peaks)])
 
 
   def traceScaleScale(self, window:'GuiWindow', scale:float):

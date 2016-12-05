@@ -60,7 +60,7 @@ class ExperimentFilterPopup(QtGui.QDialog, Base):
       self.hCheckBox.setChecked(True)
       self.otherCheckBox.setChecked(True)
 
-    experimentLabel = Label(selectionBox, text='%s: experiment type' % spectrum.name, grid=(0, 0),
+    experimentLabel = Label(selectionBox, text='%s experiment type' % spectrum.pid, grid=(0, 0),
                             hAlign='r')
     self.experimentPulldown = FilteringPulldownList(selectionBox, grid=(0, 1))
 

@@ -328,6 +328,7 @@ class Framework:
       self.styleSheet = self.getStyleSheet()
       from ccpn.ui.gui.Gui import Gui
       ui = Gui(self)
+      ui.qtApp._ccpnApplication = self
     else:
       from ccpn.ui.Ui import NoUi
       ui = NoUi(self)
@@ -733,6 +734,8 @@ class Framework:
       ("Set Experiment Types...", self.showExperimentTypePopup, [('shortcut', 'et')]),
       (),
       ("Pick Peaks...", self.showPeakPickPopup, [('shortcut', 'pp')]),
+      ("Copy PeakList", self.showCopyPeakListPopup, [('shortcut', 'cp')]),
+
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
     ]
@@ -1207,6 +1210,16 @@ class Framework:
     from ccpn.ui.gui.popups.PeakFind import PeakFindPopup
     popup = PeakFindPopup(parent=self.ui.mainWindow, project=self.project, current=self.current)
     popup.exec_()
+
+  def showCopyPeakListPopup(self):
+    if not self.project.peakLists:
+      self.project._logger.warn('Project has no Peak Lists. Peak Lists cannot be copied')
+      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied',
+                                colourScheme=self.preferences.general.colourScheme)
+      return
+    else:
+      from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
+      CopyPeakListPopup(parent=self.ui.mainWindow, application=self).exec_()
 
 
   ################################################################################################

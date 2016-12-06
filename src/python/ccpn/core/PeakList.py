@@ -332,6 +332,12 @@ class PeakList(AbstractWrapperObject):
     singleValueTags = ['isSimulated', 'symbolColour', 'symbolStyle', 'textColour', 'textColour',
                        'title', 'comment']
 
+    dimensionCount = self.spectrum.dimensionCount
+    if dimensionCount != targetSpectrum.dimensionCount:
+      raise ValueError("Cannot copy %sD %s to %sD %s"
+                       % (dimensionCount, self.longPid,
+                          targetSpectrum.dimensionCount, targetSpectrum.longPid))
+
     params = dict(((tag, getattr(self, tag)) for tag in singleValueTags))
     params['comment'] = "Copy of %s\n" % self.longPid + (params['comment'] or '')
     for key, val in kwargs.items():

@@ -175,10 +175,13 @@ class AbstractWrapperObject():
     else:
       return (id(self._project) < id(other._project))
 
-
   def __repr__(self):
     """String representation"""
-    return "<ccpn.%s>" % self.longPid
+    return "<ccpn.core.%s>" % self.longPid
+
+  def __str__(self):
+    """Readable string representation"""
+    return "<%s>" % self.pid
 
   def __eq__(self, other):
     """Python 2 behaviour - objects equal only to themselves."""

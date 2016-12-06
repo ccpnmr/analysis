@@ -115,6 +115,10 @@ class ChemicalShift(AbstractWrapperObject):
     # NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level
     return parent._wrappedData.sortedMeasurements()
 
+  def __str__(self):
+    """Readable string representation"""
+    return "<%s; value:%.3f +- %.3f>" % (self.pid, self.value, self.valueError)
+
 # Connections to parents:
 
 def getter(self:NmrAtom) -> Tuple[ChemicalShift, ...]:

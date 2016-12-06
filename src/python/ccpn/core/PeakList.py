@@ -430,6 +430,9 @@ class PeakList(AbstractWrapperObject):
     by matching newAxisCodeOrder to spectrum axis code order"""
     return commonUtil.reorder(values, self._parent.axisCodes, newAxisCodeOrder)
 
+  def __str__(self):
+    """Readable string representation"""
+    return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
 
 # Connections to parents:

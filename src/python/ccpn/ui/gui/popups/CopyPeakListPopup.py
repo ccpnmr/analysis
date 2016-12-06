@@ -5,7 +5,7 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
 
 class CopyPeakListPopup(QtGui.QDialog):
-  def __init__(self, parent=None, application=None,   **kw):
+  def __init__(self, parent, application, **kw):
     super(CopyPeakListPopup, self).__init__(parent)
 
     self.application = application
@@ -13,7 +13,6 @@ class CopyPeakListPopup(QtGui.QDialog):
 
     self._setMainLayout()
     self.setWidgets()
-    self.setApplyButtons()
     self.addWidgetsToLayout()
 
   def _setMainLayout(self):
@@ -33,17 +32,16 @@ class CopyPeakListPopup(QtGui.QDialog):
     self.targetSpectraPullDown = PulldownList(self)
     self._populateTargetSpectraPullDown()
 
-  def setApplyButtons(self):
-    self.applyButtons = ButtonList(self, texts=['Cancel', ' Ok '],
-                                   callbacks=[self.reject, self._okButton],
-                                   tipTexts=['Close Popup', 'Copy PeakList', ])
+    self.okCancelButtons = ButtonList(self, texts=['Cancel', ' Ok '],
+                                      callbacks=[self.reject, self._okButton],
+                                      tipTexts=['Close Popup', 'Copy PeakList'])
 
   def addWidgetsToLayout(self):
     self.mainLayout.addWidget(self.sourcePeakListLabel, 0,0)
     self.mainLayout.addWidget(self.sourcePeakListPullDown, 0, 1)
     self.mainLayout.addWidget(self.targetSpectraLabel, 1, 0)
     self.mainLayout.addWidget(self.targetSpectraPullDown, 1, 1)
-    self.mainLayout.addWidget(self.applyButtons, 2,1)
+    self.mainLayout.addWidget(self.okCancelButtons, 2, 1)
 
   def _okButton(self):
       self.sourcePeakList = self.project.getByPid(self.sourcePeakListPullDown.getText())

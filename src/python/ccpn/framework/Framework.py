@@ -1219,7 +1219,7 @@ class Framework:
       return
     else:
       from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
-      CopyPeakListPopup(parent=self.ui.mainWindow, application=self).exec_()
+      CopyPeakListPopup(parent=self.ui.mainWindow).exec_()
 
 
   ################################################################################################

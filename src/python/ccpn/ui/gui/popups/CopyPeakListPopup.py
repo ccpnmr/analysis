@@ -1,14 +1,14 @@
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
 
 class CopyPeakListPopup(QtGui.QDialog):
-  def __init__(self, parent, application, **kw):
+  def __init__(self, parent, **kw):
     super(CopyPeakListPopup, self).__init__(parent)
 
-    self.application = application
+    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.project = self.application.project
 
     self._setMainLayout()

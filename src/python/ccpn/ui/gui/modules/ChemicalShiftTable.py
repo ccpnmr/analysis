@@ -120,4 +120,5 @@ class NmrAtomShiftTable(ChemicalShiftTable):
     if obj: # should presumably always be the case
       chemicalShift = obj
       chemicalShift.project._appBase.current.nmrAtom = chemicalShift.nmrAtom
+      chemicalShift.project._appBase.current.nmrResidue = chemicalShift.nmrAtom.nmrResidue
 

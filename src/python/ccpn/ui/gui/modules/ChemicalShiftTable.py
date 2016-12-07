@@ -116,4 +116,8 @@ class NmrAtomShiftTable(ChemicalShiftTable):
     self.layout.addWidget(self.chemicalShiftTable, 3, 0, 1, 4)
 
   def _callback(self, obj, row, col):
-    pass
+
+    if obj: # should presumably always be the case
+      chemicalShift = obj
+      chemicalShift.project._appBase.current.nmrAtom = chemicalShift.nmrAtom
+

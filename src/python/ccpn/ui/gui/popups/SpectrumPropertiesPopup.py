@@ -537,8 +537,11 @@ class ContoursTab(QtGui.QWidget, Base):
       mainWindow = self.spectrum.project._appBase.ui.mainWindow
     else:
       mainWindow = self.spectrum.project._appBase._mainWindow
+
     self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
+    self._changes = dict()
+
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(1, 0), vAlign='t', hAlign='l')
     positiveContoursCheckBox = CheckBox(self, grid=(1, 1), checked=True, vAlign='t', hAlign='l')
     for spectrumView in self.spectrum.spectrumViews:
@@ -547,41 +550,44 @@ class ContoursTab(QtGui.QWidget, Base):
       else:
         positiveContoursCheckBox.setChecked(False)
     self.layout().addItem(QtGui.QSpacerItem(0, 10), 0, 0)
-    positiveContoursCheckBox.stateChanged.connect(self._changePositiveContourDisplay)
+    positiveContoursCheckBox.stateChanged.connect(self._queueChangePositivieContourDisplay)
+
     positiveBaseLevelLabel = Label(self, text="Positive Base Level", grid=(2, 0), vAlign='c', hAlign='l')
     positiveBaseLevelData = DoubleSpinbox(self, grid=(2, 1), vAlign='t')
     positiveBaseLevelData.setMaximum(1e12)
     positiveBaseLevelData.setMinimum(0.1)
     positiveBaseLevelData.setValue(spectrum.positiveContourBase)
-    positiveBaseLevelData.valueChanged.connect(partial(self._lineEditTextChanged1, spectrum))
+    positiveBaseLevelData.valueChanged.connect(partial(self._queueChangePositiveBaseLevel, spectrum))
+    # positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*(positiveMultiplierData.value()-1))
+    # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
+    positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*0.1)
+
     positiveMultiplierLabel = Label(self, text="Positive Multiplier", grid=(3, 0), vAlign='c', hAlign='l')
     positiveMultiplierData = DoubleSpinbox(self, grid=(3, 1), vAlign='t')
     positiveMultiplierData.setSingleStep(0.1)
     positiveMultiplierData.setValue(float(spectrum.positiveContourFactor))
-    positiveMultiplierData.valueChanged.connect(partial(self._lineEditTextChanged2, spectrum))
-    # positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*(positiveMultiplierData.value()-1))
-    # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
-    positiveBaseLevelData.setSingleStep(positiveBaseLevelData.value()*0.1)
+    positiveMultiplierData.valueChanged.connect(partial(self._queueChangePositiveContourMultiplier, spectrum))
+
     positiveContourCountLabel = Label(self, text="Number of positive contours", grid=(4, 0), vAlign='c', hAlign='l')
     positiveContourCountData = Spinbox(self, grid=(4, 1), vAlign='t')
     positiveContourCountData.setValue(int(spectrum._apiDataSource.positiveContourCount))
-    positiveContourCountData.valueChanged.connect(partial(self._lineEditTextChanged3, spectrum))
+    positiveContourCountData.valueChanged.connect(partial(self._queueChangePositiveContourCount, spectrum))
     positiveContourColourLabel = Label(self, text="Positive Contour Colour", grid=(5, 0), vAlign='c', hAlign='l')
-    self.positiveColourBox = PulldownList(self, grid=(5, 1), vAlign='t')
 
+    self.positiveColourBox = PulldownList(self, grid=(5, 1), vAlign='t')
     for item in spectrumColours.items():
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
       pix.fill(QtGui.QColor(item[0]))
       self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
       self.positiveColourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.positiveContourColour))
-      self.positiveColourBox.currentIndexChanged.connect(partial(self._changePosColourComboIndex, spectrum))
+      self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
     except ValueError:
       pass
+
     self.positiveColourButton = Button(self, grid=(5, 2), vAlign='t', hAlign='l',
                                        icon='icons/colours', hPolicy='fixed')
     self.positiveColourButton.clicked.connect(partial(self._changePosSpectrumColour, spectrum))
-
 
     negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0), vAlign='c', hAlign='l')
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True, vAlign='t', hAlign='l')
@@ -590,27 +596,30 @@ class ContoursTab(QtGui.QWidget, Base):
         negativeContoursCheckBox.setChecked(True)
       else:
         negativeContoursCheckBox.setChecked(False)
-    negativeContoursCheckBox.stateChanged.connect(self.displayNegativeContours)
+    negativeContoursCheckBox.stateChanged.connect(self._queueChangeNegativeContourDisplay)
+
     negativeBaseLevelLabel = Label(self, text="Negative Base Level", grid=(7, 0), vAlign='c', hAlign='l')
     negativeBaseLevelData = DoubleSpinbox(self, grid=(7, 1), vAlign='t')
     negativeBaseLevelData.setMaximum(-0.1)
     negativeBaseLevelData.setMinimum(-1e12)
     negativeBaseLevelData.setValue(spectrum.negativeContourBase)
-    negativeBaseLevelData.valueChanged.connect(partial(self._lineEditTextChanged4, spectrum))
+    negativeBaseLevelData.valueChanged.connect(partial(self._queueChangeNegativeBaseLevel, spectrum))
+    # negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*negativeMultiplierData.value()-1)
+    # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
+    negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*0.1)
+
     negativeMultiplierLabel = Label(self, text="Negative Multiplier", grid=(8, 0), vAlign='c', hAlign='l')
     negativeMultiplierData = DoubleSpinbox(self, grid=(8, 1), vAlign='t')
     negativeMultiplierData.setValue(spectrum.negativeContourFactor)
     negativeMultiplierData.setSingleStep(0.1)
+    negativeMultiplierData.valueChanged.connect(partial(self._queueChangeNegativeContourMultiplier, spectrum))
 
-    negativeMultiplierData.valueChanged.connect(partial(self._lineEditTextChanged5, spectrum))
-    # negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*negativeMultiplierData.value()-1)
-    # Changed to get less quickly to zero - but DoubleSpinBox is NOT right for this
-    negativeBaseLevelData.setSingleStep((negativeBaseLevelData.value()*-1)*0.1)
     negativeContourCountLabel = Label(self, text="Number of negative contours", grid=(9, 0), vAlign='c', hAlign='l')
     negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
     negativeContourCountData.setValue(spectrum.negativeContourCount)
-    negativeContourCountData.valueChanged.connect(partial(self._lineEditTextChanged6, spectrum))
+    negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, spectrum))
     negativeContourColourLabel = Label(self, text="Colour",grid=(10, 0), vAlign='c', hAlign='l')
+
     self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
     for item in spectrumColours.items():
       pix=QtGui.QPixmap(QtCore.QSize(20,20))
@@ -618,7 +627,7 @@ class ContoursTab(QtGui.QWidget, Base):
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
       self.negativeColourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.negativeContourColour))
-      self.negativeColourBox.currentIndexChanged.connect(partial(self._changeNegColourComboIndex, spectrum))
+      self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, spectrum))
     except ValueError:
       pass
 
@@ -626,12 +635,14 @@ class ContoursTab(QtGui.QWidget, Base):
                                        vAlign='t', hAlign='l')
     self.negativeColourButton.clicked.connect(partial(self._changeNegSpectrumColour, spectrum))
 
-    Label(self, text="Note: Changes on this tab are applied immediately.", grid=(11, 0), vAlign='b', hAlign='l')
-
 
   def _writeLoggingMessage(self, command):
     self.logger.info("spectrum = project.getByPid('%s')" % self.spectrum.pid)
     self.logger.info(command)
+
+
+  def _queueChangePositivieContourDisplay(self, state):
+    self._changes['positivieContourDisplay'] = partial(self._changePositiveContourDisplay, state)
 
   def _changePositiveContourDisplay(self, state):
     if state == QtCore.Qt.Checked:
@@ -639,14 +650,17 @@ class ContoursTab(QtGui.QWidget, Base):
         spectrumView.displayPositiveContours = True
         self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayPositiveContours = True")
-
     else:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayPositiveContours = False
         self.logger.info("spectrumView = ui.getByGid('%s')" % spectrumView.pid)
         self.logger.info("spectrumView.displayPositiveContours = False")
 
-  def displayNegativeContours(self, state):
+
+  def _queueChangeNegativeContourDisplay(self, state):
+    self._changes['negativeContourDisplay'] = partial(self._changeNegativeContourDisplay, state)
+
+  def _changeNegativeContourDisplay(self, state):
     if state == QtCore.Qt.Checked:
       for spectrumView in self.spectrum.spectrumViews:
         spectrumView.displayNegativeContours = True
@@ -659,35 +673,62 @@ class ContoursTab(QtGui.QWidget, Base):
         self.logger.info("spectrumView.displayNegativeContours = False")
 
 
-  def _lineEditTextChanged1(self, spectrum, value):
+  def _queueChangePositiveBaseLevel(self, spectrum, value):
+    self._changes['positiveContourBaseLevel'] = partial(self._changePositiveBaseLevel, spectrum, value)
+
+  def _changePositiveBaseLevel(self, spectrum, value):
     spectrum.positiveContourBase = float(value)
     self._writeLoggingMessage("spectrum.positiveContourBase = %f" % float(value))
     self.pythonConsole.writeConsoleCommand("spectrum.positiveContourBase = %f" % float(value), spectrum=spectrum)
 
-  def _lineEditTextChanged2(self, spectrum, value):
+
+  def _queueChangePositiveContourMultiplier(self, spectrum, value):
+    self._changes['positiveContourMultiplier'] = partial(self._changePositiveContourMultiplier, spectrum, value)
+
+  def _changePositiveContourMultiplier(self, spectrum, value):
     spectrum.positiveContourFactor = float(value)
     self._writeLoggingMessage("spectrum.positiveContourFactor = %f" % float(value))
     self.pythonConsole.writeConsoleCommand("spectrum.positiveContourFactor = %f" % float(value), spectrum=spectrum)
 
-  def _lineEditTextChanged3(self, spectrum, value):
+
+  def _queueChangePositiveContourCount(self, spectrum, value):
+    self._changes['positiveContourCount'] = partial(self._changePositiveContourCount, spectrum, value)
+
+  def _changePositiveContourCount(self, spectrum, value):
     spectrum.positiveContourCount = int(value)
     self._writeLoggingMessage("spectrum.positiveContourCount = %d" % int(value))
     self.pythonConsole.writeConsoleCommand("spectrum.positiveContourCount = %d" % int(value), spectrum=spectrum)
 
-  def _lineEditTextChanged4(self, spectrum, value):
+
+  def _queueChangeNegativeBaseLevel(self, spectrum, value):
+    self._changes['negativeContourBaseLevel'] = partial(self._changeNegativeBaseLevel, spectrum, value)
+
+  def _changeNegativeBaseLevel(self, spectrum, value):
     spectrum.negativeContourBase = float(value)
     self._writeLoggingMessage("spectrum.negativeContourBase = %f" % float(value))
     self.pythonConsole.writeConsoleCommand("spectrum.negativeContourBase = %f" % float(value), spectrum=spectrum)
 
-  def _lineEditTextChanged5(self, spectrum, value):
+
+  def _queueChangeNegativeContourMultiplier(self, spectrum, value):
+    self._changes['negativeContourMultiplier'] = partial(self._changeNegativeContourMultiplier, spectrum, value)
+
+  def _changeNegativeContourMultiplier(self, spectrum, value):
     spectrum.negativeContourFactor = float(value)
     self._writeLoggingMessage("spectrum.negativeContourFactor = %f" % float(value))
     self.pythonConsole.writeConsoleCommand("spectrum.negativeContourFactor = %f" % float(value), spectrum=spectrum)
 
-  def _lineEditTextChanged6(self, spectrum, value):
+
+  def _queueChangeNegativeContourCount(self, spectrum, value):
+    self._changes['negativeContourCount'] = partial(self._changeNegativeContourCount, spectrum, value)
+
+  def _changeNegativeContourCount(self, spectrum, value):
     spectrum.negativeContourCount = int(value)
     self._writeLoggingMessage("spectrum.negativeContourCount = %d" % int(value))
     self.pythonConsole.writeConsoleCommand("spectrum.negativeContourCount = %d" % int(value), spectrum=spectrum)
+
+
+  def _queueChangePosSpectrumColour(self, spectrum):
+    self._changes['positiveSpectrumColour'] = partial(self._changePosSpectrumColour, spectrum)
 
   def _changePosSpectrumColour(self, spectrum):
     dialog = ColourDialog()
@@ -705,6 +746,9 @@ class ContoursTab(QtGui.QWidget, Base):
       self.positiveColourBox.setCurrentIndex(int(newIndex)-1)
 
 
+  def _queueChangeNegSpectrumColour(self, spectrum):
+    self._changes['negativeSpectrumColour'] = partial(self._changeNegSpectrumColour, spectrum)
+
   def _changeNegSpectrumColour(self, spectrum):
     dialog = ColourDialog()
     newColour = dialog.getColor()
@@ -721,15 +765,20 @@ class ContoursTab(QtGui.QWidget, Base):
       self.negativeColourBox.setCurrentIndex(int(newIndex)-1)
 
 
-  def _changePosColourComboIndex(self, spectrum, value):
+  def _queueChangePosColourComboIndex(self, spectrum, value):
+    self._changes['positiveColourComboIndex'] = partial(self._changePosColourComboIndex, spectrum, value)
 
+  def _changePosColourComboIndex(self, spectrum, value):
     newColour = list(spectrumColours.keys())[value]
     spectrum.positiveContourColour = newColour
     self._writeLoggingMessage("spectrum.positiveContourColour = '%s'" % newColour)
     self.pythonConsole.writeConsoleCommand("spectrum.positiveContourColour = '%s'" % newColour, spectrum=spectrum)
 
-  def _changeNegColourComboIndex(self, spectrum, value):
 
+  def _queueChangeNegColourComboIndex(self, spectrum, value):
+    self._changes['negativeColourComboIndex'] = partial(self._changeNegColourComboIndex, spectrum, value)
+
+  def _changeNegColourComboIndex(self, spectrum, value):
     newColour = list(spectrumColours.keys())[value]
     spectrum._apiDataSource.negativeContourColour = newColour
     self._writeLoggingMessage("spectrum.negativeContourColour = %s" % newColour)

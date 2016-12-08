@@ -75,9 +75,9 @@ class SpectrumPropertiesPopup(QtGui.QDialog, Base):
     # self.applyButton.setEnabled(False)
     Button(self, grid=(2, 3), callback=self.accept, text='Ok', vPolicy='fixed')
     if sys.platform.lower() == 'linux':
-      if spectrum.project._appBase.preferences.general.colourScheme == 'dark':
+      if spectrum.project._appBase.colourScheme == 'dark':
         self.setStyleSheet("QTabWidget > QWidget{ background-color:  #2a3358; color: #f7ffff; padding:4px;}")
-      elif spectrum.project._appBase.preferences.general.colourScheme == 'light':
+      elif spectrum.project._appBase.colourScheme == 'light':
         self.setStyleSheet("QTabWidget > QWidget { background-color: #fbf4cc;} QTabWidget { background-color: #fbf4cc;}")
 
   def _keyPressEvent(self, event):

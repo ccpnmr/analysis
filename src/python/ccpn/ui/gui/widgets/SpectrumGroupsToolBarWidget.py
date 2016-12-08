@@ -107,7 +107,7 @@ class SpectrumGroupsWidget(QtGui.QWidget):
 
   def setColours(self):
 
-    self.colourScheme = self.project._appBase.preferences.general.colourScheme
+    self.colourScheme = self.project._appBase.colourScheme
     if self.colourScheme == 'dark':
       self.setStyleSheet("""
                       Button::checked {background-color: #020F31;}

@@ -80,7 +80,11 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
     # newSplitter = QtGui.QSplitter   # NBNB FIXME - is this correct?
     self.stripFrame.layout().addWidget(self.plotWidget, 0,
                                        self.guiSpectrumDisplay.orderedStrips.index(self))
-    self.colourScheme = self._parent._appBase.preferences.general.colourScheme
+
+    self._appBase = self._parent._appBase
+    self.current = self._appBase.current
+
+    self.colourScheme = self._appBase.colourScheme
     if self.colourScheme == 'light':
       self.background = '#f7ffff'
       self.foreground = '#080000'
@@ -90,8 +94,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       self.foreground = '#f7ffff'
       self.gridColour = '#f7ffff'
     self.plotWidget.setBackground(self.background)
-    self._appBase = self._parent._appBase
-    self.current = self._appBase.current
+
     self.current.registerNotify(self._highlightCurrentStrip, 'strips')
     self.plotItem = self.plotWidget.plotItem
     self.plotItem.parent = self
@@ -167,9 +170,9 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
 
   def _highlightCurrentStrip(self, strips=None):
 
-    if self._appBase.preferences.general.colourScheme == 'light':
+    if self._appBase.colourScheme == 'light':
       axisColour = '#3333ff'
-    elif self._appBase.preferences.general.colourScheme == 'dark':
+    elif self._appBase.colourScheme == 'dark':
       axisColour = '#00ff00'
     else:
       return
@@ -348,7 +351,7 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       
   def _updatePhasing(self):
     #colour = '#ffffff' if self.background == 'k' else '#000000'
-    colour = '#e4e15b' if self._appBase.preferences.general.colourScheme == 'dark' else '#000000'
+    colour = '#e4e15b' if self._appBase.colourScheme == 'dark' else '#000000'
     self.hPhasingPivot.setPen({'color': colour})
     self.vPhasingPivot.setPen({'color': colour})
     for spectrumView in self.spectrumViews:

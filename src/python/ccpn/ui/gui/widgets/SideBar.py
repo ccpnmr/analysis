@@ -46,6 +46,7 @@ from ccpn.ui.gui.popups.SubstancePropertiesPopup import SubstancePropertiesPopup
 from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
+from ccpn.ui.gui.guiSettings import sidebarFont
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -105,7 +106,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
     self._typeToItem = dd = {}
 
-    self.setFont(QtGui.QFont('Lucida Grande', 12))
+    self.setFont(sidebarFont)
     self.header().hide()
     self.setDragEnabled(True)
     self._appBase = parent._appBase
@@ -181,7 +182,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     Sets the specified project as a class attribute so it can be accessed from elsewhere
     """
     self.project = project
-    self.colourScheme = project._appBase.preferences.general.colourScheme
+    self.colourScheme = project._appBase.colourScheme
 
     # Register notifiers to maintain sidebar
     for cls in classesInSideBar.values():

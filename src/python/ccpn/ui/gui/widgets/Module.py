@@ -1,10 +1,35 @@
-__author__ = 'simon1'
+"""This file contains CcpnModule base class
+
+intial version by Simon;
+modified by Geerten 1-7/12/2016
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: geertenv $"
+__date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
+__version__ = "$Revision: 9605 $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
 
 from PyQt4 import QtCore, QtGui
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
-from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.guiSettings import moduleLabelFont
 
 from functools import partial
 
@@ -81,10 +106,12 @@ class CcpnModule(Module):
       args[0].ignore()
       return
 
+
 class CcpnModuleLabel(ModuleLabel):
   def __init__(self, *args):
     super(CcpnModuleLabel, self).__init__(showCloseButton=True, *args)
-    self.setFont(Font(size=12, semiBold=True))
+    self.setFont(moduleLabelFont)
+    #self.setStyleSheet("padding:20px"): doesn't do anything?
 
   def mousePressEvent(self, ev):
     if ev.button() == QtCore.Qt.LeftButton:

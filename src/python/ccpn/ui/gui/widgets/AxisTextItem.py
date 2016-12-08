@@ -34,7 +34,7 @@ class AxisTextItem(pg.TextItem):
     self.axisCode = axisCode
     self.units = units
     self.mappedDim = mappedDim
-    if plotWidget._appBase.preferences.general.colourScheme == 'dark':
+    if plotWidget._appBase.colourScheme == 'dark':
       colour = '#f7ffff'
     else:
       colour = '#080000'

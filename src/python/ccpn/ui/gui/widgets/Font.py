@@ -1,34 +1,32 @@
 from PyQt4 import QtGui
 
-import os
+# This only works when we have a QtApp instance working; hence it need to go somewhere else.
+#from ccpn.framework.PathsAndUrls import fontsPath
+#QtGui.QFontDatabase.addApplicationFont(os.path.join(fontsPath, 'open-sans/OpenSans-Regular.ttf'))
 
-FONT_DIR = os.path.join(os.path.dirname(__file__), 'fonts')
 
 class Font(QtGui.QFont):
 
-  def __init__(self, colour=None, size=None, bold=None, italic=None, normal=None, semiBold=None):
-    self.colour = colour
-    self.size = size
-    self.bold = bold
-    self.italic = normal
-    self.normal = normal
+  def __init__(self, fontName, size, bold=False, italic=False, underline=False, strikeout=False):
+    """
+    Initialise the font fontName
+    :param fontName: font name
+    :param size: size of font
+    :param bold (optional): make font bold
+    :param italic (optional):make fint italic
 
+     to retrieve:
+     self.fontName -> fontName
+     QFont methods:
+     self.pointSize() -> size
+     self.italic() -> italic
+     self.bold() -> bold
+    """
 
-    if self.bold is True:
-      font = 'Lucida Grande -Bold'
+    QtGui.QFont.__init__(self, fontName, size)
+    self.fontName = fontName
+    self.setBold(bold)
+    self.setItalic(italic)
+    self.setUnderline(underline)
+    self.setStrikeOut(strikeout)
 
-    if self.normal is True:
-      font = 'OpenSans-Regular'
-
-    if self.italic is True:
-      font = 'OpenSans-Italic'
-
-    if semiBold is True:
-      font = 'OpenSans-Semibold'
-
-    QtGui.QFont.__init__(self, font)
-
-    if size is None:
-      self.setPointSize(8)
-    else:
-      self.setPointSize(size)

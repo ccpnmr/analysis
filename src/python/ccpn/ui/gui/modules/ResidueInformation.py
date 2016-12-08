@@ -23,7 +23,7 @@ class ResidueInformation(CcpnModule, Base):
     chainPulldown.setData(chainPulldownData)
     self.selectedChain = project.getByPid(chainPulldown.currentText())
     residueLabel = Label(self, text='Residue ', grid=(0, 3))
-    self.colourScheme = project._appBase.preferences.general.colourScheme
+    self.colourScheme = project._appBase.colourScheme
     residuePulldown = PulldownList(self, callback=self._setCurrentResidue, grid=(0, 4))
     residuePulldown.setData(CCP_CODES)
     self.selectedResidueType = residuePulldown.currentText()

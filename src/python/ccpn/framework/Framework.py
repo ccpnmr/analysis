@@ -344,22 +344,22 @@ class Framework:
     """
     colourScheme = None
     if self.args.darkColourScheme:
-      colourScheme ='Dark'
+      colourScheme ='dark'
     elif self.args.lightColourScheme:
-      colourScheme = 'Light'
+      colourScheme = 'light'
     else:
       colourScheme = self.preferences.general.colourScheme
 
     if colourScheme is None:
       raise RuntimeError('invalid colourScheme')
 
-    self.colourScheme = metaUtil.upperFirst(colourScheme)
+    self.colourScheme = colourScheme
 
     styleSheet = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                   '%sStyleSheet.qss' % self.colourScheme)).read()
+                                   '%sStyleSheet.qss' % metaUtil.upperFirst(colourScheme))).read()
     if platform.system() == 'Linux':
       additions = open(os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                                    '%sAdditionsLinux.qss' % self.colourScheme)).read()
+                                    '%sAdditionsLinux.qss' % metaUtil.upperFirst(colourScheme))).read()
       styleSheet += additions
     return styleSheet
 
@@ -1187,7 +1187,7 @@ class Framework:
 
   def showProjectionPopup(self):
     if not self.project.spectra:
-      MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      MessageDialog.showWarning('Project contains no spectra.', 'Make Projection Popup cannot be displayed')
       return
     from ccpn.ui.gui.popups.SpectrumProjectionPopup import SpectrumProjectionPopup
     popup = SpectrumProjectionPopup(self.ui.mainWindow, self.project)
@@ -1214,8 +1214,7 @@ class Framework:
   def showCopyPeakListPopup(self):
     if not self.project.peakLists:
       self.project._logger.warn('Project has no Peak Lists. Peak Lists cannot be copied')
-      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied',
-                                colourScheme=self.preferences.general.colourScheme)
+      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak Lists cannot be copied')
       return
     else:
       from ccpn.ui.gui.popups.CopyPeakListPopup import CopyPeakListPopup
@@ -1299,9 +1298,9 @@ class Framework:
     """
     if not self.project.chemicalShiftLists:
       self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
-      MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed')
       return
-    from ccpn.ui.gui.modules.ChemicalShiftTable import NmrAtomShiftTable as Table
+    from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable as Table
     chemicalShiftTable = Table(chemicalShiftLists=self.project.chemicalShiftLists)
     self.ui.mainWindow.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
@@ -1310,10 +1309,10 @@ class Framework:
 
   def showNmrResidueTable(self, position='bottom', relativeTo=None):
     """Displays Nmr Residue Table"""
-    from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTable
-    nmrResidueTable = NmrResidueTable(self.ui.mainWindow, self.project)
-    nmrResidueTableModule = CcpnModule(name='Nmr Residue Table')
-    nmrResidueTableModule.layout.addWidget(nmrResidueTable)
+    from ccpn.ui.gui.modules.NmrResidueTable import NmrResidueTableModule
+    nmrResidueTableModule = NmrResidueTableModule(self.ui.mainWindow, self.project)
+    #nmrResidueTableModule = CcpnModule(name='Nmr Residue Table')
+    #nmrResidueTableModule.layout.addWidget(nmrResidueTable)
     self.ui.mainWindow.moduleArea.addModule(nmrResidueTableModule, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showNmrResidueTable()")
     self.project._logger.info("application.showNmrResidueTable()")
@@ -1326,7 +1325,7 @@ class Framework:
     from ccpn.ui.gui.modules.PeakTable import PeakTable
     if not self.project.peakLists:
       self.project._logger.warn('Project has no Peak Lists. Peak table cannot be displayed')
-      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      MessageDialog.showWarning('Project has no Peak Lists.', 'Peak table cannot be displayed')
       return
     self.peakTable = PeakTable(self.project, selectedList=selectedList)
     self.ui.mainWindow.moduleArea.addModule(self.peakTable, position=position, relativeTo=relativeTo)
@@ -1341,7 +1340,7 @@ class Framework:
     from ccpn.ui.gui.modules.RestraintTable import RestraintTable
     if not self.project.restraintLists:
       self.project._logger.warn('Project has no Restraint Lists. Restraint table cannot be displayed')
-      MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed', colourScheme=self.preferences.general.colourScheme)
+      MessageDialog.showWarning('Project has no Restraint Lists.', 'Restraint table cannot be displayed')
       return
     restraintTable = RestraintTable(self.project, selectedList=selectedList, project=self.project)
     self.ui.mainWindow.moduleArea.addModule(restraintTable, position=position, relativeTo=relativeTo)

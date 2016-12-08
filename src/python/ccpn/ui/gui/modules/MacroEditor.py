@@ -25,7 +25,8 @@ class MacroEditor(DropBase, CcpnModule):
     # macro selection
     self.label1 = Label(self, 'Macro Name')
     self.lineEdit1 = LineEdit(self)
-    self.button = Button(self, 'Select...', callback=self._openMacroFile)
+    self.button = Button(self, text='Select...', callback=self._openMacroFile, vPolicy='fixed')
+
     # macro editing area
     self.textBox = TextEditor()
 
@@ -34,6 +35,8 @@ class MacroEditor(DropBase, CcpnModule):
     widget = self.mainWidget
     widgetLayout = QtGui.QGridLayout()
     widget.setLayout(widgetLayout)
+    widget.layout().setSpacing(0)
+    widget.layout().setContentsMargins(0,0,0,0)
     widget.layout().addWidget(self.label1,    0, 0, 1, 1)
     widget.layout().addWidget(self.lineEdit1, 0, 1, 1, 3)
     widget.layout().addWidget(self.button,    0, 4, 1, 1)
@@ -41,12 +44,16 @@ class MacroEditor(DropBase, CcpnModule):
 
     self.buttonBox = ButtonList(self, texts=['Start', 'Stop', 'Close', 'Save Macro'],
                                 callbacks=[self._startMacroRecord, self._stopMacroRecord, self._reject, self._saveMacro])
+#    buttonLayout = QtGui.QGridLayout()
+#    self.buttonBox.setLayout(buttonLayout)
+#    self.buttonBox.layout().setSpacing(0)
+
     self.buttonBox.buttons[1].setDisabled(True)
     self.buttonBox.buttons[0].setEnabled(True)
     widget.layout().addWidget(self.buttonBox, 2, 3, 1, 2)
 
 #    self.layout().setSpacing(1)
-    self.layout.addWidget(widget)
+#    self.layout.addWidget(widget)
 
     if showRecordButtons is False:
       self.buttonBox.buttons[0].hide()

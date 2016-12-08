@@ -35,9 +35,11 @@ ccpnIssuesUrl                   = 'https://sourceforge.net/p/ccpn/bugs/'
 ccpnCodePath                    = Path.getTopDirectory()
 ccpnConfigPath                  = os.path.join(ccpnCodePath, 'config')
 defaultPreferencesPath          = os.path.join(ccpnConfigPath, 'defaultv3settings.json')
-macroPath                       = os.path.join(Path.getPythonDirectory(), 'ccpn', 'macros')
-pluginPath                      = os.path.join(Path.getPythonDirectory(), 'ccpn', 'plugins')
-pipePath                        = os.path.join(Path.getPythonDirectory(), 'ccpn', 'pipes')
+ccpnPythonPath                  = os.path.join(Path.getPythonDirectory(), 'ccpn')
+macroPath                       = os.path.join(ccpnPythonPath, 'macros')
+pluginPath                      = os.path.join(ccpnPythonPath, 'plugins')
+pipePath                        = os.path.join(ccpnPythonPath, 'pipes')
+fontsPath                       = os.path.join(ccpnPythonPath, 'ui', 'gui', 'widgets', 'fonts')
 
 # Program tutorials and documentation
 shortcutsPath                   = os.path.join(ccpnCodePath, 'doc', 'static', 'AnalysisShortcuts.pdf')

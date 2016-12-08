@@ -101,7 +101,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     msg2 = 'project = %sProject("%s")' % (('new' if isNew else 'open'), path)
     self.pythonConsole.writeConsoleCommand(msg2)
 
-    self.colourScheme = self._appBase.preferences.general.colourScheme
+    self.colourScheme = self._appBase.colourScheme
     self._appBase._updateRecentFiles()
     self.pythonConsole.setProject(project)
     self._updateWindowTitle()

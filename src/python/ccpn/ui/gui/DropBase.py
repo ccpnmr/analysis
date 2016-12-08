@@ -100,8 +100,7 @@ class DropBase(GuiBase):
                 pids = projects[:1]
                 if len(data) > 1 or len(newPids) > 1:
                   showWarning('Incorrect data load',
-                              "Attempt to load project together with other data. Other data ignored",
-                              colourScheme=self._appBase.preferences.general.colourScheme)
+                              "Attempt to load project together with other data. Other data ignored")
                 break
               else:
                 pids.extend(newPids)

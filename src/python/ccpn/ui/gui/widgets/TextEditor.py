@@ -26,18 +26,16 @@ import os
 from PyQt4 import QtGui
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.guiSettings import fixedWidthFont
 
 class TextEditor(QtGui.QTextEdit, Base):
-
-  font = 'Monaco'
-  fontSize = 12
 
   def __init__(self, parent=None, filename=None, **kw):
     super(TextEditor, self).__init__(parent)
     Base.__init__(self, **kw)
 
     self.filename = filename
-    self.setFont(QtGui.QFont(TextEditor.font, TextEditor.fontSize))
+    self.setFont(fixedWidthFont)
     # if self.filename is not None:
     #
     #   fileData = self.filename.read()

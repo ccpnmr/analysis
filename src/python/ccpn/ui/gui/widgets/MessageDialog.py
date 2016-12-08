@@ -1,4 +1,7 @@
+
 from PyQt4 import QtCore, QtGui
+
+from ccpn.ui.gui.guiSettings import messageFont
 
 Ok          = QtGui.QMessageBox.Ok
 Cancel      = QtGui.QMessageBox.Cancel
@@ -15,12 +18,40 @@ Critical    = QtGui.QMessageBox.Critical
 Save        = QtGui.QMessageBox.Save 
 Discard     = QtGui.QMessageBox.Discard
 
+
+class MessageDialog(QtGui.QMessageBox):
+  """
+  Base class for all dialogues
+  Using the 'multiline' to emulate the windowTitle, as on Mac the windows do not get their title
+  """
+  def __init__(self, title, basicText, message, icon=Information, iconPath=None, parent=None):
+    QtGui.QMessageBox.__init__(self, parent)
+    self.setFont(messageFont)
+    self.setWindowModality(QtCore.Qt.WindowModal)
+
+    self.setWindowTitle(title)
+    self.setText(basicText)
+    self.setInformativeText(message)
+    self.setIcon(icon)
+
+    palette = QtGui.QPalette()
+    self.setPalette(palette)
+
+    if iconPath:
+      image = QtGui.QPixmap(iconPath)
+      scaledImage = image.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
+      self.setIconPixmap(scaledImage)
+
+
+
 def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
+  """Display an info message
+  """
 
-  dialog = MessageDialog('Information', title, message,
-                         Information, iconPath, colourScheme, parent)
-
+  dialog = MessageDialog('Information', title, message, Information, iconPath, parent)
   dialog.setStandardButtons(Ok)
+
+  #dialog = QtGui.QMessageBox.information(parent, title, message)
   dialog.raise_()
   dialog.exec_()
   
@@ -28,8 +59,7 @@ def showInfo(title, message, parent=None, colourScheme=None, iconPath=None):
 
 def showOkCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
-  dialog = MessageDialog('Query', title, message,
-                         Question, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
 
   dialog.setStandardButtons(Ok | Cancel)
   dialog.setDefaultButton(Ok)
@@ -40,8 +70,7 @@ def showOkCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
 
 
-  dialog = MessageDialog('Query', title, message,
-                         Question, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
                          
   dialog.setStandardButtons(Yes | No)
   dialog.setDefaultButton(Yes)
@@ -51,8 +80,7 @@ def showYesNo(title, message, parent=None, colourScheme=None, iconPath=None):
 
 def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
-  dialog = MessageDialog('Retry', title, message,
-                         Question, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Retry', title, message, Question, iconPath, parent)
                          
   dialog.setStandardButtons( Retry | Ignore | Cancel)
   dialog.setDefaultButton(Retry)
@@ -71,8 +99,7 @@ def showRetryIgnoreCancel(title, message, parent=None, colourScheme=None, iconPa
 
 def showSaveDiscardCancel(title, message, parent=None, colourScheme=None, iconPath=None):
 
-  dialog = MessageDialog('Query', title, message,
-                         Question, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
                          
   dialog.setStandardButtons( Save | Discard | Cancel)
   dialog.setDefaultButton(Save)
@@ -91,8 +118,7 @@ def showSaveDiscardCancel(title, message, parent=None, colourScheme=None, iconPa
 
 def showWarning(title, message, parent=None, colourScheme=None, iconPath=None):
 
-  dialog = MessageDialog('Warning', title, message,
-                         Warning, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Warning', title, message, Warning, iconPath, parent)
 
   dialog.setStandardButtons(Close)
   dialog.raise_()
@@ -105,8 +131,7 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
   if objects:
     assert len(objects) == len(texts)
 
-  dialog = MessageDialog('Query', title, message,
-                         Question, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Query', title, message, Question, iconPath, parent)
   
   for text in texts:
     dialog.addButton(text, QtGui.QMessageBox.AcceptRole)
@@ -122,8 +147,7 @@ def showMulti(title, message, texts, objects=None, parent=None, colourScheme=Non
 
 def showError(title, message, parent=None, colourScheme=None, iconPath=None):
   
-  dialog = MessageDialog('Error', title, message,
-                         Critical, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Error', title, message, Critical, iconPath, parent)
 
   dialog.setStandardButtons(Close)
   dialog.raise_()
@@ -133,50 +157,13 @@ def showError(title, message, parent=None, colourScheme=None, iconPath=None):
 
 def showMessage(title, message, parent=None, colourScheme=None, iconPath=None):
   
-  dialog = MessageDialog('Message', title, message,
-                         Information, iconPath, colourScheme, parent)
+  dialog = MessageDialog('Message', title, message, Information, iconPath, parent)
 
   dialog.setStandardButtons(Close)
   dialog.raise_()
   dialog.exec_()
   
   return
-  
-class MessageDialog(QtGui.QMessageBox):
-
-  def __init__(self, title, basicText, message, icon=Information, iconPath=None, colourScheme='dark', parent=None):
-     
-    QtGui.QMessageBox.__init__(self, parent)
-    
-    self.setWindowTitle(title)
-    self.setText(basicText)
-    self.setInformativeText(message)
-    self.setIcon(icon)
-    palette = QtGui.QPalette()
-    if iconPath:
-      image = QtGui.QPixmap(iconPath)
-      scaledImage = image.scaled(64, 64, QtCore.Qt.KeepAspectRatio)
-      self.setIconPixmap(scaledImage)
-
-    if colourScheme == 'dark':
-      self.setStyleSheet("""  QMessageBox QLabel {
-                              color: #f7ffff;
-                          }
-                          QMessageBox QPushButton {
-                            color:  #bec4f3;
-                            background-color: #535a83;
-                            padding: 2px;
-                            border: 1px solid #182548;
-                            }
-
-                          """)
-      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#2a3358'))
-    elif colourScheme == 'light':
-      self.setStyleSheet("""  QMessageBox QLabel {
-                              color: #555d85;
-                          }""")
-      palette.setColor(QtGui.QPalette.Background, QtGui.QColor('#fbf4cc'))
-    self.setPalette(palette)
 
 if __name__ == '__main__':
 
@@ -186,6 +173,7 @@ if __name__ == '__main__':
   from ccpn.ui.gui.widgets.Button import Button
 
   def callback():
+    print(showInfo('My info window', 'test info'))
     print(showMulti('Test', 'Multi Choice', ['Apples', 'Bananas', 'Pears']))
     print(showError('Test', 'This is a test error message'))
     print(showYesNo('Test', 'Yes or No message'))
@@ -195,6 +183,6 @@ if __name__ == '__main__':
  
   app = TestApplication()
   popup = BasePopup(title='Test MessageReporter')
-  popup.setSize(200,30)
+  #popup.setSize(200,30)
   button = Button(popup, text='hit me', callback=callback)
   app.start()

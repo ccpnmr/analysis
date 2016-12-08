@@ -341,7 +341,7 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.setFlag(self.ItemSendsScenePositionChanges, True)
     # if self.isSelected():
     #   print(self)
-    self.colourScheme = peakItem.peakListView._appBase.preferences.general.colourScheme
+    self.colourScheme = peakItem.peakListView._appBase.colourScheme
     # color.setRgbF(*self.peakItem.glWidget._hexToRgba(textColor))
     self.setColour()
     self.updatePos()
@@ -481,7 +481,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
     pen = painter.pen()
     pen.setStyle(QtCore.Qt.DashLine)
     pen.setWidth(self.lineWidth)
-    self.colourScheme = peakItem.peakListView._appBase.preferences.general.colourScheme
+    self.colourScheme = peakItem.peakListView._appBase.colourScheme
     if self.colourScheme == 'light':
       colour = QtGui.QColor('#080000')
     else:
@@ -523,7 +523,7 @@ class PeakNd(QtGui.QGraphicsItem):
     self._appBase = peakListView._appBase
     scene = peakListView.spectrumView.strip.plotWidget.scene()
     #QtGui.QGraphicsItem.__init__(self, scene=scene)
-    self.colourScheme =self._appBase.preferences.general.colourScheme
+    self.colourScheme =self._appBase.colourScheme
     QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
     ###QtGui.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
@@ -789,7 +789,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.text = (' , ').join('-' * peakItem.peak.peakList.spectrum.dimensionCount)
     # if self.isSelected():
     #   print(self)
-    self.colourScheme = peakItem.peakListView._appBase.preferences.general.colourScheme
+    self.colourScheme = peakItem.peakListView._appBase.colourScheme
     colour = peakItem.peakListView.textColour
     # if self.colourScheme == 'light':
     #   colour = QtGui.QColor('#080000')

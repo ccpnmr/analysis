@@ -5,12 +5,15 @@ from ccpn.core.Chain import Chain
 from ccpn.core.Residue import Residue
 
 from ccpn.ui.gui.widgets.Module import CcpnModule
-from ccpn.ui.gui.widgets.Font import Font
 from ccpn.ui.gui.widgets.MessageDialog import showYesNo
+from ccpn.ui.gui.guiSettings import textFontHugeBold
+from ccpn.ui.gui.guiSettings import textFontHuge
+
 import typing
 
 from ccpn.ui.gui.DropBase import DropBase
 from PyQt4 import QtCore, QtGui
+
 
 class SequenceModule(CcpnModule):
 
@@ -26,7 +29,7 @@ class SequenceModule(CcpnModule):
     CcpnModule.__init__(self, size=(10, 30), name='Sequence')
 
     self.project = project
-    self.colourScheme = project._appBase.preferences.general.colourScheme
+    self.colourScheme = project._appBase.colourScheme
     self.label.hide()
     self.setAcceptDrops(True)
     self.scrollArea = QtGui.QScrollArea()
@@ -102,7 +105,18 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
     QtGui.QGraphicsTextItem.__init__(self)
 
     self.chain = chain
-    self.colourScheme = project._appBase.preferences.general.colourScheme
+
+    self.colourScheme = project._appBase.colourScheme
+    #print('>>', self.colourScheme)
+    if self.colourScheme == 'dark':
+      self.colour1 = '#bec4f3'
+      self.colour2 = '#f7ffff'
+    elif self.colourScheme == 'light':
+      #colour = '#bd8413'
+      self.colour1 = 'black'
+      self.colour2 = '#555D85'
+    self.setDefaultTextColor(QtGui.QColor(self.colour1))
+
     self.setPos(QtCore.QPointF(position[0], position[1]))
     if placeholder:
       self.text = 'No Chains in Project!'
@@ -110,12 +124,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
       self.text = chain.compoundName
     self.parent = parent
     self.setHtml('<div style=><strong>'+self.text+' </strong></div>')
-    self.setFont(Font(size=20, bold=True))
-    if self.colourScheme == 'dark':
-      colour = '#bec4f3'
-    elif self.colourScheme == 'light':
-      colour = '#bd8413'
-    self.setDefaultTextColor(QtGui.QColor(colour))
+    self.setFont(textFontHuge)
     self.residueDict = {}
     i = 0
     if chain:
@@ -133,25 +142,31 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
     QtGui.QGraphicsTextItem.__init__(self)
     DropBase.__init__(self, project._appBase)
-    self.setPlainText(residue.shortName)
-    position = labelPosition+(20*index)
-    font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
-    font.setStyleHint(QtGui.QFont.Monospace)
-    self.setFont(font)
-    self.colourScheme = project._appBase.preferences.general.colourScheme
-    if self.colourScheme == 'dark':
-      self.colour1 = '#bec4f3'
-      self.colour2 = '#f7ffff'
-    elif self.colourScheme == 'light':
-      self.colour1 = '#bd8413'
-      self.colour2 = '#666e98'
-    self.setDefaultTextColor(QtGui.QColor(self.colour1))
-    self.setPos(QtCore.QPointF(position, yPosition))
-    self.residueNumber = residue.sequenceCode
+    self.setAcceptDrops(True)
+
     self.project = project
     self.residue = residue
-    self.setAcceptDrops(True)
     self.parent = parent
+
+    #font = QtGui.QFont('Lucida Console', GuiChainResidue.fontSize)
+    #font.setStyleHint(QtGui.QFont.Monospace)
+    #self.setFont(font)
+    self.setFont(textFontHuge)
+    self.colourScheme = project._appBase.colourScheme
+    if self.colourScheme == 'dark':
+      self.colour1 = '#bec4f3'  # un-assigned
+      self.colour2 = '#f7ffff'  # assigned
+    elif self.colourScheme == 'light':
+      #self.colour1 = '#bd8413'
+      #self.colour2 = '#666e98'
+      self.colour1 = 'black'
+      self.colour2 = '#555D85'
+    self.setDefaultTextColor(QtGui.QColor(self.colour1))
+
+    self.setPlainText(residue.shortName)
+    position = labelPosition+(20*index)
+    self.setPos(QtCore.QPointF(position, yPosition))
+    self.residueNumber = residue.sequenceCode
     scene.dragLeaveEvent = self._dragLeaveEvent
     scene.dragEnterEvent = self._dragEnterEvent
     scene.dropEvent = self.dropEvent

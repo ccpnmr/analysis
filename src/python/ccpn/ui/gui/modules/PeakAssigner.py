@@ -74,7 +74,7 @@ class PeakAssigner(CcpnModule, Base):
     self.seqCodePulldowns = []
     self.resTypePulldowns = []
     self.atomTypePulldowns = []
-    self.colourScheme = self.project._appBase.preferences.general.colourScheme
+    self.colourScheme = self.project._appBase.colourScheme
 
     self.doubleToleranceCheckbox = CheckBox(self.mainWidget, checked=False)
     self.doubleToleranceCheckbox.stateChanged.connect(self._updateInterface)

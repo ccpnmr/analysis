@@ -21,7 +21,7 @@ class NmrAtomPopup(QtGui.QDialog, Base):
     self.project = nmrAtom.project
     ###application = createFramework() # this does not work, it creates a new Framework
     application = self.project._appBase
-    self.colourScheme = application.preferences.general.colourScheme
+    self.colourScheme = application.colourScheme
     self.nmrAtomLabel = Label(self, "NmrAtom: %s " % self.nmrAtom.id, grid=(0, 0))
     self.nmrAtomNameLabel = Label(self, "NmrAtom name", grid=(1, 0))
     self.nmrAtomNamePulldown = PulldownList(self, grid=(1, 1))

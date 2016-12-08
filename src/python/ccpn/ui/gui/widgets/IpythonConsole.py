@@ -1,6 +1,7 @@
 from PyQt4 import QtGui
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
+from ccpn.ui.gui.guiSettings import fixedWidthFont
 
 from ccpn.ui.gui.widgets.Widget import Widget
 from qtconsole.rich_jupyter_widget import RichJupyterWidget
@@ -23,7 +24,7 @@ class IpythonConsole(Widget, Base):
         self.mainWindow = mainWindow
         self.ipythonWidget = RichJupyterWidget(self, gui_completion='plain')
         self.setStyleSheet(self.mainWindow.styleSheet())
-        self.ipythonWidget._set_font(QtGui.QFont(TextEditor.font, TextEditor.fontSize))
+        self.ipythonWidget._set_font(fixedWidthFont)
         self.ipythonWidget.kernel_manager = km
         self.ipythonWidget.kernel_client = kc
         consoleLayout = QtGui.QGridLayout()

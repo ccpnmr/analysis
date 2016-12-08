@@ -66,31 +66,57 @@ IDENTITY.reset()
 #     for apiStripPeakListView in apiPeakListView._apiStripPeakListViews:
 
 def _getPeakAnnotation(peak):
-
   peakLabel = []
   for dimension in range(peak.peakList.spectrum.dimensionCount):
-    if len(peak.dimensionNmrAtoms[dimension]) == 0:
-      if len(peak.dimensionNmrAtoms) == 1:
+    pdNA = peak.dimensionNmrAtoms
+    if len(pdNA[dimension]) == 0:
+      if len(pdNA) == 1:
         peakLabel.append('1H')
       else:
         peakLabel.append('-')
     else:
-      peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms if len(atom) != 0]
+      peakNmrResidues = [atom[0].nmrResidue.id for atom in pdNA if len(atom) != 0]
       if all(x==peakNmrResidues[0] for x in peakNmrResidues):
-        for item in peak.dimensionNmrAtoms[dimension]:
+        for item in pdNA[dimension]:
           if len(peakLabel) > 0:
             peakLabel.append(item.name)
           else:
             peakLabel.append(item.pid.id)
 
       else:
-        for item in peak.dimensionNmrAtoms[dimension]:
+        for item in pdNA[dimension]:
           label = item.nmrResidue.id+item.name
           peakLabel.append(label)
 
   text = ', '.join(peakLabel)
-
   return text
+
+# @profile
+# def _getPeakAnnotation(peak):
+#
+#   peakLabel = []
+#   for dimension in range(peak.peakList.spectrum.dimensionCount):
+#     if len(peak.dimensionNmrAtoms[dimension]) == 0:
+#       if len(peak.dimensionNmrAtoms) == 1:
+#         peakLabel.append('1H')
+#       else:
+#         peakLabel.append('-')
+#     else:
+#       peakNmrResidues = [atom[0].nmrResidue.id for atom in peak.dimensionNmrAtoms if len(atom) != 0]
+#       if all(x==peakNmrResidues[0] for x in peakNmrResidues):
+#         for item in peak.dimensionNmrAtoms[dimension]:
+#           if len(peakLabel) > 0:
+#             peakLabel.append(item.name)
+#           else:
+#             peakLabel.append(item.pid.id)
+#
+#       else:
+#         for item in peak.dimensionNmrAtoms[dimension]:
+#           label = item.nmrResidue.id+item.name
+#           peakLabel.append(label)
+#
+#   text = ', '.join(peakLabel)
+#   return text
 
 class GuiPeakListView(QtGui.QGraphicsItem):
 
@@ -681,9 +707,8 @@ class PeakNd(QtGui.QGraphicsItem):
 
     return QtGui.QGraphicsItem.itemChange(self, change, value)
 """
-
+  # @profile
   def paint(self, painter, option, widget):
-
     if self.peakListView.isDeleted: # strip has been deleted
       return
 
@@ -800,6 +825,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     self.setPos(15, -15)
     # self.updatePos()
 
+  # @profile
   def setupPeakAnnotationItem(self, peakItem):
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.

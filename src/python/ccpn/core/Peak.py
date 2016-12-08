@@ -433,8 +433,11 @@ class Peak(AbstractWrapperObject):
     pstring = ''
     for p in self.position:
       pstring += '%.3f,' % p
-    return "<%s; position:[%s], height:%.1e>" % (self.pid, pstring[:-1], self.height)
 
+    if self.height is None:
+      return "<%s; position:[%s]>" % (self.pid, pstring[:-1])
+    else:
+      return "<%s; position:[%s], height:%.1e>" % (self.pid, pstring[:-1], self.height)
 
 # Connections to parents:
 def _newPeak(self:PeakList,height:float=None, volume:float=None,

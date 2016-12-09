@@ -327,12 +327,11 @@ class ViewBox(pg.ViewBox):
       self._resetBoxes()
       mousePosition=self.mapSceneToView(event.pos())
       position = [mousePosition.x(), mousePosition.y()]
+      orderedAxes = self.current.strip.orderedAxes
+      for orderedAxis in orderedAxes[2:]:
+        position.append(orderedAxis.position)
       for spectrumView in self.current.strip.spectrumViews:
         peakList = spectrumView.spectrum.peakLists[0]
-        orderedAxes = self.current.strip.orderedAxes
-        if len(orderedAxes) > 2:
-          for n in orderedAxes[2:]:
-            position.append(n.position)
         peak = peakList.newPeak(position=position)
         self.current.addPeak(peak)
         peak.isSelected = True

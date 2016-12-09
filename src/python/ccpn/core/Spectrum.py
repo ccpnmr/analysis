@@ -962,6 +962,10 @@ class Spectrum(AbstractWrapperObject):
     finally:
       self._project._appBase._endCommandBlock()
 
+  def getPositionValue(self, position):
+
+    return self._apiDataSource.getPositionValue(position)
+
   def getPlaneData(self, position=None, xDim:int=1, yDim:int=2):
 
     return self._apiDataSource.getPlaneData(position=position, xDim=xDim, yDim=yDim)

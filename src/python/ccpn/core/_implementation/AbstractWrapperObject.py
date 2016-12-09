@@ -322,7 +322,11 @@ class AbstractWrapperObject():
     """Get an arbitrary data object from either its pid (e.g. 'SP:HSQC2') or its longPid
     (e.g. 'Spectrum:HSQC2'
 
-    Returns None for invalid or unrecognised input strings."""
+    Returns None for invalid or unrecognised input strings.
+    """
+
+    if pidstring is None:
+      return None
 
     tt = pidstring.split(Pid.PREFIXSEP, 1)
     if len(tt) == 2:

@@ -196,7 +196,17 @@ ObjectTable::item::selected {
     color: #464E76;
 }
 
+/* make all background the same so that selection and sorting does not changes things */
 QHeaderView {
+    background-color: #FDFDFC;
+    color: #555D85;
+    font-weight: bold;
+}
+QHeaderView::section {
+    background-color: #FDFDFC;
+    color: #555D85;
+}
+QHeaderView::section:checked {
     background-color: #FDFDFC;
     color: #555D85;
 }

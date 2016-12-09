@@ -213,11 +213,23 @@ ObjectTable::item::selected {
     color: #f7ffff;
 }
 
+
+/* make all background the same so that selection and sorting does not changes things */
 QHeaderView {
-    background-color: #f7ffff;
-    color: #122043;
+    background-color: #FDFDFC;
+    /*color: #122043;*/
+    color: #555D85;
     font-weight: bold;
 }
+QHeaderView::section {
+    background-color: #FDFDFC;
+    color: #555D85;
+}
+QHeaderView::section:checked {
+    background-color: #FDFDFC;
+    color: #555D85;
+}
+
 
 QToolBar {
           border: 0px;

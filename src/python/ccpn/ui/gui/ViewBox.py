@@ -333,6 +333,9 @@ class ViewBox(pg.ViewBox):
       for spectrumView in self.current.strip.spectrumViews:
         peakList = spectrumView.spectrum.peakLists[0]
         peak = peakList.newPeak(position=position)
+        # note, the height below is not derived from any fitting
+        # but is a weighted average of the values at the neighbouring grid points
+        peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
         self.current.addPeak(peak)
         peak.isSelected = True
         self.current.strip.showPeaks(peakList)

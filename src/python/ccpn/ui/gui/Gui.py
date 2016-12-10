@@ -127,18 +127,18 @@ class Gui(Ui):
   def start(self):
 
     # show splash screen
-    splash = SplashScreen()
-    self.qtApp.processEvents()  # needed directly after splashScreen show to show something
+    # GWV comment out to speed up loading and reduce memory footprint
+    #splash = SplashScreen()
+    #self.qtApp.processEvents()  # needed directly after splashScreen show to show something
+    #splash.close()
+    #splash.finish(self.mainWindow)
 
-    sys.stderr.write('==> Gui interface is ready\n' )
-    splash.close()
-    splash.finish(self.mainWindow)
     self.mainWindow._fillMacrosMenu()
     self.mainWindow.setUserShortcuts(self.mainWindow._appBase.preferences)
     project = self.application.project
     self.application.experimentClassifications = getExperimentClassifications(project)
 
-
+    sys.stderr.write('==> Gui interface is ready\n' )
     self.qtApp.start()
 
 

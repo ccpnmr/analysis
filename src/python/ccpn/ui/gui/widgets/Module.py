@@ -2,7 +2,7 @@
 This file contains CcpnModule base class
 
 intial version by Simon;
-modified by Geerten 1-7/12/2016
+Extensively modified by Geerten 1-12/12/2016
 
 """
 #=========================================================================================
@@ -36,6 +36,9 @@ from functools import partial
 
 #Module = Dock
 #ModuleLabel = DockLabel
+from ccpn.util.Logging import getLogger
+
+logger = getLogger()
 
 class CcpnModule(Dock):
   """
@@ -65,13 +68,6 @@ class CcpnModule(Dock):
       self.addWidget(self.settingsWidget, 1, 0)
       self.settingsWidget.hide()
 
-
-      #
-      # if buttonParent and buttonGrid:
-      #   self.placeSettingsButton(buttonParent, buttonGrid)
-      # else:
-      #   print('cannot add settings button')
-
   def resizeEvent(self, event):
     #self.setOrientation('vertical', force=True)
     self.setOrientation(self.ORIENTATION, force=True)
@@ -93,7 +89,7 @@ class CcpnModule(Dock):
       else:
         self.settingsWidget.hide()
     else:
-      print('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
+      logger.debug('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
   def _closeModule(self):
 
@@ -124,7 +120,7 @@ class CcpnModuleLabel(DockLabel):
     self.updateStyle()
     #self.update()
 
-  #GWV not sure why this was copied as it is identical to the routine in the parent class
+  # GWV: not sure why this was copied as it is identical to the routine in the parent class
   # def mousePressEvent(self, ev):
   #   if ev.button() == QtCore.Qt.LeftButton:
   #     self.pressPos = ev.pos()
@@ -134,10 +130,12 @@ class CcpnModuleLabel(DockLabel):
   def updateStyle(self):
     """
     Copied from the parent class to allow for modification in StyleSheet
-    However, that appears not to work
+    However, that appears not to work; TODO: this routine needs fixing so that colourschemes
+    are taken from the stylesheet
     """
-    # GWV many calls to the updateStyle are triggered during initialization
+    # GWV: many calls to the updateStyle are triggered during initialization
     # probably from paint event
+
     #print('>updateStyle>', self)
     #return
 
@@ -167,11 +165,6 @@ class CcpnModuleLabel(DockLabel):
     Copied from the parent VerticlLabel class to allow for modification in StyleSheet
     """
     p = QtGui.QPainter(self)
-    # p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 200)))
-    # p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 100)))
-    # p.drawRect(self.rect().adjusted(0, 0, -1, -1))
-
-    # p.setPen(QtGui.QPen(QtGui.QColor(255, 255, 255)))
 
     # GWV: this moved the label in vertical mode and horizontal, after some trial and error
     # NOTE: A QRect can be constructed with a set of left, top, width and height integers

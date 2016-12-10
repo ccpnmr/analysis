@@ -52,7 +52,8 @@ class SequenceModule(CcpnModule):
   """
 
   def __init__(self, project):
-    CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
+    #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
+    CcpnModule.__init__(self, name='Sequence', closable=False)
 
     self.project = project
     self.colourScheme = project._appBase.colourScheme
@@ -68,8 +69,8 @@ class SequenceModule(CcpnModule):
     self.scrollContents.setGeometry(QtCore.QRect(0, 0, 380, 1000))
     self.horizontalLayout2 = QtGui.QHBoxLayout(self.scrollContents)
     self.scrollArea.setWidget(self.scrollContents)
-    self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 10px;}
-                          QScrollArea QScrollBar::vertical{max-width:0px;}
+    self.setStyleSheet("""QScrollArea QScrollBar::horizontal {max-height: 20px;}
+                          QScrollArea QScrollBar::vertical{max-width:20px;}
                       """)
     self.residueCount = 0
     self.layout.addWidget(self.scrollArea)
@@ -77,16 +78,18 @@ class SequenceModule(CcpnModule):
     # assignment routines.
     self.scrollArea.scene.dragMoveEvent = self.dragMoveEvent
     self.chainLabels = []
-    self.widgetHeight = 0
+    self.widgetHeight = 0 # dynamically calculated from the number of chains
     if not project.chains:
       self._addChainLabel(placeholder=True)
     else:
       for chain in project.chains:
         self._addChainLabel(chain)
 
-    self.setFixedHeight(2*self.widgetHeight)
-    self.scrollContents.setFixedHeight(2*self.widgetHeight)
-
+    #GWV: removed fixed height restrictions but maximum height instead
+    #self.setFixedHeight(2*self.widgetHeight)
+    #self.scrollContents.setFixedHeight(2*self.widgetHeight)
+    self.setMaximumHeight(100)
+    self.scrollContents.setMaximumHeight(100)
 
   def _highlightPossibleStretches(self, residues:typing.List[Residue]):
     """
@@ -182,11 +185,14 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     if self.colourScheme == 'dark':
       self.colour1 = '#bec4f3'  # un-assigned
       self.colour2 = '#f7ffff'  # assigned
+      self.colour3 = '#e4e15b'  # drag-enter event
     elif self.colourScheme == 'light':
       #self.colour1 = '#bd8413'
       #self.colour2 = '#666e98'
       self.colour1 = 'black'
       self.colour2 = '#555D85'
+      self.colour3 = '#009a00'  # drag-enter event
+
     self.setDefaultTextColor(QtGui.QColor(self.colour1))
 
     self.setPlainText(residue.shortName)
@@ -228,14 +234,9 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     of GuiChainResidues during drag-and-drop.
     Required for processNmrChains to work properly.
     """
-
-    if self.colourScheme == 'dark':
-      colour = '#e4e15b'
-    elif self.colourScheme == 'light':
-      colour = '#009a00'
     item = self.scene.itemAt(event.scenePos())
     if isinstance(item, GuiChainResidue):
-      item.setDefaultTextColor(QtGui.QColor(colour))
+      item.setDefaultTextColor(QtGui.QColor(self.colour3))
     event.accept()
 
   def _dragLeaveEvent(self, event:QtGui.QMouseEvent):
@@ -243,6 +244,7 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     A re-implementation of the QGraphicsTextItem.dragLeaveEvent to facilitate the correct colouring
     of GuiChainResidues during drag-and-drop.
     Required for processNmrChains to work properly.
+    GWV: TODO: this need to call the _StyleResidue function
     """
     if self.colourScheme == 'dark':
       colour = '#f7ffff'

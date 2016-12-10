@@ -29,6 +29,10 @@ from ccpn.ui.gui.widgets.Font import Font
 # fonts
 monaco12              = Font('Monaco', 12)
 
+helvetica10           = Font('Helvetica', 10)
+helveticaItalic10     = Font('Helvetica', 10, italic=True)
+helveticaBold10       = Font('Helvetica', 10, bold=True)
+
 helvetica12           = Font('Helvetica', 12)
 helveticaItalic12     = Font('Helvetica', 12, italic=True)
 helveticaBold12       = Font('Helvetica', 12, bold=True)
@@ -53,7 +57,7 @@ textFontHuge    = helvetica20        # general text font huge
 textFontHugeBold = helveticaBold20   # general text font huge bold
 
 fixedWidthFont  = monaco12           # for TextEditor, ipythonconsole
-moduleLabelFont = helveticaBold12    # for text of left-label of modules
+moduleLabelFont = helvetica12    # for text of left-label of modules
 sidebarFont     = lucidaGrande12     # sidebar
 menuFont        = lucidaGrande14     # Menus
 messageFont     = helvetica14        # use in popup messages; does not seem to affect the dialog on OSX

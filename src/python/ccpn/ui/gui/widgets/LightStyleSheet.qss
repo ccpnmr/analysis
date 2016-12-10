@@ -204,7 +204,7 @@ QHeaderView {
 }
 QHeaderView::section {
     background-color: #FDFDFC;
-    color: #555D85;
+    color: c;
 }
 QHeaderView::section:checked {
     background-color: #FDFDFC;
@@ -400,4 +400,9 @@ QGraphicsView {
     foreground-colour: black;
     /* background-color: #f7ffff; */
     background-color: #EDC151;
+}
+
+DockLabel {
+                background-color: #E7D8B6;
+                color: #555D85;
 }

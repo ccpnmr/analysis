@@ -423,3 +423,10 @@ QTableView {
 QWidget {
     padding: 0;
 }
+
+/* does not seem to do anything, even when override the updateStyle method */
+DockLabel {
+          background-color: #555D85;
+          /* color: #fdfdfc; */
+          color: 'white';
+}

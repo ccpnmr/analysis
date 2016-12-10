@@ -1,4 +1,5 @@
-"""This file contains CcpnModule base class
+"""
+This file contains CcpnModule base class
 
 intial version by Simon;
 modified by Geerten 1-7/12/2016
@@ -33,22 +34,28 @@ from ccpn.ui.gui.guiSettings import moduleLabelFont
 
 from functools import partial
 
-Module = Dock
-ModuleLabel = DockLabel
+#Module = Dock
+#ModuleLabel = DockLabel
 
-class CcpnModule(Module):
+class CcpnModule(Dock):
+  """
+  Base class for CCPN modules
+  """
 
-  includeSettingsWidget = False
+  ORIENTATION = 'horizontal' #''vertical'   # toplabel orientation
+  includeSettingsWidget = False   # overide in specific module implementations
 
-  def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closeFunc=None, **kw):
-    super(CcpnModule, self).__init__(name, self)
+  def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closable=True, closeFunc=None, **kw):
+    super(CcpnModule, self).__init__(name, self, closable=closable)
     self.closeFunc = closeFunc
 
+    # hide original dock label and generate a new CCPN one
     self.label.hide()
-    self.label = CcpnModuleLabel(name.upper(), self)
+    self.label = CcpnModuleLabel(name.upper(), self, showCloseButton=closable)
+    if closable:
+      self.label.closeButton.clicked.connect(self._closeModule)
     self.label.show()
-    self.label.closeButton.clicked.connect(self._closeModule)
-    self.label.fixedWidth = True
+
     self.autoOrientation = False
     self.mainWidget = QtGui.QWidget(self)
     self.addWidget(self.mainWidget, 0, 0)
@@ -65,10 +72,9 @@ class CcpnModule(Module):
       # else:
       #   print('cannot add settings button')
 
-
-
   def resizeEvent(self, event):
-    self.setOrientation('vertical', force=True)
+    #self.setOrientation('vertical', force=True)
+    self.setOrientation(self.ORIENTATION, force=True)
     self.resizeOverlay(self.size())
 
   def placeSettingsButton(self, buttonParent, buttonGrid):
@@ -76,7 +82,6 @@ class CcpnModule(Module):
       settingsButton = Button(buttonParent, icon='icons/applications-system', grid=buttonGrid, hPolicy='fixed', toggle=True)
       settingsButton.toggled.connect(partial(self.toggleSettingsWidget, settingsButton))
       settingsButton.setChecked(False)
-
 
   def toggleSettingsWidget(self, button=None):
     """
@@ -107,17 +112,112 @@ class CcpnModule(Module):
       return
 
 
-class CcpnModuleLabel(ModuleLabel):
-  def __init__(self, *args):
-    super(CcpnModuleLabel, self).__init__(showCloseButton=True, *args)
+class CcpnModuleLabel(DockLabel):
+  """
+  Subclassing DockLabel to modify appearance and functionality
+  """
+  def __init__(self, name, module, showCloseButton=True):
+    super(CcpnModuleLabel, self).__init__(name, module, showCloseButton=showCloseButton)
+    self.module = module
+    self.fixedWidth = True
     self.setFont(moduleLabelFont)
-    #self.setStyleSheet("padding:20px"): doesn't do anything?
+    self.updateStyle()
+    #self.update()
 
-  def mousePressEvent(self, ev):
-    if ev.button() == QtCore.Qt.LeftButton:
-      self.pressPos = ev.pos()
-      self.startedDrag = False
-      ev.accept()
+  #GWV not sure why this was copied as it is identical to the routine in the parent class
+  # def mousePressEvent(self, ev):
+  #   if ev.button() == QtCore.Qt.LeftButton:
+  #     self.pressPos = ev.pos()
+  #     self.startedDrag = False
+  #     ev.accept()
+
+  def updateStyle(self):
+    """
+    Copied from the parent class to allow for modification in StyleSheet
+    However, that appears not to work
+    """
+    # GWV many calls to the updateStyle are triggered during initialization
+    # probably from paint event
+    #print('>updateStyle>', self)
+    #return
+
+    r = '3px'
+    fg = '#fdfdfc'
+    bg = '#555D85'
+    border = bg
+
+    # Padding apears not to work; overriden somewhere else?
+    if self.orientation == 'vertical':
+      self.vStyle = """DockLabel {
+              background-color : %s;
+              color : %s;
+              border-width: 0px;
+          }""" % (bg, fg)
+      self.setStyleSheet(self.vStyle)
+    else:
+      self.hStyle = """DockLabel {
+              background-color : %s;
+              color : %s;
+              border-width: 0px;
+          }""" % (bg, fg)
+      self.setStyleSheet(self.hStyle)
+
+  def paintEvent(self, ev):
+    """
+    Copied from the parent VerticlLabel class to allow for modification in StyleSheet
+    """
+    p = QtGui.QPainter(self)
+    # p.setBrush(QtGui.QBrush(QtGui.QColor(100, 100, 200)))
+    # p.setPen(QtGui.QPen(QtGui.QColor(50, 50, 100)))
+    # p.drawRect(self.rect().adjusted(0, 0, -1, -1))
+
+    # p.setPen(QtGui.QPen(QtGui.QColor(255, 255, 255)))
+
+    # GWV: this moved the label in vertical mode and horizontal, after some trial and error
+    # NOTE: A QRect can be constructed with a set of left, top, width and height integers
+    if self.orientation == 'vertical':
+      added = 2
+      p.rotate(-90)
+      rgn = QtCore.QRect(-self.height(), 0, self.height(), self.width()+added)
+    else:
+      rgn = self.contentsRect()
+      #print('>>', self.width(), self.height())
+      #print(rgn, rgn.left(), rgn.top())
+      added = 4
+      rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height()+added)
+
+    #align = self.alignment()
+    # GWV adjusted
+    align  = QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter
+
+    self.hint = p.drawText(rgn, align, self.text())
+    p.end()
+
+    minSize = 16  #GWV parameter
+    if self.orientation == 'vertical':
+      self.setMinimumWidth(minSize)
+      self.setMaximumWidth(minSize)
+    else:
+      self.setMinimumHeight(minSize)
+      self.setMaximumHeight(minSize)
+
+    # if self.orientation == 'vertical':
+    #   self.setMaximumWidth(self.hint.height())
+    #   self.setMinimumWidth(0)
+    #   self.setMaximumHeight(16777215)
+    #   if self.forceWidth:
+    #     self.setMinimumHeight(self.hint.width())
+    #   else:
+    #     self.setMinimumHeight(minSize)
+    # else:
+    #   self.setMaximumHeight(self.hint.height())
+    #   self.setMinimumHeight(0)
+    #   self.setMaximumWidth(16777215)
+    #   if self.forceWidth:
+    #     self.setMinimumWidth(self.hint.width())
+    #   else:
+    #     self.setMinimumWidth(minSize)
+
 
 
 

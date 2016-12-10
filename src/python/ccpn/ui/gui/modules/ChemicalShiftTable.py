@@ -89,8 +89,8 @@ class ChemicalShiftTable(CcpnModule):
       chemicalShiftLists = []
     self.chemicalShiftLists = chemicalShiftLists
 
-    self.labelWidget = Label(self, "ChemicalShiftList:", grid=(0,0), gridSpan=(1,1))
-    self.chemicalShiftListPulldown = PulldownList(self, grid=(0,1), gridSpan=(1,1))
+    self.labelWidget = Label(self.mainWidget, "ChemicalShiftList:", grid=(0,0), gridSpan=(1,1))
+    self.chemicalShiftListPulldown = PulldownList(self.mainWidget, grid=(0,1), gridSpan=(1,1))
 
     columns = [('#', lambda chemicalShift: chemicalShift.nmrAtom.serial),
                ('NmrResidue', lambda chemicalShift: chemicalShift._key.rsplit('.', 1)[0]),
@@ -115,8 +115,9 @@ class ChemicalShiftTable(CcpnModule):
                 'ChemicalShiftList',
                 'Number of peaks assigned to this NmrAtom across all PeakLists']
 
-    self.chemicalShiftTable = GuiTableGenerator(self, chemicalShiftLists,
-                                                actionCallback=self._callback,
+    self.chemicalShiftTable = GuiTableGenerator(self.mainWidget, chemicalShiftLists,
+                                                selectionCallback=self._callback,
+                                                actionCallback=None,
                                                 columns=columns,
                                                 selector=self.chemicalShiftListPulldown,
                                                 tipTexts=tipTexts,

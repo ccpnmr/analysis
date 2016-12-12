@@ -30,6 +30,7 @@ from PyQt4 import QtCore, QtGui
 from pyqtgraph.dockarea.DockDrop import DockDrop
 from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
 
 from functools import partial
@@ -117,6 +118,24 @@ class CcpnModuleLabel(DockLabel):
     self.module = module
     self.fixedWidth = True
     self.setFont(moduleLabelFont)
+    self.setAlignment(QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter)
+
+    # Tests; not yet there
+    if False:
+      self.settingsButton = QtGui.QToolButton(self)
+      #self.settingsButton.clicked.connect(self.sigCloseClicked)
+      self.settingsButton.setIcon(Icon('icons/applications-system'))
+      self.settingsButton.setIconSize(QtCore.QSize(16, 16))
+      self.settingsButton.setStyleSheet("""
+        QPushButton {
+          border-width: 0px;
+          padding: 0px;
+          background-color: #555D85;
+          color: #555D85;
+        }""")
+
+    #self.update()
+
     self.updateStyle()
     #self.update()
 
@@ -176,7 +195,7 @@ class CcpnModuleLabel(DockLabel):
       rgn = self.contentsRect()
       #print('>>', self.width(), self.height())
       #print(rgn, rgn.left(), rgn.top())
-      added = 4
+      added = 2
       rgn = QtCore.QRect(rgn.left(), rgn.top(), rgn.width(), rgn.height()+added)
 
     #align = self.alignment()

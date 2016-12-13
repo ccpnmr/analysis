@@ -6,6 +6,15 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpn.ui.gui.modules.GuiStrip import GuiStrip
 from ccpn.ui.gui.lib import Window
 
+
+def _getCurrentZoomRatio(viewRange):
+  xRange, yRange = viewRange
+  xMin, xMax = xRange
+  xRatio = (xMax - xMin)
+  yMin, yMax = yRange
+  yRatio = (yMax - yMin)
+  return xRatio, yRatio
+
 def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typing.List[str]=None,
                               widths:typing.List[float]=None):
   """
@@ -13,32 +22,43 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
   Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates
   to the positions in the displayed axis order of the strip.
   """
+
   if not axisCodes:
     axisCodes = strip.axisCodes
+
+  if widths is None:
+    widths = _getCurrentZoomRatio(strip.viewBox.viewRange())
 
   for ii, axisCode in enumerate(axisCodes):
     try:
       stripAxisIndex = strip.axisCodes.index(axisCode)
     except ValueError as e:
       continue
-    if positions[ii]:
+    if len(positions)>1:
       strip.orderedAxes[stripAxisIndex].position = positions[ii]
-    if widths:
-      if widths[ii]:
-        # if this item in the list contains a float, set the axis width to that float value
-        if isinstance(widths[ii], float):
-          strip.orderedAxes[stripAxisIndex].width = widths[ii]
-        elif isinstance(widths[ii], str):
-          # if the list item is a str with value, full, reset the corresponding axis
-          if widths[ii] == 'full':
-            strip.resetAxisRange(stripAxisIndex)
-          if widths[ii] == 'default' and stripAxisIndex < 2:
-            # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
-            if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
-                commonUtil.name2IsotopeCode(axisCode) == '15N'):
-              strip.orderedAxes[stripAxisIndex].width = 5
-            else:
-              strip.orderedAxes[stripAxisIndex].width = 0.5
+    else:
+      strip.orderedAxes[stripAxisIndex].position = positions[0]
+
+    if widths is not None:
+      try:
+        if widths[ii]: # FIXME this can be out of range
+          # if this item in the list contains a float, set the axis width to that float value
+          if isinstance(widths[ii], float):
+            strip.orderedAxes[stripAxisIndex].width = widths[ii]
+          elif isinstance(widths[ii], str):
+            # if the list item is a str with value, full, reset the corresponding axis
+            if widths[ii] == 'full':
+              strip.resetAxisRange(stripAxisIndex)
+            if widths[ii] == 'default' and stripAxisIndex < 2:
+              # if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H
+              if (commonUtil.name2IsotopeCode(axisCode) == '13C' or
+                  commonUtil.name2IsotopeCode(axisCode) == '15N'):
+                strip.orderedAxes[stripAxisIndex].width = 5
+              else:
+                strip.orderedAxes[stripAxisIndex].width = 0.5
+      except:
+        continue
+
 
 
 def matchAxesAndNmrAtoms(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom]):

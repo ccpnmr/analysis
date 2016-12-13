@@ -69,6 +69,8 @@ class ObjectTable(QtGui.QTableView, Base):
     self.setVerticalScrollMode(self.ScrollPerItem)
     self.setSortingEnabled(True)
 
+    self.multiSelect = multiSelect
+
 
     # self.setAutoFillBackground(True)
 
@@ -216,15 +218,23 @@ class ObjectTable(QtGui.QTableView, Base):
       if selection:
         rows = [i.row() for i in selection]
         rows.sort()
-        if row not in rows:
-          row = rows[0]
 
-        index = self.model.index(row, 0)
-        row = self.model.mapToSource(index).row()
+        objs = []
 
-        if row >= 0:
-          obj = self.objects[row]
-          self.selectionCallback(obj, row, col)
+        for row in rows:
+          if row not in rows:
+            row = rows[0]
+          if row >= 0:
+            index = self.model.index(row, 0)
+            row = self.model.mapToSource(index).row()
+            obj = self.objects[row]
+            objs.append(obj)
+
+            if not self.multiSelect:
+              self.selectionCallback(obj, row, col)
+            if self.multiSelect:
+              self.selectionCallback(objs, row, col)
+
 
       else:
         self.selectionCallback(None, row, col)
@@ -402,6 +412,41 @@ class ObjectTable(QtGui.QTableView, Base):
 
     self.setFocus(QtCore.Qt.OtherFocusReason)
 
+  def _highLightObjs(self, selection):
+
+    objects = self.objects
+
+    selectionModel = self.selectionModel()
+
+    rows = []
+    uniqObjs = set(selection)
+
+    for row, obj in enumerate(objects):
+      if obj in uniqObjs:
+        rows.append(row)
+
+    if rows:
+      self._silenceCallback = True
+      selectionModel.clearSelection()
+      self.setUpdatesEnabled(False)
+
+      selectMode = selectionModel.Select | selectionModel.Rows
+      select = selectionModel.select
+      getIndex = self.model.sourceModel().index
+      mapFromSource = self.model.mapFromSource
+
+      for row in rows:
+        index = getIndex(row, 0)
+        index = mapFromSource(index)
+        select(index, selectMode)
+
+      self._silenceCallback = False
+      # self._callback(None)
+      self.setUpdatesEnabled(True)
+
+      self.setFocus(QtCore.Qt.OtherFocusReason)
+
+
 
   def setupHeaderStretch(self):
 
@@ -459,7 +504,7 @@ class ObjectTable(QtGui.QTableView, Base):
   def tableContextMenu(self, pos):
 
     menu = QtGui.QMenu()
-    copyMenu =  menu.addAction("Copy Selected")
+    # copyMenu =  menu.addAction("Copy Selected")
     exportMenu = menu.addAction("Export Table")
     # searchMenu = menu.addAction("Search")
 
@@ -473,8 +518,8 @@ class ObjectTable(QtGui.QTableView, Base):
     #   else:
     #     if not self.searchPopup.isOpened:
     #       self.openSearchPopup()
-    if action == copyMenu:
-      self.copyRow()
+    # if action == copyMenu:
+    #   self.copyRow()
 
   def openSearchPopup(self):
     self.searchPopup = ObjectTableFilter(self)
@@ -644,10 +689,11 @@ class ObjectTable(QtGui.QTableView, Base):
 
 
   def setObjectsAndColumns(self, objects, columns):
-
+    self._silenceCallback = True
     self.setObjects([])
     self.setColumns(columns)
     self.setObjects(objects)
+    self._silenceCallback = False
 
 
   def setObjects(self, objects, applyFilter=False):

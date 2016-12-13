@@ -344,6 +344,7 @@ class ViewBox(pg.ViewBox):
       # Control-left-click; (de-)select peak and add/remove to selection
       event.accept()
       self._resetBoxes()
+      self._deselectPeaks()
       self._selectPeak(xPosition, yPosition)
 
     elif leftMouse(event):
@@ -558,6 +559,7 @@ class ViewBox(pg.ViewBox):
         self._resetBoxes()
         self._updateSelectionBox(event.buttonDownPos(), event.pos())
       else:
+        self._deselectPeaksFromOtherDisplays()
         self._resetBoxes()
         endPosition = self.mapSceneToView(event.pos())
         startPosition = self.mapSceneToView(event.buttonDownPos())
@@ -697,6 +699,14 @@ class ViewBox(pg.ViewBox):
     else:
       self._resetBoxes()
       event.ignore()
+
+  def _deselectPeaksFromOtherDisplays(self):
+    if self.current.peak:
+      if len(self.current.strip.spectrumViews) > 0:
+        if len(self.current.peak.peakList.spectrum.spectrumViews) > 0:
+          if self.current.strip.spectrumViews[0].strip != self.current.peak.peakList.spectrum.spectrumViews[0].strip:
+            self._deselectPeaks()
+            logger.warn('Can only multi select from current strip')
 
   def _setView(self, point1, point2):
     ax = QtCore.QRectF(point1, point2)

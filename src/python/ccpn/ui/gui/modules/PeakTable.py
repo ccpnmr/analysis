@@ -324,14 +324,13 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
 
 
-  def _selectOnTableCurrentPeaks(self, peaks:None):
-    '''
-    :param current.peaks:
-    highlight current peaks on the opened peak table.
+  def _selectOnTableCurrentPeaks(self, currentPeaks):
+    ''' highlight current peaks on the opened peak table '''
 
-    '''
-    if peaks is not None:
-      self.peakTable.table._highLightObjs(peaks)
+    if len(currentPeaks)>0:
+      self.peakTable.table._highLightObjs(currentPeaks)
+    else:
+      self.peakTable.table.clearSelection()
 
 
   def _getPeakHeight(self, peak: Peak):

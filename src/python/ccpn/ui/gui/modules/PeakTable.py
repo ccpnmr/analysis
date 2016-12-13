@@ -166,7 +166,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
   def updateSelectionOnTable(self):
 
-    self._findSelectedPeaks(self.application.current.peaks)
+    self._selectOnTableCurrentPeaks(self.application.current.peaks)
 
 
   def getExtraColumns(self, peakList):
@@ -237,7 +237,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.registerNotifier('PeakList', 'modify', self._updatePeakLists, onceOnly=True)
     self.project.registerNotifier('PeakList', 'rename', self._updatePeakLists, onceOnly=True)
     self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists, onceOnly=True)
-    self.application.current.registerNotify(self._findSelectedPeaks, 'peaks')
+    self.application.current.registerNotify(self._selectOnTableCurrentPeaks, 'peaks')
 
   def _deregisterNotifiers(self):
     self.project.unRegisterNotifier('Peak', 'create', self._refreshPeakTable)
@@ -248,7 +248,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'delete', self._updatePeakLists)
-    self.application.current.unRegisterNotify(self._findSelectedPeaks, 'peaks')
+    self.application.current.unRegisterNotify(self._selectOnTableCurrentPeaks, 'peaks')
 
   def _updatePeakLists(self, value):
     self.peakTable.objectLists = self.project.peakLists
@@ -324,7 +324,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
 
 
-  def _findSelectedPeaks(self, peaks:None):
+  def _selectOnTableCurrentPeaks(self, peaks:None):
     '''
     :param current.peaks:
     highlight current peaks on the opened peak table.

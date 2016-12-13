@@ -49,6 +49,8 @@ class PeakTable(CcpnModule):
   def __init__(self, project, selectedList=None):
     CcpnModule.__init__(self, name='Peak List')
 
+    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+
     if not project.peakLists:
       project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
       return
@@ -74,10 +76,10 @@ class PeakTable(CcpnModule):
     detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self.selectionBox, grid=(1, 13), hAlign='l', checked=True)
 
 
-    self.peakList = PeakListSimple(self.mainWidget, project, selectedList=selectedList, columnSettings=self.checkBoxDict)
+    self.peakList = PeakListSimple(self.mainWidget, selectedList=selectedList, columnSettings=self.checkBoxDict)
     self.layout.addWidget(self.peakList)
-    self.current = project._appBase.current
-    self.settingsButton = self.placeSettingsButton(buttonParent=self.peakList, buttonGrid=(0, 8))
+    self.current = self.application.current
+    self.settingsButton = self.placeSettingsButton(buttonParent=self.peakList, buttonGrid=(0, 4))
 
     if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]
@@ -98,23 +100,25 @@ class PeakTable(CcpnModule):
 
 class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
-  def __init__(self, parent=None, project=None,  callback=None, selectedList=None, columnSettings=None, **kw):
+  def __init__(self, parent=None, selectedList=None, columnSettings=None, **kw):
 
       
     QtGui.QWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
-    self.project = project
+    self.setMinimumWidth(500)
+    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    self.project = self.application.project
     self.columnSettings = columnSettings
 
     self.sampledDims = {}
-    if not selectedList and project.peakLists:
+    if not selectedList and self.project.peakLists:
       self.selectedList = self.project.peakLists[0]
     elif not selectedList:
       self.peakLists = []
     else:
       self.selectedList = selectedList
-    self.peakLists = project.peakLists
+    self.peakLists = self.project.peakLists
     self.label = Label(self, 'Peak List')
 
     widget1 = QtGui.QWidget(self)
@@ -124,8 +128,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.peakListPulldown = PulldownList(self)
     widget1.layout().addWidget(self.peakListPulldown, 0, 1)
     self.layout().addWidget(widget1, 0, 0)
-    if callback is None:
-      callback=self._selectPeak
 
     widget2 = QtGui.QWidget(self)
     l2 = QtGui.QGridLayout()
@@ -136,27 +138,36 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     widget2.layout().addWidget(self.posUnitPulldown, 0, 1, QtCore.Qt.AlignLeft)
     self.layout().addWidget(widget2, 0, 1)
 
-    self.subtractPeakListsButton = Button(self, text='Subtract PeakLists',
+    self.subtractPeakListsButton = Button(self, text='Subtract \nPeakLists',
                                           callback=self._subtractPeakLists)
 
-    self.deletePeakButton = Button(self, 'Delete Selected', callback=self._deleteSelectedPeaks)
+    self.deletePeakButton = Button(self, 'Delete \nSelected', callback=self._deleteSelectedPeaks)
     self.widget3 = QtGui.QWidget(self)
     l3 = QtGui.QGridLayout()
     self.widget3.setLayout(l3)
     self.widget3.layout().addWidget(self.subtractPeakListsButton, 0, 0)
     self.widget3.layout().addWidget(self.deletePeakButton, 0, 1)
-    self.layout().addWidget(self.widget3, 0, 6, 1, 2)
+    self.layout().addWidget(self.widget3, 0, 2)
 
-    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=callback, selectionCallback=self._selectPeak,
+    self.peakTable = GuiTableGenerator(self, objectLists=self.peakLists, actionCallback=self._actionCallback, selectionCallback=self._selectionCallback,
                                        getColumnsFunction=self.getExtraColumns, selector=self.peakListPulldown,
                                        multiSelect=True, unitPulldown=self.posUnitPulldown)
 
-    self.layout().addWidget(self.peakTable, 1, 0, 1, 9)
+    self.layout().addWidget(self.peakTable, 1, 0, 1, 5)
     if selectedList is not None:
       self.peakListPulldown.setCurrentIndex(selectedList)
 
     self.__registerNotifiers()
-    # self.closeModule = self._closeModule
+    from functools import partial
+
+    self.peakListPulldown.activated[str].connect(self.updateSelectionOnTable)
+
+
+
+  def updateSelectionOnTable(self):
+
+    self._findSelectedPeaks(self.application.current.peaks)
+
 
   def getExtraColumns(self, peakList):
 
@@ -226,6 +237,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.registerNotifier('PeakList', 'modify', self._updatePeakLists, onceOnly=True)
     self.project.registerNotifier('PeakList', 'rename', self._updatePeakLists, onceOnly=True)
     self.project.registerNotifier('PeakList', 'delete', self._updatePeakLists, onceOnly=True)
+    self.application.current.registerNotify(self._findSelectedPeaks, 'peaks')
 
   def _deregisterNotifiers(self):
     self.project.unRegisterNotifier('Peak', 'create', self._refreshPeakTable)
@@ -236,6 +248,7 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     self.project.unRegisterNotifier('PeakList', 'modify', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'rename', self._updatePeakLists)
     self.project.unRegisterNotifier('PeakList', 'delete', self._updatePeakLists)
+    self.application.current.unRegisterNotify(self._findSelectedPeaks, 'peaks')
 
   def _updatePeakLists(self, value):
     self.peakTable.objectLists = self.project.peakLists
@@ -267,17 +280,40 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
 
     self._refreshTable()
 
+  def _actionCallback(self, peak, *args):
+    ''' If current strip contains the double clicked peak will navigateToPositionInStrip '''
+    from ccpn.ui.gui.lib.Strip import navigateToPositionInStrip
 
-  def _selectPeak(self, peak:Peak, row:int, col:int):
-    """
-    Sets current.peak to selected peak.
-    """
-    if not peak:
-      return
+    if self.application.current.strip is not None:
+        navigateToPositionInStrip(strip = self.application.current.strip, positions=peak.position)
     else:
-    #   self.project._appBase.current.unRegisterNotify(self._selectPeakInTable, 'peaks')
-      self.project._appBase.current.peak = peak
-      # self.project._appBase.current.registerNotify(self._selectPeakInTable, 'peaks')
+      self.project._logger.warn('Impossible to navigate to peak position. Set a current strip first')
+
+
+  def _selectionCallback(self, peaks, *args):
+    """
+    set as current the selected peaks on the table
+    """
+    if peaks is not None :
+      self.application.current.peaks = peaks
+      self._deselectNonCurrentPeaks()
+      self._selectCurrentPeaks()
+
+    if peaks is None:
+      self.application.current.clearPeaks()
+      self._deselectNonCurrentPeaks()
+
+
+  def _selectCurrentPeaks(self):
+    if len(self.application.current.peaks) >0:
+      for peak in self.application.current.peaks:
+        peak.isSelected = True
+
+  def _deselectNonCurrentPeaks(self):
+    for peak in self.project.peaks:
+      if peak not in self.application.current.peaks:
+        peak.isSelected = False
+
 
   def _getPeakVolume(self, peak:Peak):
     """
@@ -286,10 +322,17 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     if peak.volume:
       return '%7.2E' % float(peak.volume*peak.peakList.spectrum.scale)
 
-  def _selectPeakInTable(self, peaks=None):
-    peakList = self.project.getByPid(self.peakListPulldown.currentText())
-    if peaks and peaks[-1] in peakList.peaks:
-      self.peakTable.table.selectObject(peaks[-1])
+
+
+  def _findSelectedPeaks(self, peaks:None):
+    '''
+    :param current.peaks:
+    highlight current peaks on the opened peak table.
+
+    '''
+    if peaks is not None:
+      self.peakTable.table._highLightObjs(peaks)
+
 
   def _getPeakHeight(self, peak: Peak):
     """

@@ -34,8 +34,9 @@ import os
 import random
 import sys
 import typing
-from collections import abc as collectionClasses
-from functools import total_ordering
+import collections
+import string
+# from functools import total_ordering
 
 from ccpn.util import Path, Constants
 from ccpnmodel.ccpncore.lib import Constants as coreLibConstants
@@ -56,15 +57,8 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
 
-@total_ordering
-class __MinType(object):
-    def __le__(self, other):
-        return True
+Sentinel = collections.namedtuple('Sentinel', ['value'])
 
-    def __eq__(self, other):
-        return (self is other)
-
-__smallest = __MinType()
 
 
 def convertStringToFileName(fileNameString, validChars=validCcpnFileNameChars,
@@ -208,7 +202,7 @@ def dictionaryProduct(dict1:dict, dict2:dict) -> dict:
   #
   return result
 
-def uniquify(sequence:collectionClasses.Sequence) -> list:
+def uniquify(sequence:typing.Sequence) -> list:
   """Get list of unique elements in sequence, in order of first appearance"""
   seen = set()
   seen_add = seen.add
@@ -528,3 +522,62 @@ def doAxisCodesMatch(axisCodes:Sequence[str], refAxisCodes:Sequence[str])->bool:
       return False
   #
   return True
+
+
+def stringifier(*fields, floatFormat:str=None) -> typing.Callable[[object], str]:
+  """Get stringifier function, that will format an object x according to
+
+  <str(x): field1=x.field1, field2=x.field2, ...>
+
+  All floating point values encountered will be formatted according to floatFormat"""
+  if floatFormat is None:
+    # use default formatter, avoiding continuous creation of new ones
+    localFormatter = stdLocalFormatter
+  else:
+    localFormatter = LocalFormatter(overrideFloatFormat=floatFormat)
+
+  fieldFormats = []
+  for field in fields:
+    # String will be 'field1={_obj.field1}
+    fieldFormats.append('{0}={{_obj.{0}!r}}'.format(field))
+
+  formatString = '<{_obj.pid!s}| ' + ', '.join(fieldFormats) + '>'
+
+  def formatter(x):
+    return localFormatter.format(format_string=formatString, _obj=x)
+
+  return formatter
+
+
+class LocalFormatter(string.Formatter):
+  """Overrides the string formatter to change the float formatting"""
+  def __init__(self, overrideFloatFormat:str='.6g'):
+    super().__init__()
+    self.overrideFloatFormat = overrideFloatFormat
+
+  def convert_field(self, value, conversion):
+    # do any conversion on the resulting object
+    # NB, conversion parameter is not used
+
+    if hasattr(value, 'pid'):
+      return str(value)
+    elif isinstance(value, float):
+      return format(value, self.overrideFloatFormat)
+    elif type(value) == tuple:
+      # Deliberate. We do NOT want to catch tuple subtypes here
+      end = ',)' if len(value) == 1 else ')'
+      return '(' + ', '.join(self.convert_field(x, 'r') for x in value) + end
+    elif type(value) == list:
+      # Deliberate. We do NOT want to catch list subtypes here
+      return '[' + ', '.join(self.convert_field(x, 'r') for x in value) + ']'
+    elif conversion is None:
+        return value
+    elif conversion == 's':
+        return str(value)
+    elif conversion == 'r':
+        return repr(value)
+    elif conversion == 'a':
+        return ascii(value)
+    raise ValueError("Unknown conversion specifier {0!s}".format(conversion))
+
+stdLocalFormatter = LocalFormatter()

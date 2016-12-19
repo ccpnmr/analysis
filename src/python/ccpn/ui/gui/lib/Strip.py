@@ -35,7 +35,8 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
     except ValueError as e:
       continue
     if len(positions)>1:
-      strip.orderedAxes[stripAxisIndex].position = positions[ii]
+      if positions[ii]:
+        strip.orderedAxes[stripAxisIndex].position = positions[ii]
     else:
       strip.orderedAxes[stripAxisIndex].position = positions[0]
 

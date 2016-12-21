@@ -393,7 +393,8 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
 
       for i, data in enumerate(matches[:10]):
         score, residues = data
-        score /= sumScore
+        if sumScore > 0:
+          score /= sumScore
         datum = [i+1, 100.0*score]
 
         for residue in residues:

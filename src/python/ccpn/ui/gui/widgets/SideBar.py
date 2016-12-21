@@ -369,11 +369,29 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     #   # Object type is not in sidebar
     #   return None
 
+  def _itemObjects(self, item, recursive=False):
+
+    objects = [self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))]
+
+    if recursive:
+      for i in range(item.childCount()):
+        child = item.child(i)
+        if child.data(0, QtCore.Qt.DisplayRole)[:2] in classesInSideBar:
+          objects.extend(self._itemObjects(child, recursive=True))
+
+    return objects
+
   def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
     """rename item(s) from previous pid oldPid to current object pid"""
+    import sip
     newPid = obj.pid
     for item in self._findItems(oldPid):
       item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
+      if not oldPid[3:].startswith(obj._parent.id): # parent has changed
+        objects = self._itemObjects(item, recursive=True)
+        sip.delete(item) # this also removes child items
+        for obj in objects:
+          self._createItem(obj)
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
   # def _removeItem(self, parent, objPid):

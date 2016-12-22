@@ -26,8 +26,11 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
   if not axisCodes:
     axisCodes = strip.axisCodes
 
-  if widths is None:
-    widths = _getCurrentZoomRatio(strip.viewBox.viewRange())
+  # below does not work for the Navigate To right mouse menu option because in the width
+  # setting further down, stripAxisIndex is not necessarily the same as ii
+  # so the width in the z axis can be set to some huge number by mistake
+  # if widths is None:
+  #   widths = _getCurrentZoomRatio(strip.viewBox.viewRange())
 
   for ii, axisCode in enumerate(axisCodes):
     try:

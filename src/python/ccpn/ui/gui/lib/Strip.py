@@ -37,11 +37,12 @@ def navigateToPositionInStrip(strip, positions:typing.List[float], axisCodes:typ
       stripAxisIndex = strip.axisCodes.index(axisCode)
     except ValueError as e:
       continue
-    if len(positions)>1:
+    if len(positions)>ii: # this used to say 1 rather than ii (coupled with the else below)
       if positions[ii]:
         strip.orderedAxes[stripAxisIndex].position = positions[ii]
-    else:
-      strip.orderedAxes[stripAxisIndex].position = positions[0]
+    #else: # what in the world is the case this is trying to deal with??
+           # why would you want to set all the positions to the same thing??
+    #  strip.orderedAxes[stripAxisIndex].position = positions[0]
 
     if widths is not None:
       try:

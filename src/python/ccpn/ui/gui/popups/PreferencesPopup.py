@@ -147,7 +147,7 @@ class PreferencesPopup(QtGui.QDialog):
     self.dropFactorData.editingFinished.connect(self._setDropFactor)
     row += 1
 
-    buttonBox = Button(self, grid=(row, 1), text='Save', callback=self.accept)
+    buttonBox = Button(self, grid=(row, 1), text='Close', callback=self.accept)
     row += 1
 
   def _getDataPath(self):
@@ -223,16 +223,16 @@ class PreferencesPopup(QtGui.QDialog):
       self.preferences.general.userExtensionPath = directory[0]
 
   def _setMacroFilesPath(self):
-      newPath = self.macroPathData.text()
-      self.preferences.general.userMacroPath = newPath
+    newPath = self.macroPathData.text()
+    self.preferences.general.userMacroPath = newPath
 
   def _setPluginFilesPath(self):
-      newPath = self.pluginPathData.text()
-      self.preferences.general.userPluginPath = newPath
+    newPath = self.pluginPathData.text()
+    self.preferences.general.userPluginPath = newPath
 
   def _setExtensionFilesPath(self):
-      newPath = self.extensionPathData.text()
-      self.preferences.general.userExtensionPath = newPath
+    newPath = self.extensionPathData.text()
+    self.preferences.general.userExtensionPath = newPath
 
   def _changeLanguage(self, value):
     self.preferences.general.language = (LANGUAGES[value])
@@ -242,13 +242,9 @@ class PreferencesPopup(QtGui.QDialog):
 
   def _toggleGeneralOptions(self, preference, checked):
     self.preferences.general[preference] = checked
-    if preference == 'toolbarHidden':
-      if checked is True:
-        for strip in self.project.strips:
-          strip.guiSpectrumDisplay.spectrumUtilToolBar.hide()
-      else:
-        for strip in self.project.strips:
-          strip.guiSpectrumDisplay.spectrumUtilToolBar.show()
+    if preference == 'showToolbar':
+      for spectrumDisplay in self.project.spectrumDisplays:
+        spectrumDisplay.spectrumUtilToolBar.setVisible(checked)
     elif preference == 'showSpectrumBorder':
       for strip in self.project.strips:
         for spectrumView in strip.spectrumViews:

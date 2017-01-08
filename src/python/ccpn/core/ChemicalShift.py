@@ -59,6 +59,15 @@ class ChemicalShift(AbstractWrapperObject):
     """identifier - assignment string"""
     # return ','.join(x or '' for x in self.nmrAtom.assignment)
     return self.nmrAtom._id
+
+  @property
+  def _localCcpnSortKey(self) -> Tuple:
+    """Local sorting key, in context of parent."""
+
+    # NBNB NmrAtoms sort by Resonance serial,  within the NmrResidue,
+    # but chemicalShifts should sort by atom name
+    nmrAtom = self.nmrAtom
+    return nmrAtom.nmrResidue._ccpnSortKey[2:] + (nmrAtom.name,)
     
   @property
   def _parent(self) -> Project:
@@ -113,11 +122,11 @@ class ChemicalShift(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: ChemicalShiftList)-> list:
     """get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList"""
     # NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level
-    return parent._wrappedData.sortedMeasurements()
+    return parent._wrappedData.measurements
 
-  def __str__(self):
-    """Readable string representation"""
-    return "<%s; value:%.3f +- %.3f>" % (self.pid, self.value, self.valueError)
+  # def __str__(self):
+  #   """Readable string representation"""
+  #   return "<%s; value:%.3f +- %.3f>" % (self.pid, self.value, self.valueError)
 
 # Connections to parents:
 

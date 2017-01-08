@@ -23,10 +23,12 @@ __version__ = "$Revision$"
 
 import typing
 
-from ccpn.core.Residue import Residue
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
 from ccpn.core.lib.Util import AtomIdTuple
+from ccpn.core.Project import Project
+from ccpn.core.Residue import Residue
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Atom as ApiAtom
 
 class Atom(AbstractWrapperObject):
@@ -176,10 +178,79 @@ class Atom(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Residue)-> list:
     """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
-    return parent._wrappedData.sortedAtoms()
+    return parent._wrappedData.atoms
 
-# No 'new' function - chains are made elsewhere
+  def _newAtom(self:Residue, name:str, elementSymbol:str=None) -> 'Atom':
+    """Create new Atom within Residue. If elementSymbol is None, it is derived from the name"""
+    lastAtom = self.getAtom(name)
+    if lastAtom is not None:
+      raise ValueError("Cannot create %s, atom name %s already in use" % (lastAtom.longPid, name))
+    if elementSymbol is None:
+      elementSymbol = commonUtil.name2ElementSymbol(name)
+    apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
+    #
+    return self._project._data2Obj[apiAtom]
+  #
+  Residue.newAtom = _newAtom
+
+def _expandNewAtom(atom:Atom):
+  """Add compound NmrAtoms and bonds when template atoms are (re)added"""
+
+  apiAtom = atom._wrappedData
+
+  # NBNB This could be done differently.
+  # It might be better to do this directly from the API functions
+  # but in order not to mess with the complexities of the expandMolSystemAtoms
+  # function (which does the same job, but in batch) this is simpler
+
+  apiResidue = apiAtom.residue
+  apiChemAtom = apiAtom.chemAtom
+  if apiChemAtom is not None:
+    apiChemAtomSet = apiChemAtom.chemAtomSet
+    if apiChemAtomSet is not None:
+      # NB, we do not want to add atoms for '*', but rather for '%'
+      newName = apiChemAtomSet.name.replace('*', '%')
+      apiAtomGroup = apiResidue.findFirstAtom(name=newName)
+      if apiAtomGroup is None:
+        # NB - this is not tested and is likely to be used VERY rarely, if at all.
+        # Basically this is the case where we have a ChemAtomSet in the template,
+        # had only ONE of the relevant atoms previously, and are now adding the second
+        # atom, so we have to create the Atom matching the ChemAtomSet.
+
+        # check if we now have atoms to create one
+        apiAtoms = []
+        for aca in apiChemAtomSet.chemAtoms:
+          aa = apiResidue.findFirstAtom(name=aca.name)
+          if aa is not None:
+            apiAtoms.append(aa)
+        if len(apiAtoms) > 1:
+
+          # NB this is slightly heuristic,
+          # but I'd say it is as good as can reasonably be expected
+          if apiChemAtomSet.isEquivalent:
+            atomType = 'equivalent'
+          elif len(apiChemAtomSet.chemAtoms) == 2:
+            atomType = 'pseudo'
+          else:
+            atomType = 'nonstereo'
+
+          apiResidue.newAtom(name=newName, components=apiAtoms,
+                                atomType=atomType, elementSymbol=apiChemAtomSet.elementSymbol)
+      else:
+        # ChemAtomSet already exists in wrapper in partial form.
+        # In Practice we must be adding the third H to an NH3 group
+        apiAtomGroup.addComponent(apiAtom)
+
+      # Add bonds from template
+      for apiChemBond in apiChemAtom.chemBonds:
+        apiAtoms = set(apiResidue.findFirstAtom(name=x.name)
+                       for x in apiChemBond.chemAtoms)
+        for aa in apiAtoms:
+          if aa is not None and aa is not apiAtom and aa not in apiAtom.boundAtoms:
+            apiAtom.addBoundAtom(aa)
+
     
 # Connections to parents:
 
 # Notifiers:
+Atom._setupCoreNotifier('create', _expandNewAtom)

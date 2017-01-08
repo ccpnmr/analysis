@@ -26,7 +26,6 @@ __version__ = "$Revision$"
 
 import collections
 from ccpn.core.lib import Pid
-import typing
 
 def pid2PluralName(pid:str) -> str:
   """Get plural class name, (e.g. 'peaks', 'spectra' from short-form or long-form, Pid string

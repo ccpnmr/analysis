@@ -272,19 +272,25 @@ import collections
 # All classes must be imported in correct order for subsequent code
 # to work, as connections between classes are set when child class is imported
 # _wrappedClassNames gives import order
-_importOrder = [
+#
+# NB this list will be added to from other modules that also add to _coreClassMap
+# in practice ccpn.ui.gui.Gui
+_coreImportOrder = (
   'Project',  'Spectrum',  'SpectrumReference',  'SpectrumGroup',  'PeakList',  'Peak',
   'IntegralList',  'Integral',  'PseudoDimension',  'SpectrumHit',  'Sample',  'SampleComponent',
   'Substance',  'Chain',  'Residue', 'Atom',  'NmrChain',  'NmrResidue',  'NmrAtom',
   'ChemicalShiftList',  'ChemicalShift',  'DataSet',  'RestraintList',  'Restraint',
   'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note'
-]
+)
+
+# This list includes ui classes (added below)
+_importOrder = list(_coreImportOrder)
 
 # {className:class} dictionary in import order for all wrapper classes
 _coreClassMap = collections.OrderedDict()
 
 # Main data classes
-for className in _importOrder:
+for className in _coreImportOrder:
   cls = getattr(importlib.import_module('ccpn.core.%s' % className), className)
   parentClass = cls._parentClass
   if parentClass is not None:
@@ -294,7 +300,8 @@ for className in _importOrder:
   _coreClassMap[className] = cls
 
 # Wrapped graphics data classes
-from ccpn.ui._implementation import _importOrder as _uiImportOrder
+from ccpn.ui._implementation import _uiImportOrder
+_importOrder.extend(_uiImportOrder)
 for className in _uiImportOrder:
   cls = getattr(importlib.import_module('ccpn.ui._implementation.%s' % className), className)
   parentClass = cls._parentClass

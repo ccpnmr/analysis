@@ -23,7 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import operator
-from typing import Tuple
+import typing
 
 from ccpn.core.PeakList import PeakList
 from ccpn.core.Project import Project
@@ -75,6 +75,11 @@ class PeakListView(AbstractWrapperObject):
   def _key(self) -> str:
     """id string - """
     return str(self._wrappedData.peakListView.peakListSerial)
+
+  @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    return(self._wrappedData.peakListView.peakListSerial,)
 
   @property
   def symbolStyle(self) -> str:
@@ -142,7 +147,7 @@ class PeakListView(AbstractWrapperObject):
   @property
   def peakList(self) -> PeakList:
     """PeakList that PeakListView refers to"""
-    return self._getWrapperObject(self._wrappedData.peakListView.peakList)
+    return self._project._data2Obj.get(self._wrappedData.peakListView.peakList)
 
   # Implementation functions
   @classmethod
@@ -156,7 +161,7 @@ class PeakListView(AbstractWrapperObject):
 # newPeakListView functions: None
 
 # PeakList.peakListViews property
-def getter(peakList:PeakList) -> Tuple[PeakListView, ...]:
+def getter(peakList:PeakList) -> typing.Tuple[PeakListView, ...]:
   data2ObjDict = peakList._project._data2Obj
   return tuple(data2ObjDict[y]
                for x in peakList._wrappedData.sortedPeakListViews()

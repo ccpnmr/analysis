@@ -105,18 +105,18 @@ class Project(AbstractWrapperObject):
     # set up attributes
     self._project = self
     self._wrappedData = wrappedData
-    self._id = _id = ''
+    # self._id = _id = ''
     
     # setup object handling dictionaries
     self._data2Obj = {wrappedData:self}
     self._pid2Obj = {}
     
-    self._pid2Obj[self.className] =  dd = {}
-    self._pid2Obj[self.shortClassName] = dd
-    dd[_id] = self
+    # self._pid2Obj[self.className] =  dd = {}
+    # self._pid2Obj[self.shortClassName] = dd
+    # dd[_id] = self
 
-    # Set up pid sorting dictionary to cache pid sort keys
-    self._pidSortKeys = {}
+    self._id = None
+    self._resetIds()
 
     # Set up notification machinery
 

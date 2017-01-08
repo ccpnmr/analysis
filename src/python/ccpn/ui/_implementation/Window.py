@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 import collections
-from typing import Sequence
+from typing import Sequence, Tuple
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -61,6 +61,11 @@ class Window(AbstractWrapperObject):
     return self._wrappedData.title.translate(Pid.remapSeparators)
 
   @property
+  def _localCcpnSortKey(self) -> Tuple:
+    """Local sorting key, in context of parent."""
+    return(self._wrappedData.title,)
+
+  @property
   def title(self) -> str:
     """Window display title (not used in PID)."""
     return self._wrappedData.title
@@ -97,7 +102,7 @@ class Window(AbstractWrapperObject):
     if windowStore is None:
       return []
     else:
-      return windowStore.sortedWindows()
+      return windowStore.windows
 
 # newWindow function
 def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:

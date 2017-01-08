@@ -1300,8 +1300,8 @@ class Framework:
       self.project._logger.warn('Project has no Chemical Shift Lists. Chemical Shift Table cannot be displayed')
       MessageDialog.showWarning('Project has no Chemical Shift Lists.', 'Chemical Shift Table cannot be displayed')
       return
-    from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable as Table
-    chemicalShiftTable = Table(chemicalShiftLists=self.project.chemicalShiftLists)
+    from ccpn.ui.gui.modules.ChemicalShiftTable import ChemicalShiftTable
+    chemicalShiftTable = ChemicalShiftTable(chemicalShiftLists=self.project.chemicalShiftLists)
     self.ui.mainWindow.moduleArea.addModule(chemicalShiftTable, position=position, relativeTo=relativeTo)
     self.ui.mainWindow.pythonConsole.writeConsoleCommand("application.showChemicalShiftTable()")
     self.project._logger.info("application.showChemicalShiftTable()")
@@ -1460,9 +1460,9 @@ class Framework:
 
 
 
-  ###################################################################################################################
+  #################################################################################################
   ## MENU callbacks:  Macro
-  ###################################################################################################################
+  #################################################################################################
 
   def showMacroEditor(self):
     """

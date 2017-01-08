@@ -113,6 +113,12 @@ class Spectrum(AbstractWrapperObject):
     """name, regularised as used for id"""
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
+  @property
+  def _localCcpnSortKey(self) -> Tuple:
+    """Local sorting key, in context of parent."""
+    dataSource = self._wrappedData
+    return(dataSource.experiment.serial, dataSource.serial)
+
 
   @property
   def name(self) -> str:
@@ -934,8 +940,7 @@ class Spectrum(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
-    return sorted((x for y in parent._wrappedData.sortedExperiments()
-                   for x in y.sortedDataSources()), key=operator.attrgetter('name'))
+    return list(x for y in parent._wrappedData.experiments for x in y.dataSources)
 
   # Library functions
 

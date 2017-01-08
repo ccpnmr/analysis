@@ -20,7 +20,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from typing import Optional
+import typing
 
 from ccpn.util import Common as commonUtil
 from ccpn.core.Project import Project
@@ -71,6 +71,11 @@ class Residue(AbstractWrapperObject):
   def _key(self) -> str:
     """Residue ID. Identical to sequenceCode.residueType. Characters translated for pid"""
     return Pid.createId(self.sequenceCode, self.residueType)
+
+  @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    return(self._wrappedData.seqId,)
     
   @property
   def _parent(self) -> Chain:
@@ -150,6 +155,9 @@ class Residue(AbstractWrapperObject):
           else:
             return 'middle'
 
+    elif molType == 'dummy':
+      return 'dummy'
+
     else:
       # All other types have linking 'non-linear' in the wrapper
       return 'single'
@@ -167,10 +175,12 @@ class Residue(AbstractWrapperObject):
     self._wrappedData.linking = value
 
   @property
-  def residueVariant(self) -> Optional[str]:
+  def residueVariant(self) -> typing.Optional[str]:
     """NEF convention Residue variant descriptor (protonation state etc.) for residue"""
-    # NBNB TBD FIXME not implemented yet, pending sorting out the NEF standard on this point
-    return None
+    atomNamesRemoved, atomNamesAdded = self._wrappedData.getAtomNameDifferences()
+    ll = ['-' + x for x in sorted(atomNamesRemoved)]
+    ll.extend('+' + x for x in sorted(atomNamesAdded))
+    return ','.join(ll) or None
 
   @property
   def descriptor(self) -> str:
@@ -192,13 +202,14 @@ class Residue(AbstractWrapperObject):
     self._wrappedData.details = value
 
   @property
-  def nextResidue(self) -> Optional['Residue']:
+  def nextResidue(self) -> typing.Optional['Residue']:
     """Next residue in sequence, if any, otherwise None"""
     apiResidue = self._wrappedData
 
     molResidue = apiResidue.molResidue.nextMolResidue
     if molResidue is None:
       result = None
+      self._project._logger.debug("No next residue - API ")
     else:
       result = self._project._data2Obj.get(
         apiResidue.chain.findFirstResidue(seqId=molResidue.serial))
@@ -206,7 +217,7 @@ class Residue(AbstractWrapperObject):
     return result
 
   @property
-  def previousResidue(self) -> Optional['Residue']:
+  def previousResidue(self) -> typing.Optional['Residue']:
     """Previous residue in sequence, if any,otherwise None"""
     apiResidue = self._wrappedData
 
@@ -253,6 +264,15 @@ class Residue(AbstractWrapperObject):
       self._project._appBase._endCommandBlock()
       self._project.unblankNotification()
 
+  def resetVariantToDefault(self):
+    """Reset Residue.residueVariant to the default variant"""
+    atomNamesMissing, extraAtomNames = self._wrappedData.getAtomNameDifferences()
+    # No need for testing - the names returned are guaranteed to be missing/superfluous
+    for atomName in atomNamesMissing:
+      self.newAtom(name=atomName)
+    for atomName in extraAtomNames:
+      self.getAtom(atomName).delete()
+
   # Implementation functions
 
   @classmethod
@@ -262,7 +282,7 @@ class Residue(AbstractWrapperObject):
     # If the seqId order does not match the sequence we have a problem anyway.
     # NBNB the doe relies on this sorting order to handle position-specific labeling
     # for substances
-    return parent._apiChain.sortedResidues()
+    return parent._apiChain.residues
 
 def getter(self:Residue) -> Residue:
   apiResidue = self._wrappedData

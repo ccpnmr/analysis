@@ -2,6 +2,7 @@
 #=========================================================================================
 # FUnctions for sorting and comparison.
 #=========================================================================================
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -27,11 +28,10 @@ __version__ = "$Revision$"
 
 import math
 import re
-from numbers import Real
 from collections import OrderedDict
+from numbers import Real
+from ccpn.util import Constants
 
-NEGINFINITY = float('-Infinity')
-POSINFINITY = float('Infinity')
 NUMERICSPLIT = re.compile("([ ]*[+-]?\d+)")
 
 sortOrder = [
@@ -105,7 +105,7 @@ def _floatStringKey(key:str) -> tuple:
     floatkey = float(key)
     if math.isnan(floatkey):
       # Put NaN before -Infinity
-      return ('',(NEGINFINITY, ''), '')
+      return ('', (Constants.NEGINFINITY, ''), '')
     else:
       return ('',(floatkey, key), '')
 
@@ -178,7 +178,7 @@ def universalSortKey(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey,
       # Should be RecursionError from version 3.5 onwards
       # We have infinite recursion - default to generic object key
       category = 'unordered'
-      key = _unorderedKey(key)
+      key = _unorderedKeyHook(key)
 
   elif isinstance(key, list):
     try:
@@ -188,7 +188,7 @@ def universalSortKey(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey,
       # Should be RecursionError from version 3.5
       # We have infinite recursion - default to generic object key
       category = 'unordered'
-      key = _unorderedKey(key)
+      key = _unorderedKeyHook(key)
 
   elif isinstance(key, tuple):
     try:
@@ -220,7 +220,7 @@ def universalSortKey(key, _stringOrderingHook=None, _orderedKeyHook=_orderedKey,
     cls = key.__class__
     if isOrderable:
       category = 'ordered'
-      key = _orderedKey(key)
+      key = _orderedKeyHook(key)
 
     else:
       category = 'unordered'

@@ -57,7 +57,7 @@ def duplicateAtomBonds(chainMap:typing.Dict[Chain,Chain]):
   project = list(chainMap.keys())[0]._project
   apiMolSystem = project._wrappedData.molSystem
 
-  # Make source -> target APiAtom map and remove target atoms with no match in source
+  # Make source -> target ApiAtom map and remove target atoms with no match in source
   apiAtomMap = {}
   for source, target in chainMap.items():
     cutat = 3+len(target.shortName)  # Cut after e.g. 'MA:B' for chain B
@@ -133,6 +133,7 @@ def extraBoundAtomPairs(project:Project, selectSequential:bool=None) -> typing.L
   result.sort()
   return result
 
+.0
 def sequenceMatchOffset(reference:OrderedDict, sequence:OrderedDict) -> typing.Optional[int]:
   """Check if residues in sequence match those in reference, directly or with an offset.
   Reference and sequence are OrderedDict(sequenceCode:residueType)

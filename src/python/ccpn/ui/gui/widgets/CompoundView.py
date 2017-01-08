@@ -1606,7 +1606,7 @@ class AtomItem(QtGui.QGraphicsItem):
       # This code block is to handle position changes of branches when snapping to grid.
       # In practice it will allow two branches to swap places.
       if compoundView.snapToGrid and (dx != 0 or dy != 0) and nSelected <= 1:
-        # Find which of the neighbouring atoms form the longst branch. A more proper check
+        # Find which of the neighbouring atoms form the longest branch. A more proper check
         # to ensure the backbone is found could be done.
         # The shortest branch and the branch of the selected atom can be moved.
         neighbours = sorted(self.atom.neighbours, key=lambda atom: atom.name)

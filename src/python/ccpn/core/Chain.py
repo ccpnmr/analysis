@@ -30,6 +30,7 @@ from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObjec
 from ccpn.core.Project import Project
 from ccpn.core.Substance import Substance
 from ccpn.core.Substance import SampleComponent
+from ccpnmodel.ccpncore.lib.CopyData import copySubTree
 from ccpnmodel.ccpncore.api.ccp.molecule.MolSystem import Chain as ApiChain
 from ccpnmodel.ccpncore.api.ccp.molecule import Molecule
 from ccpnmodel.ccpncore.api.ccp.lims import Sample
@@ -129,30 +130,56 @@ class Chain(AbstractWrapperObject):
   def clone(self, shortName:str=None):
     """Make copy of chain."""
 
-    # Imported here to avoid circular imports
-    from ccpn.core.lib import MoleculeLib
+    # # Imported here to avoid circular imports
+    # from ccpn.core.lib import MoleculeLib
+    apiChain = self._wrappedData
+    apiMolSystem = apiChain.molSystem
+    dataObj = self._project._data2Obj
 
-    apiMolSystem = self._project._wrappedData.molSystem
 
     if shortName is None:
       shortName = apiMolSystem.nextChainCode()
 
     if apiMolSystem.findFirstChain(code=shortName) is not None:
       raise ValueError("Project already has one Chain with shortName %s" % shortName)
-    
-    ccpnChain = self._wrappedData
-    tags = ['molecule', 'role', 'magnEquivalenceCode', 'physicalState', 
-            'conformationalIsomer', 'chemExchangeState', 'details']
-    params = {tag:getattr(ccpnChain,tag) for tag in tags}
-    params['code'] = shortName
-    params['pdbOneLetterCode'] = shortName[0]
+
+    topObjectParameters = {'code':shortName,
+                           'pdbOneLetterCode':shortName[0]}
     self._startFunctionCommandBlock('clone', shortName, parName='newChain')
+    # Must be blanked to avoid atom creation notifiers while creating entire chain
+    self._project.blankNotification()
     try:
-      newCcpnChain = apiMolSystem.newChain(**params)
-      result = self._project._data2Obj[newCcpnChain]
-      MoleculeLib.duplicateAtomBonds({self:result})
+      newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
+                                topObjectParameters=topObjectParameters)
+      result = self._project._data2Obj.get(newApiChain)
+
+      # Add intra-chain generic bonds
+      for apiGenericBond in apiMolSystem.genericBonds:
+        ll = []
+        for aa in apiGenericBond.atoms:
+          if aa.residue.chain is apiChain:
+            ll.append(dataObj[aa])
+        if len(ll) == 2:
+          relativeIds = list(x._id.split(Pid.IDSEP, 1)[1] for x in ll)
+          newAtoms = list(result.getAtom(x) for x in relativeIds)
+          newAtoms[0].addInterAtomBond(newAtoms[1])
+
     finally:
+      self._project.blankNotification()
       self._project._appBase._endCommandBlock()
+
+    # tags = ['molecule', 'role', 'magnEquivalenceCode', 'physicalState',
+    #         'conformationalIsomer', 'chemExchangeState', 'details']
+    # params = {tag:getattr(ccpnChain,tag) for tag in tags}
+    # params['code'] = shortName
+    # params['pdbOneLetterCode'] = shortName[0]
+    # self._startFunctionCommandBlock('clone', shortName, parName='newChain')
+    # try:
+    #   newCcpnChain = apiMolSystem.newChain(**params)
+    #   result = self._project._data2Obj[newCcpnChain]
+    #   MoleculeLib.duplicateAtomBonds({self:result})
+    # finally:
+    #   self._project._appBase._endCommandBlock()
     #
     return result
                                   
@@ -185,12 +212,14 @@ class Chain(AbstractWrapperObject):
     finally:
       self._project._appBase._endCommandBlock()
 
-  def incrementResidueAssignments(self, increment:int, firstSeqCode:int=None,
-                                  lastSeqCode:int=None):
-    """Change all residues with sequence number part of sequenceCode
-    in range firstSeqCode - lastSeqCode (inclusive) by offset
+  def renumberResidues(self, offset:int, start:int=None,
+                                  stop:int=None):
+    """Renumber residues in range start-stop (inclusive) by adding offset
 
-    if firstSeqCode (lastSeqCode) is None, there is no lower (upper) limit
+    The residue number is the integer starting part of the sequenceCode,
+    e.g. residue '12B' is renumbered to '13B' (offset=1)
+
+    if start (stop) is None, there is no lower (upper) limit
 
     NB Will rename residues one by one, and stop on error."""
 
@@ -198,24 +227,34 @@ class Chain(AbstractWrapperObject):
     from ccpn.core.lib import MoleculeLib
 
     residues = self.residues
-    if increment > 0:
+    if offset > 0:
       residues.reverse()
 
-    self._startFunctionCommandBlock('incrementResidueAssignments', increment, firstSeqCode,
-                                    values={'lastSeqCode':lastSeqCode})
+    changedResidues = []
+    self._startFunctionCommandBlock('renumberResidues', offset,
+                                    values={'start':start, 'stop':stop})
     try:
       for residue in residues:
         sequenceCode = residue.sequenceCode
-        code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
-        # assert offset is None
+        code, ss, unused = commonUtil.parseSequenceCode(sequenceCode)
+        # assert unused is None
         if code is not None:
-          if ((firstSeqCode is None or code >= firstSeqCode)
-              and (lastSeqCode is None or code <= lastSeqCode)):
-            newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, increment)
+          if ((start is None or code >= start)
+              and (stop is None or code <= stop)):
+            newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, offset)
             residue.rename(newSequenceCode)
+            changedResidues.append(residue)
 
     finally:
       self._project._appBase._endCommandBlock()
+      for residue in changedResidues:
+        residue._finaliseAction('rename')
+        residue._finaliseAction('change')
+
+    if start is not None and stop is not None:
+      if len(changedResidues) != stop +1 - start:
+        self._project._logger.warning("Only %s residues found in range %s tos %s"
+                                      % (len(changedResidues), start, stop))
 
 
   @classmethod
@@ -225,14 +264,14 @@ class Chain(AbstractWrapperObject):
     if molSystem is None:
       return []
     else:
-      return molSystem.sortedChains()
+      return molSystem.chains
 
 
 
 def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:str=None,
                  startNumber:int=1, molType:str=None, isCyclic:bool=False,
                  shortName:str=None, role:str=None, comment:str=None) -> Chain:
-  """Create new chain from sequence of residue codes
+  """Create new chain from sequence of residue codes, using default variants.
 
   Automatically creates the corresponding polymer Substance if the compoundName is not already taken
 
@@ -278,6 +317,8 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
 
   self._startFunctionCommandBlock('createChain', sequence, values=locals(), defaults=defaults,
                                   parName='newChain')
+  # Must be blanked to avoid atom creation notifiers while creating entire chain
+  self._project.blankNotification()
   try:
     substance = self.createPolymerSubstance(sequence=sequence, name=name,
                                             startNumber=startNumber, molType=molType,
@@ -289,8 +330,15 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
   finally:
+    self._project.unblankNotification()
     self._project._appBase._endCommandBlock()
-  return self._project._data2Obj[newApiChain]
+
+  result = self._project._data2Obj[newApiChain]
+  for residue in result.residues:
+    # Necessary as CCPN V2 default protonation states do not match tne NEF / V3 standard
+    residue.resetVariantToDefault()
+  #
+  return result
 Project.createChain = _createChain
 del _createChain
 
@@ -298,6 +346,7 @@ del _createChain
 def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
                              comment:str=None) -> Chain:
   """Create new Chain that matches Substance"""
+
   defaults = collections.OrderedDict((('shortName', None), ('role', None), ('comment', None)))
 
   if self.substanceType != 'Molecule':
@@ -317,15 +366,22 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
 
   self._startFunctionCommandBlock('createChain', values=locals(), defaults=defaults,
                                   parName='newChain')
+  # Must be blanked to avoid atom creation notifiers while creating entire chain
+  self._project.blankNotification()
   try:
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                          details=comment)
-    #
-    result = self._project._data2Obj[newApiChain]
   finally:
+    self._project.unblankNotification()
     self._project._appBase._endCommandBlock()
 
+  result = self._project._data2Obj[newApiChain]
+  for residue in result.residues:
+    # Necessary as CCPN V2 default protonation states do not match the NEF / V3 standard
+    residue.resetVariantToDefault()
+  #
   return result
+#
 Substance.createChain = _createChainFromSubstance
 del _createChainFromSubstance
 

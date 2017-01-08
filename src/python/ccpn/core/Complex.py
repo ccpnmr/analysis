@@ -70,6 +70,11 @@ class Complex(AbstractWrapperObject):
     return self._wrappedData.name
 
   @property
+  def serial(self) -> str:
+    """Serial number of Complex, used for sorting"""
+    return self._wrappedData.serial
+
+  @property
   def _parent(self) -> Project:
     """Parent (containing) object."""
     return self._project
@@ -79,7 +84,7 @@ class Complex(AbstractWrapperObject):
   def chains(self) -> typing.Tuple[Chain, ...]:
     """Chains that make up Complex."""
     data2Obj = self._project._data2Obj
-    return tuple(data2Obj[x] for x in self._wrappedData.sortedChains())
+    return tuple(sorted(data2Obj[x] for x in self._wrappedData.chains))
 
   @chains.setter
   def chains(self, value):
@@ -102,7 +107,8 @@ class Complex(AbstractWrapperObject):
       elif Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.Complex.name" % Pid.altCharacter)
       else:
-        coreUtil._resetParentLink(self._wrappedData, 'chainGroups', {'name':value})
+        self._wrappedData.__dict__['name'] = value
+        # coreUtil._resetParentLink(self._wrappedData, 'chainGroups', {'name':value})
         self._finaliseAction('rename')
         self._finaliseAction('change')
 
@@ -121,7 +127,7 @@ class Complex(AbstractWrapperObject):
     if molSystem is None:
       return []
     else:
-      return molSystem.sortedChainGroups()
+      return molSystem.chainGroups
 
 
 
@@ -161,7 +167,7 @@ del _newComplex
 # reverse link Chain.complexes
 def getter(self:Chain) -> typing.Tuple[Complex, ...]:
   data2Obj = self._project._data2Obj
-  return tuple(data2Obj[x] for x in self._wrappedData.sortedChainGroups())
+  return tuple(sorted(data2Obj[x] for x in self._wrappedData.chainGroups))
 def setter(self:Chain, value):
   self._wrappedData.chainGroups = [x._wrappedData for x in value]
 #

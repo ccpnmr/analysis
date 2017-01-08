@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from typing import Sequence, Tuple
+import typing
 import collections
 
 from ccpn.core.Project import Project
@@ -63,6 +63,11 @@ class Task(AbstractWrapperObject):
     return Pid.createId(self._wrappedData.nameSpace, self._wrappedData.name)
 
   @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    return(self._wrappedData.nameSpace, self._wrappedData.name)
+
+  @property
   def nameSpace(self) -> str:
     """Task nameSpace"""
     return self._wrappedData.nameSpace
@@ -83,14 +88,14 @@ class Task(AbstractWrapperObject):
     return self._wrappedData.details
 
   @property
-  def windows(self) -> Tuple[Window, ...]:
+  def windows(self) -> typing.Tuple[Window, ...]:
     """Gui windows where Task is shown"""
 
     ff = self._project._data2Obj.get
     return tuple(ff(x) for x in self._wrappedData.sortedWindows())
 
   @windows.setter
-  def windows(self, value:Sequence):
+  def windows(self, value:typing.Sequence):
     value = [self.getByPid(x) if isinstance(x, str) else x for x in value]
     self._wrappedData.windows = tuple(x._wrappedData for x in value)
 
@@ -109,8 +114,7 @@ class Task(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (ccp.gui.guiTasks) for all GuiTasks connected to NmrProject"""
-    nmrProject = parent._wrappedData
-    return nmrProject.sortedGuiTasks()
+    return parent._wrappedData.guiTasks
 
 
   # # NBNB Commented out 22/6/2016 as the functions are not in use (and likely never will be

@@ -94,6 +94,13 @@ class Substance(AbstractWrapperObject):
     return Pid.createId(name, labelling)
 
   @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    obj =  self._wrappedData
+    labelling = obj.labeling
+    return(obj.name, '' if labelling == DEFAULT_LABELLING else labelling)
+
+  @property
   def name(self) -> str:
     """name of Substance"""
     return self._wrappedData.name
@@ -410,7 +417,7 @@ class Substance(AbstractWrapperObject):
       raise ValueError("Atom with ID %s does not exist" % atom)
 
     if atom.residue.chain not in self.chains:
-      raise ValueError("Atom %s and its chain do not match the Substance" % atomId)
+      raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
     dd = self.ccpnInternalData.get('_specificAtomLabelling')
     if dd is None:
@@ -434,7 +441,7 @@ class Substance(AbstractWrapperObject):
       raise ValueError("Atom with ID %s does not exist" % atom)
 
     if atom.residue.chain not in self.chains:
-      raise ValueError("Atom %s and its chain do not match the Substance" % atomId)
+      raise ValueError("%s and its chain do not match the Substance" % atom.longPid)
 
     dd = self.ccpnInternalData.get('_specificAtomLabelling')
     if dd is None:
@@ -515,9 +522,9 @@ class Substance(AbstractWrapperObject):
 
     name = self.name
     data2Obj = self._project._data2Obj
-    return tuple(data2Obj[y] for x in self._project._apiNmrProject.sortedExperiments()
-                 for y in x.sortedDataSources()
-                 if x.refComponentName == name)
+    return tuple(sorted(data2Obj[y] for x in self._project._apiNmrProject.experiments
+                 for y in x.dataSources
+                 if x.refComponentName == name))
 
   @referenceSpectra.setter
   def referenceSpectra(self, value):
@@ -593,7 +600,7 @@ class Substance(AbstractWrapperObject):
     if componentStore is None:
       return []
     else:
-      return componentStore.sortedComponents()
+      return componentStore.components
 
 # Connections to parents:
 

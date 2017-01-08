@@ -223,7 +223,7 @@ class Restraint(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:RestraintList)-> list:
     """get wrappedData - all Constraint children of parent ConstraintList"""
-    return parent._wrappedData.sortedConstraints()
+    return parent._wrappedData.constraints
 
 
 def getter(self:Peak) -> Tuple[Restraint, ...]:
@@ -231,10 +231,10 @@ def getter(self:Peak) -> Tuple[Restraint, ...]:
   result = []
   apiPeak = self._wrappedData
   for restraintList in self._project.restraintLists:
-    for apiRestraint in restraintList._wrappedData.sortedRestraints():
+    for apiRestraint in restraintList._wrappedData.restraints:
       if apiPeak in apiRestraint.peaks:
         result.append(getDataObj(apiRestraint))
-  return tuple(result)
+  return tuple(sorted(result))
 def setter(self:Peak, value:Sequence):
   apiPeak = self._wrappedData
   for restraint in self.restraints:

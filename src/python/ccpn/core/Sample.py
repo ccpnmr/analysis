@@ -72,6 +72,11 @@ class Sample(AbstractWrapperObject):
   def name(self) -> str:
     """actual sample name"""
     return self._wrappedData.name
+
+  @property
+  def serial(self) -> int:
+    """Sample serial number, used for sorting"""
+    return self._wrappedData.serial
     
   @property
   def _parent(self) -> Project:
@@ -203,8 +208,8 @@ class Sample(AbstractWrapperObject):
     """ccpn.Spectra acquired using
      ccpn.Sample (excluding multiSample spectra)"""
     ff = self._project._data2Obj.get
-    return tuple(ff(y) for x in self._wrappedData.sortedNmrExperiments()
-                 for y in x.sortedDataSources())
+    return tuple(sorted(ff(y) for x in self._wrappedData.nmrExperiments
+                 for y in x.dataSources))
 
   @spectra.setter
   def spectra(self, value:Sequence[Spectrum]):
@@ -215,13 +220,13 @@ class Sample(AbstractWrapperObject):
   def spectrumHits(self) -> Tuple[SpectrumHit, ...]:
     """SpectrumHits that were found using Sample"""
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._apiSample.sortedSpectrumHits())
+    return tuple(sorted(ff(x) for x in self._apiSample.spectrumHits))
 
   @property
   def pseudoDimensions(self) -> PseudoDimension:
     """Pseudodimensions where sample is used for only one point along the sampled dimension"""
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._apiSample.sortedSampledDataDims())
+    return tuple(sorted(ff(x) for x in self._apiSample.sampledDataDims))
 
   # Implementation functions
   def rename(self, value:str):
@@ -238,7 +243,7 @@ class Sample(AbstractWrapperObject):
       elif Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
       else:
-        coreUtil._resetParentLink(self._wrappedData, 'samples', {'name':value})
+        self._wrappedData.__dict__['name'] = value
         self._finaliseAction('rename')
         self._finaliseAction('change')
 
@@ -254,7 +259,7 @@ class Sample(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (Sample.Samples) for all Sample children of parent NmrProject.sampleStore
     Set sampleStore to default if not set"""
-    return parent._wrappedData.sampleStore.sortedSamples()
+    return parent._wrappedData.sampleStore.samples
 
 
 def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=None,

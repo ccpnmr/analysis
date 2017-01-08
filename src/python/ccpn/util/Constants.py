@@ -23,6 +23,10 @@ __version__ = "$Revision$"
 #=========================================================================================
 from collections import namedtuple
 from collections import OrderedDict
+
+POSINFINITY = float('Infinity')
+NEGINFINITY = float('-Infinity')
+
 # Units allowed for amounts (e.g. Sample)
 amountUnits = ('L', 'g', 'mole')
 

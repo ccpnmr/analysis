@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple, Optional, List
+import typing
 from ccpn.core.lib import Pid
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -70,6 +70,12 @@ class SpectrumReference(AbstractWrapperObject):
     """object identifier, used for id"""
     dataDimRef = self._wrappedData
     return Pid.createId(dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
+
+  @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    dataDimRef = self._wrappedData
+    return(dataDimRef.dataDim.dim, dataDimRef.expDimRef.serial)
 
   @property
   def _parent(self) -> Spectrum:
@@ -133,18 +139,18 @@ class SpectrumReference(AbstractWrapperObject):
 
 
   @property
-  def isotopeCodes(self) -> Tuple[str, ...]:
+  def isotopeCodes(self) -> typing.Tuple[str, ...]:
     """Isotope identification strings for isotopes.
     NB there can be several isotopes for e.g. J-coupling or multiple quantum coherence."""
 
     return self._wrappedData.expDimRef.isotopeCodes
 
   @isotopeCodes.setter
-  def isotopeCodes(self, value:Sequence):
+  def isotopeCodes(self, value:typing.Sequence):
       self._wrappedData.expDimRef.isotopeCodes = value
 
   @property
-  def foldingMode(self) -> Optional[str]:
+  def foldingMode(self) -> typing.Optional[str]:
     """folding mode matching reference (values: 'aliased', 'folded', None)"""
     dd = {True:'folded', False:'aliased', None:None}
     return dd[self._wrappedData.expDimRef.isFolded]
@@ -241,16 +247,12 @@ class SpectrumReference(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.DataDimRefs) for all Spectrum children of parent Spectrum"""
-    result = []
-    for ddim in parent._wrappedData.sortedDataDims():
-      if hasattr(ddim, 'dataDimRefs'):
-        result.extend(ddim.sortedDataDimRefs())
-    #
-    return result
+    return [y for x in parent._wrappedData.dataDims if hasattr(x, 'dataDimRefs')
+            for y in x.sortedDataDimRefs()]
 
 
 def _newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:float,
-                       isotopeCodes:Sequence[str], axisCode:str=None, measurementType:str='Shift',
+                       isotopeCodes:typing.Sequence[str], axisCode:str=None, measurementType:str='Shift',
                        maxAliasedFrequency:float=None, minAliasedFrequency:float=None,
                        foldingMode:str=None, axisUnit:str=None, referencePoint:float=0.0,
                        referenceValue:float=0.0) -> SpectrumReference:
@@ -277,7 +279,7 @@ def _newSpectrumReference(self:Spectrum, dimension:int, spectrometerFrequency:fl
 Spectrum.newSpectrumReference = _newSpectrumReference
 del _newSpectrumReference
 
-def getter(self:Spectrum) -> List[Optional[SpectrumReference]]:
+def getter(self:Spectrum) -> typing.List[typing.Optional[SpectrumReference]]:
   data2Obj = self._project._data2Obj
   return list(data2Obj.get(x) if x else None for x in self._mainDataDimRefs())
 Spectrum.mainSpectrumReferences = property(getter, None, None,

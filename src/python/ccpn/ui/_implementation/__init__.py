@@ -49,8 +49,8 @@ __version__ = "$Revision$"
 # CCPNINTERNAL used in ccpn.core.__init__
 
 # Order to import ui implementation classes -
-_importOrder = ['Window','Task','Mark','SpectrumDisplay','Module','Strip',
-                'Axis','SpectrumView', 'PeakListView']
+_uiImportOrder = ('Window','Task','Mark','SpectrumDisplay','Module','Strip',
+                'Axis','SpectrumView', 'PeakListView')
 
 # Necessary to ensure classes are always imported in the right order
 from ccpn import core

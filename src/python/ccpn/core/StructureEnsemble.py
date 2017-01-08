@@ -611,7 +611,7 @@ class StructureEnsemble(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
-    return parent._wrappedData.molSystem.sortedStructureEnsembles()
+    return parent._wrappedData.molSystem.structureEnsembles
 
 def _newStructureEnsemble(self:Project, ensembleId:int=None, comment:str=None) -> StructureEnsemble:
   """Create new, empty StructureEnsemble"""

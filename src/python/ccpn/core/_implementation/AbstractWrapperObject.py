@@ -27,7 +27,8 @@ import operator
 import typing
 from collections import OrderedDict
 
-from ccpn.core.lib import CcpnSorting
+from ccpn.core import _importOrder
+# from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Util as coreUtil
 from ccpn.util import Common as commonUtil
 from ccpn.core.lib import Pid
@@ -140,23 +141,55 @@ class AbstractWrapperObject():
     self._project = project
     self._wrappedData = wrappedData
     data2Obj[wrappedData] = self
+
+    self._id = None
+    self._resetIds()
       
-    # set _id
+    # # set _id
+    # parent = self._parent
+    # if parent is project:
+    #   _id = str(self._key)
+    # else:
+    #   _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
+    # self._id = _id
+    #
+    # # update pid:object mapping dictionary
+    # dd = project._pid2Obj.get(self.className)
+    # if dd is None:
+    #   dd = {}
+    #   project._pid2Obj[self.className] = dd
+    #   project._pid2Obj[self.shortClassName] = dd
+    # dd[_id] = self
+
+  def _resetIds(self):
+    # reset id
+    oldId = self._id
+    project = self._project
     parent = self._parent
-    if parent is project:
+    className = self.className
+    if parent is None:
+      # This is the project
+      _id = ''
+      sortKey = ('',)
+    elif parent is project:
       _id = str(self._key)
+      sortKey = self._localCcpnSortKey
     else:
-      _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
+      _id = '%s%s%s' % (parent._id, Pid.IDSEP, self._key)
+      sortKey = parent._ccpnSortKey[2:] + self._localCcpnSortKey
     self._id = _id
-    
+    self._ccpnSortKey = (id(project), _importOrder.index(className)) + sortKey
+
     # update pid:object mapping dictionary
-    dd = project._pid2Obj.get(self.className)
+    dd = project._pid2Obj.get(className)
     if dd is None:
       dd = {}
-      project._pid2Obj[self.className] = dd
+      project._pid2Obj[className] = dd
       project._pid2Obj[self.shortClassName] = dd
+    # assert oldId is not None
+    if oldId in dd:
+      del dd[oldId]
     dd[_id] = self
-
 
   def __bool__(self):
     """Truth value: true - wrapper classes are never empty"""
@@ -165,19 +198,17 @@ class AbstractWrapperObject():
   def __lt__(self, other):
     """Ordering implementation function, necessary for making lists sortable.
     """
-    if self._project is other._project:
-      className1 = self.className
-      className2 = other.className
-      if className1 == className2:
-        return (CcpnSorting.stringSortKey(self._id) < CcpnSorting.stringSortKey(other._id))
-      else:
-        return (className1 < className2)
+
+    if hasattr(other, '_ccpnSortKey'):
+      return self._ccpnSortKey < other._ccpnSortKey
     else:
-      return (id(self._project) < id(other._project))
+      return id(self) < id(other)
+
 
   def __repr__(self):
     """String representation"""
     return "<ccpn.core.%s>" % self.longPid
+
 
   def __str__(self):
     """Readable string representation"""
@@ -285,7 +316,17 @@ class AbstractWrapperObject():
       - 'HA' *Atom.name*"""
 
     return self._id
-  
+
+  @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent.
+    NBNB Must be overridden is some subclasses to get proper sorting order"""
+
+    if hasattr(self._wrappedData, 'serial'):
+      return (self._wrappedData.serial,)
+    else:
+      return (self._key,)
+
   # Abstract methods
   @classmethod
   def _getAllWrappedData(cls, parent)-> list:
@@ -342,9 +383,9 @@ class AbstractWrapperObject():
     #
     return None
 
-  def _getWrapperObject(self, apiObject:ApiImplementation.DataObject):
-    """get wrapper object wrapping apiObject or None"""
-    return self._project._data2Obj.get(apiObject)
+  # def _getWrapperObject(self, apiObject:ApiImplementation.DataObject):
+  #   """get wrapper object wrapping apiObject or None"""
+  #   return self._project._data2Obj.get(apiObject)
     
   # CCPN Implementation methods
 
@@ -451,12 +492,12 @@ class AbstractWrapperObject():
       # objects is all wrapper objects for next child level down
       # NB this may sometimes (during undo/redo) get called when not all objects
       # are finalised - hence the test if y is None
-      objects = [y for y in (data2Obj.get(x) for x in ll) if y is not None]
-      if cls.className in ('ChemicalShift',):
-        # These cannot be correctly sorted at the API level
-        objects.sort()
+      objects = list(y for y in (data2Obj.get(x) for x in ll) if y is not None)
+      # if cls.className in ('ChemicalShift',):
+      #   # These cannot be correctly sorted at the API level
+      #   objects.sort()
     #
-    return objects
+    return sorted(objects)
 
   def _initializeAll(self):
     """Initialize children, using existing objects in data model"""
@@ -540,9 +581,9 @@ class AbstractWrapperObject():
     """Get list of objects that have self as a parent"""
 
     getDataObj = self._project._data2Obj.get
-    return list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+    return sorted(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
 
-  # NOtifiers and related functions:
+  # Notifiers and related functions:
 
   @classmethod
   def _setupCoreNotifier(cls, target:str, func:typing.Callable,
@@ -564,26 +605,27 @@ class AbstractWrapperObject():
     cls._coreNotifiers.append((cls.className, target, func, parameterDict, onceOnly))
 
 
-  def _finaliseRename(self):
-    """Reset internal attributes after values determining PID have changed
-    """
+  # def _finaliseRename(self):
+  #   """Reset internal attributes after values determining PID have changed
+  #   """
+  #
+  #   # reset id
+  #   project = self._project
+  #   oldId = self._id
+  #   parent = self._parent
+  #   if parent is None:
+  #     _id = ''
+  #   elif parent is project:
+  #     _id = str(self._key)
+  #   else:
+  #     _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
+  #   self._id = _id
+  #
+  #   # update pid:object mapping dictionary
+  #   dd = project._pid2Obj[self.className]
+  #   del dd[oldId]
+  #   dd[_id] = self
 
-    # reset id
-    project = self._project
-    oldId = self._id
-    parent = self._parent
-    if parent is None:
-      _id = ''
-    elif parent is project:
-      _id = str(self._key)
-    else:
-      _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
-    self._id = _id
-
-    # update pid:object mapping dictionary
-    dd = project._pid2Obj[self.className]
-    del dd[oldId]
-    dd[_id] = self
 
   def _finaliseRelatedObjectFromRename(self, oldPid, pathToObject:str, action:str):
     """Finalise related objects after rename
@@ -636,7 +678,7 @@ class AbstractWrapperObject():
       oldPid = self.pid
 
       # Wrapper-level processing
-      self._finaliseRename()
+      self._resetIds()
 
       # Call notifiers with special signature
       if project._notificationSuspension:

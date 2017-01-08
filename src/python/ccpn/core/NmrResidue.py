@@ -22,19 +22,24 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import collections
-from typing import Tuple, Optional
+import typing
 from typing import Union
 
+from ccpn.util import Constants
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.Project import Project
 from ccpn.core.Residue import Residue
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.lib import CcpnSorting
+# from ccpn.core.lib import CcpnSorting
 from ccpn.core.lib import Pid
 from ccpnmodel.ccpncore.lib import Util as modelUtil
 from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-from ccpnmodel.ccpncore.lib import Constants
+from ccpnmodel.ccpncore.lib.Constants import defaultNmrChainCode
 #from ccpnmodel.ccpncore.lib.molecule import MoleculeQuery
+
+# Value used for sorting with no offset - puts no_offset just before offset +0
+SORT_NO_OFFSET = -0.1
+
 
 
 class NmrResidue(AbstractWrapperObject):
@@ -95,6 +100,49 @@ class NmrResidue(AbstractWrapperObject):
   def _key(self) -> str:
     """Residue local ID"""
     return Pid.createId(self.sequenceCode, self.residueType)
+
+  @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+
+    unassignedOffset = 1000000000
+
+    obj = self._wrappedData
+    offset = obj.relativeOffset
+
+    if offset is None:
+      # this is a main NmrResidue
+      offset = SORT_NO_OFFSET
+    else:
+      # Offset NmrResidue - get sort key from main Nmr Residue
+      # NBNB We can NOT rely on the main NmrResidue to be already initialised
+      obj = obj.mainResonanceGroup
+
+    apiNmrChain = obj.nmrChain
+    if apiNmrChain.isConnected:
+      result = (apiNmrChain.mainResonanceGroups.index(obj), '', offset)
+    else:
+      seqCode = obj.seqCode
+      if seqCode is None:
+        result = (unassignedOffset + obj.serial, obj.seqInsertCode or '', offset)
+      else:
+        result = (seqCode, obj.seqInsertCode or '', offset)
+
+    # if offset is None:
+    #   apiNmrChain = obj.nmrChain
+    #   if apiNmrChain.isConnected:
+    #     result = (apiNmrChain.mainResonanceGroups.index(obj), '', SORT_NO_OFFSET)
+    #   else:
+    #     # this is a main NmrResidue
+    #     seqCode = obj.seqCode
+    #     if seqCode is None:
+    #       result = (Constants.POSINFINITY, '@%s' % obj.serial, SORT_NO_OFFSET)
+    #     else:
+    #       result = (seqCode, obj.seqInsertCode or '', SORT_NO_OFFSET)
+    # else:
+    #   result = self.mainNmrResidue._localCcpnSortKey[:-1]  + (offset,)
+    #
+    return  result
     
   @property
   def _parent(self) -> NmrChain:
@@ -118,7 +166,7 @@ class NmrResidue(AbstractWrapperObject):
     #   return apiResidue.code3Letter
 
   @property
-  def relativeOffset(self) -> Optional[int]:
+  def relativeOffset(self) -> typing.Optional[int]:
     """Sequential offset of NmrResidue relative to mainNmrResidue
     May be 0. Is None for residues that are not offset."""
     return self._wrappedData.relativeOffset
@@ -151,12 +199,12 @@ class NmrResidue(AbstractWrapperObject):
 
 
   @property
-  def offsetNmrResidues(self) -> Tuple['NmrResidue', ...]:
+  def offsetNmrResidues(self) -> typing.Tuple['NmrResidue', ...]:
     """"All other NmrResidues with the same sequenceCode sorted by offSet suffix '-1', '+1', etc."""
     getDataObj = self._project._data2Obj.get
     return tuple(getDataObj(x) for x in self._wrappedData.offsetResonanceGroups)
 
-  def getOffsetNmrResidue(self, offset:int) -> Optional['NmrResidue']:
+  def getOffsetNmrResidue(self, offset:int) -> typing.Optional['NmrResidue']:
     """Get offset NmrResidue with indicated offset
     (or None, if no such offset NmrResidue exists"""
     for result in self.offsetNmrResidues:
@@ -166,12 +214,12 @@ class NmrResidue(AbstractWrapperObject):
     return None
 
   @property
-  def mainNmrResidue(self) -> Optional['NmrResidue']:
+  def mainNmrResidue(self) -> typing.Optional['NmrResidue']:
     """Main NmrResidue (self, or the residue that self is offset relative to"""
     return self._project._data2Obj.get(self._wrappedData.mainResonanceGroup)
 
   @property
-  def nextNmrResidue(self) -> Optional['NmrResidue']:
+  def nextNmrResidue(self) -> typing.Optional['NmrResidue']:
     """Next sequentially connected NmrResidue (or None, as appropriate).
     Either from a connected NmrChain,
     or the NmrResidue assigned to the next Residue in the same Chain"""
@@ -304,7 +352,7 @@ class NmrResidue(AbstractWrapperObject):
 
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
-    defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
+    defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
     self._startFunctionCommandBlock('disconnectNext')
     try:
@@ -348,7 +396,7 @@ class NmrResidue(AbstractWrapperObject):
       self._project._appBase._endCommandBlock()
 
   @property
-  def previousNmrResidue(self) -> Optional['NmrResidue']:
+  def previousNmrResidue(self) -> typing.Optional['NmrResidue']:
     """Previous sequentially connected NmrResidue (or None, as appropriate).
     Either from a connected NmrChain,
     or the NmrResidue assigned to the previous Residue in the same Chain"""
@@ -478,7 +526,7 @@ class NmrResidue(AbstractWrapperObject):
 
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
-    defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
+    defaultChain =  apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
     self._startFunctionCommandBlock('disconnectPrevious')
     try:
@@ -526,7 +574,7 @@ class NmrResidue(AbstractWrapperObject):
     creating new connected NmrChains as necessary"""
     apiResonanceGroup = self._wrappedData
     apiNmrChain = apiResonanceGroup.directNmrChain
-    defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=Constants.defaultNmrChainCode)
+    defaultChain = apiNmrChain.nmrProject.findFirstNmrChain(code=defaultNmrChainCode)
 
     self._startFunctionCommandBlock('disconnect')
     try:
@@ -573,7 +621,7 @@ class NmrResidue(AbstractWrapperObject):
       self._project._appBase._endCommandBlock()
 
   @property
-  def probableResidues(self) -> Tuple[Tuple[Residue,float], ...]:
+  def probableResidues(self) -> typing.Tuple[typing.Tuple[Residue,float], ...]:
     """tuple of (residue, probability) tuples for probable residue assignments
     sorted by decreasing probability. Probabilities are normalised to 1"""
     getDataObj = self._project._data2Obj.get
@@ -590,7 +638,7 @@ class NmrResidue(AbstractWrapperObject):
       apiResonanceGroup.newResidueProb(possibility=residue._wrappedData, weight=weight)
 
   @property
-  def probableResidueTypes(self) -> Tuple[Tuple[str,float]]:
+  def probableResidueTypes(self) -> typing.Tuple[typing.Tuple[str,float]]:
     """tuple of (residueType, probability) tuples for probable residue types
     sorted by decreasing probability"""
     ll = sorted((x.weight, x.possibility) for x in self._wrappedData.residueTypeProbs)
@@ -774,7 +822,9 @@ class NmrResidue(AbstractWrapperObject):
         except:
           apiResonanceGroup.resetResidueType(oldResidueType)
           apiResonanceGroup.sequenceCode = None
-          apiResonanceGroup.directNmrChain = oldNmrChain
+          apiResonanceGroup.directNmrChain = apiResonanceGroup.nmrProject.findFirstNmrChain(
+            code=oldChainCode
+          )
           apiResonanceGroup.sequenceCode = oldSequenceCode
           self._project._logger.error("Attempt to set illegal or inconsistent assignment: %s.%s.%s"
             % (chainCode, sequenceCode, residueType) + "\n  Reset to original state"
@@ -823,12 +873,7 @@ class NmrResidue(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    if parent.isConnected:
-      # for connected NmrChains you keep the order
-      return parent._wrappedData.resonanceGroups
-    else:
-      ll = list((x.sequenceCode, x) for x in parent._wrappedData.resonanceGroups)
-      return list(tt[-1] for tt in sorted(ll, key=CcpnSorting.universalSortKey))
+    return parent._wrappedData.resonanceGroups
 
 
 def getter(self:Residue) -> NmrResidue:
@@ -857,7 +902,7 @@ def setter(self:Residue, value:NmrResidue):
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
 
-def getter(self:NmrChain) -> Tuple[NmrResidue]:
+def getter(self:NmrChain) -> typing.Tuple[NmrResidue]:
   result = list(self._project._data2Obj.get(x)for x in self._wrappedData.mainResonanceGroups)
   if not self.isConnected:
     result.sort()

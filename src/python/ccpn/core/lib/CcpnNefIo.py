@@ -33,7 +33,7 @@ from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
 from ccpn.core.lib import Pid
-from ccpn.core import _importOrder
+from ccpn.core import _coreImportOrder
 from ccpn.util import Common as commonUtil
 from ccpn.util import Constants
 from ccpn.util import jsonIo
@@ -1061,11 +1061,23 @@ class CcpnNefWriter:
     if shifts:
       for shift in shifts:
         rowdata = self._loopRowData(loopName, shift)
-        rowdata.update(zip(atomCols, shift.nmrAtom._idTuple))
-        isotope,element = commonUtil.splitIntFromChars(shift.nmrAtom.isotopeCode)
+        nmrAtom = shift.nmrAtom
+        rowdata.update(zip(atomCols, nmrAtom._idTuple))
+        isotopeCode = nmrAtom.isotopeCode.upper()
+        isotope,element = commonUtil.splitIntFromChars(isotopeCode)
         if isotope is not None:
-          rowdata['element'] = element.upper()
+          rowdata['element'] = element
           rowdata['isotope_number'] = isotope
+
+        # Correct for atom names starting with the isotopeCode (e.g. 2HA, 111CD)
+        name = rowdata['atom_name']
+        if name.startswith(isotopeCode):
+          plainName = name[len(str(isotope)):]
+          if chemicalShiftList.getChemicalShift(nmrAtom.nmrResidue._id + Pid.IDSEP + plainName) is None:
+            # There is no shift in this list that has the corresponding name without the
+            # isotope number prefix. Remove the prefix for writing
+            rowdata['atom_name'] = plainName
+
         loop.newRow(rowdata)
     else:
       del result[loopName]
@@ -1592,7 +1604,7 @@ class CcpnNefWriter:
     category = 'ccpn_additional_data'
     pid2Obj = project._pid2Obj
     data = {}
-    for className in _importOrder:
+    for className in _coreImportOrder:
       # Use importOrder to get all classNames. The actual order does not matter here.
       dd = pid2Obj.get(className)
       if dd:
@@ -1804,7 +1816,7 @@ class CcpnNefReader:
 
         importer = self.importers.get(sf_category)
         if importer is None:
-          print ("WARNING, unknown saveframe category", sf_category)
+          print ("WARNING, unknown saveframe category", sf_category, saveFrameName)
         else:
           # NB - newObject may be project, for some saveframes.
           result = importer(self, project, saveFrame)
@@ -1901,37 +1913,77 @@ class CcpnNefReader:
       role = rows[0].get('ccpn_chain_role')
       comment = rows[0].get('ccpn_chain_comment')
       sequence = tuple(tuple(row.get(tag) for tag in tags) for row in rows)
+      for row in rows:
+        if row.get('linking') == 'dummy':
+          row['residue_name'] = 'dummy.' + row['residue_name']
+
       lastChain = sequence2Chain.get(sequence)
       if lastChain is None:
         newSubstance = project.fetchNefSubstance(sequence=rows, name=compoundName)
         newChain = newSubstance.createChain(shortName=chainCode, role=role,
                                             comment=comment)
         sequence2Chain[sequence] = newChain
+
+        # Set variant codes:
+        for ii, residue in enumerate(newChain.residues):
+          variantCode = sequence[ii][2]
+
+          if variantCode:
+
+            atomNamesRemoved, atomNamesAdded = residue._wrappedData.getAtomNameDifferences()
+
+
+            for code in variantCode.split(','):
+              code = code.strip()  # Should not be necessary but costs nothing to catch those errors
+              atom = residue.getAtom(code[1:])
+              if code[0] == '-':
+                if atom is None:
+                  residue._project._logger.error(
+                    "Incorrect variantCode %s: No atom named %s found in %s. Skipping ..."
+                    % (variantCode, code, residue)
+                  )
+                else:
+                  atom.delete()
+
+              elif code[0] == '+':
+                if atom is None:
+                  residue.newAtom(name=code[1:])
+                else:
+                  residue._project._logger.error(
+                    "Incorrect variantCode %s: Atom named %s already present in %s. Skipping ..."
+                    % (variantCode, code, residue)
+                  )
+
+              else:
+                residue._project._logger.error(
+                  "Incorrect variantCode %s: must start with '+' or '-'. Skipping ..."
+                  % variantCode
+                )
+
       else:
         newChain = lastChain.clone(shortName=chainCode)
         newChain.role = role
         newChain.comment = comment
+
       for apiResidue in newChain._wrappedData.sortedResidues():
         # Necessary to guarantee against name clashes
-        # Direct access to avoid unnecessary nootifiers
+        # Direct access to avoid unnecessary notifiers
         apiResidue.__dict__['seqInsertCode'] = '__@~@~__'
       for ii,apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
-        # NB we have to lop over API residues to be sure we get the residues
+        # NB we have to loop over API residues to be sure we get the residues
         # in creation order rather than sorted order
         residue = project._data2Obj[apiResidue]
         residue.rename(rows[ii].get('sequence_code'))
-        residue._finaliseRename()
+        residue._resetIds()
 
-      # Nexessary as notification is blanked here:
-      newChain._finaliseRename()
+      # Necessary as notification is blanked here:
+      newChain._resetIds()
 
       #
       result.append(newChain)
 
       # Add Residue comments
-      for ii, apiResidue in enumerate(newChain._wrappedData.sortedResidues()):
-        # WE must do this at the API level to be sure we get the Residues in the
-        # input order rather than in sorted order
+      for ii, apiResidue in enumerate(newChain.residues):
         comment = rows[ii].get('ccpn_comment')
         if comment:
           apiResidue.details = comment
@@ -1969,8 +2021,14 @@ class CcpnNefReader:
 
   def preloadAssignmentData(self, dataBlock:StarIo.NmrDataBlock):
     """Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK
+    and create NmrResidues in connencted nmrChains in order
 
-    NB later we can store serials in CCPN projects, but something is needed that works anyway"""
+    NB later we can store serials in CCPN projects, but something is needed that works anyway
+
+    NB, without CCPN-specific tags you can NOT guarantee that connected stretches are stable,
+    and that serials are put back where they came from.
+    This heuristic creates NmrResidues in connected stretches in the order they are found,
+    but this will break if connected tretches appear in multiple shiftlists and some are partial."""
 
 
     project = self.project
@@ -1979,12 +2037,13 @@ class CcpnNefReader:
 
       # get all NmrResidue data in chemicalshift lists
       assignmentData = {}
+      assignmentData2 = {}
       if saveFrameName.startswith('nef_chemical_shift_list'):
         for row in saveFrame['nef_chemical_shift'].data:
           chainCode = row['chain_code']
-          aSet = assignmentData.get(chainCode, set())
-          assignmentData[chainCode] = aSet
-          aSet.add((row['sequence_code'], row['residue_name']))
+          nmrResidues = assignmentData.get(chainCode, OD())
+          assignmentData[chainCode] = nmrResidues
+          nmrResidues[(row['sequence_code'], row['residue_name'])] = None
 
       # Create objects with reserved names
 
@@ -1997,16 +2056,31 @@ class CcpnNefReader:
             # Could not be done, probably because we have NmrChain '@1'. Leave for later
             pass
 
-      for chainCode, aSet in sorted(assignmentData.items()):
+      for chainCode, nmrResidues in sorted(assignmentData.items()):
+
+        # Create NmrChain
         try:
           nmrChain = project.fetchNmrChain(chainCode)
         except ValueError:
           nmrChain = project.fetchNmrChain('`%s`' % chainCode)
 
-        for sequenceCode, residueType in aSet:
-          if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
-            nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
+        if nmrChain.isConnected:
+          # Save data for later processing
+          assignmentData2[nmrChain] = nmrResidues
+        else:
+          # Create non-assigned NmrResidues to reserve the serials. The rest can wait
+          for sequenceCode, residueType in list(nmrResidues.keys()):
+            if sequenceCode[0] == '@' and sequenceCode[1:].isdigit():
+              nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
 
+      for nmrChain, nmrResidues in sorted(assignmentData2.items()):
+        # Create NmrResidues in order, to preserve connection order
+        for sequenceCode, residueType in list(nmrResidues.keys()):
+          # This time we want all non-offset, regardless of type - as we must get them in order
+          if (len(sequenceCode) < 2 or sequenceCode[-2] not in '+-'
+              or not sequenceCode[-1].isdigit()):
+            # I.e. for sequenceCodes that do not include an offset
+            nmrChain.fetchNmrResidue(sequenceCode=sequenceCode, residueType=residueType)
 
 
   def load_nef_chemical_shift_list(self, project:Project, saveFrame:StarIo.NmrSaveFrame):
@@ -3130,7 +3204,7 @@ class CcpnNefReader:
       while True:
         try:
           result = nmrChain.fetchNmrResidue(newSequenceCode, residueType)
-          # return result
+          return result
         except ValueError:
           newSequenceCode = '`%s`' % newSequenceCode
           self.warning("New NmrResidue:%s.%s.%s name caused an error.  Renamed %s.%s.%s"
@@ -3454,9 +3528,10 @@ def makeNefAxisCodes(isotopeCodes:Sequence[str], dimensionIds:List[int],
 
     resultMap[dim] = axisCode
   dimensionIds.sort()
-  if acquisitionAtEnd:
-    # put result back in dimension order
-    dimensionIds.reverse()
+  # NBNB new attempt - may not work
+  # if acquisitionAtEnd:
+  #   # put result back in dimension order
+  #   dimensionIds.reverse()
   result = list(resultMap[ii] for ii in dimensionIds)
   #
   return result
@@ -3528,7 +3603,7 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
   application.loadProject(path)
 
   project = application.project
-  spectrum = project.spectra[0]
+  # spectrum = project.spectra[0]
   time2 = time.time()
   print ("====> Loaded %s from NEF file in seconds %s" % (project.name, time2-time1))
   saveNefProject(project, outPath, overwriteExisting=True, skipPrefixes=skipPrefixes)
@@ -3642,10 +3717,10 @@ def _testNefIo(path:str, skipPrefixes:Sequence[str]=()):
 if __name__ == '__main__':
   import sys
   path = sys.argv[1]
-  # _testNefIo(path, skipPrefixes=('ccpn' ,))
+  _testNefIo(path, skipPrefixes=('ccpn' ,))
   # _testNefIo(path)
   # nefpath = _exportToNef(path)
   # _testNefIo(nefpath)
-  nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
-  _testNefIo(nefpath, skipPrefixes=('ccpn',))
+  # nefpath = _exportToNef(path, skipPrefixes=('ccpn' ,))
+  # _testNefIo(nefpath, skipPrefixes=('ccpn',))
   # print(_extractVariantsTable(path))

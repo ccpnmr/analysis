@@ -262,7 +262,7 @@ class RestraintList(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: DataSet)-> list:
     """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
-    return sorted(parent._wrappedData.constraintLists, key=operator.attrgetter('name'))
+    return parent._wrappedData.constraintLists
 
 # Connections to parents:
 def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=None,

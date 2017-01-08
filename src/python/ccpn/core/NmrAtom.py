@@ -328,7 +328,7 @@ class NmrAtom(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: NmrResidue)-> list:
     """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
-    return sorted(parent._wrappedData.resonances, key=operator.attrgetter('name'))
+    return parent._wrappedData.resonances
 
 def getter(self:Atom) -> NmrAtom:
   return self._project.getNmrAtom(self._id)

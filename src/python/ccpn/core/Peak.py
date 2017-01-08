@@ -229,7 +229,7 @@ class Peak(AbstractWrapperObject):
       data2Obj = self._project._data2Obj
       dimResults = [data2Obj[pdc.resonance] for pdc in mainPeakDimContribs
                     if hasattr(pdc, 'resonance')]
-      result.append(sorted(dimResults))
+      result.append(tuple(sorted(dimResults)))
     #
     return tuple(result)
 
@@ -291,8 +291,11 @@ class Peak(AbstractWrapperObject):
           nmrAtoms = [None]
         allAtoms.append(nmrAtoms)
 
-      # NB this gives a lit of tuples
-      result += itertools.product(*allAtoms)
+      # NB this gives a list of tuples
+      # Remove all-NOne tuples
+      result.extend(tt for tt in itertools.product(*allAtoms)
+                    if any(x is not None for x in tt))
+      # result += itertools.product(*allAtoms)
     #
     return tuple(sorted(result))
 
@@ -425,19 +428,19 @@ class Peak(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: PeakList)-> Tuple[Nmr.Peak, ...]:
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""
-    return parent._wrappedData.sortedPeaks()
+    return parent._wrappedData.peaks
 
-  def __str__(self):
-    """Readable string representation"""
-    # format the position list
-    pstring = ''
-    for p in self.position:
-      pstring += '%.3f,' % p
-
-    if self.height is None:
-      return "<%s; position:[%s]>" % (self.pid, pstring[:-1])
-    else:
-      return "<%s; position:[%s], height:%.1e>" % (self.pid, pstring[:-1], self.height)
+  # def __str__(self):
+  #   """Readable string representation"""
+  #   # format the position list
+  #   pstring = ''
+  #   for p in self.position:
+  #     pstring += '%.3f,' % p
+  #
+  #   if self.height is None:
+  #     return "<%s; position:[%s]>" % (self.pid, pstring[:-1])
+  #   else:
+  #     return "<%s; position:[%s], height:%.1e>" % (self.pid, pstring[:-1], self.height)
 
 # Connections to parents:
 def _newPeak(self:PeakList,height:float=None, volume:float=None,

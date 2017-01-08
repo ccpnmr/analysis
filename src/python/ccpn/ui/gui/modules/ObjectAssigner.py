@@ -149,10 +149,11 @@ class ObjectAssigner(QtGui.QWidget, Base):
   def setAtomType(self, item):
     self.project._appBase.current.nmrAtom.name = item
 
-  def natural_key(self, string_):
-    import re
-    """See http://www.codinghorror.com/blog/archives/001018.html"""
-    return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
+  # Obsolete, replaced by CcpnSorting.stringSortKey
+  # def natural_key(self, string_):
+  #   import re
+  #   """See http://www.codinghorror.com/blog/archives/001018.html"""
+  #   return [int(s) if s.isdigit() else s for s in re.split(r'(\d+)', string_)]
 
 
 
@@ -173,7 +174,7 @@ class ObjectAssigner(QtGui.QWidget, Base):
       # self.chainPulldowns[dim].setIndex(self.chainPulldowns[dim].texts.index(chain.id))
       self.chainPulldowns[dim].setCallback(partial(self.setNmrChain))
       sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
-      self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=self.natural_key))
+      self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey))
       # self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
       self.seqCodePulldowns[dim].setCallback(partial(self.setSequenceCode))
       residueTypes = [code.upper() for code in CCP_CODES] + ['']

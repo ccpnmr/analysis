@@ -70,6 +70,11 @@ class SpectrumGroup(AbstractWrapperObject):
     return self._wrappedData.name
 
   @property
+  def serial(self) -> str:
+    """Serial number  of SpectrumGroup, used for sorting"""
+    return self._wrappedData.serial
+
+  @property
   def _parent(self) -> Project:
     """Parent (containing) object."""
     return self._project
@@ -79,7 +84,7 @@ class SpectrumGroup(AbstractWrapperObject):
   def spectra(self) -> Tuple[Spectrum, ...]:
     """Spectra that make up SpectrumGroup."""
     data2Obj = self._project._data2Obj
-    return tuple(data2Obj[x] for x in self._wrappedData.sortedDataSources())
+    return tuple(sorted(data2Obj[x] for x in self._wrappedData.dataSources))
 
   @spectra.setter
   def spectra(self, value):
@@ -102,7 +107,8 @@ class SpectrumGroup(AbstractWrapperObject):
       elif Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.SpectrumGroup.name" % Pid.altCharacter)
       else:
-        coreUtil._resetParentLink(self._wrappedData, 'spectrumGroups', {'name':value})
+        self._wrappedData.__dict__['name'] = value
+        # coreUtil._resetParentLink(self._wrappedData, 'spectrumGroups', {'name':value})
         self._finaliseAction('rename')
         self._finaliseAction('change')
 
@@ -117,7 +123,7 @@ class SpectrumGroup(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData for all SpectrumGroups linked to NmrProject"""
-    return parent._wrappedData.sortedSpectrumGroups()
+    return parent._wrappedData.spectrumGroups
 
 
 def _newSpectrumGroup(self:Project, name:str, spectra=()) -> SpectrumGroup:
@@ -156,7 +162,7 @@ del _newSpectrumGroup
 # reverse link Spectrum.spectrumGroups
 def getter(self:Spectrum) -> Tuple[SpectrumGroup, ...]:
   data2Obj = self._project._data2Obj
-  return tuple(data2Obj[x] for x in self._wrappedData.sortedSpectrumGroups())
+  return tuple(sorted(data2Obj[x] for x in self._wrappedData.spectrumGroups))
 def setter(self:Spectrum, value):
   self._wrappedData.spectrumGroups = [x._wrappedData for x in value]
 #

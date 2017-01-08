@@ -149,7 +149,7 @@ class PeakList(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
-    return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
+    return [x for x in parent._wrappedData.peakLists if x.dataType == 'Peak']
 
   # Library functions
 
@@ -436,9 +436,9 @@ class PeakList(AbstractWrapperObject):
     by matching newAxisCodeOrder to spectrum axis code order"""
     return commonUtil.reorder(values, self._parent.axisCodes, newAxisCodeOrder)
 
-  def __str__(self):
-    """Readable string representation"""
-    return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
+  # def __str__(self):
+  #   """Readable string representation"""
+  #   return "<%s; #peaks:%d (isSimulated=%s)>" % (self.pid, len(self.peaks), self.isSimulated)
 
 
 # Connections to parents:

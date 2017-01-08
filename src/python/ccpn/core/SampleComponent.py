@@ -77,6 +77,13 @@ class SampleComponent(AbstractWrapperObject):
     return Pid.createId(name, labelling)
 
   @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    obj =  self._wrappedData
+    labelling = obj.labeling
+    return(obj.name, '' if labelling == DEFAULT_LABELLING else labelling)
+
+  @property
   def name(self) -> str:
     """name of SampleComponent and corresponding substance"""
     return self._wrappedData.name
@@ -166,7 +173,7 @@ class SampleComponent(AbstractWrapperObject):
   def spectrumHits(self) -> typing.Tuple[SpectrumHit, ...]:
     """ccpn.SpectrumHits found for SampleComponent"""
     ff = self._project._data2Obj.get
-    return tuple(ff(x) for x in self._apiSampleComponent.sortedSpectrumHits())
+    return tuple(sorted(ff(x) for x in self._apiSampleComponent.spectrumHits))
 
 
   @property
@@ -198,7 +205,7 @@ class SampleComponent(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Sample)-> list:
     """get wrappedData (SampleComponent) for all SampleComponent children of parent Sample"""
-    return parent._wrappedData.sortedSampleComponents()
+    return parent._wrappedData.sampleComponents
 
 
 def getter(self:SpectrumHit) -> SampleComponent:

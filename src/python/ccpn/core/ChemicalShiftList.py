@@ -132,8 +132,8 @@ class ChemicalShiftList(AbstractWrapperObject):
   def spectra(self) -> Tuple[Spectrum, ...]:
     """ccpn.Spectra that use ChemicalShiftList to store chemical shifts"""
     ff = self._project._data2Obj.get
-    return tuple(ff(y) for x in self._wrappedData.sortedExperiments()
-                 for y in x.sortedDataSources())
+    return tuple(sorted(ff(y) for x in self._wrappedData.experiments
+                 for y in x.dataSources))
 
   @spectra.setter
   def spectra(self, value:Sequence[Spectrum]):
@@ -159,12 +159,11 @@ class ChemicalShiftList(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> List[Nmr.ShiftList]:
     """get wrappedData (ShiftLists) for all ShiftList children of parent Project"""
-    return sorted((x for x in parent._apiNmrProject.measurementLists
-            if x.className == 'ShiftList'), key=operator.attrgetter('name'))
+    return list(x for x in parent._apiNmrProject.measurementLists if x.className == 'ShiftList')
 
-  def __str__(self):
-    """Readable string representation"""
-    return "<%s; #chemicalShifts:%d (autoUpdate:%s, isSimulated:%s)>" % (self.pid, len(self.chemicalShifts), self.autoUpdate, self.isSimulated)
+  # def __str__(self):
+  #   """Readable string representation"""
+  #   return "<%s; #chemicalShifts:%d (autoUpdate:%s, isSimulated:%s)>" % (self.pid, len(self.chemicalShifts), self.autoUpdate, self.isSimulated)
 
 # Connections to parents:
 

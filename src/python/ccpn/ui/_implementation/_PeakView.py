@@ -22,7 +22,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Tuple
+import typing
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 # from ccpn.core.Project import Project
@@ -67,6 +67,11 @@ class PeakView(AbstractWrapperObject):
     return str(self._wrappedData.peak.serial)
 
   @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    return(self._wrappedData.peak.serial,)
+
+  @property
   def textOffset(self) -> tuple:
     """Peak X,Y text annotation offset"""
     return self._wrappedData.textOffset
@@ -78,13 +83,13 @@ class PeakView(AbstractWrapperObject):
   @property
   def peak(self) -> Peak:
     """Peak that PeakView refers to"""
-    return self._getWrapperObject(self._wrappedData.peak)
+    return self._project._data2Obj.get(self._wrappedData.peak)
 
   # Implementation functions
   @classmethod
   def _getAllWrappedData(cls, parent:PeakListView)-> list:
     """get wrappedData (ccpnmr.gui.Task.PeakView) in serial number order"""
-    return parent._wrappedData.sortedPeakViews()
+    return parent._wrappedData.peakViews
 
   #CCPN functions
 

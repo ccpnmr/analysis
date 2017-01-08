@@ -26,7 +26,7 @@ import sys
 import typing
 
 from ccpn.core.Project import Project
-from ccpn.ui._implementation import _importOrder as _uiClassOrder
+from ccpn.ui._implementation import _uiImportOrder
 from ccpn.core import _coreClassMap
 
 from ccpn.util import Register
@@ -55,7 +55,7 @@ class Ui:
   def setUp(cls):
     """Set up graphics data classes, cleaning up previous settings"""
 
-    for className in _uiClassOrder:
+    for className in _uiImportOrder:
       # Remove ui-specific settings. Will be reset as necessary in subclasses
       _coreClassMap[className]._factoryFunction = cls._factoryFunctions.get(className)
 

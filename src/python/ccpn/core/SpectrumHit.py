@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import List, Optional
+import typing
 import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Spectrum import Spectrum
@@ -69,6 +69,12 @@ For this reason SpectrumHits cannot be renamed."""
     return Pid.createId(obj.substanceName, obj.sampledDimension, obj.sampledPoint)
 
   @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    obj =  self._wrappedData
+    return(obj.substanceName, obj.sampledDimension, obj.sampledPoint)
+
+  @property
   def _parent(self) -> Spectrum:
     """Spectrum containing spectrumHit."""
     return self._project._data2Obj[self._wrappedData.dataSource]
@@ -94,7 +100,7 @@ For this reason SpectrumHits cannot be renamed."""
     if dimensionNumber == 0:
       return None
     else:
-      return self.spectrum.getPseudoDimension(dimensionNumer)
+      return self.spectrum.getPseudoDimension(dimensionNumber)
 
   @property
   def pointNumber(self) -> int:
@@ -133,7 +139,7 @@ For this reason SpectrumHits cannot be renamed."""
     self._wrappedData.normalisedChange = value
 
   @property
-  def isConfirmed(self) -> Optional[bool]:
+  def isConfirmed(self) -> typing.Optional[bool]:
     """True if this Hit is confirmed? True: yes; False; no; None: not determined"""
     return  self._wrappedData.isConfirmed
 
@@ -191,7 +197,7 @@ For this reason SpectrumHits cannot be renamed."""
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
-    return parent._wrappedData.sortedSpectrumHits()
+    return parent._wrappedData.spectrumHits
 
 # Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
@@ -241,7 +247,7 @@ Spectrum.newSpectrumHit = _newSpectrumHit
 del _newSpectrumHit
 
 
-def getter(self:PseudoDimension) -> List[SpectrumHit]:
+def getter(self:PseudoDimension) -> typing.List[SpectrumHit]:
   dimensionNumber = self.dimension
   return list(x for x in self.spectrum.spectrumHits if x.dimensionNumber == dimensionNumber)
 PseudoDimension.spectrumHits = property(getter, None, None,

@@ -21,7 +21,7 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence, Tuple
+import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.Spectrum import Spectrum
@@ -64,6 +64,11 @@ experiments."""
     """object identifier, used for id"""
 
     return str(self._wrappedData.dim)
+
+  @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    return(self._wrappedData.dim,)
 
   @property
   def _parent(self) -> Spectrum:
@@ -119,21 +124,21 @@ experiments."""
       expDimRef.unit = value
 
   @property
-  def pointValues(self) -> Tuple[float, ...]:
+  def pointValues(self) -> typing.Tuple[float, ...]:
     """point values for PseudoDimension)."""
     return tuple(self._wrappedData.pointValues)
 
   @pointValues.setter
-  def pointValues(self, value:Sequence) -> tuple:
+  def pointValues(self, value:typing.Sequence) -> tuple:
     self._wrappedData.pointValues = value
 
   @property
-  def pointErrors(self) -> Tuple[float, ...]:
+  def pointErrors(self) -> typing.Tuple[float, ...]:
     """point errors for PseudoDimension)."""
     return tuple(self._wrappedData.pointErrors)
 
   @pointErrors.setter
-  def pointErrors(self, value:Sequence) -> tuple:
+  def pointErrors(self, value:typing.Sequence) -> tuple:
     self._wrappedData.pointErrors = value
 
   @property
@@ -150,12 +155,8 @@ experiments."""
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.SampledDataDims) for all DataDim children of parent Spectrum"""
-    result = []
-    for ddim in parent._wrappedData.sortedDataDims():
-      if ddim.className == 'SampledDataDim':
-        result.append(ddim)
-    #
-    return result
+
+    return [x for x in parent._wrappedData.dataDims if x.className == 'SampledDataDim']
 
 # No 'new' function - PseudoDimensions are made on spectrum load
 

@@ -128,7 +128,7 @@ class IntegralList(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (PeakLists) for all IntegralList children of parent Spectrum"""
-    return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Integral']
+    return [x for x in parent._wrappedData.peakLists if x.dataType == 'Integral']
 
 # Connections to parents:
 

@@ -299,6 +299,8 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
 
   # TODO NBNB rename variables so api level objects have .api...' names
   # Also consider moving to ccpnmodel, or refactoring. NBNB
+  # Also check sorting order fo rsidues
+  # NBNB TODO
 
   nmrProject = project._wrappedData
   spinSystems = [nmrResidue._wrappedData for nmrResidue in nmrResidues]
@@ -472,10 +474,10 @@ def getBoundNmrAtomPairs(nmrAtoms, nucleus) -> list:
 
 def findClosePeaks(peak, matchPeakList, tolerance=0.02):
   """
-  Takes an input peak and finds all peaks in the matchPeakList that are close in space to the position
-  of the input peak. A close peak is defined as one for which the euclidean distance between its position
-  and that of the input peak is less than the specified tolerance. AxisCodes are used to match dimensions
-  between peaks to ensure correct distance calculation.
+  Takes an input peak and finds all peaks in the matchPeakList that are close in space to the
+  position of the input peak. A close peak is defined as one for which the euclidean distance
+  between its position and that of the input peak is less than the specified tolerance. AxisCodes
+  are used to match dimensions between peaks to ensure correct distance calculation.
   """
   closePeaks = []
   refAxisCodes = peak.axisCodes

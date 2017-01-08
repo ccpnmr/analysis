@@ -82,6 +82,11 @@ class NmrChain(AbstractWrapperObject):
     return self._wrappedData.code.translate(Pid.remapSeparators)
 
   @property
+  def _localCcpnSortKey(self) -> typing.Tuple:
+    """Local sorting key, in context of parent."""
+    return(self._wrappedData.code,)
+
+  @property
   def shortName(self) -> str:
     """short form of name, used in Pid and to identify the NmrChain
     Names of the form '\@ijk' and '#ijk' (where ijk is an integers)
@@ -221,40 +226,53 @@ class NmrChain(AbstractWrapperObject):
     finally:
      self._project._appBase._endCommandBlock()
 
-  def incrementNmrResidueAssignments(self, increment:int, firstSeqCode:int=None,
-                              lastSeqCode:int=None):
-    """Change all residues with sequence number part of sequenceCode
-    in range firstSeqCode - lastSeqCode (inclusive) by offset
+  def renumberNmrResidues(self, offset:int, start:int=None, stop:int=None):
+    """Renumber nmrResidues in range start-stop (inclusive) by adding offset
 
-    if firstSeqCode (lastSeqCode) is None, there is no lower (upper) limit
+    The nmrResidue number is the integer starting part of the sequenceCode,
+    e.g. nmrResidue '12B' is renumbered to '13B' (offset=1)
+    and e.g. nmrResidue '@119' is ignored
 
-    NB Will rename residues one by one, and stop on error."""
+    if start (stop) is None, there is no lower (upper) limit
 
-    residues = self.nmrResidues
-    if increment > 0:
-      residues.reverse()
+    NB Will rename nmrResidues one by one, and stop on error."""
 
-    self._startFunctionCommandBlock('incrementResidueAssignments', increment,
-                                    values={'firstSeqCode':firstSeqCode, 'lastSeqCode':lastSeqCode})
+    nmrResidues = self.nmrResidues
+    if offset > 0:
+      nmrResidues.reverse()
+
+    changedNmrResidues = []
+    self._startFunctionCommandBlock('renumberNmrResidues', offset,
+                                    values={'start':start, 'stop':stop})
     try:
-      for residue in residues:
-        sequenceCode = residue.sequenceCode
-        code, ss, offset = commonUtil.parseSequenceCode(sequenceCode)
-        if offset is None and code is not None:
+      for nmrResidue in nmrResidues:
+        sequenceCode = nmrResidue.sequenceCode
+        code, ss, offs = commonUtil.parseSequenceCode(sequenceCode)
+        if offs is None and code is not None:
           # offset residues are handled with their mainResidues
-          if ((firstSeqCode is None or code >= firstSeqCode)
-              and (lastSeqCode is None or code <= lastSeqCode)):
-            newSequenceCode = MoleculeLib._incrementedSequenceCode(residue.sequenceCode, increment)
-            residue.rename('%s.%s' % (newSequenceCode, residue.residueType or ''))
+          if ((start is None or code >= start)
+              and (stop is None or code <= stop)):
+            newSequenceCode = MoleculeLib._incrementedSequenceCode(nmrResidue.sequenceCode, offset)
+
+            nmrResidue.rename('%s.%s' % (newSequenceCode, nmrResidue.residueType or ''))
+            changedNmrResidues.append(nmrResidue)
 
     finally:
       self._project._appBase._endCommandBlock()
+      for nmrResidue in changedNmrResidues:
+        nmrResidue._finaliseAction('rename')
+        nmrResidue._finaliseAction('change')
+
+    if start is not None and stop is not None:
+      if len(changedNmrResidues) != stop +1 - start:
+        self._project._logger.warning("Only %s nmrResidues found in range %s to %s"
+                                      % (len(changedNmrResidues), start, stop))
 
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (Nmr.DataSources) for all NmrChain children of parent Project"""
-    return sorted(parent._wrappedData.nmrChains, key=operator.attrgetter('code'))
+    return parent._wrappedData.nmrChains
 
 
 def getter(self:Chain) -> NmrChain:

@@ -203,8 +203,7 @@ class SpectrumDisplay(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Task)-> list:
     """get wrappedData (ccp.gui.Module) for all SpectrumDisplay children of parent Task"""
-    return [x for x in parent._wrappedData.sortedModules()
-            if isinstance(x, ApiBoundDisplay)]
+    return [x for x in parent._wrappedData.modules if isinstance(x, ApiBoundDisplay)]
 
   # CCPN functions
   def resetAxisOrder(self):

@@ -157,7 +157,7 @@ class CalculationStep(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:DataSet)-> list:
     """get wrappedData - all ConstraintList children of parent NmrConstraintStore"""
-    return parent._wrappedData.sortedCalculationSteps()
+    return parent._wrappedData.calculationSteps
 
 # Connections to parents:
 

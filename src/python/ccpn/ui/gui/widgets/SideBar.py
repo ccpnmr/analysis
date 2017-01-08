@@ -28,6 +28,11 @@ import json
 
 from PyQt4 import QtCore, QtGui
 
+
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
+from ccpn.core.Project import Project
+from ccpn.core import _coreClassMap
+from ccpn.core.lib import Pid
 from ccpn.ui.gui.DropBase import DropBase
 
 from ccpn.ui.gui.modules.CreateSequence import CreateSequence
@@ -48,10 +53,6 @@ from ccpn.ui.gui.popups.SpectrumGroupEditor import SpectrumGroupEditor
 from ccpn.ui.gui.widgets.MessageDialog import showInfo
 from ccpn.ui.gui.guiSettings import sidebarFont
 
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
-from ccpn.core import _coreClassMap
-
 # NB the order matters!
 # NB 'SG' must be before 'SP', as SpectrumGroups must be ready before Spectra
 # Also parents must appear before their children
@@ -61,8 +62,10 @@ _classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
                         'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
 
-ll = [_coreClassMap[x] for x in _classNamesInSidebar]
-classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
+# ll = [_coreClassMap[x] for x in _classNamesInSidebar]
+# classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))
+classesInSideBar = OrderedDict(((x.shortClassName, x) for x in _coreClassMap.values()
+                                if x.className in _classNamesInSidebar))
 # classesInSideBar = ('SG', 'SP', 'PL', 'SA', 'SC', 'SU', 'MC', 'NC', 'NR', 'NA',
 #                     'CL', 'SE', 'MO', 'DS',
 #                     'RL', 'NO')
@@ -386,8 +389,13 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     import sip
     newPid = obj.pid
     for item in self._findItems(oldPid):
-      item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
-      if not oldPid[3:].startswith(obj._parent.id): # parent has changed
+
+      if oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
+        # Parent unchanged, just rename
+        item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
+      else:
+        # parent has changed - we must move and rename the entire item tree.
+        # NB this is relevant for NmrResidue and NmrAtom
         objects = self._itemObjects(item, recursive=True)
         sip.delete(item) # this also removes child items
         for obj in objects:

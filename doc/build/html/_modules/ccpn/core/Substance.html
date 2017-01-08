@@ -143,6 +143,13 @@
     <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">labelling</span><span class="p">)</span>
 
   <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
+    <span class="n">obj</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="n">labelling</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">labeling</span>
+    <span class="k">return</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="n">labelling</span> <span class="o">==</span> <span class="n">DEFAULT_LABELLING</span> <span class="k">else</span> <span class="n">labelling</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;name of Substance&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
@@ -459,7 +466,7 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atom with ID </span><span class="si">%s</span><span class="s2"> does not exist&quot;</span> <span class="o">%</span> <span class="n">atom</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atom </span><span class="si">%s</span><span class="s2"> and its chain do not match the Substance&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and its chain do not match the Substance&quot;</span> <span class="o">%</span> <span class="n">atom</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
     <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -483,7 +490,7 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atom with ID </span><span class="si">%s</span><span class="s2"> does not exist&quot;</span> <span class="o">%</span> <span class="n">atom</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">chain</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Atom </span><span class="si">%s</span><span class="s2"> and its chain do not match the Substance&quot;</span> <span class="o">%</span> <span class="n">atomId</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> and its chain do not match the Substance&quot;</span> <span class="o">%</span> <span class="n">atom</span><span class="o">.</span><span class="n">longPid</span><span class="p">)</span>
 
     <span class="n">dd</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpnInternalData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;_specificAtomLabelling&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -564,9 +571,9 @@
 
     <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">sortedExperiments</span><span class="p">()</span>
-                 <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">sortedDataSources</span><span class="p">()</span>
-                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">y</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">experiments</span>
+                 <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">dataSources</span>
+                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">refComponentName</span> <span class="o">==</span> <span class="n">name</span><span class="p">))</span>
 
   <span class="nd">@referenceSpectra.setter</span>
   <span class="k">def</span> <span class="nf">referenceSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
@@ -642,7 +649,7 @@
     <span class="k">if</span> <span class="n">componentStore</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">componentStore</span><span class="o">.</span><span class="n">sortedComponents</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="n">componentStore</span><span class="o">.</span><span class="n">components</span></div>
 
 <span class="c1"># Connections to parents:</span>
 

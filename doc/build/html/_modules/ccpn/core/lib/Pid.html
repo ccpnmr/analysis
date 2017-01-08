@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9962 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10012 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -328,6 +328,8 @@
     <span class="c1"># NBNB having a property called &#39;str&#39; confuses Sphinx.</span>
     <span class="c1"># It is probably a bad idea on general grounds</span>
 
+
+    <span class="c1"># NBNB TODO function name &#39;str&#39; confuses Sphinx documentation and is bad for, Change it?</span>
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">str</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -452,6 +454,7 @@
 
     <span class="c1">#end def</span>
 
+    <span class="c1"># NBNB TODO parameter name &#39;type&#39; clashes with built-in and confuses Sphinx documentation</span>
 <div class="viewcode-block" id="Pid.modify"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">newId</span><span class="p">:</span><span class="nb">object</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Pid&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return new pid with position index modified by newId</span>
 <span class="sd">        &quot;&quot;&quot;</span>

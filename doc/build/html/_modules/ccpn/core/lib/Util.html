@@ -55,7 +55,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="kn">from</span> <span class="nn">ccpn.util.Path</span> <span class="kn">import</span> <span class="n">joinPath</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-29 12:46:07 +0000 (Tue, 29 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,8 +66,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-07-14 07:16:02 +0100 (Thu, 14 Jul 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9647 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-29 12:46:07 +0000 (Tue, 29 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10030 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -75,7 +75,6 @@
 
 <span class="kn">import</span> <span class="nn">collections</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
-<span class="kn">import</span> <span class="nn">typing</span>
 
 <div class="viewcode-block" id="pid2PluralName"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.pid2PluralName">[docs]</a><span class="k">def</span> <span class="nf">pid2PluralName</span><span class="p">(</span><span class="n">pid</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Get plural class name, (e.g. &#39;peaks&#39;, &#39;spectra&#39; from short-form or long-form, Pid string</span>
@@ -127,7 +126,7 @@
 <div class="viewcode-block" id="commandParameterString"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Util.commandParameterString">[docs]</a><span class="k">def</span> <span class="nf">commandParameterString</span><span class="p">(</span><span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">defaults</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Make  parameter string to insert into function call string.</span>
 
-<span class="sd">  params are positional parameters in order, values are keyword prameters.</span>
+<span class="sd">  params are positional parameters in order, values are keyword parameters.</span>
 <span class="sd">  If the defaults dictionary is passed in,</span>
 <span class="sd">  only parameters in defaults are added to the string, and only if the value differs from the</span>
 <span class="sd">  default. This allows you to pass in values=locals(). The order of keyword parameters</span>

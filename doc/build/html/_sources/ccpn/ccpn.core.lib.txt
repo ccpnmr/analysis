@@ -65,6 +65,14 @@ ccpn.core.lib.MoleculeLib module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.lib.PeakLib module
+----------------------------
+
+.. automodule:: ccpn.core.lib.PeakLib
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.lib.Pid module
 ------------------------
 

@@ -25,7 +25,7 @@
     <script type="text/javascript" src="../_static/doctools.js"></script>
     <link rel="top" title="Python  documentation" href="../index.html" />
     <link rel="up" title="ccpn.AnalysisAssign package" href="ccpn.AnalysisAssign.html" />
-    <link rel="next" title="ccpn.AnalysisMetabolomics package" href="ccpn.AnalysisMetabolomics.html" />
+    <link rel="next" title="ccpn.AnalysisScreen package" href="ccpn.AnalysisScreen.html" />
     <link rel="prev" title="ccpn.AnalysisAssign package" href="ccpn.AnalysisAssign.html" /> 
   </head>
   <body role="document">
@@ -39,7 +39,7 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ccpn.AnalysisMetabolomics.html" title="ccpn.AnalysisMetabolomics package"
+          <a href="ccpn.AnalysisScreen.html" title="ccpn.AnalysisScreen package"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="ccpn.AnalysisAssign.html" title="ccpn.AnalysisAssign package"
@@ -91,11 +91,24 @@ to peak dimensions</p>
 </div>
 <div class="section" id="module-ccpn.AnalysisAssign.modules.ModifyAssignmentModule">
 <span id="ccpn-analysisassign-modules-modifyassignmentmodule-module"></span><h2>ccpn.AnalysisAssign.modules.ModifyAssignmentModule module<a class="headerlink" href="#module-ccpn.AnalysisAssign.modules.ModifyAssignmentModule" title="Permalink to this headline">¶</a></h2>
-<p>Module Documentation here</p>
+<p>This file contains ModifyAssignmentModule class</p>
+<p>intial version by Simon;
+extensively modified by Geerten 1-9/12/2016:
+- intialisation with &#8216;empty&#8217; settings possible,
+- now responsive to current.nmrResidues</p>
 <dl class="class">
 <dt id="ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule">
-<em class="property">class </em><code class="descclassname">ccpn.AnalysisAssign.modules.ModifyAssignmentModule.</code><code class="descname">ModifyAssignmentModule</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>nmrAtom=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/ModifyAssignmentModule.html#ModifyAssignmentModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Module.CcpnModule</span></code>, <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></p>
+<em class="property">class </em><code class="descclassname">ccpn.AnalysisAssign.modules.ModifyAssignmentModule.</code><code class="descname">ModifyAssignmentModule</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/ModifyAssignmentModule.html#ModifyAssignmentModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Module.CcpnModule</span></code></p>
+<p>This Module allows inspection of the NmrAtoms of a selected NmrResidue
+It responds to current.nmrResidues, taking the last added residue to this list
+The NmrAtom listWidget allows for selection of the nmrAtom; subsequently its assignedPeaks
+are displayed.</p>
+<dl class="attribute">
+<dt id="ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.ALL">
+<code class="descname">ALL</code><em class="property"> = '&lt;all&gt;'</em><a class="headerlink" href="#ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.ALL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.getColumns">
 <code class="descname">getColumns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/ModifyAssignmentModule.html#ModifyAssignmentModule.getColumns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.getColumns" title="Permalink to this definition">¶</a></dt>
@@ -104,16 +117,6 @@ to peak dimensions</p>
 <dl class="method">
 <dt id="ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.setCurrentPeak">
 <code class="descname">setCurrentPeak</code><span class="sig-paren">(</span><em>peak</em>, <em>row</em>, <em>col</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/ModifyAssignmentModule.html#ModifyAssignmentModule.setCurrentPeak"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.setCurrentPeak" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.updateModule">
-<code class="descname">updateModule</code><span class="sig-paren">(</span><em>nmrAtoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/ModifyAssignmentModule.html#ModifyAssignmentModule.updateModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.updateModule" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.updatePeakTable">
-<code class="descname">updatePeakTable</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/ModifyAssignmentModule.html#ModifyAssignmentModule.updatePeakTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.ModifyAssignmentModule.ModifyAssignmentModule.updatePeakTable" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -161,6 +164,24 @@ to peak dimensions</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QGraphicsTextItem</span></code></p>
 <p>A graphical object specifying the position and name of an atom when created by the Assigner.
 Can be linked to a Nmr Atom.</p>
+<dl class="method">
+<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mouseDoubleClickEvent">
+<code class="descname">mouseDoubleClickEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#GuiNmrAtom.mouseDoubleClickEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mouseDoubleClickEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>CCPN INTERNAL - re-implementation of double click event</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mousePressEvent">
+<code class="descname">mousePressEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#GuiNmrAtom.mousePressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mousePressEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>CCPN INTERNAL - re-implementation of mouse press event</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mouseReleaseEvent">
+<code class="descname">mouseReleaseEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/AnalysisAssign/modules/SequenceGraph.html#GuiNmrAtom.mouseReleaseEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.AnalysisAssign.modules.SequenceGraph.GuiNmrAtom.mouseReleaseEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>CCPN INTERNAL - re-implementation of mouse press event</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -294,8 +315,8 @@ ordered lists to makeStripPlot so strips are in the correct order.</p>
   <p class="topless"><a href="ccpn.AnalysisAssign.html"
                         title="previous chapter">ccpn.AnalysisAssign package</a></p>
   <h4>Next topic</h4>
-  <p class="topless"><a href="ccpn.AnalysisMetabolomics.html"
-                        title="next chapter">ccpn.AnalysisMetabolomics package</a></p>
+  <p class="topless"><a href="ccpn.AnalysisScreen.html"
+                        title="next chapter">ccpn.AnalysisScreen package</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -327,7 +348,7 @@ ordered lists to makeStripPlot so strips are in the correct order.</p>
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="ccpn.AnalysisMetabolomics.html" title="ccpn.AnalysisMetabolomics package"
+          <a href="ccpn.AnalysisScreen.html" title="ccpn.AnalysisScreen package"
              >next</a> |</li>
         <li class="right" >
           <a href="ccpn.AnalysisAssign.html" title="ccpn.AnalysisAssign package"

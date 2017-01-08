@@ -53,7 +53,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-12-06 17:29:49 +0000 (Tue, 06 Dec 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: lucamureddu $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-12-06 17:29:49 +0000 (Tue, 06 Dec 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10047 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -198,14 +198,15 @@
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Spectrum</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData (PeakLists) for all PeakList children of parent Spectrum&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedPeakLists</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Peak&#39;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">peakLists</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;Peak&#39;</span><span class="p">]</span>
 
   <span class="c1"># Library functions</span>
 
 <div class="viewcode-block" id="PeakList.pickPeaksNd"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.pickPeaksNd">[docs]</a>  <span class="k">def</span> <span class="nf">pickPeaksNd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
                   <span class="n">doPos</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">doNeg</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                   <span class="n">fitMethod</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;gaussian&#39;</span><span class="p">,</span> <span class="n">excludedRegions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-                  <span class="n">excludedDiagonalDims</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">excludedDiagonalTransform</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+                  <span class="n">excludedDiagonalDims</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">excludedDiagonalTransform</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                  <span class="n">minDropfactor</span><span class="p">:</span><span class="nb">float</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
 
     <span class="c1"># TODO NBNB Add doc string and put type annotation on all parameters</span>
 
@@ -264,8 +265,9 @@
       <span class="c1"># undo.increaseBlocking()</span>
       <span class="k">try</span><span class="p">:</span>
         <span class="n">apiPeaks</span> <span class="o">=</span> <span class="n">pickNewPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_apiPeakList</span><span class="p">,</span> <span class="n">startPoint</span><span class="o">=</span><span class="n">startPoints</span><span class="p">,</span> <span class="n">endPoint</span><span class="o">=</span><span class="n">endPoints</span><span class="p">,</span>
-                       <span class="n">posLevel</span><span class="o">=</span><span class="n">posLevel</span><span class="p">,</span> <span class="n">negLevel</span><span class="o">=</span><span class="n">negLevel</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="n">fitMethod</span><span class="p">,</span> <span class="n">excludedRegions</span><span class="o">=</span><span class="n">excludedRegions</span><span class="p">,</span>
-                     <span class="n">excludedDiagonalDims</span><span class="o">=</span><span class="n">excludedDiagonalDims</span><span class="p">,</span> <span class="n">excludedDiagonalTransform</span><span class="o">=</span><span class="n">excludedDiagonalTransform</span><span class="p">)</span>
+                                <span class="n">posLevel</span><span class="o">=</span><span class="n">posLevel</span><span class="p">,</span> <span class="n">negLevel</span><span class="o">=</span><span class="n">negLevel</span><span class="p">,</span> <span class="n">fitMethod</span><span class="o">=</span><span class="n">fitMethod</span><span class="p">,</span>
+                                <span class="n">excludedRegions</span><span class="o">=</span><span class="n">excludedRegions</span><span class="p">,</span> <span class="n">excludedDiagonalDims</span><span class="o">=</span><span class="n">excludedDiagonalDims</span><span class="p">,</span>
+                                <span class="n">excludedDiagonalTransform</span><span class="o">=</span><span class="n">excludedDiagonalTransform</span><span class="p">,</span> <span class="n">minDropfactor</span><span class="o">=</span><span class="n">minDropfactor</span><span class="p">)</span>
 
       <span class="k">finally</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
@@ -371,6 +373,33 @@
 
     <span class="k">return</span> <span class="n">peaks</span></div>
 
+<div class="viewcode-block" id="PeakList.copyTo"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.copyTo">[docs]</a>  <span class="k">def</span> <span class="nf">copyTo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targetSpectrum</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PeakList&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Make (and return) a copy of the PeakList attached to targetSpectrum</span>
+
+<span class="sd">    Peaklist attributes can be passed in as keyword arguments&quot;&quot;&quot;</span>
+
+    <span class="n">singleValueTags</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;isSimulated&#39;</span><span class="p">,</span> <span class="s1">&#39;symbolColour&#39;</span><span class="p">,</span> <span class="s1">&#39;symbolStyle&#39;</span><span class="p">,</span> <span class="s1">&#39;textColour&#39;</span><span class="p">,</span> <span class="s1">&#39;textColour&#39;</span><span class="p">,</span>
+                       <span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="s1">&#39;comment&#39;</span><span class="p">]</span>
+
+    <span class="n">dimensionCount</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span>
+    <span class="k">if</span> <span class="n">dimensionCount</span> <span class="o">!=</span> <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot copy </span><span class="si">%s</span><span class="s2">D </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">D </span><span class="si">%s</span><span class="s2">&quot;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">dimensionCount</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span>
+                          <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">,</span> <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">longPid</span><span class="p">))</span>
+
+    <span class="n">params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(((</span><span class="n">tag</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">))</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">singleValueTags</span><span class="p">))</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;Copy of </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">longPid</span> <span class="o">+</span> <span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="s1">&#39;comment&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">singleValueTags</span><span class="p">:</span>
+        <span class="n">params</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;PeakList has no attribute </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+    <span class="n">newPeakList</span> <span class="o">=</span> <span class="n">targetSpectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+      <span class="n">peak</span><span class="o">.</span><span class="n">copyTo</span><span class="p">(</span><span class="n">newPeakList</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">newPeakList</span></div>
+
 
 <div class="viewcode-block" id="PeakList.subtractPeakLists"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.subtractPeakLists">[docs]</a>  <span class="k">def</span> <span class="nf">subtractPeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList2</span><span class="p">:</span><span class="s1">&#39;PeakList&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;PeakList&#39;</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -449,25 +478,39 @@
 
     <span class="n">regionToPick</span> <span class="o">=</span> <span class="n">selectedRegion</span>
     <span class="n">peaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickPeaksNd</span><span class="p">(</span><span class="n">regionToPick</span><span class="p">,</span> <span class="n">doPos</span><span class="o">=</span><span class="n">doPos</span><span class="p">,</span> <span class="n">doNeg</span><span class="o">=</span><span class="n">doNeg</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">peaks</span></div></div>
+    <span class="k">return</span> <span class="n">peaks</span></div>
 
+<div class="viewcode-block" id="PeakList.reorderValues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.PeakList.PeakList.reorderValues">[docs]</a>  <span class="k">def</span> <span class="nf">reorderValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">newAxisCodeOrder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reorder values in spectrum dimension order to newAxisCodeOrder</span>
+<span class="sd">    by matching newAxisCodeOrder to spectrum axis code order&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">newAxisCodeOrder</span><span class="p">)</span></div></div>
+
+  <span class="c1"># def __str__(self):</span>
+  <span class="c1">#   &quot;&quot;&quot;Readable string representation&quot;&quot;&quot;</span>
+  <span class="c1">#   return &quot;&lt;%s; #peaks:%d (isSimulated=%s)&gt;&quot; % (self.pid, len(self.peaks), self.isSimulated)</span>
 
 
 <span class="c1"># Connections to parents:</span>
 
 <span class="k">def</span> <span class="nf">_newPeakList</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">,</span> <span class="n">title</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">comment</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
-             <span class="n">isSimulated</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PeakList</span><span class="p">:</span>
+                 <span class="n">isSimulated</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">symbolStyle</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">symbolColour</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">textColour</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">serial</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PeakList</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Create new empty PeakList within Spectrum&quot;&quot;&quot;</span>
 
   <span class="n">defaults</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">OrderedDict</span><span class="p">(((</span><span class="s1">&#39;title&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;comment&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;isSimulated&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">),</span>
-                                      <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)))</span>
+                                        <span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;symbolStyle&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="p">(</span>
+                                        <span class="s1">&#39;symbolColour&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),(</span><span class="s1">&#39;textColour&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span>
+                                      <span class="p">)</span>
+                                     <span class="p">)</span>
 
   <span class="n">apiDataSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;newPeakList&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
                                   <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newPeakList&#39;</span><span class="p">)</span>
   <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
   <span class="k">try</span><span class="p">:</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="n">apiDataSource</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">isSimulated</span><span class="o">=</span><span class="n">isSimulated</span><span class="p">)</span>
+    <span class="n">obj</span> <span class="o">=</span> <span class="n">apiDataSource</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">title</span><span class="p">,</span> <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">,</span> <span class="n">isSimulated</span><span class="o">=</span><span class="n">isSimulated</span><span class="p">,</span>
+                                    <span class="n">symbolStyle</span><span class="o">=</span><span class="n">symbolStyle</span><span class="p">,</span> <span class="n">symbolColour</span><span class="o">=</span><span class="n">symbolColour</span><span class="p">,</span>
+                                    <span class="n">textColour</span><span class="o">=</span><span class="n">textColour</span><span class="p">)</span>
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">try</span><span class="p">:</span>

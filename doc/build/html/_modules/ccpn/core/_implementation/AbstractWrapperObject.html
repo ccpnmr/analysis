@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-09 10:20:17 +0000 (Wed, 09 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-12-09 09:02:09 +0000 (Fri, 09 Dec 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -62,9 +62,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-09 10:20:17 +0000 (Wed, 09 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9984 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: geertenv $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-12-09 09:02:09 +0000 (Fri, 09 Dec 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10060 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -76,7 +76,8 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">CcpnSorting</span>
+<span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_importOrder</span>
+<span class="c1"># from ccpn.core.lib import CcpnSorting</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
@@ -189,23 +190,55 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="n">project</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="o">=</span> <span class="n">wrappedData</span>
     <span class="n">data2Obj</span><span class="p">[</span><span class="n">wrappedData</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
       
-    <span class="c1"># set _id</span>
+    <span class="c1"># # set _id</span>
+    <span class="c1"># parent = self._parent</span>
+    <span class="c1"># if parent is project:</span>
+    <span class="c1">#   _id = str(self._key)</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   _id = &#39;%s%s%s&#39;% (parent._id, Pid.IDSEP, self._key)</span>
+    <span class="c1"># self._id = _id</span>
+    <span class="c1">#</span>
+    <span class="c1"># # update pid:object mapping dictionary</span>
+    <span class="c1"># dd = project._pid2Obj.get(self.className)</span>
+    <span class="c1"># if dd is None:</span>
+    <span class="c1">#   dd = {}</span>
+    <span class="c1">#   project._pid2Obj[self.className] = dd</span>
+    <span class="c1">#   project._pid2Obj[self.shortClassName] = dd</span>
+    <span class="c1"># dd[_id] = self</span>
+
+  <span class="k">def</span> <span class="nf">_resetIds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># reset id</span>
+    <span class="n">oldId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
     <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
-    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="n">project</span><span class="p">:</span>
+    <span class="n">className</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
+    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># This is the project</span>
+      <span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+      <span class="n">sortKey</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,)</span>
+    <span class="k">elif</span> <span class="n">parent</span> <span class="ow">is</span> <span class="n">project</span><span class="p">:</span>
       <span class="n">_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+      <span class="n">sortKey</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localCcpnSortKey</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+      <span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
+      <span class="n">sortKey</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">_ccpnSortKey</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_localCcpnSortKey</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">_id</span>
-    
+    <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnSortKey</span> <span class="o">=</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="n">project</span><span class="p">),</span> <span class="n">_importOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">className</span><span class="p">))</span> <span class="o">+</span> <span class="n">sortKey</span>
+
     <span class="c1"># update pid:object mapping dictionary</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">dd</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
-      <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
       <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+    <span class="c1"># assert oldId is not None</span>
+    <span class="k">if</span> <span class="n">oldId</span> <span class="ow">in</span> <span class="n">dd</span><span class="p">:</span>
+      <span class="k">del</span> <span class="n">dd</span><span class="p">[</span><span class="n">oldId</span><span class="p">]</span>
     <span class="n">dd</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
-
 
   <span class="k">def</span> <span class="nf">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Truth value: true - wrapper classes are never empty&quot;&quot;&quot;</span>
@@ -214,20 +247,21 @@
   <span class="k">def</span> <span class="nf">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Ordering implementation function, necessary for making lists sortable.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="ow">is</span> <span class="n">other</span><span class="o">.</span><span class="n">_project</span><span class="p">:</span>
-      <span class="n">className1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">className</span>
-      <span class="n">className2</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">className</span>
-      <span class="k">if</span> <span class="n">className1</span> <span class="o">==</span> <span class="n">className2</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">CcpnSorting</span><span class="o">.</span><span class="n">stringSortKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">CcpnSorting</span><span class="o">.</span><span class="n">stringSortKey</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_id</span><span class="p">))</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span><span class="n">className1</span> <span class="o">&lt;</span> <span class="n">className2</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="s1">&#39;_ccpnSortKey&#39;</span><span class="p">):</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ccpnSortKey</span> <span class="o">&lt;</span> <span class="n">other</span><span class="o">.</span><span class="n">_ccpnSortKey</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_project</span><span class="p">))</span>
+      <span class="k">return</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">id</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
 
 
   <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;String representation&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;&lt;ccpn.</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">longPid</span>
+    <span class="k">return</span> <span class="s2">&quot;&lt;ccpn.core.</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">longPid</span>
+
+
+  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Readable string representation&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
 
   <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
@@ -331,7 +365,17 @@
 <span class="sd">      - &#39;HA&#39; *Atom.name*&quot;&quot;&quot;</span>
 
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
-  
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.</span>
+<span class="sd">    NBNB Must be overridden is some subclasses to get proper sorting order&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
+      <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span><span class="p">,)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">,)</span>
+
   <span class="c1"># Abstract methods</span>
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
@@ -368,7 +412,11 @@
     <span class="sd">&quot;&quot;&quot;Get an arbitrary data object from either its pid (e.g. &#39;SP:HSQC2&#39;) or its longPid</span>
 <span class="sd">    (e.g. &#39;Spectrum:HSQC2&#39;</span>
 
-<span class="sd">    Returns None for invalid or unrecognised input strings.&quot;&quot;&quot;</span>
+<span class="sd">    Returns None for invalid or unrecognised input strings.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">pidstring</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">None</span>
 
     <span class="n">tt</span> <span class="o">=</span> <span class="n">pidstring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
@@ -384,9 +432,9 @@
     <span class="c1">#</span>
     <span class="k">return</span> <span class="bp">None</span>
 
-  <span class="k">def</span> <span class="nf">_getWrapperObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">apiObject</span><span class="p">:</span><span class="n">ApiImplementation</span><span class="o">.</span><span class="n">DataObject</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;get wrapper object wrapping apiObject or None&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiObject</span><span class="p">)</span>
+  <span class="c1"># def _getWrapperObject(self, apiObject:ApiImplementation.DataObject):</span>
+  <span class="c1">#   &quot;&quot;&quot;get wrapper object wrapping apiObject or None&quot;&quot;&quot;</span>
+  <span class="c1">#   return self._project._data2Obj.get(apiObject)</span>
     
   <span class="c1"># CCPN Implementation methods</span>
 
@@ -493,12 +541,12 @@
       <span class="c1"># objects is all wrapper objects for next child level down</span>
       <span class="c1"># NB this may sometimes (during undo/redo) get called when not all objects</span>
       <span class="c1"># are finalised - hence the test if y is None</span>
-      <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">(</span><span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span> <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">]</span>
-      <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;ChemicalShift&#39;</span><span class="p">,):</span>
-        <span class="c1"># These cannot be correctly sorted at the API level</span>
-        <span class="n">objects</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+      <span class="n">objects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">y</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="p">(</span><span class="n">data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">)</span> <span class="k">if</span> <span class="n">y</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">)</span>
+      <span class="c1"># if cls.className in (&#39;ChemicalShift&#39;,):</span>
+      <span class="c1">#   # These cannot be correctly sorted at the API level</span>
+      <span class="c1">#   objects.sort()</span>
     <span class="c1">#</span>
-    <span class="k">return</span> <span class="n">objects</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_initializeAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Initialize children, using existing objects in data model&quot;&quot;&quot;</span>
@@ -582,9 +630,9 @@
     <span class="sd">&quot;&quot;&quot;Get list of objects that have self as a parent&quot;&quot;&quot;</span>
 
     <span class="n">getDataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span>
-    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_childClasses</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">_getAllWrappedData</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
-  <span class="c1"># NOtifiers and related functions:</span>
+  <span class="c1"># Notifiers and related functions:</span>
 
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_setupCoreNotifier</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
@@ -606,26 +654,27 @@
     <span class="n">cls</span><span class="o">.</span><span class="n">_coreNotifiers</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">cls</span><span class="o">.</span><span class="n">className</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">parameterDict</span><span class="p">,</span> <span class="n">onceOnly</span><span class="p">))</span>
 
 
-  <span class="k">def</span> <span class="nf">_finaliseRename</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Reset internal attributes after values determining PID have changed</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+  <span class="c1"># def _finaliseRename(self):</span>
+  <span class="c1">#   &quot;&quot;&quot;Reset internal attributes after values determining PID have changed</span>
+  <span class="c1">#   &quot;&quot;&quot;</span>
+  <span class="c1">#</span>
+  <span class="c1">#   # reset id</span>
+  <span class="c1">#   project = self._project</span>
+  <span class="c1">#   oldId = self._id</span>
+  <span class="c1">#   parent = self._parent</span>
+  <span class="c1">#   if parent is None:</span>
+  <span class="c1">#     _id = &#39;&#39;</span>
+  <span class="c1">#   elif parent is project:</span>
+  <span class="c1">#     _id = str(self._key)</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     _id = &#39;%s%s%s&#39;% (parent._id, Pid.IDSEP, self._key)</span>
+  <span class="c1">#   self._id = _id</span>
+  <span class="c1">#</span>
+  <span class="c1">#   # update pid:object mapping dictionary</span>
+  <span class="c1">#   dd = project._pid2Obj[self.className]</span>
+  <span class="c1">#   del dd[oldId]</span>
+  <span class="c1">#   dd[_id] = self</span>
 
-    <span class="c1"># reset id</span>
-    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
-    <span class="n">oldId</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_id</span>
-    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span>
-    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-    <span class="k">elif</span> <span class="n">parent</span> <span class="ow">is</span> <span class="n">project</span><span class="p">:</span>
-      <span class="n">_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-      <span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_id</span><span class="p">,</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key</span><span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">_id</span>
-
-    <span class="c1"># update pid:object mapping dictionary</span>
-    <span class="n">dd</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">]</span>
-    <span class="k">del</span> <span class="n">dd</span><span class="p">[</span><span class="n">oldId</span><span class="p">]</span>
-    <span class="n">dd</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
 
   <span class="k">def</span> <span class="nf">_finaliseRelatedObjectFromRename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">,</span> <span class="n">pathToObject</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">action</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Finalise related objects after rename</span>
@@ -678,7 +727,7 @@
       <span class="n">oldPid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span>
 
       <span class="c1"># Wrapper-level processing</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseRename</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
       <span class="c1"># Call notifiers with special signature</span>
       <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_notificationSuspension</span><span class="p">:</span>

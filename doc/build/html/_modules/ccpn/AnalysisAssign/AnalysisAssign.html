@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 14:00:56 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-12-08 12:40:04 +0000 (Thu, 08 Dec 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 14:00:56 +0100 (Tue, 18 Oct 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9951 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: geertenv $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-12-08 12:40:04 +0000 (Thu, 08 Dec 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10057 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -119,66 +119,6 @@
         <span class="nb">delattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
 
     <span class="n">Framework</span><span class="o">.</span><span class="n">_closeExtraWindows</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-  <span class="c1"># def initGraphics(self):</span>
-  <span class="c1">#   &quot;&quot;&quot;Set up graphics system after loading&quot;&quot;&quot;</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # Initialise strips</span>
-  <span class="c1">#   project = self.project</span>
-  <span class="c1">#   for strip in project.strips:</span>
-  <span class="c1">#     GuiStrip._setupGuiStrip(project, strip._wrappedData)</span>
-  <span class="c1">#</span>
-  <span class="c1">#     # if isinstance(strip, GuiStripNd) and not strip.haveSetupZWidgets:</span>
-  <span class="c1">#     #   strip.setZWidgets()</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # Initialise Rulers</span>
-  <span class="c1">#   for task in project.tasks:</span>
-  <span class="c1">#     for apiMark in task._wrappedData.sortedMarks():</span>
-  <span class="c1">#       for apiRuler in apiMark.sortedRulers():</span>
-  <span class="c1">#         GuiStrip._rulerCreated(project, apiRuler)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   # Initialise SpectrumViews</span>
-  <span class="c1">#   for spectrumDisplay in project.spectrumDisplays:</span>
-  <span class="c1">#     for strip in spectrumDisplay.strips:</span>
-  <span class="c1">#       for spectrumView in strip.spectrumViews:</span>
-  <span class="c1">#         spectrumView._createdSpectrumView()</span>
-  <span class="c1">#         for peakList in spectrumView.spectrum.peakLists:</span>
-  <span class="c1">#           strip.showPeaks(peakList)</span>
-  <span class="c1">#</span>
-  <span class="c1">#   self.initLayout()</span>
-  <span class="c1">#</span>
-  <span class="c1"># def initLayout(self):</span>
-  <span class="c1">#   &quot;&quot;&quot;</span>
-  <span class="c1">#   Restore layout of modules from previous save after graphics have been set up.</span>
-  <span class="c1">#   &quot;&quot;&quot;</span>
-  <span class="c1">#   import yaml, os</span>
-  <span class="c1">#   if os.path.exists(os.path.join(self.project.path, &#39;layouts&#39;, &#39;layout.yaml&#39;)):</span>
-  <span class="c1">#     with open(os.path.join(self.project.path, &#39;layouts&#39;, &#39;layout.yaml&#39;)) as f:</span>
-  <span class="c1">#       layout = yaml.load(f)</span>
-  <span class="c1">#       typ, contents, state = layout[&#39;main&#39;]</span>
-  <span class="c1">#</span>
-  <span class="c1">#       # TODO: When UI has a main window, change the call below (then move the whole function!)</span>
-  <span class="c1">#       containers, modules = self.ui.mainWindow.moduleArea.findAll()</span>
-  <span class="c1">#       flatten = lambda *n: (e for a in n</span>
-  <span class="c1">#       for e in (flatten(*a) if isinstance(a, (tuple, list)) else (a,)))</span>
-  <span class="c1">#       flatContents = list(flatten(contents))</span>
-  <span class="c1">#       for item in flatContents:</span>
-  <span class="c1">#         if item in list(MODULE_DICT.keys()):</span>
-  <span class="c1">#           obj = modules.get(item)</span>
-  <span class="c1">#           if not obj:</span>
-  <span class="c1">#            func = getattr(self, MODULE_DICT[item])</span>
-  <span class="c1">#            func()</span>
-  <span class="c1">#       for s in layout[&#39;float&#39;]:</span>
-  <span class="c1">#         typ, contents, state = s[0][&#39;main&#39;]</span>
-  <span class="c1">#         containers, modules = self.ui.mainWindow.moduleArea.findAll()</span>
-  <span class="c1">#         for item in contents:</span>
-  <span class="c1">#           if item[0] == &#39;dock&#39;:</span>
-  <span class="c1">#             obj = modules.get(item[1])</span>
-  <span class="c1">#             if not obj:</span>
-  <span class="c1">#               func = getattr(self, MODULE_DICT[item[1]])</span>
-  <span class="c1">#               func()</span>
-  <span class="c1">#       self.ui.mainWindow.moduleArea.restoreState(layout)</span>
-
 
 <div class="viewcode-block" id="Assign.showSetupNmrResiduesPopup"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showSetupNmrResiduesPopup">[docs]</a>  <span class="k">def</span> <span class="nf">showSetupNmrResiduesPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SetupNmrResiduesPopup</span> <span class="kn">import</span> <span class="n">SetupNmrResiduesPopup</span>
@@ -275,8 +215,8 @@
     <span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.ResidueInformation</span> <span class="kn">import</span> <span class="n">ResidueInformation</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No Residues in  project. Residue Information Module requires Residues in the project to launch.&#39;</span><span class="p">)</span>
-      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;No Residues in  project.&#39;</span><span class="p">,</span> <span class="s1">&#39;Residue Information Module requires Residues in the project to launch.&#39;</span><span class="p">,</span>
-                                <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;No Residues in  project.&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;Residue Information Module requires Residues in the project to launch.&#39;</span><span class="p">)</span>
       <span class="k">return</span>
 
     <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
@@ -289,19 +229,21 @@
 <div class="viewcode-block" id="Assign.showModifyAssignmentModule"><a class="viewcode-back" href="../../../ccpn/ccpn.AnalysisAssign.html#ccpn.AnalysisAssign.AnalysisAssign.Assign.showModifyAssignmentModule">[docs]</a>  <span class="k">def</span> <span class="nf">showModifyAssignmentModule</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">relativeTo</span><span class="p">:</span><span class="n">CcpnModule</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">ccpn.AnalysisAssign.modules.ModifyAssignmentModule</span> <span class="kn">import</span> <span class="n">ModifyAssignmentModule</span>
 
-    <span class="c1"># NB Rasmus addition - this must work also outside the sequenceGraph</span>
-    <span class="k">if</span> <span class="n">nmrAtom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-      <span class="n">nmrAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">nmrAtom</span>
-
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtom</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrAtom selected. The Modify Assignments Module requires an NmrAtom to launch&#39;</span><span class="p">)</span>
-      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;No NmrAtom selected.&#39;</span><span class="p">,</span> <span class="s1">&#39;The Modify Assignments Module requires an NmrAtom to launch&#39;</span><span class="p">,</span>
-                                <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">nmrAtom</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;No NmrAtom selected or defined. The Modify Assignments Module requires an NmrAtom to launch&#39;</span><span class="p">)</span>
+      <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;No NmrAtom selected or defined.&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;The Modify Assignments Module requires an NmrAtom to launch&#39;</span><span class="p">)</span>
       <span class="k">return</span>
+
+    <span class="c1"># if nmrAtom is not None:</span>
+    <span class="c1">#   self.current.nmrAtom = nmrAtom</span>
+    <span class="c1"># if self.current.nmrAtom is None:</span>
+    <span class="c1">#   self.current.nmrAtom = self.project.nmrAtoms[0]</span>
+    <span class="c1"># print(&#39;&gt;&gt;&#39;, self.current.nmrAtom)</span>
+
     <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">modifyAssignmentsModule</span> <span class="o">=</span> <span class="n">ModifyAssignmentModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="n">nmrAtom</span><span class="p">)</span>
-    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modifyAssignmentsModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span>
-                              <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span></div></div>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modifyAssignmentsModule</span> <span class="o">=</span> <span class="n">ModifyAssignmentModule</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="o">.</span><span class="n">addModule</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modifyAssignmentsModule</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="n">position</span><span class="p">,</span> <span class="n">relativeTo</span><span class="o">=</span><span class="n">relativeTo</span><span class="p">)</span></div></div>
 </pre></div>
 
           </div>

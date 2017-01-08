@@ -92,10 +92,10 @@ of a match peakList based on matching axis codes.</p>
 <dl class="function">
 <dt id="ccpn.core.lib.AssignmentLib.findClosePeaks">
 <code class="descclassname">ccpn.core.lib.AssignmentLib.</code><code class="descname">findClosePeaks</code><span class="sig-paren">(</span><em>peak</em>, <em>matchPeakList</em>, <em>tolerance=0.02</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/AssignmentLib.html#findClosePeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.AssignmentLib.findClosePeaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>Takes an input peak and finds all peaks in the matchPeakList that are close in space to the position
-of the input peak. A close peak is defined as one for which the euclidean distance between its position
-and that of the input peak is less than the specified tolerance. AxisCodes are used to match dimensions
-between peaks to ensure correct distance calculation.</p>
+<dd><p>Takes an input peak and finds all peaks in the matchPeakList that are close in space to the
+position of the input peak. A close peak is defined as one for which the euclidean distance
+between its position and that of the input peak is less than the specified tolerance. AxisCodes
+are used to match dimensions between peaks to ensure correct distance calculation.</p>
 </dd></dl>
 
 <dl class="function">
@@ -182,7 +182,7 @@ with input None</p>
 
 <dl class="attribute">
 <dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers">
-<code class="descname">importers</code><em class="property"> = {'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x7f13e8c9fa60&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x7f13e8c9f620&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f13e8c9f510&gt;, 'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x7f13e8c9f400&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x7f13e86c87b8&gt;, 'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x7f13e86c8620&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x7f13e8c9f268&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x7f13e86c8840&gt;, 'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x7f13e8c9f158&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f13e8c9f598&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x7f13e86c8268&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x7f13e8c9f1e0&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x7f13e86c8730&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x7f13e86c8598&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x7f13e8c9f2f0&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f13e8c9f510&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f13e8c9f598&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f13e8c9f510&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f13e8c9f598&gt;, 'ccpn_assignments': &lt;function CcpnNefReader.load_ccpn_assignments at 0x7f13e86c86a8&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x7f13e86c82f0&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x7f13e86c8378&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f13e8c9f598&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x7f13e86c8488&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x7f13e86c81e0&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x7f13e86c8400&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f13e8c9f510&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x7f13e8c9f488&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x7f13e86c8510&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
+<code class="descname">importers</code><em class="property"> = {'nef_chemical_shift_list': &lt;function CcpnNefReader.load_nef_chemical_shift_list at 0x7f06ed6f9c80&gt;, 'ccpn_substance_synonym': &lt;function CcpnNefReader.load_ccpn_substance_synonym at 0x7f06ed6fdea0&gt;, 'nef_peak_restraint_links': &lt;function CcpnNefReader.load_nef_peak_restraint_links at 0x7f06ed6fdae8&gt;, 'nef_sequence': &lt;function CcpnNefReader.load_nef_sequence at 0x7f06ed6f9ae8&gt;, 'nef_dihedral_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f06ed6f9e18&gt;, 'ccpn_spectrum_group': &lt;function CcpnNefReader.load_ccpn_spectrum_group at 0x7f06ed6fdbf8&gt;, 'ccpn_spectrum_dimension': &lt;function CcpnNefReader.load_ccpn_spectrum_dimension at 0x7f06ed6fd378&gt;, 'ccpn_group_spectrum': &lt;function CcpnNefReader.load_ccpn_group_spectrum at 0x7f06ed6fdc80&gt;, 'nef_rdc_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f06ed6f9d90&gt;, 'nef_distance_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f06ed6f9d90&gt;, 'nef_nmr_meta_data': &lt;function CcpnNefReader.load_nef_nmr_meta_data at 0x7f06ed6f99d8&gt;, 'nef_peak': &lt;function CcpnNefReader.load_nef_peak at 0x7f06ed6fda60&gt;, 'nef_nmr_spectrum': &lt;function CcpnNefReader.load_nef_nmr_spectrum at 0x7f06ed6f9ea0&gt;, 'ccpn_dataset': &lt;function CcpnNefReader.load_ccpn_dataset at 0x7f06ed702158&gt;, 'nef_rdc_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f06ed6f9e18&gt;, 'ccpn_substance': &lt;function CcpnNefReader.load_ccpn_substance at 0x7f06ed6fde18&gt;, 'ccpn_notes': &lt;function CcpnNefReader.load_ccpn_notes at 0x7f06ed702048&gt;, 'nef_peak_restraint_link': &lt;function CcpnNefReader.load_nef_peak_restraint_link at 0x7f06ed6fdb70&gt;, 'ccpn_additional_data': &lt;function CcpnNefReader.load_ccpn_additional_data at 0x7f06ed7020d0&gt;, 'ccpn_sample_component': &lt;function CcpnNefReader.load_ccpn_sample_component at 0x7f06ed6fdd90&gt;, 'nef_distance_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f06ed6f9e18&gt;, 'ccpn_assignments': &lt;function CcpnNefReader.load_ccpn_assignments at 0x7f06ed6fdf28&gt;, 'ccpn_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f06ed6f9d90&gt;, 'nef_dihedral_restraint_list': &lt;function CcpnNefReader.load_nef_restraint_list at 0x7f06ed6f9d90&gt;, 'nef_chemical_shift': &lt;function CcpnNefReader.load_nef_chemical_shift at 0x7f06ed6f9d08&gt;, 'nef_covalent_links': &lt;function CcpnNefReader.load_nef_covalent_links at 0x7f06ed6f9b70&gt;, 'ccpn_restraint': &lt;function CcpnNefReader.load_nef_restraint at 0x7f06ed6f9e18&gt;, 'nef_molecular_system': &lt;function CcpnNefReader.load_nef_molecular_system at 0x7f06ed6f9a60&gt;, 'ccpn_sample': &lt;function CcpnNefReader.load_ccpn_sample at 0x7f06ed6fdd08&gt;}</em><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.importers" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -336,8 +336,13 @@ nef_rdc_restraint_list and ccpn_restraint_list</p>
 <dl class="method">
 <dt id="ccpn.core.lib.CcpnNefIo.CcpnNefReader.preloadAssignmentData">
 <code class="descname">preloadAssignmentData</code><span class="sig-paren">(</span><em>dataBlock: ccpn.util.nef.StarIo.NmrDataBlock</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/CcpnNefIo.html#CcpnNefReader.preloadAssignmentData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.CcpnNefIo.CcpnNefReader.preloadAssignmentData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK</p>
+<dd><p>Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK
+and create NmrResidues in connencted nmrChains in order</p>
 <p>NB later we can store serials in CCPN projects, but something is needed that works anyway</p>
+<p>NB, without CCPN-specific tags you can NOT guarantee that connected stretches are stable,
+and that serials are put back where they came from.
+This heuristic creates NmrResidues in connected stretches in the order they are found,
+but this will break if connected tretches appear in multiple shiftlists and some are partial.</p>
 </dd></dl>
 
 <dl class="method">
@@ -858,7 +863,7 @@ misleading results, but it is the best available default behaviour</p>
 <code class="descclassname">ccpn.core.lib.MoleculeLib.</code><code class="descname">duplicateAtomBonds</code><span class="sig-paren">(</span><em>chainMap: Dict[ccpn.core.Chain.Chain, ccpn.core.Chain.Chain]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/MoleculeLib.html#duplicateAtomBonds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.MoleculeLib.duplicateAtomBonds" title="Permalink to this definition">¶</a></dt>
 <dd><p>Duplicate atom-atom bonds within source chains to target chains,
 skipping those that already exist.</p>
-<p>Input is a map from source chains to corresponding trget chains.</p>
+<p>Input is a map from source chains to corresponding target chains.</p>
 <p>Atoms are mapped on matching Pids (with different chain codes</p>
 </dd></dl>
 
@@ -866,7 +871,7 @@ skipping those that already exist.</p>
 <dt id="ccpn.core.lib.MoleculeLib.extraBoundAtomPairs">
 <code class="descclassname">ccpn.core.lib.MoleculeLib.</code><code class="descname">extraBoundAtomPairs</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em>, <em>selectSequential: bool = None</em><span class="sig-paren">)</span> &rarr; List[Tuple[ccpn.core.Atom.Atom, ccpn.core.Atom.Atom]]<a class="reference internal" href="../_modules/ccpn/core/lib/MoleculeLib.html#extraBoundAtomPairs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.MoleculeLib.extraBoundAtomPairs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get pairs of bound Atoms whose bonds are NOT defined through the residue topology.
-The result and each individualnatom pair are both sorted</p>
+The result and each individual atom pair are both sorted</p>
 <p>Returns sequential bond pairs if selectSequential is True,
 non-sequential bond pairs if selectSequential is False,
 and both if selectSequential is None</p>
@@ -885,6 +890,15 @@ and checks if all (reference.get(key+offset) == val for key, val in sequence.ite
 for some offset.</p>
 <p>Returns the offset is a match is found,, None if no match is found</p>
 </dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.lib.PeakLib">
+<span id="ccpn-core-lib-peaklib-module"></span><h2>ccpn.core.lib.PeakLib module<a class="headerlink" href="#module-ccpn.core.lib.PeakLib" title="Permalink to this headline">¶</a></h2>
+<p>Peak-related functions and utiliities</p>
+<dl class="function">
+<dt id="ccpn.core.lib.PeakLib.refitPeaks">
+<code class="descclassname">ccpn.core.lib.PeakLib.</code><code class="descname">refitPeaks</code><span class="sig-paren">(</span><em>peaks: Sequence[ccpn.core.Peak.Peak], method: str = 'gaussian'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/PeakLib.html#refitPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.PeakLib.refitPeaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 <div class="section" id="ccpn-core-lib-pid-module">
@@ -1063,9 +1077,9 @@ mapping altCharacter back to separator and replacing empty strings with None</p>
 </dd></dl>
 
 </div>
-<div class="section" id="ccpn-core-lib-spectrumlib-module">
-<h2>ccpn.core.lib.SpectrumLib module<a class="headerlink" href="#ccpn-core-lib-spectrumlib-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.lib.SpectrumLib"></span><p>SPectrum-related functions and utiliities</p>
+<div class="section" id="module-ccpn.core.lib.SpectrumLib">
+<span id="ccpn-core-lib-spectrumlib-module"></span><h2>ccpn.core.lib.SpectrumLib module<a class="headerlink" href="#module-ccpn.core.lib.SpectrumLib" title="Permalink to this headline">¶</a></h2>
+<p>SPectrum-related functions and utiliities</p>
 <dl class="class">
 <dt id="ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple">
 <em class="property">class </em><code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">MagnetisationTransferTuple</code><span class="sig-paren">(</span><em>dimension1</em>, <em>dimension2</em>, <em>transferType</em>, <em>isIndirect</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.MagnetisationTransferTuple" title="Permalink to this definition">¶</a></dt>
@@ -1098,8 +1112,9 @@ mapping altCharacter back to separator and replacing empty strings with None</p>
 
 <dl class="function">
 <dt id="ccpn.core.lib.SpectrumLib.getExperimentClassifications">
-<code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">getExperimentClassifications</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#getExperimentClassifications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.getExperimentClassifications" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="descclassname">ccpn.core.lib.SpectrumLib.</code><code class="descname">getExperimentClassifications</code><span class="sig-paren">(</span><em>project: ccpn.core.Project.Project</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/core/lib/SpectrumLib.html#getExperimentClassifications"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.SpectrumLib.getExperimentClassifications" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ccpn.core.lib.Summary">
@@ -1182,7 +1197,7 @@ Sometimes-equivalent atom groups (rotating aromatic rings) count as equivalent</
 <dt id="ccpn.core.lib.Util.commandParameterString">
 <code class="descclassname">ccpn.core.lib.Util.</code><code class="descname">commandParameterString</code><span class="sig-paren">(</span><em>*params</em>, <em>*</em>, <em>values: dict = None</em>, <em>defaults: dict = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/lib/Util.html#commandParameterString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.lib.Util.commandParameterString" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make  parameter string to insert into function call string.</p>
-<p>params are positional parameters in order, values are keyword prameters.
+<p>params are positional parameters in order, values are keyword parameters.
 If the defaults dictionary is passed in,
 only parameters in defaults are added to the string, and only if the value differs from the
 default. This allows you to pass in values=locals(). The order of keyword parameters
@@ -1239,9 +1254,10 @@ Unrecognised strings are returned unchanged</p>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Documentation">ccpn.core.lib.Documentation module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.LabellingLib">ccpn.core.lib.LabellingLib module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.MoleculeLib">ccpn.core.lib.MoleculeLib module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.PeakLib">ccpn.core.lib.PeakLib module</a></li>
 <li><a class="reference internal" href="#ccpn-core-lib-pid-module">ccpn.core.lib.Pid module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.RestraintLib">ccpn.core.lib.RestraintLib module</a></li>
-<li><a class="reference internal" href="#ccpn-core-lib-spectrumlib-module">ccpn.core.lib.SpectrumLib module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.lib.SpectrumLib">ccpn.core.lib.SpectrumLib module</a></li>
 <li><a class="reference internal" href="#module-ccpn.core.lib.Summary">ccpn.core.lib.Summary module</a></li>
 <li><a class="reference internal" href="#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
 </ul>

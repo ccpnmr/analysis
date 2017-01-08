@@ -192,7 +192,7 @@
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData for all NmrConstraintStores linked to NmrProject&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedNmrConstraintStores</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrConstraintStores</span>
 
   <span class="k">def</span> <span class="nf">_fetchFixedResonance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assignment</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">checkUniqueness</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ApiFixedResonance</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Fetch FixedResonance matching assignment string, creating anew if needed.</span>

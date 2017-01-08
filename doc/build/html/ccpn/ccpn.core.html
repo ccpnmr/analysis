@@ -230,9 +230,10 @@ all of which should be self-explanatory.</p>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Documentation">ccpn.core.lib.Documentation module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.LabellingLib">ccpn.core.lib.LabellingLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.MoleculeLib">ccpn.core.lib.MoleculeLib module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.PeakLib">ccpn.core.lib.PeakLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-pid-module">ccpn.core.lib.Pid module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.RestraintLib">ccpn.core.lib.RestraintLib module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-spectrumlib-module">ccpn.core.lib.SpectrumLib module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.SpectrumLib">ccpn.core.lib.SpectrumLib module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#module-ccpn.core.lib.Summary">ccpn.core.lib.Summary module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ccpn.core.lib.html#ccpn-core-lib-util-module">ccpn.core.lib.Util module</a></li>
 </ul>
@@ -514,6 +515,16 @@ NmrChain to which Chain is assigned</p>
 <dd><p>Rename Chain, changing its shortName and Pid.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Chain.Chain.renumberResidues">
+<code class="descname">renumberResidues</code><span class="sig-paren">(</span><em>offset: int</em>, <em>start: int = None</em>, <em>stop: int = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Chain.html#Chain.renumberResidues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Chain.Chain.renumberResidues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renumber residues in range start-stop (inclusive) by adding offset</p>
+<p>The residue number is the integer starting part of the sequenceCode,
+e.g. residue &#8216;12B&#8217; is renumbered to &#8216;13B&#8217; (offset=1)</p>
+<p>if start (stop) is None, there is no lower (upper) limit</p>
+<p>NB Will rename residues one by one, and stop on error.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.residues">
 <code class="descname">residues</code><a class="headerlink" href="#ccpn.core.Chain.Chain.residues" title="Permalink to this definition">¶</a></dt>
@@ -749,6 +760,13 @@ Name of Complex, part of identifier</p>
 <dt id="ccpn.core.Complex.Complex.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Complex.html#Complex.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Complex.Complex.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rename Complex, changing its name and Pid</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Complex.Complex.serial">
+<code class="descname">serial</code><a class="headerlink" href="#ccpn.core.Complex.Complex.serial" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+Serial number of Complex, used for sorting</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1029,6 +1047,122 @@ Title of DataSet (not used in PID).</p>
 Universal identifier for dataSet</p>
 </dd></dl>
 
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.core.Ensemble">
+<span id="ccpn-core-ensemble-module"></span><h2>ccpn.core.Ensemble module<a class="headerlink" href="#module-ccpn.core.Ensemble" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.core.Ensemble.Ensemble">
+<em class="property">class </em><code class="descclassname">ccpn.core.Ensemble.</code><code class="descname">Ensemble</code><span class="sig-paren">(</span><em>*args</em>, <em>*</em>, <em>name=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pandas.core.frame.DataFrame</span></code></p>
+<p>A struture Ensemble</p>
+<dl class="attribute">
+<dt id="ccpn.core.Ensemble.Ensemble.amideNitrogenSelector">
+<code class="descname">amideNitrogenSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.amideNitrogenSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
+Return a selector that selects only the amide nitrogen.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Ensemble.Ensemble.amideProtonSelector">
+<code class="descname">amideProtonSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.amideProtonSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
+Return a selector that selects only the amide proton.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Ensemble.Ensemble.backboneSelector">
+<code class="descname">backboneSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.backboneSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
+Return a selector that selects backbone atoms.</p>
+<dl class="docutils">
+<dt>The selector is specific for:</dt>
+<dd>Ca, C&#8217;, O, Nh, Hn</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Ensemble.Ensemble.extract">
+<code class="descname">extract</code><span class="sig-paren">(</span><em>selector=None</em>, <em>columns=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.extract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extracts a copy of a subset of atoms from the Ensemble</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><dl class="first last docutils">
+<dt>selector</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">Boolean Pandas series the same length as the number of rows in the ensemble</span><dd>If no selector is given,  pass the keyward args on to the selector function
+and use the resulting selector to extract a sub-ensemble.</dd>
+</dl>
+</dd>
+</dl>
+<p>Returns a new Ensemble</p>
+</dd></dl>
+
+<dl class="classmethod">
+<dt id="ccpn.core.Ensemble.Ensemble.from_pdb">
+<em class="property">classmethod </em><code class="descname">from_pdb</code><span class="sig-paren">(</span><em>filename: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.from_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.from_pdb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an Ensemble from a pdb file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Ensemble.Ensemble.listFromString">
+<code class="descname">listFromString</code><span class="sig-paren">(</span><em>string: str</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.listFromString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.listFromString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience function to turn a string into a list of items.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Ensemble.Ensemble.methylSelector">
+<code class="descname">methylSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.methylSelector" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
+Return a selector that selects atoms in methyl groups.</p>
+<dl class="docutils">
+<dt>The selector is specific for:</dt>
+<dd>Ala: Cb and attached protons
+Leu: Both Cd&#8217;s and attached protons
+Met: Ce and attached protons
+Thr: Cg and attached protons
+Val: Both Cg&#8217;s and attached protons</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Ensemble.Ensemble.records">
+<code class="descname">records</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.records" title="Permalink to this definition">¶</a></dt>
+<dd><p>An iterator over the rows (atoms) of the ensemble</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Ensemble.Ensemble.selector">
+<code class="descname">selector</code><span class="sig-paren">(</span><em>chainCodes=None</em>, <em>residueNames=None</em>, <em>sequenceIds=None</em>, <em>atomNames=None</em>, <em>modelNumbers=None</em>, <em>ids=None</em>, <em>elements=None</em>, <em>func=None</em>, <em>inverse=False</em><span class="sig-paren">)</span> &rarr; pandas.core.series.Series<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.selector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make a boolean selector restricted to rows matching the parameters specified</p>
+<p>Returns Pandas Series</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Ensemble.Ensemble.setValues">
+<code class="descname">setValues</code><span class="sig-paren">(</span><em>accessor</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.setValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.setValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Allows you to easily set values (in place) for fields in the Ensemble</p>
+<dl class="docutils">
+<dt>Params:</dt>
+<dd><dl class="first docutils">
+<dt>accessor</dt>
+ <span class="classifier-delimiter">:</span> <span class="classifier">int, Ensemble, Selector</span><dd><p class="first">If an integer is given, the value will be set on the row at that index
+If an single row Ensemble is given, the value will be set on the row that matches.
+If a selector that matches a single row is given, the value will be set on that matching row</p>
+<p class="last">Multi-row Ensembles or selectors are not allowed. (consider using Ensemble.records() to iterate)</p>
+</dd>
+</dl>
+<p class="last">kwargs : columns on which to set the values</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.core.Ensemble.pdb2df">
+<code class="descclassname">ccpn.core.Ensemble.</code><code class="descname">pdb2df</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#pdb2df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.pdb2df" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a pandas dataframe from a pdb file.</p>
 </dd></dl>
 
 </div>
@@ -1543,6 +1677,17 @@ If NmrChain is connected, append the new NmrResidue to the end of the stretch.</
 Use the &#8216;deassign&#8217; function if you want to revert to the canonical name</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.NmrChain.NmrChain.renumberNmrResidues">
+<code class="descname">renumberNmrResidues</code><span class="sig-paren">(</span><em>offset: int</em>, <em>start: int = None</em>, <em>stop: int = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrChain.html#NmrChain.renumberNmrResidues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.renumberNmrResidues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renumber nmrResidues in range start-stop (inclusive) by adding offset</p>
+<p>The nmrResidue number is the integer starting part of the sequenceCode,
+e.g. nmrResidue &#8216;12B&#8217; is renumbered to &#8216;13B&#8217; (offset=1)
+and e.g. nmrResidue <a class="reference external" href="mailto:'&#37;&#52;&#48;119">'<span>&#64;</span>119</a>&#8216; is ignored</p>
+<p>if start (stop) is None, there is no lower (upper) limit</p>
+<p>NB Will rename nmrResidues one by one, and stop on error.</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.NmrChain.NmrChain.serial">
 <code class="descname">serial</code><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.serial" title="Permalink to this definition">¶</a></dt>
@@ -1955,7 +2100,7 @@ Spectrum axis codes in dimension order matching position.</p>
 <dt id="ccpn.core.Peak.Peak.boxWidths">
 <code class="descname">boxWidths</code><a class="headerlink" href="#ccpn.core.Peak.Peak.boxWidths" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>Tuple[float=None, ...]</em>, <em>mutable</em> - 
-The full width of the peak footprint in points for eqach dimension,
+The full width of the peak footprint in points for each dimension,
 i.e. the width of the area that should be considered for integration, fitting, etc. .</p>
 </dd></dl>
 
@@ -1969,6 +2114,12 @@ i.e. the width of the area that should be considered for integration, fitting, e
 <code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Peak.Peak.comment" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str=None</em>, <em>mutable</em> - 
 Free-form text comment</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Peak.Peak.copyTo">
+<code class="descname">copyTo</code><span class="sig-paren">(</span><em>targetPeakList: ccpn.core.PeakList.PeakList</em><span class="sig-paren">)</span> &rarr; ccpn.core.Peak.Peak<a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.copyTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.copyTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make (and return) a copy of the Peak in targetPeakList</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2059,6 +2210,13 @@ Peak position in ppm (or other relevant unit) in dimension order.</p>
 Peak position error in ppm (or other relevant unit).</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Peak.Peak.reorderValues">
+<code class="descname">reorderValues</code><span class="sig-paren">(</span><em>values</em>, <em>newAxisCodeOrder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.reorderValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.reorderValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorder values in spectrum dimension order to newAxisCodeOrder
+by matching newAxisCodeOrder to spectrum axis code order</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Peak.Peak.restraints">
 <code class="descname">restraints</code><a class="headerlink" href="#ccpn.core.Peak.Peak.restraints" title="Permalink to this definition">¶</a></dt>
@@ -2124,6 +2282,13 @@ Free-form text comment</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.PeakList.PeakList.copyTo">
+<code class="descname">copyTo</code><span class="sig-paren">(</span><em>targetSpectrum: ccpn.core.Spectrum.Spectrum</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; ccpn.core.PeakList.PeakList<a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.copyTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.copyTo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make (and return) a copy of the PeakList attached to targetSpectrum</p>
+<p>Peaklist attributes can be passed in as keyword arguments</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.getPeak">
 <code class="descname">getPeak</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Peak.Peak<a class="headerlink" href="#ccpn.core.PeakList.PeakList.getPeak" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get contained &#8216;ccpn.core.Peak.Peak object by relative ID</p>
@@ -2138,7 +2303,7 @@ True if this PeakList is simulated.</p>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.newPeak">
-<code class="descname">newPeak</code><span class="sig-paren">(</span><em>height: float = None</em>, <em>volume: float = None</em>, <em>heightError: float = None</em>, <em>volumeError: float = None</em>, <em>figureOfMerit: float = 1.0</em>, <em>annotation: str = None</em>, <em>comment: str = None</em>, <em>position: Sequence[float] = ()</em>, <em>positionError: Sequence[float] = ()</em>, <em>pointPosition: Sequence[float] = ()</em>, <em>serial: int = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Peak.Peak<a class="headerlink" href="#ccpn.core.PeakList.PeakList.newPeak" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newPeak</code><span class="sig-paren">(</span><em>height: float = None</em>, <em>volume: float = None</em>, <em>heightError: float = None</em>, <em>volumeError: float = None</em>, <em>figureOfMerit: float = 1.0</em>, <em>annotation: str = None</em>, <em>comment: str = None</em>, <em>position: Sequence[float] = ()</em>, <em>positionError: Sequence[float] = ()</em>, <em>pointPosition: Sequence[float] = ()</em>, <em>boxWidths: Sequence[float] = ()</em>, <em>lineWidths: Sequence[float] = ()</em>, <em>serial: int = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Peak.Peak<a class="headerlink" href="#ccpn.core.PeakList.PeakList.newPeak" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new Peak within peakList</p>
 <p>NB you must create the peak before you can assign it. The assignment attributes are:</p>
 <ul class="simple">
@@ -2175,13 +2340,20 @@ PeakListViews showing Spectrum</p>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaksNd">
-<code class="descname">pickPeaksNd</code><span class="sig-paren">(</span><em>positions: Sequence[float] = None</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>fitMethod: str = 'gaussian'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksNd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaksNd</code><span class="sig-paren">(</span><em>positions: Sequence[float] = None</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>fitMethod: str = 'gaussian'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em>, <em>minDropfactor: float = 0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksNd" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.refit">
 <code class="descname">refit</code><span class="sig-paren">(</span><em>method: str = 'gaussian'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.refit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.refit" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.PeakList.PeakList.reorderValues">
+<code class="descname">reorderValues</code><span class="sig-paren">(</span><em>values</em>, <em>newAxisCodeOrder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.reorderValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.reorderValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorder values in spectrum dimension order to newAxisCodeOrder
+by matching newAxisCodeOrder to spectrum axis code order</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.restrictedPick">
@@ -2246,9 +2418,9 @@ title of PeakList (not used in PID).</p>
 </dd></dl>
 
 </div>
-<div class="section" id="ccpn-core-project-module">
-<h2>ccpn.core.Project module<a class="headerlink" href="#ccpn-core-project-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.Project"></span><dl class="class">
+<div class="section" id="module-ccpn.core.Project">
+<span id="ccpn-core-project-module"></span><h2>ccpn.core.Project module<a class="headerlink" href="#module-ccpn.core.Project" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
 <dt id="ccpn.core.Project.Project">
 <em class="property">class </em><code class="descclassname">ccpn.core.Project.</code><code class="descname">Project</code><span class="sig-paren">(</span><em>wrappedData: ccpnmodel.ccpncore.api.ccp.nmr.Nmr.NmrProject</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
@@ -2311,7 +2483,7 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 <dl class="method">
 <dt id="ccpn.core.Project.Project.createChain">
 <code class="descname">createChain</code><span class="sig-paren">(</span><em>sequence: Sequence[str], compoundName: str = None, startNumber: int = 1, molType: str = None, isCyclic: bool = False, shortName: str = None, role: str = None, comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Chain.Chain<a class="headerlink" href="#ccpn.core.Project.Project.createChain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new chain from sequence of residue codes</p>
+<dd><p>Create new chain from sequence of residue codes, using default variants.</p>
 <p>Automatically creates the corresponding polymer Substance if the compoundName is not already taken</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2392,7 +2564,7 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.duplicateNotifier">
-<code class="descname">duplicateNotifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.duplicateNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.duplicateNotifier" title="Permalink to this definition">¶</a></dt>
+<code class="descname">duplicateNotifier</code><span class="sig-paren">(</span><em>className: str, target: str, notifier: Callable[..., None]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.duplicateNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.duplicateNotifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>register copy of notifier for a new className and target.
 Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
 interface matches the action</p>
@@ -2887,7 +3059,7 @@ Name of running program - defaults to &#8216;CcpNmr&#8217;</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.registerNotifier">
-<code class="descname">registerNotifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.registerNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.registerNotifier" title="Permalink to this definition">¶</a></dt>
+<code class="descname">registerNotifier</code><span class="sig-paren">(</span><em>className: str, target: str, func: Callable[..., None], parameterDict: dict = {}, onceOnly: bool = False</em><span class="sig-paren">)</span> &rarr; Callable[..., None]<a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.registerNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.registerNotifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Register notifiers to be triggered when data change</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -2934,7 +3106,7 @@ parameter.</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.removeNotifier">
-<code class="descname">removeNotifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.removeNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.removeNotifier" title="Permalink to this definition">¶</a></dt>
+<code class="descname">removeNotifier</code><span class="sig-paren">(</span><em>notifier: Callable[..., None]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.removeNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.removeNotifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unregister the the notifier from all places where it appears.</p>
 </dd></dl>
 
@@ -3070,7 +3242,7 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.unRegisterNotifier">
-<code class="descname">unRegisterNotifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.unRegisterNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.unRegisterNotifier" title="Permalink to this definition">¶</a></dt>
+<code class="descname">unRegisterNotifier</code><span class="sig-paren">(</span><em>className: str, target: str, notifier: Callable[..., None]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.unRegisterNotifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.unRegisterNotifier" title="Permalink to this definition">¶</a></dt>
 <dd><p>Unregister the notifier from this className, and target</p>
 </dd></dl>
 
@@ -3256,6 +3428,12 @@ unknown residue or to a cap, so that the linear polymer chain does not continue.
 </div></blockquote>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Residue.Residue.newAtom">
+<code class="descname">newAtom</code><span class="sig-paren">(</span><em>name: str</em>, <em>elementSymbol: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Atom.Atom<a class="headerlink" href="#ccpn.core.Residue.Residue.newAtom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new Atom within Residue. If elementSymbol is None, it is derived from the name</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.nextResidue">
 <code class="descname">nextResidue</code><a class="headerlink" href="#ccpn.core.Residue.Residue.nextResidue" title="Permalink to this definition">¶</a></dt>
@@ -3282,6 +3460,12 @@ Previous sequentially connected Residue</p>
 <code class="descname">rename</code><span class="sig-paren">(</span><em>sequenceCode: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Residue.html#Residue.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Residue.Residue.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Reset Residue.sequenceCode (residueType is immutable).
 Renaming to None sets the sequence code to the seqId (serial number equivalent)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Residue.Residue.resetVariantToDefault">
+<code class="descname">resetVariantToDefault</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Residue.html#Residue.resetVariantToDefault"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Residue.Residue.resetVariantToDefault" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset Residue.residueVariant to the default variant</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3537,7 +3721,7 @@ error of contribution</p>
 <dl class="attribute">
 <dt id="ccpn.core.RestraintContribution.RestraintContribution.isDistanceDependent">
 <code class="descname">isDistanceDependent</code><a class="headerlink" href="#ccpn.core.RestraintContribution.RestraintContribution.isDistanceDependent" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>float</em>, <em>mutable</em> - 
+<dd><p>- <em>bool</em>, <em>mutable</em> - 
 Does targetValue depend on a variable distance (where this is relevant, e.g. for Rdc)</p>
 </dd></dl>
 
@@ -3948,6 +4132,13 @@ Row number on plate</p>
 </dd></dl>
 
 <dl class="attribute">
+<dt id="ccpn.core.Sample.Sample.serial">
+<code class="descname">serial</code><a class="headerlink" href="#ccpn.core.Sample.Sample.serial" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>int</em>, <em>immutable</em> - 
+Sample serial number, used for sorting</p>
+</dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.core.Sample.Sample.shortClassName">
 <code class="descname">shortClassName</code><em class="property"> = 'SA'</em><a class="headerlink" href="#ccpn.core.Sample.Sample.shortClassName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Short class name, for PID.</p>
@@ -4276,6 +4467,11 @@ Gaussian broadening per dimension. Always None for sampled dimensions.</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.getPositionValue">
+<code class="descname">getPositionValue</code><span class="sig-paren">(</span><em>position</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getPositionValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getPositionValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getPseudoDimension">
 <code class="descname">getPseudoDimension</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.PseudoDimension.PseudoDimension<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getPseudoDimension" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get contained &#8216;ccpn.core.PseudoDimension.PseudoDimension object by relative ID</p>
@@ -4420,7 +4616,7 @@ level multiplier for negative contours</p>
 
 <dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.newPeakList">
-<code class="descname">newPeakList</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>comment: str = None</em>, <em>isSimulated: bool = False</em>, <em>serial: int = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.PeakList.PeakList<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newPeakList" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newPeakList</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>comment: str = None</em>, <em>isSimulated: bool = False</em>, <em>symbolStyle: str = None</em>, <em>symbolColour: str = None</em>, <em>textColour: str = None</em>, <em>serial: int = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.PeakList.PeakList<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.newPeakList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new empty PeakList within Spectrum</p>
 </dd></dl>
 
@@ -4562,6 +4758,13 @@ value used for axis (chemical shift) referencing, per dimension.</p>
 <dt id="ccpn.core.Spectrum.Spectrum.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rename Spectrum, changing its name and Pid</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.reorderValues">
+<code class="descname">reorderValues</code><span class="sig-paren">(</span><em>values</em>, <em>newAxisCodeOrder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.reorderValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.reorderValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reorder values in spectrum dimension order to newAxisCodeOrder
+by matching newAxisCodeOrder to spectrum axis code order</p>
 </dd></dl>
 
 <dl class="method">
@@ -4712,6 +4915,13 @@ Name of SpectrumGroup, part of identifier</p>
 <dt id="ccpn.core.SpectrumGroup.SpectrumGroup.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/SpectrumGroup.html#SpectrumGroup.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup.rename" title="Permalink to this definition">¶</a></dt>
 <dd><p>Rename SpectrumGroup, changing its name and Pid</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.SpectrumGroup.SpectrumGroup.serial">
+<code class="descname">serial</code><a class="headerlink" href="#ccpn.core.SpectrumGroup.SpectrumGroup.serial" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+Serial number  of SpectrumGroup, used for sorting</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5535,6 +5745,7 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-complex-module">ccpn.core.Complex module</a></li>
 <li><a class="reference internal" href="#ccpn-core-data-module">ccpn.core.Data module</a></li>
 <li><a class="reference internal" href="#ccpn-core-dataset-module">ccpn.core.DataSet module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.Ensemble">ccpn.core.Ensemble module</a></li>
 <li><a class="reference internal" href="#ccpn-core-integral-module">ccpn.core.Integral module</a></li>
 <li><a class="reference internal" href="#ccpn-core-integrallist-module">ccpn.core.IntegralList module</a></li>
 <li><a class="reference internal" href="#ccpn-core-model-module">ccpn.core.Model module</a></li>
@@ -5544,7 +5755,7 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-note-module">ccpn.core.Note module</a></li>
 <li><a class="reference internal" href="#ccpn-core-peak-module">ccpn.core.Peak module</a></li>
 <li><a class="reference internal" href="#ccpn-core-peaklist-module">ccpn.core.PeakList module</a></li>
-<li><a class="reference internal" href="#ccpn-core-project-module">ccpn.core.Project module</a></li>
+<li><a class="reference internal" href="#module-ccpn.core.Project">ccpn.core.Project module</a></li>
 <li><a class="reference internal" href="#ccpn-core-pseudodimension-module">ccpn.core.PseudoDimension module</a></li>
 <li><a class="reference internal" href="#ccpn-core-residue-module">ccpn.core.Residue module</a></li>
 <li><a class="reference internal" href="#ccpn-core-restraint-module">ccpn.core.Restraint module</a></li>

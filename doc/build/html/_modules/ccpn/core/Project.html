@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9962 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10012 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -154,18 +154,18 @@
     <span class="c1"># set up attributes</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span> <span class="o">=</span> <span class="bp">self</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="o">=</span> <span class="n">wrappedData</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">_id</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="c1"># self._id = _id = &#39;&#39;</span>
     
     <span class="c1"># setup object handling dictionaries</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span> <span class="o">=</span> <span class="p">{</span><span class="n">wrappedData</span><span class="p">:</span><span class="bp">self</span><span class="p">}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span> <span class="o">=</span> <span class="p">{}</span>
     
-    <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">className</span><span class="p">]</span> <span class="o">=</span>  <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_pid2Obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
-    <span class="n">dd</span><span class="p">[</span><span class="n">_id</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="c1"># self._pid2Obj[self.className] =  dd = {}</span>
+    <span class="c1"># self._pid2Obj[self.shortClassName] = dd</span>
+    <span class="c1"># dd[_id] = self</span>
 
-    <span class="c1"># Set up pid sorting dictionary to cache pid sort keys</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_pidSortKeys</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
     <span class="c1"># Set up notification machinery</span>
 
@@ -549,8 +549,8 @@
 
   <span class="c1"># New notifier system (Free for use in application code):</span>
 
-<div class="viewcode-block" id="Project.registerNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.registerNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">registerNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
-                       <span class="n">parameterDict</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{},</span> <span class="n">onceOnly</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+<div class="viewcode-block" id="Project.registerNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.registerNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">registerNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">className</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">],</span>
+                       <span class="n">parameterDict</span><span class="p">:</span><span class="nb">dict</span><span class="o">=</span><span class="p">{},</span> <span class="n">onceOnly</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Register notifiers to be triggered when data change</span>
 
@@ -620,7 +620,7 @@
     <span class="k">return</span> <span class="n">notifier</span></div>
 
 <div class="viewcode-block" id="Project.duplicateNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.duplicateNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">duplicateNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">className</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span>
-                        <span class="n">notifier</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">):</span>
+                        <span class="n">notifier</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;register copy of notifier for a new className and target.</span>
 <span class="sd">    Intended for onceOnly=True notifiers. It is up to the user to make sure the calling</span>
 <span class="sd">    interface matches the action&quot;&quot;&quot;</span>
@@ -640,7 +640,7 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown notifier: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">notifier</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Project.unRegisterNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.unRegisterNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">unRegisterNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">className</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">):</span>
+<div class="viewcode-block" id="Project.unRegisterNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.unRegisterNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">unRegisterNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">className</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;Unregister the notifier from this className, and target&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">target</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_notifierActions</span><span class="p">:</span>
       <span class="n">tt</span> <span class="o">=</span> <span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
@@ -655,7 +655,7 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Attempt to unregister unknown notifier </span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">notifier</span><span class="p">,</span> <span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="n">target</span><span class="p">)))</span></div>
 
 
-<div class="viewcode-block" id="Project.removeNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.removeNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">removeNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">):</span>
+<div class="viewcode-block" id="Project.removeNotifier"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.removeNotifier">[docs]</a>  <span class="k">def</span> <span class="nf">removeNotifier</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="bp">None</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;Unregister the the notifier from all places where it appears.&quot;&quot;&quot;</span>
     <span class="n">found</span> <span class="o">=</span> <span class="bp">False</span>
     <span class="k">for</span> <span class="n">od</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_context2Notifiers</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>

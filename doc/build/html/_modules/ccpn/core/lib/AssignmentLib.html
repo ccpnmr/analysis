@@ -54,7 +54,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-12-21 15:47:48 +0000 (Wed, 21 Dec 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -64,9 +64,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9962 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-12-21 15:47:48 +0000 (Wed, 21 Dec 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10084 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -348,6 +348,8 @@
 
   <span class="c1"># TODO NBNB rename variables so api level objects have .api...&#39; names</span>
   <span class="c1"># Also consider moving to ccpnmodel, or refactoring. NBNB</span>
+  <span class="c1"># Also check sorting order fo rsidues</span>
+  <span class="c1"># NBNB TODO</span>
 
   <span class="n">nmrProject</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span>
   <span class="n">spinSystems</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">]</span>
@@ -442,7 +444,8 @@
 
       <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">matches</span><span class="p">[:</span><span class="mi">10</span><span class="p">]):</span>
         <span class="n">score</span><span class="p">,</span> <span class="n">residues</span> <span class="o">=</span> <span class="n">data</span>
-        <span class="n">score</span> <span class="o">/=</span> <span class="n">sumScore</span>
+        <span class="k">if</span> <span class="n">sumScore</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+          <span class="n">score</span> <span class="o">/=</span> <span class="n">sumScore</span>
         <span class="n">datum</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mf">100.0</span><span class="o">*</span><span class="n">score</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">residues</span><span class="p">:</span>
@@ -520,10 +523,10 @@
 
 <div class="viewcode-block" id="findClosePeaks"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.AssignmentLib.findClosePeaks">[docs]</a><span class="k">def</span> <span class="nf">findClosePeaks</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">matchPeakList</span><span class="p">,</span> <span class="n">tolerance</span><span class="o">=</span><span class="mf">0.02</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">  Takes an input peak and finds all peaks in the matchPeakList that are close in space to the position</span>
-<span class="sd">  of the input peak. A close peak is defined as one for which the euclidean distance between its position</span>
-<span class="sd">  and that of the input peak is less than the specified tolerance. AxisCodes are used to match dimensions</span>
-<span class="sd">  between peaks to ensure correct distance calculation.</span>
+<span class="sd">  Takes an input peak and finds all peaks in the matchPeakList that are close in space to the</span>
+<span class="sd">  position of the input peak. A close peak is defined as one for which the euclidean distance</span>
+<span class="sd">  between its position and that of the input peak is less than the specified tolerance. AxisCodes</span>
+<span class="sd">  are used to match dimensions between peaks to ensure correct distance calculation.</span>
 <span class="sd">  &quot;&quot;&quot;</span>
   <span class="n">closePeaks</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">refAxisCodes</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">axisCodes</span>

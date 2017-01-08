@@ -51,6 +51,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># FUnctions for sorting and comparison.</span>
 <span class="c1">#=========================================================================================</span>
+
 <span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
@@ -76,11 +77,10 @@
 
 <span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">numbers</span> <span class="kn">import</span> <span class="n">Real</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
 
-<span class="n">NEGINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;-Infinity&#39;</span><span class="p">)</span>
-<span class="n">POSINFINITY</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;Infinity&#39;</span><span class="p">)</span>
 <span class="n">NUMERICSPLIT</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;([ ]*[+-]?\d+)&quot;</span><span class="p">)</span>
 
 <span class="n">sortOrder</span> <span class="o">=</span> <span class="p">[</span>
@@ -154,7 +154,7 @@
     <span class="n">floatkey</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">math</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">floatkey</span><span class="p">):</span>
       <span class="c1"># Put NaN before -Infinity</span>
-      <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,(</span><span class="n">NEGINFINITY</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">Constants</span><span class="o">.</span><span class="n">NEGINFINITY</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,(</span><span class="n">floatkey</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
 
@@ -227,7 +227,7 @@
       <span class="c1"># Should be RecursionError from version 3.5 onwards</span>
       <span class="c1"># We have infinite recursion - default to generic object key</span>
       <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;unordered&#39;</span>
-      <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+      <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKeyHook</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
@@ -237,7 +237,7 @@
       <span class="c1"># Should be RecursionError from version 3.5</span>
       <span class="c1"># We have infinite recursion - default to generic object key</span>
       <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;unordered&#39;</span>
-      <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+      <span class="n">key</span> <span class="o">=</span> <span class="n">_unorderedKeyHook</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
   <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
@@ -269,7 +269,7 @@
     <span class="n">cls</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">__class__</span>
     <span class="k">if</span> <span class="n">isOrderable</span><span class="p">:</span>
       <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;ordered&#39;</span>
-      <span class="n">key</span> <span class="o">=</span> <span class="n">_orderedKey</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+      <span class="n">key</span> <span class="o">=</span> <span class="n">_orderedKeyHook</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
     <span class="k">else</span><span class="p">:</span>
       <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;unordered&#39;</span>

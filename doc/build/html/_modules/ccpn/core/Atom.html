@@ -72,10 +72,12 @@
 
 <span class="kn">import</span> <span class="nn">typing</span>
 
-<span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
-<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib.Util</span> <span class="kn">import</span> <span class="n">AtomIdTuple</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.molecule.MolSystem</span> <span class="kn">import</span> <span class="n">Atom</span> <span class="k">as</span> <span class="n">ApiAtom</span>
 
 <div class="viewcode-block" id="Atom"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Atom.Atom">[docs]</a><span class="k">class</span> <span class="nc">Atom</span><span class="p">(</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
@@ -225,13 +227,82 @@
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Residue</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedAtoms</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">atoms</span>
 
-<span class="c1"># No &#39;new&#39; function - chains are made elsewhere</span>
+  <span class="k">def</span> <span class="nf">_newAtom</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Residue</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Atom&#39;</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Create new Atom within Residue. If elementSymbol is None, it is derived from the name&quot;&quot;&quot;</span>
+    <span class="n">lastAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAtom</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lastAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create </span><span class="si">%s</span><span class="s2">, atom name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">lastAtom</span><span class="o">.</span><span class="n">longPid</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">elementSymbol</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">elementSymbol</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">apiAtom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="o">=</span><span class="n">elementSymbol</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiAtom</span><span class="p">]</span>
+  <span class="c1">#</span>
+  <span class="n">Residue</span><span class="o">.</span><span class="n">newAtom</span> <span class="o">=</span> <span class="n">_newAtom</span></div>
+
+<span class="k">def</span> <span class="nf">_expandNewAtom</span><span class="p">(</span><span class="n">atom</span><span class="p">:</span><span class="n">Atom</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Add compound NmrAtoms and bonds when template atoms are (re)added&quot;&quot;&quot;</span>
+
+  <span class="n">apiAtom</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">_wrappedData</span>
+
+  <span class="c1"># NBNB This could be done differently.</span>
+  <span class="c1"># It might be better to do this directly from the API functions</span>
+  <span class="c1"># but in order not to mess with the complexities of the expandMolSystemAtoms</span>
+  <span class="c1"># function (which does the same job, but in batch) this is simpler</span>
+
+  <span class="n">apiResidue</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">residue</span>
+  <span class="n">apiChemAtom</span> <span class="o">=</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">chemAtom</span>
+  <span class="k">if</span> <span class="n">apiChemAtom</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">apiChemAtomSet</span> <span class="o">=</span> <span class="n">apiChemAtom</span><span class="o">.</span><span class="n">chemAtomSet</span>
+    <span class="k">if</span> <span class="n">apiChemAtomSet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># NB, we do not want to add atoms for &#39;*&#39;, but rather for &#39;%&#39;</span>
+      <span class="n">newName</span> <span class="o">=</span> <span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;%&#39;</span><span class="p">)</span>
+      <span class="n">apiAtomGroup</span> <span class="o">=</span> <span class="n">apiResidue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">apiAtomGroup</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># NB - this is not tested and is likely to be used VERY rarely, if at all.</span>
+        <span class="c1"># Basically this is the case where we have a ChemAtomSet in the template,</span>
+        <span class="c1"># had only ONE of the relevant atoms previously, and are now adding the second</span>
+        <span class="c1"># atom, so we have to create the Atom matching the ChemAtomSet.</span>
+
+        <span class="c1"># check if we now have atoms to create one</span>
+        <span class="n">apiAtoms</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">aca</span> <span class="ow">in</span> <span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">:</span>
+          <span class="n">aa</span> <span class="o">=</span> <span class="n">apiResidue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">aca</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">aa</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">apiAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">apiAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+
+          <span class="c1"># NB this is slightly heuristic,</span>
+          <span class="c1"># but I&#39;d say it is as good as can reasonably be expected</span>
+          <span class="k">if</span> <span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">isEquivalent</span><span class="p">:</span>
+            <span class="n">atomType</span> <span class="o">=</span> <span class="s1">&#39;equivalent&#39;</span>
+          <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">atomType</span> <span class="o">=</span> <span class="s1">&#39;pseudo&#39;</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">atomType</span> <span class="o">=</span> <span class="s1">&#39;nonstereo&#39;</span>
+
+          <span class="n">apiResidue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">,</span> <span class="n">components</span><span class="o">=</span><span class="n">apiAtoms</span><span class="p">,</span>
+                                <span class="n">atomType</span><span class="o">=</span><span class="n">atomType</span><span class="p">,</span> <span class="n">elementSymbol</span><span class="o">=</span><span class="n">apiChemAtomSet</span><span class="o">.</span><span class="n">elementSymbol</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># ChemAtomSet already exists in wrapper in partial form.</span>
+        <span class="c1"># In Practice we must be adding the third H to an NH3 group</span>
+        <span class="n">apiAtomGroup</span><span class="o">.</span><span class="n">addComponent</span><span class="p">(</span><span class="n">apiAtom</span><span class="p">)</span>
+
+      <span class="c1"># Add bonds from template</span>
+      <span class="k">for</span> <span class="n">apiChemBond</span> <span class="ow">in</span> <span class="n">apiChemAtom</span><span class="o">.</span><span class="n">chemBonds</span><span class="p">:</span>
+        <span class="n">apiAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">apiResidue</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                       <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">apiChemBond</span><span class="o">.</span><span class="n">chemAtoms</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">aa</span> <span class="ow">in</span> <span class="n">apiAtoms</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">aa</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">aa</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">apiAtom</span> <span class="ow">and</span> <span class="n">aa</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">apiAtom</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">:</span>
+            <span class="n">apiAtom</span><span class="o">.</span><span class="n">addBoundAtom</span><span class="p">(</span><span class="n">aa</span><span class="p">)</span>
+
     
 <span class="c1"># Connections to parents:</span>
 
 <span class="c1"># Notifiers:</span>
+<span class="n">Atom</span><span class="o">.</span><span class="n">_setupCoreNotifier</span><span class="p">(</span><span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="n">_expandNewAtom</span><span class="p">)</span>
 </pre></div>
 
           </div>

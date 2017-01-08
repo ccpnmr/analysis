@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-29 12:46:07 +0000 (Tue, 29 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9962 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-29 12:46:07 +0000 (Tue, 29 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10030 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -74,6 +74,8 @@
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">MoleculeLib</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
@@ -127,6 +129,11 @@
   <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;short form of name, as used for id with illegal characters replaced by Pid.altCharacter&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">translate</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">remapSeparators</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
+    <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">code</span><span class="p">,)</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">shortName</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -268,11 +275,53 @@
     <span class="k">finally</span><span class="p">:</span>
      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="NmrChain.renumberNmrResidues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.NmrChain.NmrChain.renumberNmrResidues">[docs]</a>  <span class="k">def</span> <span class="nf">renumberNmrResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Renumber nmrResidues in range start-stop (inclusive) by adding offset</span>
+
+<span class="sd">    The nmrResidue number is the integer starting part of the sequenceCode,</span>
+<span class="sd">    e.g. nmrResidue &#39;12B&#39; is renumbered to &#39;13B&#39; (offset=1)</span>
+<span class="sd">    and e.g. nmrResidue &#39;@119&#39; is ignored</span>
+
+<span class="sd">    if start (stop) is None, there is no lower (upper) limit</span>
+
+<span class="sd">    NB Will rename nmrResidues one by one, and stop on error.&quot;&quot;&quot;</span>
+
+    <span class="n">nmrResidues</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidues</span>
+    <span class="k">if</span> <span class="n">offset</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">nmrResidues</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+    <span class="n">changedNmrResidues</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;renumberNmrResidues&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span>
+                                    <span class="n">values</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;start&#39;</span><span class="p">:</span><span class="n">start</span><span class="p">,</span> <span class="s1">&#39;stop&#39;</span><span class="p">:</span><span class="n">stop</span><span class="p">})</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
+        <span class="n">sequenceCode</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span>
+        <span class="n">code</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">offs</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">offs</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="c1"># offset residues are handled with their mainResidues</span>
+          <span class="k">if</span> <span class="p">((</span><span class="n">start</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">&gt;=</span> <span class="n">start</span><span class="p">)</span>
+              <span class="ow">and</span> <span class="p">(</span><span class="n">stop</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">code</span> <span class="o">&lt;=</span> <span class="n">stop</span><span class="p">)):</span>
+            <span class="n">newSequenceCode</span> <span class="o">=</span> <span class="n">MoleculeLib</span><span class="o">.</span><span class="n">_incrementedSequenceCode</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+
+            <span class="n">nmrResidue</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">newSequenceCode</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">))</span>
+            <span class="n">changedNmrResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
+
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">changedNmrResidues</span><span class="p">:</span>
+        <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
+        <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">stop</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">changedNmrResidues</span><span class="p">)</span> <span class="o">!=</span> <span class="n">stop</span> <span class="o">+</span><span class="mi">1</span> <span class="o">-</span> <span class="n">start</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Only </span><span class="si">%s</span><span class="s2"> nmrResidues found in range </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                      <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">changedNmrResidues</span><span class="p">),</span> <span class="n">start</span><span class="p">,</span> <span class="n">stop</span><span class="p">))</span></div>
+
 
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span> <span class="n">Project</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData (Nmr.DataSources) for all NmrChain children of parent Project&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;code&#39;</span><span class="p">))</span></div>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">nmrChains</span></div>
 
 
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Chain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NmrChain</span><span class="p">:</span>

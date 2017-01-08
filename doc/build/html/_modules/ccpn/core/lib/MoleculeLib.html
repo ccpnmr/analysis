@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-12-05 12:21:41 +0000 (Mon, 05 Dec 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -64,8 +64,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-08-18 13:33:23 +0100 (Thu, 18 Aug 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9798 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-12-05 12:21:41 +0000 (Mon, 05 Dec 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10039 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -73,16 +73,32 @@
 
 <span class="kn">import</span> <span class="nn">typing</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Atom</span> <span class="kn">import</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+
+<span class="k">def</span> <span class="nf">_incrementedSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">seqOffset</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get sequenceCode of Residue or NmrResidue incremented by seqOffset.</span>
+
+<span class="sd">  Will raise ValueError if residue.seqCode is not set (i.e. there is no sequence number&quot;&quot;&quot;</span>
+  <span class="n">code</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">parseSequenceCode</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span>
+  <span class="n">sequenceCode</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="k">if</span> <span class="n">code</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">code</span> <span class="o">+=</span> <span class="n">seqOffset</span>
+    <span class="k">if</span> <span class="n">offset</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">ss</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%+d</span><span class="s1">&#39;</span><span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">ss</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">sequenceCode</span>
 
 
 <div class="viewcode-block" id="duplicateAtomBonds"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.duplicateAtomBonds">[docs]</a><span class="k">def</span> <span class="nf">duplicateAtomBonds</span><span class="p">(</span><span class="n">chainMap</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">Chain</span><span class="p">,</span><span class="n">Chain</span><span class="p">]):</span>
   <span class="sd">&quot;&quot;&quot;Duplicate atom-atom bonds within source chains to target chains,</span>
 <span class="sd">  skipping those that already exist.</span>
 
-<span class="sd">  Input is a map from source chains to corresponding trget chains.</span>
+<span class="sd">  Input is a map from source chains to corresponding target chains.</span>
 
 <span class="sd">  Atoms are mapped on matching Pids (with different chain codes&quot;&quot;&quot;</span>
   <span class="k">if</span> <span class="ow">not</span> <span class="n">chainMap</span><span class="p">:</span>
@@ -90,7 +106,7 @@
   <span class="n">project</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chainMap</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_project</span>
   <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">molSystem</span>
 
-  <span class="c1"># Make source -&gt; target APiAtom map and remove target atoms with no match in source</span>
+  <span class="c1"># Make source -&gt; target ApiAtom map and remove target atoms with no match in source</span>
   <span class="n">apiAtomMap</span> <span class="o">=</span> <span class="p">{}</span>
   <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">chainMap</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
     <span class="n">cutat</span> <span class="o">=</span> <span class="mi">3</span><span class="o">+</span><span class="nb">len</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">shortName</span><span class="p">)</span>  <span class="c1"># Cut after e.g. &#39;MA:B&#39; for chain B</span>
@@ -122,7 +138,7 @@
 
 <div class="viewcode-block" id="extraBoundAtomPairs"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.extraBoundAtomPairs">[docs]</a><span class="k">def</span> <span class="nf">extraBoundAtomPairs</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">selectSequential</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Atom</span><span class="p">,</span> <span class="n">Atom</span><span class="p">]]:</span>
   <span class="sd">&quot;&quot;&quot;Get pairs of bound Atoms whose bonds are NOT defined through the residue topology.</span>
-<span class="sd">  The result and each individualnatom pair are both sorted</span>
+<span class="sd">  The result and each individual atom pair are both sorted</span>
 
 <span class="sd">  Returns sequential bond pairs if selectSequential is True,</span>
 <span class="sd">  non-sequential bond pairs if selectSequential is False,</span>
@@ -166,6 +182,7 @@
   <span class="n">result</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
+<span class="o">.</span><span class="mi">0</span>
 <div class="viewcode-block" id="sequenceMatchOffset"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.MoleculeLib.sequenceMatchOffset">[docs]</a><span class="k">def</span> <span class="nf">sequenceMatchOffset</span><span class="p">(</span><span class="n">reference</span><span class="p">:</span><span class="n">OrderedDict</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span><span class="n">OrderedDict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
   <span class="sd">&quot;&quot;&quot;Check if residues in sequence match those in reference, directly or with an offset.</span>
 <span class="sd">  Reference and sequence are OrderedDict(sequenceCode:residueType)</span>

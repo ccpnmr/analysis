@@ -56,7 +56,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-12-16 12:44:19 +0000 (Fri, 16 Dec 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -67,8 +67,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-12-16 12:44:19 +0000 (Fri, 16 Dec 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10077 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -82,8 +82,10 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">abc</span> <span class="k">as</span> <span class="n">collectionClasses</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">total_ordering</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="c1"># from functools import total_ordering</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Constants</span>
 <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">coreLibConstants</span>
@@ -104,15 +106,8 @@
 <span class="n">validCcpnFileNameChars</span>  <span class="o">=</span> <span class="n">validFileNamePartChars</span> <span class="o">+</span> <span class="s1">&#39;-.&#39;</span> <span class="o">+</span> <span class="n">separatorFileNameChar</span>
 
 
-<span class="nd">@total_ordering</span>
-<span class="k">class</span> <span class="nc">__MinType</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__le__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">True</span>
+<span class="n">Sentinel</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Sentinel&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
 
-    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span><span class="p">)</span>
-
-<span class="n">__smallest</span> <span class="o">=</span> <span class="n">__MinType</span><span class="p">()</span>
 
 
 <div class="viewcode-block" id="convertStringToFileName"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.convertStringToFileName">[docs]</a><span class="k">def</span> <span class="nf">convertStringToFileName</span><span class="p">(</span><span class="n">fileNameString</span><span class="p">,</span> <span class="n">validChars</span><span class="o">=</span><span class="n">validCcpnFileNameChars</span><span class="p">,</span>
@@ -218,7 +213,7 @@
 
   <span class="n">tt</span> <span class="o">=</span> <span class="n">coreLibConstants</span><span class="o">.</span><span class="n">sequenceCodePattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
 
-  <span class="k">if</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+  <span class="k">if</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
     <span class="c1"># special case: entire string matches offset modifier and is misread</span>
     <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="n">tt</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="bp">None</span>
   <span class="k">else</span><span class="p">:</span>
@@ -256,7 +251,7 @@
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
-<div class="viewcode-block" id="uniquify"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.uniquify">[docs]</a><span class="k">def</span> <span class="nf">uniquify</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span><span class="n">collectionClasses</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+<div class="viewcode-block" id="uniquify"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.uniquify">[docs]</a><span class="k">def</span> <span class="nf">uniquify</span><span class="p">(</span><span class="n">sequence</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Get list of unique elements in sequence, in order of first appearance&quot;&quot;&quot;</span>
   <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
   <span class="n">seen_add</span> <span class="o">=</span> <span class="n">seen</span><span class="o">.</span><span class="n">add</span>
@@ -440,6 +435,21 @@
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
 
+<div class="viewcode-block" id="reorder"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.reorder">[docs]</a><span class="k">def</span> <span class="nf">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+            <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;reorder values in axisCode order to refAxisCode order, by matching axisCodes</span>
+
+<span class="sd">  NB, the result will be the length of refAxisCodes, with additional Nones inserted</span>
+<span class="sd">  if this is longer than the values.</span>
+
+<span class="sd">  NB if there are multiple matches possible, one is chosen by heuristics&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Length mismatch between </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">))</span>
+  <span class="n">remapping</span> <span class="o">=</span> <span class="n">_axisCodeMapIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">refAxisCodes</span><span class="p">)</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">remapping</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
 
 <span class="k">def</span> <span class="nf">_axisCodeMapIndices</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">refAxisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span><span class="o">-&gt;</span><span class="nb">list</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;get mapping tuple so that axisCodes[result[ii]] matches refAxisCodes[ii]</span>
@@ -561,6 +571,65 @@
       <span class="k">return</span> <span class="bp">False</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<div class="viewcode-block" id="stringifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringifier">[docs]</a><span class="k">def</span> <span class="nf">stringifier</span><span class="p">(</span><span class="o">*</span><span class="n">fields</span><span class="p">,</span> <span class="n">floatFormat</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="nb">object</span><span class="p">],</span> <span class="nb">str</span><span class="p">]:</span>
+  <span class="sd">&quot;&quot;&quot;Get stringifier function, that will format an object x according to</span>
+
+<span class="sd">  &lt;str(x): field1=x.field1, field2=x.field2, ...&gt;</span>
+
+<span class="sd">  All floating point values encountered will be formatted according to floatFormat&quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">floatFormat</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># use default formatter, avoiding continuous creation of new ones</span>
+    <span class="n">localFormatter</span> <span class="o">=</span> <span class="n">stdLocalFormatter</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">localFormatter</span> <span class="o">=</span> <span class="n">LocalFormatter</span><span class="p">(</span><span class="n">overrideFloatFormat</span><span class="o">=</span><span class="n">floatFormat</span><span class="p">)</span>
+
+  <span class="n">fieldFormats</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+    <span class="c1"># String will be &#39;field1={_obj.field1}</span>
+    <span class="n">fieldFormats</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;{0}={{_obj.{0}!r}}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field</span><span class="p">))</span>
+
+  <span class="n">formatString</span> <span class="o">=</span> <span class="s1">&#39;&lt;{_obj.pid!s}| &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fieldFormats</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;&gt;&#39;</span>
+
+  <span class="k">def</span> <span class="nf">formatter</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">localFormatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">format_string</span><span class="o">=</span><span class="n">formatString</span><span class="p">,</span> <span class="n">_obj</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">formatter</span></div>
+
+
+<div class="viewcode-block" id="LocalFormatter"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.LocalFormatter">[docs]</a><span class="k">class</span> <span class="nc">LocalFormatter</span><span class="p">(</span><span class="n">string</span><span class="o">.</span><span class="n">Formatter</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Overrides the string formatter to change the float formatting&quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">overrideFloatFormat</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="s1">&#39;.6g&#39;</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">overrideFloatFormat</span> <span class="o">=</span> <span class="n">overrideFloatFormat</span>
+
+<div class="viewcode-block" id="LocalFormatter.convert_field"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.LocalFormatter.convert_field">[docs]</a>  <span class="k">def</span> <span class="nf">convert_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">conversion</span><span class="p">):</span>
+    <span class="c1"># do any conversion on the resulting object</span>
+    <span class="c1"># NB, conversion parameter is not used</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;pid&#39;</span><span class="p">):</span>
+      <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">format</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">overrideFloatFormat</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+      <span class="c1"># Deliberate. We do NOT want to catch tuple subtypes here</span>
+      <span class="n">end</span> <span class="o">=</span> <span class="s1">&#39;,)&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;)&#39;</span>
+      <span class="k">return</span> <span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_field</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="n">end</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+      <span class="c1"># Deliberate. We do NOT want to catch list subtypes here</span>
+      <span class="k">return</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">convert_field</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
+    <span class="k">elif</span> <span class="n">conversion</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">elif</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s1">&#39;r&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">conversion</span> <span class="o">==</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ascii</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown conversion specifier {0!s}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">conversion</span><span class="p">))</span></div></div>
+
+<span class="n">stdLocalFormatter</span> <span class="o">=</span> <span class="n">LocalFormatter</span><span class="p">()</span>
 </pre></div>
 
           </div>

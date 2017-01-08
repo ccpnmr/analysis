@@ -119,6 +119,11 @@
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">name</span>
 
   <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">serial</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Serial number of Complex, used for sorting&quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">serial</span>
+
+  <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Project</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Parent (containing) object.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span>
@@ -128,7 +133,7 @@
   <span class="k">def</span> <span class="nf">chains</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Chain</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Chains that make up Complex.&quot;&quot;&quot;</span>
     <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
-    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedChains</span><span class="p">())</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">chains</span><span class="p">))</span>
 
   <span class="nd">@chains.setter</span>
   <span class="k">def</span> <span class="nf">chains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
@@ -151,7 +156,8 @@
       <span class="k">elif</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Character </span><span class="si">%s</span><span class="s2"> not allowed in ccpn.Complex.name&quot;</span> <span class="o">%</span> <span class="n">Pid</span><span class="o">.</span><span class="n">altCharacter</span><span class="p">)</span>
       <span class="k">else</span><span class="p">:</span>
-        <span class="n">coreUtil</span><span class="o">.</span><span class="n">_resetParentLink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="s1">&#39;chainGroups&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="n">value</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="c1"># coreUtil._resetParentLink(self._wrappedData, &#39;chainGroups&#39;, {&#39;name&#39;:value})</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;change&#39;</span><span class="p">)</span>
 
@@ -170,7 +176,7 @@
     <span class="k">if</span> <span class="n">molSystem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="k">return</span> <span class="p">[]</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">sortedChainGroups</span><span class="p">()</span></div>
+      <span class="k">return</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">chainGroups</span></div>
 
 
 
@@ -210,7 +216,7 @@
 <span class="c1"># reverse link Chain.complexes</span>
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Chain</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Complex</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
   <span class="n">data2Obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
-  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedChainGroups</span><span class="p">())</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">data2Obj</span><span class="p">[</span><span class="n">x</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">chainGroups</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Chain</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
   <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">chainGroups</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">_wrappedData</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
 <span class="c1">#</span>

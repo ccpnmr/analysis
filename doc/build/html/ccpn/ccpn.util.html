@@ -154,6 +154,30 @@ location of the repository.</p>
 <div class="section" id="module-ccpn.util.Common">
 <span id="ccpn-util-common-module"></span><h2>ccpn.util.Common module<a class="headerlink" href="#module-ccpn.util.Common" title="Permalink to this headline">¶</a></h2>
 <p>Miscellaneous common utilities</p>
+<dl class="class">
+<dt id="ccpn.util.Common.LocalFormatter">
+<em class="property">class </em><code class="descclassname">ccpn.util.Common.</code><code class="descname">LocalFormatter</code><span class="sig-paren">(</span><em>overrideFloatFormat: str = '.6g'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#LocalFormatter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.LocalFormatter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">string.Formatter</span></code></p>
+<p>Overrides the string formatter to change the float formatting</p>
+<dl class="method">
+<dt id="ccpn.util.Common.LocalFormatter.convert_field">
+<code class="descname">convert_field</code><span class="sig-paren">(</span><em>value</em>, <em>conversion</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#LocalFormatter.convert_field"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.LocalFormatter.convert_field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.Common.Sentinel">
+<em class="property">class </em><code class="descclassname">ccpn.util.Common.</code><code class="descname">Sentinel</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.util.Common.Sentinel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.util.Common.Sentinel.value">
+<code class="descname">value</code><a class="headerlink" href="#ccpn.util.Common.Sentinel.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="function">
 <dt id="ccpn.util.Common.axisCodeMapping">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">axisCodeMapping</code><span class="sig-paren">(</span><em>axisCodes: Sequence[str], refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; dict<a class="reference internal" href="../_modules/ccpn/util/Common.html#axisCodeMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.axisCodeMapping" title="Permalink to this definition">¶</a></dt>
@@ -284,6 +308,15 @@ the ones encountered first on the pythonPath</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.util.Common.reorder">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">reorder</code><span class="sig-paren">(</span><em>values: Sequence[T_co], axisCodes: Sequence[str], refAxisCodes: Sequence[str]</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/Common.html#reorder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.reorder" title="Permalink to this definition">¶</a></dt>
+<dd><p>reorder values in axisCode order to refAxisCode order, by matching axisCodes</p>
+<p>NB, the result will be the length of refAxisCodes, with additional Nones inserted
+if this is longer than the values.</p>
+<p>NB if there are multiple matches possible, one is chosen by heuristics</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Common.splitIntFromChars">
 <code class="descclassname">ccpn.util.Common.</code><code class="descname">splitIntFromChars</code><span class="sig-paren">(</span><em>value: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/Common.html#splitIntFromChars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.splitIntFromChars" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert a string with a leading integer optionally followed by characters
@@ -297,8 +330,16 @@ into an (integer,string) tuple</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ccpn.util.Common.stringifier">
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">stringifier</code><span class="sig-paren">(</span><em>*fields</em>, <em>*</em>, <em>floatFormat: str = None</em><span class="sig-paren">)</span> &rarr; Callable[[object], str]<a class="reference internal" href="../_modules/ccpn/util/Common.html#stringifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.stringifier" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get stringifier function, that will format an object x according to</p>
+<p>&lt;str(x): field1=x.field1, field2=x.field2, ...&gt;</p>
+<p>All floating point values encountered will be formatted according to floatFormat</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="ccpn.util.Common.uniquify">
-<code class="descclassname">ccpn.util.Common.</code><code class="descname">uniquify</code><span class="sig-paren">(</span><em>sequence: collections.abc.Sequence</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/Common.html#uniquify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.uniquify" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">ccpn.util.Common.</code><code class="descname">uniquify</code><span class="sig-paren">(</span><em>sequence: Sequence[T_co]</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/Common.html#uniquify"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.Common.uniquify" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get list of unique elements in sequence, in order of first appearance</p>
 </dd></dl>
 

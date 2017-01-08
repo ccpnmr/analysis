@@ -80,6 +80,14 @@ ccpn.core.DataSet module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.Ensemble module
+-------------------------
+
+.. automodule:: ccpn.core.Ensemble
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.Integral module
 -------------------------
 

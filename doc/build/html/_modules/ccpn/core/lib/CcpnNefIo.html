@@ -55,7 +55,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-28 14:51:44 +0000 (Mon, 28 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,8 +66,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-01 15:00:51 +0000 (Tue, 01 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9962 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-28 14:51:44 +0000 (Mon, 28 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10027 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -82,7 +82,7 @@
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">attrgetter</span><span class="p">,</span> <span class="n">itemgetter</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
-<span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_importOrder</span>
+<span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreImportOrder</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">jsonIo</span>
@@ -1110,11 +1110,23 @@
     <span class="k">if</span> <span class="n">shifts</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">:</span>
         <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
-        <span class="n">rowdata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">atomCols</span><span class="p">,</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">_idTuple</span><span class="p">))</span>
-        <span class="n">isotope</span><span class="p">,</span><span class="n">element</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">splitIntFromChars</span><span class="p">(</span><span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span><span class="p">)</span>
+        <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">shift</span><span class="o">.</span><span class="n">nmrAtom</span>
+        <span class="n">rowdata</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">atomCols</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">_idTuple</span><span class="p">))</span>
+        <span class="n">isotopeCode</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">isotope</span><span class="p">,</span><span class="n">element</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">splitIntFromChars</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">isotope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;element&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+          <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;element&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">element</span>
           <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;isotope_number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">isotope</span>
+
+        <span class="c1"># Correct for atom names starting with the isotopeCode (e.g. 2HA, 111CD)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;atom_name&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">):</span>
+          <span class="n">plainName</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">isotope</span><span class="p">)):]</span>
+          <span class="k">if</span> <span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_id</span> <span class="o">+</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span> <span class="o">+</span> <span class="n">plainName</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># There is no shift in this list that has the corresponding name without the</span>
+            <span class="c1"># isotope number prefix. Remove the prefix for writing</span>
+            <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;atom_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">plainName</span>
+
         <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
@@ -1641,7 +1653,7 @@
     <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;ccpn_additional_data&#39;</span>
     <span class="n">pid2Obj</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_pid2Obj</span>
     <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">className</span> <span class="ow">in</span> <span class="n">_importOrder</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">className</span> <span class="ow">in</span> <span class="n">_coreImportOrder</span><span class="p">:</span>
       <span class="c1"># Use importOrder to get all classNames. The actual order does not matter here.</span>
       <span class="n">dd</span> <span class="o">=</span> <span class="n">pid2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">className</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
@@ -1853,7 +1865,7 @@
 
         <span class="n">importer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">importers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sf_category</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">importer</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-          <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;WARNING, unknown saveframe category&quot;</span><span class="p">,</span> <span class="n">sf_category</span><span class="p">)</span>
+          <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;WARNING, unknown saveframe category&quot;</span><span class="p">,</span> <span class="n">sf_category</span><span class="p">,</span> <span class="n">saveFrameName</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
           <span class="c1"># NB - newObject may be project, for some saveframes.</span>
           <span class="n">result</span> <span class="o">=</span> <span class="n">importer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">)</span>
@@ -1950,37 +1962,77 @@
       <span class="n">role</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_chain_role&#39;</span><span class="p">)</span>
       <span class="n">comment</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_chain_comment&#39;</span><span class="p">)</span>
       <span class="n">sequence</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;linking&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;dummy&#39;</span><span class="p">:</span>
+          <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;dummy.&#39;</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">]</span>
+
       <span class="n">lastChain</span> <span class="o">=</span> <span class="n">sequence2Chain</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">lastChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">newSubstance</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">fetchNefSubstance</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">rows</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">compoundName</span><span class="p">)</span>
         <span class="n">newChain</span> <span class="o">=</span> <span class="n">newSubstance</span><span class="o">.</span><span class="n">createChain</span><span class="p">(</span><span class="n">shortName</span><span class="o">=</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span>
                                             <span class="n">comment</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
         <span class="n">sequence2Chain</span><span class="p">[</span><span class="n">sequence</span><span class="p">]</span> <span class="o">=</span> <span class="n">newChain</span>
+
+        <span class="c1"># Set variant codes:</span>
+        <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">residue</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">newChain</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
+          <span class="n">variantCode</span> <span class="o">=</span> <span class="n">sequence</span><span class="p">[</span><span class="n">ii</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+
+          <span class="k">if</span> <span class="n">variantCode</span><span class="p">:</span>
+
+            <span class="n">atomNamesRemoved</span><span class="p">,</span> <span class="n">atomNamesAdded</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">getAtomNameDifferences</span><span class="p">()</span>
+
+
+            <span class="k">for</span> <span class="n">code</span> <span class="ow">in</span> <span class="n">variantCode</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+              <span class="n">code</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>  <span class="c1"># Should not be necessary but costs nothing to catch those errors</span>
+              <span class="n">atom</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">getAtom</span><span class="p">(</span><span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+              <span class="k">if</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;-&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">atom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                  <span class="n">residue</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Incorrect variantCode </span><span class="si">%s</span><span class="s2">: No atom named </span><span class="si">%s</span><span class="s2"> found in </span><span class="si">%s</span><span class="s2">. Skipping ...&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">variantCode</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">residue</span><span class="p">)</span>
+                  <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="n">atom</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+              <span class="k">elif</span> <span class="n">code</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">atom</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                  <span class="n">residue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">code</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="n">residue</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s2">&quot;Incorrect variantCode </span><span class="si">%s</span><span class="s2">: Atom named </span><span class="si">%s</span><span class="s2"> already present in </span><span class="si">%s</span><span class="s2">. Skipping ...&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">variantCode</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">residue</span><span class="p">)</span>
+                  <span class="p">)</span>
+
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">residue</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                  <span class="s2">&quot;Incorrect variantCode </span><span class="si">%s</span><span class="s2">: must start with &#39;+&#39; or &#39;-&#39;. Skipping ...&quot;</span>
+                  <span class="o">%</span> <span class="n">variantCode</span>
+                <span class="p">)</span>
+
       <span class="k">else</span><span class="p">:</span>
         <span class="n">newChain</span> <span class="o">=</span> <span class="n">lastChain</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">shortName</span><span class="o">=</span><span class="n">chainCode</span><span class="p">)</span>
         <span class="n">newChain</span><span class="o">.</span><span class="n">role</span> <span class="o">=</span> <span class="n">role</span>
         <span class="n">newChain</span><span class="o">.</span><span class="n">comment</span> <span class="o">=</span> <span class="n">comment</span>
+
       <span class="k">for</span> <span class="n">apiResidue</span> <span class="ow">in</span> <span class="n">newChain</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedResidues</span><span class="p">():</span>
         <span class="c1"># Necessary to guarantee against name clashes</span>
-        <span class="c1"># Direct access to avoid unnecessary nootifiers</span>
+        <span class="c1"># Direct access to avoid unnecessary notifiers</span>
         <span class="n">apiResidue</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;seqInsertCode&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;__@~@~__&#39;</span>
       <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">apiResidue</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">newChain</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedResidues</span><span class="p">()):</span>
-        <span class="c1"># NB we have to lop over API residues to be sure we get the residues</span>
+        <span class="c1"># NB we have to loop over API residues to be sure we get the residues</span>
         <span class="c1"># in creation order rather than sorted order</span>
         <span class="n">residue</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiResidue</span><span class="p">]</span>
         <span class="n">residue</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">rows</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">))</span>
-        <span class="n">residue</span><span class="o">.</span><span class="n">_finaliseRename</span><span class="p">()</span>
+        <span class="n">residue</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
-      <span class="c1"># Nexessary as notification is blanked here:</span>
-      <span class="n">newChain</span><span class="o">.</span><span class="n">_finaliseRename</span><span class="p">()</span>
+      <span class="c1"># Necessary as notification is blanked here:</span>
+      <span class="n">newChain</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
       <span class="c1">#</span>
       <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newChain</span><span class="p">)</span>
 
       <span class="c1"># Add Residue comments</span>
-      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">apiResidue</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">newChain</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedResidues</span><span class="p">()):</span>
-        <span class="c1"># WE must do this at the API level to be sure we get the Residues in the</span>
-        <span class="c1"># input order rather than in sorted order</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">apiResidue</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">newChain</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
         <span class="n">comment</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_comment&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">comment</span><span class="p">:</span>
           <span class="n">apiResidue</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">comment</span>
@@ -2018,8 +2070,14 @@
 
 <div class="viewcode-block" id="CcpnNefReader.preloadAssignmentData"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.preloadAssignmentData">[docs]</a>  <span class="k">def</span> <span class="nf">preloadAssignmentData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataBlock</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Set up NmrChains and NmrResidues with reserved names to ensure the serials are OK</span>
+<span class="sd">    and create NmrResidues in connencted nmrChains in order</span>
 
-<span class="sd">    NB later we can store serials in CCPN projects, but something is needed that works anyway&quot;&quot;&quot;</span>
+<span class="sd">    NB later we can store serials in CCPN projects, but something is needed that works anyway</span>
+
+<span class="sd">    NB, without CCPN-specific tags you can NOT guarantee that connected stretches are stable,</span>
+<span class="sd">    and that serials are put back where they came from.</span>
+<span class="sd">    This heuristic creates NmrResidues in connected stretches in the order they are found,</span>
+<span class="sd">    but this will break if connected tretches appear in multiple shiftlists and some are partial.&quot;&quot;&quot;</span>
 
 
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
@@ -2028,12 +2086,13 @@
 
       <span class="c1"># get all NmrResidue data in chemicalshift lists</span>
       <span class="n">assignmentData</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="n">assignmentData2</span> <span class="o">=</span> <span class="p">{}</span>
       <span class="k">if</span> <span class="n">saveFrameName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;nef_chemical_shift_list&#39;</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;nef_chemical_shift&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
           <span class="n">chainCode</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">]</span>
-          <span class="n">aSet</span> <span class="o">=</span> <span class="n">assignmentData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="nb">set</span><span class="p">())</span>
-          <span class="n">assignmentData</span><span class="p">[</span><span class="n">chainCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">aSet</span>
-          <span class="n">aSet</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">]))</span>
+          <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">assignmentData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">OD</span><span class="p">())</span>
+          <span class="n">assignmentData</span><span class="p">[</span><span class="n">chainCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrResidues</span>
+          <span class="n">nmrResidues</span><span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="bp">None</span>
 
       <span class="c1"># Create objects with reserved names</span>
 
@@ -2046,16 +2105,31 @@
             <span class="c1"># Could not be done, probably because we have NmrChain &#39;@1&#39;. Leave for later</span>
             <span class="k">pass</span>
 
-      <span class="k">for</span> <span class="n">chainCode</span><span class="p">,</span> <span class="n">aSet</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assignmentData</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+      <span class="k">for</span> <span class="n">chainCode</span><span class="p">,</span> <span class="n">nmrResidues</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assignmentData</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+
+        <span class="c1"># Create NmrChain</span>
         <span class="k">try</span><span class="p">:</span>
           <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="n">chainCode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
           <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">fetchNmrChain</span><span class="p">(</span><span class="s1">&#39;`</span><span class="si">%s</span><span class="s1">`&#39;</span> <span class="o">%</span> <span class="n">chainCode</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span> <span class="ow">in</span> <span class="n">aSet</span><span class="p">:</span>
-          <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span> <span class="ow">and</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
-            <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">isConnected</span><span class="p">:</span>
+          <span class="c1"># Save data for later processing</span>
+          <span class="n">assignmentData2</span><span class="p">[</span><span class="n">nmrChain</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrResidues</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># Create non-assigned NmrResidues to reserve the serials. The rest can wait</span>
+          <span class="k">for</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">nmrResidues</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span> <span class="ow">and</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+              <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span>
 
+      <span class="k">for</span> <span class="n">nmrChain</span><span class="p">,</span> <span class="n">nmrResidues</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assignmentData2</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+        <span class="c1"># Create NmrResidues in order, to preserve connection order</span>
+        <span class="k">for</span> <span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">nmrResidues</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+          <span class="c1"># This time we want all non-offset, regardless of type - as we must get them in order</span>
+          <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span> <span class="ow">or</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="s1">&#39;+-&#39;</span>
+              <span class="ow">or</span> <span class="ow">not</span> <span class="n">sequenceCode</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">()):</span>
+            <span class="c1"># I.e. for sequenceCodes that do not include an offset</span>
+            <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">sequenceCode</span><span class="o">=</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="o">=</span><span class="n">residueType</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CcpnNefReader.load_nef_chemical_shift_list"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefReader.load_nef_chemical_shift_list">[docs]</a>  <span class="k">def</span> <span class="nf">load_nef_chemical_shift_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">saveFrame</span><span class="p">:</span><span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">):</span>
@@ -3179,7 +3253,7 @@
       <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
           <span class="n">result</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">fetchNmrResidue</span><span class="p">(</span><span class="n">newSequenceCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">)</span>
-          <span class="c1"># return result</span>
+          <span class="k">return</span> <span class="n">result</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
           <span class="n">newSequenceCode</span> <span class="o">=</span> <span class="s1">&#39;`</span><span class="si">%s</span><span class="s1">`&#39;</span> <span class="o">%</span> <span class="n">newSequenceCode</span>
           <span class="bp">self</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;New NmrResidue:</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> name caused an error.  Renamed </span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span>
@@ -3503,9 +3577,10 @@
 
     <span class="n">resultMap</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="n">axisCode</span>
   <span class="n">dimensionIds</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-  <span class="k">if</span> <span class="n">acquisitionAtEnd</span><span class="p">:</span>
-    <span class="c1"># put result back in dimension order</span>
-    <span class="n">dimensionIds</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+  <span class="c1"># NBNB new attempt - may not work</span>
+  <span class="c1"># if acquisitionAtEnd:</span>
+  <span class="c1">#   # put result back in dimension order</span>
+  <span class="c1">#   dimensionIds.reverse()</span>
   <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">resultMap</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="n">dimensionIds</span><span class="p">)</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
@@ -3543,10 +3618,10 @@
   <span class="k">else</span><span class="p">:</span>
     <span class="n">outPath</span> <span class="o">=</span> <span class="n">path</span> <span class="o">+</span> <span class="s1">&#39;.nef&#39;</span>
 
-  <span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">getFramework</span>
+  <span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">createFramework</span>
   <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
   <span class="n">time1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-  <span class="n">application</span> <span class="o">=</span> <span class="n">getFramework</span><span class="p">()</span>
+  <span class="n">application</span> <span class="o">=</span> <span class="n">createFramework</span><span class="p">()</span>
   <span class="n">application</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
   <span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
   <span class="n">time2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
@@ -3562,7 +3637,7 @@
 
 <span class="k">def</span> <span class="nf">_testNefIo</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="p">()):</span>
 
-  <span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">getFramework</span>
+  <span class="kn">from</span> <span class="nn">ccpn.framework.Framework</span> <span class="kn">import</span> <span class="n">createFramework</span>
 
   <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
 
@@ -3572,12 +3647,12 @@
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;File name does not end in &#39;.nef&#39;: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
 
   <span class="n">time1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-  <span class="n">application</span> <span class="o">=</span> <span class="n">getFramework</span><span class="p">()</span>
+  <span class="n">application</span> <span class="o">=</span> <span class="n">createFramework</span><span class="p">()</span>
   <span class="n">application</span><span class="o">.</span><span class="n">nefReader</span><span class="o">.</span><span class="n">testing</span> <span class="o">=</span> <span class="bp">True</span>
   <span class="n">application</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
   <span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
-  <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="c1"># spectrum = project.spectra[0]</span>
   <span class="n">time2</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
   <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;====&gt; Loaded </span><span class="si">%s</span><span class="s2"> from NEF file in seconds </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">time2</span><span class="o">-</span><span class="n">time1</span><span class="p">))</span>
   <span class="n">saveNefProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">outPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="n">skipPrefixes</span><span class="p">)</span>
@@ -3691,8 +3766,8 @@
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
   <span class="kn">import</span> <span class="nn">sys</span>
   <span class="n">path</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-  <span class="c1"># _testNefIo(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>
-  <span class="n">_testNefIo</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="n">_testNefIo</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">skipPrefixes</span><span class="o">=</span><span class="p">(</span><span class="s1">&#39;ccpn&#39;</span> <span class="p">,))</span>
+  <span class="c1"># _testNefIo(path)</span>
   <span class="c1"># nefpath = _exportToNef(path)</span>
   <span class="c1"># _testNefIo(nefpath)</span>
   <span class="c1"># nefpath = _exportToNef(path, skipPrefixes=(&#39;ccpn&#39; ,))</span>

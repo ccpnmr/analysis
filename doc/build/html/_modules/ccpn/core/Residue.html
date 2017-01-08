@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,13 +63,13 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-18 17:09:43 +0100 (Tue, 18 Oct 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9953 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10012 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
 <span class="c1">#=========================================================================================</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">import</span> <span class="nn">typing</span>
 
 <span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
@@ -120,6 +120,11 @@
   <span class="k">def</span> <span class="nf">_key</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Residue ID. Identical to sequenceCode.residueType. Characters translated for pid&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">Pid</span><span class="o">.</span><span class="n">createId</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">_localCcpnSortKey</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Local sorting key, in context of parent.&quot;&quot;&quot;</span>
+    <span class="k">return</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">seqId</span><span class="p">,)</span>
     
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">_parent</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Chain</span><span class="p">:</span>
@@ -162,8 +167,6 @@
         <span class="k">assert</span> <span class="n">linkString</span> <span class="o">==</span> <span class="s1">&#39;middle&#39;</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;Illegal API linking value for linear polymer: </span><span class="si">%s</span><span class="s2">&quot;</span>
                                         <span class="o">%</span> <span class="n">linkString</span><span class="p">)</span>
 
-         <span class="c1"># NBNB TBD FIXME - This does (MAY?) not deal properly with capped residues</span>
-
         <span class="n">nextResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextResidue</span>
         <span class="n">previousResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">previousResidue</span>
         <span class="k">if</span> <span class="n">previousResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -201,6 +204,9 @@
           <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="s1">&#39;middle&#39;</span>
 
+    <span class="k">elif</span> <span class="n">molType</span> <span class="o">==</span> <span class="s1">&#39;dummy&#39;</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s1">&#39;dummy&#39;</span>
+
     <span class="k">else</span><span class="p">:</span>
       <span class="c1"># All other types have linking &#39;non-linear&#39; in the wrapper</span>
       <span class="k">return</span> <span class="s1">&#39;single&#39;</span>
@@ -218,10 +224,12 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">linking</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">residueVariant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">residueVariant</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;NEF convention Residue variant descriptor (protonation state etc.) for residue&quot;&quot;&quot;</span>
-    <span class="c1"># NBNB TBD FIXME not implemented yet, pending sorting out the NEF standard on this point</span>
-    <span class="k">return</span> <span class="bp">None</span>
+    <span class="n">atomNamesRemoved</span><span class="p">,</span> <span class="n">atomNamesAdded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">getAtomNameDifferences</span><span class="p">()</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;-&#39;</span> <span class="o">+</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">atomNamesRemoved</span><span class="p">)]</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="s1">&#39;+&#39;</span> <span class="o">+</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">atomNamesAdded</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s1">&#39;,&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">None</span>
 
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">descriptor</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -243,13 +251,14 @@
     <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">details</span> <span class="o">=</span> <span class="n">value</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">nextResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">nextResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Next residue in sequence, if any, otherwise None&quot;&quot;&quot;</span>
     <span class="n">apiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
     <span class="n">molResidue</span> <span class="o">=</span> <span class="n">apiResidue</span><span class="o">.</span><span class="n">molResidue</span><span class="o">.</span><span class="n">nextMolResidue</span>
     <span class="k">if</span> <span class="n">molResidue</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;No next residue - API &quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
         <span class="n">apiResidue</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">findFirstResidue</span><span class="p">(</span><span class="n">seqId</span><span class="o">=</span><span class="n">molResidue</span><span class="o">.</span><span class="n">serial</span><span class="p">))</span>
@@ -257,7 +266,7 @@
     <span class="k">return</span> <span class="n">result</span>
 
   <span class="nd">@property</span>
-  <span class="k">def</span> <span class="nf">previousResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">]:</span>
+  <span class="k">def</span> <span class="nf">previousResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="s1">&#39;Residue&#39;</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Previous residue in sequence, if any,otherwise None&quot;&quot;&quot;</span>
     <span class="n">apiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
 
@@ -304,6 +313,15 @@
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="Residue.resetVariantToDefault"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Residue.Residue.resetVariantToDefault">[docs]</a>  <span class="k">def</span> <span class="nf">resetVariantToDefault</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reset Residue.residueVariant to the default variant&quot;&quot;&quot;</span>
+    <span class="n">atomNamesMissing</span><span class="p">,</span> <span class="n">extraAtomNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">getAtomNameDifferences</span><span class="p">()</span>
+    <span class="c1"># No need for testing - the names returned are guaranteed to be missing/superfluous</span>
+    <span class="k">for</span> <span class="n">atomName</span> <span class="ow">in</span> <span class="n">atomNamesMissing</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">atomName</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">atomName</span> <span class="ow">in</span> <span class="n">extraAtomNames</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">getAtom</span><span class="p">(</span><span class="n">atomName</span><span class="p">)</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
   <span class="c1"># Implementation functions</span>
 
   <span class="nd">@classmethod</span>
@@ -313,7 +331,7 @@
     <span class="c1"># If the seqId order does not match the sequence we have a problem anyway.</span>
     <span class="c1"># NBNB the doe relies on this sorting order to handle position-specific labeling</span>
     <span class="c1"># for substances</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_apiChain</span><span class="o">.</span><span class="n">sortedResidues</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_apiChain</span><span class="o">.</span><span class="n">residues</span></div>
 
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Residue</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Residue</span><span class="p">:</span>
   <span class="n">apiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>

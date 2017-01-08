@@ -272,7 +272,7 @@
   <span class="nd">@classmethod</span>
   <span class="k">def</span> <span class="nf">_getAllWrappedData</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">parent</span><span class="p">:</span><span class="n">RestraintList</span><span class="p">)</span><span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;get wrappedData - all Constraint children of parent ConstraintList&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedConstraints</span><span class="p">()</span></div>
+    <span class="k">return</span> <span class="n">parent</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">constraints</span></div>
 
 
 <span class="k">def</span> <span class="nf">getter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Peak</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Restraint</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -280,10 +280,10 @@
   <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
   <span class="k">for</span> <span class="n">restraintList</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">restraintLists</span><span class="p">:</span>
-    <span class="k">for</span> <span class="n">apiRestraint</span> <span class="ow">in</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">sortedRestraints</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">apiRestraint</span> <span class="ow">in</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">restraints</span><span class="p">:</span>
       <span class="k">if</span> <span class="n">apiPeak</span> <span class="ow">in</span> <span class="n">apiRestraint</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
         <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getDataObj</span><span class="p">(</span><span class="n">apiRestraint</span><span class="p">))</span>
-  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">result</span><span class="p">))</span>
 <span class="k">def</span> <span class="nf">setter</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Peak</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="n">Sequence</span><span class="p">):</span>
   <span class="n">apiPeak</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
   <span class="k">for</span> <span class="n">restraint</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">restraints</span><span class="p">:</span>

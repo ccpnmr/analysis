@@ -89,9 +89,36 @@
 <em class="property">class </em><code class="descclassname">ccpn.framework.Current.</code><code class="descname">Current</code><span class="sig-paren">(</span><em>project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Current.html#Current"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Current.Current" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>The current object gives access to the collection of active or selected objects and values.</p>
-<p>Currently implemented:
-nmrAtom (last selected nmrAtom); nmrAtoms (all selected nmrAtoms); nmrChain (last selected nmrChain); nmrChains (all selected nmrChains); nmrResidue (last selected nmrResidue); nmrResidues (all selected nmrResidues); peak (last selected peak); peaks (all selected peaks); position (last cursor position); positions (last cursor positions); cursorPosition (last cursor position - (posX,posY) tuple); spectrumGroup (current spectrum); strip (selected strip)</p>
-<p>Use print(current) to get a list of attribute, value pairs</p>
+<p>Currently implemented:</p>
+<p>chain (last selected chain); chains (all selected chains); 
+chemicalShift (last selected chemicalShift); chemicalShifts (all selected chemicalShifts); 
+chemicalShiftList (last selected chemicalShiftList); chemicalShiftLists (all selected chemicalShiftLists); 
+nmrAtom (last selected nmrAtom); nmrAtoms (all selected nmrAtoms); 
+nmrChain (last selected nmrChain); nmrChains (all selected nmrChains); 
+nmrResidue (last selected nmrResidue); nmrResidues (all selected nmrResidues); 
+peak (last selected peak); peaks (all selected peaks); 
+residue (last selected residue); residues (all selected residues); 
+spectrumGroup (last selected spectrumGroup); 
+strip (last selected strip); 
+axisCode (last selected axisCode); 
+cursorPosition (last cursor cursorPosition - (posX,posY) tuple); 
+position (last cursor position); positions (last cursor positions)</p>
+<p>Use print(current) to get a list of attribute, value pairs&#8217;)</p>
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.addChain">
+<code class="descname">addChain</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addChain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.addChemicalshift">
+<code class="descname">addChemicalshift</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addChemicalshift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.addChemicalshiftlist">
+<code class="descname">addChemicalshiftlist</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addChemicalshiftlist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 <dl class="method">
 <dt id="ccpn.framework.Current.Current.addNmratom">
 <code class="descname">addNmratom</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addNmratom" title="Permalink to this definition">¶</a></dt>
@@ -115,6 +142,75 @@ nmrAtom (last selected nmrAtom); nmrAtoms (all selected nmrAtoms); nmrChain (las
 <dl class="method">
 <dt id="ccpn.framework.Current.Current.addPosition">
 <code class="descname">addPosition</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.addResidue">
+<code class="descname">addResidue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.addResidue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.axisCode">
+<code class="descname">axisCode</code><a class="headerlink" href="#ccpn.framework.Current.Current.axisCode" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current axisCode</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.chain">
+<code class="descname">chain</code><a class="headerlink" href="#ccpn.framework.Current.Current.chain" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current chain</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.chains">
+<code class="descname">chains</code><a class="headerlink" href="#ccpn.framework.Current.Current.chains" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current chains</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.chemicalShift">
+<code class="descname">chemicalShift</code><a class="headerlink" href="#ccpn.framework.Current.Current.chemicalShift" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current chemicalShift</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.chemicalShiftList">
+<code class="descname">chemicalShiftList</code><a class="headerlink" href="#ccpn.framework.Current.Current.chemicalShiftList" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current chemicalShiftList</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.chemicalShiftLists">
+<code class="descname">chemicalShiftLists</code><a class="headerlink" href="#ccpn.framework.Current.Current.chemicalShiftLists" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current chemicalShiftLists</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.chemicalShifts">
+<code class="descname">chemicalShifts</code><a class="headerlink" href="#ccpn.framework.Current.Current.chemicalShifts" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current chemicalShifts</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.clearChains">
+<code class="descname">clearChains</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearChains" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.clearChemicalshiftlists">
+<code class="descname">clearChemicalshiftlists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearChemicalshiftlists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.clearChemicalshifts">
+<code class="descname">clearChemicalshifts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearChemicalshifts" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -142,12 +238,38 @@ nmrAtom (last selected nmrAtom); nmrAtoms (all selected nmrAtoms); nmrChain (las
 <code class="descname">clearPositions</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearPositions" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.clearResidues">
+<code class="descname">clearResidues</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.clearResidues" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.cls">
+<code class="descname">cls</code><a class="headerlink" href="#ccpn.framework.Current.Current.cls" title="Permalink to this definition">¶</a></dt>
+<dd><p>alias of <code class="xref py py-class docutils literal"><span class="pre">Strip</span></code></p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.cursorPosition">
 <code class="descname">cursorPosition</code><a class="headerlink" href="#ccpn.framework.Current.Current.cursorPosition" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> - 
 Current cursorPosition</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.dd">
+<code class="descname">dd</code><em class="property"> = {'docTemplate': 'last cursor %s'}</em><a class="headerlink" href="#ccpn.framework.Current.Current.dd" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.field">
+<code class="descname">field</code><em class="property"> = 'positions'</em><a class="headerlink" href="#ccpn.framework.Current.Current.field" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.ll">
+<code class="descname">ll</code><em class="property"> = ['\nchain (last selected chain)', 'chains (all selected chains)', '\nchemicalShift (last selected chemicalShift)', 'chemicalShifts (all selected chemicalShifts)', '\nchemicalShiftList (last selected chemicalShiftList)', 'chemicalShiftLists (all selected chemicalShiftLists)', '\nnmrAtom (last selected nmrAtom)', 'nmrAtoms (all selected nmrAtoms)', '\nnmrChain (last selected nmrChain)', 'nmrChains (all selected nmrChains)', '\nnmrResidue (last selected nmrResidue)', 'nmrResidues (all selected nmrResidues)', '\npeak (last selected peak)', 'peaks (all selected peaks)', '\nresidue (last selected residue)', 'residues (all selected residues)', '\nspectrumGroup (last selected spectrumGroup)', '\nstrip (last selected strip)', '\naxisCode (last selected axisCode)', '\ncursorPosition (last cursor cursorPosition - (posX,posY) tuple)', '\nposition (last cursor position)', 'positions (last cursor positions)']</em><a class="headerlink" href="#ccpn.framework.Current.Current.ll" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.nmrAtom">
@@ -232,6 +354,21 @@ Project attached to current</p>
 <dd></dd></dl>
 
 <dl class="method">
+<dt id="ccpn.framework.Current.Current.removeChain">
+<code class="descname">removeChain</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeChain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.removeChemicalshift">
+<code class="descname">removeChemicalshift</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeChemicalshift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.removeChemicalshiftlist">
+<code class="descname">removeChemicalshiftlist</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeChemicalshiftlist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="ccpn.framework.Current.Current.removeNmratom">
 <code class="descname">removeNmratom</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeNmratom" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -256,12 +393,36 @@ Project attached to current</p>
 <code class="descname">removePosition</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removePosition" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.framework.Current.Current.removeResidue">
+<code class="descname">removeResidue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.framework.Current.Current.removeResidue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.residue">
+<code class="descname">residue</code><a class="headerlink" href="#ccpn.framework.Current.Current.residue" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current residue</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.residues">
+<code class="descname">residues</code><a class="headerlink" href="#ccpn.framework.Current.Current.residues" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>None</em>, <em>mutable</em> - 
+Current residues</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.spectrumGroup">
 <code class="descname">spectrumGroup</code><a class="headerlink" href="#ccpn.framework.Current.Current.spectrumGroup" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>None</em>, <em>mutable</em> - 
 Current spectrumGroup</p>
 </dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.framework.Current.Current.ss">
+<code class="descname">ss</code><em class="property"> = 'positions'</em><a class="headerlink" href="#ccpn.framework.Current.Current.ss" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.framework.Current.Current.strip">

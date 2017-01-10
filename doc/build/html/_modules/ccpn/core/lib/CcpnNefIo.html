@@ -55,7 +55,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-28 14:51:44 +0000 (Mon, 28 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,8 +66,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-28 14:51:44 +0000 (Mon, 28 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10027 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10094 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -908,10 +908,10 @@
     <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">makeNefMetaData</span><span class="p">(</span><span class="n">project</span><span class="p">))</span>
 
     <span class="c1"># Chains</span>
-    <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains2Nef</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">))</span>
+    <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains2Nef</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">)))</span>
 
     <span class="c1"># ChemicalShiftLists</span>
-    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">):</span>
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftList2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
 
     <span class="c1"># RestraintLists and</span>
@@ -922,7 +922,7 @@
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">restraintList2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">singleDataSet</span><span class="o">=</span><span class="n">singleDataSet</span><span class="p">))</span>
 
     <span class="c1"># Spectra</span>
-    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
       <span class="c1"># NB we get multiple saveframes, one per peakList</span>
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrum2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
 
@@ -937,11 +937,11 @@
     <span class="c1">#   saveFrames.append(self.spectrumGroup2Nef(obj))</span>
 
     <span class="c1"># Samples</span>
-    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">):</span>
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sample2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
 
     <span class="c1"># Substances</span>
-    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">substances</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span><span class="p">):</span>
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substance2Nef</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
 
     <span class="c1"># # NmrChains</span>
@@ -952,7 +952,7 @@
     <span class="c1">#   saveFrames.append(self.dataSet2Nef(obj))</span>
 
     <span class="c1"># Notes</span>
-    <span class="n">saveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes2Nef</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">notes</span><span class="p">)</span>
+    <span class="n">saveFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">notes2Nef</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">notes</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">saveFrame</span><span class="p">:</span>
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
 
@@ -961,7 +961,7 @@
     <span class="k">if</span> <span class="n">saveFrame</span><span class="p">:</span>
       <span class="n">saveFrames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">)</span>
 
-    <span class="c1"># make and return dataBlock with sameframes in export order</span>
+    <span class="c1"># make and return dataBlock with saveframes in export order</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrDataBlock</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">saveFrame</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_saveFrameNefOrder</span><span class="p">(</span><span class="n">saveFrames</span><span class="p">):</span>
       <span class="n">result</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;sf_framecode&#39;</span><span class="p">],</span> <span class="n">saveFrame</span><span class="p">)</span>
@@ -1032,7 +1032,7 @@
 
       <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
       <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">chains</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">):</span>
           <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
           <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">residue</span><span class="p">)</span>
           <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">index</span>
@@ -1070,21 +1070,32 @@
     <span class="n">nmrAtomLoopName</span> <span class="o">=</span> <span class="s1">&#39;nmr_atom&#39;</span>
     <span class="n">nmrAtomLoop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">nmrAtomLoopName</span><span class="p">]</span>
 
-    <span class="k">for</span> <span class="n">nmrChain</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">nmrChain</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">):</span>
       <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">nmrChainLoopName</span><span class="p">,</span> <span class="n">nmrChain</span><span class="p">)</span>
       <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">serial</span>
       <span class="n">nmrChainLoop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
 
-      <span class="c1"># NB this makes sure that connected stretches are given in order.</span>
-      <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">mainNmrResidues</span>
-      <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
+      <span class="c1"># # NB this makes sure that connected stretches are given in order.</span>
+      <span class="c1"># nmrResidues = nmrChain.mainNmrResidues</span>
+      <span class="c1"># for nmrResidue in nmrResidues:</span>
+      <span class="c1">#   rowdata = self._loopRowData(nmrResidueLoopName, nmrResidue)</span>
+      <span class="c1">#   rowdata[&#39;serial&#39;] = nmrResidue.serial</span>
+      <span class="c1">#   nmrResidueLoop.newRow(rowdata)</span>
+      <span class="c1">#</span>
+      <span class="c1">#   nmrResidues.extend(nmrResidue.offsetNmrResidues)</span>
+      <span class="c1">#</span>
+      <span class="c1">#   for nmrAtom in nmrResidue.nmrAtoms:</span>
+      <span class="c1">#     rowdata = self._loopRowData(nmrAtomLoopName, nmrAtom)</span>
+      <span class="c1">#     rowdata[&#39;serial&#39;] = nmrAtom.serial</span>
+      <span class="c1">#     nmrAtomLoop.newRow(rowdata)</span>
+
+      <span class="c1"># Use sorting - should give correct results</span>
+      <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">):</span>
         <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">nmrResidueLoopName</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">)</span>
         <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">serial</span>
         <span class="n">nmrResidueLoop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
 
-        <span class="n">nmrResidues</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">offsetNmrResidues</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">):</span>
           <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">nmrAtomLoopName</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="p">)</span>
           <span class="n">rowdata</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">serial</span>
           <span class="n">nmrAtomLoop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
@@ -1106,7 +1117,7 @@
     <span class="n">loop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
     <span class="n">atomCols</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">,</span> <span class="s1">&#39;sequence_code&#39;</span><span class="p">,</span> <span class="s1">&#39;residue_name&#39;</span><span class="p">,</span> <span class="s1">&#39;atom_name&#39;</span><span class="p">,]</span>
     <span class="c1"># NB We cannot use nmrAtom.id.split(&#39;.&#39;), since the id has reserved characters remapped</span>
-    <span class="n">shifts</span> <span class="o">=</span> <span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">chemicalShifts</span>
+    <span class="n">shifts</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">chemicalShifts</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">shifts</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="n">shifts</span><span class="p">:</span>
         <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">shift</span><span class="p">)</span>
@@ -1255,7 +1266,7 @@
           <span class="n">loop</span><span class="o">.</span><span class="n">removeColumn</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">removeData</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">restraintContributions</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">contribution</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">restraintList</span><span class="o">.</span><span class="n">restraintContributions</span><span class="p">):</span>
       <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">contribution</span><span class="p">)</span>
       <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">contribution</span><span class="o">.</span><span class="n">restraintItems</span><span class="p">:</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
@@ -1283,7 +1294,7 @@
 
     <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">peakLists</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span>
+    <span class="n">peakLists</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">peakLists</span><span class="p">:</span>
       <span class="n">peakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">()]</span>
 
@@ -1422,12 +1433,12 @@
     <span class="p">}</span>
 
     <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">):</span>
       <span class="n">rowdata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">peak</span><span class="p">)</span>
 
       <span class="n">assignments</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span>
       <span class="k">if</span> <span class="n">assignments</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">assignments</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assignments</span><span class="p">):</span>
           <span class="c1"># Make one row per assignment</span>
           <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">rowdata</span><span class="p">)</span>
           <span class="n">index</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1489,7 +1500,7 @@
       <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">removeNameEndings</span><span class="p">):</span>
           <span class="n">loop</span><span class="o">.</span><span class="n">removeColumn</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-      <span class="k">for</span> <span class="n">integralList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">integralLists</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">integralList</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">integralLists</span><span class="p">):</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">integralList</span><span class="p">))</span>
         <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">integralList</span><span class="o">.</span><span class="n">serial</span>
 
@@ -1498,7 +1509,7 @@
       <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">tag</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">removeNameEndings</span><span class="p">):</span>
           <span class="n">loop</span><span class="o">.</span><span class="n">removeColumn</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-      <span class="k">for</span> <span class="n">integral</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">integrals</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">integral</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">integrals</span><span class="p">):</span>
         <span class="n">row</span> <span class="o">=</span> <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">integral</span><span class="p">))</span>
         <span class="n">row</span><span class="p">[</span><span class="s1">&#39;integral_serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">integral</span><span class="o">.</span><span class="n">serial</span>
         <span class="n">values</span> <span class="o">=</span><span class="n">integral</span><span class="o">.</span><span class="n">slopes</span>
@@ -1525,11 +1536,11 @@
 <div class="viewcode-block" id="CcpnNefWriter.peakRestraintLinks2Nef"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.CcpnNefIo.CcpnNefWriter.peakRestraintLinks2Nef">[docs]</a>  <span class="k">def</span> <span class="nf">peakRestraintLinks2Nef</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">restraintLists</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="n">RestraintList</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">StarIo</span><span class="o">.</span><span class="n">NmrSaveFrame</span><span class="p">:</span>
 
     <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">restraintList</span> <span class="ow">in</span> <span class="n">restraintLists</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">restraintList</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">restraintLists</span><span class="p">):</span>
       <span class="n">restraintListFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">restraintList</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">restraintListFrame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">restraint</span> <span class="ow">in</span> <span class="n">restraintList</span><span class="o">.</span><span class="n">restraints</span><span class="p">:</span>
-          <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">restraint</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">restraint</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">restraintList</span><span class="o">.</span><span class="n">restraints</span><span class="p">):</span>
+          <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">restraint</span><span class="o">.</span><span class="n">peaks</span><span class="p">):</span>
             <span class="n">peakListFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ccpn2SaveFrameName</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">peakListFrame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
               <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">peakListFrame</span><span class="p">,</span> <span class="n">peak</span><span class="o">.</span><span class="n">serial</span><span class="p">,</span> <span class="n">restraintListFrame</span><span class="p">,</span> <span class="n">restraint</span><span class="o">.</span><span class="n">serial</span><span class="p">))</span>
@@ -1562,9 +1573,9 @@
     <span class="c1"># Fill in loop</span>
     <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_group_spectrum&#39;</span>
     <span class="n">loop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
-    <span class="n">spectra</span> <span class="o">=</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span>
+    <span class="n">spectra</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">spectra</span><span class="p">:</span>
-      <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
         <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
       <span class="k">del</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
@@ -1584,7 +1595,7 @@
     <span class="c1"># Fill in loop</span>
     <span class="n">loopName</span> <span class="o">=</span> <span class="s1">&#39;ccpn_sample_component&#39;</span>
     <span class="n">loop</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">loopName</span><span class="p">]</span>
-    <span class="n">components</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span>
+    <span class="n">components</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">sample</span><span class="o">.</span><span class="n">sampleComponents</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">components</span><span class="p">:</span>
       <span class="k">for</span> <span class="n">sampleComponent</span> <span class="ow">in</span> <span class="n">components</span><span class="p">:</span>
         <span class="n">loop</span><span class="o">.</span><span class="n">newRow</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_loopRowData</span><span class="p">(</span><span class="n">loopName</span><span class="p">,</span> <span class="n">sampleComponent</span><span class="p">))</span>

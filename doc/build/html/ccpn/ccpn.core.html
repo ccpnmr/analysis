@@ -195,7 +195,8 @@ of the internal collection, to prevent accidental modification of the data
 <p>Each class has a link to contained objects,
 and a function to get a contained object by relative id.
 E.g. myProject.peaks, mySpectrum.peaks, and myPeakList.peaks will each get
-all peaks contained within the relevant object, sorted by Peak id.
+all peaks contained within the relevant object. The lists will be in creation order
+(where applicable) otherwise sorted by name or underlying key.
 Similarly, a given peak can be found by either myProject.getPeak(&#8216;HSQC2.1.593&#8217;),
 mySpectrum.getPeak(&#8216;1.593&#8217;), or myPeakList.getPeak(&#8216;593&#8217;)</p>
 <p>Most objects can be created using a <em>newXyzObject</em> method on the parent.
@@ -215,6 +216,23 @@ These will return the identified object if it exists, but will create a new obje
 <p>Other common prefixes for function names include &#8216;add&#8217; and &#8216;remove&#8217; (which add and remove
 pre-existing objects to collections), &#8216;copy&#8217;, &#8216;clear&#8217;, &#8216;load&#8217;, &#8216;process&#8217; and &#8216;toggle&#8217;,
 all of which should be self-explanatory.</p>
+<p>Objects sort by type (in import order) then by parent, then by local key.
+Sorting the objects will give a sensible and reproducible ordering for all classes.
+A number of classes are returned sorted by creation order (e.g. NmrAtoms), but are
+sorted by a more significant key (for NmrAtoms alphabetically by name).
+ChemicalShift objects sort as the NmrAtom they belong to.
+NmrResidue objects behave in there different ways:</p>
+<blockquote>
+<div><ul class="simple">
+<li>If they are assigned to a Residue they sort like the Residue, in sequential order</li>
+<li>If they belong to a connected NmrChain, they sort by the order they appear in the</li>
+</ul>
+<p>NmrChain.</p>
+<ul class="simple">
+<li>In other 4cases they sort by creation order.</li>
+<li>Offset NmrResidues in all cases sort alongside their main NmrResidue, by offset.</li>
+</ul>
+</div></blockquote>
 </div>
 </div>
 <div class="section" id="subpackages">
@@ -448,7 +466,7 @@ serial number of CalculationStep, used in Pid and to identify the CalculationSte
 <dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.atoms">
 <code class="descname">atoms</code><a class="headerlink" href="#ccpn.core.Chain.Chain.atoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Atom.Atom,)</em>  - contained Atom objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Atom.Atom,)</em>  - contained Atom objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -528,7 +546,7 @@ e.g. residue &#8216;12B&#8217; is renumbered to &#8216;13B&#8217; (offset=1)</p>
 <dl class="attribute">
 <dt id="ccpn.core.Chain.Chain.residues">
 <code class="descname">residues</code><a class="headerlink" href="#ccpn.core.Chain.Chain.residues" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Residue.Residue,)</em>  - contained Residue objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Residue.Residue,)</em>  - contained Residue objects in sequential order This is identical to the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -575,7 +593,11 @@ Substances matching to Chain (based on chain.compoundName)</p>
 <dt id="ccpn.core.ChemicalShift.ChemicalShift">
 <em class="property">class </em><code class="descclassname">ccpn.core.ChemicalShift.</code><code class="descname">ChemicalShift</code><a class="reference internal" href="../_modules/ccpn/core/ChemicalShift.html#ChemicalShift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.ChemicalShift.ChemicalShift" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Chemical Shift.</p>
+<p>Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.</p>
+<p>Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,
+unless this behaviour is turned off. If the NmrAtom is reassigned, the ChemcalShift
+is reassigned with it.</p>
+<p>ChemicalShift objects sort as the NmrAtom they belong to.</p>
 <dl class="attribute">
 <dt id="ccpn.core.ChemicalShift.ChemicalShift.chemicalShiftList">
 <code class="descname">chemicalShiftList</code><a class="headerlink" href="#ccpn.core.ChemicalShift.ChemicalShift.chemicalShiftList" title="Permalink to this definition">¶</a></dt>
@@ -652,7 +674,7 @@ Automatically update Chemical Shifts from assigned peaks - True/False</p>
 <dl class="attribute">
 <dt id="ccpn.core.ChemicalShiftList.ChemicalShiftList.chemicalShifts">
 <code class="descname">chemicalShifts</code><a class="headerlink" href="#ccpn.core.ChemicalShiftList.ChemicalShiftList.chemicalShifts" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.ChemicalShift.ChemicalShift,)</em>  - contained ChemicalShift objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.ChemicalShift.ChemicalShift,)</em>  - contained ChemicalShift objects in NmrAtom creation order This is different from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -889,7 +911,7 @@ data history and file loads.</p>
 <dl class="attribute">
 <dt id="ccpn.core.DataSet.DataSet.calculationSteps">
 <code class="descname">calculationSteps</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.calculationSteps" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.CalculationStep.CalculationStep,)</em>  - contained CalculationStep objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.CalculationStep.CalculationStep,)</em>  - contained CalculationStep objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -914,7 +936,7 @@ Creation timestamp for DataSet</p>
 <dl class="attribute">
 <dt id="ccpn.core.DataSet.DataSet.data">
 <code class="descname">data</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.data" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Data.Data,)</em>  - contained Data objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Data.Data,)</em>  - contained Data objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1005,19 +1027,19 @@ Version of program performing the calculation</p>
 <dl class="attribute">
 <dt id="ccpn.core.DataSet.DataSet.restraintContributions">
 <code class="descname">restraintContributions</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.restraintContributions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.DataSet.DataSet.restraintLists">
 <code class="descname">restraintLists</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.restraintLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.RestraintList.RestraintList,)</em>  - contained RestraintList objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.RestraintList.RestraintList,)</em>  - contained RestraintList objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.DataSet.DataSet.restraints">
 <code class="descname">restraints</code><a class="headerlink" href="#ccpn.core.DataSet.DataSet.restraints" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Restraint.Restraint,)</em>  - contained Restraint objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Restraint.Restraint,)</em>  - contained Restraint objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1090,7 +1112,7 @@ Return a selector that selects backbone atoms.</p>
 <dt>Params:</dt>
 <dd><dl class="first last docutils">
 <dt>selector</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Boolean Pandas series the same length as the number of rows in the ensemble</span><dd>If no selector is given,  pass the keyward args on to the selector function
+ <span class="classifier-delimiter">:</span> <span class="classifier">Boolean Pandas series the same length as the number of rows in the ensemble</span><dd>If no selector is given,  pass the keyword args on to the selector function
 and use the resulting selector to extract a sub-ensemble.</dd>
 </dl>
 </dd>
@@ -1148,8 +1170,10 @@ Val: Both Cg&#8217;s and attached protons</dd>
 <dt>accessor</dt>
  <span class="classifier-delimiter">:</span> <span class="classifier">int, Ensemble, Selector</span><dd><p class="first">If an integer is given, the value will be set on the row at that index
 If an single row Ensemble is given, the value will be set on the row that matches.
-If a selector that matches a single row is given, the value will be set on that matching row</p>
-<p class="last">Multi-row Ensembles or selectors are not allowed. (consider using Ensemble.records() to iterate)</p>
+If a selector that matches a single row is given, the value will be set on that
+matching row</p>
+<p class="last">Multi-row Ensembles or selectors are not allowed.
+(consider using Ensemble.records() to iterate)</p>
 </dd>
 </dl>
 <p class="last">kwargs : columns on which to set the values</p>
@@ -1303,7 +1327,7 @@ Free-form text comment</p>
 <dl class="attribute">
 <dt id="ccpn.core.IntegralList.IntegralList.integrals">
 <code class="descname">integrals</code><a class="headerlink" href="#ccpn.core.IntegralList.IntegralList.integrals" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Integral.Integral,)</em>  - contained Integral objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Integral.Integral,)</em>  - contained Integral objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -1537,7 +1561,7 @@ Parent (containing) object.</p>
 <dl class="method">
 <dt id="ccpn.core.NmrAtom.NmrAtom.rename">
 <code class="descname">rename</code><span class="sig-paren">(</span><em>value: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/NmrAtom.html#NmrAtom.rename"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrAtom.NmrAtom.rename" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename the NmrAtom, changing ita name, Pid, and internal representation.</p>
+<dd><p>Rename the NmrAtom, changing its name, Pid, and internal representation.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -1661,13 +1685,13 @@ If NmrChain is connected, append the new NmrResidue to the end of the stretch.</
 <dl class="attribute">
 <dt id="ccpn.core.NmrChain.NmrChain.nmrAtoms">
 <code class="descname">nmrAtoms</code><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.nmrAtoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.NmrAtom.NmrAtom,)</em>  - contained NmrAtom objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.NmrAtom.NmrAtom,)</em>  - contained NmrAtom objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.NmrChain.NmrChain.nmrResidues">
 <code class="descname">nmrResidues</code><a class="headerlink" href="#ccpn.core.NmrChain.NmrChain.nmrResidues" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.NmrResidue.NmrResidue,)</em>  - contained NmrResidue objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.NmrResidue.NmrResidue,)</em>  - contained NmrResidue objects in sequential order (for assigned or connected NmrChains), otherwise in creation order. This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="method">
@@ -1734,6 +1758,18 @@ to be reassigned to NR:B.do1-1.VAL or NR:B.125-1.VAL, respectively. Offsets can 
 (including &#8216;+0&#8217;.</p>
 <p>NmrResidues that are not offset can be linked into consecutive stretches by putting them
 into connected NmrChains (see NmrChain).</p>
+<p>NmrResidue objects behave in there different ways when sorted:</p>
+<blockquote>
+<div><ul class="simple">
+<li>If they are assigned to a Residue they sort like the Residue, in sequential order</li>
+<li>If they belong to a connected NmrChain, they sort by the order they appear in the</li>
+</ul>
+<p>NmrChain.</p>
+<ul class="simple">
+<li>In other 4cases they sort by creation order.</li>
+<li>Offset NmrResidues in all cases sort alongside their main NmrResidue, by offset.</li>
+</ul>
+</div></blockquote>
 <dl class="method">
 <dt id="ccpn.core.NmrResidue.NmrResidue.assignTo">
 <code class="descname">assignTo</code><span class="sig-paren">(</span><em>chainCode: str = None</em>, <em>sequenceCode: int | str = None</em>, <em>residueType: str = None</em>, <em>mergeToExisting: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.core.NmrResidue.NmrResidue<a class="reference internal" href="../_modules/ccpn/core/NmrResidue.html#NmrResidue.assignTo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.assignTo" title="Permalink to this definition">¶</a></dt>
@@ -1869,7 +1905,7 @@ or the NmrResidue assigned to the next Residue in the same Chain</p>
 <dl class="attribute">
 <dt id="ccpn.core.NmrResidue.NmrResidue.nmrAtoms">
 <code class="descname">nmrAtoms</code><a class="headerlink" href="#ccpn.core.NmrResidue.NmrResidue.nmrAtoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.NmrAtom.NmrAtom,)</em>  - contained NmrAtom objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.NmrAtom.NmrAtom,)</em>  - contained NmrAtom objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2323,7 +2359,7 @@ PeakListViews showing Spectrum</p>
 <dl class="attribute">
 <dt id="ccpn.core.PeakList.PeakList.peaks">
 <code class="descname">peaks</code><a class="headerlink" href="#ccpn.core.PeakList.PeakList.peaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Peak.Peak,)</em>  - contained Peak objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Peak.Peak,)</em>  - contained Peak objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -2434,13 +2470,13 @@ a Spectrum has PeakLists, which in turn, are made up of Peaks, whereas a Chain i
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.atoms">
 <code class="descname">atoms</code><a class="headerlink" href="#ccpn.core.Project.Project.atoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Atom.Atom,)</em>  - contained Atom objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Atom.Atom,)</em>  - contained Atom objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.axes">
 <code class="descname">axes</code><a class="headerlink" href="#ccpn.core.Project.Project.axes" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.Axis.Axis,)</em>  - contained Axis objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Axis.Axis,)</em>  - contained Axis objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -2454,25 +2490,25 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.calculationSteps">
 <code class="descname">calculationSteps</code><a class="headerlink" href="#ccpn.core.Project.Project.calculationSteps" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.CalculationStep.CalculationStep,)</em>  - contained CalculationStep objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.CalculationStep.CalculationStep,)</em>  - contained CalculationStep objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.chains">
 <code class="descname">chains</code><a class="headerlink" href="#ccpn.core.Project.Project.chains" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Chain.Chain,)</em>  - contained Chain objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Chain.Chain,)</em>  - contained Chain objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.chemicalShiftLists">
 <code class="descname">chemicalShiftLists</code><a class="headerlink" href="#ccpn.core.Project.Project.chemicalShiftLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.ChemicalShiftList.ChemicalShiftList,)</em>  - contained ChemicalShiftList objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.ChemicalShiftList.ChemicalShiftList,)</em>  - contained ChemicalShiftList objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.chemicalShifts">
 <code class="descname">chemicalShifts</code><a class="headerlink" href="#ccpn.core.Project.Project.chemicalShifts" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.ChemicalShift.ChemicalShift,)</em>  - contained ChemicalShift objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.ChemicalShift.ChemicalShift,)</em>  - contained ChemicalShift objects in NmrAtom creation order This is different from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2540,13 +2576,13 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.data">
 <code class="descname">data</code><a class="headerlink" href="#ccpn.core.Project.Project.data" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Data.Data,)</em>  - contained Data objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Data.Data,)</em>  - contained Data objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.dataSets">
 <code class="descname">dataSets</code><a class="headerlink" href="#ccpn.core.Project.Project.dataSets" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.DataSet.DataSet,)</em>  - contained DataSet objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.DataSet.DataSet,)</em>  - contained DataSet objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -2835,13 +2871,13 @@ number fo cases, e.g. for NmrResidues</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.integralLists">
 <code class="descname">integralLists</code><a class="headerlink" href="#ccpn.core.Project.Project.integralLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.IntegralList.IntegralList,)</em>  - contained IntegralList objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.IntegralList.IntegralList,)</em>  - contained IntegralList objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.integrals">
 <code class="descname">integrals</code><a class="headerlink" href="#ccpn.core.Project.Project.integrals" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Integral.Integral,)</em>  - contained Integral objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Integral.Integral,)</em>  - contained Integral objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -2865,19 +2901,19 @@ number fo cases, e.g. for NmrResidues</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.marks">
 <code class="descname">marks</code><a class="headerlink" href="#ccpn.core.Project.Project.marks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.Mark.Mark,)</em>  - contained Mark objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Mark.Mark,)</em>  - contained Mark objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.models">
 <code class="descname">models</code><a class="headerlink" href="#ccpn.core.Project.Project.models" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Model.Model,)</em>  - contained Model objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Model.Model,)</em>  - contained Model objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.modules">
 <code class="descname">modules</code><a class="headerlink" href="#ccpn.core.Project.Project.modules" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.Module.Module,)</em>  - contained Module objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Module.Module,)</em>  - contained Module objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2998,25 +3034,25 @@ Use Project.loadData or Project.createDummySpectrum instead</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.nmrAtoms">
 <code class="descname">nmrAtoms</code><a class="headerlink" href="#ccpn.core.Project.Project.nmrAtoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.NmrAtom.NmrAtom,)</em>  - contained NmrAtom objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.NmrAtom.NmrAtom,)</em>  - contained NmrAtom objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.nmrChains">
 <code class="descname">nmrChains</code><a class="headerlink" href="#ccpn.core.Project.Project.nmrChains" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.NmrChain.NmrChain,)</em>  - contained NmrChain objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.NmrChain.NmrChain,)</em>  - contained NmrChain objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.nmrResidues">
 <code class="descname">nmrResidues</code><a class="headerlink" href="#ccpn.core.Project.Project.nmrResidues" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.NmrResidue.NmrResidue,)</em>  - contained NmrResidue objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.NmrResidue.NmrResidue,)</em>  - contained NmrResidue objects in sequential order (for assigned or connected NmrChains), otherwise in creation order. This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.notes">
 <code class="descname">notes</code><a class="headerlink" href="#ccpn.core.Project.Project.notes" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Note.Note,)</em>  - contained Note objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Note.Note,)</em>  - contained Note objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3029,19 +3065,19 @@ path to directory containing Project</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.peakListViews">
 <code class="descname">peakListViews</code><a class="headerlink" href="#ccpn.core.Project.Project.peakListViews" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.PeakListView.PeakListView,)</em>  - contained PeakListView objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.PeakListView.PeakListView,)</em>  - contained PeakListView objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.peakLists">
 <code class="descname">peakLists</code><a class="headerlink" href="#ccpn.core.Project.Project.peakLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.PeakList.PeakList,)</em>  - contained PeakList objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.PeakList.PeakList,)</em>  - contained PeakList objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.peaks">
 <code class="descname">peaks</code><a class="headerlink" href="#ccpn.core.Project.Project.peaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Peak.Peak,)</em>  - contained Peak objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Peak.Peak,)</em>  - contained Peak objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3054,7 +3090,7 @@ Name of running program - defaults to &#8216;CcpNmr&#8217;</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.pseudoDimensions">
 <code class="descname">pseudoDimensions</code><a class="headerlink" href="#ccpn.core.Project.Project.pseudoDimensions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.PseudoDimension.PseudoDimension,)</em>  - contained PseudoDimension objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.PseudoDimension.PseudoDimension,)</em>  - contained PseudoDimension objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -3110,36 +3146,28 @@ parameter.</p>
 <dd><p>Unregister the the notifier from all places where it appears.</p>
 </dd></dl>
 
-<dl class="method">
-<dt id="ccpn.core.Project.Project.renameObject">
-<code class="descname">renameObject</code><span class="sig-paren">(</span><em>objectOrPid: str | ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</em>, <em>newName: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Project.html#Project.renameObject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Project.Project.renameObject" title="Permalink to this definition">¶</a></dt>
-<dd><p>Rename object indicated by objectOrPid to name newName
-NB at last one class (Substance) has a two-art name - these are passed as one,
-dot-separated string (e.g. &#8216;Lysozyme.U13C&#8217;</p>
-</dd></dl>
-
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.residues">
 <code class="descname">residues</code><a class="headerlink" href="#ccpn.core.Project.Project.residues" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Residue.Residue,)</em>  - contained Residue objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Residue.Residue,)</em>  - contained Residue objects in sequential order This is identical to the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.restraintContributions">
 <code class="descname">restraintContributions</code><a class="headerlink" href="#ccpn.core.Project.Project.restraintContributions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.restraintLists">
 <code class="descname">restraintLists</code><a class="headerlink" href="#ccpn.core.Project.Project.restraintLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.RestraintList.RestraintList,)</em>  - contained RestraintList objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.RestraintList.RestraintList,)</em>  - contained RestraintList objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.restraints">
 <code class="descname">restraints</code><a class="headerlink" href="#ccpn.core.Project.Project.restraints" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Restraint.Restraint,)</em>  - contained Restraint objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Restraint.Restraint,)</em>  - contained Restraint objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -3151,13 +3179,13 @@ dot-separated string (e.g. &#8216;Lysozyme.U13C&#8217;</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.sampleComponents">
 <code class="descname">sampleComponents</code><a class="headerlink" href="#ccpn.core.Project.Project.sampleComponents" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.SampleComponent.SampleComponent,)</em>  - contained SampleComponent objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.SampleComponent.SampleComponent,)</em>  - contained SampleComponent objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.samples">
 <code class="descname">samples</code><a class="headerlink" href="#ccpn.core.Project.Project.samples" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Sample.Sample,)</em>  - contained Sample objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Sample.Sample,)</em>  - contained Sample objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -3177,55 +3205,55 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.spectra">
 <code class="descname">spectra</code><a class="headerlink" href="#ccpn.core.Project.Project.spectra" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Spectrum.Spectrum,)</em>  - contained Spectrum objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Spectrum.Spectrum,)</em>  - contained Spectrum objects in approximate creation order This is different from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.spectrumDisplays">
 <code class="descname">spectrumDisplays</code><a class="headerlink" href="#ccpn.core.Project.Project.spectrumDisplays" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.SpectrumDisplay.SpectrumDisplay,)</em>  - contained SpectrumDisplay objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.SpectrumDisplay.SpectrumDisplay,)</em>  - contained SpectrumDisplay objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.spectrumGroups">
 <code class="descname">spectrumGroups</code><a class="headerlink" href="#ccpn.core.Project.Project.spectrumGroups" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.SpectrumGroup.SpectrumGroup,)</em>  - contained SpectrumGroup objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.SpectrumGroup.SpectrumGroup,)</em>  - contained SpectrumGroup objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.spectrumHits">
 <code class="descname">spectrumHits</code><a class="headerlink" href="#ccpn.core.Project.Project.spectrumHits" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.SpectrumHit.SpectrumHit,)</em>  - contained SpectrumHit objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.SpectrumHit.SpectrumHit,)</em>  - contained SpectrumHit objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.spectrumReferences">
 <code class="descname">spectrumReferences</code><a class="headerlink" href="#ccpn.core.Project.Project.spectrumReferences" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.SpectrumReference.SpectrumReference,)</em>  - contained SpectrumReference objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.SpectrumReference.SpectrumReference,)</em>  - contained SpectrumReference objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.spectrumViews">
 <code class="descname">spectrumViews</code><a class="headerlink" href="#ccpn.core.Project.Project.spectrumViews" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.SpectrumView.SpectrumView,)</em>  - contained SpectrumView objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.SpectrumView.SpectrumView,)</em>  - contained SpectrumView objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.strips">
 <code class="descname">strips</code><a class="headerlink" href="#ccpn.core.Project.Project.strips" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.Strip.Strip,)</em>  - contained Strip objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Strip.Strip,)</em>  - contained Strip objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.structureEnsembles">
 <code class="descname">structureEnsembles</code><a class="headerlink" href="#ccpn.core.Project.Project.structureEnsembles" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.StructureEnsemble.StructureEnsemble,)</em>  - contained StructureEnsemble objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.StructureEnsemble.StructureEnsemble,)</em>  - contained StructureEnsemble objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.substances">
 <code class="descname">substances</code><a class="headerlink" href="#ccpn.core.Project.Project.substances" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Substance.Substance,)</em>  - contained Substance objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Substance.Substance,)</em>  - contained Substance objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="method">
@@ -3237,7 +3265,7 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.tasks">
 <code class="descname">tasks</code><a class="headerlink" href="#ccpn.core.Project.Project.tasks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.Task.Task,)</em>  - contained Task objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Task.Task,)</em>  - contained Task objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">
@@ -3255,7 +3283,7 @@ Return True if save succeeded otherwise return False (or throw error)</p>
 <dl class="attribute">
 <dt id="ccpn.core.Project.Project.windows">
 <code class="descname">windows</code><a class="headerlink" href="#ccpn.core.Project.Project.windows" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.ui._implementation.Window.Window,)</em>  - contained Window objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.ui._implementation.Window.Window,)</em>  - contained Window objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 </dd></dl>
@@ -3377,7 +3405,7 @@ SpectrumHits (for screening/metabolomics) that refer to individual points in the
 <dl class="attribute">
 <dt id="ccpn.core.Residue.Residue.atoms">
 <code class="descname">atoms</code><a class="headerlink" href="#ccpn.core.Residue.Residue.atoms" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Atom.Atom,)</em>  - contained Atom objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Atom.Atom,)</em>  - contained Atom objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3590,7 +3618,7 @@ peaks used to derive restraint</p>
 <dl class="attribute">
 <dt id="ccpn.core.Restraint.Restraint.restraintContributions">
 <code class="descname">restraintContributions</code><a class="headerlink" href="#ccpn.core.Restraint.Restraint.restraintContributions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3896,7 +3924,7 @@ Potential type for restraints</p>
 <dl class="attribute">
 <dt id="ccpn.core.RestraintList.RestraintList.restraintContributions">
 <code class="descname">restraintContributions</code><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.restraintContributions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.RestraintContribution.RestraintContribution,)</em>  - contained RestraintContribution objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -3918,7 +3946,7 @@ Freely settable for now - further enumerations will eventually be introduced.</p
 <dl class="attribute">
 <dt id="ccpn.core.RestraintList.RestraintList.restraints">
 <code class="descname">restraints</code><a class="headerlink" href="#ccpn.core.RestraintList.RestraintList.restraints" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Restraint.Restraint,)</em>  - contained Restraint objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Restraint.Restraint,)</em>  - contained Restraint objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4128,7 +4156,7 @@ Row number on plate</p>
 <dl class="attribute">
 <dt id="ccpn.core.Sample.Sample.sampleComponents">
 <code class="descname">sampleComponents</code><a class="headerlink" href="#ccpn.core.Sample.Sample.sampleComponents" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.SampleComponent.SampleComponent,)</em>  - contained SampleComponent objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.SampleComponent.SampleComponent,)</em>  - contained SampleComponent objects in name order This is identical to the standard sorting order.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4504,13 +4532,13 @@ File header size in bytes.</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.integralLists">
 <code class="descname">integralLists</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.integralLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.IntegralList.IntegralList,)</em>  - contained IntegralList objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.IntegralList.IntegralList,)</em>  - contained IntegralList objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.integrals">
 <code class="descname">integrals</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.integrals" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Integral.Integral,)</em>  - contained Integral objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Integral.Integral,)</em>  - contained Integral objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4642,13 +4670,13 @@ Data type of numbers stored in data matrix (&#8216;int&#8217; or &#8216;float&#8
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.peakLists">
 <code class="descname">peakLists</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.peakLists" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.PeakList.PeakList,)</em>  - contained PeakList objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.PeakList.PeakList,)</em>  - contained PeakList objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.peaks">
 <code class="descname">peaks</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.peaks" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Peak.Peak,)</em>  - contained Peak objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Peak.Peak,)</em>  - contained Peak objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4730,7 +4758,7 @@ level multiplier for positive contours</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.pseudoDimensions">
 <code class="descname">pseudoDimensions</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.pseudoDimensions" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.PseudoDimension.PseudoDimension,)</em>  - contained PseudoDimension objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.PseudoDimension.PseudoDimension,)</em>  - contained PseudoDimension objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4839,7 +4867,7 @@ SpectrumGroups that contain Spectrum</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.spectrumHits">
 <code class="descname">spectrumHits</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.spectrumHits" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.SpectrumHit.SpectrumHit,)</em>  - contained SpectrumHit objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.SpectrumHit.SpectrumHit,)</em>  - contained SpectrumHit objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4853,7 +4881,7 @@ SpectrumGroups that contain Spectrum</p>
 <dl class="attribute">
 <dt id="ccpn.core.Spectrum.Spectrum.spectrumReferences">
 <code class="descname">spectrumReferences</code><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.spectrumReferences" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.SpectrumReference.SpectrumReference,)</em>  - contained SpectrumReference objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.SpectrumReference.SpectrumReference,)</em>  - contained SpectrumReference objects in order of underlying key. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5355,7 +5383,7 @@ ID number of StructureEnsemble, used in Pid and to identify the StructureEnsembl
 <dl class="attribute">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.models">
 <code class="descname">models</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.models" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>(&#8216;ccpn.core.Model.Model,)</em>  - contained Model objects sorted by id</p>
+<dd><p>- <em>(&#8216;ccpn.core.Model.Model,)</em>  - contained Model objects in creation order. This may differ from the standard sorting order</p>
 </dd></dl>
 
 <dl class="method">

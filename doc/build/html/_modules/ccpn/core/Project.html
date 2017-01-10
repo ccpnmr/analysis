@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10012 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10094 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -164,7 +164,7 @@
     <span class="c1"># self._pid2Obj[self.shortClassName] = dd</span>
     <span class="c1"># dd[_id] = self</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="n">wrappedData</span><span class="o">.</span><span class="n">name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
 
     <span class="c1"># Set up notification machinery</span>
@@ -234,9 +234,16 @@
   <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;String representation&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
-      <span class="k">return</span> <span class="s2">&quot;&lt;ccpn.Project:isDeleted=True&gt;&quot;</span>
+      <span class="k">return</span> <span class="s2">&quot;&lt;ccpn.core.Project:</span><span class="si">%s</span><span class="s2">, isDeleted=True&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
     <span class="k">else</span><span class="p">:</span>
-      <span class="k">return</span> <span class="s2">&quot;&lt;ccpn.Project:name=</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+      <span class="k">return</span> <span class="s2">&quot;&lt;ccpn.core.Project:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;String representation&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">isDeleted</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;&lt;PR:</span><span class="si">%s</span><span class="s2">, isDeleted=True&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="s2">&quot;&lt;PR:</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
 
   <span class="c1"># CCPN properties  </span>
@@ -257,10 +264,14 @@
 <span class="sd">    Unlike lower-level functions, this function ensures that data in high level caches are saved.</span>
 <span class="sd">    Return True if save succeeded otherwise return False (or throw error)&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_flushCachedData</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">saveProject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">newPath</span><span class="o">=</span><span class="n">newPath</span><span class="p">,</span>
-                             <span class="n">changeBackup</span><span class="o">=</span><span class="n">changeBackup</span><span class="p">,</span> <span class="n">createFallback</span><span class="o">=</span><span class="n">createFallback</span><span class="p">,</span>
-                             <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">,</span> <span class="n">checkValid</span><span class="o">=</span><span class="n">checkValid</span><span class="p">,</span>
-                             <span class="n">changeDataLocations</span><span class="o">=</span><span class="n">changeDataLocations</span><span class="p">)</span></div>
+    <span class="n">savedOk</span> <span class="o">=</span>  <span class="n">apiIo</span><span class="o">.</span><span class="n">saveProject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">newPath</span><span class="o">=</span><span class="n">newPath</span><span class="p">,</span>
+                                 <span class="n">changeBackup</span><span class="o">=</span><span class="n">changeBackup</span><span class="p">,</span> <span class="n">createFallback</span><span class="o">=</span><span class="n">createFallback</span><span class="p">,</span>
+                                 <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">,</span> <span class="n">checkValid</span><span class="o">=</span><span class="n">checkValid</span><span class="p">,</span>
+                                 <span class="n">changeDataLocations</span><span class="o">=</span><span class="n">changeDataLocations</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">savedOk</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">savedOk</span></div>
 
   
   <span class="nd">@property</span>
@@ -377,13 +388,13 @@
     <span class="k">finally</span><span class="p">:</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_endDeleteCommandBlock</span><span class="p">(</span><span class="o">*</span><span class="n">apiObjs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Project.renameObject"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.renameObject">[docs]</a>  <span class="k">def</span> <span class="nf">renameObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectOrPid</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="n">AbstractWrapperObject</span><span class="p">],</span> <span class="n">newName</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Rename object indicated by objectOrPid to name newName</span>
-<span class="sd">    NB at last one class (Substance) has a two-art name - these are passed as one,</span>
-<span class="sd">    dot-separated string (e.g. &#39;Lysozyme.U13C&#39;&quot;&quot;&quot;</span>
-    <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">objectOrPid</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objectOrPid</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">objectOrPid</span>
-    <span class="n">names</span> <span class="o">=</span> <span class="n">newName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-    <span class="n">obj</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="o">*</span><span class="n">names</span><span class="p">)</span></div>
+  <span class="c1"># def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):</span>
+  <span class="c1">#   &quot;&quot;&quot;Rename object indicated by objectOrPid to name newName</span>
+  <span class="c1">#   NB at last one class (Substance) has a two-part name - these are passed as one,</span>
+  <span class="c1">#   dot-separated string (e.g. &#39;Lysozyme.U13C&#39;&quot;&quot;&quot;</span>
+  <span class="c1">#   obj = self._data2Obj.get(objectOrPid) if isinstance(objectOrPid, str) else objectOrPid</span>
+  <span class="c1">#   names = newName.split(&#39;.&#39;)</span>
+  <span class="c1">#   obj.rename(*names)</span>
 
 <div class="viewcode-block" id="Project.execute"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Project.execute">[docs]</a>  <span class="k">def</span> <span class="nf">execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pid</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="o">**</span><span class="n">kwparams</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Get the object identified by pid, execute object.funcName(\*params, \*\*kwparams)</span>

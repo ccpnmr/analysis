@@ -297,7 +297,7 @@ class RestraintContribution(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Restraint)-> list:
     """get wrappedData - all ConstraintContribution children of parent ConstraintList"""
-    return parent._wrappedData.contributions
+    return parent._wrappedData.sortedContributions()
 
 # Connections to parents:
 def _newRestraintContribution(self:Restraint, targetValue:float=None, error:float=None,

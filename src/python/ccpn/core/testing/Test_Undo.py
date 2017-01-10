@@ -41,8 +41,12 @@ class ComplexUndoTest(WrapperTesting):
     project._undo.newWaypoint()
     molSystem = project.findFirstMolSystem(code='MS1')
     chainA = molSystem.findFirstChain(code='A')
-    chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
-    project._undo.undo()
+    self.project.blankNotification()
+    try:
+      chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+      project._undo.undo()
+    finally:
+      self.project.unblankNotification()
     project.checkAllValid()
 
   def test_make_chain_undo_redo(self):
@@ -51,9 +55,13 @@ class ComplexUndoTest(WrapperTesting):
     project._undo.newWaypoint()
     molSystem = project.findFirstMolSystem(code='MS1')
     chainA = molSystem.findFirstChain(code='A')
-    chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
-    project._undo.undo()
-    project._undo.redo()
+    self.project.blankNotification()
+    try:
+      chainB = molSystem.newChain(code='X', molecule=chainA.molecule)
+      project._undo.undo()
+      project._undo.redo()
+    finally:
+      self.project.unblankNotification()
     project.checkAllValid()
 
 

@@ -157,7 +157,7 @@ class Mark(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:Task)-> list:
     """get wrappedData (ccp.gui.windows) for all Window children of parent NmrProject.windowStore"""
 
-    return parent._wrappedData.marks
+    return parent._wrappedData.sortedMarks()
 
 
 # newMark functions

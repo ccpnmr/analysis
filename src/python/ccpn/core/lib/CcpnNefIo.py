@@ -859,10 +859,10 @@ class CcpnNefWriter:
     saveFrames.append(self.makeNefMetaData(project))
 
     # Chains
-    saveFrames.append(self.chains2Nef(project.chains))
+    saveFrames.append(self.chains2Nef(sorted(project.chains)))
 
     # ChemicalShiftLists
-    for obj in project.chemicalShiftLists:
+    for obj in sorted(project.chemicalShiftLists):
       saveFrames.append(self.chemicalShiftList2Nef(obj))
 
     # RestraintLists and
@@ -873,7 +873,7 @@ class CcpnNefWriter:
       saveFrames.append(self.restraintList2Nef(obj, singleDataSet=singleDataSet))
 
     # Spectra
-    for obj in project.spectra:
+    for obj in sorted(project.spectra):
       # NB we get multiple saveframes, one per peakList
       saveFrames.extend(self.spectrum2Nef(obj))
 
@@ -888,11 +888,11 @@ class CcpnNefWriter:
     #   saveFrames.append(self.spectrumGroup2Nef(obj))
 
     # Samples
-    for obj in project.samples:
+    for obj in sorted(project.samples):
       saveFrames.append(self.sample2Nef(obj))
 
     # Substances
-    for obj in project.substances:
+    for obj in sorted(project.substances):
       saveFrames.append(self.substance2Nef(obj))
 
     # # NmrChains
@@ -903,7 +903,7 @@ class CcpnNefWriter:
     #   saveFrames.append(self.dataSet2Nef(obj))
 
     # Notes
-    saveFrame = self.notes2Nef(project.notes)
+    saveFrame = self.notes2Nef(sorted(project.notes))
     if saveFrame:
       saveFrames.append(saveFrame)
 
@@ -912,7 +912,7 @@ class CcpnNefWriter:
     if saveFrame:
       saveFrames.append(saveFrame)
 
-    # make and return dataBlock with sameframes in export order
+    # make and return dataBlock with saveframes in export order
     result = StarIo.NmrDataBlock(name=self.project.name)
     for saveFrame in self._saveFrameNefOrder(saveFrames):
       result.addItem(saveFrame['sf_framecode'], saveFrame)
@@ -983,7 +983,7 @@ class CcpnNefWriter:
 
       index = 0
       for chain in chains:
-        for residue in chain.residues:
+        for residue in sorted(chain.residues):
           index += 1
           rowdata = self._loopRowData(loopName, residue)
           rowdata['index'] = index
@@ -1021,21 +1021,32 @@ class CcpnNefWriter:
     nmrAtomLoopName = 'nmr_atom'
     nmrAtomLoop = result[nmrAtomLoopName]
 
-    for nmrChain in project.nmrChains:
+    for nmrChain in sorted(project.nmrChains):
       rowdata = self._loopRowData(nmrChainLoopName, nmrChain)
       rowdata['serial'] = nmrChain.serial
       nmrChainLoop.newRow(rowdata)
 
-      # NB this makes sure that connected stretches are given in order.
-      nmrResidues = nmrChain.mainNmrResidues
-      for nmrResidue in nmrResidues:
+      # # NB this makes sure that connected stretches are given in order.
+      # nmrResidues = nmrChain.mainNmrResidues
+      # for nmrResidue in nmrResidues:
+      #   rowdata = self._loopRowData(nmrResidueLoopName, nmrResidue)
+      #   rowdata['serial'] = nmrResidue.serial
+      #   nmrResidueLoop.newRow(rowdata)
+      #
+      #   nmrResidues.extend(nmrResidue.offsetNmrResidues)
+      #
+      #   for nmrAtom in nmrResidue.nmrAtoms:
+      #     rowdata = self._loopRowData(nmrAtomLoopName, nmrAtom)
+      #     rowdata['serial'] = nmrAtom.serial
+      #     nmrAtomLoop.newRow(rowdata)
+
+      # Use sorting - should give correct results
+      for nmrResidue in sorted(nmrChain.nmrResidues):
         rowdata = self._loopRowData(nmrResidueLoopName, nmrResidue)
         rowdata['serial'] = nmrResidue.serial
         nmrResidueLoop.newRow(rowdata)
 
-        nmrResidues.extend(nmrResidue.offsetNmrResidues)
-
-        for nmrAtom in nmrResidue.nmrAtoms:
+        for nmrAtom in sorted(nmrResidue.nmrAtoms):
           rowdata = self._loopRowData(nmrAtomLoopName, nmrAtom)
           rowdata['serial'] = nmrAtom.serial
           nmrAtomLoop.newRow(rowdata)
@@ -1057,7 +1068,7 @@ class CcpnNefWriter:
     loop = result[loopName]
     atomCols = ['chain_code', 'sequence_code', 'residue_name', 'atom_name',]
     # NB We cannot use nmrAtom.id.split('.'), since the id has reserved characters remapped
-    shifts = chemicalShiftList.chemicalShifts
+    shifts = sorted(chemicalShiftList.chemicalShifts)
     if shifts:
       for shift in shifts:
         rowdata = self._loopRowData(loopName, shift)
@@ -1206,7 +1217,7 @@ class CcpnNefWriter:
           loop.removeColumn(tag, removeData=True)
 
     index = 0
-    for contribution in restraintList.restraintContributions:
+    for contribution in sorted(restraintList.restraintContributions):
       rowdata = self._loopRowData(loopName, contribution)
       for item in contribution.restraintItems:
         row = loop.newRow(rowdata)
@@ -1234,7 +1245,7 @@ class CcpnNefWriter:
 
     result = []
 
-    peakLists = spectrum.peakLists
+    peakLists = sorted(spectrum.peakLists)
     if not peakLists:
       peakLists = [spectrum.newPeakList()]
 
@@ -1373,12 +1384,12 @@ class CcpnNefWriter:
     }
 
     index = 0
-    for peak in peakList.peaks:
+    for peak in sorted(peakList.peaks):
       rowdata = self._loopRowData(loopName, peak)
 
       assignments = peak.assignedNmrAtoms
       if assignments:
-        for tt in assignments:
+        for tt in sorted(assignments):
           # Make one row per assignment
           row = loop.newRow(rowdata)
           index += 1
@@ -1440,7 +1451,7 @@ class CcpnNefWriter:
       for tag in loop.columns:
         if any(tag.endswith(x) for x in removeNameEndings):
           loop.removeColumn(tag)
-      for integralList in spectrum.integralLists:
+      for integralList in sorted(spectrum.integralLists):
         row = loop.newRow(self._loopRowData(loopName, integralList))
         row['serial'] = integralList.serial
 
@@ -1449,7 +1460,7 @@ class CcpnNefWriter:
       for tag in loop.columns:
         if any(tag.endswith(x) for x in removeNameEndings):
           loop.removeColumn(tag)
-      for integral in spectrum.integrals:
+      for integral in sorted(spectrum.integrals):
         row = loop.newRow(self._loopRowData(loopName, integral))
         row['integral_serial'] = integral.serial
         values =integral.slopes
@@ -1476,11 +1487,11 @@ class CcpnNefWriter:
   def peakRestraintLinks2Nef(self, restraintLists:Sequence[RestraintList]) -> StarIo.NmrSaveFrame:
 
     data = []
-    for restraintList in restraintLists:
+    for restraintList in sorted(restraintLists):
       restraintListFrame = self.ccpn2SaveFrameName.get(restraintList)
       if restraintListFrame is not None:
-        for restraint in restraintList.restraints:
-          for peak in restraint.peaks:
+        for restraint in sorted(restraintList.restraints):
+          for peak in sorted(restraint.peaks):
             peakListFrame = self.ccpn2SaveFrameName.get(peak.peakList)
             if peakListFrame is not None:
               data.append((peakListFrame, peak.serial, restraintListFrame, restraint.serial))
@@ -1513,9 +1524,9 @@ class CcpnNefWriter:
     # Fill in loop
     loopName = 'ccpn_group_spectrum'
     loop = result[loopName]
-    spectra = spectrumGroup.spectra
+    spectra = sorted(spectrumGroup.spectra)
     if spectra:
-      for spectrum in spectrumGroup.spectra:
+      for spectrum in spectra:
         loop.newRow(spectrum.name)
     else:
       del result[loopName]
@@ -1535,7 +1546,7 @@ class CcpnNefWriter:
     # Fill in loop
     loopName = 'ccpn_sample_component'
     loop = result[loopName]
-    components = sample.sampleComponents
+    components = sorted(sample.sampleComponents)
     if components:
       for sampleComponent in components:
         loop.newRow(self._loopRowData(loopName, sampleComponent))

@@ -282,7 +282,7 @@ class Residue(AbstractWrapperObject):
     # If the seqId order does not match the sequence we have a problem anyway.
     # NBNB the doe relies on this sorting order to handle position-specific labeling
     # for substances
-    return parent._apiChain.residues
+    return parent._apiChain.sortedResidues()
 
 def getter(self:Residue) -> Residue:
   apiResidue = self._wrappedData

@@ -600,7 +600,7 @@ class Substance(AbstractWrapperObject):
     if componentStore is None:
       return []
     else:
-      return componentStore.components
+      return componentStore.sortedComponents()
 
 # Connections to parents:
 

@@ -271,8 +271,8 @@ class NmrChain(AbstractWrapperObject):
 
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
-    """get wrappedData (Nmr.DataSources) for all NmrChain children of parent Project"""
-    return parent._wrappedData.nmrChains
+    """get wrappedData (Nmr.NmrChains) for all NmrChain children of parent Project"""
+    return parent._wrappedData.sortedNmrChains()
 
 
 def getter(self:Chain) -> NmrChain:

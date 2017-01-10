@@ -22,6 +22,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 import collections
+import operator
 from typing import Tuple
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
@@ -30,7 +31,13 @@ from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 
 class ChemicalShift(AbstractWrapperObject):
-  """Chemical Shift."""
+  """Chemical Shift, containing a ChemicalShift value for the NmrAtom they belong to.
+
+  Chemical shift values are continuously averaged over peaks assigned to the NmrAtom,
+  unless this behaviour is turned off. If the NmrAtom is reassigned, the ChemcalShift
+  is reassigned with it.
+
+  ChemicalShift objects sort as the NmrAtom they belong to."""
   
   #: Short class name, for PID.
   shortClassName = 'CS'
@@ -64,10 +71,7 @@ class ChemicalShift(AbstractWrapperObject):
   def _localCcpnSortKey(self) -> Tuple:
     """Local sorting key, in context of parent."""
 
-    # NBNB NmrAtoms sort by Resonance serial,  within the NmrResidue,
-    # but chemicalShifts should sort by atom name
-    nmrAtom = self.nmrAtom
-    return nmrAtom.nmrResidue._ccpnSortKey[2:] + (nmrAtom.name,)
+    return self.nmrAtom._ccpnSortKey[2:]
     
   @property
   def _parent(self) -> Project:
@@ -122,7 +126,8 @@ class ChemicalShift(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent: ChemicalShiftList)-> list:
     """get wrappedData (ApiShift) for all ChemicalShift children of parent ChemicalShiftList"""
     # NB this is NOT the right sorting order, but sorting on atomId is not possible at the API level
-    return parent._wrappedData.measurements
+    return sorted(parent._wrappedData.measurements,
+                  key=operator.attrgetter('resonance.serial'))
 
   # def __str__(self):
   #   """Readable string representation"""

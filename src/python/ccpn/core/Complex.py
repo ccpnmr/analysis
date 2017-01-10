@@ -127,7 +127,7 @@ class Complex(AbstractWrapperObject):
     if molSystem is None:
       return []
     else:
-      return molSystem.chainGroups
+      return molSystem.sortedChainGroups()
 
 
 

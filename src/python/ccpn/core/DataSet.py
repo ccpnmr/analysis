@@ -143,7 +143,7 @@ class DataSet(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData for all NmrConstraintStores linked to NmrProject"""
-    return parent._wrappedData.nmrConstraintStores
+    return parent._wrappedData.sortedNmrConstraintStores()
 
   def _fetchFixedResonance(self, assignment:str, checkUniqueness:bool=True) -> ApiFixedResonance:
     """Fetch FixedResonance matching assignment string, creating anew if needed.

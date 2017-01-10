@@ -264,7 +264,7 @@ class Chain(AbstractWrapperObject):
     if molSystem is None:
       return []
     else:
-      return molSystem.chains
+      return molSystem.sortedChains()
 
 
 

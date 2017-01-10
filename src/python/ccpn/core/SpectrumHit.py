@@ -197,7 +197,7 @@ For this reason SpectrumHits cannot be renamed."""
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.SpectrumHit) for all SpectrumHit children of parent Spectrum"""
-    return parent._wrappedData.spectrumHits
+    return parent._wrappedData.sortedSpectrumHits()
 
 # Connections to parents:
 def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,

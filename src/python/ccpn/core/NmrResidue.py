@@ -59,7 +59,21 @@ class NmrResidue(AbstractWrapperObject):
   (including '+0'.
 
   NmrResidues that are not offset can be linked into consecutive stretches by putting them
-  into connected NmrChains (see NmrChain). """
+  into connected NmrChains (see NmrChain).
+
+
+  NmrResidue objects behave in there different ways when sorted:
+
+    - If they are assigned to a Residue they sort like the Residue, in sequential order
+
+    - If they belong to a connected NmrChain, they sort by the order they appear in the
+    NmrChain.
+
+    - In other 4cases they sort by creation order.
+
+    - Offset NmrResidues in all cases sort alongside their main NmrResidue, by offset.
+
+  """
   
   #: Short class name, for PID.
   shortClassName = 'NR'
@@ -873,7 +887,7 @@ class NmrResidue(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: NmrChain)-> list:
     """get wrappedData (MolSystem.Residues) for all Residue children of parent Chain"""
-    return parent._wrappedData.resonanceGroups
+    return parent._wrappedData.sortedResonanceGroups()
 
 
 def getter(self:Residue) -> NmrResidue:

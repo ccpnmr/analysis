@@ -223,7 +223,7 @@ class Integral(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: IntegralList)-> Tuple[Nmr.Peak, ...]:
     """get wrappedData (Peaks) for all Integral children of parent IntegralList"""
-    return parent._wrappedData.peaks
+    return parent._wrappedData.sortedPeaks()
 
 # Connections to parents:
 

@@ -178,7 +178,7 @@ class Atom(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Residue)-> list:
     """get wrappedData (MolSystem.Atoms) for all Atom children of parent Residue"""
-    return parent._wrappedData.atoms
+    return parent._wrappedData.sortedAtoms()
 
   def _newAtom(self:Residue, name:str, elementSymbol:str=None) -> 'Atom':
     """Create new Atom within Residue. If elementSymbol is None, it is derived from the name"""

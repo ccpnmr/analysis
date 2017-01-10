@@ -127,7 +127,7 @@ class Note(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData for all Notes linked to NmrProject"""
-    return parent._wrappedData.notes
+    return parent._wrappedData.sortedNotes()
 
 
 def _newNote(self:Project, name:str='Note', text:str=None) -> Note:

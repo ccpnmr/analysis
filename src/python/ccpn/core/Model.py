@@ -140,7 +140,7 @@ class Model(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: StructureEnsemble)-> list:
     """get wrappedData - all Model children of parent StructureEnsemble"""
-    return parent._wrappedData.models
+    return parent._wrappedData.sortedModels()
 
 def _newModel(self:StructureEnsemble, title:str=None, comment:str=None,
               coordinateData:numpy.ndarray=None,

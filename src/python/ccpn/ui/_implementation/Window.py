@@ -102,7 +102,7 @@ class Window(AbstractWrapperObject):
     if windowStore is None:
       return []
     else:
-      return windowStore.windows
+      return windowStore.sortedWindows()
 
 # newWindow function
 def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -> Window:

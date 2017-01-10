@@ -205,7 +205,7 @@ class SampleComponent(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Sample)-> list:
     """get wrappedData (SampleComponent) for all SampleComponent children of parent Sample"""
-    return parent._wrappedData.sampleComponents
+    return parent._wrappedData.sortedSampleComponents()
 
 
 def getter(self:SpectrumHit) -> SampleComponent:

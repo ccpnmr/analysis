@@ -247,7 +247,7 @@ class SpectrumReference(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.DataDimRefs) for all Spectrum children of parent Spectrum"""
-    return [y for x in parent._wrappedData.dataDims if hasattr(x, 'dataDimRefs')
+    return [y for x in parent._wrappedData.sortedDataDims() if hasattr(x, 'dataDimRefs')
             for y in x.sortedDataDimRefs()]
 
 

@@ -159,7 +159,8 @@ class ChemicalShiftList(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> List[Nmr.ShiftList]:
     """get wrappedData (ShiftLists) for all ShiftList children of parent Project"""
-    return list(x for x in parent._apiNmrProject.measurementLists if x.className == 'ShiftList')
+    return list(x for x in parent._apiNmrProject.sortedMeasurementLists()
+                if x.className == 'ShiftList')
 
   # def __str__(self):
   #   """Readable string representation"""

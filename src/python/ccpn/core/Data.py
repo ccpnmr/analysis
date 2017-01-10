@@ -179,7 +179,7 @@ class Data(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:DataSet)-> list:
     """get wrappedData - all Data children of parent NmrConstraintStore"""
-    return parent._wrappedData.data
+    return parent._wrappedData.sortedData()
 
 # Connections to parents:
 

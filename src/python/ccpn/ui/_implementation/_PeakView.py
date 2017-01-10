@@ -89,7 +89,7 @@ class PeakView(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:PeakListView)-> list:
     """get wrappedData (ccpnmr.gui.Task.PeakView) in serial number order"""
-    return parent._wrappedData.peakViews
+    return parent._wrappedData.sortedPeakViews()
 
   #CCPN functions
 

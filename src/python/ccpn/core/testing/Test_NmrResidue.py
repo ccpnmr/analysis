@@ -295,12 +295,12 @@ class NmrStretchTest(WrapperTesting):
     nmrResidues = []
     for residueType in ('TRP', 'THR', None):
       nmrResidues.append(nmrChain.fetchNmrResidue(residueType=residueType))
-    self.assertEqual([x.id for x in nmrChain.mainNmrResidues],
+    self.assertEqual([x.id for x in sorted(nmrChain.mainNmrResidues)],
                      ['@-.@1.TRP', '@-.@2.THR', '@-.@3.', ])
 
     nmrChain2 = self.project.newNmrChain(isConnected=True)
     nmrChain2.mainNmrResidues = reversed(nmrResidues)
-    self.assertEqual([x.id for x in nmrChain2.nmrResidues],
+    self.assertEqual([x.id for x in sorted(nmrChain2.nmrResidues)],
                      ['#2.@3.',  '#2.@2.THR', '#2.@1.TRP',])
 
     nmrChain2.mainNmrResidues[1].disconnect()
@@ -319,13 +319,13 @@ class NmrStretchTest(WrapperTesting):
 
     nmrChain2 = self.project.newNmrChain(isConnected=True)
     nmrChain2.mainNmrResidues = reversed(nmrResidues)
-    self.assertEqual([x.id for x in nmrChain2.nmrResidues],
+    self.assertEqual([x.id for x in sorted(nmrChain2.nmrResidues)],
                      ['#2.@3.',  '#2.@2.THR', '#2.@1.TRP',])
 
     nmrChain2.mainNmrResidues[1].moveToNmrChain(nmrChain)
     self.undo.undo()
     self.undo.redo()
-    self.assertEqual([x.id for x in nmrChain.nmrResidues],
+    self.assertEqual([x.id for x in sorted(nmrChain.nmrResidues)],
                      ['@-.@1.TRP', '@-.@2.THR', '@-.@3.', ])
 
   def test_assigning_connected_stretch(self):
@@ -352,10 +352,10 @@ class NmrStretchTest(WrapperTesting):
                                             mergeToExisting=True)
     self.assertIs(mergedResidue, nmrResidues[2])
     self.undo.undo()
-    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+    self.assertEqual([x.id for x in sorted(self.project.getByPid('NC:X').nmrResidues)],
                      ['X.2.TRP', 'X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
     self.undo.redo()
-    self.assertEqual([x.id for x in self.project.getByPid('NC:X').nmrResidues],
+    self.assertEqual([x.id for x in sorted(self.project.getByPid('NC:X').nmrResidues)],
                      ['X.3.GLU', 'X.4.ARG', 'X.5.THR', 'X.6.TYR',])
 
 
@@ -368,10 +368,10 @@ class NmrResidueTest(WrapperTesting):
     nchain = self.project.getByPid('NC:A')
     nchain0 = self.project.getByPid('NC:@-')
 
-    nr1, nr2 = nchain.nmrResidues[8:10]
+    nr1, nr2 = sorted(nchain.nmrResidues)[8:10]
     res1 = nr1.residue
     res2 = nr2.residue
-    res3 = self.project.chains[0].residues[2]
+    res3 = sorted(self.project.chains[0].residues)[2]
     nr3 = res3.nmrResidue
     nr2.residue = None
     self.assertEqual(nr2.longPid, "NmrResidue:A.@2.ARG")
@@ -395,7 +395,7 @@ class NmrResidueTest(WrapperTesting):
 
   def test_rename(self):
     nchain = self.project.getByPid('NC:A')
-    nr1, nr2 = nchain.nmrResidues[8:10]
+    nr1, nr2 = sorted(nchain.nmrResidues)[8:10]
     self.assertEqual(nr1.id, "A.10.TYR")
     nr1.deassign()
     self.assertEqual(nr1.id, "A.@1.")
@@ -416,7 +416,7 @@ class NmrResidueTest(WrapperTesting):
 
   def test_reassign(self):
     nchain = self.project.getByPid('NC:A')
-    nr1, nr2 = nchain.nmrResidues[8:10]
+    nr1, nr2 = sorted(nchain.nmrResidues)[8:10]
     self.assertEqual(nr1.id, "A.10.TYR")
     nr1 = nr1.assignTo(chainCode='A', sequenceCode=999)
     self.assertEqual(nr1.id, "A.999.TYR")

@@ -123,7 +123,7 @@ class SpectrumGroup(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData for all SpectrumGroups linked to NmrProject"""
-    return parent._wrappedData.spectrumGroups
+    return parent._wrappedData.sortedSpectrumGroups()
 
 
 def _newSpectrumGroup(self:Project, name:str, spectra=()) -> SpectrumGroup:

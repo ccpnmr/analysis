@@ -87,6 +87,14 @@ class NmrAtom(AbstractWrapperObject):
     return self._wrappedData.name.translate(Pid.remapSeparators)
 
   @property
+  def _localCcpnSortKey(self) -> Tuple:
+    """Local sorting key, in context of parent."""
+
+    # We want sorting by name, even though Resonances have serials
+    return (self._key,)
+
+
+  @property
   def _idTuple(self) -> AtomIdTuple:
     """ID as chainCode, sequenceCode, residueType, atomName namedtuple
     NB Unlike the _id and key, these do NOT have reserved characters mapped to '^'
@@ -171,9 +179,9 @@ class NmrAtom(AbstractWrapperObject):
     return sorted(data2Obj[x] for x in set(apiPeaks))
 
   def rename(self, value:str=None):
-    """Rename the NmrAtom, changing ita name, Pid, and internal representation."""
+    """Rename the NmrAtom, changing its name, Pid, and internal representation."""
 
-    # NBNB TODO change so you can set names of teh form '@123' (?)
+    # NBNB TODO change so you can set names of the form '@123' (?)
 
     # NB This is a VERY special case
     # - API code and notifiers will take care of resetting id and Pid
@@ -328,7 +336,7 @@ class NmrAtom(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: NmrResidue)-> list:
     """get wrappedData (ApiResonance) for all NmrAtom children of parent NmrResidue"""
-    return parent._wrappedData.resonances
+    return parent._wrappedData.sortedResonances()
 
 def getter(self:Atom) -> NmrAtom:
   return self._project.getNmrAtom(self._id)

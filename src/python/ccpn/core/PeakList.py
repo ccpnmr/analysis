@@ -149,7 +149,7 @@ class PeakList(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (PeakLists) for all PeakList children of parent Spectrum"""
-    return [x for x in parent._wrappedData.peakLists if x.dataType == 'Peak']
+    return [x for x in parent._wrappedData.sortedPeakLists() if x.dataType == 'Peak']
 
   # Library functions
 

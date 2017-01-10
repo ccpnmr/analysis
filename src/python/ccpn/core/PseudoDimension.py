@@ -156,7 +156,7 @@ experiments."""
   def _getAllWrappedData(cls, parent: Spectrum)-> list:
     """get wrappedData (Nmr.SampledDataDims) for all DataDim children of parent Spectrum"""
 
-    return [x for x in parent._wrappedData.dataDims if x.className == 'SampledDataDim']
+    return [x for x in parent._wrappedData.sortedDataDims() if x.className == 'SampledDataDim']
 
 # No 'new' function - PseudoDimensions are made on spectrum load
 

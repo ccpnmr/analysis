@@ -144,7 +144,7 @@ class Module(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Task)-> list:
     """get wrappedData (ccp.gui.Module) for all GenericModule children of parent Task"""
-    return [x for x in parent._wrappedData.modules if isinstance(x, ApiGenericModule)]
+    return [x for x in parent._wrappedData.sortedModules() if isinstance(x, ApiGenericModule)]
 
 
 # newModule functions

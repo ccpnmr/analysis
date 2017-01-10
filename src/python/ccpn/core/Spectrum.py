@@ -940,7 +940,7 @@ class Spectrum(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: Project)-> list:
     """get wrappedData (Nmr.DataSources) for all Spectrum children of parent Project"""
-    return list(x for y in parent._wrappedData.experiments for x in y.dataSources)
+    return list(x for y in parent._wrappedData.sortedExperiments() for x in y.sortedDataSources())
 
   # Library functions
 

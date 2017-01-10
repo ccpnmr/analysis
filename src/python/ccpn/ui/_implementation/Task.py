@@ -114,7 +114,7 @@ class Task(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (ccp.gui.guiTasks) for all GuiTasks connected to NmrProject"""
-    return parent._wrappedData.guiTasks
+    return parent._wrappedData.sortedGuiTasks()
 
 
   # # NBNB Commented out 22/6/2016 as the functions are not in use (and likely never will be

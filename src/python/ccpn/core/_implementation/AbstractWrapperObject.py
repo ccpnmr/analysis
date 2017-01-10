@@ -169,7 +169,7 @@ class AbstractWrapperObject():
     className = self.className
     if parent is None:
       # This is the project
-      _id = ''
+      _id = self._wrappedData.name
       sortKey = ('',)
     elif parent is project:
       _id = str(self._key)
@@ -331,6 +331,11 @@ class AbstractWrapperObject():
   @classmethod
   def _getAllWrappedData(cls, parent)-> list:
     """get list of wrapped data objects for each class that is a child of parent
+
+    List must be sorted at the API level 1) to give a reproducible order,
+    2) using serial (if present) and otherwise a natural (i.e.NON-object) key.
+    Wrapper level sorting may be (and sometimes is) different.
+
     """
     if cls not in parent._childClasses:
       raise Exception
@@ -420,12 +425,40 @@ class AbstractWrapperObject():
           func = functools.partial(AbstractWrapperObject._allDescendants,
                                             descendantClasses=newAncestors[ii+1:])
           # func.__annotations__['return'] = typing.Tuple[cls, ...]
-          prop = property(func,
-                            None, None,
-                            ("\- *(%s,)*  - contained %s objects sorted by id" %
-                              (classFullName, cls.className)
-                            )
-                          )
+          if cls.className == 'NmrResidue':
+            docTemplate = (
+              "\- *(%s,)*  - contained %s objects in sequential order "
+              + "(for assigned or connected NmrChains), otherwise in creation order. "
+              + "This is identical to the standard sorting order."
+            )
+          elif cls.className == 'ChemicalShift':
+            docTemplate = (
+              "\- *(%s,)*  - contained %s objects in NmrAtom creation order "
+                           + "This is different from the standard sorting order"
+            )
+          elif cls.className == 'Spectrum':
+            docTemplate = (
+              "\- *(%s,)*  - contained %s objects in approximate creation order "
+                           + "This is different from the standard sorting order"
+            )
+          elif cls.className == 'Residue':
+            docTemplate = (
+              "\- *(%s,)*  - contained %s objects in sequential order "
+                           + "This is identical to the standard sorting order"
+            )
+          elif hasattr(cls, 'serial'):
+            docTemplate = ("\- *(%s,)*  - contained %s objects in creation order. "
+                           + "This may differ from the standard sorting order")
+          elif cls.className in ('Data', 'Atom', 'Chain', 'Substance', 'SampleComponent'):
+            docTemplate = (
+              "\- *(%s,)*  - contained %s objects in name order "
+              + "This is identical to the standard sorting order."
+            )
+          else:
+            docTemplate = ("\- *(%s,)*  - contained %s objects in order of underlying key. "
+                           + "This may differ from the standard sorting order")
+
+          prop = property(func, None, None, docTemplate % (classFullName, cls.className))
           setattr(ancestor, linkName, prop)
 
 
@@ -493,11 +526,11 @@ class AbstractWrapperObject():
       # NB this may sometimes (during undo/redo) get called when not all objects
       # are finalised - hence the test if y is None
       objects = list(y for y in (data2Obj.get(x) for x in ll) if y is not None)
-      # if cls.className in ('ChemicalShift',):
-      #   # These cannot be correctly sorted at the API level
-      #   objects.sort()
+      if cls.className == 'NmrResidue':
+        # These must always be sorted
+        objects.sort()
     #
-    return sorted(objects)
+    return objects
 
   def _initializeAll(self):
     """Initialize children, using existing objects in data model"""
@@ -581,7 +614,12 @@ class AbstractWrapperObject():
     """Get list of objects that have self as a parent"""
 
     getDataObj = self._project._data2Obj.get
-    return sorted(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+    result = list(getDataObj(y) for x in self._childClasses for y in x._getAllWrappedData(self))
+    if self.className == 'NmrChain':
+      # Special case - NmrResidues must always be sorted
+      result.sort()
+
+    return result
 
   # Notifiers and related functions:
 

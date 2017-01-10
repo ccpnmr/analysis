@@ -115,7 +115,7 @@ class Project(AbstractWrapperObject):
     # self._pid2Obj[self.shortClassName] = dd
     # dd[_id] = self
 
-    self._id = None
+    self._id = wrappedData.name
     self._resetIds()
 
     # Set up notification machinery
@@ -185,9 +185,16 @@ class Project(AbstractWrapperObject):
   def __repr__(self):
     """String representation"""
     if self.isDeleted:
-      return "<ccpn.Project:isDeleted=True>"
+      return "<ccpn.core.Project:%s, isDeleted=True>" % self.name
     else:
-      return "<ccpn.Project:name=%s>" % self.name
+      return "<ccpn.core.Project:%s>" % self.name
+
+  def __str__(self):
+    """String representation"""
+    if self.isDeleted:
+      return "<PR:%s, isDeleted=True>" % self.name
+    else:
+      return "<PR:%s>" % self.name
 
 
   # CCPN properties  
@@ -208,10 +215,14 @@ class Project(AbstractWrapperObject):
     Unlike lower-level functions, this function ensures that data in high level caches are saved.
     Return True if save succeeded otherwise return False (or throw error)"""
     self._flushCachedData()
-    return apiIo.saveProject(self._wrappedData.root, newPath=newPath,
-                             changeBackup=changeBackup, createFallback=createFallback,
-                             overwriteExisting=overwriteExisting, checkValid=checkValid,
-                             changeDataLocations=changeDataLocations)
+    savedOk =  apiIo.saveProject(self._wrappedData.root, newPath=newPath,
+                                 changeBackup=changeBackup, createFallback=createFallback,
+                                 overwriteExisting=overwriteExisting, checkValid=checkValid,
+                                 changeDataLocations=changeDataLocations)
+    if savedOk:
+      self._resetIds()
+    #
+    return savedOk
 
   
   @property
@@ -328,13 +339,13 @@ class Project(AbstractWrapperObject):
     finally:
       self._endDeleteCommandBlock(*apiObjs)
 
-  def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
-    """Rename object indicated by objectOrPid to name newName
-    NB at last one class (Substance) has a two-art name - these are passed as one,
-    dot-separated string (e.g. 'Lysozyme.U13C'"""
-    obj = self._data2Obj.get(objectOrPid) if isinstance(objectOrPid, str) else objectOrPid
-    names = newName.split('.')
-    obj.rename(*names)
+  # def renameObject(self, objectOrPid:typing.Union[str,AbstractWrapperObject], newName:str):
+  #   """Rename object indicated by objectOrPid to name newName
+  #   NB at last one class (Substance) has a two-part name - these are passed as one,
+  #   dot-separated string (e.g. 'Lysozyme.U13C'"""
+  #   obj = self._data2Obj.get(objectOrPid) if isinstance(objectOrPid, str) else objectOrPid
+  #   names = newName.split('.')
+  #   obj.rename(*names)
 
   def execute(self, pid, funcName, *params, **kwparams):
     """Get the object identified by pid, execute object.funcName(\*params, \*\*kwparams)

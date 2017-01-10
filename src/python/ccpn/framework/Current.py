@@ -24,29 +24,56 @@ __version__ = "$Revision$"
 import operator
 import typing
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Spectrum import Spectrum
-from ccpn.core.SpectrumGroup import SpectrumGroup
-from ccpn.core.Peak import Peak
-from ccpn.core.Integral import Integral
+from ccpn.core.Chain import Chain
+from ccpn.core.Residue import Residue
 from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.ChemicalShiftList import ChemicalShiftList
+from ccpn.core.ChemicalShift import ChemicalShift
+# from ccpn.core.Spectrum import Spectrum
+from ccpn.core.SpectrumGroup import SpectrumGroup
+from ccpn.core.Peak import Peak
+# from ccpn.core.Integral import Integral
 from ccpn.ui._implementation.Strip import Strip
-from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
+# from ccpn.ui._implementation.SpectrumDisplay import SpectrumDisplay
 
-# TODO: refactoring using _definitions needed
-# Classes (in addition to Project) that have a corresponding 'current' field
-_currentClasses = [SpectrumGroup, Peak, NmrChain, NmrResidue, NmrAtom,
-                   Strip, ]
+_currentClasses = {
+  SpectrumGroup:{'singularOnly':True},
+  Peak:{},
+  NmrChain:{},
+  NmrResidue:{},
+  NmrAtom:{},
+  Strip:{'singularOnly':True},
+  Chain:{},
+  Residue:{},
+  ChemicalShiftList:{},
+  ChemicalShift:{}
+}
 
-# 'current' fields that do not correspond to a wrapper class. Must be plural and end in 's'
-_currentExtraFields = ['positions', 'cursorPositions']
-
-_fieldsAreSingularOnly = ['spectrumGroups', 'cursorPositions', 'strips']
+_currentExtraFields = {
+  'positions':{'docTemplate':"last cursor %s"},
+  'cursorPositions':{'singularOnly':True, 'docTemplate':'last cursor %s - (posX,posY) tuple'},
+  'axisCodes':{'singularOnly':True, 'docTemplate':'last selected %s'},
+}
 
 # Fields in current (there is a current.xyz attribute with related functions
 # for every 'xyz' in fields
-_fields = [x._pluralLinkName for x in _currentClasses] + _currentExtraFields
+_fields = [x._pluralLinkName for x in _currentClasses] + list(_currentExtraFields.keys())
+
+# # TODO: refactoring using _definitions needed
+# # Classes (in addition to Project) that have a corresponding 'current' field
+# _currentClasses = [SpectrumGroup, Peak, NmrChain, NmrResidue, NmrAtom,
+#                    Strip, Chain, Residue, ChemicalShiftList, ChemicalShift]
+#
+# # 'current' fields that do not correspond to a wrapper class. Must be plural and end in 's'
+# _currentExtraFields = ['positions', 'cursorPositions']
+#
+# _fieldsAreSingularOnly = ['spectrumGroups', 'cursorPositions', 'strips']
+
+# # Fields in current (there is a current.xyz attribute with related functions
+# # for every 'xyz' in fields
+# _fields = [x._pluralLinkName for x in _currentClasses] + _currentExtraFields
 
 def noCap(string):
   """return de-capitalised string"""
@@ -56,50 +83,74 @@ def noCap(string):
 
 class Current:
 
-  # Definitions of the attributes of the Current object
-  _definitions = [
-    # attribute name,                      storage name,        description
-    # (noCap(Integral.className),            '_integrals[-1]',   'last selected integral'),
-    # (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
-
-    (noCap(NmrAtom.className),             '_nmrAtoms[-1]',    'last selected nmrAtom'),
-    (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
-
-    (noCap(NmrChain.className),            '_nmrChains[-1]',   'last selected nmrChain'),
-    (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
-
-    (noCap(NmrResidue.className),          '_nmrResidues[-1]', 'last selected nmrResidue'),
-    (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
-
-    # ('regions',                            '_regions',         'last selected region'),
-
-    (noCap(Peak.className),                '_peaks[-1]',       'last selected peak'),
-    (noCap(Peak._pluralLinkName),          '_peaks',           'all selected peaks'),
-
-    ('position',                           '_positions[-1]',   'last cursor position'),
-    ('positions',                          '_positions',       'last cursor positions'),
-
-    ('cursorPosition',        '_cursorPositions[-1]', 'last cursor position - (posX,posY) tuple'),
-    # ('cursorPositions',       '_cursorPositions',     'last cursor positions - (posX,posY) tuples'),
-
-    # (noCap(Spectrum.className),            '_spectra[-1]',        'current spectrum'), # broken
-    # (noCap(Spectrum._pluralLinkName),      '_spectra',         'list with all spectra present in a module'), # (broken)
-
-    # (noCap(SpectrumDisplay.className),     '_spectrumDisplay', 'current spectrumDisplay'), # (broken)
-
-    (noCap(SpectrumGroup.className),       '_spectrumGroups[-1]',   'current spectrum'), # broken
-    # (noCap(SpectrumGroup._pluralLinkName), '_spectrumGroups',  'list with all spectra present in a module'), # (broken)
-
-    (noCap(Strip.className),               '_strips[-1]',           'selected strip'),
-    # (noCap(Strip._pluralLinkName),         '_strips',          'lists with all strips'),
-  ]
+  # # Definitions of the attributes of the Current object
+  # _definitions = [
+  #   # attribute name,                      storage name,        description
+  #   # (noCap(Integral.className),            '_integrals[-1]',   'last selected integral'),
+  #   # (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
+  #
+  #   (noCap(NmrAtom.className),             '_nmrAtoms[-1]',    'last selected nmrAtom'),
+  #   (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
+  #
+  #   (noCap(NmrChain.className),            '_nmrChains[-1]',   'last selected nmrChain'),
+  #   (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
+  #
+  #   (noCap(NmrResidue.className),          '_nmrResidues[-1]', 'last selected nmrResidue'),
+  #   (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
+  #
+  #   # ('regions',                            '_regions',         'last selected region'),
+  #
+  #   (noCap(Peak.className),                '_peaks[-1]',       'last selected peak'),
+  #   (noCap(Peak._pluralLinkName),          '_peaks',           'all selected peaks'),
+  #
+  #   ('position',                           '_positions[-1]',   'last cursor position'),
+  #   ('positions',                          '_positions',       'last cursor positions'),
+  #
+  #   ('cursorPosition',        '_cursorPositions[-1]', 'last cursor position - (posX,posY) tuple'),
+  #   # ('cursorPositions',       '_cursorPositions',     'last cursor positions - (posX,posY) tuples'),
+  #
+  #   # (noCap(Spectrum.className),            '_spectra[-1]',        'current spectrum'), # broken
+  #   # (noCap(Spectrum._pluralLinkName),      '_spectra',         'list with all spectra present in a module'), # (broken)
+  #
+  #   # (noCap(SpectrumDisplay.className),     '_spectrumDisplay', 'current spectrumDisplay'), # (broken)
+  #
+  #   (noCap(SpectrumGroup.className),       '_spectrumGroups[-1]',   'current spectrum'), # broken
+  #   # (noCap(SpectrumGroup._pluralLinkName), '_spectrumGroups',  'list with all spectra present in a module'), # (broken)
+  #
+  #   (noCap(Strip.className),               '_strips[-1]',           'selected strip'),
+  #   # (noCap(Strip._pluralLinkName),         '_strips',          'lists with all strips'),
+  # ]
 
   # create the doc-string dynamically from definitions above;
   # cannot do newlines as Python console falls over when querying using the current? syntax (too many newlines?)
-  __doc__ = \
-  """The current object gives access to the collection of active or selected objects and values.\n\nCurrently implemented:\n""" \
-  + '; '.join(('%s (%s)' % (f,v) for f,t,v in _definitions)) \
-  + '\n\nUse print(current) to get a list of attribute, value pairs'
+
+  ll = []
+  for cls in sorted(_currentClasses.keys(), key=operator.attrgetter('className')):
+    ss = noCap(cls.className)
+    ll.append('\n%s (last selected %s)' % (ss, ss))
+    if not _currentClasses[cls].get('singularOnly'):
+      ss = noCap(cls._pluralLinkName)
+      ll.append('%s (all selected %s)' % (ss, ss))
+
+  for field in sorted(_currentExtraFields.keys()):
+    ss = field[:-1]
+    dd = _currentExtraFields[field]
+    ll.append('\n%s (%s)' % (ss, dd['docTemplate'] % ss))
+    if not dd.get('singularOnly'):
+      ss = field
+      ll.append('%s (%s)' % (ss, dd['docTemplate'] % ss))
+
+  __doc__ = (
+  """The current object gives access to the collection of active or selected objects and values.
+
+Currently implemented:
+%s
+
+Use print(current) to get a list of attribute, value pairs')
+""" % '; '.join(ll)
+  )
+  # + '; '.join(('%s (%s)' % (f,v) for f,t,v in _definitions))
+  # + '\n\nUse print(current) to get a list of attribute, value pairs')
 
   def __init__(self, project):
     # initialise non-=auto fields
@@ -140,10 +191,31 @@ class Current:
     """
     Return string representation of self listing all attribute, value pairs
     """
-    maxlen = max((len(f) for f,t,v in self._definitions))
+    ll = []
+    for cls in sorted(_currentClasses.keys(), key=operator.attrgetter('className')):
+      ss = noCap(cls.className)
+      ll.append((ss, getattr(self, ss)))
+      if not _currentClasses[cls].get('singularOnly'):
+        ss = noCap(cls._pluralLinkName)
+        ll.append((ss, getattr(self, ss)))
+
+    for field in sorted(_currentExtraFields.keys()):
+      ss = field[:-1]
+      ll.append((ss, getattr(self, ss)))
+      if not _currentExtraFields[field].get('singularOnly'):
+        ss = field
+        ll.append((ss, getattr(self, ss)))
+
+    maxlen = max((len(tt[0]) for tt in ll))
     fmt = 'current.%-' + str(maxlen) + 's : %s'
-    #return "current\n" + '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in _definitions))
-    return '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in self._definitions))
+    # fmt = "current.%%-%s : %%s" % maxlen
+    return '\n'.join(fmt % tt for tt in ll)
+
+
+    # maxlen = max((len(f) for f,t,v in self._definitions))
+    # fmt = 'current.%-' + str(maxlen) + 's : %s'
+    # #return "current\n" + '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in _definitions))
+    # return '\n'.join((fmt % (f,getattr(self,f)) for f,t,v in self._definitions))
 
   @classmethod
   def  _addClassField(cls, param:typing.Union[str, AbstractWrapperObject]):
@@ -153,11 +225,13 @@ class Current:
     if isinstance(param, str):
       plural = param
       singular = param[:-1]  # It is assumed that param ends in plural 's'
+      singularOnly = _currentExtraFields[param].get('singularOnly')
     else:
       # param is a wrapper class
       plural = param._pluralLinkName
       singular = param.className
       singular = singular[0].lower() + singular[1:]
+      singularOnly = _currentClasses[param].get('singularOnly')
 
     # getter function for _field; getField(obj) returns obj._field:
     getField = operator.attrgetter('_' + plural)
@@ -182,7 +256,7 @@ class Current:
     #
     setattr(cls, singular, property(getter, setter, None, "Current %s" % singular))
 
-    if plural not in _fieldsAreSingularOnly:
+    if not singularOnly:
 
       def getter(self):
         return tuple(getField(self))

@@ -292,7 +292,7 @@ class Peak(AbstractWrapperObject):
         allAtoms.append(nmrAtoms)
 
       # NB this gives a list of tuples
-      # Remove all-NOne tuples
+      # Remove all-None tuples
       result.extend(tt for tt in itertools.product(*allAtoms)
                     if any(x is not None for x in tt))
       # result += itertools.product(*allAtoms)
@@ -428,7 +428,7 @@ class Peak(AbstractWrapperObject):
   @classmethod
   def _getAllWrappedData(cls, parent: PeakList)-> Tuple[Nmr.Peak, ...]:
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""
-    return parent._wrappedData.peaks
+    return parent._wrappedData.sortedPeaks()
 
   # def __str__(self):
   #   """Readable string representation"""

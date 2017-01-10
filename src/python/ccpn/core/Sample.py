@@ -259,7 +259,7 @@ class Sample(AbstractWrapperObject):
   def _getAllWrappedData(cls, parent:Project)-> list:
     """get wrappedData (Sample.Samples) for all Sample children of parent NmrProject.sampleStore
     Set sampleStore to default if not set"""
-    return parent._wrappedData.sampleStore.samples
+    return parent._wrappedData.sampleStore.sortedSamples()
 
 
 def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=None,

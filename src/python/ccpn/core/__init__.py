@@ -182,7 +182,8 @@ Each object has a link to the containing (parent) object (e.g. myPeakList.spectr
 Each class has a link to contained objects,
 and a function to get a contained object by relative id.
 E.g. myProject.peaks, mySpectrum.peaks, and myPeakList.peaks will each get
-all peaks contained within the relevant object, sorted by Peak id.
+all peaks contained within the relevant object. The lists will be in creation order
+(where applicable) otherwise sorted by name or underlying key.
 Similarly, a given peak can be found by either myProject.getPeak('HSQC2.1.593'),
 mySpectrum.getPeak('1.593'), or myPeakList.getPeak('593')
 
@@ -207,6 +208,22 @@ These will return the identified object if it exists, but will create a new obje
 Other common prefixes for function names include 'add' and 'remove' (which add and remove
 pre-existing objects to collections), 'copy', 'clear', 'load', 'process' and 'toggle',
 all of which should be self-explanatory.
+
+Objects sort by type (in import order) then by parent, then by local key.
+Sorting the objects will give a sensible and reproducible ordering for all classes.
+A number of classes are returned sorted by creation order (e.g. NmrAtoms), but are
+sorted by a more significant key (for NmrAtoms alphabetically by name).
+ChemicalShift objects sort as the NmrAtom they belong to.
+NmrResidue objects behave in there different ways:
+
+  - If they are assigned to a Residue they sort like the Residue, in sequential order
+
+  - If they belong to a connected NmrChain, they sort by the order they appear in the
+  NmrChain.
+
+  - In other 4cases they sort by creation order.
+
+  - Offset NmrResidues in all cases sort alongside their main NmrResidue, by offset.
 
 """
 

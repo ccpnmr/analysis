@@ -34,10 +34,10 @@ class ChemicalShiftTest(WrapperTesting):
     shiftList = self.project.chemicalShiftLists[0]
 
     self.assertEqual(shiftList.pid,'CL:ShiftList_2')
-    self.assertEqual(shiftList.chemicalShifts[5].pid,'CS:ShiftList_2.A.3.GLU.CA')
+    self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid,'CS:ShiftList_2.A.3.GLU.CA')
     shiftList.rename('RenamedList')
     # Undo and redo all operations
     self.undo.undo()
     self.undo.redo()
     self.assertEqual(shiftList.pid,'CL:RenamedList')
-    self.assertEqual(shiftList.chemicalShifts[5].pid,'CS:RenamedList.A.3.GLU.CA')
+    self.assertEqual(sorted(shiftList.chemicalShifts)[5].pid,'CS:RenamedList.A.3.GLU.CA')

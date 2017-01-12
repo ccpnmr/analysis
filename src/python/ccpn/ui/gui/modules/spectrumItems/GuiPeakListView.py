@@ -720,7 +720,8 @@ class PeakNd(QtGui.QGraphicsItem):
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):
       # if self.isInPlane():
-        self.annotation.setupPeakAnnotationItem(self)
+        # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
+        ###self.annotation.setupPeakAnnotationItem(self)
         # r, w, box = self.drawData
         r, w = self.drawData
 
@@ -772,7 +773,8 @@ class PeakNd(QtGui.QGraphicsItem):
         pen = QtGui.QPen(QtGui.QColor(colour))
         pen.setStyle(QtCore.Qt.DotLine)
         painter.setPen(pen)
-        self.annotation.setupPeakAnnotationItem(self)
+        # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
+        ###self.annotation.setupPeakAnnotationItem(self)
         r, w = self.drawData
 
         painter.drawLine(-r,-r,r,r)
@@ -826,15 +828,15 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.updatePos()
 
   # @profile
+  # should not ever call setupPeakAnnotationItem in paint()
+  # instead make sure that you have appropriate notifiers call _refreshPeakAnnotation()
   def setupPeakAnnotationItem(self, peakItem):
 
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
     self.setParentItem(peakItem)
     colour = peakItem.peakListView.textColour
     self.setBrush(QtGui.QColor(colour))
-    peak = peakItem.peak
-    text = _getPeakAnnotation(peak)
-    text = text
+    text = _getPeakAnnotation(peakItem.peak)
 
     self.setText(text)
   

@@ -509,25 +509,28 @@ class Framework:
         contents.remove(content)
 
     if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
-      with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
-        layout = yaml.load(f)
+      try:
+        with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+          layout = yaml.load(f)
 
-      typ, contents, state = layout['main']  # main window
-      _analyseContents(contents)
-
-      floatLayoutsToRemove = []
-      for floatLayout in layout['float']:  # floating windows
-        typ, contents, state = floatLayout[0]['main']
+        typ, contents, state = layout['main']  # main window
         _analyseContents(contents)
-        if not contents:
-          floatLayoutsToRemove.append(floatLayout)
 
-      floatLayoutsToRemove.reverse()  # not needed, but delete from end
-      for floatLayout in floatLayoutsToRemove:
-        layout['float'].remove(floatLayout)
+        floatLayoutsToRemove = []
+        for floatLayout in layout['float']:  # floating windows
+          typ, contents, state = floatLayout[0]['main']
+          _analyseContents(contents)
+          if not contents:
+            floatLayoutsToRemove.append(floatLayout)
 
-      self.ui.mainWindow.moduleArea.restoreState(layout)
+        floatLayoutsToRemove.reverse()  # not needed, but delete from end
+        for floatLayout in floatLayoutsToRemove:
+          layout['float'].remove(floatLayout)
 
+        self.ui.mainWindow.moduleArea.restoreState(layout)
+      except Exception as e:
+        # for now just ignore restore failures
+        self.project._logger.warning("Layout restore failed: %s" % e)
 
   def getByPid(self, pid):
     return self.project.getByPid(pid)

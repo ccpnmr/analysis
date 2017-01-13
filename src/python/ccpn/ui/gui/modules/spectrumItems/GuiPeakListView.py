@@ -626,7 +626,15 @@ class PeakNd(QtGui.QGraphicsItem):
     self.annotation.setupPeakAnnotationItem(self)
     peakListView.peakItems[self.peak] = self
 
-    self.zRegionPrev = None
+    self._stripRegionUpdated()
+
+  def _stripRegionUpdated(self):
+    """CCPN internal, used in GuiStrip._axisRegionChanged()"""
+
+    strip = self.peakListView.spectrumView.strip
+    self._isInPlane = strip.peakIsInPlane(self.peak)
+    if not self._isInPlane:
+      self._isInFlankingPlane = strip.peakIsInFlankingPlane(self.peak)
 
   # replaced by Strip.peakIsInPlane
   # def isInPlane(self):
@@ -719,17 +727,8 @@ class PeakNd(QtGui.QGraphicsItem):
       if self.peak.isDeleted:
         return
 
-      strip = self.peakListView.spectrumView.strip
-      zRegion = tuple([tuple(axis.region) for axis in strip.orderedAxes[2:]])
-      if self.zRegionPrev != zRegion:
-        self._isInPlane = strip.peakIsInPlane(self.peak)
-        if not self._isInPlane:
-          self._isInFlankingPlane = strip.peakIsInFlankingPlane(self.peak)
-        self.zRegionPrev = zRegion
-
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self._isInPlane:
-      # if self.isInPlane():
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
         # r, w, box = self.drawData

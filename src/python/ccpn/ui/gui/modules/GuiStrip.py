@@ -808,6 +808,16 @@ def _axisRegionChanged(axis:'Axis'):
             planeLabel.setValue(position)
             strip.planeToolbar.planeCounts[n].setValue(width/planeSize)
 
+      if index >= 2:
+        spectrumDisplay = strip.spectrumDisplay
+        if hasattr(spectrumDisplay, 'activePeakItemDict'):  # ND display
+          activePeakItemDict = spectrumDisplay.activePeakItemDict
+          for spectrumView in strip.spectrumViews:
+            for peakListView in spectrumView.peakListViews:
+              peakItemDict = activePeakItemDict.get(peakListView, {})
+              for peakItem in peakItemDict.values():
+                peakItem._stripRegionUpdated()
+
     finally:
       strip.beingUpdated = False
 

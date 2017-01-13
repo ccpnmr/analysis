@@ -626,6 +626,8 @@ class PeakNd(QtGui.QGraphicsItem):
     self.annotation.setupPeakAnnotationItem(self)
     peakListView.peakItems[self.peak] = self
 
+    self.zRegionPrev = None
+
   # replaced by Strip.peakIsInPlane
   # def isInPlane(self):
   #
@@ -717,8 +719,16 @@ class PeakNd(QtGui.QGraphicsItem):
       if self.peak.isDeleted:
         return
 
+      strip = self.peakListView.spectrumView.strip
+      zRegion = tuple([tuple(axis.region) for axis in strip.orderedAxes[2:]])
+      if self.zRegionPrev != zRegion:
+        self._isInPlane = strip.peakIsInPlane(self.peak)
+        if not self._isInPlane:
+          self._isInFlankingPlane = strip.peakIsInFlankingPlane(self.peak)
+        self.zRegionPrev = zRegion
+
       self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
-      if self.peakListView.spectrumView.strip.peakIsInPlane(self.peak):
+      if self._isInPlane:
       # if self.isInPlane():
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
@@ -768,7 +778,7 @@ class PeakNd(QtGui.QGraphicsItem):
         #   painter.setPen(QtGui.QColor('white'))
         #   painter.drawRect(-r,-r,w,w)
 
-      elif self.peakListView.spectrumView.strip.peakIsInFlankingPlane(self.peak):
+      elif self._isInFlankingPlane:
         colour = self.peakListView.symbolColour
         pen = QtGui.QPen(QtGui.QColor(colour))
         pen.setStyle(QtCore.Qt.DotLine)

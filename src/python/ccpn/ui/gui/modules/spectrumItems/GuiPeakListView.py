@@ -149,6 +149,9 @@ class GuiPeakListView(QtGui.QGraphicsItem):
 
     # NOTE: only valid for ND so far
 
+    if not self.isVisible():
+      return
+    
     width = printer.width
     height = printer.height
     xCount = printer.xCount

@@ -61,19 +61,6 @@ _currentExtraFields = {
 # for every 'xyz' in fields
 _fields = [x._pluralLinkName for x in _currentClasses] + list(_currentExtraFields.keys())
 
-# # TODO: refactoring using _definitions needed
-# # Classes (in addition to Project) that have a corresponding 'current' field
-# _currentClasses = [SpectrumGroup, Peak, NmrChain, NmrResidue, NmrAtom,
-#                    Strip, Chain, Residue, ChemicalShiftList, ChemicalShift]
-#
-# # 'current' fields that do not correspond to a wrapper class. Must be plural and end in 's'
-# _currentExtraFields = ['positions', 'cursorPositions']
-#
-# _fieldsAreSingularOnly = ['spectrumGroups', 'cursorPositions', 'strips']
-
-# # Fields in current (there is a current.xyz attribute with related functions
-# # for every 'xyz' in fields
-# _fields = [x._pluralLinkName for x in _currentClasses] + _currentExtraFields
 
 def noCap(string):
   """return de-capitalised string"""
@@ -82,44 +69,6 @@ def noCap(string):
 
 
 class Current:
-
-  # # Definitions of the attributes of the Current object
-  # _definitions = [
-  #   # attribute name,                      storage name,        description
-  #   # (noCap(Integral.className),            '_integrals[-1]',   'last selected integral'),
-  #   # (noCap(Integral._pluralLinkName),      '_integrals',       'all selected integrals'),
-  #
-  #   (noCap(NmrAtom.className),             '_nmrAtoms[-1]',    'last selected nmrAtom'),
-  #   (noCap(NmrAtom._pluralLinkName),       '_nmrAtoms',        'all selected nmrAtoms'),
-  #
-  #   (noCap(NmrChain.className),            '_nmrChains[-1]',   'last selected nmrChain'),
-  #   (noCap(NmrChain._pluralLinkName),      '_nmrChains',       'all selected nmrChains'),
-  #
-  #   (noCap(NmrResidue.className),          '_nmrResidues[-1]', 'last selected nmrResidue'),
-  #   (noCap(NmrResidue._pluralLinkName),    '_nmrResidue',      'all selected nmrResidues'),
-  #
-  #   # ('regions',                            '_regions',         'last selected region'),
-  #
-  #   (noCap(Peak.className),                '_peaks[-1]',       'last selected peak'),
-  #   (noCap(Peak._pluralLinkName),          '_peaks',           'all selected peaks'),
-  #
-  #   ('position',                           '_positions[-1]',   'last cursor position'),
-  #   ('positions',                          '_positions',       'last cursor positions'),
-  #
-  #   ('cursorPosition',        '_cursorPositions[-1]', 'last cursor position - (posX,posY) tuple'),
-  #   # ('cursorPositions',       '_cursorPositions',     'last cursor positions - (posX,posY) tuples'),
-  #
-  #   # (noCap(Spectrum.className),            '_spectra[-1]',        'current spectrum'), # broken
-  #   # (noCap(Spectrum._pluralLinkName),      '_spectra',         'list with all spectra present in a module'), # (broken)
-  #
-  #   # (noCap(SpectrumDisplay.className),     '_spectrumDisplay', 'current spectrumDisplay'), # (broken)
-  #
-  #   (noCap(SpectrumGroup.className),       '_spectrumGroups[-1]',   'current spectrum'), # broken
-  #   # (noCap(SpectrumGroup._pluralLinkName), '_spectrumGroups',  'list with all spectra present in a module'), # (broken)
-  #
-  #   (noCap(Strip.className),               '_strips[-1]',           'selected strip'),
-  #   # (noCap(Strip._pluralLinkName),         '_strips',          'lists with all strips'),
-  # ]
 
   # create the doc-string dynamically from definitions above;
   # cannot do newlines as Python console falls over when querying using the current? syntax (too many newlines?)

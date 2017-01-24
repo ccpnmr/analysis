@@ -158,33 +158,33 @@ class MixtureAnalysis(CcpnModule):
     self.tabPeaksMoleculeLayout.addWidget(self.peakTable, 1,0)
 
 
-  def _selectPeak(self, row:int=None, col:int=None, obj:object=None):
-    ''' this callback  '''
-    self.selectedTablePeaks = self.peakTable.getSelectedObjects()
-    for peak in self.selectedTablePeaks:
-      if peak.isSelected:
-        print(self.project._appBase.current.peaks, 'currents')
-        # self.project._appBase.current.clearPeaks()
-      else:
-        peak.isSelected = True
-        self.current.peak = peak
+  # def _selectPeak(self, row:int=None, col:int=None, obj:object=None):
+  #   ''' this callback  '''
+  #   self.selectedTablePeaks = self.peakTable.getSelectedObjects()
+  #   for peak in self.selectedTablePeaks:
+  #     if peak.isSelected:
+  #       print(self.project._appBase.current.peaks, 'currents')
+  #       # self.project._appBase.current.clearPeaks()
+  #     else:
+  #       peak.isSelected = True
+  #       self.current.peak = peak
 
   def _findSelectedPeaks(self, peaks:None):
     ''' this callback, registered with a notifier, allows to select a peak either on the table, compoundView or
     guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display '''
     # self.peakTable.clearSelection()
     selectedPeaks = []
-    if len(self.project.strips)>0:
+    if self.project.strips:
       currentDisplayed = self.project.strips[0]
-      if len(self.project._appBase.current.peaks):
+      if self.project._appBase.current.peaks:
         self.currentPeaks = self.project._appBase.current.peaks
-        if len(self.peakTable.objects)>0:
+        if self.peakTable.objects:
           for peak in self.currentPeaks:
             if peak in self.peakTable.objects:
               self.peakTable.setCurrentObject(peak)
               selectedPeaks.append(peak)
 
-    if len(selectedPeaks)>0:
+    if selectedPeaks:
       print(selectedPeaks, 'selected peaks')
       self.peakTable.setCurrentObjects(selectedPeaks)
 

@@ -272,7 +272,8 @@ class GuiWindow(DropBase):
     """
     Sets current.peaks to an empty list.
     """
-    self._appBase.current.peaks = []
+    # self._appBase.current.peaks = []
+    self._appBase.current.clearPeaks()
 
   def toggleCrossHairAll(self):
     """

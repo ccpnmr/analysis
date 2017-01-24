@@ -27,7 +27,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
-from ccpn.core.NmrAtom import NmrAtom
+# from ccpn.core.NmrAtom import NmrAtom
 from ccpnmodel.ccpncore.api.ccp.nmr import Nmr
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import AbstractPeakDimContrib as ApiAbstractPeakDimContrib
 # from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import Resonance as ApiResonance
@@ -250,6 +250,8 @@ class Peak1d(QtGui.QGraphicsItem):
     scene = peakListView.spectrumView.strip.plotWidget.scene()
     QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
 
+    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+
     self.peakHeight = peak.height
     self.peak = peak
     self.peakListView = peakListView
@@ -304,9 +306,12 @@ class Peak1d(QtGui.QGraphicsItem):
 
     self.peakListView = peakListView
     self.peak = peak
-    if not hasattr(peak, 'isSelected'):
-      peak.isSelected = False
-    self.setSelected(peak.isSelected)
+
+    self.setSelected(peak in self.application.current.peaks)
+
+    # if not hasattr(peak, 'isSelected'):
+    #   peak.isSelected = False
+    # self.setSelected(peak.isSelected)
     # This code does not make sense - you need its own spectrumView, not the zero'th
     # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
     # dimensionOrdering deprecated
@@ -355,6 +360,8 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
   def __init__(self, peakItem, scene):
 
     QtGui.QGraphicsSimpleTextItem.__init__(self, scene=scene)
+
+    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
 
     self.setParentItem(peakItem)
     self.peakItem = peakItem # When exporting to e.g. PDF the parentItem is temporarily set to None, which means that there must be a separate link to the PeakItem.
@@ -444,7 +451,8 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
   def paint(self, painter, option, widget):
 
     if self.peak: # TBD: is this ever not true??
-      self.setSelected(self.peak.isSelected)
+      self.setSelected(self.peak in self.application.current.peaks)
+      # self.setSelected(self.peak.isSelected)
     QtGui.QGraphicsSimpleTextItem.paint(self, painter, option, widget)
 
     # if self.peakItem.peak in self.analysisLayout.currentPeaks:
@@ -611,9 +619,10 @@ class PeakNd(QtGui.QGraphicsItem):
 
     self.peakListView = peakListView
     self.peak = peak
-    if not hasattr(peak, 'isSelected'):
-      peak.isSelected = False
-    self.setSelected(peak.isSelected)
+    # if not hasattr(peak, 'isSelected'):
+    #   peak.isSelected = False
+    # self.setSelected(peak.isSelected)
+    self.setSelected(self.peak in self._appBase.current.peaks)
     # This code does not make sense - you need its own spectrumView, not the zero'th
     # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
     # dimensionOrdering deprecated
@@ -730,7 +739,8 @@ class PeakNd(QtGui.QGraphicsItem):
       if self.peak.isDeleted:
         return
 
-      self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
+      self.setSelected(self.peak in self._appBase.current.peaks)
+      # self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self._isInPlane:
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
         ###self.annotation.setupPeakAnnotationItem(self)
@@ -770,7 +780,8 @@ class PeakNd(QtGui.QGraphicsItem):
         ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
         ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
 
-        if self.peak.isSelected:
+        if self.peak in self._appBase.current.peaks:
+        # if self.peak.isSelected:
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
           painter.drawLine(r,r,r,-r)
@@ -792,7 +803,8 @@ class PeakNd(QtGui.QGraphicsItem):
         painter.drawLine(-r,-r,r,r)
         painter.drawLine(-r,r,r,-r)
 
-        if self.peak.isSelected:
+        if self.peak in self._appBase.current.peaks:
+        # if self.peak.isSelected:
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
           painter.drawLine(r,r,r,-r)

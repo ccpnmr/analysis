@@ -294,25 +294,31 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
     """
     set as current the selected peaks on the table
     """
-    if peaks is not None :
-      self.application.current.peaks = peaks
-      self._deselectNonCurrentPeaks()
-      self._selectCurrentPeaks()
 
     if peaks is None:
       self.application.current.clearPeaks()
-      self._deselectNonCurrentPeaks()
+    else:
+      self.application.current.peaks = peaks
 
+    # if peaks is not None :
+    #   self.application.current.peaks = peaks
+    #   self._deselectNonCurrentPeaks()
+    #   self._selectCurrentPeaks()
+    #
+    # if peaks is None:
+    #   self.application.current.clearPeaks()
+    #   self._deselectNonCurrentPeaks()
 
-  def _selectCurrentPeaks(self):
-    if len(self.application.current.peaks) >0:
-      for peak in self.application.current.peaks:
-        peak.isSelected = True
+  #
+  # def _selectCurrentPeaks(self):
+  #   if len(self.application.current.peaks) >0:
+  #     for peak in self.application.current.peaks:
+  #       peak.isSelected = True
 
-  def _deselectNonCurrentPeaks(self):
-    for peak in self.project.peaks:
-      if peak not in self.application.current.peaks:
-        peak.isSelected = False
+  # def _deselectNonCurrentPeaks(self):
+  #   for peak in self.project.peaks:
+  #     if peak not in self.application.current.peaks:
+  #       peak.isSelected = False
 
 
   def _getPeakVolume(self, peak:Peak):

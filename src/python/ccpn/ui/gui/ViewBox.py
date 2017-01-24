@@ -337,21 +337,23 @@ class ViewBox(pg.ViewBox):
         # but is a weighted average of the values at the neighbouring grid points
         peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
         self.current.addPeak(peak)
-        peak.isSelected = True
+        # peak.isSelected = True
         self.current.strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
       # Control-left-click; (de-)select peak and add/remove to selection
       event.accept()
       self._resetBoxes()
-      self._deselectPeaks()
+      # self._deselectPeaks()
+      self.current.clearPeaks()
       self._selectPeak(xPosition, yPosition)
 
     elif leftMouse(event):
       # Left-click; select peak, deselecting others
       event.accept()
       self._resetBoxes()
-      self._deselectPeaks()
+      # self._deselectPeaks()
+      self.current.clearPeaks()
       self._selectPeak(xPosition, yPosition)
 
     elif shiftRightMouse(event):
@@ -385,21 +387,21 @@ class ViewBox(pg.ViewBox):
       self._resetBoxes()
       event.ignore()
 
-  def _deselectPeaks(self):
-    "Deselected all current peaks"
-    # NBNB TBD FIXME. We need to deselect ALL peaks
-    for spectrumView in self.current.strip.spectrumViews:
-      for peakList in spectrumView.spectrum.peakLists:
-        for peak in peakList.peaks:
-          peak.isSelected = False
-
-    # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
-    # Probably we should replace 'peak.isSelected' with 'peak in current.peaks'
-    # Meanwhile at least deselect current peaks
-    for peak in self.current.peaks:
-      peak.isSelected = False
-
-    self.current.clearPeaks()
+  # def _deselectPeaks(self):
+  #   "Deselected all current peaks"
+  #   # NBNB TBD FIXME. We need to deselect ALL peaks
+  #   for spectrumView in self.current.strip.spectrumViews:
+  #     for peakList in spectrumView.spectrum.peakLists:
+  #       for peak in peakList.peaks:
+  #         peak.isSelected = False
+  #
+  #   # NBNB TBD FIXME this isSelected stuff is a dogs breakfast and needs refactoring.
+  #   # Probably we should replace 'peak.isSelected' with 'peak in current.peaks'
+  #   # Meanwhile at least deselect current peaks
+  #   for peak in self.current.peaks:
+  #     peak.isSelected = False
+  #
+  #   self.current.clearPeaks()
 
   def _selectPeak(self, xPosition, yPosition):
     """(de-)Select first peak near cursor xPosition, yPosition
@@ -426,14 +428,9 @@ class ViewBox(pg.ViewBox):
               and yPositions[0] < float(peak.position[1]) < yPositions[1]):
               if zPositions is None or (zPositions[0] < float(peak.position[2]) < zPositions[1]):
                 #print(">>found peak", peak, peak.isSelected, peak in self.current.peaks)
-                if peak.isSelected and peak in self.current.peaks:
-                  #TODO: need official way to remove peak from current
+                if peak in self.current.peaks:
                   self.current._peaks.remove(peak)
-                  peak.isSelected = False
                 else:
-                  peak.isSelected = True
-                  # Bug fix - Rasmus 14/3/2016
-                  # self.current.peak = peak
                   self.current.addPeak(peak)
                 break
 
@@ -540,7 +537,7 @@ class ViewBox(pg.ViewBox):
 
           # Add the new peaks to selection
           for peak in newPeaks:
-            peak.isSelected = True
+            # peak.isSelected = True
             self.current.addPeak(peak)
 
           for window in self.current.project.windows:
@@ -587,7 +584,7 @@ class ViewBox(pg.ViewBox):
               for peak in peakList.peaks:
                 height = peak.height * scale # TBD: is the scale already taken into account in peak.height???
                 if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
-                  peak.isSelected = True
+                  # peak.isSelected = True
                   self.current.addPeak(peak)
             else:
               # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
@@ -606,10 +603,10 @@ class ViewBox(pg.ViewBox):
                     zAxis = spectrumIndices[2]
                     # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
                     if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
-                      peak.isSelected = True
+                      # peak.isSelected = True
                       self.current.addPeak(peak)
                   else:
-                    peak.isSelected = True
+                    # peak.isSelected = True
                     self.current.addPeak(peak)
 
     elif controlMiddleMouse(event):
@@ -702,10 +699,11 @@ class ViewBox(pg.ViewBox):
 
   def _deselectPeaksFromOtherDisplays(self):
     if self.current.peak:
-      if len(self.current.strip.spectrumViews) > 0:
-        if len(self.current.peak.peakList.spectrum.spectrumViews) > 0:
+      if self.current.strip.spectrumViews:
+        if self.current.peak.peakList.spectrum.spectrumViews:
           if self.current.strip.spectrumViews[0].strip != self.current.peak.peakList.spectrum.spectrumViews[0].strip:
-            self._deselectPeaks()
+            # self._deselectPeaks()
+            self.current.clearPeaks()
             logger.warn('Can only multi select from current strip')
 
   def _setView(self, point1, point2):

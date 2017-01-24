@@ -17,9 +17,8 @@ def navigateToPeakPosition(project:Project, peak:Peak=None,
     selectedDisplays = [display.pid for display in project.spectrumDisplays]
 
   if peak is None:
-    if project._appBase.current.peaks[0]:
-      peak = project._appBase.current.peaks[0]
-    else:
+    peak = project._appBase.current.peak
+    if peak is None:
       print('No peak passed in')
       return
 

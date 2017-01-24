@@ -139,7 +139,10 @@ class PeakAssigner(CcpnModule, Base):
     """
     Creates an empty Label to contain peak dimension position.
     """
-    positions = [peak.position[dim] for peak in self.current.peaks]
+    peaks = self.current.peaks
+    if not peaks:
+      return
+    positions = [peak.position[dim] for peak in peaks]
     avgPos = round(sum(positions)/len(positions), 3)
     axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
     text = axisCode + ' ' + str(avgPos)
@@ -240,7 +243,11 @@ class PeakAssigner(CcpnModule, Base):
 
     '''
 
-    Ndimensions = len(self.current.peak.position)
+    peak = self.current.peak
+    if peak is None:
+      return
+
+    Ndimensions = len(peak.position)
 
 
     # Create extra tables if needed.
@@ -303,6 +310,9 @@ class PeakAssigner(CcpnModule, Base):
 
   def _updateWidgetLabels(self):
 
+    if not self.current.peaks:
+      return
+
     Ndimensions = len(self.current.peak.position)
 
     for dim, label in zip(range(Ndimensions), self.labels):
@@ -351,10 +361,10 @@ class PeakAssigner(CcpnModule, Base):
        though.
 
     '''
-
-    Ndimensions = len(self.current.peak.position)
-
     if self.current.peaks:
+
+      Ndimensions = len(self.current.peak.position)
+
       for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
 
         ll = [set(peak.dimensionNmrAtoms[dim]) for peak in self.current.peaks]
@@ -405,6 +415,8 @@ class PeakAssigner(CcpnModule, Base):
     sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
     self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey))
     self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
+
+    # NBNB FIXME What should happen if self.current.peak is None???
     atomPrefix = self.current.peak.peakList.spectrum.isotopeCodes[dim][-1]
     atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]
     self.atomTypePulldowns[dim].setData(atomNames)
@@ -477,9 +489,13 @@ class PeakAssigner(CcpnModule, Base):
     dimensions of a peak allowed.
     """
 
-    if len(self.current.peaks) == 1:
+    nPeaks = len(self.current.peaks)
+
+    if nPeaks == 1:
       return True
-    if not self.multiCheckbox.isChecked():
+    elif nPeaks == 0:
+      return False
+    elif not self.multiCheckbox.isChecked():
       self.project._logger.warning("Multiple peaks selected, not allowed.")
       return False
     dimensionalities = set([len(peak.position) for peak in self.current.peaks])
@@ -506,6 +522,11 @@ class PeakAssigner(CcpnModule, Base):
 
 
   def _createNewNmrAtom(self, dim):
+
+    # NBNB This is in the peak Assigner
+    # - presumably there is at least one current peak at this point
+    # assert self.current.peak is not None
+
     isotopeCode = self.current.peak.peakList.spectrum.isotopeCodes[dim]
     nmrAtom = self.project.fetchNmrChain(shortName=defaultNmrChainCode
                                            ).newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)

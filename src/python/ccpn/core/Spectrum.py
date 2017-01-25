@@ -858,6 +858,10 @@ class Spectrum(AbstractWrapperObject):
     'onebond', 'Jcoupling', 'Jmultibond', 'relayed', 'relayed-alternate', 'through-space'
     isIndirect is used where there is more than one successive transfer step;
     it is combined with the highest-priority transferType in the transfer path.
+
+    The magnetisationTransfers are deduced from the experimentType and axisCodes.
+    Only when the experimentType is unset or does not match any known reference experiment
+    magnetisationTransfers are kept separately in the API layer.
     """
 
     result = []
@@ -893,6 +897,42 @@ class Spectrum(AbstractWrapperObject):
 
     #
     return tuple(result)
+
+  def _setMagnetisationTransfers(self, value:Tuple[MagnetisationTransferTuple, ...]):
+    """Setter for magnetisation transfers.
+
+
+    The magnetisationTransfers are deduced from the experimentType and axisCodes.
+    When the experimentType is set this function is a No-op.
+    Only when the experimentType is unset or does not match any known reference experiment
+    does this function set the magnetisation transfers, and the corresponding values are
+    ignored if the experimentType is later set."""
+
+    apiExperiment = self._wrappedData.experiment
+    apiRefExperiment = apiExperiment.refExperiment
+    if apiRefExperiment is None:
+      for et in apiExperiment.expTransfers:
+        et.delete()
+      mainExpDimRefs = self._mainExpDimRefs()
+      for tt in value:
+        try:
+          dim1, dim2, transferType, isIndirect = tt
+          expDimRefs = (mainExpDimRefs[dim1 - 1], mainExpDimRefs[dim2 - 1])
+        except:
+          raise ValueError(
+            "Attempt to set incorrect magnetisationTransfer value %s in spectrum %s"
+            % (tt, self.pid)
+          )
+        apiExperiment.newExpTransfer(expDimRefs=expDimRefs, transferType=transferType,
+                                     isDirect=(not isIndirect))
+    else:
+      apiRefExperiment.root._logger.warning(
+  """An attempt to set Spectrum.magnetisationTransfers directly was ignored
+because the spectrum experimentType was defined.
+Use axisCodes to set magnetisation transfers instead.""")
+
+
+
 
   @property
   def intensities(self) -> numpy.ndarray:

@@ -1923,10 +1923,10 @@ class CcpnNefReader:
       compoundName = rows[0].get('ccpn_compound_name')
       role = rows[0].get('ccpn_chain_role')
       comment = rows[0].get('ccpn_chain_comment')
-      sequence = tuple(tuple(row.get(tag) for tag in tags) for row in rows)
       for row in rows:
         if row.get('linking') == 'dummy':
           row['residue_name'] = 'dummy.' + row['residue_name']
+      sequence = tuple(tuple(row.get(tag) for tag in tags) for row in rows)
 
       lastChain = sequence2Chain.get(sequence)
       if lastChain is None:
@@ -2390,6 +2390,9 @@ class CcpnNefReader:
       spectrum = createSpectrum(project, spectrumName, spectrumParameters, dimensionData,
                                 transferData=transferData)
 
+      # Set experiment transfers at the API level
+      if transferData and not spectrum.magnetisationTransfers:
+        spectrum._setMagnetisationTransfers(transferData)
 
       # Make data storage object
       filePath = saveFrame.get('ccpn_spectrum_file_path')

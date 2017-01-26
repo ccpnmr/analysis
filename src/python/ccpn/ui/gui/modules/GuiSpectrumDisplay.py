@@ -86,7 +86,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     
     self.setEnabled(True)
 
-    includeDirection = not self._wrappedData.is1d
+    includeDirection = not self.is1D
     self.phasingFrame = PhasingFrame(self.module, includeDirection=includeDirection, callback=self._updatePhasing, returnCallback=self._updatePivot,
                                      directionCallback=self._changedPhasingDirection, grid=(2, 0), gridSpan=(1, 3))
     self.phasingFrame.setVisible(False)

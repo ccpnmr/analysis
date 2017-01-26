@@ -513,8 +513,6 @@ class ViewBox(pg.ViewBox):
 
           if spectrumView.spectrum.dimensionCount > 1:
             sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-            #TODO: remove reference to apidata
-            apiSpectrumView = spectrumView._wrappedData
             spectrumAxisCodes = spectrumView.spectrum.axisCodes
             stripAxisCodes = self.current.strip.axisCodes
             sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
@@ -525,8 +523,8 @@ class ViewBox(pg.ViewBox):
               idx = remapIndices[n]
               sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
             newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-                                            doPos=apiSpectrumView.spectrumView.displayPositiveContours,
-                                            doNeg=apiSpectrumView.spectrumView.displayNegativeContours,
+                                            doPos=spectrumView.displayPositiveContours,
+                                            doNeg=spectrumView.displayNegativeContours,
                                             fitMethod='gaussian', minDropfactor=minDropfactor)
           else:
             # 1D's
@@ -655,7 +653,8 @@ class ViewBox(pg.ViewBox):
               undo.newItem(setattr, setattr, undoArgs=[peak, 'position', peak.startPosition],
                            redoArgs=[peak, 'position', peak.position])
               delattr(peak, 'startPosition')
-            project._modifiedApiObject(peak._wrappedData)
+            # project._modifiedApiObject(peak._wrappedData)
+            peak._finaliseAction('change')
             project._appBase.ui.echoCommands(
               ("project.getByPid(%s).position = %s" % (peak.pid, peak.position),)
             )

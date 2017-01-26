@@ -334,7 +334,8 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
     result = self._data2Obj.get(newApiNmrChain)
     if serial is not None:
       try:
-        modelUtil.resetSerial(newApiNmrChain, serial, 'nmrChains')
+        result.resetSerial(serial)
+        # modelUtil.resetSerial(newApiNmrChain, serial, 'nmrChains')
       except ValueError:
         self.project._logger.warning("Could not set shortName of %s to %s - keeping default value"
                                      %(result, shortName))

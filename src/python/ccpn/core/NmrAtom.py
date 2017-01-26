@@ -399,7 +399,8 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None,
           # We can renumber obj to free the serial for the new NmrAtom
           newSerial = obj.parent._serialDict['resonances'] + 1
           try:
-            modelUtil.resetSerial(obj, newSerial, 'resonances')
+            previous.resetSerial(newSerial)
+            # modelUtil.resetSerial(obj, newSerial, 'resonances')
           except ValueError:
             self.project._logger.warning(
               "Could not reset serial of %s to %s - keeping original value" %(previous, serial)
@@ -420,7 +421,8 @@ def _newNmrAtom(self:NmrResidue, name:str=None, isotopeCode:str=None,
     result = self._project._data2Obj.get(obj)
     if serial is not None:
       try:
-        modelUtil.resetSerial(obj, serial, 'resonances')
+        result.resetSerial(serial)
+        # modelUtil.resetSerial(obj, serial, 'resonances')
       except ValueError:
         self.project._logger.warning(
           "Could not set (reserved) name of %s to %s - set to %s instead"

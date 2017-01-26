@@ -29,7 +29,7 @@ import os
 import time
 from datetime import datetime
 from collections import OrderedDict as OD
-from collections import Counter
+# from collections import Counter
 from operator import attrgetter, itemgetter
 from typing import List, Union, Optional, Sequence, Tuple
 from ccpn.core.lib import Pid
@@ -50,16 +50,16 @@ from ccpn.core.IntegralList import IntegralList
 from ccpn.core.Integral import Integral
 from ccpn.core.Peak import Peak
 from ccpn.core.Sample import Sample
-from ccpn.core.SampleComponent import SampleComponent
+# from ccpn.core.SampleComponent import SampleComponent
 from ccpn.core.Substance import Substance
 from ccpn.core.Chain import Chain
-from ccpn.core.Residue import Residue
-from ccpn.core.Atom import Atom
-from ccpn.core.NmrChain import NmrChain
+# from ccpn.core.Residue import Residue
+# from ccpn.core.Atom import Atom
+# from ccpn.core.NmrChain import NmrChain
 from ccpn.core.NmrResidue import NmrResidue
-from ccpn.core.NmrAtom import NmrAtom
+# from ccpn.core.NmrAtom import NmrAtom
 from ccpn.core.ChemicalShiftList import ChemicalShiftList
-from ccpn.core.ChemicalShift import ChemicalShift
+# from ccpn.core.ChemicalShift import ChemicalShift
 from ccpn.core.DataSet import DataSet
 from ccpn.core.RestraintList import RestraintList
 from ccpn.core.Note import Note
@@ -2050,14 +2050,15 @@ class CcpnNefReader:
       assignmentData = {}
       assignmentData2 = {}
       if saveFrameName.startswith('nef_chemical_shift_list'):
-        for row in saveFrame['nef_chemical_shift'].data:
-          chainCode = row['chain_code']
-          nmrResidues = assignmentData.get(chainCode, OD())
-          assignmentData[chainCode] = nmrResidues
-          nmrResidues[(row['sequence_code'], row['residue_name'])] = None
+        loop = saveFrame.get('nef_chemical_shift')
+        if loop:
+          for row in loop.data:
+            chainCode = row['chain_code']
+            nmrResidues = assignmentData.get(chainCode, OD())
+            assignmentData[chainCode] = nmrResidues
+            nmrResidues[(row['sequence_code'], row['residue_name'])] = None
 
       # Create objects with reserved names
-
       for chainCode in sorted(assignmentData):
         if chainCode[0] in '@#' and chainCode[1:].isdigit():
           # reserved name - make chain
@@ -2618,7 +2619,9 @@ class CcpnNefReader:
     for row in loop.data:
       parameters = self._parametersFromLoopRow(row, map2)
       integralList = creatorFunc(**parameters)
-      modelUtil.resetSerial(integralList, row['serial'], 'integralLists')
+      integralList.resetSerial(row['serial'])
+      # NB former call was BROKEN!
+      # modelUtil.resetSerial(integralList, row['serial'], 'integralLists')
       result.append(integralList)
     #
     return result
@@ -2652,7 +2655,9 @@ class CcpnNefReader:
       # lowerLimits = row._get('lower_limits')
       # upperLimits = row._get('upper_limits')
       integral.limits = zip((lowerLimits, upperLimits))
-      modelUtil.resetSerial(integral, row['integral_serial'], 'integrals')
+      integral.resetSerial(row['integral_serial'])
+      # NB former call was BROKEN!
+      # modelUtil.resetSerial(integral, row['integral_serial'], 'integrals')
       result.append(integral)
     #
     return result
@@ -2992,7 +2997,9 @@ class CcpnNefReader:
     for row in saveFrame[nmrChainLoopName].data:
       parameters = self._parametersFromLoopRow(row, map2)
       nmrChain = creatorFunc(**parameters)
-      modelUtil.resetSerial(nmrChain, row['serial'], 'nmrChains')
+      nmrChain.resetSerial(row['serial'])
+      # NB former call was BROKEN!
+      # modelUtil.resetSerial(nmrChain, row['serial'], 'nmrChains')
       nmrChains[parameters['shortName']] = nmrChain
 
     # read nmr_residue loop
@@ -3003,7 +3010,9 @@ class CcpnNefReader:
       chainCode =  row['chain_code']
       nmrChain = nmrChains[chainCode]
       nmrResidue = nmrChain.newNmrResidue(**parameters)
-      modelUtil.resetSerial(nmrResidue, row['serial'], 'nmrResidues')
+      nmrResidue.resetSerial(row['serial'])
+      # NB former call was BROKEN!
+      # modelUtil.resetSerial(nmrResidue, row['serial'], 'nmrResidues')
       nmrResidues[(chainCode,parameters['sequenceCode'])] = nmrChain
 
     # read nmr_atom loop
@@ -3015,7 +3024,9 @@ class CcpnNefReader:
       sequenceCode =  row['sequence_code']
       nmrResidue = nmrResidue[(chainCode, sequenceCode)]
       nmrAtom = nmrResidue.newNmrAtom(**parameters)
-      modelUtil.resetSerial(nmrAtom, row['serial'], 'nmrAtoms')
+      nmrAtom.resetSerial(row['serial'])
+      # NB former call was BROKEN!
+      # modelUtil.resetSerial(nmrAtom, row['serial'], 'nmrAtoms')
   #
   importers['ccpn_assignments'] = load_ccpn_assignments
 
@@ -3045,7 +3056,9 @@ class CcpnNefReader:
                                                              coreConstants.isoTimeFormat)
       serial = row.get('serial')
       if serial is not None:
-        modelUtil.resetSerial(apiNote, serial, 'notes')
+        result.resetSerial(serial)
+        # NB former call was BROKEN!
+        # modelUtil.resetSerial(apiNote, serial, 'notes')
 
     #
     return result
@@ -3310,7 +3323,9 @@ class CcpnNefReader:
       dataSet = self.project.getDataSet(str(serial))
       if dataSet is None:
         dataSet = self.project.newDataSet()
-        modelUtil.resetSerial(dataSet._wrappedData, serial, 'nmrConstraintStores')
+        dataSet.resetSerial(serial)
+        # NB former call was BROKEN!
+        # modelUtil.resetSerial(dataSet._wrappedData, serial, 'nmrConstraintStores')
         dataSet._finaliseAction('rename')
         dataSet.title = 'Data_%s' % serial
 
@@ -3386,7 +3401,9 @@ def createSpectrum(project:Project, spectrumName:str, spectrumParameters:dict,
 
 
       # make new spectrum with default parameters
-      spectrum = project.createDummySpectrum(axisCodes, spectrumName)
+      spectrum = project.createDummySpectrum(axisCodes, spectrumName,
+        chemicalShiftList=spectrumParameters.get('chemicalShiftList')
+      )
       if acquisitionAxisIndex is not None:
         spectrum.acquisitionAxisCode = axisCodes[acquisitionAxisIndex]
 

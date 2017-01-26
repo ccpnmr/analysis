@@ -1003,7 +1003,8 @@ def _newNmrResidue(self:NmrChain, sequenceCode:Union[int,str]=None, residueType:
     result = self._project._data2Obj.get(obj)
     if serial is not None:
       try:
-        modelUtil.resetSerial(obj, serial, 'resonanceGroups')
+        result.resetSerial(serial)
+        # modelUtil.resetSerial(obj, serial, 'resonanceGroups')
       except ValueError:
         self.project._logger.warning(
           "Could not set sequenceCode of %s to %s - keeping default value"

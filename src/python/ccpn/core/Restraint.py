@@ -276,7 +276,8 @@ def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None
     result = self._project._data2Obj.get(obj)
     if serial is not None:
       try:
-        modelUtil.resetSerial(obj, serial, 'constraints')
+        result.resetSerial(serial)
+        # modelUtil.resetSerial(obj, serial, 'constraints')
       except ValueError:
         self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                      %(result, serial))

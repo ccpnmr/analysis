@@ -314,7 +314,8 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
     result = self._project._data2Obj.get(obj)
     if serial is not None:
       try:
-        modelUtil.resetSerial(obj, serial, 'constraintLists')
+        result.resetSerial(serial)
+        # modelUtil.resetSerial(obj, serial, 'constraintLists')
       except ValueError:
         self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                      %(result, serial))

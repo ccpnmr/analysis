@@ -480,7 +480,8 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
     result = self._project._data2Obj.get(apiPeak)
     if serial is not None:
       try:
-        modelUtil.resetSerial(apiPeak, serial, 'peaks')
+        result.resetSerial(serial)
+        # modelUtil.resetSerial(apiPeak, serial, 'peaks')
       except ValueError:
         self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
                                      %(result, serial))

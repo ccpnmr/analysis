@@ -1046,10 +1046,13 @@ def _newSpectrum(self:Project, name:str) -> Spectrum:
   raise NotImplementedError("Not implemented. Use loadSpectrum instead")
 
 
-def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Spectrum:
+def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None,
+                         chemicalShiftList=None) -> Spectrum:
   """Make dummy spectrum from isotopeCodes list - without data and with default parameters """
 
   # TODO - change so isotopeCodes can be passed in instead of axisCodes
+
+  apiShiftList = chemicalShiftList._wrappedData if chemicalShiftList else None
 
   if name:
     if Pid.altCharacter in name:
@@ -1061,7 +1064,8 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None) -> Sp
   self._startFunctionCommandBlock('_createDummySpectrum', axisCodes, values=values,
                                   parName='newSpectrum')
   try:
-    result = self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name)]
+    result = self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name,
+                                                                  shiftList=apiShiftList)]
   finally:
     self._project._appBase._endCommandBlock()
   return result

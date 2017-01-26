@@ -745,6 +745,40 @@ class AbstractWrapperObject():
                                         % (action, self, notifier))
             notifier(self)
 
+  def resetSerial(self, newSerial: int):
+    """ADVANCED Reset serial of object to newSerial, resetting parent link
+    and the nextSerial of the parent.
+
+    Raises ValueError for objects that do not have a serial
+    (or, more precisely, where the _wrappedData does not have a serial)."""
+
+    apiObject = self._wrappedData
+    if not hasattr(apiObject, 'serial'):
+      raise ValueError("Cannot reset serial, %s does not have a 'serial' attribute"
+                       % self.pid)
+    downlink = apiObject.__class__._metaclass.parentRole.otherRole.name
+
+    parentDict = apiObject.parent.__dict__
+    downdict = parentDict[downlink]
+    oldSerial = apiObject.serial
+    serialDict = parentDict['_serialDict']
+
+    if newSerial == oldSerial:
+      return
+
+    elif newSerial in downdict:
+      raise ValueError("Cannot reset serial to %s - value already in use" % newSerial)
+
+    else:
+      maxSerial = serialDict[downlink]
+      apiObject.__dict__['serial'] = newSerial
+      downdict[newSerial] = apiObject
+      del downdict[oldSerial]
+      if newSerial > maxSerial:
+        serialDict[downlink] = newSerial
+      elif oldSerial == maxSerial:
+        serialDict[downlink] = max(downdict)
+
   def _startFunctionCommandBlock(self, funcName, *params, values=None, defaults=None, parName=None):
     """Execute StartCommandBlock for an object creation function,
     """

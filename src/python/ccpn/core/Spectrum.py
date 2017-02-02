@@ -237,6 +237,8 @@ class Spectrum(AbstractWrapperObject):
   @scale.setter
   def scale(self, value:float):
     self._wrappedData.scale = value
+    for spectrumView in self.spectrumViews:
+      spectrumView.refreshData()
 
   @property
   def spinningRate(self) -> float:
@@ -943,8 +945,9 @@ Use axisCodes to set magnetisation transfers instead.""")
       
     if self._intensities is None:
       self._intensities = self.getSliceData()
-      if self._intensities is not None:
-        self._intensities *= self.scale
+      # below not needed any more since now scaled in getSliceData()
+      # if self._intensities is not None:
+      #   self._intensities *= self.scale
       
     return self._intensities
 

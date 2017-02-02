@@ -177,10 +177,10 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
         columns.append(('#', 'serial'))
 
       if self.columnSettings['height'].isChecked():
-        columns.append(('Height', lambda pk: self._getPeakHeight(pk)))
+        columns.append(('Height', lambda pk: pk.height))
 
       if self.columnSettings['volume'].isChecked():
-        columns.append(('Volume', lambda pk: self._getPeakVolume(pk)))
+        columns.append(('Volume', lambda pk: pk.volume))
 
       tipTexts=['Peak serial number',
               'Magnitude of spectrum intensity at peak center (interpolated), unless user edited',
@@ -321,15 +321,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
   #       peak.isSelected = False
 
 
-  def _getPeakVolume(self, peak:Peak):
-    """
-    Returns the volume of the specified peak.
-    """
-    if peak.volume:
-      return '%7.2E' % float(peak.volume*peak.peakList.spectrum.scale)
-
-
-
   def _selectOnTableCurrentPeaks(self, currentPeaks):
     ''' highlight current peaks on the opened peak table '''
 
@@ -337,14 +328,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
       self.peakTable.table._highLightObjs(currentPeaks)
     else:
       self.peakTable.table.clearSelection()
-
-
-  def _getPeakHeight(self, peak: Peak):
-    """
-    Returns the height of the specified peak.
-    """
-    if peak.height:
-      return '%7.2E' % float(peak.height*peak.peakList.spectrum.scale)
 
 
   def _refreshTable(self, item=None):

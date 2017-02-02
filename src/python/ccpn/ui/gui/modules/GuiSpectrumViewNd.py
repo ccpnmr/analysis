@@ -495,22 +495,13 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     if not self.isVisible():
       return
 
-    apiSpectrumView = self._wrappedData.spectrumView
-    apiDataSource = apiSpectrumView.dataSource
-  
-    # assume that already done on screen
-    #if apiDataSource.positiveContourBase == 10000.0: # horrid
-    #  # base has not yet been set, so guess a sensible value
-    #  apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
-    #  apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
-
-    if apiSpectrumView.displayPositiveContours is True:
-      posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
+    if self.displayPositiveContours is True:
+      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
     else:
       posLevels = []
     
-    if apiSpectrumView.displayNegativeContours is True:
-      negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
+    if self.displayNegativeContours is True:
+      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
     else:
       negLevels = []
 
@@ -612,21 +603,21 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
         
-    apiDataSource = self._apiDataSource
-    if apiDataSource.positiveContourBase == 10000.0: # horrid
+    if self.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
-      apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
-      apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
+      self.positiveContourBase = self.estimateNoise()
+      self.negativeContourBase = - self.positiveContourBase
 
-    if self._wrappedData.spectrumView.displayPositiveContours is True:
-      posLevels = _getLevels(apiDataSource.positiveContourCount, apiDataSource.positiveContourBase, apiDataSource.positiveContourFactor)
+    if self.displayPositiveContours is True:
+      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
     else:
       posLevels = []
 
-    if self._wrappedData.spectrumView.displayNegativeContours is True:
-      negLevels = _getLevels(apiDataSource.negativeContourCount, apiDataSource.negativeContourBase, apiDataSource.negativeContourFactor)
+    if self.displayNegativeContours is True:
+      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
     else:
       negLevels = []
+
     if not posLevels and not negLevels:
       return
 
@@ -694,14 +685,14 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       painter.endNativePainting()
       
   #def constructContours(self, guiStrip, posLevels, negLevels):
-  def _constructContours(self, posLevels, negLevels):
+  def _constructContours(self, posLevels, negLevels, doRefresh=False):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
     """
     
     xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
 
-    if xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
+    if doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
       or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]]):
       self._releaseDisplayLists(self.posDisplayLists)
       self._releaseDisplayLists(self.negDisplayLists)
@@ -1018,3 +1009,23 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency)-1)))
 
     return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
+
+  def refreshData(self):
+
+    if self.displayPositiveContours is True:
+      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
+    else:
+      posLevels = []
+
+    if self.displayNegativeContours is True:
+      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
+    else:
+      negLevels = []
+
+    if not posLevels and not negLevels:
+      return
+
+    # the makeCurrent() happens automatically when Qt itself calls paint() but here we need to do it
+    self.strip.plotWidget.viewport().makeCurrent()
+
+    self._constructContours(posLevels, negLevels, doRefresh=True)

@@ -225,3 +225,8 @@ class GuiSpectrumView1d(GuiSpectrumView):
   def update(self):
     self.plot.curve.setData(self.data[0], self.data[1])
 
+  def refreshData(self):
+
+    self.spectrum._intensities = None  # UGLY, but need to force data to be reloaded
+    self.data = self.spectrum.positions, self.spectrum.intensities
+    self.update()

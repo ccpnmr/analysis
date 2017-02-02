@@ -152,7 +152,7 @@ class MixtureAnalysis(CcpnModule):
 
     columns = [Column('#', 'serial'),
                Column('Position', lambda peak: '%.3f' % peak.position[0] ),
-               Column('Height', lambda peak: self._getPeakHeight(peak))]
+               Column('Height', lambda peak: peak.height)]
 
     self.peakTable = ObjectTable(self, columns, objects=[], selectionCallback=self._selectPeak, multiSelect=True)
     self.tabPeaksMoleculeLayout.addWidget(self.peakTable, 1,0)
@@ -191,10 +191,6 @@ class MixtureAnalysis(CcpnModule):
       for atom, atomObject in self.compoundView.atomViews.items():
         if atom.name == 'H1':
           atomObject.select()
-
-  def _getPeakHeight(self, peak):
-    if peak.height:
-      return peak.height*peak.peakList.spectrum.scale
 
   def _createButtons(self, sample):
     ''' This creates buttons according with how many spectra are inside the mixture. '''

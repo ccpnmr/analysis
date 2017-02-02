@@ -578,9 +578,9 @@ class ViewBox(pg.ViewBox):
               y1 = endPosition.y()
               y0, y1 = min(y0, y1), max(y0, y1)
               xAxis = 0
-              scale = peakList.spectrum.scale
+              # scale = peakList.spectrum.scale  # peak height now contains scale in it (so no scaling below)
               for peak in peakList.peaks:
-                height = peak.height * scale # TBD: is the scale already taken into account in peak.height???
+                height = peak.height # * scale # TBD: is the scale already taken into account in peak.height???
                 if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
                   # peak.isSelected = True
                   self.current.addPeak(peak)

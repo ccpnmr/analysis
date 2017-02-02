@@ -234,3 +234,7 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
     scene.removeItem(self)
     if hasattr(self, 'plot'):  # 1d
       scene.removeItem(self.plot)
+
+  def refreshData(self):
+
+    raise Exception('Needs to be implemented in subclass')

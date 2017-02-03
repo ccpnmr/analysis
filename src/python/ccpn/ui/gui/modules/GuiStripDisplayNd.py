@@ -120,11 +120,28 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
-        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
-        apiDataSource.positiveContourBase *= apiDataSource.positiveContourFactor
-        apiDataSource.negativeContourBase *= apiDataSource.negativeContourFactor
-        spectrumView.update()
         spectrum = spectrumView.spectrum
+        if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.positiveContourBase = None
+          spectrumView.positiveContourFactor = None
+          spectrum.positiveContourBase *= spectrum.positiveContourFactor
+        else:
+          # Display has custom contour base - change that one only
+          spectrumView.positiveContourBase *= spectrumView.positiveContourFactor
+
+        if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.negativeContourBase = None
+          spectrumView.negativeContourFactor = None
+          spectrum.negativeContourBase *= spectrum.negativeContourFactor
+        else:
+          # Display has custom contour base - change that one only
+          spectrumView.negativeContourBase *= spectrumView.negativeContourFactor
+
+        spectrumView.update()
         if self._appBase.ui.mainWindow is not None:
           mainWindow = self._appBase.ui.mainWindow
         else:
@@ -143,11 +160,28 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
-        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
-        apiDataSource.positiveContourBase /= apiDataSource.positiveContourFactor
-        apiDataSource.negativeContourBase /= apiDataSource.negativeContourFactor
-        spectrumView.update()
         spectrum = spectrumView.spectrum
+        if spectrum.positiveContourBase == spectrumView.positiveContourBase:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.positiveContourBase = None
+          spectrumView.positiveContourFactor = None
+          spectrum.positiveContourBase /= spectrum.positiveContourFactor
+        else:
+          # Display has custom contour base - change that one only
+          spectrumView.positiveContourBase /= spectrumView.positiveContourFactor
+
+        if spectrum.negativeContourBase == spectrumView.negativeContourBase:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.negativeContourBase = None
+          spectrumView.negativeContourFactor = None
+          spectrum.negativeContourBase /= spectrum.negativeContourFactor
+        else:
+          # Display has custom contour base - change that one only
+          spectrumView.negativeContourBase /= spectrumView.negativeContourFactor
+
+        spectrumView.update()
         if self._appBase.ui.mainWindow is not None:
           mainWindow = self._appBase.ui.mainWindow
         else:
@@ -166,10 +200,25 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
-        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
-        apiDataSource.positiveContourCount += 1
-        apiDataSource.negativeContourCount += 1
         spectrum = spectrumView.spectrum
+        if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.positiveContourCount = None
+          spectrum.positiveContourCount += 1
+        else:
+          # Display has custom contour count - change that one only
+          spectrumView.positiveContourCount += 1
+
+        if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.negativeContourCount = None
+          spectrum.negativeContourCount += 1
+        else:
+          # Display has custom contour count - change that one only
+          spectrumView.negativeContourCount += 1
+
         if self._appBase.ui.mainWindow is not None:
           mainWindow = self._appBase.ui.mainWindow
         else:
@@ -188,12 +237,29 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
     """
     for spectrumView in self.spectrumViews:
       if spectrumView.isVisible():
-        apiDataSource = spectrumView._wrappedData.spectrumView.dataSource
-        if apiDataSource.positiveContourCount > 0:
-          apiDataSource.positiveContourCount -= 1
-        if apiDataSource.negativeContourCount > 0:
-          apiDataSource.negativeContourCount -= 1
         spectrum = spectrumView.spectrum
+        if spectrum.positiveContourCount == spectrumView.positiveContourCount:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.positiveContourCount = None
+          if spectrum.positiveContourCount:
+            spectrum.positiveContourCount -= 1
+        else:
+          # Display has custom contour count - change that one only
+          if spectrumView.positiveContourCount:
+            spectrumView.positiveContourCount -= 1
+
+        if spectrum.negativeContourCount == spectrumView.negativeContourCount:
+          # We want to set the base for ALL spectra
+          # and to ensure that any private settings are overridden for this display
+          spectrumView.negativeContourCount = None
+          if spectrum.negativeContourCount:
+            spectrum.negativeContourCount -= 1
+        else:
+          # Display has custom contour count - change that one only
+          if spectrum.negativeContourCount:
+            spectrumView.negativeContourCount -= 1
+
         if self._appBase.ui.mainWindow is not None:
           mainWindow = self._appBase.ui.mainWindow
         else:

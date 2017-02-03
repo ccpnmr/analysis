@@ -494,14 +494,22 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
     if not self.isVisible():
       return
+  
+    # assume that already done on screen
+    #if apiDataSource.positiveContourBase == 10000.0: # horrid
+    #  # base has not yet been set, so guess a sensible value
+    #  apiDataSource.positiveContourBase = apiDataSource.estimateNoise()
+    #  apiDataSource.negativeContourBase = - apiDataSource.positiveContourBase
 
-    if self.displayPositiveContours is True:
-      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
+    if self.displayPositiveContours:
+      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
+                             self.positiveContourFactor)
     else:
       posLevels = []
     
     if self.displayNegativeContours is True:
-      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
+      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
+                             self.negativeContourFactor)
     else:
       negLevels = []
 
@@ -511,8 +519,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     posColour = self._getColour('positiveContourColour')
     negColour = self._getColour('negativeContourColour')
   
-    xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1)
-    yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
+    xTranslate, xScale, xTotalPointCount, xClipPoint0, xClipPoint1 = self._getTranslateScale(
+        0, pixelViewBox0=printer.x0, pixelViewBox1=printer.x1 )
+    yTranslate, yScale, yTotalPointCount, yClipPoint0, yClipPoint1 = self._getTranslateScale(
+        1, pixelViewBox0=printer.y0, pixelViewBox1=printer.y1)
 
     xTile0 = xClipPoint0 // xTotalPointCount
     xTile1 = 1 + (xClipPoint1 // xTotalPointCount)
@@ -525,13 +535,17 @@ class GuiSpectrumViewNd(GuiSpectrumView):
         posLevelsArray = numpy.array(posLevels, numpy.float32)
         posContours = Contourer2d.contourer2d(dataArray, posLevelsArray)
         for contourData in posContours:
-          self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount)
+          self._printContourData(printer, contourData, posColour, xTile0, xTile1, yTile0, yTile1,
+                                 xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
+                                 yTotalPointCount)
       
       if negLevels:
         negLevelsArray = numpy.array(negLevels, numpy.float32)
         negContours = Contourer2d.contourer2d(dataArray, negLevelsArray)
         for contourData in negContours:
-          self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1, xTranslate, xScale, xTotalPointCount, yTranslate, yScale, yTotalPointCount)
+          self._printContourData(printer, contourData, negColour, xTile0, xTile1, yTile0, yTile1,
+                                 xTranslate, xScale, xTotalPointCount, yTranslate, yScale,
+                                 yTotalPointCount)
                 
     for peakListView in self.peakListViews:
       peakListView._printToFile(printer)
@@ -602,22 +616,23 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
-        
+
     if self.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
-      self.positiveContourBase = self.estimateNoise()
+      self.positiveContourBase = self.spectrum.estimateNoise()
       self.negativeContourBase = - self.positiveContourBase
 
-    if self.displayPositiveContours is True:
-      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
+    if self.displayPositiveContours:
+      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,
+                             self.positiveContourFactor)
     else:
       posLevels = []
 
-    if self.displayNegativeContours is True:
-      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
+    if self.displayNegativeContours:
+      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase,
+                             self.negativeContourFactor)
     else:
       negLevels = []
-
     if not posLevels and not negLevels:
       return
 
@@ -668,7 +683,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
           GL.glClipPlane(GL.GL_CLIP_PLANE2, (0.0, 1.0, 0.0, - (yClipPoint0 - yTotalPointCount*yTile)))
           GL.glClipPlane(GL.GL_CLIP_PLANE3, (0.0, -1.0, 0.0, yClipPoint1 - yTotalPointCount*yTile))
           
-          for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists), (negColour, negLevels, self.negDisplayLists)):
+          for (colour, levels, displayLists) in ((posColour, posLevels, self.posDisplayLists),
+                                                 (negColour, negLevels, self.negDisplayLists)):
             for n, level in enumerate(levels):
               GL.glColor4f(*colour)
               # TBD: scaling, translating, etc.
@@ -692,8 +708,8 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     
     xDataDim, yDataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[:2]
 
-    if doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev \
-      or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]]):
+    if (doRefresh or xDataDim is not self.xDataDimPrev or yDataDim is not self.yDataDimPrev 
+      or self.zRegionPrev != tuple([tuple(axis.region) for axis in self.strip.orderedAxes[2:]])):
       self._releaseDisplayLists(self.posDisplayLists)
       self._releaseDisplayLists(self.negDisplayLists)
       doPosLevels = doNegLevels = True
@@ -1009,23 +1025,3 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency)-1)))
 
     return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
-
-  def refreshData(self):
-
-    if self.displayPositiveContours is True:
-      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
-    else:
-      posLevels = []
-
-    if self.displayNegativeContours is True:
-      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
-    else:
-      negLevels = []
-
-    if not posLevels and not negLevels:
-      return
-
-    # the makeCurrent() happens automatically when Qt itself calls paint() but here we need to do it
-    self.strip.plotWidget.viewport().makeCurrent()
-
-    self._constructContours(posLevels, negLevels, doRefresh=True)

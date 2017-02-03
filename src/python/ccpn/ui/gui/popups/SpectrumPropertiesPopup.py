@@ -545,7 +545,7 @@ class ContoursTab(QtGui.QWidget, Base):
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(1, 0), vAlign='t', hAlign='l')
     positiveContoursCheckBox = CheckBox(self, grid=(1, 1), checked=True, vAlign='t', hAlign='l')
     for spectrumView in self.spectrum.spectrumViews:
-      if spectrumView._wrappedData.spectrumView.displayPositiveContours is True:
+      if spectrumView.displayPositiveContours:
         positiveContoursCheckBox.setChecked(True)
       else:
         positiveContoursCheckBox.setChecked(False)
@@ -592,7 +592,7 @@ class ContoursTab(QtGui.QWidget, Base):
     negativeContoursLabel = Label(self, text="Show Negative Contours", grid=(6 ,0), vAlign='c', hAlign='l')
     negativeContoursCheckBox = CheckBox(self, grid=(6, 1), checked=True, vAlign='t', hAlign='l')
     for spectrumView in self.spectrum.spectrumViews:
-      if spectrumView._wrappedData.spectrumView.displayNegativeContours is True:
+      if spectrumView.displayNegativeContours:
         negativeContoursCheckBox.setChecked(True)
       else:
         negativeContoursCheckBox.setChecked(False)

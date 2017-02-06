@@ -171,7 +171,7 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
             spectrumView.plot.setPen(apiDataSource.sliceColour)
 
 
-# Functions for nnotifiers
+# Functions for notifiers
 
 def _updateSpectrumPlotColour(project:Project, apiDataSource:ApiDataSource):
   getDataObj = project._data2Obj.get

@@ -331,6 +331,18 @@ Strip.spectrumViews = property(getter, None, None,
 del getter
 
 
+def _findSpectrumView(strip:Strip, spectrum:Spectrum) -> SpectrumView:
+  """find Strip.spectrumView that matches spectrum"""
+  dataSource = spectrum._wrappedData
+  for stripSpectrumView in strip._wrappedData.sortedStripSpectrumViews():
+    if stripSpectrumView.spectrumView.dataSource is dataSource:
+      return strip._project._data2Obj.get(stripSpectrumView)
+  #
+  return None
+Strip.findSpectrumView = _findSpectrumView
+del _findSpectrumView
+
+
 # Notifiers:
 # Notify SpectrumView change when ApiSpectrumView changes (underlying object is StripSpectrumView)
 Project._apiNotifiers.append(

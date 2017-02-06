@@ -338,48 +338,84 @@ class Strip(AbstractWrapperObject):
 
   def peakIsInPlane(self, peak:Peak) -> bool:
     """is peak in currently displayed planes for strip?"""
-    apiSpectrumView = self._wrappedData.findFirstSpectrumView(
-      dataSource=peak._wrappedData.peakList.dataSource)
 
-    if apiSpectrumView is None:
+    spectrumView = self.findSpectrumView(peak.peakList.spectrum)
+    if spectrumView is None:
       return False
-
+    displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
     orderedAxes = self.orderedAxes
-    for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
-      if zDataDim:
-        zPosition = peak.position[zDataDim.dimensionIndex]
-        # NBNB W3e do not think this should add anything - the region should be set correctly.
-        # RHF, WB
-        # zPlaneSize = zDataDim.getDefaultPlaneSize()
+
+    for ii,displayIndex in enumerate(displayIndices)[2:]:
+      if displayIndex is not None:
+        # If no axis matches the index may be None
+        zPosition = peak.position[displayIndex]
         zPlaneSize = 0.
-        zRegion = orderedAxes[2+ii].region
+        zRegion = orderedAxes[ii].region
         if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
           return False
     #
     return True
 
+    # apiSpectrumView = self._wrappedData.findFirstSpectrumView(
+    #   dataSource=peak._wrappedData.peakList.dataSource)
+    #
+    # if apiSpectrumView is None:
+    #   return False
+    #
+    #
+    # orderedAxes = self.orderedAxes
+    # for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
+    #   if zDataDim:
+    #     zPosition = peak.position[zDataDim.dimensionIndex]
+    #     # NBNB W3e do not think this should add anything - the region should be set correctly.
+    #     # RHF, WB
+    #     # zPlaneSize = zDataDim.getDefaultPlaneSize()
+    #     zPlaneSize = 0.
+    #     zRegion = orderedAxes[2+ii].region
+    #     if zPosition < zRegion[0]-zPlaneSize or zPosition > zRegion[1]+zPlaneSize:
+    #       return False
+    # #
+    # return True
+
   def peakIsInFlankingPlane(self, peak:Peak) -> bool:
-
     """is peak in planes flanking currently displayed planes for strip?"""
-    apiSpectrumView = self._wrappedData.findFirstSpectrumView(
-      dataSource=peak._wrappedData.peakList.dataSource)
 
-    if apiSpectrumView is None:
+    spectrumView = self.findSpectrumView(peak.peakList.spectrum)
+    if spectrumView is None:
       return False
-
+    displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
     orderedAxes = self.orderedAxes
-    for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
-      if zDataDim:
-        zPosition = peak.position[zDataDim.dimensionIndex]
-        # NBNB W3e do not think this should add anything - the region should be set correctly.
-        # RHF, WB
-        # zPlaneSize = zDataDim.getDefaultPlaneSize()
-        zRegion = orderedAxes[2+ii].region
-        zWidth = orderedAxes[2+ii].width
+
+    for ii,displayIndex in enumerate(displayIndices)[2:]:
+      if displayIndex is not None:
+        # If no axis matches the index may be None
+        zPosition = peak.position[displayIndex]
+        zRegion = orderedAxes[ii].region
+        zWidth = orderedAxes[ii].width
         if zRegion[0]-zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1]+zWidth:
           return True
-
+    #
     return False
+
+    # apiSpectrumView = self._wrappedData.findFirstSpectrumView(
+    #   dataSource=peak._wrappedData.peakList.dataSource)
+    #
+    # if apiSpectrumView is None:
+    #   return False
+    #
+    # orderedAxes = self.orderedAxes
+    # for ii,zDataDim in enumerate(apiSpectrumView.orderedDataDims[2:]):
+    #   if zDataDim:
+    #     zPosition = peak.position[zDataDim.dimensionIndex]
+    #     # NBNB W3e do not think this should add anything - the region should be set correctly.
+    #     # RHF, WB
+    #     # zPlaneSize = zDataDim.getDefaultPlaneSize()
+    #     zRegion = orderedAxes[2+ii].region
+    #     zWidth = orderedAxes[2+ii].width
+    #     if zRegion[0]-zWidth < zPosition < zRegion[0] or zRegion[1] < zPosition < zRegion[1]+zWidth:
+    #       return True
+    #
+    # return False
 
 
 # newStrip functions

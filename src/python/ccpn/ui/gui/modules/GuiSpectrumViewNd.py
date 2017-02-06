@@ -138,18 +138,22 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       self.borderItem.setVisible(visible)
     
   def _setupBorderItem(self):
-    
-    apiSpectrumView = self._apiStripSpectrumView.spectrumView
-    dataDims = apiSpectrumView.orderedDataDims
-    ll = apiSpectrumView.dataSource.sortedDataDims()
-    # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
-    dimIndices = [x and ll.index(x) for x in dataDims]
-    xDim = dimIndices[0]
-    yDim = dimIndices[1]
-    
     spectrumLimits = self.spectrum.spectrumLimits
-    xLimits = spectrumLimits[xDim]
-    yLimits = spectrumLimits[yDim]
+    displayIndices = self._displayOrderSpectrumDimensionIndices
+    xLimits = spectrumLimits[displayIndices[0]]
+    yLimits = spectrumLimits[displayIndices[1]]
+
+    # apiSpectrumView = self._apiStripSpectrumView.spectrumView
+    # dataDims = apiSpectrumView.orderedDataDims
+    # ll = apiSpectrumView.dataSource.sortedDataDims()
+    # # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
+    # dimIndices = [x and ll.index(x) for x in dataDims]
+    # xDim = dimIndices[0]
+    # yDim = dimIndices[1]
+    #
+    # spectrumLimits = self.spectrum.spectrumLimits
+    # xLimits = spectrumLimits[xDim]
+    # yLimits = spectrumLimits[yDim]
 
     colour = Colour.rgba(self._getColour('positiveContourColour')) # TBD: for now assume only one colour
     rect = QtCore.QRectF(xLimits[0], yLimits[0], xLimits[1]-xLimits[0], yLimits[1]-yLimits[0])
@@ -803,19 +807,28 @@ class GuiSpectrumViewNd(GuiSpectrumView):
 
   #def getPlaneData(self, guiStrip):
   def _getPlaneData(self):
-    
-    apiSpectrumView = self._apiStripSpectrumView.spectrumView
-    orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
-    dataDims = apiSpectrumView.orderedDataDims
-    ll = apiSpectrumView.dataSource.sortedDataDims()
-    # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
-    dimIndices = [x and ll.index(x) for x in dataDims]
-    xDim = dimIndices[0]
-    yDim = dimIndices[1]
-    # xDim = dataDims[0].dim - 1  # -1 because dataDim.dim starts at 1
-    # yDim = dataDims[1].dim - 1
+
+    # NBNB TODO FIXME - Wayne, please check through the modified code
+
     spectrum = self.spectrum
     dimensionCount = spectrum.dimensionCount
+    dimIndices = self._displayOrderSpectrumDimensionIndices
+    xDim = dimIndices[0]
+    yDim = dimIndices[1]
+    orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
+    
+    # apiSpectrumView = self._apiStripSpectrumView.spectrumView
+    # orderedAxes = self._apiStripSpectrumView.strip.orderedAxes
+    # dataDims = apiSpectrumView.orderedDataDims
+    # ll = apiSpectrumView.dataSource.sortedDataDims()
+    # # NB Not all dataDIms must match spectrum e.g. 2D spectra in a 3D display
+    # dimIndices = [x and ll.index(x) for x in dataDims]
+    # xDim = dimIndices[0]
+    # yDim = dimIndices[1]
+    # # xDim = dataDims[0].dim - 1  # -1 because dataDim.dim starts at 1
+    # # yDim = dataDims[1].dim - 1
+    # spectrum = self.spectrum
+    # dimensionCount = spectrum.dimensionCount
         
     if dimensionCount == 2:
       planeData = spectrum.getPlaneData(xDim=xDim+1, yDim=yDim+1)

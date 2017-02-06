@@ -700,7 +700,6 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       
       painter.endNativePainting()
       
-  #def constructContours(self, guiStrip, posLevels, negLevels):
   def _constructContours(self, posLevels, negLevels, doRefresh=False):
     """ Construct the contours for this spectrum using an OpenGL display list
         The way this is done here, any change in contour level needs to call this function.
@@ -1025,3 +1024,23 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     clipPoint1 = int(math.ceil(min(lastPoint, valueToPoint(viewParams.minAliasedFrequency)-1)))
 
     return translate, scale, viewParams.totalPointCount, clipPoint0, clipPoint1
+
+  def refreshData(self):
+
+    if self.displayPositiveContours:
+      posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase, self.positiveContourFactor)
+    else:
+      posLevels = []
+
+    if self.displayNegativeContours:
+      negLevels = _getLevels(self.negativeContourCount, self.negativeContourBase, self.negativeContourFactor)
+    else:
+      negLevels = []
+
+    if not posLevels and not negLevels:
+      return
+
+    # the makeCurrent() happens automatically when Qt itself calls paint() but here we need to do it
+    self.strip.plotWidget.viewport().makeCurrent()
+
+    self._constructContours(posLevels, negLevels, doRefresh=True)

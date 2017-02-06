@@ -21,14 +21,130 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from typing import Sequence
-import numpy
+import typing
+import pandas as pd
 import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
 from ccpn.core.StructureEnsemble import StructureEnsemble
-from ccpn.util import Common as commonUtil
+from ccpn.core.StructureEnsemble import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
+
+
+class ModelData:
+  """
+  A view of a single model within an ensemble.
+
+  Once created, a ModelData object *should* behave exactly like an Ensemble.
+  If it doesn't, please report it as a bug.
+
+  Note that ModelData objects are only valid when linked to an existing StructureEnsemble
+  and that self._modelNumber must match
+  """
+
+  def __init__(self, model:'Model'=None) -> None:
+
+    # Model CCPN object that contains ModelData. The object is ONLY valid when self._model is set
+    self._model = model
+
+  @property
+  def _modelNumber(self) -> int:
+    # Serial number for model containing ModelData
+    return self._model.serial
+
+  @property
+  def _ensemble(self) -> EnsembleData:
+    """EnsembleData object on which the ModelData are a view"""
+    return self._model.structureEnsemble.data
+
+  @property
+  def _modelNumberIndices(self) -> typing.Tuple[int, int]:
+    """Get indices (in the pandas sense, elements of the index column,
+    in theory need not be integers). These should be used with self._ensemble.loc"""
+    data = self._ensemble
+    if data:
+      modelFilter = data[data['modelNumber'] == self._modelNumber]
+      if modelFilter.shape[0] > 0:
+        modelStart = modelFilter.index[0]
+        modelEnd = modelFilter.index[-1]
+        return (modelStart, modelEnd)
+    # No data found for the model:
+    return None
+
+
+  def __str__(self) -> str:
+    # This relies on the EnsembleData.__str__ having (only) the class name and the number of
+    # models before the first ','
+    s = str(self._ensemble).split(',', 1)[1]
+    return '<ModelData model=%s (%s' % (self._modelNumber, s)
+
+  def __getattr__(self, attr:str) -> typing.Any:
+
+    if hasattr(self._ensemble, attr):
+      if attr in self._ensemble.columns:
+        # Use __getitem__
+        return self[attr]
+
+      elif attr == 'index':
+        mni = self._modelNumberIndices
+        if mni is None:
+          # This should give an empty series of whatever type the index is (?)
+          return pd.Series(self._ensemble.index[0:0])
+        else:
+          # Set e to a slice of the ensemble data
+          e = self._ensemble.loc[mni[0]:mni[1]]
+          e.reset_index(inplace=True, drop=True)
+
+      else:
+        # This is not a column - the indices are irrelevant. Just work on the full ensemble
+        e = self._ensemble
+
+      #
+      return ChainedAssignmentWarningSuppressor(getattr(e, attr))
+
+    else:
+      raise AttributeError("'Model' object has no attribute '{}'".format(attr))
+
+
+  def __getitem__(self, key:str) -> typing.Any:
+
+    if key in self._ensemble.columns:
+      mni = self._modelNumberIndices
+      if mni is None:
+        # No data present - return empty series, paying attention to type
+        return pd.Series(dtype=self._ensemble.dtypes[key])
+      else:
+        # Set get item from a slice of the ensemble data
+        e = self._ensemble.loc[mni[0]:mni[1]]
+        e.reset_index(inplace=True, drop=True)
+        return e[key]
+
+    else:
+      # Should probably throw an error, but anyway we leave that to pandas
+      return self._ensemble.__getitem__(key)
+
+
+  def __setitem__(self, key:str, value:typing.Any) -> None:
+
+    # Works by creating a view on the ensemble and using the ensemble.__setitem__ on that.
+
+    mni = self._modelNumberIndices
+    if mni is None:
+      raise ValueError("Cannot set column values, model %s has no data" % self._model)
+
+    else:
+      e = self._ensemble.loc[mni[0]:mni[1]]
+      e.reset_index(inplace=True, drop=True)
+
+      pd.set_option('chained_assignment', None)
+      # NB This switch is a nasty hack, done to get the echoing and undoing to work
+      structureEnsemble = e._containingObject
+      e._containingObject = self._model
+      try:
+        e[key] = value
+      finally:
+        e._containingObject = structureEnsemble
+        pd.set_option('chained_assignment', 'warn')
 
 
 class Model(AbstractWrapperObject):
@@ -50,6 +166,9 @@ class Model(AbstractWrapperObject):
 
   # Qualified name of matching API class
   _apiClassQualifiedName = ApiModel._metaclass.qualifiedName()
+
+  # Sentinel, to check if modelData view object has been created
+  _modelData = None
 
   # CCPN properties
   @property
@@ -75,13 +194,22 @@ class Model(AbstractWrapperObject):
   structureEnsemble = _parent
   
   @property
-  def title(self) -> str:
-    """title of Model (not used in PID)."""
+  def label(self) -> str:
+    """title of Model -  a line of free-form text."""
     return self._wrappedData.name
 
-  @title.setter
-  def title(self, value):
+  @label.setter
+  def label(self, value):
     self._wrappedData.name = value
+
+  @property
+  def data(self) -> ModelData:
+    """Model data pandas object - a view on the dat ain the StructureEnsemble."""
+    result = self._modelData
+    if result is None:
+      result = self._modelData = ModelData(model=self)
+    #
+    return result
 
   @property
   def comment(self) -> str:
@@ -92,109 +220,39 @@ class Model(AbstractWrapperObject):
   def comment(self, value:str):
     self._wrappedData.details = value
 
-  @property
-  def coordinateData(self) -> numpy.ndarray:
-    """ atomCount * 3 numpy array of coordinates.
+  def clearData(self):
+    """Remove all data for model
     """
-    data = self.structureEnsemble.coordinateData
-    return data[self._wrappedData.index]
-
-  @coordinateData.setter
-  def coordinateData(self, value):
-    data = self.structureEnsemble.coordinateData
-    data[self._wrappedData.index] = value
-
-  @property
-  def occupancyData(self) -> numpy.ndarray:
-    """ atomCount length numpy array of occupancies.
-    """
-    data = self.structureEnsemble.occupancyData
-    return data[self._wrappedData.index]
-
-  @occupancyData.setter
-  def occupancyData(self, value):
-    data = self.structureEnsemble.occupancyData
-    data[self._wrappedData.index] = value
-
-  @property
-  def bFactorData(self) -> numpy.ndarray:
-    """ atomCount length numpy array of B factors.
-    """
-    data = self.structureEnsemble.bFactorData
-    return data[self._wrappedData.index]
-
-  @bFactorData.setter
-  def bFactorData(self, value):
-    data = self.structureEnsemble.bFactorData
-    data[self._wrappedData.index] = value
-
-  @property
-  def atomNameData(self) -> numpy.ndarray:
-    """atomCount length numpy array of model-specific atom names."""
-    raise NotImplementedError("atomNameData not implemented yet")
-
-  @atomNameData.setter
-  def atomNameData(self, value):
-    raise NotImplementedError("atomNameData not implemented yet")
+    data = self.structureEnsemble.data
+    data.drop(data._modelsSelector(self.serial))
 
   @classmethod
   def _getAllWrappedData(cls, parent: StructureEnsemble)-> list:
     """get wrappedData - all Model children of parent StructureEnsemble"""
     return parent._wrappedData.sortedModels()
 
-def _newModel(self:StructureEnsemble, title:str=None, comment:str=None,
-              coordinateData:numpy.ndarray=None,
-              bFactorData:Sequence[float]=None,
-              occupancyData:Sequence[float]=None) -> Model:
-  """Create new Model
+def _newModel(self:StructureEnsemble, serial:int=None, label:str=None, comment:str=None) -> Model:
+  """Create new Model"""
 
-  CoordinateData can be a numpy.ndarray of the right shape,
-  or any nested list or tuple representation that contains the right number of elements"""
-
-  defaults = collections.OrderedDict((('title', None), ('comment', None),
-                                      ('coordinateData', None),
-                                      ('bFactorData', None),
-                                      ('occupancyData', None)
-                                      )
-                                     )
+  defaults = collections.OrderedDict((('serial', None), ('label', None), ('comment', None)))
 
   structureEnsemble = self._wrappedData
 
   self._startFunctionCommandBlock('newModel', values=locals(), defaults=defaults,
                                   parName='newModel')
-  self._project.blankNotification() # delay notifiers till model is fully ready
   try:
-    if coordinateData:
-      atomCount = structureEnsemble.nAtoms
-      # Sanity check - filter out (most?) wrongly shaped arrays
-      if hasattr(coordinateData, 'shape'):
-        if coordinateData.shape != (atomCount,3):
-          raise ValueError("numpy.ndarray input not of correct shape (%s,3)" % atomCount)
-      else:
-        if len(coordinateData) not in (atomCount, 3*atomCount):
-          raise ValueError("nested sequence input does not match %s*3 array" % atomCount)
+    newApiModel = structureEnsemble.newModel(name=label, details=comment)
+    result = self._project._data2Obj.get(newApiModel)
 
-      coordinateData = commonUtil.flattenIfNumpy(coordinateData, shape=(atomCount,3))
-
-    newApiModel = structureEnsemble.newModel(name=title, details=comment)
-    if coordinateData:
-      newApiModel.setSubmatrixData('coordinates', coordinateData)
-    if occupancyData:
-      newApiModel.setSubmatrixData('occupancies', occupancyData)
-    if bFactorData:
-      newApiModel.setSubmatrixData('bFactors', bFactorData)
-    # remove cached matrices, which are now out of date:
-    for tag in ('_coordinateData', '_occupancyData', '_bFactorData'):
-      if hasattr(self, tag):
-        delattr(self, tag)
+    if serial is not None:
+      try:
+        result.resetSerial(serial)
+      except ValueError:
+        self.project._logger.warning("Could not reset serial of %s to %s - keeping original value"
+                                     %(result, serial))
+      result._finaliseAction('rename')
   finally:
-    self._project.unblankNotification()
     self._project._appBase._endCommandBlock()
-
-  result = self._project._data2Obj.get(newApiModel)
-
-  # Do creation notifications
-  result._finaliseAction('create')
   #
   return result
 
@@ -204,12 +262,40 @@ StructureEnsemble.newModel = _newModel
 del _newModel
 
 # Notifiers:
+Model._setupCoreNotifier('delete', Model.clearData)
 
-# Must be done with API notifiers as it requires a predelete notifier.
-def _flushCachedData(project:Project, apiModel:ApiModel):
-  """Flush cached data to ensure up-to-date data are saved"""
-  structureEnsemble = project._data2Obj[apiModel].structureEnsemble
-  structureEnsemble._flushCachedData()
-Project._apiNotifiers.append(
-  ('_flushCachedData', {},  ApiModel._metaclass.qualifiedName(), 'preDelete'),
-)
+
+
+class ChainedAssignmentWarningSuppressor:
+  """
+  Suppress Pandas' warnings about chained assignment when using an assignment strategy
+  known to not suffer from chained assignment.
+  """
+  def __init__(self, f:typing.Any) -> None:
+    self.__f = f
+
+  def __call__(self, *args, **kwargs) -> typing.Any:
+    pd.set_option('chained_assignment', None)
+    o = self.__f(*args, **kwargs)
+    pd.set_option('chained_assignment', 'warn')
+    return o
+
+  def __getitem__(self, key:str) -> typing.Any:
+    return self.__f[key]
+
+  def __setitem__(self, key:str, value:typing.Any):
+    pd.set_option('chained_assignment', None)
+    self.__f[key] = value
+    pd.set_option('chained_assignment', 'warn')
+
+  def __get__(self, obj:typing.Any) -> typing.Any:
+    return self.__f
+
+  def __set__(self, obj:typing.Any, value:typing.Any) -> None:
+    self.__f = value
+
+  def __repr__(self) -> typing.Any:
+    return self.__f.__repr__()
+
+  def __str__(self) -> str:
+    return self.__f.__str__()

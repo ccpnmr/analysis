@@ -1,3 +1,9 @@
+"""THIS FILE IS OBSOLETE AND SHOULD BE DELETED
+
+It's copmtents have been copied into StructureEnsemble.py and Model.py (and modified)
+
+It is left here temporarily for thenpurpose of comparison"""
+
 from typing import Tuple
 from typing import Union
 from typing import Iterable
@@ -7,16 +13,18 @@ from typing import Optional
 import pandas as pd
 
 from ccpn.util.ListFromString import listFromString
-from ccpn.util.ListFromString import ListOrString
+from ccpn.util.ListFromString import SelectorInput
+
+
 
 
 
 class Ensemble(pd.DataFrame):
-  '''
+  """
   A structure Ensemble
 
-  The structure ensemble is based on a Pandas Dataframe.  All of the functionality of Dataframes is available,
-  but we have added a number of convenience methods for working with the data.
+  The structure ensemble is based on a Pandas Dataframe.  All of the functionality of Dataframes
+  is available, but we have added a number of convenience methods for working with the data.
 
   In general, there are three things you may want to do with an ensemble:
   1.	 Select a sub-set of atoms within the ensemble
@@ -25,10 +33,11 @@ class Ensemble(pd.DataFrame):
   We will cover each of these in turn below.
 
   1.	Selecting sub-sets of atoms within the ensemble:
-    Subsets of atoms can be extracted by creating a selector, which is nothing more than a Pandas Series object.
-    These can be thought of as a table with the same number of rows as the ensemble you want to select from,
-    and containing a single column of True/False values, where True represents a value to be included in the selection.
-    We provide a .selector() function that will return a selector based on criteria you provide.  Please note that
+    Subsets of atoms can be extracted by creating a selector, which is nothing more than a Pandas
+    Series object. These can be thought of as a table with the same number of rows as the ensemble
+    you want to select from, and containing a single column of True/False values, where True
+    represents a value to be included in the selection. We provide a .selector() function that will
+    return a selector based on criteria you provide.  Please note that
     although the criteria names are plural, single values are also allowed.
 
     The following criteria are currently supported:
@@ -57,13 +66,13 @@ class Ensemble(pd.DataFrame):
       allowed values: ‘H’; ‘H,C’; ‘H, C’; [‘H’, ‘C’]
       not allowed: ‘H-N’; [‘H, N’, ‘C’]
 
-    In addition to these criteria, functions taking a record and returning True or False can be supplied
-    via the func keyword argument.
+    In addition to these criteria, functions taking a record and returning True or False can
+    be supplied via the func keyword argument.
     For example:
       ensemble.selector(func=lambda r: (r[‘tempFactor’]< 70) and (r[‘tempFactor’]>60))
     which will select everything with a tempFactor between 60 and 70 exclusive.
-        The selector can be converted to a filter by setting the inverse keyword to True, so that any record
-    that matches the criteria are excluded from the selection.
+        The selector can be converted to a filter by setting the inverse keyword to True, so that
+        any record that matches the criteria are excluded from the selection.
 
     Finally, selectors can be combined using Boolean operations.  The following statement:
       s = ensemble.selector(atomNames=’N, CA’)
@@ -79,44 +88,48 @@ class Ensemble(pd.DataFrame):
       s2 = ensemble.selector(modelNumbers = ‘1-3’)
       s = s1 & s2  # Matches both s1 AND s2
 
-    Because certain selections are quite common, we provide several pre-packaged selections, these include:
+    Because certain selections are quite common, we provide several pre-packaged selections,
+    these include:
       ensemble.backboneSelector
       ensemble.amideProtonSelector
       ensemble.amideNitrogenSelector
       ensemble.methylSelector
 
 
-    Once you have a selector, you can use it to extract a copy of the rows you want from the ensemble
-    via ensemble.extract(). extract() accepts a selector and a list of columns to extract.  If no selector
-    is provided, extract() will use any criteria provided to generate a selector on-the-fly for selection (in fact,
-    this is the recommended usage pattern.)
+    Once you have a selector, you can use it to extract a copy of the rows you want from the
+    ensemble via ensemble.extract(). extract() accepts a selector and a list of columns to extract.
+    If no selector is provided, extract() will use any criteria provided to generate a selector
+    on-the-fly for selection (in fact, this is the recommended usage pattern.)
 
     The extract() method has some important caveats:
-    1. It is very important to remember that extract() gives a COPY of the data, not the original data.
-       If you change the data in the extracted ensemble, the original data will remain unaltered.
-    2. If you use a selector created from one ensemble on a different ensemble, it will fail if they don’t
-       have exactly the same number of records.  If they do have the same number of records, you will get
-      the corresponding record numbers, which is probably not what you want.
-    3. In order to avoid the problem in 2., the recommended usage pattern is to let extract() create the selector
-       on-the-fly.
-    4. If you must create complex selectors, please make sure that you create the selector from the exact ensemble
-       you wish to extract from.
+    1. It is very important to remember that extract() gives a COPY of the data, not the original
+        data. If you change the data in the extracted ensemble, the original data will remain
+        unaltered.
+    2. If you use a selector created from one ensemble on a different ensemble, it will fail if they
+       don’t have exactly the same number of records.  If they do have the same number of records,
+       you will get the corresponding record numbers, which is probably not what you want.
+    3. In order to avoid the problem in 2., the recommended usage pattern is to let extract()
+       create the selector on-the-fly.
+    4. If you must create complex selectors, please make sure that you create the selector from the
+       exact ensemble you wish to extract from.
 
-  2.	There are several ways to access the data within the ensemble (or an extracted subset thereof.)
-    If your ensemble has multiple records, copies of the columns can be accessed by name.
+  2.	There are several ways to access the data within the ensemble (or an extracted subset
+    thereof.) If your ensemble has multiple records, copies of the columns can be accessed by name.
     For example:
       occupancies = ensemble['occupancy']  # Gives a Pandas Series
       occupancies = ensemble['occupancy'].tolist()  # Gives a Python List
-    Alternatively, you can convert the records into a tuple of namedTuples using the as_namedTuples() method.
+    Alternatively, you can convert the records into a tuple of namedTuples using the
+    as_namedTuples() method.
 
     If you have a single record, the values can be accessed by column name.
     For example:
       atomName = singleRecordEnsemble[‘atomName’]
       atomName, sequenceId = singleRecordEnsemble[[‘atomName’, ‘sequenceId’]]
-    but beware: selecting multiple columns when you don’t have a single record ensemble can lead to very
-    confusing error messages.
+    but beware: selecting multiple columns when you don’t have a single record ensemble can lead to
+    very confusing error messages.
 
-    Instead, it’s often better to step over copies of all the records in a subset using the iterrecords() iterator:
+    Instead, it’s often better to step over copies of all the records in a subset using the
+    iterrecords() iterator:
       for record in ensemble.iterrecords():
         print(record[[‘x’, ‘y’, ‘z’]])
 
@@ -124,39 +137,42 @@ class Ensemble(pd.DataFrame):
       for record in ensemble.itertuples():
         print(record.x, record.y, record.z)
 
-    Finally, all of the standard Pandas methods for accessing the data are still available.  We leave it to the
-    interested coder to investigate that.
+    Finally, all of the standard Pandas methods for accessing the data are still available.
+    We leave it to the interested coder to investigate that.
 
-    3. Writing data to the ensemble is by far the most tricky operation.  There are two primary issues to be dealt
-       with:  putting data in the right place within the ensemble, and making sure you’re writing to the ensemble
-       and not a copy of the ensemble.
+    3. Writing data to the ensemble is by far the most tricky operation.  There are two primary
+       issues to be dealt with:  putting data in the right place within the ensemble, and making
+       sure you’re writing to the ensemble and not a copy of the ensemble.
 
-    The easiest case is probably the least common for users: creating an ensemble from scratch.  In this case, the
-    best way to create the ensemble is to assign several equal-length lists or tuples to columns within the ensemble:
+    The easiest case is probably the least common for users: creating an ensemble from scratch.
+    In this case, the best way to create the ensemble is to assign several equal-length lists or
+    tuples to columns within the ensemble:
       ensemble = Ensemble()
       ensemble[‘modelNumber’] = [1,1,1,2,2,2]
       ensemble[‘chainCode’] = [‘A’, ‘A’, ‘A’, ‘A’, ‘A’, ‘A’]
       # Etc,…
       ensemble = ensemble.reset_index(drop=True)  # Cleanup the indexing
 
-    More commonly, users may want to alter values in a pre-existing ensemble.  The method setValues() can be used
-    for this.  The first parameter to setValues() tells setValues() which record to change, and can be an index, a
-    single record selector or a single record ensemble (this last option is easily achieved with the iterrecords()
-    method.)  Any subsequent parameters passed to setValues() are the column names and values to set.
+    More commonly, users may want to alter values in a pre-existing ensemble.  The method
+    setValues() can be used for this.  The first parameter to setValues() tells setValues() which
+    record to change, and can be an index, a single record selector or a single record ensemble
+    (this last option is easily achieved with the iterrecords() method.)
+    Any subsequent parameters passed to setValues() are the column names and values to set.
     For example:
       extracted = ensemble.extract(residueNames='MET', atomNames='CB')
       for record in extracted.iterrecords():
         if record[‘x’] > 999:
           ensemble.setValues(record, x=999, y=999, z=999)
 
-    Just like extract(), exactly matching the source of your selector/selecting ensemble and the ensemble you
-    call setValues() on is vital to prevent unpredictable behavior.  You have been warned!
+    Just like extract(), exactly matching the source of your selector/selecting ensemble and the
+    ensemble you call setValues() on is vital to prevent unpredictable behavior.
+    You have been warned!
 
-    There are currently no insert functions.  You can, if you wish, append a row to the ensemble using setValues
-    and passing an index value not currently in the ensemble:
+    There are currently no insert functions.  You can, if you wish, append a row to the ensemble
+    using setValues and passing an index value not currently in the ensemble:
       maxEnsembleIndexValue = ensemble.index.max()
       ensemble.setValues(maxEnsembleIndexValue+1, x=0, y=1, z=2)
-  '''
+  """
 
   _metadata = ['name']
   _reservedColumns = ['atomSerial', 'modelNumber', 'chainCode', 'sequenceId', 'insertionCode',
@@ -220,19 +236,19 @@ class Ensemble(pd.DataFrame):
     return s
 
 
-  def _chainsSelector(self, chains:ListOrString) -> pd.Series:
+  def _chainsSelector(self, chains:SelectorInput) -> pd.Series:
     if isinstance(chains, str):
       chains = listFromString(chains)
     return self['chainCode'].isin(chains)
 
 
-  def _residuesSelector(self, residues:ListOrString) -> pd.Series:
+  def _residuesSelector(self, residues:SelectorInput) -> pd.Series:
     if isinstance(residues, str):
       residues = listFromString(residues)
     return self['residueName'].isin(residues)
 
 
-  def _sequenceIdsSelector(self, sequenceIds:ListOrString) -> pd.Series:
+  def _sequenceIdsSelector(self, sequenceIds:SelectorInput) -> pd.Series:
     if isinstance(sequenceIds, int):
       sequenceIds = [sequenceIds, ]
     if isinstance(sequenceIds, str):
@@ -241,13 +257,13 @@ class Ensemble(pd.DataFrame):
     return self['sequenceId'].isin(sequenceIds)
 
 
-  def _atomsSelector(self, atomNames:ListOrString) -> pd.Series:
+  def _atomsSelector(self, atomNames:SelectorInput) -> pd.Series:
     if isinstance(atomNames, str):
       atomNames = listFromString(atomNames)
     return self['atomName'].isin(atomNames)
 
 
-  def _modelsSelector(self, modelNumbers:ListOrString) -> pd.Series:
+  def _modelsSelector(self, modelNumbers:SelectorInput) -> pd.Series:
     if isinstance(modelNumbers, str):
       modelNumbers = listFromString(modelNumbers)
     if isinstance(modelNumbers, int):
@@ -255,7 +271,7 @@ class Ensemble(pd.DataFrame):
     return self['modelNumber'].isin(modelNumbers)
 
 
-  def _idsSelector(self, ids:ListOrString) -> pd.Series:
+  def _idsSelector(self, ids:SelectorInput) -> pd.Series:
     if isinstance(ids, str):
       ids = listFromString(ids)
     s = pd.Series((False,) * self.shape[0])
@@ -266,7 +282,7 @@ class Ensemble(pd.DataFrame):
     return s
 
 
-  def _elementsSelector(self, elements:ListOrString) -> pd.Series:
+  def _elementsSelector(self, elements:SelectorInput) -> pd.Series:
     if isinstance(elements, str):
       elements = listFromString(elements)
     s = pd.Series((False,) * self.shape[0])
@@ -332,8 +348,39 @@ class Ensemble(pd.DataFrame):
 
   ### extracting selections
 
-  def extract(self, selector:Union[int, pd.Series]=None,
-              columns:ListOrString=None, **kwargs) -> 'Ensemble':
+  # def extract(self, selector:Union[int, pd.Series]=None,
+  #             columns:ListOrString=None, **kwargs) -> 'Ensemble':
+  #   '''
+  #   Extracts a copy of a subset of atoms from the Ensemble
+  #
+  #   Params:
+  #     selector : Boolean Pandas series the same length as the number of rows in the ensemble
+  #                 If no selector is given,  pass the keyword args on to the selector function
+  #                 and use the resulting selector to extract a sub-ensemble.
+  #
+  #   Returns a new Ensemble
+  #   '''
+  #   if columns is None:
+  #     columns = self.columns
+  #   else:
+  #     if isinstance(columns, str):
+  #       columns = listFromString(columns)
+  #   try:
+  #     if self.shape[0] == selector.shape[0]:
+  #       return self.ix[selector, columns]
+  #     else:
+  #       raise ValueError('Selectors must be the same length as atom count * model count.')
+  #   except AttributeError:
+  #     s = self.selector(**kwargs)
+  #     return self.extract(s, columns)
+
+  def extract(self, selector:pd.Series=None,
+              columns:SelectorInput=None, **kwargs) -> 'Ensemble':
+
+    # NBNB How should this work if the selector is an integer?
+    # The former code ignored it and used the kwargs instead.
+    # For now I have disabled integer selectors. RHF.
+
     '''
     Extracts a copy of a subset of atoms from the Ensemble
 
@@ -349,14 +396,18 @@ class Ensemble(pd.DataFrame):
     else:
       if isinstance(columns, str):
         columns = listFromString(columns)
+
+    if selector is None:
+      return self.extract(self.selector(**kwargs), columns)
+
     try:
       if self.shape[0] == selector.shape[0]:
         return self.ix[selector, columns]
       else:
         raise ValueError('Selectors must be the same length as atom count * model count.')
     except AttributeError:
-      s = self.selector(**kwargs)
-      return self.extract(s, columns)
+      # raise ValueError("selector must be an integer, a Pandas series, or None")
+      raise ValueError("selector must be a Pandas series or None")
 
 
   ### Record-wise access
@@ -371,7 +422,7 @@ class Ensemble(pd.DataFrame):
   def records(self) -> Tuple['Ensemble']:
     return tuple(self.iterrecords())
 
-  def as_namedTuples(self)-> Tuple['namedTuple']:
+  def as_namedTuples(self)-> Tuple['namedTuple', ...]:
     '''
     An tuple of named tuples over the records (atoms) in the ensemble
     '''
@@ -388,30 +439,55 @@ class Ensemble(pd.DataFrame):
       accessor : int, Ensemble, Selector
                  If an integer is given, the value will be set on the row at that index
                  If an single row Ensemble is given, the value will be set on the row that matches.
-                 If a selector that matches a single row is given, the value will be set on that matching row
+                 If a selector that matches a single row is given, the value will be set on that
+                 matching row
 
-                 Multi-row Ensembles or selectors are not allowed. (consider using Ensemble.iterrecords() to iterate)
+                 Multi-row Ensembles or selectors are not allowed. (consider using
+                 Ensemble.iterrecords() to iterate)
+
       kwargs : columns on which to set the values
 
     '''
-    columns = []
-    values = []
-    for k, v in kwargs.items():
-      columns.append(k)
-      values.append(v)
-    if len(columns) == 1:
-      columns, values = columns[0], values[0]
 
-    if type(accessor) is int:  # passed an index
+    # This is just a matter of style - admitted. Can be changed back. RHF.
+    # columns = []
+    # values = []
+    # for k, v in kwargs.items():
+    #   columns.append(k)
+    #   values.append(v)
+    # if len(columns) == 1:
+    #   columns, values = columns[0], values[0]
+
+    if len(kwargs) == 1:
+      # This gives two elements, not two lists. Deliberate.
+      columns, values = kwargs.popitem()
+    else:
+      columns, values = list(zip(*kwargs.items()))
+
+    # Standard python: use isinstance instead of checks on type to catch also subtypes
+    # if type(accessor) is int:  # passed an index
+    #   self.loc[accessor, columns] = values
+    # elif type(accessor) is Ensemble:
+    #   assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
+    #   self.loc[accessor.index, columns] = values
+    # elif type(accessor) is pd.Series:  # selector
+    #   assert accessor.sum() == 1, "Boolean selectors must select a single row"
+    #   self.loc[accessor[accessor == True].index, columns] = values
+    # else:
+    #   raise TypeError('accessor must be index, ensemble row, or selector.')
+
+    if isinstance(accessor, int):
       self.loc[accessor, columns] = values
-    elif type(accessor) is Ensemble:
+    elif isinstance(accessor, Ensemble):
       assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
       self.loc[accessor.index, columns] = values
-    elif type(accessor) is pd.Series:  # selector
+    elif isinstance(accessor, pd.Series): # selector
       assert accessor.sum() == 1, "Boolean selectors must select a single row"
       self.loc[accessor[accessor == True].index, columns] = values
     else:
       raise TypeError('accessor must be index, ensemble row, or selector.')
+
+
 
 
   ### PDB mapping
@@ -458,6 +534,11 @@ class Ensemble(pd.DataFrame):
 
 
   ### Property type checking
+
+  # I do not understand this.
+  # Why type checking on setitem but not on setattr?
+  # If value can be e.g. int, float, or str, how can you call value.astype?
+  # Why is making a pandas series and using astpe better than just casting with e.g. int?
 
   def __setitem__(self, key:str, value:Any) -> None:
     if key in self._reservedColumns:
@@ -639,10 +720,10 @@ class Ensemble(pd.DataFrame):
       d['residues'] = self.groupby(['chainCode', 'sequenceId']).count().shape[0]
     except KeyError:
       d['residues'] = '?'
-    try:
-      d['models'] = len(self['modelNumber'].unique())
-    except KeyError:
-      d['models'] = '?'
+    # try:
+    #   d['models'] = len(self['modelNumber'].unique())
+    # except KeyError:
+    #   d['models'] = '?'
     try:
       d['atoms'] = self.groupby(['chainCode', 'sequenceId', 'atomName']).count().shape[0]
     except KeyError:
@@ -659,7 +740,8 @@ class Model:
   """
   A view of a single model within an ensemble.
 
-  Once created, a Model *should* behave exactly like an Ensemble.  If it doesn't, pleast report it as a bug.
+  Once created, a Model *should* behave exactly like an Ensemble.
+  If it doesn't, please report it as a bug.
   """
 
   def __init__(self, ensemble, modelNumber) -> None:
@@ -709,7 +791,8 @@ class Model:
 
 class ChainedAssignmentWarningSuppressor:
   """
-  Suppress Pandas' warnings about chained assignment when using an assignment strategy known to not suffer from chained assignment.
+  Suppress Pandas' warnings about chained assignment when using an assignment strategy
+  known to not suffer from chained assignment.
   """
   def __init__(self, f:Any) -> None:
     self.__f = f

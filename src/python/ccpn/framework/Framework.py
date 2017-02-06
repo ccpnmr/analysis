@@ -951,7 +951,8 @@ class Framework:
 
   def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
-    successful = self.project.save(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
+    successful = self.project.save(newPath=newPath, createFallback=createFallback,
+                                   overwriteExisting=overwriteExisting)
     if not successful:
       sys.stderr.write('==> Project save failed\n')
       # NBNB TODO Gui should pre-check newPath and/or pop up something in case of failure

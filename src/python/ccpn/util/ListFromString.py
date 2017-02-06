@@ -1,14 +1,19 @@
 from typing import Union
 from typing import Iterable
 
-ListOrString = Union[int, float, str, Iterable[Union[int, float, str]]]
+# THIS IS OBSOLETE AND SHOULD BE REMOVED (left here for comparison and to match with Ensemble.py)
+SelectorInput = Union[int, float, str, Iterable[Union[int, float, str]]]
 
 
 
 def listFromString(string:str) -> list:
-    '''
-    Convenience function to turn a string into a list of items.
-    '''
+    """
+    Convenience function to turn a string into a list of mixed str and int.
+
+    Splits on ',', strips the resulting strings,
+    and converts 'i-j' into range(int(i),int(j)+1)
+
+    """
     l = [e.strip() for e in string.split(',')]
     lst = []
     for i in l:

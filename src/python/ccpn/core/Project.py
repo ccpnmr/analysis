@@ -214,7 +214,7 @@ class Project(AbstractWrapperObject):
     """Save project with all data, optionally to new location or with new name.
     Unlike lower-level functions, this function ensures that data in high level caches are saved.
     Return True if save succeeded otherwise return False (or throw error)"""
-    self._flushCachedData()
+    # self._flushCachedData()
     savedOk =  apiIo.saveProject(self._wrappedData.root, newPath=newPath,
                                  changeBackup=changeBackup, createFallback=createFallback,
                                  overwriteExisting=overwriteExisting, checkValid=checkValid,
@@ -246,11 +246,11 @@ class Project(AbstractWrapperObject):
     appBase = self._appBase if hasattr(self, '_appBase') else None
     return 'CcpNmr' if appBase is None else appBase.applicationName
 
-  def _flushCachedData(self, dummy=None):
-    """Flush cached data to ensure up-to-date data are saved"""
-
-    for structureEnsemble in self.structureEnsembles:
-      structureEnsemble._flushCachedData()
+  # def _flushCachedData(self, dummy=None):
+  #   """Flush cached data to ensure up-to-date data are saved"""
+  #
+  #   for structureEnsemble in self.structureEnsembles:
+  #     structureEnsemble._flushCachedData()
 
   # def rename(self, name:str) -> None:
   #   """Rename Project, and rename the underlying API project and the directory stored on disk.
@@ -915,8 +915,13 @@ class Project(AbstractWrapperObject):
   def _loadStructure(self, path:str, subType:str) -> list:
     """Load Structure ensemble(s) from file into Wrapper project"""
 
+    # NBNB TODO FIXME The loader should be replaced with one that uses the current model
+    # Meanwhile this should make the old loader work
+    from ccpnmodel.v_3_0_2.upgrade import upgradeToPandasData
+
     if subType == ioFormats.PDB:
       apiEnsemble = pdbIo.loadStructureEnsemble(self._apiNmrProject.molSystem, path)
+      upgradeToPandasData(apiEnsemble)
     else:
       raise ValueError("Structure file type %s is not recognised" % subType)
     #

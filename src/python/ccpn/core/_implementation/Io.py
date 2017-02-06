@@ -33,12 +33,23 @@ from ccpnmodel.ccpncore.lib import ApiPath
 def loadProject(path:str, useFileLogger:bool=True) -> Project:
   """Open Project stored at path."""
   project = _loadNmrProject(path, useFileLogger=useFileLogger)
+  apiProject = project._wrappedData.root
+
+  if apiProject._upgradedFromV2:
+    # Regrettably this V2 upgrade operation must be done at the wrapper level.
+    # No good place except here
+    for structureEnsemble in project.structureEnsembles:
+      data = structureEnsemble.data
+      if data is None:
+        project._logger.warning("%s has no data. This should never happen")
+      else:
+        data._containingObject = structureEnsemble
+
   projectPath = project.path
   oldName = project.name
   newName = os.path.basename(apiIo.removeCcpnDirectorySuffix(projectPath))
   if oldName != newName:
     # Directory name has changed. Change project name and move Project xml file.
-    apiProject = project._wrappedData.root
     oldProjectFilePath = ApiPath.getProjectFile(projectPath, oldName)
     if os.path.exists(oldProjectFilePath):
       os.remove(oldProjectFilePath)

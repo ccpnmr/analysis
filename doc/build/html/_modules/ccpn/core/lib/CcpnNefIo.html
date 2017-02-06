@@ -55,7 +55,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-26 10:21:40 +0000 (Thu, 26 Jan 2017) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,8 +66,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10094 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-26 10:21:40 +0000 (Thu, 26 Jan 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10111 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -78,7 +78,7 @@
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span> <span class="k">as</span> <span class="n">OD</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">Counter</span>
+<span class="c1"># from collections import Counter</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">attrgetter</span><span class="p">,</span> <span class="n">itemgetter</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
@@ -99,16 +99,16 @@
 <span class="kn">from</span> <span class="nn">ccpn.core.Integral</span> <span class="kn">import</span> <span class="n">Integral</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Sample</span> <span class="kn">import</span> <span class="n">Sample</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.SampleComponent</span> <span class="kn">import</span> <span class="n">SampleComponent</span>
+<span class="c1"># from ccpn.core.SampleComponent import SampleComponent</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Substance</span> <span class="kn">import</span> <span class="n">Substance</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.Atom</span> <span class="kn">import</span> <span class="n">Atom</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.NmrChain</span> <span class="kn">import</span> <span class="n">NmrChain</span>
+<span class="c1"># from ccpn.core.Residue import Residue</span>
+<span class="c1"># from ccpn.core.Atom import Atom</span>
+<span class="c1"># from ccpn.core.NmrChain import NmrChain</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
+<span class="c1"># from ccpn.core.NmrAtom import NmrAtom</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
-<span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShift</span> <span class="kn">import</span> <span class="n">ChemicalShift</span>
+<span class="c1"># from ccpn.core.ChemicalShift import ChemicalShift</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.DataSet</span> <span class="kn">import</span> <span class="n">DataSet</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.RestraintList</span> <span class="kn">import</span> <span class="n">RestraintList</span>
 <span class="kn">from</span> <span class="nn">ccpn.core.Note</span> <span class="kn">import</span> <span class="n">Note</span>
@@ -1972,10 +1972,10 @@
       <span class="n">compoundName</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_compound_name&#39;</span><span class="p">)</span>
       <span class="n">role</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_chain_role&#39;</span><span class="p">)</span>
       <span class="n">comment</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_chain_comment&#39;</span><span class="p">)</span>
-      <span class="n">sequence</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
       <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;linking&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;dummy&#39;</span><span class="p">:</span>
           <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;dummy.&#39;</span> <span class="o">+</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">]</span>
+      <span class="n">sequence</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">)</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
 
       <span class="n">lastChain</span> <span class="o">=</span> <span class="n">sequence2Chain</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">lastChain</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
@@ -2099,14 +2099,15 @@
       <span class="n">assignmentData</span> <span class="o">=</span> <span class="p">{}</span>
       <span class="n">assignmentData2</span> <span class="o">=</span> <span class="p">{}</span>
       <span class="k">if</span> <span class="n">saveFrameName</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;nef_chemical_shift_list&#39;</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="p">[</span><span class="s1">&#39;nef_chemical_shift&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
-          <span class="n">chainCode</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">]</span>
-          <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">assignmentData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">OD</span><span class="p">())</span>
-          <span class="n">assignmentData</span><span class="p">[</span><span class="n">chainCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrResidues</span>
-          <span class="n">nmrResidues</span><span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">loop</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;nef_chemical_shift&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loop</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
+            <span class="n">chainCode</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">]</span>
+            <span class="n">nmrResidues</span> <span class="o">=</span> <span class="n">assignmentData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">OD</span><span class="p">())</span>
+            <span class="n">assignmentData</span><span class="p">[</span><span class="n">chainCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">nmrResidues</span>
+            <span class="n">nmrResidues</span><span class="p">[(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;residue_name&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="bp">None</span>
 
       <span class="c1"># Create objects with reserved names</span>
-
       <span class="k">for</span> <span class="n">chainCode</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">assignmentData</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">chainCode</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;@#&#39;</span> <span class="ow">and</span> <span class="n">chainCode</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
           <span class="c1"># reserved name - make chain</span>
@@ -2439,6 +2440,9 @@
       <span class="n">spectrum</span> <span class="o">=</span> <span class="n">createSpectrum</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">spectrumName</span><span class="p">,</span> <span class="n">spectrumParameters</span><span class="p">,</span> <span class="n">dimensionData</span><span class="p">,</span>
                                 <span class="n">transferData</span><span class="o">=</span><span class="n">transferData</span><span class="p">)</span>
 
+      <span class="c1"># Set experiment transfers at the API level</span>
+      <span class="k">if</span> <span class="n">transferData</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">magnetisationTransfers</span><span class="p">:</span>
+        <span class="n">spectrum</span><span class="o">.</span><span class="n">_setMagnetisationTransfers</span><span class="p">(</span><span class="n">transferData</span><span class="p">)</span>
 
       <span class="c1"># Make data storage object</span>
       <span class="n">filePath</span> <span class="o">=</span> <span class="n">saveFrame</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ccpn_spectrum_file_path&#39;</span><span class="p">)</span>
@@ -2664,7 +2668,9 @@
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">loop</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromLoopRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">map2</span><span class="p">)</span>
       <span class="n">integralList</span> <span class="o">=</span> <span class="n">creatorFunc</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
-      <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">integralList</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">],</span> <span class="s1">&#39;integralLists&#39;</span><span class="p">)</span>
+      <span class="n">integralList</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">])</span>
+      <span class="c1"># NB former call was BROKEN!</span>
+      <span class="c1"># modelUtil.resetSerial(integralList, row[&#39;serial&#39;], &#39;integralLists&#39;)</span>
       <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">integralList</span><span class="p">)</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
@@ -2698,7 +2704,9 @@
       <span class="c1"># lowerLimits = row._get(&#39;lower_limits&#39;)</span>
       <span class="c1"># upperLimits = row._get(&#39;upper_limits&#39;)</span>
       <span class="n">integral</span><span class="o">.</span><span class="n">limits</span> <span class="o">=</span> <span class="nb">zip</span><span class="p">((</span><span class="n">lowerLimits</span><span class="p">,</span> <span class="n">upperLimits</span><span class="p">))</span>
-      <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">integral</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;integral_serial&#39;</span><span class="p">],</span> <span class="s1">&#39;integrals&#39;</span><span class="p">)</span>
+      <span class="n">integral</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;integral_serial&#39;</span><span class="p">])</span>
+      <span class="c1"># NB former call was BROKEN!</span>
+      <span class="c1"># modelUtil.resetSerial(integral, row[&#39;integral_serial&#39;], &#39;integrals&#39;)</span>
       <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">integral</span><span class="p">)</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
@@ -3038,7 +3046,9 @@
     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">saveFrame</span><span class="p">[</span><span class="n">nmrChainLoopName</span><span class="p">]</span><span class="o">.</span><span class="n">data</span><span class="p">:</span>
       <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parametersFromLoopRow</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">map2</span><span class="p">)</span>
       <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">creatorFunc</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
-      <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">],</span> <span class="s1">&#39;nmrChains&#39;</span><span class="p">)</span>
+      <span class="n">nmrChain</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">])</span>
+      <span class="c1"># NB former call was BROKEN!</span>
+      <span class="c1"># modelUtil.resetSerial(nmrChain, row[&#39;serial&#39;], &#39;nmrChains&#39;)</span>
       <span class="n">nmrChains</span><span class="p">[</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;shortName&#39;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">nmrChain</span>
 
     <span class="c1"># read nmr_residue loop</span>
@@ -3049,7 +3059,9 @@
       <span class="n">chainCode</span> <span class="o">=</span>  <span class="n">row</span><span class="p">[</span><span class="s1">&#39;chain_code&#39;</span><span class="p">]</span>
       <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nmrChains</span><span class="p">[</span><span class="n">chainCode</span><span class="p">]</span>
       <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">newNmrResidue</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
-      <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">],</span> <span class="s1">&#39;nmrResidues&#39;</span><span class="p">)</span>
+      <span class="n">nmrResidue</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">])</span>
+      <span class="c1"># NB former call was BROKEN!</span>
+      <span class="c1"># modelUtil.resetSerial(nmrResidue, row[&#39;serial&#39;], &#39;nmrResidues&#39;)</span>
       <span class="n">nmrResidues</span><span class="p">[(</span><span class="n">chainCode</span><span class="p">,</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;sequenceCode&#39;</span><span class="p">])]</span> <span class="o">=</span> <span class="n">nmrChain</span>
 
     <span class="c1"># read nmr_atom loop</span>
@@ -3061,7 +3073,9 @@
       <span class="n">sequenceCode</span> <span class="o">=</span>  <span class="n">row</span><span class="p">[</span><span class="s1">&#39;sequence_code&#39;</span><span class="p">]</span>
       <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="p">[(</span><span class="n">chainCode</span><span class="p">,</span> <span class="n">sequenceCode</span><span class="p">)]</span>
       <span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">newNmrAtom</span><span class="p">(</span><span class="o">**</span><span class="n">parameters</span><span class="p">)</span>
-      <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">,</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">],</span> <span class="s1">&#39;nmrAtoms&#39;</span><span class="p">)</span></div>
+      <span class="n">nmrAtom</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">])</span></div>
+      <span class="c1"># NB former call was BROKEN!</span>
+      <span class="c1"># modelUtil.resetSerial(nmrAtom, row[&#39;serial&#39;], &#39;nmrAtoms&#39;)</span>
   <span class="c1">#</span>
   <span class="n">importers</span><span class="p">[</span><span class="s1">&#39;ccpn_assignments&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load_ccpn_assignments</span>
 
@@ -3091,7 +3105,9 @@
                                                              <span class="n">coreConstants</span><span class="o">.</span><span class="n">isoTimeFormat</span><span class="p">)</span>
       <span class="n">serial</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;serial&#39;</span><span class="p">)</span>
       <span class="k">if</span> <span class="n">serial</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">apiNote</span><span class="p">,</span> <span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;notes&#39;</span><span class="p">)</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="c1"># NB former call was BROKEN!</span>
+        <span class="c1"># modelUtil.resetSerial(apiNote, serial, &#39;notes&#39;)</span>
 
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
@@ -3356,7 +3372,9 @@
       <span class="n">dataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getDataSet</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">serial</span><span class="p">))</span>
       <span class="k">if</span> <span class="n">dataSet</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">dataSet</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newDataSet</span><span class="p">()</span>
-        <span class="n">modelUtil</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">dataSet</span><span class="o">.</span><span class="n">_wrappedData</span><span class="p">,</span> <span class="n">serial</span><span class="p">,</span> <span class="s1">&#39;nmrConstraintStores&#39;</span><span class="p">)</span>
+        <span class="n">dataSet</span><span class="o">.</span><span class="n">resetSerial</span><span class="p">(</span><span class="n">serial</span><span class="p">)</span>
+        <span class="c1"># NB former call was BROKEN!</span>
+        <span class="c1"># modelUtil.resetSerial(dataSet._wrappedData, serial, &#39;nmrConstraintStores&#39;)</span>
         <span class="n">dataSet</span><span class="o">.</span><span class="n">_finaliseAction</span><span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">)</span>
         <span class="n">dataSet</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Data_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">serial</span>
 
@@ -3432,7 +3450,9 @@
 
 
       <span class="c1"># make new spectrum with default parameters</span>
-      <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">createDummySpectrum</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">spectrumName</span><span class="p">)</span>
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">createDummySpectrum</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">spectrumName</span><span class="p">,</span>
+        <span class="n">chemicalShiftList</span><span class="o">=</span><span class="n">spectrumParameters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chemicalShiftList&#39;</span><span class="p">)</span>
+      <span class="p">)</span>
       <span class="k">if</span> <span class="n">acquisitionAxisIndex</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
         <span class="n">spectrum</span><span class="o">.</span><span class="n">acquisitionAxisCode</span> <span class="o">=</span> <span class="n">axisCodes</span><span class="p">[</span><span class="n">acquisitionAxisIndex</span><span class="p">]</span>
 

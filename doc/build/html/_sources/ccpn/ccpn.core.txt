@@ -88,6 +88,14 @@ ccpn.core.Ensemble module
     :undoc-members:
     :show-inheritance:
 
+ccpn.core.Ensemble_bak module
+-----------------------------
+
+.. automodule:: ccpn.core.Ensemble_bak
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.core.Integral module
 -------------------------
 
@@ -108,6 +116,14 @@ ccpn.core.Model module
 ----------------------
 
 .. automodule:: ccpn.core.Model
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.Model_bak module
+--------------------------
+
+.. automodule:: ccpn.core.Model_bak
     :members:
     :undoc-members:
     :show-inheritance:
@@ -260,6 +276,14 @@ ccpn.core.StructureEnsemble module
 ----------------------------------
 
 .. automodule:: ccpn.core.StructureEnsemble
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.core.StructureEnsemble_bak module
+--------------------------------------
+
+.. automodule:: ccpn.core.StructureEnsemble_bak
     :members:
     :undoc-members:
     :show-inheritance:

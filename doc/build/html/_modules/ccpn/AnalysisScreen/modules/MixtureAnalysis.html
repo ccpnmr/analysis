@@ -201,49 +201,45 @@
 
     <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">Column</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">),</span>
                <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Position&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peak</span><span class="p">:</span> <span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">),</span>
-               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peak</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getPeakHeight</span><span class="p">(</span><span class="n">peak</span><span class="p">))]</span>
+               <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peak</span><span class="p">:</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)]</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="p">[],</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectPeak</span><span class="p">,</span> <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">tabPeaksMoleculeLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
 
 
-  <span class="k">def</span> <span class="nf">_selectPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span><span class="nb">int</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="nb">object</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; this callback  &#39;&#39;&#39;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">selectedTablePeaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectedTablePeaks</span><span class="p">:</span>
-      <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">isSelected</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">,</span> <span class="s1">&#39;currents&#39;</span><span class="p">)</span>
-        <span class="c1"># self.project._appBase.current.clearPeaks()</span>
-      <span class="k">else</span><span class="p">:</span>
-        <span class="n">peak</span><span class="o">.</span><span class="n">isSelected</span> <span class="o">=</span> <span class="bp">True</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peak</span> <span class="o">=</span> <span class="n">peak</span>
+  <span class="c1"># def _selectPeak(self, row:int=None, col:int=None, obj:object=None):</span>
+  <span class="c1">#   &#39;&#39;&#39; this callback  &#39;&#39;&#39;</span>
+  <span class="c1">#   self.selectedTablePeaks = self.peakTable.getSelectedObjects()</span>
+  <span class="c1">#   for peak in self.selectedTablePeaks:</span>
+  <span class="c1">#     if peak.isSelected:</span>
+  <span class="c1">#       print(self.project._appBase.current.peaks, &#39;currents&#39;)</span>
+  <span class="c1">#       # self.project._appBase.current.clearPeaks()</span>
+  <span class="c1">#     else:</span>
+  <span class="c1">#       peak.isSelected = True</span>
+  <span class="c1">#       self.current.peak = peak</span>
 
   <span class="k">def</span> <span class="nf">_findSelectedPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">:</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; this callback, registered with a notifier, allows to select a peak either on the table, compoundView or</span>
 <span class="sd">    guiSpectrum display and highLight the respective peak/s or atom/s on compoundView, table , display &#39;&#39;&#39;</span>
     <span class="c1"># self.peakTable.clearSelection()</span>
     <span class="n">selectedPeaks</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
       <span class="n">currentDisplayed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">):</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">currentPeaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
           <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentPeaks</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">peak</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
               <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setCurrentObject</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
               <span class="n">selectedPeaks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">selectedPeaks</span><span class="p">:</span>
       <span class="k">print</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">,</span> <span class="s1">&#39;selected peaks&#39;</span><span class="p">)</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">setCurrentObjects</span><span class="p">(</span><span class="n">selectedPeaks</span><span class="p">)</span>
 
       <span class="k">for</span> <span class="n">atom</span><span class="p">,</span> <span class="n">atomObject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundView</span><span class="o">.</span><span class="n">atomViews</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;H1&#39;</span><span class="p">:</span>
           <span class="n">atomObject</span><span class="o">.</span><span class="n">select</span><span class="p">()</span>
-
-  <span class="k">def</span> <span class="nf">_getPeakHeight</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">:</span>
-      <span class="k">return</span> <span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="o">*</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">scale</span>
 
   <span class="k">def</span> <span class="nf">_createButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sample</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; This creates buttons according with how many spectra are inside the mixture. &#39;&#39;&#39;</span>

@@ -72,6 +72,14 @@ ccpn.util.Hdf5 module
     :undoc-members:
     :show-inheritance:
 
+ccpn.util.ListFromString module
+-------------------------------
+
+.. automodule:: ccpn.util.ListFromString
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.util.LocalShutil module
 ----------------------------
 

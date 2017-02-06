@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-26 10:21:40 +0000 (Thu, 26 Jan 2017) $&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,8 +63,8 @@
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
 <span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10094 $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-26 10:21:40 +0000 (Thu, 26 Jan 2017) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10111 $&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -793,6 +793,40 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;finaliseAction notifier: </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="s1">; </span><span class="si">%s</span><span class="s1">&#39;</span>
                                         <span class="o">%</span> <span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">notifier</span><span class="p">))</span>
             <span class="n">notifier</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">resetSerial</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">newSerial</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;ADVANCED Reset serial of object to newSerial, resetting parent link</span>
+<span class="sd">    and the nextSerial of the parent.</span>
+
+<span class="sd">    Raises ValueError for objects that do not have a serial</span>
+<span class="sd">    (or, more precisely, where the _wrappedData does not have a serial).&quot;&quot;&quot;</span>
+
+    <span class="n">apiObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset serial, </span><span class="si">%s</span><span class="s2"> does not have a &#39;serial&#39; attribute&quot;</span>
+                       <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+    <span class="n">downlink</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">parentRole</span><span class="o">.</span><span class="n">otherRole</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="n">parentDict</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span>
+    <span class="n">downdict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+    <span class="n">oldSerial</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">serial</span>
+    <span class="n">serialDict</span> <span class="o">=</span> <span class="n">parentDict</span><span class="p">[</span><span class="s1">&#39;_serialDict&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">newSerial</span> <span class="o">==</span> <span class="n">oldSerial</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="k">elif</span> <span class="n">newSerial</span> <span class="ow">in</span> <span class="n">downdict</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot reset serial to </span><span class="si">%s</span><span class="s2"> - value already in use&quot;</span> <span class="o">%</span> <span class="n">newSerial</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">maxSerial</span> <span class="o">=</span> <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span>
+      <span class="n">apiObject</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
+      <span class="n">downdict</span><span class="p">[</span><span class="n">newSerial</span><span class="p">]</span> <span class="o">=</span> <span class="n">apiObject</span>
+      <span class="k">del</span> <span class="n">downdict</span><span class="p">[</span><span class="n">oldSerial</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">newSerial</span> <span class="o">&gt;</span> <span class="n">maxSerial</span><span class="p">:</span>
+        <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span> <span class="o">=</span> <span class="n">newSerial</span>
+      <span class="k">elif</span> <span class="n">oldSerial</span> <span class="o">==</span> <span class="n">maxSerial</span><span class="p">:</span>
+        <span class="n">serialDict</span><span class="p">[</span><span class="n">downlink</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">downdict</span><span class="p">)</span>
 
   <span class="k">def</span> <span class="nf">_startFunctionCommandBlock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="o">*</span><span class="n">params</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">defaults</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Execute StartCommandBlock for an object creation function,</span>

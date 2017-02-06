@@ -263,7 +263,7 @@
     <span class="sd">&quot;&quot;&quot;Save project with all data, optionally to new location or with new name.</span>
 <span class="sd">    Unlike lower-level functions, this function ensures that data in high level caches are saved.</span>
 <span class="sd">    Return True if save succeeded otherwise return False (or throw error)&quot;&quot;&quot;</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_flushCachedData</span><span class="p">()</span>
+    <span class="c1"># self._flushCachedData()</span>
     <span class="n">savedOk</span> <span class="o">=</span>  <span class="n">apiIo</span><span class="o">.</span><span class="n">saveProject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="n">newPath</span><span class="o">=</span><span class="n">newPath</span><span class="p">,</span>
                                  <span class="n">changeBackup</span><span class="o">=</span><span class="n">changeBackup</span><span class="p">,</span> <span class="n">createFallback</span><span class="o">=</span><span class="n">createFallback</span><span class="p">,</span>
                                  <span class="n">overwriteExisting</span><span class="o">=</span><span class="n">overwriteExisting</span><span class="p">,</span> <span class="n">checkValid</span><span class="o">=</span><span class="n">checkValid</span><span class="p">,</span>
@@ -295,11 +295,11 @@
     <span class="n">appBase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_appBase&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span>
     <span class="k">return</span> <span class="s1">&#39;CcpNmr&#39;</span> <span class="k">if</span> <span class="n">appBase</span> <span class="ow">is</span> <span class="bp">None</span> <span class="k">else</span> <span class="n">appBase</span><span class="o">.</span><span class="n">applicationName</span>
 
-  <span class="k">def</span> <span class="nf">_flushCachedData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dummy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Flush cached data to ensure up-to-date data are saved&quot;&quot;&quot;</span>
-
-    <span class="k">for</span> <span class="n">structureEnsemble</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">structureEnsembles</span><span class="p">:</span>
-      <span class="n">structureEnsemble</span><span class="o">.</span><span class="n">_flushCachedData</span><span class="p">()</span>
+  <span class="c1"># def _flushCachedData(self, dummy=None):</span>
+  <span class="c1">#   &quot;&quot;&quot;Flush cached data to ensure up-to-date data are saved&quot;&quot;&quot;</span>
+  <span class="c1">#</span>
+  <span class="c1">#   for structureEnsemble in self.structureEnsembles:</span>
+  <span class="c1">#     structureEnsemble._flushCachedData()</span>
 
   <span class="c1"># def rename(self, name:str) -&gt; None:</span>
   <span class="c1">#   &quot;&quot;&quot;Rename Project, and rename the underlying API project and the directory stored on disk.</span>

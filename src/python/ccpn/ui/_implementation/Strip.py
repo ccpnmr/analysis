@@ -345,7 +345,7 @@ class Strip(AbstractWrapperObject):
     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
     orderedAxes = self.orderedAxes
 
-    for ii,displayIndex in enumerate(displayIndices)[2:]:
+    for ii,displayIndex in enumerate(displayIndices[2:]):
       if displayIndex is not None:
         # If no axis matches the index may be None
         zPosition = peak.position[displayIndex]
@@ -386,7 +386,7 @@ class Strip(AbstractWrapperObject):
     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
     orderedAxes = self.orderedAxes
 
-    for ii,displayIndex in enumerate(displayIndices)[2:]:
+    for ii,displayIndex in enumerate(displayIndices[2:]):
       if displayIndex is not None:
         # If no axis matches the index may be None
         zPosition = peak.position[displayIndex]

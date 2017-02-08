@@ -91,6 +91,9 @@ class Gui(Ui):
                              GuiPeakListView.GuiPeakListView._createdPeakListView)
     project.registerNotifier('PeakListView', 'delete',
                              GuiPeakListView.GuiPeakListView._deletedStripPeakListView)
+    project.registerNotifier('PeakListView', 'change',
+                             GuiPeakListView.GuiPeakListView._changedPeakListView)
+
     project.registerNotifier('NmrAtom', 'rename', GuiPeakListView._updateAssignmentsNmrAtom)
 
     project.registerNotifier('Peak', 'change', _coreClassMap['Peak']._refreshPeakPosition)

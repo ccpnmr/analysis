@@ -239,6 +239,12 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     del spectrumDisplay.activePeakItemDict[self]
     del spectrumDisplay.inactivePeakItemDict[self]
 
+  def _changedPeakListView(self):
+
+    for peakItem in self.peakItems.values():
+      if isinstance(peakItem, PeakNd):
+        peakItem.annotation.setupPeakAnnotationItem(peakItem)
+
 class Peak1d(QtGui.QGraphicsItem):
   """ A GraphicsItem that is not actually drawn itself,
   but is the parent of the peak symbol and peak annotation.
@@ -423,8 +429,6 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     # text = text + "*"
     text = spectrumId
     self.setText(text)
-
-
 
   def updatePos(self):
     pass
@@ -877,7 +881,6 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
       # self.setSelected(True)
       # print(self.peakItem)
       # self.update()
-
 
 # Notifiers for assignment annotation change
 # Needed for:

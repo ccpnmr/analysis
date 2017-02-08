@@ -343,7 +343,7 @@ class Strip(AbstractWrapperObject):
     if spectrumView is None:
       return False
     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-    orderedAxes = self.orderedAxes
+    orderedAxes = self.orderedAxes[2:]
 
     for ii,displayIndex in enumerate(displayIndices[2:]):
       if displayIndex is not None:
@@ -384,7 +384,7 @@ class Strip(AbstractWrapperObject):
     if spectrumView is None:
       return False
     displayIndices = spectrumView._displayOrderSpectrumDimensionIndices
-    orderedAxes = self.orderedAxes
+    orderedAxes = self.orderedAxes[2:]
 
     for ii,displayIndex in enumerate(displayIndices[2:]):
       if displayIndex is not None:

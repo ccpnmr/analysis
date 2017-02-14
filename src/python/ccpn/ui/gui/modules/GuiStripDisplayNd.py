@@ -257,7 +257,7 @@ class GuiStripDisplayNd(GuiSpectrumDisplay):
             spectrum.negativeContourCount -= 1
         else:
           # Display has custom contour count - change that one only
-          if spectrum.negativeContourCount:
+          if spectrumView.negativeContourCount:
             spectrumView.negativeContourCount -= 1
 
         if self._appBase.ui.mainWindow is not None:

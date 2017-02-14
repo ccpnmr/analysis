@@ -103,7 +103,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def positiveContourColour(self) -> str:
-    """Colour identifier for positive contours"""
+    """Colour identifier for positive contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourColour
     if result is None:
@@ -118,7 +122,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def positiveContourCount(self) -> int:
-    """Number of positive contours"""
+    """Number of positive contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourCount
     if result is None:
@@ -133,7 +141,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def positiveContourBase(self) -> float:
-    """Base level for positive contours"""
+    """Base level for positive contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourBase
     if result is None:
@@ -148,7 +160,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def positiveContourFactor(self) -> float:
-    """Level multiplication factor for positive contours"""
+    """Level multiplication factor for positive contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.positiveContourFactor
     if result is None:
@@ -172,7 +188,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def negativeContourColour(self) -> str:
-    """Colour identifier for negative contours"""
+    """Colour identifier for negative contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourColour
     if result is None:
@@ -187,7 +207,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def negativeContourCount(self) -> int:
-    """Number of negative contours"""
+    """Number of negative contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourCount
     if result is None:
@@ -202,7 +226,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def negativeContourBase(self) -> float:
-    """Base level for negative contours"""
+    """Base level for negative contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourBase
     if result is None:
@@ -217,7 +245,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def negativeContourFactor(self) -> float:
-    """Level multiplication factor for negative contours"""
+    """Level multiplication factor for negative contours.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.negativeContourFactor
     if result is None:
@@ -269,7 +301,11 @@ class SpectrumView(AbstractWrapperObject):
 
   @property
   def sliceColour(self) -> str:
-    """Colour for 1D slices and 1D spectra"""
+    """Colour for 1D slices and 1D spectra.
+
+    If not set for SpectrumView gives you the value for Spectrum.
+    If set for SpectrumView overrides Spectrum value.
+    Set SpectrumView value to None to return to non-local value"""
     wrappedData = self._wrappedData.spectrumView
     result = wrappedData.sliceColour
     if result is None:

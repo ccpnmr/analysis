@@ -156,8 +156,8 @@ class GuiSpectrumView(GuiBase, QtGui.QGraphicsItem):
   def _getColour(self, colourAttr, defaultColour=None):
 
     colour = getattr(self, colourAttr)
-    if not colour:
-      colour = getattr(self.spectrum, colourAttr)
+    # if not colour:
+    #   colour = getattr(self.spectrum, colourAttr)
       
     if not colour:
       colour = defaultColour

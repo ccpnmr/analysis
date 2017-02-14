@@ -83,7 +83,11 @@ class PeakListView(AbstractWrapperObject):
 
   @property
   def symbolStyle(self) -> str:
-    """Symbol style for displayed peak markers"""
+    """Symbol style for displayed peak markers.
+
+    If not set for PeakListView gives you the value for PeakList.
+    If set for PeakListView overrides PeakList value.
+    Set PeakListView value to None to return to non-local value"""
     wrappedData = self._wrappedData.peakListView
     result = wrappedData.symbolStyle
     if result is None:
@@ -98,7 +102,11 @@ class PeakListView(AbstractWrapperObject):
 
   @property
   def symbolColour(self) -> str:
-    """Symbol style for displayed peak markers"""
+    """Symbol style for displayed peak markers.
+
+    If not set for PeakListView gives you the value for PeakList.
+    If set for PeakListView overrides PeakList value.
+    Set PeakListView value to None to return to non-local value"""
     wrappedData = self._wrappedData.peakListView
     result = wrappedData.symbolColour
     if result is None:
@@ -113,7 +121,11 @@ class PeakListView(AbstractWrapperObject):
 
   @property
   def textColour(self) -> str:
-    """Symbol style for displayed peak markers"""
+    """Symbol style for displayed peak markers.
+
+    If not set for PeakListView gives you the value for PeakList.
+    If set for PeakListView overrides PeakList value.
+    Set PeakListView value to None to return to non-local value"""
     wrappedData = self._wrappedData.peakListView
     result = wrappedData.textColour
     if result is None:

@@ -930,7 +930,7 @@ class CcpnNefWriter:
 
     # NBNB TBD FIXME add proper values for format version from specification file
     result['format_name'] = 'nmr_exchange_format'
-    result['format_version'] = '1.0'
+    result['format_version'] = '1.1'
     # format_version=None
     result['coordinate_file_name'] = coordinateFileName
     if headObject.className == 'Project':

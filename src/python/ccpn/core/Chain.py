@@ -326,7 +326,6 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
 
     apiMolecule = substance._apiSubstance.molecule
     apiMolecule.isFinalised = True
-    # fetch to ensure creation of Substance
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
   finally:

@@ -699,7 +699,6 @@ class AbstractWrapperObject():
 
     action is one of: 'create', 'delete', 'change', 'rename'"""
 
-
     project = self.project
     if project._notificationBlanking:
       return

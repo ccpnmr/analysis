@@ -31,6 +31,7 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.Project import Project
+from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core import _coreClassMap
 from ccpn.core.lib import Pid
 from ccpn.ui.gui.DropBase import DropBase
@@ -190,13 +191,13 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     # Register notifiers to maintain sidebar
     for cls in classesInSideBar.values():
       className = cls.className
-      project.registerNotifier(className, 'create', self._createItem)
       project.registerNotifier(className, 'delete', self._removeItem)
-      project.registerNotifier(className, 'rename', self._renameItem)
+      if className != 'NmrResidue':
+        project.registerNotifier(className, 'create', self._createItem)
+        project.registerNotifier(className, 'rename', self._renameItem)
+    project.registerNotifier('NmrResidue', 'create', self._refreshParentNmrChain)
+    project.registerNotifier('NmrResidue', 'rename', self._renameNmrResidueItem)
 
-    # notifier = project.registerNotifier('AbstractWrapperObject', 'create', self._createItem)
-    # notifier = project.registerNotifier('AbstractWrapperObject', 'delete', self._removeItem)
-    # notifier = project.registerNotifier('AbstractWrapperObject', 'rename', self._renameItem)
     notifier = project.registerNotifier('SpectrumGroup', 'Spectrum', self._refreshSidebarSpectra,
                                         onceOnly=True)
     project.duplicateNotifier('SpectrumGroup', 'create', notifier)
@@ -213,7 +214,22 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       for obj in spectrum.peakLists + spectrum.integralLists:
         self._createItem(obj)
 
+  def _refreshParentNmrChain(self, nmrResidue:NmrResidue):
+    """Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort
 
+    Replaces normal _createItem notifier for NmrResidues"""
+
+    nmrChain = nmrResidue._parent
+
+    # Remove NmrChain item and contents
+    self._removeItem(nmrChain)
+
+    # Create NmrResidue items again - this gives them in correctly sorted order
+    self._createItem(nmrChain)
+    for nr in nmrChain.nmrResidues:
+      self._createItem(nr)
+      for nmrAtom in nr.nmrAtoms:
+        self._createItem(nmrAtom)
 
   def _addItem(self, item:QtGui.QTreeWidgetItem, pid:str):
     """
@@ -296,7 +312,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
         itemParent = self._typeToItem.get(shortClassName)
         newItem = self._addItem(itemParent, obj.pid)
-        itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
+        # itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)
         if shortClassName in ['SA', 'NC', 'DS']:
           newObjectItem = QtGui.QTreeWidgetItem(newItem)
           newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
@@ -318,8 +334,8 @@ class SideBar(DropBase, QtGui.QTreeWidget):
             newObjectItem = QtGui.QTreeWidgetItem(newItem)
             newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
             newObjectItem.setText(0, "<New NmrAtom>")
-          for i in range(itemParent.childCount()):
-            itemParent.child(i).sortChildren(0, QtCore.Qt.AscendingOrder)
+          # for i in range(itemParent.childCount()):
+          #   itemParent.child(i).sortChildren(0, QtCore.Qt.AscendingOrder)
 
     else:
       # Object type is not in sidebar
@@ -386,6 +402,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
   def _renameItem(self, obj:AbstractWrapperObject, oldPid:str):
     """rename item(s) from previous pid oldPid to current object pid"""
+
     import sip
     newPid = obj.pid
     for item in self._findItems(oldPid):
@@ -395,17 +412,27 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
       else:
         # parent has changed - we must move and rename the entire item tree.
-        # NB this is relevant for NmrResidue and NmrAtom
+        # NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)
         objects = self._itemObjects(item, recursive=True)
         sip.delete(item) # this also removes child items
-        for obj in objects:
-          self._createItem(obj)
+        for xx in objects:
+          self._createItem(xx)
+
+  def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):
+    """rename NmrResidue(s) from previous pid oldPid to current object pid"""
+
+    if not oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
+      # Parent has changed - remove items from old location
+      import sip
+      for item in self._findItems(oldPid):
+        sip.delete(item) # this also removes child items
+
+    #
+    self._refreshParentNmrChain(obj)
 
   def _removeItem(self, wrapperObject:AbstractWrapperObject):
-  # def _removeItem(self, parent, objPid):
     """Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.
-    Called when objects are deleted.
-    The parent parameter is necessary to match the standard calling interface of notifiers"""
+    Called when objects are deleted."""
     import sip
     for item in self._findItems(wrapperObject.pid):
       sip.delete(item)
@@ -427,12 +454,14 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """
 
     self.projectItem.setText(0, project.name)
-    pid2Obj = project._pid2Obj
-    for className in classesInSideBar:
-      dd = pid2Obj.get(className)
-      if dd:
-        for obj in sorted(dd.values()):
-          self._createItem(obj)
+    # pid2Obj = project._pid2Obj
+    for className, cls in classesInSideBar.items():
+      for obj in getattr(project, cls._pluralLinkName):
+        self._createItem(obj)
+      # dd = pid2Obj.get(className)
+      # if dd:
+      #   for obj in sorted(dd.values()):
+      #     self._createItem(obj)
 
   def _dragEnterEvent(self, event, enter=True):
     if event.mimeData().hasUrls():
@@ -539,13 +568,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     """Create new object starting from the <New> item
     """
 
-    # NBNB TBD FIXME
-    # This function (and the NEW_ITEM_DICT) it uses gets the create_new
-    # function from the shortClassName of the PARENT!!!
-    # The assumes that each parent can have only ONE kind of new child.
-    # This is true as of 16/2/2016, but may NOT remain true
-    # (e.g. Spectrum has multiple children).
-
     if item.text(0) == "<New Integral List>" or item.text(0) == "<New Peak List>":
 
       if item.text(0) == "<New Peak List>":
@@ -553,7 +575,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       if item.text(0) == "<New Integral List>":
         self.project.getByPid(item.parent().text(0)).newIntegralList()
 
-      item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
+      # item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
 
     else:
 
@@ -603,15 +625,16 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         # for i in range(item.childCount()):
 
       if funcName is not None:
-        # if (item.parent().text(0)) == 'SpectrumGroups':
-        #   getattr(itemParent, funcName)('NewSpectrumGroup')
-        # else:
-          newItem = getattr(itemParent, funcName)()
-          item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
+        newItem = getattr(itemParent, funcName)()
+        # if funcName == 'newNmrResidue':
+        #   newItem.parent().sortChildren(0, QtCore.Qt.AscendingOrder)
 
       else:
         info = showInfo('Not implemented yet!',
             'This function has not been implemented in the current version',
             colourScheme=self.colourScheme)
+
+
+
 
 

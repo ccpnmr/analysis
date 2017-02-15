@@ -25,9 +25,8 @@ import typing
 import pandas as pd
 import collections
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
 from ccpn.core.StructureEnsemble import StructureEnsemble
-from ccpn.core.StructureEnsemble import EnsembleData
+from ccpn.util.StructureData import EnsembleData
 from ccpnmodel.ccpncore.api.ccp.molecule.MolStructure import Model as ApiModel
 
 

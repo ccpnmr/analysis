@@ -55,13 +55,23 @@ class _CcpnMultiEncoder(json.JSONEncoder):
     # Sentinel - reset if we find a supported type
     typ = None
 
+    try:
+      from ccpn.util.StructureData import EnsembleData
+    except ImportError:
+      EnsembleData = None
+
     if isinstance(obj, OrderedDict):
       typ = 'OrderedDict'
       data = list(obj.items())
 
+    elif EnsembleData is not None and isinstance(obj,EnsembleData):
+      # Works like pandas.DataFrame (see comments there), but instantiates subclass.
+      typ = 'ccpn.EnsembleData'
+      data = obj.to_json(orient='split')
+
     elif isinstance(obj, pandas.DataFrame):
       # NB this converts both None and NaN to 'null'
-      # We assume that pandas will get back the correct value from the type of teh array
+      # We assume that pandas will get back the correct value from the type of the array
       # (NaN in numeric data, None in object data).
       typ = 'pandas.DataFrame'
       data = obj.to_json(orient='split')
@@ -74,9 +84,9 @@ class _CcpnMultiEncoder(json.JSONEncoder):
       data = obj.to_json(orient='split')
 
     elif isinstance(obj, pandas.Panel):
-      typ = 'pandas.Panel'
-      data = list( ( (item, obj.loc[item ,: , :])
-                            for item in obj.items() ) )
+      # NBNB NOT TESTED
+      frame = obj.to_frame()
+      data = frame.to_json(orient='split')
 
     elif isinstance(obj, numpy.ndarray):
       typ = 'numpy.ndarray'
@@ -111,20 +121,46 @@ def _ccpnObjectPairHook(pairs):
       if typ == 'OrderedDict':
         return OrderedDict(data)
 
+      elif typ == 'ccpn.EnsembleData':
+
+        try:
+          from ccpn.util.StructureData import EnsembleData
+        except ImportError:
+          EnsembleData = None
+
+        if EnsembleData is None:
+          return pandas.read_json(data, orient='split')
+        else:
+
+          # NBNB HACK:
+          # We want the pandas read_json to instantiate EnsembleData, which is a subclass
+          # of DataFrame. Hence this temporary monkeypatching
+          from pandas.io import json as pandasJson
+          backup= pandasJson.DataFrame
+          pandasJson.DataFrame = EnsembleData
+          result = None
+          try:
+            result = pandas.read_json(data, orient='split')
+          finally:
+            pandasJson.DataFrame = backup
+          return result
+
       elif typ == 'pandas.DataFrame':
-        return pandas.DataFrame(data=data.get('data'), index=data.get('index'),
-                                columns=data.get('columns'))
+        # return pandas.DataFrame(data=data.get('data'), index=data.get('index'),
+        #                         columns=data.get('columns'))
+        return pandas.read_json(data, orient='split')
 
       elif typ == 'pandas.Panel':
-        # NBNB TBD CHECKME this may well not work!!!
-        return pandas.Panel(data=OrderedDict(data))
+        # NBNB NOT TESTED
+        return pandas.read_json(data, orient='split').to_panel()
 
       elif typ == 'pandas.Series':
-        columns = data.get('columns')
-        # Does the series name get stored in columns? Presumably. Let us try
-        name = columns[0] if columns else None
-        return pandas.Series(data=data.get('data'), index=data.get('index'),
-                             name=name)
+        # columns = data.get('columns')
+        # # Does the series name get stored in columns? Presumably. Let us try
+        # name = columns[0] if columns else None
+        # return pandas.Series(data=data.get('data'), index=data.get('index'),
+        #                      name=name)
+        return pandas.read_json(data, typ='series', orient='split')
 
       elif typ == 'numpy.ndarray':
         return numpy.ndarray(data)

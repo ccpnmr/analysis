@@ -290,7 +290,7 @@ class Peak1d(QtGui.QGraphicsItem):
         self.height = height.value
       else:
         self.height = 0
-    self.height *= self.spectrum.scale
+    #self.height *= self.spectrum.scale  # should not need this now
     #
     # # if peakDims[dim].numAliasing:
     # #   self.isAliased = True
@@ -438,10 +438,12 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
       # Translate first to rotate around bottom left corner
       self.translate(0, -self.boundingRect().height())
       self.setRotation(0)
-      self.setPos(0, min(peakItem.pos().y()*0.75, peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
+      #self.setPos(0, min(peakItem.pos().y()*0.75, peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
+      self.setPos(0, min(peakItem.pos().y()*0.75, peakItem.spectrum.positiveContourBase))
       # print(peakItem.height, max(peakItem.pos().y()*0.75, peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
     else:
-      self.setPos(0, min(peakItem.pos().y()*0.75, -peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
+      #self.setPos(0, min(peakItem.pos().y()*0.75, -peakItem.spectrum.positiveContourBase * peakItem.spectrum.scale))
+      self.setPos(0, min(peakItem.pos().y()*0.75, -peakItem.spectrum.positiveContourBase))
       self.setRotation(45)
 
   def setColour(self):
@@ -733,7 +735,7 @@ class PeakNd(QtGui.QGraphicsItem):
 
     return QtGui.QGraphicsItem.itemChange(self, change, value)
 """
-  # @profile
+  #@profile
   def paint(self, painter, option, widget):
     if self.peakListView.isDeleted: # strip has been deleted
       return

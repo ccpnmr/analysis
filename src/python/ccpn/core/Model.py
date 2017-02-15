@@ -62,7 +62,7 @@ class ModelData:
     """Get indices (in the pandas sense, elements of the index column,
     in theory need not be integers). These should be used with self._ensemble.loc"""
     data = self._ensemble
-    if data:
+    if data is not None:
       modelFilter = data[data['modelNumber'] == self._modelNumber]
       if modelFilter.shape[0] > 0:
         modelStart = modelFilter.index[0]

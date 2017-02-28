@@ -105,7 +105,7 @@ class StructureEnsemble(AbstractWrapperObject):
       else:
         apiObj.value = value
     else:
-      raise TypeError("Value ie not of type EnsembleData")
+      raise TypeError("Value is not of type EnsembleData")
     #
     value._containingObject = self
 

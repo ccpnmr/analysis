@@ -26,7 +26,7 @@ __version__ = "$Revision$"
 # Deliberate
 from shutil import *
 import os
-# Override copytree to ignore copystat erroes:
+# Override copytree to ignore copystat errors:
 # def copytree(src, dst, symlinks=False, ignore=None, copy_function=copy2,
 #              ignore_dangling_symlinks=False):
 # Replaced copy2 (which uses copystat) with copy (which uses copymode)

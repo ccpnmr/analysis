@@ -56,8 +56,8 @@ validFileNamePartChars = ('abcdefghijklmnopqrstuvwxyz'
                           + defaultFileNameChar)
 validCcpnFileNameChars  = validFileNamePartChars + '-.' + separatorFileNameChar
 
-
-Sentinel = collections.namedtuple('Sentinel', ['value'])
+# # Not used - Rasmus 20/2/2017
+# Sentinel = collections.namedtuple('Sentinel', ['value'])
 
 
 
@@ -215,25 +215,26 @@ def isClose(a:float, b:float, relTolerance:float=1e-05, absTolerance=1e-08) -> b
   Inspired by numpy.isclose()"""
   return (abs(a - b) <= (absTolerance + relTolerance * abs(b)))
 
-def flattenIfNumpy(data, shape=None):
-  """If data are Numpy, convert to flat array
-  If shape is given, check that numpy fits shape, and flat sequence fits total number of elements"""
-
-  if hasattr(data, 'flat'):
-    # Numpy array
-    if shape and data.shape != tuple(shape):
-      raise ValueError("Shape of array data is %s, should be %s" % (data.shape, shape))
-    data = data.flat
-
-  elif shape:
-      elementCount = 1
-      for x in shape:
-        elementCount *= x
-      if len(data) != elementCount:
-        raise ValueError("Number of elements in data sequence is %s, should be %s"
-                         % (len(data), elementCount))
-  #
-  return data
+# # No longer used - Rasmus 20/2/2017
+# def flattenIfNumpy(data, shape=None):
+#   """If data are Numpy, convert to flat array
+#   If shape is given, check that numpy fits shape, and flat sequence fits total number of elements"""
+#
+#   if hasattr(data, 'flat'):
+#     # Numpy array
+#     if shape and data.shape != tuple(shape):
+#       raise ValueError("Shape of array data is %s, should be %s" % (data.shape, shape))
+#     data = data.flat
+#
+#   elif shape:
+#       elementCount = 1
+#       for x in shape:
+#         elementCount *= x
+#       if len(data) != elementCount:
+#         raise ValueError("Number of elements in data sequence is %s, should be %s"
+#                          % (len(data), elementCount))
+#   #
+#   return data
 
 def stringToIdentifier(value:str) -> str:
   """Convert string to identifier, replacing non-alphanumeric values by underscore"""

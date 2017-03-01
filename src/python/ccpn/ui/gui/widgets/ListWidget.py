@@ -7,19 +7,28 @@ from ccpn.ui.gui.widgets.Menu import Menu
 
 class ListWidget(QtGui.QListWidget, Base):
 
-  def __init__(self, parent, callback=None, rightMouseCallback=None, contextMenu=True, **kw):
+  def __init__(self, parent, objects=None, callback=None, rightMouseCallback=None, contextMenu=True, multiSelect=True, **kw):
 
     QtGui.QListWidget.__init__(self, parent)
     Base.__init__(self, **kw)
 
     self.setDragDropMode(QtGui.QAbstractItemView.DragDrop)
-    self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+
     self.setAcceptDrops(False)
     self.contextMenu = contextMenu
     self.callback = callback
+    self.objects = list(objects or [])
+    self.items = list(objects or [])
+    self.multiSelect = multiSelect
+
     self.rightMouseCallback = rightMouseCallback
     if callback is not None:
       self.itemClicked.connect(callback)
+
+    if self.multiSelect:
+      self.setSelectionMode(QtGui.QAbstractItemView.ExtendedSelection)
+    else:
+      self.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
 
     self.contextMenuItem = 'Delete'
 
@@ -29,6 +38,43 @@ class ListWidget(QtGui.QListWidget, Base):
       self.removeItem()
     self.rightMouseCallback()
 
+  def setObjects(self, objects, name='pid'):
+    self.clear()
+    self.objects = list(objects)
+    for obj in objects:
+      if hasattr(obj, name):
+        item = QtGui.QListWidgetItem(getattr(obj, name), self)
+        item.setData(QtCore.Qt.UserRole, obj)
+        self.addItem(item)
+        self.items.append(item)
+
+      else:
+        item = QtGui.QListWidgetItem(str(obj))
+        item.setData(QtCore.Qt.UserRole, obj)
+        self.addItem(item)
+
+  def getObjects(self):
+     return list(self.objects)
+
+  def getSelectedObjects(self):
+    indexes =  self.selectedIndexes()
+    objects = []
+    for item in indexes:
+      obj = item.data(QtCore.Qt.UserRole)
+      if obj is not None:
+        objects.append(obj)
+    return objects
+
+  def selectObject(self, obj):
+    for item in self.items:
+      itemObject = item.data(QtCore.Qt.UserRole)
+      if obj == itemObject:
+        item.setSelected(True)
+
+  def selectObjects(self, objs):
+    self.clearSelection()
+    for obj in objs:
+      self.selectObject(obj)
 
   def removeItem(self):
     self.takeItem(self.currentRow())

@@ -17,19 +17,20 @@ class SelectObjectsPopup(QtGui.QDialog, Base):
     super(SelectObjectsPopup, self).__init__(parent)
     Base.__init__(self, **kw)
     self.parent = parent
-    if project.getByPid(objects[0]._pluralLinkName) == 'spectra':
-      objects = [spectrum.pid for spectrum in project.spectra if len(spectrum.axisCodes) >= dim]
-    else:
-      objects=[object.pid for object in objects]
+    if len(objects)>0:
+      if project.getByPid(objects[0]._pluralLinkName) == 'spectra':
+        objects = [spectrum.pid for spectrum in project.spectra if len(spectrum.axisCodes) >= dim]
+      else:
+        objects=[object.pid for object in objects]
 
-    label1a = Label(self, text="Selected %s" % project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
-    objects.insert(0, '  ')
-    self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self._selectObject)
-    self.objectPulldown.setData(objects)
-    self.objectListWidget = ListWidget(self, grid=(2, 0))
+      label1a = Label(self, text="Selected %s" % project.getByPid(objects[0])._pluralLinkName, grid=(0, 0))
+      objects.insert(0, '  ')
+      self.objectPulldown = PulldownList(self, grid=(1, 0), callback=self._selectObject)
+      self.objectPulldown.setData(objects)
+      self.objectListWidget = ListWidget(self, grid=(2, 0))
 
-    self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
-                                callbacks=[self.reject, self._setObjects])
+      self.buttonBox = ButtonList(self, grid=(3, 0), texts=['Cancel', 'Ok'],
+                                  callbacks=[self.reject, self._setObjects])
 
   def _selectObject(self, item):
     self.objectListWidget.addItem(item)

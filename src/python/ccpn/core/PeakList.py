@@ -245,7 +245,8 @@ class PeakList(AbstractWrapperObject):
       # code below assumes that dataRange[1] > dataRange[0]
       peaks = []
       spectrum = self.spectrum
-      data1d = spectrum._apiDataSource.get1dSpectrumData()
+      # data1d = spectrum._apiDataSource.get1dSpectrumData()
+      data1d = numpy.array([self.spectrum.positions, self.spectrum.intensities])
       selectedData = data1d[:, (data1d[0] < dataRange[0]) * (data1d[0] > dataRange[1])]
       if selectedData.size == 0:
         return peaks
@@ -286,7 +287,8 @@ class PeakList(AbstractWrapperObject):
         ignoredRegions = [[-20.1,-19.1]]
       peaks = []
       spectrum = self.spectrum
-      data = spectrum._apiDataSource.get1dSpectrumData()
+      # data = spectrum._apiDataSource.get1dSpectrumData()
+      data = numpy.array([spectrum.positions, spectrum.intensities])
       ppmValues = data[0]
       if noiseThreshold == 0 or noiseThreshold is None:
         noiseThreshold = spectrum.estimateNoise()*5

@@ -98,15 +98,15 @@ class CcpnModuleArea(ModuleArea):
   #     for container in self.findAll()[0]:
   #       if container and pythonConsole is not None:
   #         self.moveModule(pythonConsole, 'bottom', container)
-
-  def makeContainer(self, typ):
-    if typ == 'vertical':
-      new = VContainer(self)
-    elif typ == 'horizontal':
-      new = HContainer(self)
-    elif typ == 'tab':
-      new = TabContainer(self)
-    return new
+  #
+  # def makeContainer(self, typ):
+  #   if typ == 'vertical':
+  #     new = VContainer(self)
+  #   elif typ == 'horizontal':
+  #     new = HContainer(self)
+  #   elif typ == 'tab':
+  #     new = TContainer(self)
+  #   return new
 
 
   def apoptose(self):
@@ -122,29 +122,3 @@ class CcpnModuleArea(ModuleArea):
       #   if c and pythonConsole is not None:
       #     print(c, 'Testing')
 
-
-class TabContainer(TContainer):
-  ''' This subclass allows to set the orientation of the stacked 'tab' to vertical
-  '''
-  def __init__(self, area):
-    QtGui.QWidget.__init__(self)
-    Container.__init__(self, area)
-    self.layout = QtGui.QGridLayout()
-    self.layout.setSpacing(0)
-    self.layout.setContentsMargins(0, 0, 0, 0)
-    self.setLayout(self.layout)
-
-    self.hTabLayout = self.vTabLayout = QtGui.QVBoxLayout() #this ovveride the original tab orientation in PyGraph
-
-    self.vTabBox = QtGui.QWidget()
-    self.vTabBox.setLayout(self.vTabLayout)
-    self.vTabLayout.setSpacing(2)
-    self.vTabLayout.setContentsMargins(0, 0, 0, 0)
-    self.layout.addWidget(self.vTabBox, 0, 0)
-
-    self.stack = QtGui.QStackedWidget()
-    self.layout.addWidget(self.stack, 0, 1)
-    self.stack.childEvent = self.stackChildEvent
-
-    for n in ['count', 'widget', 'indexOf']:
-      setattr(self, n, getattr(self.stack, n))

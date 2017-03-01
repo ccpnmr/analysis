@@ -150,7 +150,7 @@ def matchSTDToReference(project, minDistance):
               newPeakListPosition = sampleComponent.substance.referenceSpectra[0].peakLists[1].newPeak(
                 position=[position], height=0.00)
 
-            merit = _stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPosition, minDistance)
+            merit = _stdEfficiency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, stdPosition, minDistance)
             if len(merit) > 0:
               newHit.meritCode = str(merit[0]) + '%'
 
@@ -184,7 +184,7 @@ def createStdDifferenceSpectrum(project, filePath):
         _loadSpectrumDifference(project, str(path) + '/pdata/1/1r', sample)
 
 
-def _stdEfficency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions, minDistance):
+def _stdEfficiency(spectrumOffResonancePeaks, spectrumOnResonancePeaks, matchedPositions, minDistance):
 
   efficiency = []
   for position in matchedPositions:

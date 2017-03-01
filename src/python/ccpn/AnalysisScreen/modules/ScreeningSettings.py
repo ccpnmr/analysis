@@ -3,7 +3,7 @@ __author__ = 'luca'
 from collections import OrderedDict
 from ccpn.ui.gui.modules.PipelineModule import GuiPipeline
 import os
-from ccpn.AnalysisMetabolomics import GuiPipeLine as gp
+# from ccpn.AnalysisMetabolomics import GuiPipeLine as gp
 
 
 pipelineFilesDirName = '/guiPipeline/'

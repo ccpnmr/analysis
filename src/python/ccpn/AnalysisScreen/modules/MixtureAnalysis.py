@@ -98,9 +98,9 @@ class MixtureAnalysis(CcpnModule):
     self._mixtureManagementWidgets()
 
     ######## ========  registerNotify ====== ########
-    self.current = project._appBase.current
-    self.current.registerNotify(self._findSelectedPeaks, 'peaks')
-    self._findSelectedPeaks(peaks=None)
+    # self.current = project._appBase.current
+    # self.current.registerNotify(self._findSelectedPeaks, 'peaks')
+    # self._findSelectedPeaks(peaks=None)
 
 
 
@@ -154,7 +154,7 @@ class MixtureAnalysis(CcpnModule):
                Column('Position', lambda peak: '%.3f' % peak.position[0] ),
                Column('Height', lambda peak: peak.height)]
 
-    self.peakTable = ObjectTable(self, columns, objects=[], selectionCallback=self._selectPeak, multiSelect=True)
+    self.peakTable = ObjectTable(self, columns, objects=[], selectionCallback=None, multiSelect=True)
     self.tabPeaksMoleculeLayout.addWidget(self.peakTable, 1,0)
 
 

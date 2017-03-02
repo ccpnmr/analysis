@@ -4,7 +4,7 @@
 
 
 
-from pyqtgraph.exporters.Exporter import Exporter
+from ccpn.ui.gui.exporters1D.Exporter import Exporter
 from pyqtgraph.parametertree import Parameter
 from pyqtgraph.python2_3 import asUnicode
 

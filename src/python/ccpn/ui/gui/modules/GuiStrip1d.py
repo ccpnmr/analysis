@@ -49,7 +49,7 @@ class GuiStrip1d(GuiStrip):
     #                        strip=self)
 
   def _printToFile(self, printer):
-    
+
     raise Exception('1D printing not enabled yet')
     
   def _get1dContextMenu(self) -> Menu:
@@ -80,8 +80,14 @@ class GuiStrip1d(GuiStrip):
     self.contextMenu.addAction(self.gridAction)
     self.contextMenu.addSeparator()
     # self.contextMenu.addItem("Print", callback=self.raisePrintMenu)
+    self.contextMenu.addAction("Print to File...", self.showExportDialog)
     self.contextMenu.navigateToMenu = self.contextMenu.addMenu('Navigate To')
     return self.contextMenu
+
+  def showExportDialog(self):
+      from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
+      self.exportDialog = CustomExportDialog(self.viewBox.scene())
+      self.exportDialog.show(self.viewBox)
 
   def resetYZoom(self):
     """

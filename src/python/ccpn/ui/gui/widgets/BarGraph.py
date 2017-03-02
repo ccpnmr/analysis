@@ -1,12 +1,11 @@
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
-from pyqtgraph.GraphicsScene.exportDialog import ExportDialog
 import  numpy as np
 from pyqtgraph.Point import Point
 import ccpn.ui.gui.ViewBox as spectrumViewbox
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.ui.gui.widgets.Menu import Menu
-
+from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
 current = []
 
 labelsColor = 'b'
@@ -98,7 +97,6 @@ class BarGraph(pg.BarGraphItem):
     position = event.pos().x()
 
     self.clicked = int(position)
-    print('kllkl;k')
     if event.button() == QtCore.Qt.LeftButton:
       for label in self.labels:
         if label.text() == str(self.clicked):
@@ -117,7 +115,6 @@ class BarGraph(pg.BarGraphItem):
     for key, value in self.allValues.items():
       label = CustomLabel(text=str(key))
       self.viewBox.addItem(label)
-      print(key,value,)
       label.setPos(int(key), value)
       self.labels.append(label)
 
@@ -168,34 +165,6 @@ class CustomLabel(QtGui.QGraphicsSimpleTextItem):
 
           self.setSelected(True)
 
-
-
-class CustomExportDialog(ExportDialog):
-
-  def updateFormatList(self):
-    from ccpn.ui.gui.exporters.ImageExporter import ImageExporter
-    from ccpn.ui.gui.exporters.SVGExporter import SVGExporter
-
-    current = self.ui.formatList.currentItem()
-    if current is not None:
-      current = str(current.text())
-    self.ui.formatList.clear()
-    self.exporterClasses = {}
-
-
-    exporterList = [ImageExporter, SVGExporter]
-
-    gotCurrent = False
-    for exp in exporterList:
-      self.ui.formatList.addItem(exp.Name)
-
-      self.exporterClasses[exp.Name] = exp
-      if exp.Name == current:
-        self.ui.formatList.setCurrentRow(self.ui.formatList.count() - 1)
-        gotCurrent = True
-
-    if not gotCurrent:
-      self.ui.formatList.setCurrentRow(0)
 
 
 

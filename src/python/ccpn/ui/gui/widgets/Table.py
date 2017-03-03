@@ -195,10 +195,10 @@ class ObjectTable(QtGui.QTableView, Base):
     header.setMinimumSectionSize(rowHeight)
     header.setDefaultSectionSize(rowHeight)
 
-    if numberRows:
-      header.setVisible(True)
-    else:
-      header.setVisible(False)
+    # if numberRows:
+    # header.setVisible(True)
+    # else:
+    header.setVisible(False)
 
     # header = ObjectHeaderView(QtCore.Qt.Horizontal, self)
     # header.setMovable(True)

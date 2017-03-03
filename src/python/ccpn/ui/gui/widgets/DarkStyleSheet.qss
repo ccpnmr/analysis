@@ -1,6 +1,7 @@
 QWidget {
     padding: 0;
     margin: 0px 0px 0px 0px;
+
 }
 
 QFrame {
@@ -220,23 +221,19 @@ ObjectTable::item::selected {
     color: #f7ffff;
 }
 
+/* setting the QHeader background colour produces an unexpected behavior when a row is selected. */
 
-/* make all background the same so that selection and sorting does not changes things */
 QHeaderView {
-    background-color: #FDFDFC;
-    /*color: #122043;*/
-    color: #555D85;
-    font-weight: bold;
-}
-QHeaderView::section {
-    background-color: #FDFDFC;
-    color: #555D85;
-}
-QHeaderView::section:checked {
-    background-color: #FDFDFC;
-    color: #555D85;
-}
+            color: #555D85;
+              }
 
+QHeaderView::section {
+                    color: #555D85;
+                     }
+
+QHeaderView::section:checked {
+                              color: #555D85;
+                             }
 
 QToolBar {
           border: 0px;

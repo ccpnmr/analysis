@@ -9,12 +9,13 @@ from pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt import Ui_Form
 
 from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
 from ccpn.ui.gui.exporters1D.SVGExporter import SVGExporter
+from ccpn.ui.gui.exporters1D.TextExporter import TextExporter
 
-ExporterList = [ImageExporter, SVGExporter]
+ExporterList = [ImageExporter, SVGExporter, TextExporter]
 
-class CustomExportDialog(QtGui.QWidget):
+class CustomExportDialog(QtGui.QDialog):
   def __init__(self, scene):
-    QtGui.QWidget.__init__(self)
+    QtGui.QDialog.__init__(self)
     self.setVisible(False)
     self.setWindowTitle("Export")
     self.shown = False
@@ -22,13 +23,12 @@ class CustomExportDialog(QtGui.QWidget):
     self.scene = scene
 
     self.selectBox = QtGui.QGraphicsRectItem()
-    self.selectBox.setPen(pg.functions.mkPen('y', width=3, style=QtCore.Qt.DashLine))
-    self.selectBox.hide()
-    self.scene.addItem(self.selectBox)
+    # self.selectBox.setPen(pg.functions.mkPen('y', width=3, style=QtCore.Qt.DashLine))
+    # self.selectBox.hide()
+    # self.scene.addItem(self.selectBox)
   
     self.ui =  Ui_Form()
     self.ui.setupUi(self)
-
     self.ui.closeBtn.clicked.connect(self.close)
     self.ui.exportBtn.clicked.connect(self.exportClicked)
     self.ui.copyBtn.clicked.connect(self.copyClicked)
@@ -69,7 +69,7 @@ class CustomExportDialog(QtGui.QWidget):
     self.setVisible(True)
     self.activateWindow()
     self.raise_()
-    self.selectBox.setVisible(True)
+    # self.selectBox.setVisible(True)
 
     if not self.shown:
       self.shown = True
@@ -111,8 +111,8 @@ class CustomExportDialog(QtGui.QWidget):
       newBounds = self.scene.views()[0].viewRect()
     else:
       newBounds = item.gitem.sceneBoundingRect()
-    self.selectBox.setRect(newBounds)
-    self.selectBox.show()
+    # self.selectBox.setRect(newBounds)
+    # self.selectBox.show()
     self.updateFormatList()
 
   
@@ -133,16 +133,19 @@ class CustomExportDialog(QtGui.QWidget):
     self.ui.copyBtn.setEnabled(exp.allowCopy)
 
   def exportClicked(self):
-    self.selectBox.hide()
+    # self.selectBox.hide()
     self.currentExporter.export()
+    self.reject()
 
   def copyClicked(self):
-    self.selectBox.hide()
+    # self.selectBox.hide()
     self.currentExporter.export(copy=True)
 
   def close(self):
-    self.selectBox.setVisible(False)
+    # self.selectBox.setVisible(False)
+    # self.selectBox.hide()
     self.setVisible(False)
+    self.reject()
 
 
 

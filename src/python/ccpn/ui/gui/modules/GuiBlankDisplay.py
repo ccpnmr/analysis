@@ -36,19 +36,6 @@ from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsToolBa
 
 from ccpn.ui.gui.DropBase import DropBase
 
-# def _findPpmRegion(spectrum, axisDim, spectrumDim):
-#
-#   pointCount = spectrum.pointCounts[spectrumDim]
-#   if axisDim < 2: # want entire region
-#     region = (0, pointCount)
-#   else:
-#     n = pointCount // 2
-#     region = (n, n+1)
-#
-#   firstPpm, lastPpm = spectrum.getDimValueFromPoint(spectrumDim, region)
-#
-#   return 0.5*(firstPpm+lastPpm), abs(lastPpm-firstPpm)
-
 class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else the drop events are not processed
 
   includeSettingsWidget = False
@@ -60,32 +47,10 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
     CcpnModule.__init__(self, name='Blank Display')
     # moduleArea.addModule(self, 'right')
 
-    self.label2 = Label(self.mainWidget, text='Drag Spectrum Here', textColor='#bec4f3')
-    self.label2.setAlignment(QtCore.Qt.AlignCenter)
+    self.label2 = Label(self.mainWidget, text='Drag Spectrum Here',
+                        textColour='#bec4f3', textSize='32', hPolicy='center', vPolicy='center')
 
     DropBase.__init__(self, moduleArea.guiWindow._appBase)
-    self.setOrientation = self._setOrientation
-    # self.closeModule = self._closeModule
-
-  def _setOrientation(self, o='vertical', force=True):
-    """
-    Sets the orientation of the title bar for this Dock.
-    Must be one of 'auto', 'horizontal', or 'vertical'.
-    By default ('auto'), the orientation is determined
-    based on the aspect ratio of the Dock.
-    """
-    #print self.name(), "setOrientation", o, force
-    if o == 'auto' and self.autoOrient:
-      if self.container().type() == 'tab':
-        o = 'horizontal'
-      elif self.width() > self.height()*1.5:
-        o = 'vertical'
-      else:
-        o = 'horizontal'
-    if force or self.orientation != o:
-      self.orientation = o
-      self.label.setOrientation(o)
-      self.updateStyle()
 
   def processSpectra(self, pids:Sequence[str], event):
     """Display spectra defined by list of Pid strings"""

@@ -35,3 +35,4 @@ class Widget(QtGui.QWidget, Base):
     if setLayout:
       layout = QtGui.QGridLayout()
       self.setLayout(layout)
+

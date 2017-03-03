@@ -21,7 +21,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 
@@ -55,12 +54,16 @@ class PulldownList(QtGui.QComboBox, Base):
 #                           padding-bottom: 2px;
 #                           }
 #                          """)
-    self.setMinimumWidth(100)
-    self.setMinimumHeight(18)
-    self.view().setMinimumHeight(18*3)
-
-
-
+#    self.setMinimumWidth(100)
+#    self.setMinimumHeight(18)
+#    self.view().setMinimumHeight(18*3)
+    self.setStyleSheet("""
+    PulldownList {
+      padding-top: 3px;
+      padding-bottom: 3px;
+      padding-left: 2px;
+    }
+    """)
     self.connect(self, QtCore.SIGNAL('currentIndexChanged(int)'), self._callback)
 
   def showPopup(self):

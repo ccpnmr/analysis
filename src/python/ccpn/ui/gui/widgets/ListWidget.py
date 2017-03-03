@@ -1,4 +1,3 @@
-__author__ = 'simon'
 
 from PyQt4 import QtCore, QtGui
 

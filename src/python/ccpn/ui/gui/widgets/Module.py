@@ -32,6 +32,8 @@ from pyqtgraph.dockarea.Dock import DockLabel, Dock
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.Icon import Icon
 from ccpn.ui.gui.guiSettings import moduleLabelFont
+from ccpn.ui.gui.widgets.Widget import Widget
+from ccpn.ui.gui.widgets.Frame import Frame
 
 from functools import partial
 
@@ -44,37 +46,87 @@ logger = getLogger()
 class CcpnModule(Dock):
   """
   Base class for CCPN modules
+  sets self.application, self.current, self.project and self.mainWindow
+
+  Overide parameters for settings widget as needed
   """
 
-  ORIENTATION = 'horizontal' #''vertical'   # toplabel orientation
-  includeSettingsWidget = False   # overide in specific module implementations
+  HORIZONTAL = 'horizontal'
+  VERTICAL   = 'vertical'
+  labelOrientation = HORIZONTAL  # toplabel orientation
+
+  # overide in specific module implementations
+  includeSettingsWidget = False
+  maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
 
   def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closable=True, closeFunc=None, **kw):
     super(CcpnModule, self).__init__(name, self, closable=closable)
     self.closeFunc = closeFunc
 
+    # useful definitions to have
+    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    self.current = self.application.current
+    self.project = self.application.project
+    self.mainWindow = self.application.ui.mainWindow
+    # GWV: logger seems not to work??
+    self.project._logger.debug('CcpnModule.__init__: %s, %s, %s' % (self.application, self.current, self.project))
+
     # hide original dock label and generate a new CCPN one
-    self.label.hide()
-    self.label = CcpnModuleLabel(name.upper(), self, showCloseButton=closable)
-    if closable:
-      self.label.closeButton.clicked.connect(self._closeModule)
+    self._originalLabel = self.label
+    self._originalLabel.hide()
+    self.label = CcpnModuleLabel(name.upper(), self, showCloseButton=closable, closeCallback=self._closeModule,
+                                 showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
+                                 )
     self.label.show()
-
     self.autoOrientation = False
-    self.mainWidget = QtGui.QWidget(self)
-    self.addWidget(self.mainWidget, 0, 0)
 
+    # main widget area
+    #self.mainWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
+    self.mainWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
+
+    # optional settings widget area
+    self.settingsState = 0  # current state (not shown)
+    self.settingsWidget = None
     if self.includeSettingsWidget:
-      self.settingsWidget = QtGui.QWidget(self)
-      self.addWidget(self.settingsWidget, 1, 0)
+      #self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
+      self.settingsWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
+      if self.settingsOnTop:
+        self.addWidget(self.settingsWidget, 0, 0)
+        self.addWidget(self.mainWidget, 1, 0)
+      else:
+        self.addWidget(self.mainWidget, 0, 0)
+        self.addWidget(self.settingsWidget, 1, 0)
       self.settingsWidget.hide()
+    else:
+      self.addWidget(self.mainWidget, 0, 0)
+
+    # self.widgetArea.setStyleSheet("""
+    # Dock > QWidget {
+    #   padding: 0;
+    #   margin: 0px 0px 0px 0px;
+    #   border: 4px solid;
+    # }
+    # """)
 
   def resizeEvent(self, event):
-    #self.setOrientation('vertical', force=True)
-    self.setOrientation(self.ORIENTATION, force=True)
+    self.setOrientation(self.labelOrientation, force=True)
     self.resizeOverlay(self.size())
 
+    # override the default dock settings
+    # self.widgetArea.setStyleSheet("""
+    # Dock > QWidget {
+    #   padding: 0;
+    #   margin: 0px 0px 0px 0px;
+    #   border: 0px;
+    # }
+    # """)
+
   def placeSettingsButton(self, buttonParent, buttonGrid):
+    """
+    Depreciated
+    """
+    logger.warning('Depreciated code')
     if self.includeSettingsWidget:
       settingsButton = Button(buttonParent, icon='icons/applications-system', grid=buttonGrid, hPolicy='fixed', toggle=True)
       settingsButton.toggled.connect(partial(self.toggleSettingsWidget, settingsButton))
@@ -91,6 +143,24 @@ class CcpnModule(Dock):
         self.settingsWidget.hide()
     else:
       logger.debug('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
+
+  def _settingsCallback(self):
+    """
+    Toggles display of settings widget in module.
+    """
+    if self.includeSettingsWidget:
+      self.settingsState = (self.settingsState + 1) % self.maxSettingsState
+      if self.settingsState == 0:
+        self.mainWidget.show()
+        self.settingsWidget.hide()
+      elif self.settingsState == 1:
+        self.mainWidget.show()
+        self.settingsWidget.show()
+      elif self.settingsState == 2:
+        self.settingsWidget.show()
+        self.mainWidget.hide()
+    else:
+      RuntimeError('Settings widget inclusion is false, please set includeSettingsWidget boolean to True at class level ')
 
   def _closeModule(self):
 
@@ -113,31 +183,61 @@ class CcpnModuleLabel(DockLabel):
   """
   Subclassing DockLabel to modify appearance and functionality
   """
-  def __init__(self, name, module, showCloseButton=True):
+
+  labelSize = 16
+
+  # defined here, as the updateStyle routine is called from the
+  # DockLabel instanciation; changed later on
+  backgroundColour = '#555D85'
+  foregroundColour = '#fdfdfc'
+
+  def __init__(self, name, module, showCloseButton=True, closeCallback=None, showSettingsButton=False, settingsCallback=None):
     super(CcpnModuleLabel, self).__init__(name, module, showCloseButton=showCloseButton)
+
     self.module = module
     self.fixedWidth = True
     self.setFont(moduleLabelFont)
+    #print('>>', name, self.module.application.colourScheme)
+    if self.module.application.colourScheme == 'light':
+      self.backgroundColour = '#bd8413'
+      #self.backgroundColour = '#EDC151'
+      self.foregroundColour = '#fdfdfc'
+    else:
+      self.backgroundColour = '#555D85'
+      self.foregroundColour = '#fdfdfc'
     self.setAlignment(QtCore.Qt.AlignVCenter|QtCore.Qt.AlignHCenter)
 
-    # Tests; not yet there
-    if False:
-      self.settingsButton = QtGui.QToolButton(self)
-      #self.settingsButton.clicked.connect(self.sigCloseClicked)
-      self.settingsButton.setIcon(Icon('icons/applications-system'))
-      self.settingsButton.setIconSize(QtCore.QSize(16, 16))
-      self.settingsButton.setStyleSheet("""
-        QPushButton {
+    if showCloseButton:
+      # button is already there because of the DockLabel init
+      self.closeButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
+      # hardcoded because stylesheet appears not to work
+      self.closeButton.setStyleSheet("""
+        QToolButton {
           border-width: 0px;
           padding: 0px;
-          background-color: #555D85;
-          color: #555D85;
         }""")
+      if closeCallback is None:
+        raise RuntimeError('Requested closeButton without callback')
+      else:
+        self.closeButton.clicked.connect(closeCallback)
 
-    #self.update()
+    # Settings
+    if showSettingsButton:
+      self.settingsButton = QtGui.QToolButton(self)
+      self.settingsButton.setIcon(Icon('icons/settings'))
+      self.settingsButton.setIconSize(QtCore.QSize(self.labelSize, self.labelSize))
+      # hardcoded because stylesheet appears not to work
+      self.settingsButton.setStyleSheet("""
+        QToolButton {
+          border-width: 0px;
+          padding: 0px;
+        }""")
+      if settingsCallback is None:
+        raise RuntimeError('Requested settingsButton without callback')
+      else:
+        self.settingsButton.clicked.connect(settingsCallback)
 
     self.updateStyle()
-    #self.update()
 
   # GWV: not sure why this was copied as it is identical to the routine in the parent class
   # def mousePressEvent(self, ev):
@@ -149,7 +249,9 @@ class CcpnModuleLabel(DockLabel):
   def updateStyle(self):
     """
     Copied from the parent class to allow for modification in StyleSheet
-    However, that appears not to work; TODO: this routine needs fixing so that colourschemes
+    However, that appears not to work;
+
+    TODO: this routine needs fixing so that colourschemes
     are taken from the stylesheet
     """
     # GWV: many calls to the updateStyle are triggered during initialization
@@ -158,10 +260,10 @@ class CcpnModuleLabel(DockLabel):
     #print('>updateStyle>', self)
     #return
 
-    r = '3px'
-    fg = '#fdfdfc'
-    bg = '#555D85'
-    border = bg
+    #r = '3px'
+    #fg = '#fdfdfc'
+    #bg = '#555D85'
+    #border = bg
 
     # Padding apears not to work; overriden somewhere else?
     if self.orientation == 'vertical':
@@ -169,14 +271,14 @@ class CcpnModuleLabel(DockLabel):
               background-color : %s;
               color : %s;
               border-width: 0px;
-          }""" % (bg, fg)
+          }""" % (self.backgroundColour, self.foregroundColour)
       self.setStyleSheet(self.vStyle)
     else:
       self.hStyle = """DockLabel {
               background-color : %s;
               color : %s;
               border-width: 0px;
-          }""" % (bg, fg)
+          }""" % (self.backgroundColour, self.foregroundColour)
       self.setStyleSheet(self.hStyle)
 
   def paintEvent(self, ev):
@@ -205,13 +307,12 @@ class CcpnModuleLabel(DockLabel):
     self.hint = p.drawText(rgn, align, self.text())
     p.end()
 
-    minSize = 16  #GWV parameter
     if self.orientation == 'vertical':
-      self.setMinimumWidth(minSize)
-      self.setMaximumWidth(minSize)
+      self.setMinimumWidth(self.labelSize)
+      self.setMaximumWidth(self.labelSize)
     else:
-      self.setMinimumHeight(minSize)
-      self.setMaximumHeight(minSize)
+      self.setMinimumHeight(self.labelSize)
+      self.setMaximumHeight(self.labelSize)
 
     # if self.orientation == 'vertical':
     #   self.setMaximumWidth(self.hint.height())

@@ -25,33 +25,68 @@ from PyQt4 import QtGui, QtCore
 Qt = QtCore.Qt
 
 from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.guiSettings import getColours
 from ccpn.framework.Translation import translator
 
 class Label(QtGui.QLabel, Base):
 
-  def __init__(self, parent, text='', textColor=None, textSize=None, bold=False, **kw):
+  _styleSheet = """
+  QLabel {
+    font-size: %spt;
+    font-weight: %s;
+    color: %s;
+    margin-left: %dpx;
+    margin-top: %dpx;
+    margin-right: %dpx;
+    margin-bottom: %dpx;
+  }
+  """
+
+  def __init__(self, parent, text='', textColour=None, textSize=12, bold=False,
+               margins=[2, 1, 2, 1], **kw):
 
     text = translator.translate(text)
-
     QtGui.QLabel.__init__(self, text, parent)
     Base.__init__(self, **kw)
 
-    if textColor:
-      self.setStyleSheet('QLabel {color: %s; font-size: 30pt;}' % textColor)
-    if textSize and textColor:
-      self.setStyleSheet('QLabel {font-size: %s;}' % textSize)
-    if bold:
-      self.setStyleSheet('QLabel {font-weight: bold;}')
-    
-  def get(self):
+    # if textColor:
+    #   self.setStyleSheet('QLabel {color: %s}' % textColor)
+    # if textSize and textColor:
+    #   self.setStyleSheet('QLabel {font-size: %s; color: %s;}' % (textSize, textColor))
+    # if bold:
+    #   self.setStyleSheet('QLabel {font-weight: bold;}')
 
+    self._textSize = textSize
+    self._bold = 'bold' if bold else 'normal'
+    self._margins = margins
+
+    # this appears not to pick up the colour as set by the stylesheet!
+    # self._colour = textColor if textColor else self.palette().color(QtGui.QPalette.WindowText).name()
+
+    colours = getColours()
+    self._colour = textColour if textColour else colours['LabelFG']
+    self._setStyleSheet()
+
+  def get(self):
+    "get the label text"
     return self.text()
 
   def set(self, text=''):
-
+    "set label text, applying translator"
     text = translator.translate(text)
-
     self.setText(text)
+
+  def _setStyleSheet(self):
+    self.setStyleSheet(self._styleSheet % (
+      self._textSize,
+      self._bold,
+      self._colour,
+      self._margins[0],
+      self._margins[1],
+      self._margins[2],
+      self._margins[3],
+      )
+    )
 
 
 if __name__ == '__main__':

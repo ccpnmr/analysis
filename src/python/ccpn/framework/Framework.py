@@ -4,7 +4,7 @@
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
 __credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
 __license__   = "CCPN license. see http://www.ccpn.ac.uk"
-__reference__ = "Skinner et al, J. Biomol. NMR, 2016, accepted"
+__reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y"
 
 #=========================================================================================
 # Last code modification:
@@ -507,7 +507,9 @@ class Framework:
       contentToRemove.reverse()  # not needed, but delete from end
       for content in contentToRemove:
         contents.remove(content)
-
+    # ===
+    # start of the actual method code
+    # ===
     if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
       try:
         with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
@@ -535,10 +537,8 @@ class Framework:
   def getByPid(self, pid):
     return self.project.getByPid(pid)
 
-
   def getByGid(self, gid):
     return self.ui.getByGid(gid)
-
 
   def _startCommandBlock(self, command:str, **objectParameters):
     """Start block for command echoing, set undo waypoint, and echo command to ui and logger
@@ -741,6 +741,8 @@ class Framework:
 
       (),
       ("Make Projection...", self.showProjectionPopup, [('shortcut', 'pj')]),
+      (),
+      ("Print to File...", self.showPrintSpectrumDisplayPopup, [('shortcut', 'pr')]),
     ]
                ))
 
@@ -763,8 +765,6 @@ class Framework:
       ("NmrResidue Table", self.showNmrResidueTable, [('shortcut', 'nt')]),
       ("Peak Table", self.showPeakTable, [('shortcut', 'lt')]),
       ("Restraint Table", self.showRestraintTable, [('shortcut', 'rt')]),
-      (),
-      ("Export Spectrum Display", self.showPrintSpectrumDisplayPopup, [('shortcut', 'ed')]),
       (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),

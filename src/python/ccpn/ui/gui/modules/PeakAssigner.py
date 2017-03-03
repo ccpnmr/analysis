@@ -4,6 +4,8 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
+import ccpn.ui.gui.widgets.Frame
+
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
@@ -34,9 +36,9 @@ from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.lib.PeakAssignment import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,
                                                       sameAxisCodes)
-from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
@@ -44,28 +46,28 @@ from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
 from ccpnmodel.ccpncore.lib.Constants import  defaultNmrChainCode
 
-class PeakAssigner(CcpnModule, Base):
-  '''Module that can be used to assign nmrAtoms
-     to peaks.
+from ccpn.util.Logging import getLogger
+logger = getLogger()
 
-  '''
 
-  def __init__(self, parent=None, project:Project=None, peaks:typing.List[Peak]=None, **kw):
+class PeakAssigner(CcpnModule):
+  """Module for assignment of nmrAtoms to the different axes of a peak.
+  Module responds to current.peak
+  """
 
-    CcpnModule.__init__(self, name="Peak Assigner")
-    Base.__init__(self, **kw)
-    self.project = project
-    self.splitter1 = QtGui.QSplitter(QtCore.Qt.Horizontal)
-    self.selectionLayout = QtGui.QGridLayout()
-    self.filterLayout = QtGui.QGridLayout()
-    self.mainWidget.setLayout(QtGui.QGridLayout())
-    self.advancedLayout = QtGui.QGridLayout()
-    self.mainWidget.layout().addLayout(self.selectionLayout, 1, 0)
-    self.mainWidget.layout().addLayout(self.filterLayout, 0, 0)
-    self.selectionLayout.setRowMinimumHeight(0, 0)
-    self.selectionLayout.setRowStretch(0, 0)
-    self.selectionLayout.setRowStretch(1, 1)
-    self.current = self.project._appBase.current
+  # overide in specific module implementations
+  includeSettingsWidget = True
+  maxSettingsState = 2  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
+  settingsOnTop = True
+
+  def __init__(self, parent=None):
+
+    CcpnModule.__init__(self, parent=parent, name="Peak Assigner")
+
+    # inherited from CcpnModule:
+    # self.application, self.current, self.project, self.mainWindow
+    self.colourScheme = self.mainWindow.colourScheme
+
     self.listWidgets = []
     self.objectTables = []
     self.labels = []
@@ -74,55 +76,56 @@ class PeakAssigner(CcpnModule, Base):
     self.seqCodePulldowns = []
     self.resTypePulldowns = []
     self.atomTypePulldowns = []
-    self.colourScheme = self.project._appBase.colourScheme
 
-    self.doubleToleranceCheckbox = CheckBox(self.mainWidget, checked=False)
-    self.doubleToleranceCheckbox.stateChanged.connect(self._updateInterface)
-    doubleToleranceCheckboxLabel = Label(self.mainWidget, text="Double Tolerances ")
-    self.filterLayout.addWidget(self.doubleToleranceCheckbox, 0, 1)
-    self.filterLayout.addWidget(doubleToleranceCheckboxLabel, 0, 0)
+    # settings
+    doubleToleranceCheckboxLabel = Label(self.settingsWidget, text="Double Tolerances ", grid=(0,0))
+    self.doubleToleranceCheckbox = CheckBox(self.settingsWidget, checked=False,
+                                            callback=self._updateInterface,
+                                            grid=(0,1))
 
-    self.intraCheckbox = CheckBox(self.mainWidget, checked=False)
-    self.intraCheckbox.stateChanged.connect(self._updateInterface)
-    intraCheckboxLabel = Label(self.mainWidget, text="Only Intra-residual ")
-    self.filterLayout.addWidget(self.intraCheckbox, 0, 3)
-    self.filterLayout.addWidget(intraCheckboxLabel, 0, 2)
+    intraCheckboxLabel = Label(self.settingsWidget, text="Only Intra-residual ", grid=(0,2))
+    self.intraCheckbox = CheckBox(self.settingsWidget, checked=False,
+                                   callback=self._updateInterface,
+                                   grid=(0,3))
 
-    self.multiCheckbox = CheckBox(self.mainWidget, checked=True)
-    self.multiCheckbox.stateChanged.connect(self._updateInterface)
-    multiCheckboxLabel = Label(self.mainWidget, text="Allow multiple peaks ")
-    self.filterLayout.addWidget(self.multiCheckbox, 0, 5)
-    self.filterLayout.addWidget(multiCheckboxLabel, 0, 4)
-    self.expCheckBox = CheckBox(self.mainWidget, checked=True)
-    expCheckBoxLabel = Label(self.mainWidget, "Filter By Experiment")
-    self.filterLayout.addWidget(expCheckBoxLabel, 0, 6)
-    self.filterLayout.addWidget(self.expCheckBox, 0, 7)
+    multiCheckboxLabel = Label(self.settingsWidget, text="Allow multiple peaks ", grid=(0,4))
+    self.multiCheckbox = CheckBox(self.settingsWidget, checked=True,
+                                   callback=self._updateInterface,
+                                   grid=(0,5))
 
+    expCheckBoxLabel = Label(self.settingsWidget, "Filter By Experiment", grid=(0,6))
+    self.expCheckBox = CheckBox(self.settingsWidget, checked=True,
+                                callback=self._updateInterface,
+                                grid=(0,7))
+
+    # Main content widgets
+    self.peakLabel = Label(self.mainWidget, text='Peak:', bold=True, grid=(0,0), vAlign='center', margins=[2,5,2,5])
+    self.selectionFrame = Frame(self.mainWidget, fShape='noFrame', grid=(1, 0), vAlign='top')
+    self.selectionLayout = QtGui.QGridLayout()
+    self.selectionLayout.setSpacing(0)
+    self.selectionLayout.setContentsMargins(0, 0, 0, 0)
+    self.selectionFrame.setLayout(self.selectionLayout)
+
+    # respond to peaks
     self.current.registerNotify(self._updateInterface, 'peaks')
     self._updateInterface()
 
     self.closeModule = self._closeModule
 
-
-
-  # functions to create empty widgets
-
   def __del__(self):
     self.current.unRegisterNotify(self._updateInterface, 'peaks')
 
   def _createEmptyNmrAtomsTable(self, dim:int):
-    '''Create an empty table for the specified peak dimension to contain possible Nmr Atoms that
+    """Create an empty table for the specified peak dimension to contain possible Nmr Atoms that
     can be assigned to that peak dimension.
-
-    '''
-
-    columns = [Column('NMR Atom', lambda nmrAtom: str(nmrAtom.id)),
+    """
+    columns = [Column('NmrAtom', lambda nmrAtom: str(nmrAtom.id)),
                Column('Shift', lambda nmrAtom: self._getShift(nmrAtom)),
                Column('Delta', lambda nmrAtom: self.getDeltaShift(nmrAtom, dim))]
 
     objectTable = ObjectTable(self, columns,
                               actionCallback=partial(self._assignNmrAtomToDim, dim),
-                              objects=[])
+                              objects=[], autoResize=True)
 
     self.objectTables.append(objectTable)
 
@@ -132,27 +135,16 @@ class PeakAssigner(CcpnModule, Base):
     """
     listWidget = ListWidget(self, callback=partial(self._updateAssigmentWidget, dim),
                             rightMouseCallback=self._updateNmrAtomsFromListWidgets)
-
+    listWidget.setFixedWidth(120)
+    listWidget.setFixedHeight(100)
     self.listWidgets.append(listWidget)
 
   def _createEmptyWidgetLabel(self, dim:int):
     """
     Creates an empty Label to contain peak dimension position.
     """
-    peaks = self.current.peaks
-    if not peaks:
-      return
-    positions = [peak.position[dim] for peak in peaks]
-    avgPos = round(sum(positions)/len(positions), 3)
-    axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
-    text = axisCode + ' ' + str(avgPos)
-    label = Label(self, text=text)
-    if self.colourScheme == 'dark':
-      label.setStyleSheet("border: 0px solid; color: #f7ffff;")
-    elif self.colourScheme == 'light':
-      label.setStyleSheet("border: 0px solid; color: #555d85;")
+    label = Label(self, text='', margins=[2,3,2,1])
     self.labels.append(label)
-
 
   def _createAssignmentWidget(self, dim:int):
     """
@@ -179,7 +171,6 @@ class PeakAssigner(CcpnModule, Base):
     newAssignmentWidget.setLayout(newLayout)
     self.assignmentWidgets.append(newAssignmentWidget)
 
-
   def _setAssignment(self, dim:int):
     """
     Assigns dimensionNmrAtoms to peak dimension when called using Assign Button in assignment widget.
@@ -203,7 +194,6 @@ class PeakAssigner(CcpnModule, Base):
 
     self._updateInterface()
 
-
   def _createChainPulldown(self, dim:int) -> PulldownList:
     """
     Creates a PulldownList for selection of NmrChains.
@@ -223,7 +213,6 @@ class PeakAssigner(CcpnModule, Base):
     self.seqCodePulldowns.append(pulldownList)
     return pulldownList
 
-
   def _createAtomTypePulldown(self, dim:int) -> PulldownList:
     """
     Creates a PulldownList for selection of atom types.
@@ -232,7 +221,6 @@ class PeakAssigner(CcpnModule, Base):
     pulldownList.setEditable(True)
     self.atomTypePulldowns.append(pulldownList)
     return pulldownList
-
 
   def _createEnoughTablesAndLists(self):
     '''Makes sure there are enough tables for the amount
@@ -243,11 +231,7 @@ class PeakAssigner(CcpnModule, Base):
 
     '''
 
-    peak = self.current.peak
-    if peak is None:
-      return
-
-    Ndimensions = len(peak.position)
+    Ndimensions = len(self.current.peak.position)
 
 
     # Create extra tables if needed.
@@ -269,13 +253,12 @@ class PeakAssigner(CcpnModule, Base):
     for pair in self.widgetItems:
       widget = QtGui.QWidget(self)
       layout = QtGui.QGridLayout()
-      layout.setSpacing(10)
-      layout.setMargin(5)
-      layout.setContentsMargins(4, 4, 4, 4)
-      if self.colourScheme == 'dark':
-        widget.setStyleSheet("border: 1px solid #bec4f3")
-      elif self.colourScheme == 'light':
-        widget.setStyleSheet("border: 1px solid #bd8413")
+      #layout.setSpacing(10)
+      #layout.setMargin(5)
+      #layout.setContentsMargins(4, 4, 4, 4)
+      layout.setSpacing(2)
+      layout.setMargin(1)
+      layout.setContentsMargins(2, 1, 2, 1)
       layout.addWidget(pair[0], 0, 0, 1, 1)
       layout.addWidget(pair[1], 1, 0, 2, 1)
       layout.addWidget(pair[2], 1, 1, 2, 1)
@@ -291,27 +274,21 @@ class PeakAssigner(CcpnModule, Base):
 
   # Update functions
 
-
   def _updateInterface(self, peaks:typing.List[Peak]=None):
     """Updates the whole module, including recalculation
        of which nmrAtoms fit to the peaks.
 
     """
-
     self._emptyAllTablesAndLists()
     if not self.current.peaks or not self._peaksAreCompatible():
       return
+    self.peakLabel.setText('Peak: %s' % self.current.peak.id)
     self._createEnoughTablesAndLists()
     self._updateTables()
     self._updateAssignedNmrAtomsListwidgets()
     self._updateWidgetLabels()
 
-
-
   def _updateWidgetLabels(self):
-
-    if not self.current.peaks:
-      return
 
     Ndimensions = len(self.current.peak.position)
 
@@ -319,20 +296,14 @@ class PeakAssigner(CcpnModule, Base):
       positions = [peak.position[dim] for peak in self.current.peaks]
       avgPos = round(sum(positions)/len(positions), 3)
       axisCode = self.current.peak.peakList.spectrum.axisCodes[dim]
-      text = axisCode + ' ' + str(avgPos)
+      text = 'Axis "%s": %.3f' % (axisCode, avgPos)
       label.setText(text)
-      if self.colourScheme == 'dark':
-        label.setStyleSheet("border: 0px solid; color: #f7ffff;")
-      elif self.colourScheme == 'light':
-        label.setStyleSheet("border: 0px solid; color: #555d85;")
-
 
   def _updateTables(self):
     '''Updates the tables indicating the different assignment
        possibilities of the peak dimensions.
 
     '''
-
     peaks = self.current.peaks
     doubleTolerance = self.doubleToleranceCheckbox.isChecked()
     intraResidual = self.intraCheckbox.isChecked()
@@ -350,8 +321,6 @@ class PeakAssigner(CcpnModule, Base):
       else:
         objectTable.setObjects([NOL])
 
-
-
   def _updateAssignedNmrAtomsListwidgets(self):
     '''Update the listWidget showing which nmrAtoms
        are assigned to which peak dimensions. If multiple
@@ -359,12 +328,11 @@ class PeakAssigner(CcpnModule, Base):
        have in common are shown. Maybe this should be all
        assignments. You can see that at the peak annotation
        though.
-
     '''
+
+    Ndimensions = len(self.current.peak.position)
+
     if self.current.peaks:
-
-      Ndimensions = len(self.current.peak.position)
-
       for dim, listWidget in zip(range(Ndimensions), self.listWidgets):
 
         ll = [set(peak.dimensionNmrAtoms[dim]) for peak in self.current.peaks]
@@ -415,8 +383,6 @@ class PeakAssigner(CcpnModule, Base):
     sequenceCodes = [nmrResidue.sequenceCode for nmrResidue in self.project.nmrResidues]
     self.seqCodePulldowns[dim].setData(sorted(sequenceCodes, key=CcpnSorting.stringSortKey))
     self.seqCodePulldowns[dim].setIndex(self.seqCodePulldowns[dim].texts.index(sequenceCode))
-
-    # NBNB FIXME What should happen if self.current.peak is None???
     atomPrefix = self.current.peak.peakList.spectrum.isotopeCodes[dim][-1]
     atomNames = [atomName for atomName in ATOM_NAMES if atomName[0] == atomPrefix] + [nmrAtom.name]
     self.atomTypePulldowns[dim].setData(atomNames)
@@ -489,13 +455,9 @@ class PeakAssigner(CcpnModule, Base):
     dimensions of a peak allowed.
     """
 
-    nPeaks = len(self.current.peaks)
-
-    if nPeaks == 1:
+    if len(self.current.peaks) == 1:
       return True
-    elif nPeaks == 0:
-      return False
-    elif not self.multiCheckbox.isChecked():
+    if not self.multiCheckbox.isChecked():
       self.project._logger.warning("Multiple peaks selected, not allowed.")
       return False
     dimensionalities = set([len(peak.position) for peak in self.current.peaks])
@@ -514,7 +476,9 @@ class PeakAssigner(CcpnModule, Base):
     """
     Quick erase of all present information in ListWidgets and ObjectTables.
     """
-
+    self.peakLabel.setText('Peak: <None>')
+    for label in self.labels:
+      label.setText('')
     for objectTable in self.objectTables:
       objectTable.setObjects([])
     for listWidget in self.listWidgets:
@@ -522,11 +486,6 @@ class PeakAssigner(CcpnModule, Base):
 
 
   def _createNewNmrAtom(self, dim):
-
-    # NBNB This is in the peak Assigner
-    # - presumably there is at least one current peak at this point
-    # assert self.current.peak is not None
-
     isotopeCode = self.current.peak.peakList.spectrum.isotopeCodes[dim]
     nmrAtom = self.project.fetchNmrChain(shortName=defaultNmrChainCode
                                            ).newNmrResidue().newNmrAtom(isotopeCode=isotopeCode)

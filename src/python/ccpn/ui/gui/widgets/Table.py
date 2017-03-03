@@ -1,4 +1,91 @@
-"""Module Documentation here
+"""
+
+Inherited from QTableView (http://pyqt.sourceforge.net/Docs/PyQt4/qtableview.html)
+
+QTableView Class Reference
+[QtGui module]
+
+The QTableView class provides a default model/view implementation of a table view. More...
+
+Inherits QAbstractItemView.
+
+Inherited by QTableWidget.
+
+Methods
+
+__init__ (self, QWidget parent = None)
+clearSpans (self)
+int columnAt (self, int x)
+columnCountChanged (self, int oldCount, int newCount)
+columnMoved (self, int column, int oldIndex, int newIndex)
+columnResized (self, int column, int oldWidth, int newWidth)
+int columnSpan (self, int row, int column)
+int columnViewportPosition (self, int column)
+int columnWidth (self, int column)
+currentChanged (self, QModelIndex current, QModelIndex previous)
+Qt.PenStyle gridStyle (self)
+hideColumn (self, int column)
+hideRow (self, int row)
+QHeaderView horizontalHeader (self)
+int horizontalOffset (self)
+horizontalScrollbarAction (self, int action)
+QModelIndex indexAt (self, QPoint p)
+bool isColumnHidden (self, int column)
+bool isCornerButtonEnabled (self)
+bool isIndexHidden (self, QModelIndex index)
+bool isRowHidden (self, int row)
+bool isSortingEnabled (self)
+QModelIndex moveCursor (self, QAbstractItemView.CursorAction cursorAction, Qt.KeyboardModifiers modifiers)
+paintEvent (self, QPaintEvent e)
+resizeColumnsToContents (self)
+resizeColumnToContents (self, int column)
+resizeRowsToContents (self)
+resizeRowToContents (self, int row)
+int rowAt (self, int y)
+rowCountChanged (self, int oldCount, int newCount)
+int rowHeight (self, int row)
+rowMoved (self, int row, int oldIndex, int newIndex)
+rowResized (self, int row, int oldHeight, int newHeight)
+int rowSpan (self, int row, int column)
+int rowViewportPosition (self, int row)
+scrollContentsBy (self, int dx, int dy)
+scrollTo (self, QModelIndex index, QAbstractItemView.ScrollHint hint = QAbstractItemView.EnsureVisible)
+selectColumn (self, int column)
+list-of-QModelIndex selectedIndexes (self)
+selectionChanged (self, QItemSelection selected, QItemSelection deselected)
+selectRow (self, int row)
+setColumnHidden (self, int column, bool hide)
+setColumnWidth (self, int column, int width)
+setCornerButtonEnabled (self, bool enable)
+setGridStyle (self, Qt.PenStyle style)
+setHorizontalHeader (self, QHeaderView header)
+setModel (self, QAbstractItemModel model)
+setRootIndex (self, QModelIndex index)
+setRowHeight (self, int row, int height)
+setRowHidden (self, int row, bool hide)
+setSelection (self, QRect rect, QItemSelectionModel.SelectionFlags command)
+setSelectionModel (self, QItemSelectionModel selectionModel)
+setShowGrid (self, bool show)
+setSortingEnabled (self, bool enable)
+setSpan (self, int row, int column, int rowSpan, int columnSpan)
+setVerticalHeader (self, QHeaderView header)
+setWordWrap (self, bool on)
+showColumn (self, int column)
+bool showGrid (self)
+showRow (self, int row)
+int sizeHintForColumn (self, int column)
+int sizeHintForRow (self, int row)
+sortByColumn (self, int column)
+sortByColumn (self, int column, Qt.SortOrder order)
+timerEvent (self, QTimerEvent event)
+updateGeometries (self)
+QHeaderView verticalHeader (self)
+int verticalOffset (self)
+verticalScrollbarAction (self, int action)
+QStyleOptionViewItem viewOptions (self)
+QRect visualRect (self, QModelIndex index)
+QRegion visualRegionForSelection (self, QItemSelection selection)
+bool wordWrap (self)
 
 """
 #=========================================================================================
@@ -45,8 +132,14 @@ from collections import OrderedDict
 
 class ObjectTable(QtGui.QTableView, Base):
 
-  def __init__(self, parent, columns, objects=None, actionCallback=None, selectionCallback=None,
-               multiSelect=False, selectRows=True, numberRows=False, **kw):
+  columnSizeHint = 30  # per collumn size hint (to be multiplied by number of collums
+  rowSizeHint = 200  # total size hint (total size for all rows
+
+  def __init__(self, parent, columns,
+               objects=None,
+               actionCallback=None, selectionCallback=None,
+               multiSelect=False, selectRows=True, numberRows=False, autoResize=False,
+               **kw):
 
     QtGui.QTableView.__init__(self, parent)
     Base.__init__(self, **kw)
@@ -62,27 +155,20 @@ class ObjectTable(QtGui.QTableView, Base):
     self._silenceCallback = False
     self.selectionCallback = selectionCallback
     self.doubleClicked.connect(self.actionCallback)
-    self.selectRows = selectRows
     self.setAlternatingRowColors(True)
+    self.autoResize = autoResize
     self.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
     self.setHorizontalScrollMode(self.ScrollPerItem)
     self.setVerticalScrollMode(self.ScrollPerItem)
-    self.setSortingEnabled(True)
 
     self.multiSelect = multiSelect
-
-
-    # self.setAutoFillBackground(True)
-
-    #self.setSizePolicy(QtGui.QSizePolicy.Preferred,
-    #                   QtGui.QSizePolicy.Preferred)
-
     if multiSelect:
       self.setSelectionMode(self.ExtendedSelection)
       # + Continuous etc possible
     else:
       self.setSelectionMode(self.SingleSelection)
 
+    self.selectRows = selectRows
     if selectRows:
       self.setSelectionBehavior(self.SelectRows)
     else:
@@ -90,6 +176,8 @@ class ObjectTable(QtGui.QTableView, Base):
       # + Columns possible
 
     self._setupModel()
+
+    self.setSortingEnabled(True)
     self.sortByColumn(0, QtCore.Qt.AscendingOrder)
 
     delegate = ObjectTableItemDelegate(self)
@@ -135,7 +223,7 @@ class ObjectTable(QtGui.QTableView, Base):
 
   def sizeHint(self):
 
-    return QtCore.QSize(max(10, 30*len(self.columns)),200)
+    return QtCore.QSize(max(10, self.columnSizeHint*len(self.columns)), self.rowSizeHint)
 
   def _setupModel(self):
 
@@ -755,6 +843,8 @@ class ObjectTable(QtGui.QTableView, Base):
 
     self._syncFilterObjects(applyFilter)
     self.setupHeaderStretch()
+    if self.autoResize:
+      self.resizeColumnsToContents()
 
   def setColumns(self, columns):
 

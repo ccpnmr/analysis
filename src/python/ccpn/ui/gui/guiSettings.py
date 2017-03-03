@@ -23,7 +23,7 @@ __version__ = "$Revision: 9996 $"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 from ccpn.ui.gui.widgets.Font import Font
 
 # fonts
@@ -57,7 +57,46 @@ textFontHuge    = helvetica20        # general text font huge
 textFontHugeBold = helveticaBold20   # general text font huge bold
 
 fixedWidthFont  = monaco12           # for TextEditor, ipythonconsole
-moduleLabelFont = helvetica12    # for text of left-label of modules
+moduleLabelFont = helvetica12        # for text of left-label of modules
 sidebarFont     = lucidaGrande12     # sidebar
 menuFont        = lucidaGrande14     # Menus
 messageFont     = helvetica14        # use in popup messages; does not seem to affect the dialog on OSX
+
+# Colours
+LIGHT = 'light'
+DARK = 'dark'
+COLOUR_SCHEMES = (LIGHT, DARK)
+
+def getColourScheme():
+  """
+  :return: colourScheme
+  """
+  application = QtCore.QCoreApplication.instance()._ccpnApplication
+  colourScheme = application.colourScheme
+  if colourScheme not in COLOUR_SCHEMES:
+    raise RuntimeError('Undefined colour scheme')
+  return colourScheme
+
+
+def getColours():
+  """
+  Return colour for the different schemes
+  :return: colourDict
+  """
+  colourScheme = getColourScheme()
+  colourDict = {}
+
+  if colourScheme == DARK:
+    textColour = '#f7ffff'
+    colourDict['LabelFG'] = textColour
+    colourDict['LabelBG'] = '#2a3358'
+
+  elif colourScheme == LIGHT:
+    textColour = '#555D85'
+    colourDict['LabelFG'] = textColour
+    colourDict['LabelBG'] = '#FBF4CC'
+
+  else:
+    raise RuntimeError('Undefined colour scheme')
+
+  return colourDict

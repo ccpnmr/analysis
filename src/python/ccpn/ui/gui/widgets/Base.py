@@ -23,6 +23,7 @@ __version__ = "$Revision$"
 #=========================================================================================
 from PyQt4 import QtGui, QtCore
 
+
 from ccpn.framework.Translation import Translation
 
 from pyqtgraph.dockarea import Dock
@@ -40,6 +41,7 @@ VALIGN_DICT = {
   'top': QtCore.Qt.AlignTop,
   'bottom': QtCore.Qt.AlignBottom,
   'center': QtCore.Qt.AlignVCenter,
+  'centre': QtCore.Qt.AlignVCenter,
   't': QtCore.Qt.AlignTop,
   'b': QtCore.Qt.AlignBottom,
   'c': QtCore.Qt.AlignVCenter,
@@ -50,17 +52,33 @@ POLICY_DICT = {
   'minimum': QtGui.QSizePolicy.Minimum,
   'maximum': QtGui.QSizePolicy.Maximum,
   'preferred': QtGui.QSizePolicy.Preferred,
-    'expanding': QtGui.QSizePolicy.Expanding,
+  'expanding': QtGui.QSizePolicy.Expanding,
   'minimumExpanding': QtGui.QSizePolicy.MinimumExpanding,
   'ignored': QtGui.QSizePolicy.Ignored,
 }
 
-#class Base(Translation):
+FRAME_DICT = {
+  # Shadow
+  'plain': QtGui.QFrame.Plain,
+  'raised': QtGui.QFrame.Raised,
+  'sunken': QtGui.QFrame.Sunken,
+  # Shapes
+  'noFrame': QtGui.QFrame.NoFrame,
+  'box': QtGui.QFrame.Box,
+  'panel': QtGui.QFrame.Panel,
+  'styledPanel': QtGui.QFrame.StyledPanel,
+  'hLine': QtGui.QFrame.HLine,
+  'vLine': QtGui.QFrame.VLine,
+}
+
+
 class Base():
 
   def __init__(self, tipText=None, grid=(None, None), gridSpan=(1,1), stretch=(0,0),
                hAlign=None, vAlign=None, hPolicy=None, vPolicy=None,
-               bgColor=None, isFloatWidget=False):
+               fShape=None, fShadow=None,
+               bgColor=None, fgColor=None,
+               isFloatWidget=False):
 
     # Tool tips
     if tipText:
@@ -80,7 +98,11 @@ class Base():
       if not layout:
         layout = QtGui.QGridLayout(parent)
         # layout.setSpacing(2)
-        layout.setContentsMargins(2,2,2,2)
+
+        # setContentsMargin(left, top, right, bottom)
+        #layout.setContentsMargins(2,2,2,2)
+        layout.setContentsMargins(1,1,1,1)
+        layout.setContentsMargins(0, 0, 0, 0)
         parent.setLayout( layout )
       if isinstance(layout, QtGui.QGridLayout):
         row, col = self._getRowCol(grid)
@@ -101,11 +123,27 @@ class Base():
       self.setSizePolicy(hPolicy, vPolicy)
 
     # Setup colour overrides (styles used primarily)
-
     if bgColor:
       self.setAutoFillBackground(True)
       rgb = QtGui.QColor(bgColor).getRgb()[:3]
       self.setStyleSheet("background-color: rgb(%d, %d, %d);" %  rgb)
+
+    if fgColor:
+      self.setAutoFillBackground(True)
+      rgb = QtGui.QColor(fgColor).getRgb()[:3]
+      self.setStyleSheet("foreground-color: rgb(%d, %d, %d);" %  rgb)
+
+    # define frame styles
+    if fShape or fShadow:
+      """
+      Define frame properties:
+      TODO: GWV: routine is called but appears not to change much in the appearance
+      """
+      shape = FRAME_DICT.get(fShape, QtGui.QFrame.NoFrame)
+      shadow = FRAME_DICT.get(fShadow, 0)
+      #print('Base.framestyle>', shape | shadow)
+      self.setFrameStyle(shape | shadow)
+      self.setMidLineWidth(2)
 
   def _getRowCol(self, grid):
 

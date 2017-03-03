@@ -45,21 +45,23 @@ UNITS = ['ppm', 'Hz', 'point']
 class PeakTable(CcpnModule):
 
   includeSettingsWidget = True
+  maxSettingsState = 2
+  settingsOnTop = True
 
   def __init__(self, project, selectedList=None):
     CcpnModule.__init__(self, name='Peak List')
 
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    self.current = self.application.current
 
     if not project.peakLists:
       project._logger.warn('Project has no peaklists. Peak table cannot be displayed')
       return
 
+    # settingsWidget
     self.checkBoxDict = {}
     self.selectionBox = GroupBox(self.settingsWidget, grid=(0, 0))
-
     columnsLabel = Label(self.selectionBox, 'Columns to display', grid=(0, 0), gridSpan=(1, 2))
-
     serialCheckLabel = Label(self.selectionBox, text='Serial', grid=(1, 0), hAlign='r')
     serialCheckBox = self.checkBoxDict['serial'] = CheckBox(self.selectionBox, grid=(1, 1), hAlign='l', checked=True)
     assignCheckLabel = Label(self.selectionBox, text='Assign', grid=(1, 2), hAlign='r')
@@ -75,11 +77,8 @@ class PeakTable(CcpnModule):
     detailsCheckLabel = Label(self.selectionBox, text='Details', grid=(1, 12), hAlign='r')
     detailsCheckBox = self.checkBoxDict['details'] = CheckBox(self.selectionBox, grid=(1, 13), hAlign='l', checked=True)
 
-
+    # mainWidget
     self.peakList = PeakListSimple(self.mainWidget, selectedList=selectedList, columnSettings=self.checkBoxDict)
-    self.layout.addWidget(self.peakList)
-    self.current = self.application.current
-    self.settingsButton = self.placeSettingsButton(buttonParent=self.peakList, buttonGrid=(0, 4))
 
     if self.current.strip:
       peakList = self.current.strip.spectrumViews[0].spectrum.peakLists[0]

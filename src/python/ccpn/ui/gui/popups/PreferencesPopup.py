@@ -21,7 +21,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
 
 from PyQt4 import QtGui, QtCore
 import json, os
@@ -34,9 +33,8 @@ from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.guiSettings import COLOUR_SCHEMES
 from ccpn.framework.Translation import languages
-
-COLOUR_SCHEMES = ['light', 'dark']
 
 
 class PreferencesPopup(QtGui.QDialog):

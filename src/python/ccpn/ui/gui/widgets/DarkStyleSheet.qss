@@ -1,4 +1,19 @@
-CallTipWidget {color: #bec4f3;}
+QWidget {
+    padding: 0;
+    margin: 0px 0px 0px 0px;
+}
+
+QFrame {
+    background-color: #2a3358;
+}
+
+Frame {
+    border: 1px solid #bec4f3;
+}
+
+CallTipWidget {
+    color: #bec4f3;
+}
 
 GroupBox#borderedGroupBox {
 border: 1px solid #bec4f3;
@@ -50,6 +65,7 @@ DoubleSpinbox {
 DoubleSpinbox::hover {
               background-color: #e4e15b;
               }
+
 RadioButton {
               background-color: #2a3358;
               color: #f7ffff;
@@ -67,6 +83,17 @@ Spinbox {
 Spinbox::hover {
               background-color: #e4e15b;
               }
+
+QCombobox {
+    padding: 0;
+}
+
+QCombobox QAbstractItemView::item {
+          padding-top: 3px;
+          padding-bottom: 3px;
+          padding-left: 1px;
+          padding-right: 1px;
+}
 
 PulldownList {
           background-color: #f7ffff;
@@ -88,6 +115,10 @@ PulldownList::item::selected {
 
 PulldownList QListView { background-color: #f7ffff; }
 
+PulldownList::hover {
+                  background-color: #e4e15b;
+                  color: #122043;
+                  }
 
 QMenuBar::item {
                 background-color: #424a71;
@@ -117,26 +148,6 @@ QMenu::item::disabled::selected {background-color: #424a71;
                        color: #7f88ac;
                       }
 
-QLabel {
-        color: #f7ffff;
-        background-color: #2a3358;
-        padding-top: 3px;
-        padding-bottom: 3px;
-        padding-left: 1px;
-        padding-right: 1px;
-}
-
-Dock  {
-          background-color: #2a3358;
-}
-
-Dock DockLabel  {
-          background-color: #BEC4F3;
-          color: #122043;
-          border: 1px solid #00092D;
-          padding: 0px;
-          /*font-weight: Semibold;*/
-}
 
 QDialog QLabel {
 				color: #f7ffff;
@@ -184,17 +195,13 @@ QDialog::header {
 					background-color:#2a3358;
 					}
 
-QListWidget {background-color: #000021;
+ListWidget {background-color: #000021;
              color: #f7ffff;
              border: 1px solid #424a71;
+             margin: 0px 0px 0px 0px;
              font-weight: normal;
+}
 
-    }
-
-PulldownList::hover {
-                  background-color: #e4e15b;
-                  color: #122043;
-                  }
 ObjectTable {
              border: 1px #182548;
              font-family: open-sans;
@@ -243,11 +250,6 @@ QToolButton::checked {
                       background-color:  #020F31;
                       }
 
-Label {
-        color: #f7ffff;
-        background-color: #2a3358;
-        }
-
 QCheckBox {
         background-color: #2a3358;
         color: #f7ffff;
@@ -270,6 +272,19 @@ QTextEdit {
         font-size: 1.5em;
         }
 
+
+Dock  {
+          background-color: #2a3358;
+          border: 0px solid #2a3358;
+}
+
+Dock DockLabel  {
+          background-color: #BEC4F3;
+          color: #122043;
+          border: 1px solid #00092D;
+          padding: 0px;
+          /*font-weight: Semibold;*/
+}
 
 Dock > QWidget QScrollArea { background-color: #2a3358;
         }
@@ -313,9 +328,6 @@ Dock QPushButton::checked {
                            background-color: #182548;
                            padding: 2px;
                            }
-
-QFrame { background-color: #2a3358;}
-
 
 GroupBox { background-color: #2a3358;}
 
@@ -402,17 +414,6 @@ ScrollArea { background-color: #2a3358;
         }
 
 
-QCombobox {
-    padding: 0;
-}
-
-QCombobox QAbstractItemView::item {
-          padding-top: 3px;
-          padding-bottom: 3px;
-          padding-left: 1px;
-          padding-right: 1px;
-}
-
 /* does not seem to work */
 QTableView {
     padding: 0;
@@ -420,13 +421,18 @@ QTableView {
 }
 
 
-QWidget {
-    padding: 0;
-}
-
-/* does not seem to do anything, even when override the updateStyle method */
+/* does not seem to do anything, even when overriding the updateStyle method */
 DockLabel {
           background-color: #555D85;
           /* color: #fdfdfc; */
           color: 'white';
+}
+
+/* does not seem to do anything, whereas it works when hard-coded */
+CcpnModuleLabel QToolButton {
+           border-width: 0px;
+           padding: 0px;
+           background-color: #555D85;
+           color: #555D85;
+ }
 }

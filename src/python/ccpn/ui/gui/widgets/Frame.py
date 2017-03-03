@@ -1,4 +1,42 @@
-"""Module Documentation here
+"""
+
+Frame(QtGui.QFrame, Base)
+
+
+  From: http://pyqt.sourceforge.net/Docs/PyQt4/qframe.html#details
+
+  The QFrame class is the base class of widgets that can have a frame. More...
+
+  Inherits QWidget.
+
+  Inherited by QAbstractScrollArea, QLabel, QLCDNumber, QSplitter, QStackedWidget and QToolBox.
+
+  Types
+
+  enum Shadow { Plain, Raised, Sunken }
+  enum Shape { NoFrame, Box, Panel, WinPanel, ..., StyledPanel }
+  enum StyleMask { Shadow_Mask, Shape_Mask }
+  Methods
+
+  __init__ (self, QWidget parent = None, Qt.WindowFlags flags = 0)
+  changeEvent (self, QEvent)
+  drawFrame (self, QPainter)
+  bool event (self, QEvent e)
+  QRect frameRect (self)
+  Shadow frameShadow (self)
+  Shape frameShape (self)
+  int frameStyle (self)
+  int frameWidth (self)
+  int lineWidth (self)
+  int midLineWidth (self)
+  paintEvent (self, QPaintEvent)
+  setFrameRect (self, QRect)
+  setFrameShadow (self, Shadow)
+  setFrameShape (self, Shape)
+  setFrameStyle (self, int)
+  setLineWidth (self, int)
+  setMidLineWidth (self, int)
+  QSize sizeHint (self)
 
 """
 #=========================================================================================

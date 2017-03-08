@@ -53,7 +53,7 @@ def convertDataToHdf5(spectrum:Spectrum, outputPath:str):
       File suffix is made to end with .hdf5
   """
   if not outputPath.endswith('.hdf5'):
-    n = outputPath.rfind('.') # TEST
+    n = outputPath.rfind('.')
     if n >= 0:
       outputPath = outputPath[:n]
     outputPath += '.hdf5'

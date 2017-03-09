@@ -97,11 +97,15 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
   def _updateWindowTitle(self):
     """
     #CCPN INTERNAL - called in saveProject method of Framework
-    """    
-    self.setWindowTitle('%s %s (Revision: %s): %s' % (self._appBase.applicationName,
-                                            self._appBase.applicationVersion, self._appBase.revision,
-                                            self._project.name))
+    """
+    from ccpn.util.GitTools import getAllRepositoriesGitCommit
 
+    commits = getAllRepositoriesGitCommit()
+    windowTitle = '{}, {} (framework: {:.8s}, model: {:.8s})'.format(self.application.applicationName,
+                                                                     self.application.applicationVersion,
+                                                                     commits['analysis'],
+                                                                     commits['ccpnmodel'])
+    self.setWindowTitle(windowTitle)
 
   def getMenuAction(self, menuString, topMenuAction=None):
     from ccpn.framework.Translation import translator

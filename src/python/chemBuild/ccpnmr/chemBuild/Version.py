@@ -1,5 +1,5 @@
 major = 1
-minor = 0
-release = 2
+minor = 1
+release = 1
 
 version = '%s.%s.%s' % (major, minor, release)

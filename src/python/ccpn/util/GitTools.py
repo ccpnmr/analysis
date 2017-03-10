@@ -10,23 +10,31 @@ from ccpn.framework.PathsAndUrls import analysisMetabolomicsPath
 from ccpn.framework.PathsAndUrls import ccpnmodelPythonPath
 
 
-def getCurrentGitCommit(cwd:Optional[str]=None) -> str:
+def runGitCommand(command:str, workingDir:Optional[str]=None) -> str:
+  if workingDir is None:
+    workingDir = getcwd()
+
+  gitCommand = ['git', ] + command.split()
+  gitQuery = Popen(gitCommand, cwd=workingDir, stdout=PIPE, stderr=PIPE)
+  gitStatus, error = gitQuery.communicate()
+  if gitQuery.poll() == 0:
+    return gitStatus.decode("utf-8").strip()
+
+
+def getCurrentGitCommit(workingDir:Optional[str]=None) -> str:
   '''
   Get the current git commit hash.
-
   This function returns the git commit hash for the repository where it's called.
   '''
+  return runGitCommand('rev-parse HEAD', workingDir=workingDir)
 
-  git_command = ['git', 'rev-parse', 'HEAD']
 
-  if cwd is None:
-    cwd = getcwd()
-
-  git_query = Popen(git_command, cwd=cwd, stdout=PIPE, stderr=PIPE)
-  (git_status, error) = git_query.communicate()
-
-  if git_query.poll() == 0:
-    return(git_status.strip())
+def getCurrentGitAuthor(workingDir:Optional[str]=None) -> str:
+  '''
+  Get the current git commit hash.
+  This function returns the git commit hash for the repository where it's called.
+  '''
+  return runGitCommand('config user.name', workingDir=workingDir)
 
 
 def getAllRepositoriesGitCommit() -> dict:
@@ -44,7 +52,7 @@ def getAllRepositoriesGitCommit() -> dict:
   commits = {}
   for k,v in repos.items():
     try:
-      commits[k] = str(getCurrentGitCommit(v))[2:-1]
+      commits[k] = getCurrentGitCommit(v)
     except FileNotFoundError:
       pass
 

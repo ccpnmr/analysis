@@ -345,7 +345,7 @@ class ViewBox(pg.ViewBox):
       event.accept()
       self._resetBoxes()
       # self._deselectPeaks()
-      self.current.clearPeaks()
+      #self.current.clearPeaks()
       self._selectPeak(xPosition, yPosition)
 
     elif leftMouse(event):

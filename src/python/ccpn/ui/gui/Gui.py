@@ -192,8 +192,8 @@ class Gui(Ui):
 
     from ccpn.ui.gui.modules.GuiBlankDisplay import GuiBlankDisplay
     try:
-      if 'BLANK DISPLAY' in self.mainWindow.moduleArea.findAll()[1]:
-        blankDisplay = self.mainWindow.moduleArea.findAll()[1]['BLANK DISPLAY']
+      if 'Blank Display' in self.mainWindow.moduleArea.findAll()[1]:
+        blankDisplay = self.mainWindow.moduleArea.findAll()[1]['Blank Display']
         if blankDisplay.isVisible():
           return
         else:

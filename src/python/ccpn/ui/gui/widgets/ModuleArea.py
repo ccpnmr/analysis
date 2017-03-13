@@ -15,6 +15,27 @@ class CcpnModuleArea(ModuleArea):
     self.moveModule = self.moveDock
     # self.closeModule = self.closeDock
 
+  @property
+  def currentModules(self) -> list:
+    'return all current modules in area'
+    if self is not None:
+      modules = list(self.findAll()[1].values())
+      return modules
+
+  @property
+  def currentModulesNames(self) -> list:
+    'return the name of all current modules in area'
+    if self is not None:
+      modules = list(self.findAll()[1].keys())
+      return modules
+
+  @property
+  def currentModulesDict(self):
+    ''' returns {Class name : Name } of currently opened Modules. Used in restoring Layout '''
+    modules = {}
+    for moduleName, moduleObj in self.findAll()[1].items():
+      modules.update({moduleObj.__class__.__name__: moduleName})
+    return modules
 
   def addModule(self, module=None, position=None, relativeTo=None, **kwds):
     """With these settings the user can close all the modules from the label 'close module' or pop up and

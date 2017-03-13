@@ -488,9 +488,14 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
           return
 
       if not path:
-        path = QtGui.QFileDialog.getSaveFileName(self, caption='Print to File', filter='SVG (*.svg)')
+        dialog = FileDialog(parent=self, fileMode=FileDialog.AnyFile, text='Print to File',
+                            acceptMode=FileDialog.AcceptSave, preferences=self.application.preferences.general,
+                            filter='SVG (*.svg)')
+        path = dialog.selectedFile()
         if not path:
           return
+        if not path.endswith(".svg"):
+          path = path+".svg"
 
       xCount = yCount = 1
       if isinstance(spectrumDisplayOrStrip, GuiSpectrumDisplay):

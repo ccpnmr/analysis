@@ -13,6 +13,9 @@ import json
 from PyQt4 import QtGui
 
 
+# TODO this file is a popup and does not belong in this directory
+
+
 WIDGET_TYPES = ['Button', 'CheckBox', 'DoubleSpinbox', 'LineEdit', 'ListWidget',
                 'PulldownList', 'Spinbox', 'None']
 

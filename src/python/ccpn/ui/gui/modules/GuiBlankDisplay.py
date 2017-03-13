@@ -112,12 +112,17 @@ class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else 
         self.moduleArea.guiWindow.deleteBlankDisplay()
 
 
+
   def _closeModule(self):
     """
     Re-implementation of closeModule function from CcpnModule.
     """
-    if self.window().spectrumDisplays:
-      CcpnModule._closeModule(self)
-    else:
-      self._appBase.project._logger.info('Cannot close blank display')
+    CcpnModule._closeModule(self)
+    self._appBase.project._logger.info('Shortcut "ND" to open a new blank display')
+
+    ## No need of this hack anymore. A Blank display can be reopen anytime.
+    # if self.window().spectrumDisplays:
+    #   CcpnModule._closeModule(self)
+    # else:
+    #   self._appBase.project._logger.info('Cannot close blank display')
 

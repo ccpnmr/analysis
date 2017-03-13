@@ -9,33 +9,55 @@ from pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt import Ui_Form
 
 from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
 from ccpn.ui.gui.exporters1D.SVGExporter import SVGExporter
+# from ccpn.ui.gui.exporters1D.SVGExporterND import SVGExporterND
 from ccpn.ui.gui.exporters1D.TextExporter import TextExporter
+# ExporterList = [ImageExporter, SVGExporter, TextExporter]
 
-ExporterList = [ImageExporter, SVGExporter, TextExporter]
+ExporterList = {'1D': [ImageExporter, SVGExporter, TextExporter],
+                'nD': [SVGExporter]
+                }
 
 class CustomExportDialog(QtGui.QDialog):
-  def __init__(self, scene):
+  def __init__(self, scene, titleName=None, spectrumDimension=None ):
     QtGui.QDialog.__init__(self)
     self.setVisible(False)
-    self.setWindowTitle("Export")
     self.shown = False
     self.currentExporter = None
     self.scene = scene
+    self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+    self.setWindowFlags(self.windowFlags() & QtCore.Qt.WindowStaysOnTopHint)
 
-    self.selectBox = QtGui.QGraphicsRectItem()
+    # self.selectBox = QtGui.QGraphicsRectItem()
     # self.selectBox.setPen(pg.functions.mkPen('y', width=3, style=QtCore.Qt.DashLine))
     # self.selectBox.hide()
     # self.scene.addItem(self.selectBox)
-  
+
     self.ui =  Ui_Form()
     self.ui.setupUi(self)
+    self._setUiStyle()
+
+    if titleName is not None:
+      self.setWindowTitle('Export '+titleName)
+
+    self.spectrumDimension = spectrumDimension
+
+
     self.ui.closeBtn.clicked.connect(self.close)
     self.ui.exportBtn.clicked.connect(self.exportClicked)
     self.ui.copyBtn.clicked.connect(self.copyClicked)
     self.ui.itemTree.currentItemChanged.connect(self.exportItemChanged)
     self.ui.formatList.currentItemChanged.connect(self.exportFormatChanged)
-  
-  
+
+
+  def _setUiStyle(self):
+
+    self.ui.label.hide() #hide this part not needed
+    self.ui.itemTree.hide() #hide this part not needed
+
+    self.ui.label_2.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+    self.ui.label_3.setAlignment(QtCore.Qt.AlignCenter | QtCore.Qt.AlignVCenter)
+    self.ui.paramTree.setAlternatingRowColors(False)
+
   def updateFormatList(self):
 
 
@@ -46,13 +68,19 @@ class CustomExportDialog(QtGui.QDialog):
     self.exporterClasses = {}
 
     gotCurrent = False
-    for exp in ExporterList:
-      self.ui.formatList.addItem(exp.Name)
+    if self.spectrumDimension is not None:
+      exporterList = ExporterList[self.spectrumDimension]
+    else:
+      exporterList = []
 
-      self.exporterClasses[exp.Name] = exp
-      if exp.Name == current:
-        self.ui.formatList.setCurrentRow(self.ui.formatList.count() - 1)
-        gotCurrent = True
+    if exporterList:
+      for exp in exporterList:
+        self.ui.formatList.addItem(exp.Name)
+
+        self.exporterClasses[exp.Name] = exp
+        if exp.Name == current:
+          self.ui.formatList.setCurrentRow(self.ui.formatList.count() - 1)
+          gotCurrent = True
 
     if not gotCurrent:
       self.ui.formatList.setCurrentRow(0)
@@ -66,11 +94,12 @@ class CustomExportDialog(QtGui.QDialog):
       if isinstance(item, pg.ViewBox) and isinstance(item.parentItem(), pg.PlotItem):
         item = item.parentItem()
       self.updateItemList(select=item)
+    self.exec_()
+
     self.setVisible(True)
     self.activateWindow()
     self.raise_()
-    # self.selectBox.setVisible(True)
-
+    #
     if not self.shown:
       self.shown = True
       vcenter = self.scene.getViewWidget().geometry().center()
@@ -115,7 +144,6 @@ class CustomExportDialog(QtGui.QDialog):
     # self.selectBox.show()
     self.updateFormatList()
 
-  
 
   def exportFormatChanged(self, item, prev):
     if item is None:

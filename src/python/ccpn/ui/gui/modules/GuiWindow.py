@@ -57,8 +57,8 @@ class GuiWindow(DropBase):
     """
     Removes blank display from main window modulearea if one is present.
     """
-    if 'BLANK DISPLAY' in self.moduleArea.findAll()[1]:
-      blankDisplay = self.moduleArea.findAll()[1]['BLANK DISPLAY']
+    if 'Blank Display' in self.moduleArea.findAll()[1]:
+      blankDisplay = self.moduleArea.findAll()[1]['Blank Display']
       blankDisplay.close()
     # if self.blankDisplay:
     #   self.blankDisplay.setParent(None)

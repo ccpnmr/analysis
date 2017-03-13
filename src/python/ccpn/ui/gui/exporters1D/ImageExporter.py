@@ -29,13 +29,14 @@ class ImageExporter(Exporter):
       bg.setAlpha(0)
 
     self.params = Parameter(name='params', type='group', children=[
-      {'name': 'width', 'type': 'int', 'value': tr.width(), 'limits': (0, None)},
-      {'name': 'height', 'type': 'int', 'value': tr.height(), 'limits': (0, None)},
-      {'name': 'antialias', 'type': 'bool', 'value': True},
-      {'name': 'background', 'type': 'color', 'value': bg},
-    ])
+                          {'name': 'width', 'type': 'int', 'value': tr.width(), 'limits': (0, None)},
+                          {'name': 'height', 'type': 'int', 'value': tr.height(), 'limits': (0, None)},
+                          {'name': 'antialias', 'type': 'bool', 'value': True},
+                          {'name': 'background', 'type': 'color', 'value': bg},
+                                                                  ])
     self.params.param('width').sigValueChanged.connect(self.widthChanged)
     self.params.param('height').sigValueChanged.connect(self.heightChanged)
+
 
   def widthChanged(self):
     sr = self.getSourceRect()

@@ -9,7 +9,9 @@ from pyqtgraph.GraphicsScene.exportDialogTemplate_pyqt import Ui_Form
 
 from ccpn.ui.gui.exporters1D.ImageExporter import ImageExporter
 from ccpn.ui.gui.exporters1D.SVGExporter import SVGExporter
+# from ccpn.ui.gui.exporters1D.SVGExporterND import SVGExporterND
 from ccpn.ui.gui.exporters1D.TextExporter import TextExporter
+# ExporterList = [ImageExporter, SVGExporter, TextExporter]
 
 ExporterList = {'1D': [ImageExporter, SVGExporter, TextExporter],
                 'nD': [SVGExporter]
@@ -92,13 +94,14 @@ class CustomExportDialog(QtGui.QDialog):
       if isinstance(item, pg.ViewBox) and isinstance(item.parentItem(), pg.PlotItem):
         item = item.parentItem()
       self.updateItemList(select=item)
+    self.exec_()
 
     self.setVisible(True)
     self.activateWindow()
     self.raise_()
-    self.exec()
+    #
     if not self.shown:
-      self.shown = False
+      self.shown = True
       vcenter = self.scene.getViewWidget().geometry().center()
       self.setGeometry(vcenter.x() - self.width() / 2, vcenter.y() - self.height() / 2, self.width(), self.height())
 

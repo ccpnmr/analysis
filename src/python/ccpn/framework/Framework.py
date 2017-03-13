@@ -55,7 +55,7 @@ from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.util.Common import uniquify
 
 from PyQt4 import QtGui
-
+from functools import partial
 _DEBUG = False
 
 componentNames = ('Assignment', 'Screening', 'Structure')
@@ -459,8 +459,8 @@ class Framework:
           spectrumView._createdSpectrumView()
           for peakList in spectrumView.spectrum.peakLists:
             strip.showPeaks(peakList)
-
     self._initLayout()
+    # self._restoreLayout()
 
   def _initLayout(self):
     """
@@ -819,6 +819,8 @@ class Framework:
   ###################################################################################################################
   ## MENU callbacks:  Project
   ###################################################################################################################
+
+
 
 
   def createNewProject(self):

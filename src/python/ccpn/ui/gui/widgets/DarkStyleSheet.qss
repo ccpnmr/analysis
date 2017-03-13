@@ -203,6 +203,13 @@ ListWidget {background-color: #000021;
              font-weight: normal;
 }
 
+QListWidget {background-color: #000021;
+             color: #f7ffff;
+             border: 1px solid #424a71;
+             margin: 0px 0px 0px 0px;
+             font-weight: normal;
+}
+
 ObjectTable {
              border: 1px #182548;
              font-family: open-sans;

@@ -50,7 +50,7 @@ class CcpnModule(Dock):
 
   Overide parameters for settings widget as needed
   """
-
+  moduleName = ''
   HORIZONTAL = 'horizontal'
   VERTICAL   = 'vertical'
   labelOrientation = HORIZONTAL  # toplabel orientation
@@ -60,22 +60,25 @@ class CcpnModule(Dock):
   maxSettingsState = 3  # states are defined as: 0: invisible, 1: both visible, 2: only settings visible
   settingsOnTop = True
 
+
   def __init__(self, name, logger=None, buttonParent=None, buttonGrid=None, closable=True, closeFunc=None, **kw):
     super(CcpnModule, self).__init__(name, self, closable=closable)
     self.closeFunc = closeFunc
+    CcpnModule.moduleName = name
 
     # useful definitions to have
     self.application = QtCore.QCoreApplication.instance()._ccpnApplication
     self.current = self.application.current
     self.project = self.application.project
     self.mainWindow = self.application.ui.mainWindow
+
     # GWV: logger seems not to work??
     self.project._logger.debug('CcpnModule.__init__: %s, %s, %s' % (self.application, self.current, self.project))
 
     # hide original dock label and generate a new CCPN one
     self._originalLabel = self.label
     self._originalLabel.hide()
-    self.label = CcpnModuleLabel(name.upper(), self, showCloseButton=closable, closeCallback=self._closeModule,
+    self.label = CcpnModuleLabel(name, self, showCloseButton=closable, closeCallback=self._closeModule,
                                  showSettingsButton=self.includeSettingsWidget, settingsCallback=self._settingsCallback
                                  )
     self.label.show()
@@ -108,6 +111,17 @@ class CcpnModule(Dock):
     #   border: 4px solid;
     # }
     # """)
+
+  # @property
+  # def moduleName(self):
+  #   'return  module name'
+  #   if self is not None:
+  #     return CcpnModule.moduleName
+  #
+  # @moduleName.setter
+  # def moduleName(self, name):
+  #   CcpnModule.moduleName = name
+
 
   def resizeEvent(self, event):
     self.setOrientation(self.labelOrientation, force=True)

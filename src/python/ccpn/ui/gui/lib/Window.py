@@ -10,23 +10,23 @@ __author__ = 'simon1'
 # from ccpn.ui.gui.modules.GuiSpectrumDisplay import GuiSpectrumDisplay
 
 MODULE_DICT = {
-  'SEQUENCE GRAPH'           : 'showSequenceGraph',
-  'PEAK ASSIGNER'            : 'showPeakAssigner',
-  'ATOM SELECTOR'            : 'showAtomSelector',
-  'BACKBONE ASSIGNMENT'      : 'showBackboneAssignmentModule',
-  'SIDECHAIN ASSIGNMENT'     : 'showSidechainAssignmentModule',
-  'CHEMICAL SHIFT TABLE'     : 'showChemicalShiftTable',
+  'Sequence Graph'           : 'showSequenceGraph',
+  'Peak Assigner'            : 'showPeakAssigner',
+  'Atom Selector'            : 'showAtomSelector',
+  'Backbone Assignment'      : 'showBackboneAssignmentModule',
+  'Sidechain Assignment'     : 'showSidechainAssignmentModule',
+  'Chemical Shift Table'     : 'showChemicalShiftTable',
   # 'MACRO EDITOR'             : 'editMacro',
-  'NMR RESIDUE TABLE'        : 'showNmrResidueTable',
-  'PEAK LIST'                : 'showPeakTable',
-  'PICK AND ASSIGN'          : 'showPickAndAssignModule',
-  'REFERENCE CHEMICAL SHIFTS': 'showRefChemicalShifts',
-  'RESIDUE INFORMATION'      : 'showResidueInformation',
-  'SEQUENCE'                 : 'toggleSequenceModule',
-  'PARASSIGN SETUP'          : 'showParassignSetup',
+  'Nmr Residue Table'        : 'showNmrResidueTable',
+  'Peak List'                : 'showPeakTable',
+  'Pick And Assign'          : 'showPickAndAssignModule',
+  'Reference ChemicalShifts' : 'showRefChemicalShifts',
+  'ResidueInformation'       : 'showResidueInformation',
+  'Sequence'                 : 'toggleSequenceModule',
+  'Parassign Setup'          : 'showParassignSetup',
   # 'API DOCUMENTATION'        : 'showApiDocumentation',
-  'PYTHON CONSOLE'           : 'toggleConsole',
-  'BLANK DISPLAY'            : 'addBlankDisplay',
+  'Python Console'           : 'toggleConsole',
+  'Blank Display'            : 'addBlankDisplay',
   # 'NOTES EDITOR'             : 'showNotesEditor'
                }
 

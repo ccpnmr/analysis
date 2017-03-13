@@ -48,9 +48,10 @@ class GuiStrip1d(GuiStrip):
     #                        spectrumView.data[1], pen=spectrumView.spectrum.sliceColour,
     #                        strip=self)
 
-  def _printToFile(self, printer):
 
-    raise Exception('1D printing not enabled yet')
+  # def _printToFile(self, printer):
+  #   self.showExportDialog()
+    # raise Exception('1D printing not enabled yet')
     
   def _get1dContextMenu(self) -> Menu:
     """
@@ -85,9 +86,9 @@ class GuiStrip1d(GuiStrip):
     return self.contextMenu
 
   def showExportDialog(self):
-      from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
-      self.exportDialog = CustomExportDialog(self.viewBox.scene())
-      self.exportDialog.show(self.viewBox)
+    from ccpn.ui.gui.widgets.CustomExportDialog import CustomExportDialog
+    self.exportDialog = CustomExportDialog(self.viewBox.scene(), spectrumDimension='1D')
+    self.exportDialog.show(self.viewBox)
 
   def resetYZoom(self):
     """

@@ -2,8 +2,7 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
-__credits__   = "Wayne Boucher, Edward Brooksbank, Rasmus H Fogh, Luca Mureddu, " \
-                "Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
+__credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
 __license__   = "CCPN license. see http://www.ccpn.ac.uk"
 __reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y"
 
@@ -502,7 +501,7 @@ class Framework:
     if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
       try:
         with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
-          layout = yaml.load(f)
+          names, layout = yaml.load(f)
 
         typ, contents, state = layout['main']  # main window
         _analyseContents(contents)
@@ -933,6 +932,46 @@ class Framework:
 
     self.ui.mainWindow.processDropData(paths, dataType='urls')
 
+  def _saveLayout(self):
+    moduleArea = self.ui.mainWindow.moduleArea
+    layout = moduleArea.saveState()
+    currentModulesDict = moduleArea.currentModulesDict
+    layoutPath = os.path.join(self.project.path, 'layouts')
+    if not os.path.exists(layoutPath):
+      os.makedirs(layoutPath)
+    import yaml
+    with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
+      yaml.dump([currentModulesDict, layout], stream)
+      stream.close()
+
+
+  def _restoreLayout(self):
+    import yaml, os
+    if os.path.exists(os.path.join(self.project.path, 'layouts', 'layout.yaml')):
+      try:
+        with open(os.path.join(self.project.path, 'layouts', 'layout.yaml')) as f:
+          modulesDict, layoutState =  yaml.load(f)
+
+        import ccpn.ui.gui.modules as gm
+        ccpnModules = gm.importCcpnModules(modulesDict)
+        for ccpnModule in ccpnModules:
+          newModule = ccpnModule(self.project)
+          self.ui.mainWindow.moduleArea.addModule(newModule)
+
+        self.ui.mainWindow.moduleArea.restoreState(layoutState)
+
+      except Exception as e:
+        # for now just ignore restore failures
+        self.project._logger.warning("Layout restore failed: %s" % e)
+
+  #
+  # def _openCcpnModule(self, ccpnModules, **kwargs):
+  #
+  #   for ccpnModule in ccpnModules:
+  #     if ccpnModule.moduleName == kwargs['moduleName']:
+  #       newModule = ccpnModule(self.project)
+  #       self.ui.mainWindow.moduleArea.addModule(newModule)
+
   def _saveProject(self, newPath=None, createFallback=True, overwriteExisting=True) -> bool:
     """Save project to newPath and return True if successful"""
     successful = self.project.save(newPath=newPath, createFallback=createFallback,
@@ -945,15 +984,8 @@ class Framework:
       self.ui.mainWindow._updateWindowTitle()
       self.ui.mainWindow.getMenuAction('Project->Archive').setEnabled(True)
       self._updateRecentFiles()
+      self._saveLayout()
 
-      layout = self.ui.mainWindow.moduleArea.saveState()
-      layoutPath = os.path.join(self.project.path, 'layouts')
-      if not os.path.exists(layoutPath):
-        os.makedirs(layoutPath)
-      import yaml
-      with open(os.path.join(layoutPath, "layout.yaml"), 'w') as stream:
-        yaml.dump(layout, stream)
-        stream.close()
       # saveIconPath = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'), 'icons', 'save.png')
 
       sys.stderr.write('==> Project successfully saved\n')
@@ -1337,11 +1369,12 @@ class Framework:
 
 
   def showPrintSpectrumDisplayPopup(self):
-    from ccpn.ui.gui.popups.PrintSpectrumPopup import PrintSpectrumDisplayPopup
+    from ccpn.ui.gui.popups.PrintSpectrumPopup import SelectSpectrumDisplayPopup #,PrintSpectrumDisplayPopup
     if len(self.project.spectrumDisplays) == 0:
       MessageDialog.showWarning('', 'No Spectrum Display found')
     else:
-      PrintSpectrumDisplayPopup(project=self.project).exec_()
+      SelectSpectrumDisplayPopup(project=self.project).exec_()
+      # PrintSpectrumDisplayPopup(project=self.project).exec_()
 
 
   def showSequenceGraph(self, position:str='bottom', relativeTo:CcpnModule=None):
@@ -1407,7 +1440,7 @@ class Framework:
     Toggles whether python console is displayed at bottom of the main window.
     """
 
-    if 'PYTHON CONSOLE' in self.ui.mainWindow.moduleArea.findAll()[1]:
+    if 'Python Console' in self.ui.mainWindow.moduleArea.findAll()[1]:
       if self.ui.mainWindow.pythonConsoleModule.isVisible():
         self.ui.mainWindow.pythonConsoleModule.hide()
       else:
@@ -1578,22 +1611,22 @@ class Framework:
 
   #########################################    End Menu callbacks   ##################################################
 
-  def printToFile(self, spectrumDisplay=None):
-
-    current = self.current
-    # if not spectrumDisplay:
-    #   spectrumDisplay = current.spectrumDisplay
-    if not spectrumDisplay and current.strip:
-      spectrumDisplay = current.strip.spectrumDisplay
-    if not spectrumDisplay and self.spectrumDisplays:
-      spectrumDisplay = self.spectrumDisplays[0]
-    if spectrumDisplay:
-      dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text='Print to File',
-                          acceptMode=FileDialog.AcceptSave, preferences=self.preferences.general, filter='SVG (*.svg)')
-      path = dialog.selectedFile()
-      if not path:
-        return
-      spectrumDisplay.printToFile(path)
+  # def printToFile(self, spectrumDisplay=None):
+  #
+  #   current = self.current
+  #   # if not spectrumDisplay:
+  #   #   spectrumDisplay = current.spectrumDisplay
+  #   if not spectrumDisplay and current.strip:
+  #     spectrumDisplay = current.strip.spectrumDisplay
+  #   if not spectrumDisplay and self.spectrumDisplays:
+  #     spectrumDisplay = self.spectrumDisplays[0]
+  #   if spectrumDisplay:
+  #     dialog = FileDialog(parent=self.ui.mainWindow, fileMode=FileDialog.AnyFile, text='Print to File',
+  #                         acceptMode=FileDialog.AcceptSave, preferences=self.preferences.general, filter='SVG (*.svg)')
+  #     path = dialog.selectedFile()
+  #     if not path:
+  #       return
+  #     spectrumDisplay.printToFile(path)
 
 def getSaveDirectory(preferences=None):
   """Opens save Project as dialog box and gets directory specified in the file dialog."""

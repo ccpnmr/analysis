@@ -48,7 +48,7 @@ from ccpn.framework.lib.misc import _checked
 from ccpn.ui import interfaces, defaultInterface
 from ccpn.framework.Current import Current
 from ccpn.ui.gui.modules.MacroEditor import MacroEditor
-from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets import MessageDialog
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.lib.Window import MODULE_DICT

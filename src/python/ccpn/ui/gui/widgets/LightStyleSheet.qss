@@ -181,8 +181,14 @@ ListWidget {background-color: #FDFDFC; /* #FFFDD1; */
              font-weight: normal;
              margin: 0px 0px 0px 0px;
              border: 1px solid #EDC151;
-}
+             }
 
+QListWidget {background-color: #FDFDFC; /* #FFFDD1; */
+             color: #464E76;
+             font-weight: normal;
+             margin: 0px 0px 0px 0px;
+             border: 1px solid #EDC151;
+             }
 ObjectTable {
              font-family: open-sans;
              alternate-background-color: black;

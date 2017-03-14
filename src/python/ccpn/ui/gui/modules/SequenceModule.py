@@ -27,18 +27,16 @@ __version__ = "$Revision$"
 #=========================================================================================
 
 
-from ccpn.core.Chain import Chain
-from ccpn.core.Residue import Residue
-
-from ccpn.ui.gui.widgets.Module import CcpnModule
-from ccpn.ui.gui.widgets.MessageDialog import showYesNo
-from ccpn.ui.gui.guiSettings import textFontHugeBold
-from ccpn.ui.gui.guiSettings import textFontHuge
-
 import typing
 
-from ccpn.ui.gui.DropBase import DropBase
 from PyQt4 import QtCore, QtGui
+
+from ccpn.core.Chain import Chain
+from ccpn.core.Residue import Residue
+from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.guiSettings import textFontHuge
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
 
 class SequenceModule(CcpnModule):

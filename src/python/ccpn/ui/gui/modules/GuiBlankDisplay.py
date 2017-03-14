@@ -21,20 +21,17 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from PyQt4 import QtCore
 
 # from pyqtgraph.dockarea import Dock
 
-from ccpn.core.Spectrum import Spectrum
-
-from ccpn.core.lib.Pid import Pid
 from typing import Sequence
-from ccpn.ui.gui.widgets.Module import CcpnModule
+
+from ccpn.core.Spectrum import Spectrum
+from ccpn.core.lib.Pid import Pid
+from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.SpectrumGroupsToolBarWidget import SpectrumGroupsToolBar
-# from ccpnmodel.ccpncore.lib.Io.Fasta import parseFastaFile, isFastaFormat
-
-from ccpn.ui.gui.DropBase import DropBase
 
 class GuiBlankDisplay(DropBase, CcpnModule): # DropBase needs to be first, else the drop events are not processed
 

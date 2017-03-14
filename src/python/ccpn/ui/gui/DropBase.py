@@ -22,12 +22,12 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
+from ccpn.core import Project
 from ccpn.core.lib import Util as ccpnUtil
 from ccpn.ui.gui.Base import Base as GuiBase
-from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.MessageDialog import showWarning
 
-from ccpn.core import Project
 
 class DropBase(GuiBase):
 

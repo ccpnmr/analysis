@@ -22,16 +22,11 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from PyQt4 import QtGui
-
-
-from ccpn.ui.gui.widgets.Module import CcpnModule, CcpnModuleLabel
-
-from ccpn.ui.gui.Base import Base as GuiBase
-
-from pyqtgraph.dockarea import Dock
 
 from PyQt4 import QtCore, QtGui
+
+from ccpn.ui.gui.Base import Base as GuiBase
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
 QtCore.qInstallMsgHandler(lambda *args: None)
 

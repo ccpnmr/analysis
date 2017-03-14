@@ -21,24 +21,20 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-from ccpn.core.Peak import Peak
 
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Button import Button
-from ccpn.ui.gui.widgets.CheckBox import CheckBox
-from ccpn.ui.gui.widgets.Module import CcpnModule
-from ccpn.ui.gui.widgets.GroupBox import GroupBox
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.DropBase import DropBase
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.modules.peakUtils import getPeakPosition, getPeakAnnotation, getPeakLinewidth
-
 from ccpn.ui.gui.popups.SelectObjectsPopup import SelectObjectsPopup
-
-
-from PyQt4 import QtGui, QtCore
+from ccpn.ui.gui.widgets.Base import Base
+from ccpn.ui.gui.widgets.Button import Button
+from ccpn.ui.gui.widgets.CheckBox import CheckBox
+from ccpn.ui.gui.widgets.GroupBox import GroupBox
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 UNITS = ['ppm', 'Hz', 'point']
 
@@ -157,7 +153,6 @@ class PeakListSimple(QtGui.QWidget, DropBase, Base):
       self.peakListPulldown.setCurrentIndex(selectedList)
 
     self.__registerNotifiers()
-    from functools import partial
 
     self.peakListPulldown.activated[str].connect(self.updateSelectionOnTable)
 

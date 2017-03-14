@@ -1,11 +1,11 @@
 __author__ = 'simon1'
 
-from ccpn.ui.gui.widgets.Module import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from PyQt4 import QtGui, QtCore
 
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
-from PyQt4 import QtGui, QtCore
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 
 
 class RestraintTable(CcpnModule):

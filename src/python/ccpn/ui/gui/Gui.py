@@ -23,21 +23,18 @@ __version__ = "$Revision: 9315 $"
 #=========================================================================================
 
 import sys
-import collections
 import typing
 
-from ccpn.ui.Ui import Ui
-from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
-from ccpn.core.Project import Project
 from ccpn.core import _coreClassMap
+from ccpn.core.Project import Project
+from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
 from ccpn.core.lib.SpectrumLib import getExperimentClassifications
-
-from ccpn.ui.gui.widgets.Application import Application
-from ccpn.ui.gui.widgets.SplashScreen import SplashScreen
+from ccpn.ui.Ui import Ui
 from ccpn.ui.gui.popups.RegisterPopup import RegisterPopup
+from ccpn.ui.gui.widgets.Application import Application
+
 
 # This import initializes relative paths for QT style-sheets.  Do not remove!
-from ccpn.ui.gui.widgets import resources_rc
 
 class Gui(Ui):
 
@@ -207,7 +204,7 @@ class Gui(Ui):
 
 
   from ccpn.core.IntegralList import IntegralList
-  from ccpn.ui.gui.widgets.Module import CcpnModule
+  from ccpn.ui.gui.modules.CcpnModule import CcpnModule
   def showIntegralTable(self, position:str='bottom', relativeTo:CcpnModule=None, selectedList:IntegralList=None):
     logParametersString = "position={position}, relativeTo={relativeTo}, selectedList={selectedList}".format(
       position="'" + position + "'" if isinstance(position, str) else position,

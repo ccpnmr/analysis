@@ -1,9 +1,7 @@
-from PyQt4 import QtGui
-from pyqtgraph.dockarea.DockArea import DockArea
 from pyqtgraph.dockarea.Dock import Dock
-from pyqtgraph.dockarea.Container import Container, TContainer, HContainer, VContainer
-from ccpn.ui.gui.widgets.Module import CcpnModule
+from pyqtgraph.dockarea.DockArea import DockArea
 
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 
 ModuleArea = DockArea
 Module = Dock

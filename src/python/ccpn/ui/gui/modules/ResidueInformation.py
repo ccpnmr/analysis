@@ -3,8 +3,8 @@ __author__ = 'simon1'
 from PyQt4 import QtGui
 
 from ccpn.core.lib.AssignmentLib import CCP_CODES
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 

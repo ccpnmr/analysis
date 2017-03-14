@@ -3,7 +3,7 @@ __author__ = 'simon'
 import pyqtgraph as pg
 
 from ccpn.core.lib.AssignmentLib import CCP_CODES
-from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.util.Colour import spectrumHexColours

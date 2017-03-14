@@ -28,7 +28,6 @@ from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.Menu import Menu
-from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.ModuleArea import CcpnModuleArea
 from ccpn.ui.gui.widgets.PlotWidget import PlotWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList

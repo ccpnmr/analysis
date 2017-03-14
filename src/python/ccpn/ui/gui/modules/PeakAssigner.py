@@ -4,7 +4,6 @@
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
-import ccpn.ui.gui.widgets.Frame
 
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
 __credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
@@ -26,27 +25,26 @@ __version__ = "$Revision$"
 import typing
 from functools import partial
 
-from PyQt4 import QtGui, QtCore
-from ccpn.core.lib.AssignmentLib import ATOM_NAMES
+from PyQt4 import QtGui
 
-from ccpn.core.Project import Project
-from ccpn.core.Peak import Peak
 from ccpn.core.NmrAtom import NmrAtom
+from ccpn.core.Peak import Peak
 from ccpn.core.lib import CcpnSorting
+from ccpn.core.lib.AssignmentLib import ATOM_NAMES
 from ccpn.ui.gui.lib.PeakAssignment import (nmrAtomsForPeaks,
                                                       peaksAreOnLine,
                                                       sameAxisCodes)
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.CheckBox import CheckBox
 from ccpn.ui.gui.widgets.Frame import Frame
-from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.Table import ObjectTable, Column
+from ccpn.util.Logging import getLogger
 from ccpnmodel.ccpncore.lib.Constants import  defaultNmrChainCode
 
-from ccpn.util.Logging import getLogger
 logger = getLogger()
 
 

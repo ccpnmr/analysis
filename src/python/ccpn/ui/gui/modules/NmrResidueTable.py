@@ -24,12 +24,12 @@ __version__ = "$Revision$"
 # Start of code
 #=========================================================================================
 
-from ccpn.ui.gui.widgets.Module import CcpnModule
-from ccpn.ui.gui.widgets.Widget import Widget
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.Widget import Widget
 
 
 class NmrResidueTableModule(CcpnModule):

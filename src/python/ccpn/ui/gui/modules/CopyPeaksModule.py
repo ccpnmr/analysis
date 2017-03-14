@@ -1,11 +1,9 @@
-
 from PyQt4 import QtCore, QtGui
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 
-from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
+from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.ListWidget import ListWidget
-
 
 
 class CopyPeaksModule(CcpnModule):

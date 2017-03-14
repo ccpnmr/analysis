@@ -1,16 +1,15 @@
 __author__ = 'simon1'
 
+from PyQt4 import QtGui
+
+from ccpn.ui.gui.DropBase import DropBase
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
-from ccpn.ui.gui.widgets.Module import CcpnModule
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
 from ccpn.ui.gui.widgets.Label import Label
 from ccpn.ui.gui.widgets.LineEdit import LineEdit
 from ccpn.ui.gui.widgets.TextEditor import TextEditor
-
-from ccpn.ui.gui.DropBase import DropBase
-
-from PyQt4 import QtGui
 
 
 class MacroEditor(DropBase, CcpnModule):

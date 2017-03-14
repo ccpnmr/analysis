@@ -1,20 +1,19 @@
-
 from functools import partial
-from ccpn.core.PeakList import PeakList
+
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
+
+from ccpn.core.PeakList import PeakList
+from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.BarGraph import BarGraph, CustomViewBox
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
 from ccpn.ui.gui.widgets.GroupBox import GroupBox
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Module import CcpnModule
+from ccpn.ui.gui.widgets.PulldownList import PulldownList
 from ccpn.ui.gui.widgets.ScrollArea import ScrollArea
 from ccpn.ui.gui.widgets.Widget import Widget
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
-
-
 
 
 class InputWidget(Widget):

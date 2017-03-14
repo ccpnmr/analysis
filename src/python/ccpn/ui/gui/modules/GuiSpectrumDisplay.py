@@ -39,7 +39,7 @@ from ccpn.ui.gui.widgets.ToolBar import ToolBar
 import typing
 
 from ccpn.ui.gui.DropBase import DropBase
-from ccpn.ui.gui.base.Frame import Frame as GuiFrame
+from ccpn.ui.gui.widgets.Frame import Frame as GuiFrame
 from ccpn.ui.gui.widgets.PhasingFrame import PhasingFrame
 from ccpn.ui.gui.modules.GuiModule import GuiModule
 from ccpn.ui.gui.widgets.SpectrumToolBar import SpectrumToolBar
@@ -79,7 +79,7 @@ class GuiSpectrumDisplay(DropBase, GuiModule):
     # scroll area
     self.scrollArea = ScrollArea(self.module, grid=(1, 0), gridSpan=(1, 4))
     self.scrollArea.setWidgetResizable(True)
-    self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0), appBase=self._appBase)
+    self.stripFrame = GuiFrame(self.scrollArea, grid=(0, 0))
     self.stripFrame.guiSpectrumDisplay = self
     self.stripFrame.setAcceptDrops(True)
     self.scrollArea.setWidget(self.stripFrame)

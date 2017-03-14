@@ -55,7 +55,6 @@ from ccpn.ui.gui.lib.Window import MODULE_DICT
 from ccpn.util.Common import uniquify
 
 from PyQt4 import QtGui
-from functools import partial
 _DEBUG = False
 
 componentNames = ('Assignment', 'Screening', 'Structure')

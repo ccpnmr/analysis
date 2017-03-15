@@ -91,7 +91,7 @@ def _numericSplitString(key):
 
   The numeric tuples are (intVal, subStringVal).
   Substrings recognised as integers are an optional series of ' ',
-  an optional sign, and a seris of digits - or REGEX '[ ]*[+-]?\d+'"""
+  an optional sign, and a series of digits - or REGEX '[ ]*[+-]?\d+'"""
   matches = list(NUMERICSPLIT.split(key))
   for ii in range(1, len(matches), 2):
     matches[ii] = (int(matches[ii]), matches[ii])

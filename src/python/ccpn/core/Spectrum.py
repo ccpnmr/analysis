@@ -1041,6 +1041,32 @@ Use axisCodes to set magnetisation transfers instead.""")
     return commonUtil.reorder(values, self.axisCodes, newAxisCodeOrder)
 
 
+  def getInAxisOrder(self, attributeName:str, axisCodes:Sequence[str]=None):
+    """Get attributeName in order defined by axisCodes :
+       (default order if None)
+    """
+    if not hasattr(self, attributeName):
+      raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+
+    values = getattr(self, attributeName)
+    if axisCodes is None:
+      return values
+    else:
+      # change to order defined by axisCodes
+      return self.reorderValues(values, axisCodes)
+
+  def setInAxisOrder(self, attributeName:str, values:Sequence, axisCodes:Sequence[str]=None):
+    """Set attributeName from values in order defined by axisCodes
+       (default order if None)
+    """
+    if not hasattr(self, attributeName):
+      raise AttributeError('Spectrum object does not have attribute "%s"' % attributeName)
+
+    if axisCodes is not None:
+      # change values to the order appropriate for spectrum
+      values = self.reorderValues(values, axisCodes)
+    setattr(self, attributeName, values)
+
 
 def _newSpectrum(self:Project, name:str) -> Spectrum:
   """Creation of new Spectrum NOT IMPLEMENTED.

@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: rhfogh $"
-__date__ = "$Date: 2016-05-16 06:41:02 +0100 (Mon, 16 May 2016) $"
-__version__ = "$Revision: 9315 $"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-16 18:17:53 +0000 (Thu, March 16, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -35,6 +34,7 @@ from ccpn.ui.gui.widgets.Application import Application
 
 
 # This import initializes relative paths for QT style-sheets.  Do not remove!
+from ccpn.ui.gui.widgets import resources_rc
 
 class Gui(Ui):
 

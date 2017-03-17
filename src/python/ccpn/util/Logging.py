@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-17 12:20:10 +0000 (Fri, March 17, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -155,3 +154,10 @@ def _removeOldLogFiles(logPath, removeOldLogsDays=MAX_LOG_FILE_DAYS):
     mtime = os.path.getmtime(logFile)
     if mtime < removeTime:
       os.remove(logFile)
+
+def setLevel(logger, level=logging.INFO):
+
+  logger.setLevel(level)
+  for handler in logger.handlers:
+    handler.setLevel(level)
+    

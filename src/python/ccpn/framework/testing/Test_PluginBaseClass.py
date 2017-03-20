@@ -61,3 +61,7 @@ class TestPlugin(unittest.TestCase):
       localPath = plugin.localInfo
       mock_makedirs.assert_called_once_with(os.path.join('/tmp/ccpntest/', 'plugins', MinimalPlugin.PLUGINNAME))
 
+
+  def _test__gui(self):
+    plugin = MinimalPlugin()
+    print(plugin._gui)

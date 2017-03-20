@@ -67,7 +67,7 @@ made by him to the repository of The Software.
 2.6.1. Licensee shall register The Software upon first usage using the popup box generated automatically by The
 Software, providing valid and accurate information regarding name, Email, Workplace and Organisation.
 2.6.2. Whereever and whenever appropriate, The Software shall be referenced as “obtained from http://www.ccpn.ac.uk,
-Skinner et al. (2016), submitted”.
+CcpNmr AnalysisAssign: a flexible platform for integrated NMR analysis, Skinner et al. J Biomol NMR 66 (2016) 111-124”.
 
 3. Terms & Termination
 The terms of this license shall be active until terminated.

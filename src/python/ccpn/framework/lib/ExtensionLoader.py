@@ -15,3 +15,14 @@ def getPipes(userExtensionPath=None):
     loadedPipes.update(sc)
   return loadedPipes
 
+
+def getPlugins(userExtensionPath=None):
+  from ccpn.framework.PathsAndUrls import pluginPath
+  from ccpn.framework.lib.Plugin import Plugin
+
+  loadedPlugins = set()
+  loadedPlugins.update(loadSubclasses(pluginPath, Plugin))
+  if userExtensionPath is not None:
+    sc = loadSubclasses(userExtensionPath, Plugin)
+    loadedPlugins.update(sc)
+  return loadedPlugins

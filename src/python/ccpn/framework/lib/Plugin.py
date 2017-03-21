@@ -5,6 +5,10 @@ from abc import abstractmethod
 import os
 
 
+class NoUI:
+  def issueMessage(self, message):
+    print(message)
+
 
 class Plugin(ABC):
   '''
@@ -24,14 +28,6 @@ class Plugin(ABC):
 
 
   def __init__(self, application=None):
-    # TODO: Move to ui.gui
-    if self.guiModule is None:
-      if self.params is not None:
-        self.guiModule = _autoGenPluginGui
-      else:
-        self.guiModule = self._issueGuiInstantiatedMessage
-
-    self._uiElement = None
 
     if application is not None:
       self.application = application
@@ -45,6 +41,8 @@ class Plugin(ABC):
         self.mainWindow = self.ui.mainWindow
       except AttributeError:
         pass
+
+    self.ui = NoUI()
 
 
   @property
@@ -72,7 +70,7 @@ class Plugin(ABC):
 
 
   def run(self, **kwargs):
-    print('run() called with:', kwargs)
+    self.ui.issueMessage('run() called with:', kwargs)
 
 
   def cleanup(self):

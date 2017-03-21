@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-21 14:39:39 +0000 (Tue, March 21, 2017) $"
+__date__ = "$Date: 2017-03-21 15:38:37 +0000 (Tue, March 21, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -28,20 +28,8 @@ from ccpn.ui.gui.lib.GuiGenerator import generateWidget
 from ccpn.ui.gui.widgets.Button import Button
 
 
-# # TODO: Move to ui.gui
-# def _autoGenPluginGui(objMethod):
-#   return generateWidget(objMethod,)  # add Container=CcpnModule bit
-#
-#
-# # TODO: Move to ui.gui
-# def _issueGuiInstantiatedMessage(objMethod):
-#   print('Instantiated', str(objMethod))
-
 
 class PluginModule(CcpnModule):
-  # Populate self.mainWidget and self.settingsWidget
-  # Everything else should be taken care of
-  # set includeSettingsWidget depending on Klass.setting
 
   def __init__(self, interactor, *args, **kwargs):
     self.interactor = interactor
@@ -112,7 +100,7 @@ if __name__ == '__main__':
   interactor = Mock()
   interactor.PLUGINNAME = 'Test Plugin...Test'  # Same as above, but without checking
   interactor.params = [{'variable' : 'param1',
-                       'value'    : ('Fast', 'Slow'),
+                        'value'    : ('Fast', 'Slow'),
                         'label'    : 'Param #1',
                         'default'  : 'Fast'},                        # List
 

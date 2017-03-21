@@ -119,8 +119,7 @@ class StructureEnsemble(AbstractWrapperObject):
     self._wrappedData.details = value
 
   def resetModels(self):
-    """Remove models without data, add models to reflect modelNumbers present,
-    and remove rows with modelNumber not set"""
+    """Remove models without data, add models to reflect modelNumbers present"""
     data = self.data
     if data.shape[0]:
       # data present
@@ -137,19 +136,6 @@ class StructureEnsemble(AbstractWrapperObject):
         if modelNumber not in serial2Model:
           self.newModel(serial=modelNumber)
 
-      # Remove data without model number
-      data.drop(data['modelNumber'].isin([None,]))
-
-
-  # def _flushCachedData(self):
-  #   """Flush cached data to ensure up-to-date data are saved"""
-  #
-  #   for tag in ('coordinateData', 'occupancyData', 'bFactorData'):
-  #     _tag = '_' + tag
-  #     if hasattr(self, _tag):
-  #       # Save cached data back to underlying storage
-  #       setattr(self, tag, getattr(self, _tag))
-  #       delattr(self, _tag)
 
   # Implementation functions
   @classmethod

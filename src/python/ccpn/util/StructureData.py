@@ -27,7 +27,10 @@ import collections
 import math
 import numbers
 import typing
+import copy
+import numpy
 import pandas as pd
+from ccpn.util import Sorting
 from ccpn.util.ListFromString import listFromString
 
 # Pid.IDSEP - but we do not want to import from ccpn.core here
@@ -239,6 +242,10 @@ class EnsembleData(pd.DataFrame):
     # NB ModelData temporarily resets this to a Model object
     self.__containingObject = None
 
+    # Reset index to one-start - unless it was passed in explicitly.
+    if 'index' not in kwargs:
+      self.reset_index(drop=True, inplace=True)
+
 
   ### Making selections
 
@@ -441,12 +448,8 @@ class EnsembleData(pd.DataFrame):
     """Add row with values matching kwargs, setting index to next available index
 
     See setValues for details"""
-    if self.shape[0]:
-      index = max(self.index) + 1
-    else:
-      # NBNB TODO change this if we move to 1-based index
-      index = 0
-    self.setValues(index)
+    nextIndex =  max(self.index) + 1 if self.shape[0] else 1
+    self.setValues(nextIndex, **kwargs)
 
   def setValues(self, accessor:typing.Union[int, 'EnsembleData', pd.Series], **kwargs) -> None:
     """
@@ -454,8 +457,12 @@ class EnsembleData(pd.DataFrame):
 
     Params:
       accessor : int, EnsembleData, Selector
-                 If an integer is given, the value will be set on the row at that index
+                 If an integer is given, the value will be set on the row at that index,
+                 a new row will be added if the value is the next free index,
+                 or ValueError will be raised.
+
                  If a single row EnsembleData is given, the value will be set on the matching row.
+
                  If a selector that matches a single row is given, the value will be set on that
                  matching row
 
@@ -469,70 +476,59 @@ class EnsembleData(pd.DataFrame):
     # Row selection:
     Real= numbers.Real
 
-    if isinstance(accessor, int):
+    rowExists = True
+    if  isinstance(accessor, (int, numpy.integer)):
+      # This is utter shit! Why are numpy.integers not ints, or at least with a common superclass?
+      # Shows again that numpy is an alien growth within python.
       index = accessor
+      if index in self.index:
+        rowExists = True
+      else:
+        rowExists = False
+        nextIndex = max(self.index) + 1 if self.shape[0] else 1
+        if index != nextIndex:
+          raise ValueError("setValues cannot create a new row, "
+                           "unless accessor is the next free integer index")
     elif isinstance(accessor, EnsembleData):
       assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
       index = accessor.index
+      assert (index in self.index
+              and accessor.as_namedtuples() == self.loc[index].as_namedtuples()), (
+        "Ensembles used for selection must be (or match) row in current ensemble"
+      )
     elif isinstance(accessor, pd.Series): # selector
-      assert accessor.sum() == 1, "Boolean selectors must select a single row"
-      index = accessor[accessor == True].index
+      rows = accessor[accessor == True]
+      assert rows.shape[0] == 1, "Boolean selector must select a single row."
+      index = rows.index
+      assert index in self.index, "Boolean selector must select an existing row"
     else:
       raise TypeError('accessor must be index, ensemble row, or selector.')
-    rowExists = index in self.index
+
+    if rowExists and not kwargs:
+      # No changes - and setting with an empty dictionary gives an error
+      return
 
     # input data and columns
     values = {}
+    kwargsCopy = kwargs.copy()
     for col in self.columns:
-      if col in kwargs:
-        value = kwargs.pop(col)
-        if math.isnan(value):
-          value = None
-        elif value is not None:
-          # check validity
-          columnTypeData = self._reservedColumns.get(col)
-          if columnTypeData:
-            dataType, typeConverterName = columnTypeData
 
-            # Check dataType
-            if dataType is float:
-              if not isinstance(value, Real):
-                raise ValueError("%s values must be a real number or None" % col)
+      # dataType, typeConverterName = self._reservedColumns.get(col) or (None, None)
 
-            elif col == 'nmrSequenceCode' and isinstance(value, int):
-              # special case - convert integer to string
-              value = str(value)
+      if col in kwargsCopy:
+        value = kwargsCopy.pop(col)
 
-            elif not isinstance(value, dataType):
-              raise ValueError("%s values must be of type %s or None" % (col, dataType))
-
-            # Check special cases
-            if col == 'occupancy':
-              if (not isinstance(value, Real)) or value < 0 or value > 1:
-                raise ValueError("occupancy must be real and between 0 and 1 inclusive, was %s"
-                                 % value)
-
-            elif col == 'modelNumber':
-              if value < 1:
-                raise ValueError("Model numbers must be positive intgers, was %s"
-                                 % value)
-
-            elif col == 'nmrSequenceCode':
-              # Dealt with above, but must be here for next elif statement
-              pass
-
-            elif typeConverterName:
-              raise RuntimeError("Code error - %s not supported in setValues" % col)
         values[col] = value
+
       elif not rowExists:
         # For new rows we want None rather than NaN as the default values
         # For existing rows we leave the existing value
         values[col] = None
 
-    if kwargs:
+    if kwargsCopy:
       # Some input did not match columns
       raise ValueError("Attempt to set columns not present in DataFrame: %s"
-                       % list(kwargs))
+                       % list(kwargsCopy))
 
     containingObject = self._containingObject
     if containingObject is not None:
@@ -540,7 +536,14 @@ class EnsembleData(pd.DataFrame):
       containingObject._startFunctionCommandBlock('data.setValues', values=kwargs)
 
     try:
-      self.loc[index] = values
+      # We must do this one by one - passing in the dictionary
+      # gives you a series, and coerces None to NaN.
+
+      # Internally this calls self.__setitem__.
+      # Type handling is done there and can be skipped here.
+      # NB, various obvious alternatives, like just setting the row, do NOT work.
+      for key,val in values.items():
+        self.loc[index, key] = val
 
     finally:
       if containingObject is not None:
@@ -553,93 +556,15 @@ class EnsembleData(pd.DataFrame):
         if rowExists:
           # Undo modification of existing row
           undo.newItem(self.setValues, self.setValues,
-                       undoArgs=(accessor,), undoKwargs=dict((x, self.loc[index].get(x))
+                       undoArgs=(index,), undoKwargs=dict((x, self.loc[index].get(x))
                                                              for x in kwargs),
-                       redoArgs=(accessor,), redoKwargs=kwargs)
+                       redoArgs=(index,), redoKwargs=kwargs)
         else:
           # undo addition of new row
           undo.newItem(self.drop, self.setValues,
                        undoArgs=(index,), undoKwargs={'inplace':True},
-                       redoArgs=(accessor, ), redoKwargs=kwargs)
+                       redoArgs=(index, ), redoKwargs=kwargs)
 
-        # def setValues(self, accessor: typing.Union[int, 'EnsembleData', pd.Series],
-        #               **kwargs) -> None:
-        #   """
-        #   Allows you to easily set values (in place) for fields in the EnsembleData
-        #
-        #   Params:
-        #     accessor : int, EnsembleData, Selector
-        #                If an integer is given, the value will be set on the row at that index
-        #                If a single row EnsembleData is given, the value will be set on the matching row.
-        #                If a selector that matches a single row is given, the value will be set on that
-        #                matching row
-        #
-        #                Multi-row EnsembleData or selectors are not allowed.
-        #                (consider using EnsembleData.iterrecords() to iterate)
-        #
-        #     kwargs : columns on which to set the values
-        #
-        #   """
-        #
-        #   if len(kwargs) == 1:
-        #     # This gives two elements, not two lists. Deliberate.
-        #     columns, values = kwargs.popitem()
-        #   else:
-        #     columns, values = list(zip(*kwargs.items()))
-        #
-        #   if isinstance(accessor, int):
-        #     index = accessor
-        #   elif isinstance(accessor, EnsembleData):
-        #     assert accessor.shape[0] == 1, "Only single row ensembles can be used for setting."
-        #     index = accessor.index
-        #   elif isinstance(accessor, pd.Series):  # selector
-        #     assert accessor.sum() == 1, "Boolean selectors must select a single row"
-        #     index = accessor[accessor == True].index
-        #   else:
-        #     raise TypeError('accessor must be index, ensemble row, or selector.')
-        #
-        #   rowExists = index in self.index
-        #
-        #   containingObject = self._containingObject
-        #   if containingObject is not None:
-        #     # undo and echoing
-        #     containingObject._startFunctionCommandBlock('data.setValues', values=kwargs)
-        #
-        #   try:
-        #     self.iloc[index, columns] = values
-        #
-        #   finally:
-        #     if containingObject is not None:
-        #       modelNumber = kwargs.get('modelNumber')
-        #       if modelNumber is not None:
-        #         # NBNB The following 'if' could surely be done better in Pandas.
-        #         # Meanwhile the 'list' should guard against possible pandas weirdness
-        #         if modelNumber not in list(self['modelNumber'].unique()):
-        #           # Add new model, since new modelNumber is introduced
-        #           # NB no need for special undo-work. The creation is put on undo stack automatically.
-        #           ss = containingObject.className
-        #           if ss == 'StructureEnsemble':
-        #             containingObject.newModel(serial=modelNumber)
-        #           else:
-        #             # assert containingObject.className == 'Model'
-        #             containingObject.structureEnsemble.newModel(serial=modelNumber)
-        #       containingObject._project._appBase._endCommandBlock()
-        #
-        #   if containingObject is not None:
-        #     undo = containingObject._project._undo
-        #     if undo is not None:
-        #       # set up undo functions
-        #       if rowExists:
-        #         # Undo modification of existing row
-        #         undo.newItem(self.setValues, self.setValues,
-        #                      undoArgs=(accessor,), undoKwargs=dict((x, self.loc[index].get(x))
-        #                                                            for x in kwargs),
-        #                      redoArgs=(accessor,), redoKwargs=kwargs)
-        #       else:
-        #         # undo addition of new row
-        #         undo.newItem(self.drop, self.setValues,
-        #                      undoArgs=(index,), undoKwargs={'inplace':True},
-        #                      redoArgs=(accessor,), redoKwargs=kwargs)
 
   ### PDB mapping
 
@@ -673,7 +598,7 @@ class EnsembleData(pd.DataFrame):
     return ensemble
 
 
-  ### Pandas compatability methods
+  ### Pandas compatibility methods
 
   @property
   def _constructor(self) -> 'EnsembleData':
@@ -689,6 +614,41 @@ class EnsembleData(pd.DataFrame):
 
   ### Property type checking
 
+  def ccpnSort(self, *columns:str):
+    """Custom sort. Sorts mixed-type columns by type, sorting None and NaN at the start
+
+    If nmrSequenceCode or nmrAtomName or nmrChainCode are included in columns
+    uses custom sort *for all strings* so that e.g. '@3' comes before '@12' and '7b' before '22a' """
+    cols = list(self[x] for x in columns)
+    cols.append(self.index)
+
+    # Set sorting key for sorting mixed incompatible types
+    if ('nmrSequenceCode' in columns or 'nmrAtomName' in columns
+        or 'nmrChainCode' in columns):
+      # Sort so that all strings containing integers are sorted by the integer
+      # E.g. '@9' before '@12', and '3' before '21b'
+      # Basically a heuristic to sort nmrSequenceCode or nmrAtomName in sensible order
+      sortKey = Sorting.universalNaturalSortKey
+    else:
+      # sort strings normally
+      sortKey = Sorting.universalSortKey
+
+    # old index in sorted order
+    reordered = list(tt[-1] for tt in sorted(zip(*cols), key=sortKey))
+    ll = list((prev, new + 1) for new,prev in enumerate(reordered))
+    newIndex = list(tt[1] for tt in sorted(ll))
+    self.index = newIndex
+    self.sort_index(inplace=True)
+
+    # reset index to one-origin successive integers
+    self.index = range(1, len(reordered) + 1)
+
+  def reset_index(self, *args, **kwargs):
+    """reset_index - overridden to generate index starting at one."""
+    super().reset_index(*args, **kwargs)
+    self.index = range(1, self.shape[0] + 1)
+
+
   def __setitem__(self, key:str, value:typing.Any) -> None:
     """If the key is a single string with a reserved column name
     the value(s) must be of the right type, and the operation is echoed and undoable.
@@ -696,8 +656,7 @@ class EnsembleData(pd.DataFrame):
     and no type checking.
     """
 
-    #  NBNB TODO move to 1-based indexing
-    # Given the opacity of pandas we would need to reset after setting. Not obvious how.
+    firstData = not(self.shape[0])
 
     columnTypeData = self._reservedColumns.get(key)
     if columnTypeData is None:
@@ -715,8 +674,17 @@ class EnsembleData(pd.DataFrame):
         # NB with large objects the echo will be huge and ugly.
         # But it is almost impossible to compress the great variety of value types Pandas allow.
         containingObject._startFunctionCommandBlock('data.__setitem__', key, value)
+        project = containingObject._project
+        project.blankNotification()
+        undo = project._undo
+        undo.increaseBlocking()
 
+      # WE need a copy, not a view, as this is used for undoing etc.
       oldValue = self.get(key)
+      if oldValue is not None:
+        oldValue = oldValue.copy()
+      # NBNB copy.copy returns a VIEW!!!
+
       # Set the value using normal pandas behaviour.
       # Anyway it is impossible to modify the input, as it could take so many forms
       # We clean up the type castings etc. lower down
@@ -733,8 +701,33 @@ class EnsembleData(pd.DataFrame):
             raise RuntimeError("Code Error. Invalid type converter name %s for column %s"
                                % (typeConverterName, key))
         else:
+          # We set again to make sure of the dataType
           ll = fitToDataType(self[key], dataType)
-          super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
+          if dataType is int and None in ll:
+            super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
+          else:
+            super().__setitem__(key, pd.Series(ll, self.index, dtype=dataType))
+
+
+        if firstData:
+          self.reset_index(drop=True, inplace=True)
+
+        if containingObject is not None:
+          # WARNING This code is also called when you do ModelData.__setitem__
+          # In those cases containingObject is temporarily rest to the Model object
+          # Any bugs/modifications that arise in this code must consider ModelData as well
+          undo = containingObject._project._undo
+          if undo is not None:
+            # set up undo functions
+            if oldValue is None:
+              # undo addition of new column
+              undo.newItem(self.drop, self.__setitem__,
+                           undoArgs=(key,), undoKwargs={'axis':1, 'inplace':True},
+                           redoArgs=(key, value))
+            else:
+              # Undo overwrite of existing column
+              undo.newItem(super().__setitem__, self.__setitem__,
+                           undoArgs=(key, oldValue), redoArgs=(key, value))
 
       except:
         # We set the new value before the try:, so we need to go back to the previous state
@@ -745,24 +738,9 @@ class EnsembleData(pd.DataFrame):
         raise
       finally:
         if containingObject is not None:
-          containingObject._project._appBase._endCommandBlock()
-
-      if containingObject is not None:
-        # WARNING This code is also called when you do ModelData.__setitem__
-        # In those cases containingObject is temporarily rest to the Model object
-        # Any bugs/modifications that arise in this code must consider ModelData as well
-        undo = containingObject._project._undo
-        if undo is not None:
-          # set up undo functions
-          if oldValue is None:
-            # undo addition of new column
-            undo.newItem(self.drop, self.__setitem__,
-                         undoArgs=(key,), undoKwargs={'axis':1, 'inplace':True},
-                         redoArgs=(key, value))
-          else:
-            # Undo overwrite of existing column
-            undo.newItem(super().__setitem__, self.__setitem__,
-                         undoArgs=(key, oldValue), redoArgs=(key, value))
+          project._appBase._endCommandBlock()
+          project.unblankNotification()
+          undo.decreaseBlocking()
 
 
   def _modelNumberConversion(self, force:bool=False):
@@ -777,7 +755,10 @@ class EnsembleData(pd.DataFrame):
     else:
       if any((x is not None and x < 1) for x in ll):
         raise ValueError("Model numbers must be integers >= 1 or None")
-    super().__setitem__(key, pd.Series(ll, self.index, dtype=int))
+    if None in ll:
+      super().__setitem__(key, pd.Series(ll, self.index, dtype=object))
+    else:
+      super().__setitem__(key, pd.Series(ll, self.index, dtype=int))
 
     # Reset models to match model numbers in data
     # NBNB resetModels currently removes rows with modelNumber == None. To change??
@@ -834,9 +815,8 @@ class EnsembleData(pd.DataFrame):
       ll = [(x if 0 <= x <= 1 else NaN) for x in ll]
     else:
       if any((x < 0 or x > 1) for x in ll):
-        raise ValueError("Model numbers must be integers >= 1 or None")
+        raise ValueError("Occupancies must be in the range 0 <= x <= 1")
     super().__setitem__(key, pd.Series(ll, self.index, dtype=float))
-
 
   # Custom string representation
   def __str__(self) -> str:

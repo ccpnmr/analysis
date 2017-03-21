@@ -15,14 +15,17 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-21 10:55:49 +0000 (Tue, March 21, 2017) $"
+__date__ = "$Date: 2017-03-21 14:28:43 +0000 (Tue, March 21, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
+from functools import partial
+
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.lib.GuiGenerator import generateWidget
+from ccpn.ui.gui.widgets.Button import Button
 
 
 # # TODO: Move to ui.gui
@@ -42,6 +45,8 @@ class PluginModule(CcpnModule):
 
   def __init__(self, interactor, *args, **kwargs):
     self.interactor = interactor
+    self._kwargs = {}
+
     if interactor.setting is not None:
       self.includeSettingsWidget = True
 
@@ -51,11 +56,22 @@ class PluginModule(CcpnModule):
     if interactor.setting is not None:
       self._populateSettingsWidget()
 
+
   def _populateMainWidget(self):
-    generateWidget(self.interactor, widget=self.mainWidget)
+    generateWidget(self.interactor.params, widget=self.mainWidget, argsDict=self._kwargs)
+    self.cancelButton = Button('Cancel', callback=self._closeModule)
+    self.mainWidget.layout().addWidget(self.cancelButton)
+    self.goButton = Button('GO!', callback=partial(self.interactor.run, **self._kwargs))
+    self.mainWidget.layout().addWidget(self.goButton)
+
 
   def _populateSettingsWidget(self):
-    pass
+    generateWidget(self.interactor.settings, widget=self.settingsWidget, argsDict=self._kwargs)
+
+
+  def issueMessage(self, message):
+    raise NotImplemented('Messages are not implemented yet.')
+
 
 
 ##################### Qt Testing code #########################
@@ -94,72 +110,139 @@ if __name__ == '__main__':
   qtTestHarness.qtApp._ccpnApplication = application
 
   interactor = Mock()
-  # type(interactor).PLUGINNAME = PropertyMock(return_value='TestI')  # PropertyMock's get attached to the class, not the instance
   interactor.PLUGINNAME = 'Test Plugin...Test'  # Same as above, but without checking
   interactor.params = [{'variable' : 'param1',
-             'value'    : ('Fast', 'Slow'),
-             'label'    : 'Param #1',
-             'default'  : 'Fast'},                        # List
+                       'value'    : ('Fast', 'Slow'),
+                        'label'    : 'Param #1',
+                        'default'  : 'Fast'},                        # List
 
-            {'variable' : 'param2',
-             'value'    : False,
-             'default'  : 0},                              # checkbox 0 unchecked 2 checked
+                       {'variable' : 'param2',
+                        'value'    : False,
+                        'default'  : 0},                              # checkbox 0 unchecked 2 checked
 
-            {'variable': 'param43',
-             'value': (('White 1',False),('Red 2',True)),  #  RadioButtons
-             'default': 'Red 2'},
+                       {'variable': 'param3',
+                        'value': (('White 1',False),('Red 2',True)),  #  RadioButtons
+                        'default': 'Red 2'},
 
-            {'variable' : 'param3',
-             'value'    : ('0', '4'),
-             'default'  : 4},                                # List
+                       {'variable' : 'param4',
+                        'value'    : ('0', '4'),
+                        'default'  : 4},                                # List
 
-            {'variable' : 'param4',                         # Spinbox
-             'value'    : (0, 4),
-             'default'  : (3)},
+                       {'variable' : 'param5',                         # Spinbox
+                        'value'    : (0, 4),
+                        'default'  : (3)},
 
-            {'variable' : 'param5',                         # Spinbox with default
-             'value'    : (0, 4),
-             'default'  : 2},
+                       {'variable' : 'param6',                         # Spinbox with default
+                        'value'    : (0, 4),
+                        'default'  : 2},
 
-            {'variable' : 'param6',                         # Spinbox with stepsize
-             'value'    : (0, 4),
-             'stepsize' : 2,
-             'default'  : 3},
+                       {'variable' : 'param7',                         # Spinbox with stepsize
+                        'value'    : (0, 4),
+                        'stepsize' : 2,
+                        'default'  : 3},
 
-            {'variable' : 'param7',                         # Spinbox with default and stepsize
-             'value'    : (0, 4),
-             'stepsize' : 2,
-             'default'  : 2},
+                       {'variable' : 'param8',                         # Spinbox with default and stepsize
+                        'value'    : (0, 4),
+                        'stepsize' : 2,
+                        'default'  : 2},
 
-            {'variable' : 'param8',                         # Double Spinbox
-             'value'    : (0., 1),
-             'default'  : 0.3},
+                       {'variable' : 'param9',                         # Double Spinbox
+                        'value'    : (0., 1),
+                        'default'  : 0.3},
 
-            {'variable' : 'param9',                         # Double Spinbox with default
-             'value'    : (0., 1.),
-             'default'  : 0.2},
+                       {'variable' : 'param10',                         # Double Spinbox with default
+                        'value'    : (0., 1.),
+                        'default'  : 0.2},
 
-            {'variable' : 'param10',                         # Double Spinbox with stepsize
-             'value'    : (0., 1.),
-             'stepsize' : 0.1,
-             'default'  : 0.2},
+                       {'variable' : 'param11',                         # Double Spinbox with stepsize
+                        'value'    : (0., 1.),
+                        'stepsize' : 0.1,
+                        'default'  : 0.2},
 
-            {'variable' : 'param11',                         # Double Spinbox with default and stepsize
-             'value'    : (0., 1),
-             'stepsize' : 0.1,
-             'default'  : 0.2},
+                       {'variable' : 'param12',                         # Double Spinbox with default and stepsize
+                        'value'    : (0., 1),
+                        'stepsize' : 0.1,
+                        'default'  : 0.2},
 
-            {'variable': 'param12',                         # LineEdit
-             'value': '',
-             'default'  : 'param12'},
+                       {'variable': 'param13',                         # LineEdit
+                        'value': '',
+                        'default'  :'param13'},
 
-            {'variable': 'param13',
-             'value': (('Ford', 'Focus'),                    # Mapped list
-                       ('BMW', '320'),
-                       ('Fiat', '500')
-                      ),
-             'default'  : 'Focus'},
-            ]
+                       {'variable': 'param14',
+                        'value': (('Ford', 'Focus'),                    # Mapped list
+                                  ('BMW', '320'),
+                                  ('Fiat', '500')
+                                 ),
+                        'default'  : 'Focus'},
+                      ]
+  interactor.settings = [{'variable' : 'param1s',
+                          'value'    : ('Fast', 'Slow'),
+                          'label'    : 'Param #1',
+                          'default'  : 'Fast'},                        # List
+
+                         {'variable' : 'param2s',
+                          'value'    : False,
+                          'default'  : 0},                              # checkbox 0 unchecked 2 checked
+
+                         {'variable': 'param3s',
+                          'value': (('White 1',False),('Red 2',True)),  #  RadioButtons
+                          'default': 'Red 2'},
+
+                         {'variable' : 'param4s',
+                          'value'    : ('0', '4'),
+                          'default'  : 4},                                # List
+
+                         {'variable' : 'param5s',                         # Spinbox
+                          'value'    : (0, 4),
+                          'default'  : (3)},
+
+                         {'variable' : 'param6s',                         # Spinbox with default
+                          'value'    : (0, 4),
+                          'default'  : 2},
+
+                         {'variable' : 'param7s',                         # Spinbox with stepsize
+                          'value'    : (0, 4),
+                          'stepsize' : 2,
+                          'default'  : 3},
+
+                         {'variable' : 'param8s',                         # Spinbox with default and stepsize
+                          'value'    : (0, 4),
+                          'stepsize' : 2,
+                          'default'  : 2},
+
+                         {'variable' : 'param9s',                         # Double Spinbox
+                          'value'    : (0., 1),
+                          'default'  : 0.3},
+
+                         {'variable' : 'param10s',                         # Double Spinbox with default
+                          'value'    : (0., 1.),
+                          'default'  : 0.2},
+
+                         {'variable' : 'param11s',                         # Double Spinbox with stepsize
+                          'value'    : (0., 1.),
+                          'stepsize' : 0.1,
+                          'default'  : 0.2},
+
+                         {'variable' : 'param12s',                         # Double Spinbox with default and stepsize
+                          'value'    : (0., 1),
+                          'stepsize' : 0.1,
+                          'default'  : 0.2},
+
+                         {'variable': 'param13s',                         # LineEdit
+                          'value': '',
+                          'default'  :'param13'},
+
+                         {'variable': 'param14s',
+                          'value': (('Ford', 'Focus'),                    # Mapped list
+                                    ('BMW', '320'),
+                                    ('Fiat', '500')
+                                   ),
+                          'default'  : 'Focus'},
+                      ]
+
+  def run(**kwargs):
+    print('Run clicked, ', kwargs)
+  interactor.run = run
 
   pluginModule = PluginModule(interactor)
   qtTestHarness.showWidget(pluginModule)

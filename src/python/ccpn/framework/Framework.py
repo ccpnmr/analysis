@@ -10,8 +10,7 @@ __reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s1
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
-__version__ = "$Revision: 9320 $"
+__date__ = "$Date: 2017-03-21 16:19:44 +0000 (Tue, March 21, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -786,7 +785,7 @@ class Framework:
     ]
                ))
 
-    ms.append(('Plugins',   self.getPluginMenuItems()))
+    ms.append(('Plugins', ()))
 
     ms.append(('Help',      [
       ("Tutorials",([
@@ -1433,27 +1432,27 @@ class Framework:
   ## MENU callbacks:  Plugins
   ###################################################################################################################
 
-  def getPluginMenuItems(self):
-    # TODO: move instantiation to plugin.  This is a HACK for now!!!
-    menuItems = []
-
-    try:
-      from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
-      menuItems = [("PARAssign Setup", self.showParassignSetup)]
-    except ImportError:
-      menuItems = [("PARAssign Setup", self.showParassignSetup, [('enabled', False)])]
-
-    return menuItems
-
-  def showParassignSetup(self):
-    # try:
-      from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
-      self.ps = ParassignSetup(project=self.project)
-      newModule = CcpnModule(name='PARAssign Setup')
-      newModule.addWidget(self.ps)
-      self.ui.mainWindow.moduleArea.addModule(newModule)
-    # except ImportError:
-    #   print('PARAssign cannot be found')
+  # def getPluginMenuItems(self):
+  #   # TODO: move instantiation to plugin.  This is a HACK for now!!!
+  #   menuItems = []
+  #
+  #   try:
+  #     from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
+  #     menuItems = [("PARAssign Setup", self.showParassignSetup)]
+  #   except ImportError:
+  #     menuItems = [("PARAssign Setup", self.showParassignSetup, [('enabled', False)])]
+  #
+  #   return menuItems
+  #
+  # def showParassignSetup(self):
+  #   # try:
+  #     from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
+  #     self.ps = ParassignSetup(project=self.project)
+  #     newModule = CcpnModule(name='PARAssign Setup')
+  #     newModule.addWidget(self.ps)
+  #     self.ui.mainWindow.moduleArea.addModule(newModule)
+  #   # except ImportError:
+  #   #   print('PARAssign cannot be found')
 
 
 

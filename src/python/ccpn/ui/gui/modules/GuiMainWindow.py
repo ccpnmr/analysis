@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: TJ Ragan $"
+__date__ = "$Date: 2017-03-21 16:19:44 +0000 (Tue, March 21, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -187,6 +186,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self._fillRecentProjectsMenu()
     self._fillRecentMacrosMenu()
+    self._fillPluginsMenu()
 
 
   def _createMenu(self, spec, targetMenu=None):
@@ -362,6 +362,29 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
                                       callback=self.application.clearRecentMacros))
 
+
+  def _fillPluginsMenu(self):
+    from ccpn.framework.lib.ExtensionLoader import getPlugins
+    pluginsMenu = self.getMenuAction('Plugins')
+    pluginsMenu.clear()
+
+    # TODO: Add multiple layers for ...
+    Plugins = getPlugins()
+    Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
+    for Plugin in Plugins:  # TODO: add user extension path
+      action = Action(self, text=Plugin.PLUGINNAME, translate=False,
+                      callback=partial(self.startPlugin, Plugin=Plugin))
+      pluginsMenu.addAction(action)
+    pluginsMenu.addSeparator()
+    pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
+                                      callback=self._fillPluginsMenu))
+
+  def startPlugin(self, Plugin):
+    if Plugin.guiModule is None:
+      if Plugin.params is None:
+        p = Plugin()
+        p.run()
+    print('starting plugin:', Plugin.PLUGINNAME)
 
   def undo(self):
     self._project._undo.undo()

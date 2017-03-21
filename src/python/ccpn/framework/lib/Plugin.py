@@ -6,22 +6,13 @@ import os
 
 
 
-def _autoGenPluginGui(objMethod):
-  from ccpn.ui.gui.lib.GuiGenerator import generateWidget
-  return generateWidget(objMethod,)  # add Container=CcpnModule bit
-
-
-def _issueGuiInstantiatedMessage(objMethod):
-  print('Instantiated', str(objMethod))
-
-
 class Plugin(ABC):
   '''
   Plugin base class.
   '''
 
 
-  guiModule = None  # Specify subclass of CcpnModule here
+  guiModule = None  # Specify subclass of CcpnModule here OR
   params = None  # Populate this to have an auto-generated gui
   settings = None  # Break out the settings into another variable so pipelines are portable
 
@@ -33,13 +24,14 @@ class Plugin(ABC):
 
 
   def __init__(self, application=None):
+    # TODO: Move to ui.gui
     if self.guiModule is None:
       if self.params is not None:
         self.guiModule = _autoGenPluginGui
       else:
         self.guiModule = self._issueGuiInstantiatedMessage
 
-    self._uiWindow = None
+    self._uiElement = None
 
     if application is not None:
       self.application = application
@@ -83,8 +75,9 @@ class Plugin(ABC):
     pass
 
 
-  @property
-  def _gui(self):
-    if self._uiWindow is None:
-      self._uiWindow = self.guiModule(self)
-    return self._uiWindow
+  # # TODO: Move to ui.gui
+  # @property
+  # def _ui(self):
+  #   if self._uiElement is None:
+  #     self._uiElement = self.guiModule(self)
+  #   return self._uiElement

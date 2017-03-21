@@ -1416,34 +1416,6 @@ class Framework:
       self.ui.mainWindow.moduleArea.addModule(self.ui.mainWindow.pythonConsoleModule, 'bottom')
 
 
-  ##################################################################################################################
-  ## MENU callbacks:  Plugins
-  ###################################################################################################################
-
-  # def getPluginMenuItems(self):
-  #   # TODO: move instantiation to plugin.  This is a HACK for now!!!
-  #   menuItems = []
-  #
-  #   try:
-  #     from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
-  #     menuItems = [("PARAssign Setup", self.showParassignSetup)]
-  #   except ImportError:
-  #     menuItems = [("PARAssign Setup", self.showParassignSetup, [('enabled', False)])]
-  #
-  #   return menuItems
-  #
-  # def showParassignSetup(self):
-  #   # try:
-  #     from ccpn.plugins.PARAssign.PARAssignSetup import ParassignSetup
-  #     self.ps = ParassignSetup(project=self.project)
-  #     newModule = CcpnModule(name='PARAssign Setup')
-  #     newModule.addWidget(self.ps)
-  #     self.ui.mainWindow.moduleArea.addModule(newModule)
-  #   # except ImportError:
-  #   #   print('PARAssign cannot be found')
-
-
-
   #################################################################################################
   ## MENU callbacks:  Macro
   #################################################################################################

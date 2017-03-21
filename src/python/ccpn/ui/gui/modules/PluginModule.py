@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-21 14:28:43 +0000 (Tue, March 21, 2017) $"
+__date__ = "$Date: 2017-03-21 14:39:39 +0000 (Tue, March 21, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -59,9 +59,9 @@ class PluginModule(CcpnModule):
 
   def _populateMainWidget(self):
     generateWidget(self.interactor.params, widget=self.mainWidget, argsDict=self._kwargs)
-    self.cancelButton = Button('Cancel', callback=self._closeModule)
+    self.cancelButton = Button(self.mainWidget, text='Cancel', callback=self._closeModule)
     self.mainWidget.layout().addWidget(self.cancelButton)
-    self.goButton = Button('GO!', callback=partial(self.interactor.run, **self._kwargs))
+    self.goButton = Button(self.mainWidget, text='GO!', callback=partial(self.interactor.run, **self._kwargs))
     self.mainWidget.layout().addWidget(self.goButton)
 
 
@@ -101,12 +101,12 @@ class TestQt:
 
 
 if __name__ == '__main__':
-  from unittest.mock import Mock, PropertyMock
+  from unittest.mock import Mock
 
   qtTestHarness = TestQt()
 
   application = Mock()
-  application.colourScheme = 'dark'  # HACK!!!
+  application.colourScheme = 'light'  # HACK!!!
   qtTestHarness.qtApp._ccpnApplication = application
 
   interactor = Mock()

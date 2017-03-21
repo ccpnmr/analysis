@@ -71,6 +71,10 @@ class Plugin(ABC):
     return pth
 
 
+  def run(self, **kwargs):
+    print('run() called with:', kwargs)
+
+
   def cleanup(self):
     pass
 

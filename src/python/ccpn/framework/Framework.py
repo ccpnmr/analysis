@@ -2,16 +2,16 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
-__credits__   = "Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
+__credits__   = "Wayne Boucher, Edward Brooksbank, Rasmus H Fogh, Luca Mureddu, " \
+                "Timothy J Ragan, Simon P Skinner & Geerten W Vuister"
 __license__   = "CCPN license. see http://www.ccpn.ac.uk"
 __reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y"
 
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2016-05-16 17:45:50 +0100 (Mon, 16 May 2016) $"
-__version__ = "$Revision: 9320 $"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-22 13:14:11 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code

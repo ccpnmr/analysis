@@ -66,13 +66,6 @@ class SpectrumTest(WrapperTesting):
     self.undo.undo()
     self.undo.redo()
     self.assertTrue(spectrum.filePath.startswith(Path.getTopDirectory()))
-    
-  # def test_rank(self):  # not implemented yet
-  #   spectrum = self.project.getSpectrum('HSQC-115')
-  #   # Undo and redo all operations
-  #   self.undo.undo()
-  #   self.undo.redo()
-  #   self.assertTrue(hasattr(spectrum, 'rank'))
 
   def test_rename(self):
     spectrum = self.project.getSpectrum('HSQC-115')
@@ -91,6 +84,7 @@ class SpectrumIntensitiesTest(WrapperTesting):
   projectPath = 'Ccpn1Dtesting'
 
   def test_intensities_get(self):
+    self.project._wrappedData.root.checkAllValid(complete=True)
     spectrum = self.project.getSpectrum('1D-1')
     intensities = spectrum.intensities
     self.assertIs(intensities, spectrum.intensities)
@@ -124,6 +118,8 @@ class DummySpectrumTest(WrapperTesting):
     self.undo.redo()
     self.undo.redo()
     self.undo.redo()
+
+    self.project._wrappedData.root.checkAllValid(complete=True)
 
     self.assertEqual(spectrum.name, 'COHnNh')
     self.assertEqual(spectrum1.name, 'testspec')

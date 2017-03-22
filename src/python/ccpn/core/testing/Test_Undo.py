@@ -86,7 +86,7 @@ class ComplexUndoTest(WrapperTesting):
     chainB = chainA.clone()
     apiProject._undo.undo()
     apiProject._undo.redo()
-    apiProject.checkAllValid()
+    apiProject.checkAllValid(complete=True)
 
   def test_delete_residues_undo(self):
       project = self.project._wrappedData.root

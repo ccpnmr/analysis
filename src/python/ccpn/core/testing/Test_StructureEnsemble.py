@@ -36,6 +36,8 @@ class StructureEnsembleTesting(WrapperTesting):
   def test_haveEnsemble(self):
     assert len(self.project.structureEnsembles) > 0
 
+    self.project._wrappedData.root.checkAllValid(complete=True)
+
   def test_getModels(self):
     models = self.project.structureEnsembles[0].models
     assert len(models) > 0

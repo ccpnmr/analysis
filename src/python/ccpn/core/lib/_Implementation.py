@@ -153,8 +153,3 @@ class MutablePropertyView:
                                        if x[0] in self._fields))
     for key, value in chained:
       setattr(self, key, value)
-
-# class ListView(MutableSequence):
-#   """This class provides a list that is a view of underlying API data"""
-#   def __init__(self):
-#     raise NotImplementedError("Not implemented yet)")

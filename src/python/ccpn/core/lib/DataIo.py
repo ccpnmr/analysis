@@ -890,37 +890,6 @@ def loadCasdData(project, casdDirectory):
   #
   project.save()
 
-# def cleanUpRestraintNames(project):
-#   """Change strange restraint names to sensible ones
-#
-#   NBNB Ad-hoc hack"""
-#
-#   conversion = {
-#     "H2'1":"H2'",
-#     "H2'2":"H2''",
-#     "H5'1":"H5'",
-#     "H5'2":"H5''",
-#     "H5M*":"H7%",
-#     "H5MX":"H7%",
-#   }
-#
-#
-#   for contribution in project.restraintContributions:
-#     items = []
-#     for tt in contribution.restraintItems:
-#       ll = []
-#       for atomId in tt:
-#         res, nam = atomId.rsplit('.',1)
-#         nam2 = conversion.get(nam)
-#         print ('--->', res, nam, nam2)
-#         if nam2 is not None:
-#           print ('@~@~ renaming', res, nam, nam2)
-#           atomId = '%s.%s' % (res, nam2)
-#         ll.append(atomId)
-#       if not ll in items:
-#         # Skip duplicates
-#         items.append(ll)
-#     contribution.restraintItems = items
 
 def cleanUpDocrProject(project):
   """Clean up DOCR project - converting restraints to ambiguous atoms

@@ -55,8 +55,6 @@ class IntegralListTest(WrapperTesting):
     integral2.slopes = (0,0)
     # Undo and redo all operations
 
-    # NBNB FIXME undo still does not work, as delete notifiers are broken
-
     self.undo.undo()
     self.undo.redo()
 
@@ -69,8 +67,6 @@ class IntegralListTest(WrapperTesting):
                                          comment='really!', limits=((1,2),))
     integral3 = integralList.newIntegral(value=99., pointLimits=((21,23),))
     # Undo and redo all operations
-
-    # NBNB FIXME undo still does not work, as delete notifiers are broken
 
     self.undo.undo()
     self.undo.redo()

@@ -31,6 +31,8 @@ class ChemicalShiftTest(WrapperTesting):
     
   def test_rename_list(self):
 
+    self.project._wrappedData.root.checkAllValid(complete=True)
+
     shiftList = self.project.chemicalShiftLists[0]
 
     self.assertEqual(shiftList.pid,'CL:ShiftList_2')

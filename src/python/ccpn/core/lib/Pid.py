@@ -231,11 +231,6 @@ class Pid(str):
         """
         return type part of pid
         """
-        # parts = self._split()
-        # if len(parts) > 0:
-        #     return parts[0]
-        # else:
-        #     return ''
 
         return self.split(PREFIXSEP,1)[0]
     
@@ -244,11 +239,6 @@ class Pid(str):
         """
         return id part of pid
         """
-        # parts = self._split()
-        # if len(parts) > 1:
-        #     return IDSEP.join(parts[1:])
-        # else:
-        #     return ''
 
         return self.split(PREFIXSEP,1)[1]
 
@@ -261,19 +251,6 @@ class Pid(str):
 
     @staticmethod
     def isValid(text:str) -> bool:
-        # tests here
-        # if self.find(PREFIXSEP) < 0:
-        #     return False
-        # parts = self._split()
-        # if len(parts) < 2:
-        #     return False
-
-        # Comment 1:    Do we allow multiline strings here?
-
-        # Comment 2: When we check for validity in __init__, it will be impossible to create
-        # invalid PIds. A static function allows yo to check for validity before creating.
-        # Even so, is it necessary? It is no longer used above
-
          return PREFIXSEP in text and text[0] != PREFIXSEP
 
     # NBNB having a property called 'str' confuses Sphinx.
@@ -292,68 +269,11 @@ class Pid(str):
 
         return str(self)
 
-    # Removed as they cause un-string-like behaviour.
-    #
-    # def __add__(self, other):
-    #     tmp = self._split() + [other]
-    #     #print 'Pid.__add__', tmp
-    #     return Pid.new(*tmp)
-    # #end def
-    #
-    #
-    # Use fields property to get list-of-fields instead
-    #
-    # def __len__(self):
-    #     ll = len(self._split())-1
-    #     if ll < 0:
-    #         ll=0
-    #     return ll
-    # #end def
-    #
-    # def __getslice__(self, start, stop):
-    #     # NB using parts [1:] instead of modifying indices allows negative indices to work normally
-    #     parts = self._split()[1:][start:stop]
-    #     # if len(parts) > 0:
-    #     #     return IDSEP.join(*parts)
-    #     # else:
-    #     #     return ''
-    #
-    #     return IDSEP.join(parts)
-    # #end def
-    #
-    # def __getitem__(self, i):
-    #     return self._split()[i+1]
-    # #end def
-    #
-    # def __iter__(self):
-    #     for f in self._split()[1:]:
-    #         yield f
-    #     #end for
-    # #end def
-    #
-    # Unecessary: __str__ is inherited
-    # def __str__(self):
-    #     return str.__str__(self)
-    # #end def
-
-    # I like that one. We could activate it. Rasmus
-    # def __repr__(self):
-    #     return 'Pid(%s)' % str.__repr__(self)
-    # #end def
 
     def _split(self):
         """
         Return a splitted pid as list or empty list on error
         # """
-        # allParts = []
-        #
-        # parts = self.split(PREFIXSEP)
-        # if len(parts) > 0:
-        #     allParts.append(parts[0])
-        # if len(parts) > 1:
-        #     for p in parts[1].split(IDSEP):
-        #         allParts.append(p)
-        # return allParts
 
         parts = self.split(PREFIXSEP, 1)
         result = [parts[0]]
@@ -386,16 +306,6 @@ class Pid(str):
     def _join(*args:str) -> str:
         """Join args using the rules for constructing a pid
         """
-        # if len(args) >= 2:
-        #     tmp =PREFIXSEP.join( args[0:2] )
-        #     tmp2 = [tmp] + list(args[2:]) # don't know why args is tuple and thus I have to use
-        #                                   # the list operator to avoid TypeError:
-        #                                   # can only concatenate list (not "tuple") to list?
-        #     return IDSEP.join(tmp2)
-        # elif len(args) >= 1:
-        #     return args[0]
-        # else:
-        #     return ''
 
         # NB the behaviour if len(args) == 1 is correct (return "type:")
         if args:
@@ -409,15 +319,6 @@ class Pid(str):
     def modify(self, index:int, newId:object, type:str=None) -> 'Pid':
         """Return new pid with position index modified by newId
         """
-        # parts = self._split()
-        # if index+1 >= len(parts):
-        #     io.error('Pid.modify: invalid index ({0})\n', index+1)
-        # parts[index+1] = newId
-        # if type is not None:
-        #     parts[0] = type
-        # return Pid.new(*parts)
-
-
         parts = self._split()
 
         idparts = parts[1:]

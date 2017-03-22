@@ -69,6 +69,8 @@ class NmrStretchTest(WrapperTesting):
 
     self.assertRaises(ValueError,  stretch[-1].connectNext, stretch[0])
 
+    self.project._wrappedData.root.checkAllValid(complete=True)
+
   def test_connected_nmr_residues(self):
     nmrChain = self.project.newNmrChain()
     nmrResidues = []

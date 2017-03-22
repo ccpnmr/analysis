@@ -391,10 +391,6 @@ class SubstanceProperties(WrapperTesting):
     self.assertRaises(ValueError, self.project.newSubstance, name='test substance',
                       substanceType='other')
 
-  # def test_PolymerSubstanceProperties(self):
-  #   s = self.project.createPolymerSubstance('acd', name='test polymer substance', molType='protein')
-  #   self.assertEqual(s.molType, 'protein')
-
   def test_PolymerSubstanceWithLabellingProperties(self):
     s = self.project.createPolymerSubstance('acd',
                                             name='test polymer substance',
@@ -437,12 +433,3 @@ class SubstanceProperties(WrapperTesting):
                                             startNumber=7)
     # self.assertEqual(s.startNumber, 7)
 
-  # def test_PolymerSubstanceCyclicProperties(self):
-  #   s = self.project.createPolymerSubstance('acd', name='test polymer substance', molType='protein',
-  #                                 isCyclic=True)
-  #   self.assertTrue(s.isCyclic)
-  #
-  # def test_PolymerSubstanceNotCyclicProperties(self):
-  #   s = self.project.createPolymerSubstance('acd', name='test polymer substance', molType='protein',
-  #                                 isCyclic=False)
-  #   self.assertFalse(s.isCyclic)

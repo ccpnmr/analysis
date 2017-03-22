@@ -218,6 +218,7 @@ class ChainTest(WrapperTesting):
 
   def testCrosslinkAtoms(self):
     project = self.project
+    project._wrappedData.checkAllValid(complete=True)
     chaina = project.createChain('CDL', compoundName='cdl', molType='protein' )
     chainb = project.createChain('FPC', compoundName='fpc', molType='protein' )
     project.getByPid('MA:A.1.CYS.HG').delete()
@@ -231,6 +232,7 @@ class ChainTest(WrapperTesting):
     chainc = chaina.clone()
     chaind = chainb.clone()
     duplicateAtomBonds(({chaina:chainc, chainb:chaind}))
+    project._wrappedData.checkAllValid(complete=True)
     atom1 = project.getByPid('MA:C.1.CYS.SG')
     atom2 = project.getByPid('MA:D.3.CYS.SG')
     atom3 = project.getByPid('MA:C.1.CYS.HG')

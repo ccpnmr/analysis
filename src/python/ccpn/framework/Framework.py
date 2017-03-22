@@ -356,15 +356,6 @@ class Framework:
       styleSheet += additions
     return styleSheet
 
-
-  # def setupComponents(self, args):
-  #   # components (for menus)
-  #   self.components = set()
-  #   for component in componentNames:
-  #     if getattr(args, 'include' + component):
-  #       self.components.add(component)
-  #
-  #
   def _getUserPrefs(self):
     # user preferences
     if not self.args.skipUserPreferences:
@@ -697,7 +688,6 @@ class Framework:
 
     """
     self._menuSpec = ms = []
-    # TODO: remove QKeySequence
 
     ms.append(('Project',   [
       ("New", self.createNewProject, [('shortcut', 'pn')]),
@@ -906,10 +896,6 @@ class Framework:
       self._echoBlocking -= 1
       self.project._undo.decreaseBlocking()
 
-    # if mainWindow is not None:
-    #   # TODO initialisation does not work properly. Needs fixing.
-    #   mainWindow.sideBar.fillSideBar(project)
-    #
     return project
 
   def clearRecentProjects(self):
@@ -1656,11 +1642,6 @@ def getSaveDirectory(preferences=None):
 ########
 
 def getPreferences(skipUserPreferences=False, defaultPath=None, userPath=None):
-
-  # def _readPreferencesFile(preferencesPath):
-  #   with open(preferencesPath) as fp:
-  #     preferences = json.load(fp, object_hook=AttrDict) #TODO find a better way ?!?
-  #   return preferences
 
   def _updateDict(d, u):
     import collections

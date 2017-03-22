@@ -13,7 +13,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 
 
 
-def generateWidget(params, widget, argsDict=None):
+def generateWidget(params, widget, argsDict=None, columns=1):
 
   if argsDict is None:
     argsDict = {}
@@ -21,7 +21,6 @@ def generateWidget(params, widget, argsDict=None):
   # widget = Container()
   # # ndac = self._getNonDefaultArgCount(objMethod.run) -1  # -1 so we don't count the self arg
 
-  columns = 2
   from ccpn.ui.gui.widgets.Label import Label
   for i, param in enumerate(params):
     assert isinstance(param, Mapping)

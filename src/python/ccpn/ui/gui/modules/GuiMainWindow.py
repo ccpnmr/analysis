@@ -372,19 +372,33 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     Plugins = getPlugins()
     Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
     for Plugin in Plugins:  # TODO: add user extension path
+      # if '...' in Plugin.PLUGINNAME:
+      #   self._addMenu(plugin)
       action = Action(self, text=Plugin.PLUGINNAME, translate=False,
                       callback=partial(self.startPlugin, Plugin=Plugin))
       pluginsMenu.addAction(action)
+      # self._createMenu(action, targetMenu=)
     pluginsMenu.addSeparator()
     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                       callback=self._fillPluginsMenu))
 
   def startPlugin(self, Plugin):
-    if Plugin.guiModule is None:
-      if Plugin.params is None:
-        p = Plugin()
-        p.run()
-    print('starting plugin:', Plugin.PLUGINNAME)
+    plugin = Plugin(application=self.application)
+    self.application.plugins.append(plugin)
+    if plugin.guiModule is None:
+      if plugin.params is None:
+        plugin.run()
+        return
+      else:
+        from ccpn.ui.gui.modules.PluginModule import PluginModule
+        pluginModule = PluginModule(interactor=plugin, application=self.application)
+    else:
+      pluginModule = plugin.guiModule(name=plugin.PLUGINNAME,
+                                      interactor=plugin, application=self.application)
+    plugin.ui = pluginModule
+    self.moduleArea.addModule(pluginModule)
+    # TODO: open as pop-out, not as part of MainWindow
+    # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
   def undo(self):
     self._project._undo.undo()

@@ -10,7 +10,7 @@ __reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s1
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-21 16:19:44 +0000 (Tue, March 21, 2017) $"
+__date__ = "$Date: 2017-03-22 12:25:19 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -182,6 +182,7 @@ class Framework:
     self.applicationName = applicationName
     self.applicationVersion = applicationVersion
     self.revision = Version.revision
+    self.plugins = []  # Hack for now, how should we store these?
 
     printCreditsText(sys.stderr, applicationName, applicationVersion)
 

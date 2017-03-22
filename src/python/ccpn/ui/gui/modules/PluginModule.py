@@ -35,26 +35,30 @@ class PluginModule(CcpnModule):
     self.interactor = interactor
     self._kwargs = {}
 
-    if interactor.setting is not None:
+    if interactor.settings is not None:
       self.includeSettingsWidget = True
 
     super().__init__(name=interactor.PLUGINNAME)
 
     self._populateMainWidget()
-    if interactor.setting is not None:
+    if interactor.settings is not None:
       self._populateSettingsWidget()
 
 
   def _populateMainWidget(self):
     generateWidget(self.interactor.params, widget=self.mainWidget, argsDict=self._kwargs)
-    self.cancelButton = Button(self.mainWidget, text='Cancel', callback=self._closeModule)
-    self.mainWidget.layout().addWidget(self.cancelButton)
-    self.goButton = Button(self.mainWidget, text='GO!', callback=partial(self.interactor.run, **self._kwargs))
-    self.mainWidget.layout().addWidget(self.goButton)
+    self.addRunButton()
 
 
   def _populateSettingsWidget(self):
     generateWidget(self.interactor.settings, widget=self.settingsWidget, argsDict=self._kwargs)
+
+
+  def addRunButton(self):
+    # TODO: put the run button at the bottom, not on the bottom right.
+    self.goButton = Button(self.mainWidget, text='Run',
+                           callback=partial(self.interactor.run, **self._kwargs))
+    self.mainWidget.layout().addWidget(self.goButton)
 
 
   def issueMessage(self, message):

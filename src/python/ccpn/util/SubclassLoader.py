@@ -33,7 +33,10 @@ def loadSubclasses(path: str, baseclass, levels=2) -> set:
         moduleFiles = [os.path.splitext(f)[0] for f in moduleFiles]
         for f in moduleFiles:
           try:  # Fails on non-python files, directories, etc,...
-            module = importlib.import_module(f)
+            if f not in sys.modules:
+              module = importlib.import_module(f)
+            else:
+              module = importlib.reload(sys.modules.get(f))
             potentials = inspect.getmembers(module, inspect.isclass)
             for name, p in potentials:
               if issubclass(p, baseclass):

@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: TJ Ragan $"
+__date__ = "$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -187,6 +186,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
     self._fillRecentProjectsMenu()
     self._fillRecentMacrosMenu()
+    self._fillPluginsMenu()
 
 
   def _createMenu(self, spec, targetMenu=None):
@@ -362,6 +362,49 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     recentMacrosMenu.addAction(Action(recentMacrosMenu, text='Clear',
                                       callback=self.application.clearRecentMacros))
 
+
+  def _fillPluginsMenu(self):
+    from ccpn.framework.lib.ExtensionLoader import getPlugins
+    targetMenu = pluginsMenu = self.getMenuAction('Plugins')
+    pluginsMenu.clear()
+
+    Plugins = getPlugins()
+    Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
+    for Plugin in Plugins:  # TODO: add user extension path
+      if '...' in Plugin.PLUGINNAME:
+        package, name = Plugin.PLUGINNAME.split('...')
+        try:
+          targetMenu = self.getMenuAction(package, topMenuAction=pluginsMenu)
+        except ValueError:
+          targetMenu = self._addMenu(package, targetMenu=pluginsMenu)
+      else:
+        name = Plugin.PLUGINNAME
+      action = Action(self, text=name, translate=False,
+                      callback=partial(self.startPlugin, Plugin=Plugin))
+      targetMenu.addAction(action)
+    pluginsMenu.addSeparator()
+    pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
+                                      callback=self._fillPluginsMenu))
+
+
+  def startPlugin(self, Plugin):
+    plugin = Plugin(application=self.application)
+    self.application.plugins.append(plugin)
+    if plugin.guiModule is None:
+      if plugin.params is None:
+        plugin.run()
+        return
+      else:
+        from ccpn.ui.gui.modules.PluginModule import PluginModule
+        pluginModule = PluginModule(interactor=plugin, application=self.application)
+    else:
+      pluginModule = plugin.guiModule(name=plugin.PLUGINNAME,
+                                      interactor=plugin, application=self.application)
+    plugin.ui = pluginModule
+    self.application.ui.pluginModules.append(pluginModule)
+    self.moduleArea.addModule(pluginModule)
+    # TODO: open as pop-out, not as part of MainWindow
+    # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
   def undo(self):
     self._project._undo.undo()

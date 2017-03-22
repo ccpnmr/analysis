@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: TJ Ragan $"
+__date__ = "$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -42,6 +41,8 @@ class Ui:
     self.application = application
 
     self.mainWindow = None
+
+    self.pluginModules = []
 
   def addMenu(self, name, position=None):
     '''

@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-22 12:40:55 +0000 (Wed, March 22, 2017) $"
+__date__ = "$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -382,10 +382,10 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       action = Action(self, text=name, translate=False,
                       callback=partial(self.startPlugin, Plugin=Plugin))
       targetMenu.addAction(action)
-      # self._createMenu(action, targetMenu=)
     pluginsMenu.addSeparator()
     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                       callback=self._fillPluginsMenu))
+
 
   def startPlugin(self, Plugin):
     plugin = Plugin(application=self.application)
@@ -401,6 +401,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
       pluginModule = plugin.guiModule(name=plugin.PLUGINNAME,
                                       interactor=plugin, application=self.application)
     plugin.ui = pluginModule
+    self.application.ui.pluginModules.append(pluginModule)
     self.moduleArea.addModule(pluginModule)
     # TODO: open as pop-out, not as part of MainWindow
     # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)

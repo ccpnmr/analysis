@@ -397,20 +397,6 @@ class PeakList(AbstractWrapperObject):
 
     return peakList3
 
-  # # Removed as not used in project: Rasmus Fogh 21/6/2016
-  # def copyPeaks(self, sinkSpectrum:'Spectrum', fitPositions:bool=False):
-  #   refAxisCodes = self.spectrum.axisCodes
-  #   sinkAxisCodes = sinkSpectrum.axisCodes
-  #
-  #   if not spectrumLib.doAxisCodesMatch(sinkAxisCodes, refAxisCodes):
-  #     print('axis codes of the source and sink peaklists do not match')
-  #     return
-  #
-  #   if not fitPositions:
-  #     copySubTree(self, sinkSpectrum)
-  #
-  #   # else:
-
   def refit(self, method:str='gaussian'):
     fitExistingPeakList(self._apiPeakList, method)
 

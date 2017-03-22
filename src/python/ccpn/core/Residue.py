@@ -191,6 +191,22 @@ class Residue(AbstractWrapperObject):
   @descriptor.setter
   def descriptor(self, value:str):
     self._wrappedData.descriptor = value
+
+  @property
+  def configuration(self) -> typing.Optional[str]:
+    """Residue conformation or other non-covalent distinction.
+
+    Example: cis/trans/None for the peptide bonds N-terminal to a residue"""
+    return self._wrappedData.configuration
+
+  @configuration.setter
+  def configuration(self, value):
+    # TODO implement this as a proper enumeration
+    allowedValues = ('cis', 'trans', None)
+    if value in allowedValues:
+      self._wrappedData.configuration = value
+    else:
+      raise ValueError("%s configuration must be one of %s" % (self, allowedValues))
   
   @property
   def comment(self) -> str:

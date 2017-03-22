@@ -144,22 +144,6 @@ class AbstractWrapperObject():
 
     self._id = None
     self._resetIds()
-      
-    # # set _id
-    # parent = self._parent
-    # if parent is project:
-    #   _id = str(self._key)
-    # else:
-    #   _id = '%s%s%s'% (parent._id, Pid.IDSEP, self._key)
-    # self._id = _id
-    #
-    # # update pid:object mapping dictionary
-    # dd = project._pid2Obj.get(self.className)
-    # if dd is None:
-    #   dd = {}
-    #   project._pid2Obj[self.className] = dd
-    #   project._pid2Obj[self.shortClassName] = dd
-    # dd[_id] = self
 
   def _resetIds(self):
     # reset id
@@ -223,10 +207,6 @@ class AbstractWrapperObject():
     return self is not other
 
   __hash__ = object.__hash__
-
-  # def __hash__(self):
-  #   """Python 2 behaviour - objects equal only to themselves."""
-  #   return hash(id(self))
   
   # CCPN properties
 
@@ -387,10 +367,6 @@ class AbstractWrapperObject():
         return dd.get(tt[1])
     #
     return None
-
-  # def _getWrapperObject(self, apiObject:ApiImplementation.DataObject):
-  #   """get wrapper object wrapping apiObject or None"""
-  #   return self._project._data2Obj.get(apiObject)
     
   # CCPN Implementation methods
 

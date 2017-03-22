@@ -48,29 +48,6 @@ class Test_makeNmrAtom(WrapperTesting):
 
 
 
-# class Test_nmrAtoms(unittest.TestCase):
-#
-#   # Path of project to load (None for new project)
-#   projectPath = None
-#
-#   def setUp(self):
-#     WrapperTesting.setUp(self)
-#     c = self.project.newNmrChain()
-#     r = c.newNmrResidue()
-#     self.atom = r.newNmrAtom(isotopeCode='15N')F
-#     self.shiftList = self.project.newChemicalShiftList()
-#
-#
-#   def _test_getChemicalShift(self):
-#
-#     shift = self.shiftList.findChemicalShift(self.atom)
-#     self.assertIsNotNone(shift)
-#
-#   def test_setChemicalShift(self):
-#
-#     shift = self.shiftList.newChemicalShift(value=55, nmrAtom=self.atom)
-#     self.assertEqual(shift.value, 55)
-
 
 class Test_chemicalShift(WrapperTesting):
 

@@ -23,18 +23,6 @@ __version__ = "$Revision$"
 #=========================================================================================
 from ccpn.core.testing.WrapperTesting import WrapperTesting
 
-# class PeakListTest(WrapperTesting):
-#
-#   # Path of project to load (None for new project)
-#   projectPath = 'CcpnCourse1b'
-#
-#   def test_newPeakList(self):
-#     spectrum = self.project.getSpectrum('HSQC-115')
-#     peakList = spectrum.newPeakList()
-#     # Undo and redo all operations
-#     self.undo.undo()
-#     self.undo.redo()
-
 
 # Properly done version of above
 class PeakListCreationTest(WrapperTesting):

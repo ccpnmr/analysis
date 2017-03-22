@@ -120,8 +120,7 @@ Use print(current) to get a list of attribute, value pairs')
     # for which the notifier function object must be kept around.
     # The function is attached to the field and is executed after the field value changes
     # In practice this goes through the setter for (the equivalent of) Current.spectra
-    # The notifier function is passed the Current object as its only parameter,
-    # which allows you to access the project, the value just changed or anything else.
+    # The notifier function is passed the new value of the field as its only parameter.
     # If you need a graphics object (e.g. a module) you must make and register a bound method
     # on the module.
 

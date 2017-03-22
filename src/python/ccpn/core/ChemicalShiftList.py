@@ -162,10 +162,6 @@ class ChemicalShiftList(AbstractWrapperObject):
     return list(x for x in parent._apiNmrProject.sortedMeasurementLists()
                 if x.className == 'ShiftList')
 
-  # def __str__(self):
-  #   """Readable string representation"""
-  #   return "<%s; #chemicalShifts:%d (autoUpdate:%s, isSimulated:%s)>" % (self.pid, len(self.chemicalShifts), self.autoUpdate, self.isSimulated)
-
 # Connections to parents:
 
 def getter(self:Spectrum) -> ChemicalShiftList:

@@ -153,6 +153,9 @@ class Undo(deque):
               redoArgs=None, redoKwargs=None):
     """Add item to the undo stack.
     """
+    if self._blocked or self._blockingLevel:
+      return
+
     if self._debug:
       print('undo.newItem', self.blocking, undoMethod, redoMethod, undoArgs, undoKwargs, redoArgs,
             redoKwargs)
@@ -161,9 +164,6 @@ class Undo(deque):
       undoArgs = ()
     if not redoArgs:
       redoArgs = ()
-
-    if self._blocked or self._blockingLevel:
-      return
 
     # clear out redos that are no longer going to be doable
     for n in range(len(self)-self.nextIndex):

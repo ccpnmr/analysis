@@ -786,9 +786,9 @@ def _createPolymerSubstance(self:Project, sequence:typing.Sequence[str], name:st
     apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
                                                 name=name, startNumber=startNumber,
                                                 isCyclic=isCyclic)
-    apiMolecule.commonNames =synonyms
+    apiMolecule.commonNames = synonyms
     apiMolecule.smiles = smiles
-    apiMolecule.details=comment
+    apiMolecule.details = comment
 
     result = self._data2Obj[apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(
                             apiMolecule, labeling=apiLabeling)]

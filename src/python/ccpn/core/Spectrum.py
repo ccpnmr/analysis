@@ -650,7 +650,7 @@ class Spectrum(AbstractWrapperObject):
   @foldingModes.setter
   def foldingModes(self, value):
 
-    # TODO FOr nef we should support both True, False, and None
+    # TODO For NEF we should support both True, False, and None
     # That requires an API change
 
     dd = {'circular':False, 'mirror':True, None:False}

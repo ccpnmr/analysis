@@ -15,23 +15,9 @@ class TestNmrAtomCreation(WrapperTesting):
   def tearDown(self):
     super().tearDown()
     dd = self.nmrChain._wrappedData.__class__._notifies
-    # print ('@~@~ nmrChain notifiers:', len(dd),
-    #        [tt for tt in dd.items() if tt[1]])
     dd = self.nmrResidue._wrappedData.__class__._notifies
-    # print ('@~@~ nmrResidue notifiers:', len(dd),
-    #        [tt for tt in dd.items() if tt[1]])
     del self.nmrResidue
     del self.nmrChain
-
-    # NBNB TODO this needs updating now tha notifiers have changed
-
-    # self.assertEqual(self.nmrChain._wrappedData.__class__._notifies,
-    #                  {'': [], '__init__': [], 'delete': [], 'undelete': [],
-    #                   'setImplCode': []})
-    # self.assertEqual(self.nmrResidue._wrappedData.__class__._notifies,
-    #                  {'': [], '__init__': [], 'delete': [], 'undelete': [],
-    #                   'setDirectNmrChain': [], 'addResonance': [],
-    #                   'setResonances': [],'setResidueType': [],'setAssignedResidue': [], 'setSequenceCode': []})
 
   def test_deassign_unknown(self):
     nmrAtom = self.nmrResidue.fetchNmrAtom(name='churl')

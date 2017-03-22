@@ -57,6 +57,8 @@ class NmrAtomTest(WrapperTesting):
     atomCX.rename()
     self.assertEqual(atomCX.pid, 'NA:A.888.ARG.C@198')
 
+    self.project._wrappedData.root.checkAllValid(complete=True)
+
 
     with self.assertRaises(ValueError):
       atomCX = self.project._produceNmrAtom('NA:A.11.VAL.CX')

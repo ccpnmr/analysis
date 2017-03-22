@@ -48,6 +48,7 @@ class PeakTest(WrapperTesting):
     self.undo.redo()
     self.assertTrue(shift is not None)
     self.assertTrue(shift.value is not None)
+    self.project._wrappedData.root.checkAllValid(complete=True)
 
 
 class PeakTest2(WrapperTesting):
@@ -58,26 +59,16 @@ class PeakTest2(WrapperTesting):
                      'annotation', 'comment']
   dimensionValueTags = ['position', 'positionError', 'boxWidths', 'lineWidths', 'assignedNmrAtoms']
 
-  # NBNB TODO We still need a case where axisCOdes are not in the same order (e.g. HNC<->HCN)
+  # NBNB TODO We still need a case where axisCodes are not in the same order (e.g. HNC<->HCN)
 
-  # def test_Peak_copy_intra(self):
-  #   ccconhPeakList = self.project.getPeakList('CCCONH-172.1')
-  #   peak1 = ccconhPeakList.getPeak(260)
-  #   peak2 = peak1.copyTo(ccconhPeakList)
-  #
-  #   tags = self.singleValueTags + self.dimensionValueTags
-  #   print ('Peak1:', peak1)
-  #   for tag in tags:
-  #     print ("- ", tag, getattr(peak1, tag))
-  #   print ('Peak2:', peak2)
-  #   for tag in tags:
-  #     print ("- ", tag, getattr(peak2, tag))
 
 
   def test_Peak_copy_exo_1(self):
     peakList1 = self.project.getPeakList('3dNOESY-182.3')
     peak1 = peakList1.getPeak(1110)
     peak2 = peak1.copyTo(peakList1)
+
+    self.project._wrappedData.root.checkAllValid(complete=True)
 
     self.assertIs(peak1._parent, peakList1)
     self.assertIs(peak2._parent, peakList1)

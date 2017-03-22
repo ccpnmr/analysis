@@ -299,7 +299,7 @@ def getSpinSystemsLocation(project:Project, nmrResidues:typing.List[NmrResidue],
 
   # TODO NBNB rename variables so api level objects have .api...' names
   # Also consider moving to ccpnmodel, or refactoring. NBNB
-  # Also check sorting order fo rsidues
+  # Also check sorting order for residues
   # NBNB TODO
 
   nmrProject = project._wrappedData

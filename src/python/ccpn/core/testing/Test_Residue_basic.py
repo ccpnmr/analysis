@@ -31,9 +31,6 @@ class TestPhysicalResidueProperties(WrapperTesting):
     self.assertEqual(self.r2.residueType, 'ASP')
 
   def test_NumberOfAtomsInMolecularResiduesInChain(self):
-    self.assertEqual(len(self.r0.atoms), 15)
-    self.assertEqual(len(self.r1.atoms), 15)
-    self.assertEqual(len(self.r2.atoms), 17)
     self.assertEqual(sorted(x.name for x in self.r0.atoms),
         ['C', 'CA', 'CB', 'H%', 'H1', 'H2', 'H3', 'HA', 'HB%', 'HB1', 'HB2', 'HB3', 'MB', 'N', 'O']
     )
@@ -42,7 +39,7 @@ class TestPhysicalResidueProperties(WrapperTesting):
     )
     self.assertEqual(sorted(x.name for x in self.r2.atoms),
         ['C', 'CA', 'CB', 'CG', 'H', 'HA', 'HB%', 'HB2', 'HB3', 'HBx', 'HBy',
-         'N', "O", "OXT", 'OD1', 'OD2', 'QB']
+         'N', 'O', 'OD1', 'OD2', 'OXT', 'QB']
     )
 
   def test_ShortNamesOfMolecularResiduesInChain(self):

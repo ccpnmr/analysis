@@ -456,18 +456,6 @@ class Peak(AbstractWrapperObject):
     """get wrappedData (Peaks) for all Peak children of parent PeakList"""
     return parent._wrappedData.sortedPeaks()
 
-  # def __str__(self):
-  #   """Readable string representation"""
-  #   # format the position list
-  #   pstring = ''
-  #   for p in self.position:
-  #     pstring += '%.3f,' % p
-  #
-  #   if self.height is None:
-  #     return "<%s; position:[%s]>" % (self.pid, pstring[:-1])
-  #   else:
-  #     return "<%s; position:[%s], height:%.1e>" % (self.pid, pstring[:-1], self.height)
-
 # Connections to parents:
 def _newPeak(self:PeakList,height:float=None, volume:float=None,
              heightError:float=None, volumeError:float=None,

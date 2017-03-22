@@ -13,9 +13,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-22 15:10:48 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -113,6 +112,8 @@ Use print(current) to get a list of attribute, value pairs')
     for field in _fields:
       notifies[field] = []
 
+    self.registerNotify(self._updateSelectedPeaks, 'peaks')
+
   def registerNotify(self, notify, field):
     # Notifiers are attached to the Current OBJECT, not to the class
     # They are therefore removed when a new project is created/loaded
@@ -129,6 +130,18 @@ Use print(current) to get a list of attribute, value pairs')
   def unRegisterNotify(self, notify, field):
     """Remove 'current' notifier"""
     self._notifies[field].remove(notify)
+
+  def _updateSelectedPeaks(self, currentPeaks):
+    """ Update selected status of peaks.
+    This attribute is redundant information but is done for time efficiency in drawing,
+    so you don't have to check whether a peak is in a list / set but just check the attribute.
+    """
+    for peakList in self.project.peakLists:
+      for peak in peakList.peaks:
+        peak._isSelected = False
+
+    for peak in currentPeaks:
+      peak._isSelected = True
 
   @property
   def project(self):

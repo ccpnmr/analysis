@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-22 15:10:48 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -131,7 +130,7 @@ class GuiPeakListView(QtGui.QGraphicsItem):
     ###self.peakList = peakList
     self.peakItems = {}  # CCPN peak -> Qt peakItem
     self.setFlag(QtGui.QGraphicsItem.ItemHasNoContents, True)
-    self._appBase = strip._appBase
+    self.application = self.spectrumView.application
 
     strip.viewBox.addItem(self)
     ###self.parent = parent
@@ -256,7 +255,7 @@ class Peak1d(QtGui.QGraphicsItem):
     scene = peakListView.spectrumView.strip.plotWidget.scene()
     QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
 
-    self.application = QtCore.QCoreApplication.instance()._ccpnApplication
+    self.application = peakListView.application
 
     self.peakHeight = peak.height
     self.peak = peak
@@ -383,7 +382,7 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.setFlag(self.ItemSendsScenePositionChanges, True)
     # if self.isSelected():
     #   print(self)
-    self.colourScheme = peakItem.peakListView._appBase.colourScheme
+    self.colourScheme = peakItem.application.colourScheme
     # color.setRgbF(*self.peakItem.glWidget._hexToRgba(textColor))
     self.setColour()
     self.updatePos()
@@ -408,7 +407,7 @@ class Peak1dAnnotation(QtGui.QGraphicsSimpleTextItem):
       QtGui.QGraphicsSimpleTextItem.mousePressEvent(self, event)
       self.setSelected(True)
       self.peakItem.setSelected(True)
-      self.peak._project._appBase.current.peak = self.peak
+      self.peakItem.application.current.peak = self.peak
       self.update()
       # print('selected:', self.peak)
 
@@ -524,7 +523,7 @@ class Peak1dSymbol(QtGui.QGraphicsItem):
     pen = painter.pen()
     pen.setStyle(QtCore.Qt.DashLine)
     pen.setWidth(self.lineWidth)
-    self.colourScheme = peakItem.peakListView._appBase.colourScheme
+    self.colourScheme = peakItem.application.colourScheme
     if self.colourScheme == 'light':
       colour = QtGui.QColor('#080000')
     else:
@@ -563,10 +562,10 @@ class PeakNd(QtGui.QGraphicsItem):
 
   def __init__(self, peakListView, peak):
 
-    self._appBase = peakListView._appBase
+    self.application = peakListView.application
     scene = peakListView.spectrumView.strip.plotWidget.scene()
     #QtGui.QGraphicsItem.__init__(self, scene=scene)
-    self.colourScheme =self._appBase.colourScheme
+    self.colourScheme =self.application.colourScheme
     QtGui.QGraphicsItem.__init__(self, parent=peakListView, scene=scene)
     ###QtGui.QGraphicsItem.__init__(self, peakLayer)
     ###scene.addItem(self)
@@ -625,10 +624,10 @@ class PeakNd(QtGui.QGraphicsItem):
 
     self.peakListView = peakListView
     self.peak = peak
-    # if not hasattr(peak, 'isSelected'):
-    #   peak.isSelected = False
+    if not hasattr(peak, '_isSelected'):
+      peak._isSelected = False
     # self.setSelected(peak.isSelected)
-    self.setSelected(self.peak in self._appBase.current.peaks)
+    #####self.setSelected(self.peak in peakListView.spectrumView.application.current.peaks)
     # This code does not make sense - you need its own spectrumView, not the zero'th
     # dimensionOrdering = peakListView.spectrumView.strip.spectrumViews[0].dimensionOrdering
     # dimensionOrdering deprecated
@@ -725,7 +724,7 @@ class PeakNd(QtGui.QGraphicsItem):
     if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
       peak = self.peak
       selected = peak.isSelected = self.isSelected()
-      current = self._appBase.current
+      current = self.application.current
       if selected:
         if peak not in current.peaks:
           current.addPeak(peak)
@@ -745,7 +744,7 @@ class PeakNd(QtGui.QGraphicsItem):
       if self.peak.isDeleted:
         return
 
-      self.setSelected(self.peak in self._appBase.current.peaks)
+      ###self.setSelected(self.peak in self.application.current.peaks)
       # self.setSelected(self.peak.isSelected) # need this because dragging region to select peaks sets peak.isSelected but not self.isSelected()
       if self._isInPlane:
         # do not ever do the below in paint(), see comment at setupPeakAnnotationItem()
@@ -786,8 +785,8 @@ class PeakNd(QtGui.QGraphicsItem):
         ###painter.drawLine(xPpm-r,yPpm-r,xPpm+r,yPpm+r)
         ###painter.drawLine(xPpm-r,yPpm+r,xPpm+r,yPpm-r)
 
-        if self.peak in self._appBase.current.peaks:
-        # if self.peak.isSelected:
+        #if self.peak in self.application.current.peaks:
+        if self.peak._isSelected:
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
           painter.drawLine(r,r,r,-r)
@@ -809,8 +808,8 @@ class PeakNd(QtGui.QGraphicsItem):
         painter.drawLine(-r,-r,r,r)
         painter.drawLine(-r,r,r,-r)
 
-        if self.peak in self._appBase.current.peaks:
-        # if self.peak.isSelected:
+        #if self.peak in self.application.current.peaks:
+        if self.peak._isSelected:
           painter.drawLine(-r,-r,-r,r)
           painter.drawLine(-r,r,r,r)
           painter.drawLine(r,r,r,-r)
@@ -846,7 +845,7 @@ class PeakNdAnnotation(QtGui.QGraphicsSimpleTextItem):
     # self.text = (' , ').join('-' * peakItem.peak.peakList.spectrum.dimensionCount)
     # if self.isSelected():
     #   print(self)
-    self.colourScheme = peakItem.peakListView._appBase.colourScheme
+    self.colourScheme = peakItem.peakListView.spectrumView.application.colourScheme
     colour = peakItem.peakListView.textColour
     # if self.colourScheme == 'light':
     #   colour = QtGui.QColor('#080000')

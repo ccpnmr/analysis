@@ -56,9 +56,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-22 15:10:48 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -67,8 +66,9 @@ import sys
 import pyqtgraph as pg
 from PyQt4 import QtCore, QtGui
 from pyqtgraph.Point import Point
-from  ccpn.util import Common as commonUtil
+from ccpn.util import Common as commonUtil
 
+from ccpn.core.PeakList import PeakList
 from ccpn.ui.gui.widgets.Menu import Menu
 
 from ccpn.util.Logging import getLogger
@@ -571,6 +571,8 @@ class ViewBox(pg.ViewBox):
             if not peakListView.isVisible():
               continue
             peakList = peakListView.peakList
+            if not isinstance(peakList, PeakList):  # it could be an IntegralList
+              continue
             stripAxisCodes = self.current.strip.axisOrder
             # TODO: Special casing 1D here, seems like a hack.
             if len(spectrumView.spectrum.axisCodes) == 1:

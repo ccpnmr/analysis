@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-21 16:19:44 +0000 (Tue, March 21, 2017) $"
+__date__ = "$Date: 2017-03-22 12:40:55 +0000 (Wed, March 22, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -365,18 +365,23 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
 
   def _fillPluginsMenu(self):
     from ccpn.framework.lib.ExtensionLoader import getPlugins
-    pluginsMenu = self.getMenuAction('Plugins')
+    targetMenu = pluginsMenu = self.getMenuAction('Plugins')
     pluginsMenu.clear()
 
-    # TODO: Add multiple layers for ...
     Plugins = getPlugins()
     Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
     for Plugin in Plugins:  # TODO: add user extension path
-      # if '...' in Plugin.PLUGINNAME:
-      #   self._addMenu(plugin)
-      action = Action(self, text=Plugin.PLUGINNAME, translate=False,
+      if '...' in Plugin.PLUGINNAME:
+        package, name = Plugin.PLUGINNAME.split('...')
+        try:
+          targetMenu = self.getMenuAction(package, topMenuAction=pluginsMenu)
+        except ValueError:
+          targetMenu = self._addMenu(package, targetMenu=pluginsMenu)
+      else:
+        name = Plugin.PLUGINNAME
+      action = Action(self, text=name, translate=False,
                       callback=partial(self.startPlugin, Plugin=Plugin))
-      pluginsMenu.addAction(action)
+      targetMenu.addAction(action)
       # self._createMenu(action, targetMenu=)
     pluginsMenu.addSeparator()
     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',

@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -407,7 +406,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     newPid = obj.pid
     for item in self._findItems(oldPid):
 
-      if oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
+      if Pid.IDSEP not in oldPid or oldPid.split(Pid.PREFIXSEP,1)[1].startswith(obj._parent._id + Pid.IDSEP):
         # Parent unchanged, just rename
         item.setData(0, QtCore.Qt.DisplayRole, str(newPid))
       else:

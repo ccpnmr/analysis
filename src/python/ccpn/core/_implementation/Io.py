@@ -14,25 +14,28 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-23 15:18:33 +0000 (Thu, March 23, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
+import logging
 import os
 
 # NB this import can cause circular imports, but ccpn.__init__ makes sure it does not happen
 from ccpn.core.Project import Project
+from ccpn.util import Logging
 from ccpnmodel.ccpncore.lib.Io import Api as apiIo
 from ccpnmodel.ccpncore.lib import ApiPath
 
 
-def loadProject(path:str, useFileLogger:bool=True) -> Project:
+def loadProject(path:str, useFileLogger:bool=True, level=logging.INFO) -> Project:
   """Open Project stored at path."""
   project = _loadNmrProject(path, useFileLogger=useFileLogger)
+  logger = Logging.getLogger()
+  Logging.setLevel(logger, level)
   apiProject = project._wrappedData.root
 
   if apiProject._upgradedFromV2:
@@ -60,7 +63,7 @@ def loadProject(path:str, useFileLogger:bool=True) -> Project:
   return project
 
 
-def _loadNmrProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True) -> Project:
+def _loadNmrProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True, level=logging.INFO) -> Project:
   """Open project matching the API Project stored at path. ADVANCED - requires post-processing
 
   If the API project contains several NmrProjects (rare, and only for legacy projects),
@@ -91,4 +94,7 @@ def newProject(name:str= 'default', path:str=None, useFileLogger:bool=True) -> P
     apiNmrProject = apiProject.fetchNmrProject()
     apiNmrProject.initialiseData()
     apiNmrProject.initialiseGraphicsData()
-    return Project(apiNmrProject)
+    project = Project(apiNmrProject)
+    logger = Logging.getLogger()
+    Logging.setLevel(logger, level)
+    return project

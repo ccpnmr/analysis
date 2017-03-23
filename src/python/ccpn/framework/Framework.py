@@ -10,14 +10,15 @@ __reference__ = "Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s1
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-22 15:21:58 +0000 (Wed, March 22, 2017) $"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-03-23 15:18:33 +0000 (Thu, March 23, 2017) $"
 
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 import json
+import logging
 import os
 import platform
 import sys
@@ -107,6 +108,7 @@ def defineProgramArguments():
   parser.add_argument('--light', dest='lightColourScheme', action='store_true',
                                                  help='Use dark colour scheme')
   parser.add_argument('--nologging', dest='nologging', action='store_true', help='Do not log information to a file')
+  parser.add_argument('--debug', dest='debug', action='store_true', help='Set logging level to debug')
   parser.add_argument('projectPath', nargs='?', help='Project path')
 
   return parser
@@ -117,6 +119,7 @@ class Arguments:
   language = defaultLanguage
   interface = 'NoUi'
   nologging = True
+  debug = False
   skipUserPreferences = True
   projectPath = None
 
@@ -190,6 +193,7 @@ class Framework:
     # self.setupComponents(args)
 
     self.useFileLogger = not self.args.nologging
+    self.level = logging.DEBUG if self.args.debug else logging.INFO
 
     self.current      = None
 
@@ -827,7 +831,7 @@ class Framework:
       self._closeProject()
 
     sys.stderr.write('==> Creating new, empty project\n')
-    project = coreIo.newProject(name=name)
+    project = coreIo.newProject(name=name, useFileLogger=self.useFileLogger, level=self.level)
 
     self._initialiseProject(project)
 
@@ -861,7 +865,7 @@ class Framework:
 
       if subType == ioFormats.CCPN:
         sys.stderr.write('==> Loading %s project "%s"\n' % (subType, path))
-        project = coreIo.loadProject(path)
+        project = coreIo.loadProject(path, useFileLogger=self.useFileLogger, level=self.level)
         project._resetUndo(debug=_DEBUG)
         self._initialiseProject(project)
       elif subType == ioFormats.NEF:

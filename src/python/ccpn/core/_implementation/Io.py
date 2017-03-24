@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Wayne Boucher $"
-__date__ = "$Date: 2017-03-23 15:19:22 +0000 (Thu, March 23, 2017) $"
+__date__ = "$Date: 2017-03-24 14:31:06 +0000 (Fri, March 24, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -83,7 +83,7 @@ def _loadNmrProject(path:str, nmrProjectName:str=None, useFileLogger:bool=True, 
     return Project(apiNmrProject)
 
 
-def newProject(name:str= 'default', path:str=None, useFileLogger:bool=True) -> Project:
+def newProject(name:str= 'default', path:str=None, useFileLogger:bool=True, level=logging.INFO) -> Project:
   """Make RAW new project, putting underlying data storage (API project) at path"""
   apiProject = apiIo.newProject(name, path, overwriteExisting=True,
                                  useFileLogger=useFileLogger)

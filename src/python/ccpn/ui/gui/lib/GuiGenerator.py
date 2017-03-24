@@ -10,7 +10,7 @@ from ccpn.ui.gui.widgets.Frame import Frame
 
 # def _updateRunArgs(argsDict, arg, value):
 #   argsDict[arg] = value
-
+AUTOGEN_TAG = 'Auto-generated input:'
 
 
 def generateWidget(params, widget, argsDict=None, columns=1):
@@ -38,6 +38,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
       from ccpn.ui.gui.widgets.LineEdit import LineEdit
       le = LineEdit(frame, grid=(0, 1))
       le.setText(param['default'])
+      le.setObjectName(AUTOGEN_TAG + param['variable'])
       callback = partial(argsDict.__setitem__, param['variable'])
       le.textChanged.connect(callback)
       callback(le.get())
@@ -45,6 +46,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
     elif isinstance(param['value'], bool):
       from ccpn.ui.gui.widgets.CheckBox import CheckBox
       cb = CheckBox(frame, checked=param['value'], grid=(0, 1))
+      cb.setObjectName(AUTOGEN_TAG + param['variable'])
       cb.stateChanged.connect(partial(argsDict.__setitem__, param['variable']))
       cb.setCheckState(param['default'])
       argsDict[param['variable']] = param['default']
@@ -54,6 +56,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
       if isinstance(param['value'][0], str):
         from ccpn.ui.gui.widgets.PulldownList import PulldownList
         pdl = PulldownList(frame, texts=param['value'], grid=(0, 1))
+        pdl.setObjectName(AUTOGEN_TAG + param['variable'])
         pdl.set(param.get('default', param['value'][0]))
         callback = partial(argsDict.__setitem__, param['variable'])
         pdl.setCallback(callback)
@@ -63,6 +66,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
           from ccpn.ui.gui.widgets.RadioButtons import RadioButtons
           t, b = zip(*param['value'])
           rb = RadioButtons(frame, texts=t,  grid=(0, 1))
+          rb.setObjectName(AUTOGEN_TAG + param['variable'])
           rb.set(param['default'])
           rb.buttonGroup.buttonClicked[QtGui.QAbstractButton].connect(partial(selectedRadioButton, param=param, argsDict=argsDict))
           argsDict[param['variable']] = param['default']
@@ -74,6 +78,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
           from ccpn.ui.gui.widgets.PulldownList import PulldownList
           t, o = zip(*param['value'])
           pdl = PulldownList(frame, texts=t, objects=o, grid=(0, 1))
+          pdl.setObjectName(AUTOGEN_TAG + param['variable'])
           pdl.set(param.get('default', param['value'][0]))
           callback = partial(argsDict.__setitem__, param['variable'])
           pdl.setCallback(callback)
@@ -83,6 +88,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
         assert len(param['value']) == 2
         from ccpn.ui.gui.widgets.Spinbox import Spinbox
         sb = Spinbox(frame, min=param['value'][0], max=param['value'][1], grid=(0, 1))
+        sb.setObjectName(AUTOGEN_TAG + param['variable'])
         sb.setSingleStep(param.get('stepsize', 1))
         sb.setValue(param.get('default', param['value'][0]))
         callback = partial(argsDict.__setitem__, param['variable'])
@@ -93,6 +99,7 @@ def generateWidget(params, widget, argsDict=None, columns=1):
         assert len(param['value']) == 2
         from ccpn.ui.gui.widgets.DoubleSpinbox import DoubleSpinbox
         dsb = DoubleSpinbox(frame, min=param['value'][0], max=param['value'][1], grid=(0, 1))
+        dsb.setObjectName(AUTOGEN_TAG + param['variable'])
         defaultStepSize = (param['value'][1] - param['value'][0]) / 100
         dsb.setSingleStep(param.get('stepsize', defaultStepSize))
         dsb.setValue(param.get('default', param['value'][0]))

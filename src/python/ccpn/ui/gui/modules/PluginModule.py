@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-21 15:38:37 +0000 (Tue, March 21, 2017) $"
+__date__ = "$Date: 2017-03-24 10:20:58 +0000 (Fri, March 24, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -25,9 +25,23 @@ from functools import partial
 
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.lib.GuiGenerator import generateWidget
+from ccpn.ui.gui.lib.GuiGenerator import AUTOGEN_TAG
 from ccpn.ui.gui.widgets.Button import Button
 
-
+widgetGetters = {'CheckBox': 'get',  #returns Bool
+                 'PulldownList':  'get'               ,
+                 'LineEdit':      'get'               ,
+                 'Label':         'get'               ,
+                 'ListWidget':   'getSelectedObjects',  #returns list. Not Tested
+                 'DoubleSpinbox': 'value'             ,
+                 'Spinbox':       'value'             ,
+                 'Slider':        'get'               ,
+                 'RadioButton':   'isChecked'         ,  #returns Bool
+                 'RadioButtons':  'getIndex'          ,  # returns int index of the checked RB
+                 'ObjectTable':   'getSelectedObjects',  # returns int
+                 'TextEditor':    'getText'           ,
+                 'ToolButton':    'getText'           ,
+                 }
 
 class PluginModule(CcpnModule):
 
@@ -56,9 +70,27 @@ class PluginModule(CcpnModule):
 
   def addRunButton(self):
     # TODO: put the run button at the bottom, not on the bottom right.
-    self.goButton = Button(self.mainWidget, text='Run',
-                           callback=partial(self.interactor.run, **self._kwargs))
+    self.goButton = Button(self.mainWidget, text='Run', callback=self._runButtonCallback)
     self.mainWidget.layout().addWidget(self.goButton)
+
+
+  def _runButtonCallback(self):
+    autogenTagLength = len(AUTOGEN_TAG)
+    mainWidgetChildren = self.mainWidget.children()
+    settingsWidgetChildren = self.settingsWidget.children()
+    parameters = {}
+    for widget in (mainWidgetChildren, settingsWidgetChildren):
+      for child in widget:
+        for subchild in child.children():
+          n = subchild.objectName()
+          if n.startswith(AUTOGEN_TAG):
+            widgetType = subchild.__class__.__name__
+            val = getattr(subchild, widgetGetters[widgetType])()
+            parameters[n[autogenTagLength:]] = val
+    # for k,v in parameters.items():
+    #   print(k,v)
+    self.interactor.run(**parameters)
+    # self.interactor.run(**self._kwargs)
 
 
   def issueMessage(self, message):

@@ -24,8 +24,9 @@ def loadSubclasses(path: str, baseclass, levels=2) -> set:
         break
       dirs = [dir for dir in dirs if not dir.startswith('_')]
       dirs = [dir for dir in dirs if not dir.startswith('.')]
+      dirs.insert(0, '.')
       for dir in dirs:
-        pth = os.path.join(root,dir)
+        pth = os.path.join(root, dir)
         sys.path = [pth]
         moduleFiles = os.listdir(pth)
         moduleFiles = [f for f in moduleFiles if not f.startswith('_')]

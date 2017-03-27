@@ -77,6 +77,4 @@ class DemoExtension(PandasPipe):
 
   def run(self, dataframe, test=None, **params):
     print('', str(test), params)
-    if dataframe:
-      return dataframe + '* '
-    return 'Dataframe '
+    return dataframe

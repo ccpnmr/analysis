@@ -153,17 +153,21 @@ class PeakList(AbstractWrapperObject):
 
   # Library functions
 
-  def pickPeaksNd(self, positions:Sequence[float]=None,
-                  doPos:bool=True, doNeg:bool=True,
+  ###def pickPeaksNd(self, positions:Sequence[float]=None,
+  def pickPeaksNd(self, regionToPick: Sequence[float] = None,
+                    doPos:bool=True, doNeg:bool=True,
                   fitMethod:str='gaussian', excludedRegions=None,
                   excludedDiagonalDims=None, excludedDiagonalTransform=None,
                   minDropfactor:float=0.1):
 
     # TODO NBNB Add doc string and put type annotation on all parameters
 
+    # regionToPick = [hRange, cRange, nRange] for 3D, for example
+
     defaults = collections.OrderedDict(
-      ( ('positions', None), ('doPos', True), ('doNeg', True),
-        ('fitMethod', 'gaussian'), ('excludedRegions', None), ('excludedDiagonalDims', None),
+      ###( ('positions', None), ('doPos', True), ('doNeg', True),
+      ( ('regionToPick', None), ('doPos', True), ('doNeg', True),
+         ('fitMethod', 'gaussian'), ('excludedRegions', None), ('excludedDiagonalDims', None),
         ('excludedDiagonalTransform', None)
       )
     )
@@ -174,7 +178,7 @@ class PeakList(AbstractWrapperObject):
 
 
     # if len(positions[0]) != self.spectrum.dimensionCount:
-    positions = list(sorted(map(list, zip(*positions))))
+    ###positions = list(sorted(map(list, zip(*positions)))) # this transposed list of lists
     startPoint = []
     endPoint = []
     spectrum = self.spectrum
@@ -183,8 +187,10 @@ class PeakList(AbstractWrapperObject):
     apiPeaks = []
     for ii, dataDim in enumerate(dataDims):
       aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
-      value0 = positions[0][ii]
-      value1 = positions[1][ii]
+      #value0 = positions[0][ii]
+      #value1 = positions[1][ii]
+      value0 = regionToPick[ii][0]
+      value1 = regionToPick[ii][1]
       value0, value1 = min(value0, value1), max(value0, value1)
       if value1 < aliasingLimit0 or value0 > aliasingLimit1:
         break  # completely outside aliasing region

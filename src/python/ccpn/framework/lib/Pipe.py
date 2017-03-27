@@ -48,17 +48,10 @@ class Pipe(ABC):
     return str()
 
 
-  @abstractmethod
-  def run(self, data):
-    return data
-
-
-  def _updateRunArgs(self, arg, value):
-    self._kwargs[arg] = value
-
-
   def __init__(self, application=None):
     self._kwargs = {}
+    self.guiModule = self.__class__.guiModule
+    self.params = self.__class__.params
     self.active = False
 
     if application is not None:
@@ -74,6 +67,25 @@ class Pipe(ABC):
       except AttributeError:
         pass
       # Adding the _runMacro function here is very difficult, do we need to?
+
+    self.customizeSetup()
+
+
+  @abstractmethod
+  def run(self, data):
+    return data
+
+
+  def customizeSetup(self):
+    '''
+    Override this method to customize the UI auto-generation attributes
+    '''
+    pass
+
+
+  def _updateRunArgs(self, arg, value):
+    self._kwargs[arg] = value
+
 
 
 

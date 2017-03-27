@@ -54,6 +54,9 @@ class Plugin(ABC):
 
 
   def __init__(self, application=None):
+    self.guiModule = self.__class__.guiModule
+    self.params = self.__class__.params
+    self.settings = self.__class__.settings
 
     if application is not None:
       self.application = application
@@ -67,6 +70,8 @@ class Plugin(ABC):
         self.mainWindow = self.ui.mainWindow
       except AttributeError:
         pass
+
+    self.customizeSetup()
 
     self.ui = NoUI()
 
@@ -95,17 +100,19 @@ class Plugin(ABC):
     return pth
 
 
+  def customizeSetup(self):
+    '''
+    Override this method to customize the UI auto-generation attributes
+    '''
+    pass
+
+
   def run(self, **kwargs):
-    self.ui.issueMessage('run() called with:', kwargs)
+    '''
+    This is the method that automatically gets called for No-UI and Auto-generated UI plugins.
+    '''
+    pass
 
 
   def cleanup(self):
     pass
-
-
-  # # TODO: Move to ui.gui
-  # @property
-  # def _ui(self):
-  #   if self._uiElement is None:
-  #     self._uiElement = self.guiModule(self)
-  #   return self._uiElement

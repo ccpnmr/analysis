@@ -414,7 +414,11 @@ class SideBar(DropBase, QtGui.QTreeWidget):
         # NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)
         objects = self._itemObjects(item, recursive=True)
         sip.delete(item) # this also removes child items
-        for xx in objects:
+
+        # NB the first object cannot be found from its pid (as it has already been renamed)
+        # So we do it this way
+        self._createItem(obj)
+        for xx in objects[1:]:
           self._createItem(xx)
 
   def _renameNmrResidueItem(self, obj:NmrResidue, oldPid:str):

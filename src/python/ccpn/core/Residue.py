@@ -274,11 +274,11 @@ class Residue(AbstractWrapperObject):
 
       apiResidue.seqCode = seqCode
       apiResidue.seqInsertCode = seqInsertCode
-      self._finaliseAction('rename')
-      self._finaliseAction('change')
     finally:
       self._project._appBase._endCommandBlock()
       self._project.unblankNotification()
+    self._finaliseAction('rename')
+    self._finaliseAction('change')
 
   def resetVariantToDefault(self):
     """Reset Residue.residueVariant to the default variant"""

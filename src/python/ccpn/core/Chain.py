@@ -115,11 +115,6 @@ class Chain(AbstractWrapperObject):
     compoundName = self.compoundName
     return tuple(x for x in self.project.substances if x.name == compoundName)
 
-    # # Select 'std' labelling if present
-    # substances = [x for x in substances if x.labelling is None] or substances
-    #
-    # return substances[0] if substances else None
-
   @property
   def sampleComponents(self) -> Tuple[SampleComponent, ...]:
     """SampleComponents matching to Chain (based on chain.compoundName)"""
@@ -130,8 +125,6 @@ class Chain(AbstractWrapperObject):
   def clone(self, shortName:str=None):
     """Make copy of chain."""
 
-    # # Imported here to avoid circular imports
-    # from ccpn.core.lib import MoleculeLib
     apiChain = self._wrappedData
     apiMolSystem = apiChain.molSystem
     dataObj = self._project._data2Obj
@@ -146,8 +139,8 @@ class Chain(AbstractWrapperObject):
     topObjectParameters = {'code':shortName,
                            'pdbOneLetterCode':shortName[0]}
     self._startFunctionCommandBlock('clone', shortName, parName='newChain')
-    # Must be blanked to avoid atom creation notifiers while creating entire chain
-    self._project.blankNotification()
+    # # Blanking notification ruins sidebar handling of new chain
+    # self._project.blankNotification()
     try:
       newApiChain = copySubTree(apiChain, apiMolSystem, maySkipCrosslinks=True,
                                 topObjectParameters=topObjectParameters)
@@ -165,21 +158,8 @@ class Chain(AbstractWrapperObject):
           newAtoms[0].addInterAtomBond(newAtoms[1])
 
     finally:
-      self._project.blankNotification()
+      # self._project.unblankNotification()
       self._project._appBase._endCommandBlock()
-
-    # tags = ['molecule', 'role', 'magnEquivalenceCode', 'physicalState',
-    #         'conformationalIsomer', 'chemExchangeState', 'details']
-    # params = {tag:getattr(ccpnChain,tag) for tag in tags}
-    # params['code'] = shortName
-    # params['pdbOneLetterCode'] = shortName[0]
-    # self._startFunctionCommandBlock('clone', shortName, parName='newChain')
-    # try:
-    #   newCcpnChain = apiMolSystem.newChain(**params)
-    #   result = self._project._data2Obj[newCcpnChain]
-    #   MoleculeLib.duplicateAtomBonds({self:result})
-    # finally:
-    #   self._project._appBase._endCommandBlock()
     #
     return result
                                   
@@ -317,8 +297,8 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
 
   self._startFunctionCommandBlock('createChain', sequence, values=locals(), defaults=defaults,
                                   parName='newChain')
-  # Must be blanked to avoid atom creation notifiers while creating entire chain
-  self._project.blankNotification()
+  # # Blanking notification ruins sidebar handling of new chain
+  # self._project.blankNotification()
   try:
     substance = self.createPolymerSubstance(sequence=sequence, name=name,
                                             startNumber=startNumber, molType=molType,
@@ -329,7 +309,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                         details=comment)
   finally:
-    self._project.unblankNotification()
+    # self._project.unblankNotification()
     self._project._appBase._endCommandBlock()
 
   result = self._project._data2Obj[newApiChain]
@@ -365,13 +345,13 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
 
   self._startFunctionCommandBlock('createChain', values=locals(), defaults=defaults,
                                   parName='newChain')
-  # Must be blanked to avoid atom creation notifiers while creating entire chain
-  self._project.blankNotification()
+  # # Blanking notification ruins sidebar handling of new chain
+  # self._project.blankNotification()
   try:
     newApiChain = apiMolSystem.newChain(molecule=apiMolecule, code=shortName, role=role,
                                          details=comment)
   finally:
-    self._project.unblankNotification()
+    # self._project.unblankNotification()
     self._project._appBase._endCommandBlock()
 
   result = self._project._data2Obj[newApiChain]
@@ -390,15 +370,6 @@ def getter(self:Substance) -> Tuple[Chain, ...]:
   name = self.name
   return tuple(x for x in self._project.chains if x.compoundName == name)
 
-  # apiSubstance = self._apiSubstance
-  # apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, 'molecule') else None
-  # if apiMolecule is None:
-  #   return ()
-  # else:
-  #   data2Obj = self._project._data2Obj
-  #   return tuple(data2Obj[x]
-  #                for x in self._project._wrappedData.molSystem.sortedChains()
-  #                if x.molecule is apiMolecule)
 Substance.chains = property(getter, None, None,
   "ccpn.Chains that correspond to ccpn.Substance (if defined)"
 )

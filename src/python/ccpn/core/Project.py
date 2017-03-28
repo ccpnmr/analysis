@@ -511,6 +511,7 @@ class Project(AbstractWrapperObject):
     Intended for onceOnly=True notifiers. It is up to the user to make sure the calling
     interface matches the action"""
     if target in self._notifierActions:
+
       tt = (className, target)
     else:
       # This is right, it just looks strange. But if target is not an action it is

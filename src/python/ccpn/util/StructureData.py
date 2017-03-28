@@ -45,9 +45,13 @@ class EnsembleData(pd.DataFrame):
   is available, but we have added a number of convenience methods for working with the data.
 
   In general, there are three things you may want to do with an ensemble:
-  1.	 Select a sub-set of atoms within the ensemble
-  2.	 Access the data within the ensemble
-  3.	 Write data to the ensemble
+
+    1.	 Select a sub-set of atoms within the ensemble
+
+    2.	 Access the data within the ensemble
+
+    3.	 Write data to the ensemble
+
   We will cover each of these in turn below.
 
   1.	Selecting sub-sets of atoms within the ensemble:
@@ -59,49 +63,63 @@ class EnsembleData(pd.DataFrame):
     although the criteria names are plural, single values are also allowed.
 
     The following criteria are currently supported:
-    * chainCodes
-      allowed values: ‘A’; ‘A,C’; ‘A, C’; [‘A’, ‘C’]
-      not allowed: ‘A-C’ (currently); [‘A, B’, ‘C’] (currently)
-      Note that this is case sensitive, so ‘a’ will likely not select anything
-    * residueNames
-      allowed values: ‘MET’; ‘MET,ALA’; ‘MET, ALA’; [‘MET’, ’ALA’]
-      not allowed: ‘MET-ALA’; [‘MET, ALA’, ‘GLU’] (currently)
-      Note that this is case sensitive, so ‘met’ will likely not select anything
-    * sequenceIds
-      allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
-      not allowed: [1, 2, ‘4-7’] (currently);
-    * atomNames
-      allowed values: ‘H’; ‘H,N’; ‘H, N’; [‘H’, ‘N’]
-      not allowed: ‘H-N’; [‘H, N’, ‘CA’] (currently)
-    * modelNumbers
-      allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
-      not allowed: [1, 2, ‘4-7’] (currently);
-    * ids
-      allowed values: ‘A.3.LEU.N’; ‘A.3.LEU.N, A.3.LEU.CA’;
-                      ‘A.3.LEU.N, A.3.LEU.CA’; [‘A.3.LEU.N’, ‘A.3.LEU.CA’]
-      not allowed: ‘A.3.LEU.N-‘A.3.LEU.CA’; ‘A.3.LEU.N, CA’; [‘A.3.LEU.N, A.3.LEU.CA’, ‘A.3.LEU.CB’]
-    * elements
-      allowed values: ‘H’; ‘H,C’; ‘H, C’; [‘H’, ‘C’]
-      not allowed: ‘H-N’; [‘H, N’, ‘C’]
+
+      * chainCodes
+        allowed values: ‘A’; ‘A,C’; ‘A, C’; [‘A’, ‘C’]
+        not allowed: ‘A-C’ (currently); [‘A, B’, ‘C’] (currently)
+        Note that this is case sensitive, so ‘a’ will likely not select anything
+
+      * residueNames
+        allowed values: ‘MET’; ‘MET,ALA’; ‘MET, ALA’; [‘MET’, ’ALA’]
+        not allowed: ‘MET-ALA’; [‘MET, ALA’, ‘GLU’] (currently)
+        Note that this is case sensitive, so ‘met’ will likely not select anything
+
+      * sequenceIds
+        allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
+        not allowed: [1, 2, ‘4-7’] (currently);
+
+      * atomNames
+        allowed values: ‘H’; ‘H,N’; ‘H, N’; [‘H’, ‘N’]
+        not allowed: ‘H-N’; [‘H, N’, ‘CA’] (currently)
+
+      * modelNumbers
+        allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
+        not allowed: [1, 2, ‘4-7’] (currently);
+
+      * ids
+        allowed values: ‘A.3.LEU.N’; ‘A.3.LEU.N, A.3.LEU.CA’;
+                        ‘A.3.LEU.N, A.3.LEU.CA’; [‘A.3.LEU.N’, ‘A.3.LEU.CA’]
+        not allowed: ‘A.3.LEU.N-‘A.3.LEU.CA’; ‘A.3.LEU.N, CA’; [‘A.3.LEU.N, A.3.LEU.CA’, ‘A.3.LEU.CB’]
+
+      * elements
+        allowed values: ‘H’; ‘H,C’; ‘H, C’; [‘H’, ‘C’]
+        not allowed: ‘H-N’; [‘H, N’, ‘C’]
 
     In addition to these criteria, functions taking a record and returning True or False can
     be supplied via the func keyword argument.
+
     For example:
       ensemble.selector(func=lambda r: (r[‘bFactor’]< 70) and (r[‘bFactor’]>60))
-    which will select everything with a bFactor between 60 and 70 exclusive.
-        The selector can be converted to a filter by setting the inverse keyword to True, so that
-        any record that matches the criteria are excluded from the selection.
+      which will select everything with a bFactor between 60 and 70 exclusive.
+      The selector can be converted to a filter by setting the inverse keyword to True, so that
+      any record that matches the criteria are excluded from the selection.
 
     Finally, selectors can be combined using Boolean operations.  The following statement:
+
       s = ensemble.selector(atomNames=’N, CA’)
+
     is equivalent to:
+
       s1 = ensemble.selector(atomNames=’CA’)
       s2 = ensemble.selector(atomNames=’N’)
       s = s1 | s2  # Matches either s1 OR s2
 
     While this statement:
+      .. code-block::
       s = ensemble.selector(atomNames=’N, CA’, modelNumbers = ‘1-3’)
+
     is equivalent to:
+
       s1 = ensemble.selector(atomNames=’N, CA’)
       s2 = ensemble.selector(modelNumbers = ‘1-3’)
       s = s1 & s2  # Matches both s1 AND s2

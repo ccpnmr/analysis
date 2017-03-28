@@ -91,7 +91,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-02-02 12:14:19 +0000 (Thu, 02 Feb 2017) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -101,9 +101,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: wb104 $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-02-02 12:14:19 +0000 (Thu, 02 Feb 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10128 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -699,7 +699,7 @@
   <span class="nd">@foldingModes.setter</span>
   <span class="k">def</span> <span class="nf">foldingModes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
 
-    <span class="c1"># TODO FOr nef we should support both True, False, and None</span>
+    <span class="c1"># TODO For NEF we should support both True, False, and None</span>
     <span class="c1"># That requires an API change</span>
 
     <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;circular&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;mirror&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="bp">None</span><span class="p">:</span><span class="bp">False</span><span class="p">}</span>
@@ -1087,8 +1087,34 @@
 <div class="viewcode-block" id="Spectrum.reorderValues"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Spectrum.reorderValues">[docs]</a>  <span class="k">def</span> <span class="nf">reorderValues</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">newAxisCodeOrder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Reorder values in spectrum dimension order to newAxisCodeOrder</span>
 <span class="sd">    by matching newAxisCodeOrder to spectrum axis code order&quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">newAxisCodeOrder</span><span class="p">)</span></div></div>
+    <span class="k">return</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">reorder</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">,</span> <span class="n">newAxisCodeOrder</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Spectrum.getInAxisOrder"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Spectrum.getInAxisOrder">[docs]</a>  <span class="k">def</span> <span class="nf">getInAxisOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get attributeName in order defined by axisCodes :</span>
+<span class="sd">       (default order if None)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Spectrum object does not have attribute &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">attributeName</span><span class="p">)</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">axisCodes</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">values</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># change to order defined by axisCodes</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorderValues</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Spectrum.setInAxisOrder"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Project.Spectrum.setInAxisOrder">[docs]</a>  <span class="k">def</span> <span class="nf">setInAxisOrder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set attributeName from values in order defined by axisCodes</span>
+<span class="sd">       (default order if None)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="s1">&#39;Spectrum object does not have attribute &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">attributeName</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">axisCodes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># change values to the order appropriate for spectrum</span>
+      <span class="n">values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reorderValues</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">)</span>
+    <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attributeName</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">_newSpectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Spectrum</span><span class="p">:</span>

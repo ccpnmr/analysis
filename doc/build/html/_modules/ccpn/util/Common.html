@@ -56,7 +56,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-12-16 12:44:19 +0000 (Fri, 16 Dec 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,9 +66,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-12-16 12:44:19 +0000 (Fri, 16 Dec 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10077 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -83,7 +83,7 @@
 <span class="kn">import</span> <span class="nn">random</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">typing</span>
-<span class="kn">import</span> <span class="nn">collections</span>
+<span class="c1"># import collections</span>
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="c1"># from functools import total_ordering</span>
 
@@ -105,8 +105,8 @@
                           <span class="o">+</span> <span class="n">defaultFileNameChar</span><span class="p">)</span>
 <span class="n">validCcpnFileNameChars</span>  <span class="o">=</span> <span class="n">validFileNamePartChars</span> <span class="o">+</span> <span class="s1">&#39;-.&#39;</span> <span class="o">+</span> <span class="n">separatorFileNameChar</span>
 
-
-<span class="n">Sentinel</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Sentinel&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+<span class="c1"># # Not used - Rasmus 20/2/2017</span>
+<span class="c1"># Sentinel = collections.namedtuple(&#39;Sentinel&#39;, [&#39;value&#39;])</span>
 
 
 
@@ -264,25 +264,26 @@
 <span class="sd">  Inspired by numpy.isclose()&quot;&quot;&quot;</span>
   <span class="k">return</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">a</span> <span class="o">-</span> <span class="n">b</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">absTolerance</span> <span class="o">+</span> <span class="n">relTolerance</span> <span class="o">*</span> <span class="nb">abs</span><span class="p">(</span><span class="n">b</span><span class="p">)))</span></div>
 
-<div class="viewcode-block" id="flattenIfNumpy"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.flattenIfNumpy">[docs]</a><span class="k">def</span> <span class="nf">flattenIfNumpy</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">shape</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
-  <span class="sd">&quot;&quot;&quot;If data are Numpy, convert to flat array</span>
-<span class="sd">  If shape is given, check that numpy fits shape, and flat sequence fits total number of elements&quot;&quot;&quot;</span>
-
-  <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">&#39;flat&#39;</span><span class="p">):</span>
-    <span class="c1"># Numpy array</span>
-    <span class="k">if</span> <span class="n">shape</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">shape</span><span class="p">):</span>
-      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Shape of array data is </span><span class="si">%s</span><span class="s2">, should be </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">shape</span><span class="p">))</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">flat</span>
-
-  <span class="k">elif</span> <span class="n">shape</span><span class="p">:</span>
-      <span class="n">elementCount</span> <span class="o">=</span> <span class="mi">1</span>
-      <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shape</span><span class="p">:</span>
-        <span class="n">elementCount</span> <span class="o">*=</span> <span class="n">x</span>
-      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">!=</span> <span class="n">elementCount</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Number of elements in data sequence is </span><span class="si">%s</span><span class="s2">, should be </span><span class="si">%s</span><span class="s2">&quot;</span>
-                         <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">elementCount</span><span class="p">))</span>
-  <span class="c1">#</span>
-  <span class="k">return</span> <span class="n">data</span></div>
+<span class="c1"># # No longer used - Rasmus 20/2/2017</span>
+<span class="c1"># def flattenIfNumpy(data, shape=None):</span>
+<span class="c1">#   &quot;&quot;&quot;If data are Numpy, convert to flat array</span>
+<span class="c1">#   If shape is given, check that numpy fits shape, and flat sequence fits total number of elements&quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   if hasattr(data, &#39;flat&#39;):</span>
+<span class="c1">#     # Numpy array</span>
+<span class="c1">#     if shape and data.shape != tuple(shape):</span>
+<span class="c1">#       raise ValueError(&quot;Shape of array data is %s, should be %s&quot; % (data.shape, shape))</span>
+<span class="c1">#     data = data.flat</span>
+<span class="c1">#</span>
+<span class="c1">#   elif shape:</span>
+<span class="c1">#       elementCount = 1</span>
+<span class="c1">#       for x in shape:</span>
+<span class="c1">#         elementCount *= x</span>
+<span class="c1">#       if len(data) != elementCount:</span>
+<span class="c1">#         raise ValueError(&quot;Number of elements in data sequence is %s, should be %s&quot;</span>
+<span class="c1">#                          % (len(data), elementCount))</span>
+<span class="c1">#   #</span>
+<span class="c1">#   return data</span>
 
 <div class="viewcode-block" id="stringToIdentifier"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.Common.stringToIdentifier">[docs]</a><span class="k">def</span> <span class="nf">stringToIdentifier</span><span class="p">(</span><span class="n">value</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
   <span class="sd">&quot;&quot;&quot;Convert string to identifier, replacing non-alphanumeric values by underscore&quot;&quot;&quot;</span>

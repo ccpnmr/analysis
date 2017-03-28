@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -62,9 +62,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-23 16:12:43 +0000 (Wed, 23 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10012 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -280,11 +280,6 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        return type part of pid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># parts = self._split()</span>
-        <span class="c1"># if len(parts) &gt; 0:</span>
-        <span class="c1">#     return parts[0]</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     return &#39;&#39;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
     
@@ -293,11 +288,6 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        return id part of pid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># parts = self._split()</span>
-        <span class="c1"># if len(parts) &gt; 1:</span>
-        <span class="c1">#     return IDSEP.join(parts[1:])</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     return &#39;&#39;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
 
@@ -310,19 +300,6 @@
 
     <span class="nd">@staticmethod</span>
 <div class="viewcode-block" id="Pid.isValid"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.isValid">[docs]</a>    <span class="k">def</span> <span class="nf">isValid</span><span class="p">(</span><span class="n">text</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="c1"># tests here</span>
-        <span class="c1"># if self.find(PREFIXSEP) &lt; 0:</span>
-        <span class="c1">#     return False</span>
-        <span class="c1"># parts = self._split()</span>
-        <span class="c1"># if len(parts) &lt; 2:</span>
-        <span class="c1">#     return False</span>
-
-        <span class="c1"># Comment 1:    Do we allow multiline strings here?</span>
-
-        <span class="c1"># Comment 2: When we check for validity in __init__, it will be impossible to create</span>
-        <span class="c1"># invalid PIds. A static function allows yo to check for validity before creating.</span>
-        <span class="c1"># Even so, is it necessary? It is no longer used above</span>
-
          <span class="k">return</span> <span class="n">PREFIXSEP</span> <span class="ow">in</span> <span class="n">text</span> <span class="ow">and</span> <span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">PREFIXSEP</span></div>
 
     <span class="c1"># NBNB having a property called &#39;str&#39; confuses Sphinx.</span>
@@ -341,68 +318,11 @@
 
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="c1"># Removed as they cause un-string-like behaviour.</span>
-    <span class="c1">#</span>
-    <span class="c1"># def __add__(self, other):</span>
-    <span class="c1">#     tmp = self._split() + [other]</span>
-    <span class="c1">#     #print &#39;Pid.__add__&#39;, tmp</span>
-    <span class="c1">#     return Pid.new(*tmp)</span>
-    <span class="c1"># #end def</span>
-    <span class="c1">#</span>
-    <span class="c1">#</span>
-    <span class="c1"># Use fields property to get list-of-fields instead</span>
-    <span class="c1">#</span>
-    <span class="c1"># def __len__(self):</span>
-    <span class="c1">#     ll = len(self._split())-1</span>
-    <span class="c1">#     if ll &lt; 0:</span>
-    <span class="c1">#         ll=0</span>
-    <span class="c1">#     return ll</span>
-    <span class="c1"># #end def</span>
-    <span class="c1">#</span>
-    <span class="c1"># def __getslice__(self, start, stop):</span>
-    <span class="c1">#     # NB using parts [1:] instead of modifying indices allows negative indices to work normally</span>
-    <span class="c1">#     parts = self._split()[1:][start:stop]</span>
-    <span class="c1">#     # if len(parts) &gt; 0:</span>
-    <span class="c1">#     #     return IDSEP.join(*parts)</span>
-    <span class="c1">#     # else:</span>
-    <span class="c1">#     #     return &#39;&#39;</span>
-    <span class="c1">#</span>
-    <span class="c1">#     return IDSEP.join(parts)</span>
-    <span class="c1"># #end def</span>
-    <span class="c1">#</span>
-    <span class="c1"># def __getitem__(self, i):</span>
-    <span class="c1">#     return self._split()[i+1]</span>
-    <span class="c1"># #end def</span>
-    <span class="c1">#</span>
-    <span class="c1"># def __iter__(self):</span>
-    <span class="c1">#     for f in self._split()[1:]:</span>
-    <span class="c1">#         yield f</span>
-    <span class="c1">#     #end for</span>
-    <span class="c1"># #end def</span>
-    <span class="c1">#</span>
-    <span class="c1"># Unecessary: __str__ is inherited</span>
-    <span class="c1"># def __str__(self):</span>
-    <span class="c1">#     return str.__str__(self)</span>
-    <span class="c1"># #end def</span>
-
-    <span class="c1"># I like that one. We could activate it. Rasmus</span>
-    <span class="c1"># def __repr__(self):</span>
-    <span class="c1">#     return &#39;Pid(%s)&#39; % str.__repr__(self)</span>
-    <span class="c1"># #end def</span>
 
     <span class="k">def</span> <span class="nf">_split</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a splitted pid as list or empty list on error</span>
 <span class="sd">        # &quot;&quot;&quot;</span>
-        <span class="c1"># allParts = []</span>
-        <span class="c1">#</span>
-        <span class="c1"># parts = self.split(PREFIXSEP)</span>
-        <span class="c1"># if len(parts) &gt; 0:</span>
-        <span class="c1">#     allParts.append(parts[0])</span>
-        <span class="c1"># if len(parts) &gt; 1:</span>
-        <span class="c1">#     for p in parts[1].split(IDSEP):</span>
-        <span class="c1">#         allParts.append(p)</span>
-        <span class="c1"># return allParts</span>
 
         <span class="n">parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">PREFIXSEP</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">parts</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
@@ -435,16 +355,6 @@
     <span class="k">def</span> <span class="nf">_join</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Join args using the rules for constructing a pid</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># if len(args) &gt;= 2:</span>
-        <span class="c1">#     tmp =PREFIXSEP.join( args[0:2] )</span>
-        <span class="c1">#     tmp2 = [tmp] + list(args[2:]) # don&#39;t know why args is tuple and thus I have to use</span>
-        <span class="c1">#                                   # the list operator to avoid TypeError:</span>
-        <span class="c1">#                                   # can only concatenate list (not &quot;tuple&quot;) to list?</span>
-        <span class="c1">#     return IDSEP.join(tmp2)</span>
-        <span class="c1"># elif len(args) &gt;= 1:</span>
-        <span class="c1">#     return args[0]</span>
-        <span class="c1"># else:</span>
-        <span class="c1">#     return &#39;&#39;</span>
 
         <span class="c1"># NB the behaviour if len(args) == 1 is correct (return &quot;type:&quot;)</span>
         <span class="k">if</span> <span class="n">args</span><span class="p">:</span>
@@ -458,15 +368,6 @@
 <div class="viewcode-block" id="Pid.modify"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.Pid.Pid.modify">[docs]</a>    <span class="k">def</span> <span class="nf">modify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">newId</span><span class="p">:</span><span class="nb">object</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Pid&#39;</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Return new pid with position index modified by newId</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># parts = self._split()</span>
-        <span class="c1"># if index+1 &gt;= len(parts):</span>
-        <span class="c1">#     io.error(&#39;Pid.modify: invalid index ({0})\n&#39;, index+1)</span>
-        <span class="c1"># parts[index+1] = newId</span>
-        <span class="c1"># if type is not None:</span>
-        <span class="c1">#     parts[0] = type</span>
-        <span class="c1"># return Pid.new(*parts)</span>
-
-
         <span class="n">parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_split</span><span class="p">()</span>
 
         <span class="n">idparts</span> <span class="o">=</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>

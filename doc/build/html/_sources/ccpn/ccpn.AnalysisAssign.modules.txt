@@ -9,6 +9,14 @@ ccpn.AnalysisAssign.modules package
 Submodules
 ----------
 
+ccpn.AnalysisAssign.modules.AssignmentInspectorModule module
+------------------------------------------------------------
+
+.. automodule:: ccpn.AnalysisAssign.modules.AssignmentInspectorModule
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 ccpn.AnalysisAssign.modules.AtomSelector module
 -----------------------------------------------
 
@@ -21,14 +29,6 @@ ccpn.AnalysisAssign.modules.BackboneAssignmentModule module
 -----------------------------------------------------------
 
 .. automodule:: ccpn.AnalysisAssign.modules.BackboneAssignmentModule
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-ccpn.AnalysisAssign.modules.ModifyAssignmentModule module
----------------------------------------------------------
-
-.. automodule:: ccpn.AnalysisAssign.modules.ModifyAssignmentModule
     :members:
     :undoc-members:
     :show-inheritance:

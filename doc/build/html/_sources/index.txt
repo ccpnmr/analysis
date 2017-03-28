@@ -10,6 +10,13 @@ Welcome to CCPN's documentation!
 
    ccpn/modules.rst
 
+CCPN Implementation layer (for experts only)
+============================================
+.. toctree::
+   :maxdepth: 4
+
+   ccpnmodel/modules.rst
+
 Indices and tables
 ==================
 

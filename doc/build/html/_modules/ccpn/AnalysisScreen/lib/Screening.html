@@ -199,7 +199,7 @@
               <span class="n">newPeakListPosition</span> <span class="o">=</span> <span class="n">sampleComponent</span><span class="o">.</span><span class="n">substance</span><span class="o">.</span><span class="n">referenceSpectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">newPeak</span><span class="p">(</span>
                 <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="n">position</span><span class="p">],</span> <span class="n">height</span><span class="o">=</span><span class="mf">0.00</span><span class="p">)</span>
 
-            <span class="n">merit</span> <span class="o">=</span> <span class="n">_stdEfficency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">stdPosition</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
+            <span class="n">merit</span> <span class="o">=</span> <span class="n">_stdEfficiency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">stdPosition</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merit</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
               <span class="n">newHit</span><span class="o">.</span><span class="n">meritCode</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">merit</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;%&#39;</span></div>
 
@@ -233,7 +233,7 @@
         <span class="n">_loadSpectrumDifference</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/pdata/1/1r&#39;</span><span class="p">,</span> <span class="n">sample</span><span class="p">)</span></div>
 
 
-<span class="k">def</span> <span class="nf">_stdEfficency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">matchedPositions</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_stdEfficiency</span><span class="p">(</span><span class="n">spectrumOffResonancePeaks</span><span class="p">,</span> <span class="n">spectrumOnResonancePeaks</span><span class="p">,</span> <span class="n">matchedPositions</span><span class="p">,</span> <span class="n">minDistance</span><span class="p">):</span>
 
   <span class="n">efficiency</span> <span class="o">=</span> <span class="p">[]</span>
   <span class="k">for</span> <span class="n">position</span> <span class="ow">in</span> <span class="n">matchedPositions</span><span class="p">:</span>

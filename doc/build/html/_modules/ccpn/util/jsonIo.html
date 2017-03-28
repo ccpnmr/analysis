@@ -56,7 +56,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-18 15:47:43 +0100 (Wed, 18 May 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -66,9 +66,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-05-18 15:47:43 +0100 (Wed, 18 May 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9358 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -104,13 +104,23 @@
     <span class="c1"># Sentinel - reset if we find a supported type</span>
     <span class="n">typ</span> <span class="o">=</span> <span class="bp">None</span>
 
+    <span class="k">try</span><span class="p">:</span>
+      <span class="kn">from</span> <span class="nn">ccpn.util.StructureData</span> <span class="kn">import</span> <span class="n">EnsembleData</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+      <span class="n">EnsembleData</span> <span class="o">=</span> <span class="bp">None</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">OrderedDict</span><span class="p">):</span>
       <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;OrderedDict&#39;</span>
       <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
 
+    <span class="k">elif</span> <span class="n">EnsembleData</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">EnsembleData</span><span class="p">):</span>
+      <span class="c1"># Works like pandas.DataFrame (see comments there), but instantiates subclass.</span>
+      <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;ccpn.EnsembleData&#39;</span>
+      <span class="n">data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
+
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
       <span class="c1"># NB this converts both None and NaN to &#39;null&#39;</span>
-      <span class="c1"># We assume that pandas will get back the correct value from the type of teh array</span>
+      <span class="c1"># We assume that pandas will get back the correct value from the type of the array</span>
       <span class="c1"># (NaN in numeric data, None in object data).</span>
       <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;pandas.DataFrame&#39;</span>
       <span class="n">data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
@@ -123,9 +133,9 @@
       <span class="n">data</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Panel</span><span class="p">):</span>
-      <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;pandas.Panel&#39;</span>
-      <span class="n">data</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span> <span class="p">(</span> <span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">item</span> <span class="p">,:</span> <span class="p">,</span> <span class="p">:])</span>
-                            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="p">)</span> <span class="p">)</span>
+      <span class="c1"># NBNB NOT TESTED</span>
+      <span class="n">frame</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+      <span class="n">data</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
 
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
       <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;numpy.ndarray&#39;</span>
@@ -160,20 +170,46 @@
       <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;OrderedDict&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
+      <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;ccpn.EnsembleData&#39;</span><span class="p">:</span>
+
+        <span class="k">try</span><span class="p">:</span>
+          <span class="kn">from</span> <span class="nn">ccpn.util.StructureData</span> <span class="kn">import</span> <span class="n">EnsembleData</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+          <span class="n">EnsembleData</span> <span class="o">=</span> <span class="bp">None</span>
+
+        <span class="k">if</span> <span class="n">EnsembleData</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+
+          <span class="c1"># NBNB HACK:</span>
+          <span class="c1"># We want the pandas read_json to instantiate EnsembleData, which is a subclass</span>
+          <span class="c1"># of DataFrame. Hence this temporary monkeypatching</span>
+          <span class="kn">from</span> <span class="nn">pandas.io</span> <span class="kn">import</span> <span class="n">json</span> <span class="k">as</span> <span class="n">pandasJson</span>
+          <span class="n">backup</span><span class="o">=</span> <span class="n">pandasJson</span><span class="o">.</span><span class="n">DataFrame</span>
+          <span class="n">pandasJson</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">EnsembleData</span>
+          <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
+          <span class="k">finally</span><span class="p">:</span>
+            <span class="n">pandasJson</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">backup</span>
+          <span class="k">return</span> <span class="n">result</span>
+
       <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;pandas.DataFrame&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">),</span>
-                                <span class="n">columns</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;columns&#39;</span><span class="p">))</span>
+        <span class="c1"># return pandas.DataFrame(data=data.get(&#39;data&#39;), index=data.get(&#39;index&#39;),</span>
+        <span class="c1">#                         columns=data.get(&#39;columns&#39;))</span>
+        <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;pandas.Panel&#39;</span><span class="p">:</span>
-        <span class="c1"># NBNB TBD CHECKME this may well not work!!!</span>
-        <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Panel</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">OrderedDict</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+        <span class="c1"># NBNB NOT TESTED</span>
+        <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">to_panel</span><span class="p">()</span>
 
       <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;pandas.Series&#39;</span><span class="p">:</span>
-        <span class="n">columns</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;columns&#39;</span><span class="p">)</span>
-        <span class="c1"># Does the series name get stored in columns? Presumably. Let us try</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">columns</span> <span class="k">else</span> <span class="bp">None</span>
-        <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;index&#39;</span><span class="p">),</span>
-                             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># columns = data.get(&#39;columns&#39;)</span>
+        <span class="c1"># # Does the series name get stored in columns? Presumably. Let us try</span>
+        <span class="c1"># name = columns[0] if columns else None</span>
+        <span class="c1"># return pandas.Series(data=data.get(&#39;data&#39;), index=data.get(&#39;index&#39;),</span>
+        <span class="c1">#                      name=name)</span>
+        <span class="k">return</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">typ</span><span class="o">=</span><span class="s1">&#39;series&#39;</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;split&#39;</span><span class="p">)</span>
 
       <span class="k">elif</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;numpy.ndarray&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">numpy</span><span class="o">.</span><span class="n">ndarray</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>

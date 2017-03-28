@@ -52,7 +52,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-26 10:21:40 +0000 (Thu, 26 Jan 2017) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -62,9 +62,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-26 10:21:40 +0000 (Thu, 26 Jan 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10111 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -193,22 +193,6 @@
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_id</span> <span class="o">=</span> <span class="bp">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_resetIds</span><span class="p">()</span>
-      
-    <span class="c1"># # set _id</span>
-    <span class="c1"># parent = self._parent</span>
-    <span class="c1"># if parent is project:</span>
-    <span class="c1">#   _id = str(self._key)</span>
-    <span class="c1"># else:</span>
-    <span class="c1">#   _id = &#39;%s%s%s&#39;% (parent._id, Pid.IDSEP, self._key)</span>
-    <span class="c1"># self._id = _id</span>
-    <span class="c1">#</span>
-    <span class="c1"># # update pid:object mapping dictionary</span>
-    <span class="c1"># dd = project._pid2Obj.get(self.className)</span>
-    <span class="c1"># if dd is None:</span>
-    <span class="c1">#   dd = {}</span>
-    <span class="c1">#   project._pid2Obj[self.className] = dd</span>
-    <span class="c1">#   project._pid2Obj[self.shortClassName] = dd</span>
-    <span class="c1"># dd[_id] = self</span>
 
   <span class="k">def</span> <span class="nf">_resetIds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="c1"># reset id</span>
@@ -272,10 +256,6 @@
     <span class="k">return</span> <span class="bp">self</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">other</span>
 
   <span class="n">__hash__</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">__hash__</span>
-
-  <span class="c1"># def __hash__(self):</span>
-  <span class="c1">#   &quot;&quot;&quot;Python 2 behaviour - objects equal only to themselves.&quot;&quot;&quot;</span>
-  <span class="c1">#   return hash(id(self))</span>
   
   <span class="c1"># CCPN properties</span>
 
@@ -436,10 +416,6 @@
         <span class="k">return</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="bp">None</span>
-
-  <span class="c1"># def _getWrapperObject(self, apiObject:ApiImplementation.DataObject):</span>
-  <span class="c1">#   &quot;&quot;&quot;get wrapper object wrapping apiObject or None&quot;&quot;&quot;</span>
-  <span class="c1">#   return self._project._data2Obj.get(apiObject)</span>
     
   <span class="c1"># CCPN Implementation methods</span>
 
@@ -747,7 +723,6 @@
     <span class="sd">&quot;&quot;&quot;Do wrapper level finalisation, and execute all notifiers</span>
 
 <span class="sd">    action is one of: &#39;create&#39;, &#39;delete&#39;, &#39;change&#39;, &#39;rename&#39;&quot;&quot;&quot;</span>
-
 
     <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
     <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_notificationBlanking</span><span class="p">:</span>

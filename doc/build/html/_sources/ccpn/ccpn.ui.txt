@@ -6,6 +6,13 @@ ccpn.ui package
     :undoc-members:
     :show-inheritance:
 
+Subpackages
+-----------
+
+.. toctree::
+
+    ccpn.ui.gui
+
 Submodules
 ----------
 

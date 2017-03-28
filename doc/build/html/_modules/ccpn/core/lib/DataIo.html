@@ -53,7 +53,7 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-11-28 14:51:44 +0000 (Mon, 28 Nov 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Luca G Mureddu, Simon P Skinner &amp; Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-11-28 14:51:44 +0000 (Mon, 28 Nov 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10027 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -939,37 +939,6 @@
   <span class="c1">#</span>
   <span class="n">project</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
 
-<span class="c1"># def cleanUpRestraintNames(project):</span>
-<span class="c1">#   &quot;&quot;&quot;Change strange restraint names to sensible ones</span>
-<span class="c1">#</span>
-<span class="c1">#   NBNB Ad-hoc hack&quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#   conversion = {</span>
-<span class="c1">#     &quot;H2&#39;1&quot;:&quot;H2&#39;&quot;,</span>
-<span class="c1">#     &quot;H2&#39;2&quot;:&quot;H2&#39;&#39;&quot;,</span>
-<span class="c1">#     &quot;H5&#39;1&quot;:&quot;H5&#39;&quot;,</span>
-<span class="c1">#     &quot;H5&#39;2&quot;:&quot;H5&#39;&#39;&quot;,</span>
-<span class="c1">#     &quot;H5M*&quot;:&quot;H7%&quot;,</span>
-<span class="c1">#     &quot;H5MX&quot;:&quot;H7%&quot;,</span>
-<span class="c1">#   }</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#   for contribution in project.restraintContributions:</span>
-<span class="c1">#     items = []</span>
-<span class="c1">#     for tt in contribution.restraintItems:</span>
-<span class="c1">#       ll = []</span>
-<span class="c1">#       for atomId in tt:</span>
-<span class="c1">#         res, nam = atomId.rsplit(&#39;.&#39;,1)</span>
-<span class="c1">#         nam2 = conversion.get(nam)</span>
-<span class="c1">#         print (&#39;---&gt;&#39;, res, nam, nam2)</span>
-<span class="c1">#         if nam2 is not None:</span>
-<span class="c1">#           print (&#39;@~@~ renaming&#39;, res, nam, nam2)</span>
-<span class="c1">#           atomId = &#39;%s.%s&#39; % (res, nam2)</span>
-<span class="c1">#         ll.append(atomId)</span>
-<span class="c1">#       if not ll in items:</span>
-<span class="c1">#         # Skip duplicates</span>
-<span class="c1">#         items.append(ll)</span>
-<span class="c1">#     contribution.restraintItems = items</span>
 
 <div class="viewcode-block" id="cleanUpDocrProject"><a class="viewcode-back" href="../../../../ccpn/ccpn.core.lib.html#ccpn.core.lib.DataIo.cleanUpDocrProject">[docs]</a><span class="k">def</span> <span class="nf">cleanUpDocrProject</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
   <span class="sd">&quot;&quot;&quot;Clean up DOCR project - converting restraints to ambiguous atoms</span>

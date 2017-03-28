@@ -53,7 +53,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -63,9 +63,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-01-10 17:39:01 +0000 (Tue, 10 Jan 2017) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 10094 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -164,11 +164,6 @@
     <span class="n">compoundName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compoundName</span>
     <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">substances</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">compoundName</span><span class="p">)</span>
 
-    <span class="c1"># # Select &#39;std&#39; labelling if present</span>
-    <span class="c1"># substances = [x for x in substances if x.labelling is None] or substances</span>
-    <span class="c1">#</span>
-    <span class="c1"># return substances[0] if substances else None</span>
-
   <span class="nd">@property</span>
   <span class="k">def</span> <span class="nf">sampleComponents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">SampleComponent</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;SampleComponents matching to Chain (based on chain.compoundName)&quot;&quot;&quot;</span>
@@ -179,8 +174,6 @@
 <div class="viewcode-block" id="Chain.clone"><a class="viewcode-back" href="../../../ccpn/ccpn.core.html#ccpn.core.Chain.Chain.clone">[docs]</a>  <span class="k">def</span> <span class="nf">clone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shortName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Make copy of chain.&quot;&quot;&quot;</span>
 
-    <span class="c1"># # Imported here to avoid circular imports</span>
-    <span class="c1"># from ccpn.core.lib import MoleculeLib</span>
     <span class="n">apiChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span>
     <span class="n">apiMolSystem</span> <span class="o">=</span> <span class="n">apiChain</span><span class="o">.</span><span class="n">molSystem</span>
     <span class="n">dataObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span>
@@ -195,8 +188,8 @@
     <span class="n">topObjectParameters</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;code&#39;</span><span class="p">:</span><span class="n">shortName</span><span class="p">,</span>
                            <span class="s1">&#39;pdbOneLetterCode&#39;</span><span class="p">:</span><span class="n">shortName</span><span class="p">[</span><span class="mi">0</span><span class="p">]}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;clone&#39;</span><span class="p">,</span> <span class="n">shortName</span><span class="p">,</span> <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChain&#39;</span><span class="p">)</span>
-    <span class="c1"># Must be blanked to avoid atom creation notifiers while creating entire chain</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+    <span class="c1"># # Blanking notification ruins sidebar handling of new chain</span>
+    <span class="c1"># self._project.blankNotification()</span>
     <span class="k">try</span><span class="p">:</span>
       <span class="n">newApiChain</span> <span class="o">=</span> <span class="n">copySubTree</span><span class="p">(</span><span class="n">apiChain</span><span class="p">,</span> <span class="n">apiMolSystem</span><span class="p">,</span> <span class="n">maySkipCrosslinks</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                                 <span class="n">topObjectParameters</span><span class="o">=</span><span class="n">topObjectParameters</span><span class="p">)</span>
@@ -214,21 +207,8 @@
           <span class="n">newAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">addInterAtomBond</span><span class="p">(</span><span class="n">newAtoms</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
 
     <span class="k">finally</span><span class="p">:</span>
-      <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+      <span class="c1"># self._project.unblankNotification()</span>
       <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
-
-    <span class="c1"># tags = [&#39;molecule&#39;, &#39;role&#39;, &#39;magnEquivalenceCode&#39;, &#39;physicalState&#39;,</span>
-    <span class="c1">#         &#39;conformationalIsomer&#39;, &#39;chemExchangeState&#39;, &#39;details&#39;]</span>
-    <span class="c1"># params = {tag:getattr(ccpnChain,tag) for tag in tags}</span>
-    <span class="c1"># params[&#39;code&#39;] = shortName</span>
-    <span class="c1"># params[&#39;pdbOneLetterCode&#39;] = shortName[0]</span>
-    <span class="c1"># self._startFunctionCommandBlock(&#39;clone&#39;, shortName, parName=&#39;newChain&#39;)</span>
-    <span class="c1"># try:</span>
-    <span class="c1">#   newCcpnChain = apiMolSystem.newChain(**params)</span>
-    <span class="c1">#   result = self._project._data2Obj[newCcpnChain]</span>
-    <span class="c1">#   MoleculeLib.duplicateAtomBonds({self:result})</span>
-    <span class="c1"># finally:</span>
-    <span class="c1">#   self._project._appBase._endCommandBlock()</span>
     <span class="c1">#</span>
     <span class="k">return</span> <span class="n">result</span></div>
                                   
@@ -366,8 +346,8 @@
 
   <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;createChain&#39;</span><span class="p">,</span> <span class="n">sequence</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
                                   <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChain&#39;</span><span class="p">)</span>
-  <span class="c1"># Must be blanked to avoid atom creation notifiers while creating entire chain</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+  <span class="c1"># # Blanking notification ruins sidebar handling of new chain</span>
+  <span class="c1"># self._project.blankNotification()</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">substance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPolymerSubstance</span><span class="p">(</span><span class="n">sequence</span><span class="o">=</span><span class="n">sequence</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
                                             <span class="n">startNumber</span><span class="o">=</span><span class="n">startNumber</span><span class="p">,</span> <span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span>
@@ -375,11 +355,10 @@
 
     <span class="n">apiMolecule</span> <span class="o">=</span> <span class="n">substance</span><span class="o">.</span><span class="n">_apiSubstance</span><span class="o">.</span><span class="n">molecule</span>
     <span class="n">apiMolecule</span><span class="o">.</span><span class="n">isFinalised</span> <span class="o">=</span> <span class="bp">True</span>
-    <span class="c1"># fetch to ensure creation of Substance</span>
     <span class="n">newApiChain</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">newChain</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="n">apiMolecule</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span>
                                         <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+    <span class="c1"># self._project.unblankNotification()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newApiChain</span><span class="p">]</span>
@@ -415,13 +394,13 @@
 
   <span class="bp">self</span><span class="o">.</span><span class="n">_startFunctionCommandBlock</span><span class="p">(</span><span class="s1">&#39;createChain&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="nb">locals</span><span class="p">(),</span> <span class="n">defaults</span><span class="o">=</span><span class="n">defaults</span><span class="p">,</span>
                                   <span class="n">parName</span><span class="o">=</span><span class="s1">&#39;newChain&#39;</span><span class="p">)</span>
-  <span class="c1"># Must be blanked to avoid atom creation notifiers while creating entire chain</span>
-  <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">blankNotification</span><span class="p">()</span>
+  <span class="c1"># # Blanking notification ruins sidebar handling of new chain</span>
+  <span class="c1"># self._project.blankNotification()</span>
   <span class="k">try</span><span class="p">:</span>
     <span class="n">newApiChain</span> <span class="o">=</span> <span class="n">apiMolSystem</span><span class="o">.</span><span class="n">newChain</span><span class="p">(</span><span class="n">molecule</span><span class="o">=</span><span class="n">apiMolecule</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">shortName</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="n">role</span><span class="p">,</span>
                                          <span class="n">details</span><span class="o">=</span><span class="n">comment</span><span class="p">)</span>
   <span class="k">finally</span><span class="p">:</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">unblankNotification</span><span class="p">()</span>
+    <span class="c1"># self._project.unblankNotification()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_endCommandBlock</span><span class="p">()</span>
 
   <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">newApiChain</span><span class="p">]</span>
@@ -440,15 +419,6 @@
   <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
   <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">chains</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">compoundName</span> <span class="o">==</span> <span class="n">name</span><span class="p">)</span>
 
-  <span class="c1"># apiSubstance = self._apiSubstance</span>
-  <span class="c1"># apiMolecule = apiSubstance.molecule if hasattr(apiSubstance, &#39;molecule&#39;) else None</span>
-  <span class="c1"># if apiMolecule is None:</span>
-  <span class="c1">#   return ()</span>
-  <span class="c1"># else:</span>
-  <span class="c1">#   data2Obj = self._project._data2Obj</span>
-  <span class="c1">#   return tuple(data2Obj[x]</span>
-  <span class="c1">#                for x in self._project._wrappedData.molSystem.sortedChains()</span>
-  <span class="c1">#                if x.molecule is apiMolecule)</span>
 <span class="n">Substance</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">getter</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span>
   <span class="s2">&quot;ccpn.Chains that correspond to ccpn.Substance (if defined)&quot;</span>
 <span class="p">)</span>

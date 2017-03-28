@@ -54,7 +54,7 @@
 <span class="c1"># Licence, Reference and Credits</span>
 <span class="c1">#=========================================================================================</span>
 
-<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-10-12 17:31:21 +0100 (Wed, 12 Oct 2016) $&quot;</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
 <span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
 <span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
                <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
@@ -64,9 +64,9 @@
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Last code modification:</span>
 <span class="c1">#=========================================================================================</span>
-<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: rhfogh $&quot;</span>
-<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-10-12 17:31:21 +0100 (Wed, 12 Oct 2016) $&quot;</span>
-<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9938 $&quot;</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
 
 <span class="c1">#=========================================================================================</span>
 <span class="c1"># Start of code</span>
@@ -395,116 +395,6 @@
       <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Chain </span><span class="si">%s</span><span class="s2"> matches no SampleComponent in sample </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">sample</span><span class="p">))</span>
   <span class="c1">#</span>
   <span class="k">return</span> <span class="n">result</span></div>
-
-
-<span class="c1"># ###############################################################################</span>
-<span class="c1"># #</span>
-<span class="c1"># #  Old, V2-version-derived  functions:</span>
-<span class="c1"># #</span>
-<span class="c1"># ###############################################################################</span>
-<span class="c1">#</span>
-<span class="c1"># def atomLabellingFractions(project:Project, atom:(Atom, NmrAtom, str), labelling:str) -&gt; dict:</span>
-<span class="c1">#   &quot;&quot;&quot;get {isotopeCode:labellingFraction} in given sample for atom/nmrAtom or ID string&quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#   atomId = atom if isinstance(atom, str) else atom.id</span>
-<span class="c1">#</span>
-<span class="c1">#   useAtom = project.getAtom(atomId)</span>
-<span class="c1">#   if useAtom is None:</span>
-<span class="c1">#     fields = Pid(atomId).fields</span>
-<span class="c1">#     if len(fields) == 4:</span>
-<span class="c1">#       atomName = fields[3]</span>
-<span class="c1">#       residueType = fields[2]</span>
-<span class="c1">#       return Labeling.chemAtomLabelFractions(project, labelling, residueType, atomName)</span>
-<span class="c1">#</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       # No valid parameters found, return empty dict</span>
-<span class="c1">#       return {}</span>
-<span class="c1">#</span>
-<span class="c1">#   else:</span>
-<span class="c1">#     return Labeling.molAtomLabelFractions(labelling, useAtom._wrappedData.residue.molResidue,</span>
-<span class="c1">#                                           useAtom.name)</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># def atomPairLabellingFractions(project:Project, atomPair:typing.Sequence, labelling:str) -&gt; dict:</span>
-<span class="c1">#   &quot;&quot;&quot;get {(isotopeCode1,isotopeCode2):labellingFraction with given labelling for atom pair</span>
-<span class="c1">#   each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string &quot;&quot;&quot;</span>
-<span class="c1">#   atomIds = tuple(x if isinstance(x, str) else x.id for x in atomPair)</span>
-<span class="c1">#</span>
-<span class="c1">#   useAtoms = tuple(project.getAtom(x) for x in atomIds)</span>
-<span class="c1">#   if None in useAtoms:</span>
-<span class="c1">#     residueTypes = set()</span>
-<span class="c1">#     atomNames = []</span>
-<span class="c1">#     for atomId in atomIds:</span>
-<span class="c1">#       fields = Pid(atomId).fields</span>
-<span class="c1">#       if len(fields) == 4:</span>
-<span class="c1">#         atomNames.append(fields[3])</span>
-<span class="c1">#         residueTypes.add(fields[2])</span>
-<span class="c1">#       else:</span>
-<span class="c1">#         break</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       if len(residueTypes) == 1:</span>
-<span class="c1">#         return Labeling.chemAtomPairLabelFractions(project, labelling, residueTypes.pop(), atomNames)</span>
-<span class="c1">#</span>
-<span class="c1">#   else:</span>
-<span class="c1">#     residues = tuple(x._wrappedData.residue.molResidue for x in useAtoms)</span>
-<span class="c1">#     atomNames = tuple(x.name for x in useAtoms)</span>
-<span class="c1">#     return Labeling.molAtomLabelPairFractions(labelling, residues, atomNames)</span>
-<span class="c1">#</span>
-<span class="c1">#   # no valid return - return empty</span>
-<span class="c1">#   return {}</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># def sampleLabellingFractions(sample:Sample, atom:(Atom, NmrAtom, str)) -&gt; dict:</span>
-<span class="c1">#   &quot;&quot;&quot;get {isotopeCode:labellingFraction} with given labelling for atom/nmrAtom or ID string&quot;&quot;&quot;</span>
-<span class="c1">#</span>
-<span class="c1">#   atomId = atom if isinstance(atom, str) else atom.id</span>
-<span class="c1">#   fields = Pid(atomId).fields</span>
-<span class="c1">#   if len(fields) == 4:</span>
-<span class="c1">#     chainCode, dummy, residueType, atomName = fields</span>
-<span class="c1">#     labelling = Labeling.sampleChainLabeling(sample, chainCode)</span>
-<span class="c1">#     if labelling == DEFAULT_LABELLING:</span>
-<span class="c1">#       # No labelling found - return empty</span>
-<span class="c1">#       return {}</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       return atomLabellingFractions(sample._project, atomId, labelling)</span>
-<span class="c1">#   else:</span>
-<span class="c1">#     # Not a valid atom ID - return empty</span>
-<span class="c1">#     return {}</span>
-<span class="c1">#</span>
-<span class="c1">#</span>
-<span class="c1"># def samplePairLabellingFractions(sample:Sample, atomPair:typing.Sequence) -&gt; dict:</span>
-<span class="c1">#   &quot;&quot;&quot;get {(isotopeCode1,isotopeCode2):labellingFraction in given sample for atom pair</span>
-<span class="c1">#   each atom in atomPair may be an Atom, an NmrAtom, or an atom ID string &quot;&quot;&quot;</span>
-<span class="c1">#   atomIds = tuple(x if isinstance(x, str) else x.id for x in atomPair)</span>
-<span class="c1">#</span>
-<span class="c1">#   labellings = set()</span>
-<span class="c1">#   residueTypes = set()</span>
-<span class="c1">#   atomNames = []</span>
-<span class="c1">#   for atomId in atomIds:</span>
-<span class="c1">#     fields = Pid(atomId).fields</span>
-<span class="c1">#     if len(fields) == 4:</span>
-<span class="c1">#       atomNames.append(fields[3])</span>
-<span class="c1">#       residueTypes.add(fields[2])</span>
-<span class="c1">#       labellings.add(Labeling.sampleChainLabeling(sample, fields[0]))</span>
-<span class="c1">#     else:</span>
-<span class="c1">#       break</span>
-<span class="c1">#</span>
-<span class="c1">#   else:</span>
-<span class="c1">#     if len(labellings) == 1:</span>
-<span class="c1">#       labelling = labellings.pop()</span>
-<span class="c1">#       useAtoms = tuple(sample._project.getAtom(x) for x in atomIds)</span>
-<span class="c1">#       if None in useAtoms:</span>
-<span class="c1">#         if len(residueTypes) == 1:</span>
-<span class="c1">#           return Labeling.chemAtomPairLabelFractions(sample._project, labelling, residueTypes.pop(),</span>
-<span class="c1">#                                                      atomNames)</span>
-<span class="c1">#</span>
-<span class="c1">#       else:</span>
-<span class="c1">#         residues = tuple(x._wrappedData.residue.molResidue for x in useAtoms)</span>
-<span class="c1">#         return Labeling.molAtomLabelPairFractions(labelling, residues, atomNames)</span>
-<span class="c1">#</span>
-<span class="c1">#   # No valid return found, return empty dict</span>
-<span class="c1">#   return {}</span>
 </pre></div>
 
           </div>

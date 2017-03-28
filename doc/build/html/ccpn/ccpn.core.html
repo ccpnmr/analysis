@@ -148,7 +148,7 @@ coordinate structure defined by a <strong>Model</strong> object.</p>
 </div>
 <div class="section" id="common-class-elements">
 <h3>Common Class elements<a class="headerlink" href="#common-class-elements" title="Permalink to this headline">¶</a></h3>
-<p>All classes in this module are subclasses of the <span class="xref std std-ref">ccpn-AbstractWrapperObject-ref</span>,
+<p>All classes in this module are subclasses of the core._implementation.AbstractWrapperObject,
 and inherit the following elements:</p>
 <p><strong>project</strong> - <em>ccpn.core.Project</em></p>
 <p>The Project (root) containing the object.</p>
@@ -1072,443 +1072,6 @@ Universal identifier for dataSet</p>
 </dd></dl>
 
 </div>
-<div class="section" id="ccpn-core-ensemble-module">
-<h2>ccpn.core.Ensemble module<a class="headerlink" href="#ccpn-core-ensemble-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.Ensemble"></span><p>THIS FILE IS OBSOLETE AND SHOULD BE DELETED</p>
-<p>It&#8217;s copmtents have been copied into StructureEnsemble.py and Model.py (and modified)</p>
-<p>It is left here temporarily for thenpurpose of comparison</p>
-<dl class="class">
-<dt id="ccpn.core.Ensemble.ChainedAssignmentWarningSuppressor">
-<em class="property">class </em><code class="descclassname">ccpn.core.Ensemble.</code><code class="descname">ChainedAssignmentWarningSuppressor</code><span class="sig-paren">(</span><em>f: Any</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#ChainedAssignmentWarningSuppressor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.ChainedAssignmentWarningSuppressor" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>Suppress Pandas&#8217; warnings about chained assignment when using an assignment strategy
-known to not suffer from chained assignment.</p>
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.core.Ensemble.Ensemble">
-<em class="property">class </em><code class="descclassname">ccpn.core.Ensemble.</code><code class="descname">Ensemble</code><span class="sig-paren">(</span><em>*args</em>, <em>*</em>, <em>name: str=None = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pandas.core.frame.DataFrame</span></code></p>
-<p>A structure Ensemble</p>
-<p>The structure ensemble is based on a Pandas Dataframe.  All of the functionality of Dataframes
-is available, but we have added a number of convenience methods for working with the data.</p>
-<p>In general, there are three things you may want to do with an ensemble:
-1.     Select a sub-set of atoms within the ensemble
-2.     Access the data within the ensemble
-3.     Write data to the ensemble
-We will cover each of these in turn below.</p>
-<ol class="arabic simple">
-<li>Selecting sub-sets of atoms within the ensemble:</li>
-</ol>
-<blockquote>
-<div><p>Subsets of atoms can be extracted by creating a selector, which is nothing more than a Pandas
-Series object. These can be thought of as a table with the same number of rows as the ensemble
-you want to select from, and containing a single column of True/False values, where True
-represents a value to be included in the selection. We provide a .selector() function that will
-return a selector based on criteria you provide.  Please note that
-although the criteria names are plural, single values are also allowed.</p>
-<p>The following criteria are currently supported:
-* chainCodes</p>
-<blockquote>
-<div>allowed values: ‘A’; ‘A,C’; ‘A, C’; [‘A’, ‘C’]
-not allowed: ‘A-C’ (currently); [‘A, B’, ‘C’] (currently)
-Note that this is case sensitive, so ‘a’ will likely not select anything</div></blockquote>
-<ul>
-<li><p class="first">residueNames
-allowed values: ‘MET’; ‘MET,ALA’; ‘MET, ALA’; [‘MET’, ’ALA’]
-not allowed: ‘MET-ALA’; [‘MET, ALA’, ‘GLU’] (currently)
-Note that this is case sensitive, so ‘met’ will likely not select anything</p>
-</li>
-<li><p class="first">sequenceIds
-allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
-not allowed: [1, 2, ‘4-7’] (currently);</p>
-</li>
-<li><p class="first">atomNames
-allowed values: ‘H’; ‘H,N’; ‘H, N’; [‘H’, ‘N’]
-not allowed: ‘H-N’; [‘H, N’, ‘CA’] (currently)</p>
-</li>
-<li><p class="first">modelNumbers
-allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
-not allowed: [1, 2, ‘4-7’] (currently);</p>
-</li>
-<li><p class="first">ids
-allowed values: ‘A.3.LEU.N’; ‘A.3.LEU.N, A.3.LEU.CA’;</p>
-<blockquote>
-<div><p>‘A.3.LEU.N, A.3.LEU.CA’; [‘A.3.LEU.N’, ‘A.3.LEU.CA’]</p>
-</div></blockquote>
-<p>not allowed: ‘A.3.LEU.N-‘A.3.LEU.CA’; ‘A.3.LEU.N, CA’; [‘A.3.LEU.N, A.3.LEU.CA’, ‘A.3.LEU.CB’]</p>
-</li>
-<li><p class="first">elements
-allowed values: ‘H’; ‘H,C’; ‘H, C’; [‘H’, ‘C’]
-not allowed: ‘H-N’; [‘H, N’, ‘C’]</p>
-</li>
-</ul>
-<p>In addition to these criteria, functions taking a record and returning True or False can
-be supplied via the func keyword argument.
-For example:</p>
-<blockquote>
-<div>ensemble.selector(func=lambda r: (r[‘tempFactor’]&lt; 70) and (r[‘tempFactor’]&gt;60))</div></blockquote>
-<dl class="docutils">
-<dt>which will select everything with a tempFactor between 60 and 70 exclusive.</dt>
-<dd>The selector can be converted to a filter by setting the inverse keyword to True, so that
-any record that matches the criteria are excluded from the selection.</dd>
-<dt>Finally, selectors can be combined using Boolean operations.  The following statement:</dt>
-<dd>s = ensemble.selector(atomNames=’N, CA’)</dd>
-<dt>is equivalent to:</dt>
-<dd>s1 = ensemble.selector(atomNames=’CA’)
-s2 = ensemble.selector(atomNames=’N’)
-s = s1 | s2  # Matches either s1 OR s2</dd>
-<dt>While this statement:</dt>
-<dd>s = ensemble.selector(atomNames=’N, CA’, modelNumbers = ‘1-3’)</dd>
-<dt>is equivalent to:</dt>
-<dd>s1 = ensemble.selector(atomNames=’N, CA’)
-s2 = ensemble.selector(modelNumbers = ‘1-3’)
-s = s1 &amp; s2  # Matches both s1 AND s2</dd>
-</dl>
-<p>Because certain selections are quite common, we provide several pre-packaged selections,
-these include:</p>
-<blockquote>
-<div>ensemble.backboneSelector
-ensemble.amideProtonSelector
-ensemble.amideNitrogenSelector
-ensemble.methylSelector</div></blockquote>
-<p>Once you have a selector, you can use it to extract a copy of the rows you want from the
-ensemble via ensemble.extract(). extract() accepts a selector and a list of columns to extract.
-If no selector is provided, extract() will use any criteria provided to generate a selector
-on-the-fly for selection (in fact, this is the recommended usage pattern.)</p>
-<p>The extract() method has some important caveats:
-1. It is very important to remember that extract() gives a COPY of the data, not the original</p>
-<blockquote>
-<div>data. If you change the data in the extracted ensemble, the original data will remain
-unaltered.</div></blockquote>
-<ol class="arabic simple" start="2">
-<li>If you use a selector created from one ensemble on a different ensemble, it will fail if they
-don’t have exactly the same number of records.  If they do have the same number of records,
-you will get the corresponding record numbers, which is probably not what you want.</li>
-<li>In order to avoid the problem in 2., the recommended usage pattern is to let extract()
-create the selector on-the-fly.</li>
-<li>If you must create complex selectors, please make sure that you create the selector from the
-exact ensemble you wish to extract from.</li>
-</ol>
-</div></blockquote>
-<ol class="arabic simple" start="2">
-<li>There are several ways to access the data within the ensemble (or an extracted subset</li>
-</ol>
-<blockquote>
-<div><p>thereof.) If your ensemble has multiple records, copies of the columns can be accessed by name.
-For example:</p>
-<blockquote>
-<div>occupancies = ensemble[&#8216;occupancy&#8217;]  # Gives a Pandas Series
-occupancies = ensemble[&#8216;occupancy&#8217;].tolist()  # Gives a Python List</div></blockquote>
-<p>Alternatively, you can convert the records into a tuple of namedTuples using the
-as_namedTuples() method.</p>
-<p>If you have a single record, the values can be accessed by column name.
-For example:</p>
-<blockquote>
-<div>atomName = singleRecordEnsemble[‘atomName’]
-atomName, sequenceId = singleRecordEnsemble[[‘atomName’, ‘sequenceId’]]</div></blockquote>
-<p>but beware: selecting multiple columns when you don’t have a single record ensemble can lead to
-very confusing error messages.</p>
-<p>Instead, it’s often better to step over copies of all the records in a subset using the
-iterrecords() iterator:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>for record in ensemble.iterrecords():</dt>
-<dd>print(record[[‘x’, ‘y’, ‘z’]])</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>or the itertuples() iterator:</dt>
-<dd><dl class="first last docutils">
-<dt>for record in ensemble.itertuples():</dt>
-<dd>print(record.x, record.y, record.z)</dd>
-</dl>
-</dd>
-</dl>
-<p>Finally, all of the standard Pandas methods for accessing the data are still available.
-We leave it to the interested coder to investigate that.</p>
-<ol class="arabic simple" start="3">
-<li>Writing data to the ensemble is by far the most tricky operation.  There are two primary
-issues to be dealt with:  putting data in the right place within the ensemble, and making
-sure you’re writing to the ensemble and not a copy of the ensemble.</li>
-</ol>
-<p>The easiest case is probably the least common for users: creating an ensemble from scratch.
-In this case, the best way to create the ensemble is to assign several equal-length lists or
-tuples to columns within the ensemble:</p>
-<blockquote>
-<div>ensemble = Ensemble()
-ensemble[‘modelNumber’] = [1,1,1,2,2,2]
-ensemble[‘chainCode’] = [‘A’, ‘A’, ‘A’, ‘A’, ‘A’, ‘A’]
-# Etc,…
-ensemble = ensemble.reset_index(drop=True)  # Cleanup the indexing</div></blockquote>
-<p>More commonly, users may want to alter values in a pre-existing ensemble.  The method
-setValues() can be used for this.  The first parameter to setValues() tells setValues() which
-record to change, and can be an index, a single record selector or a single record ensemble
-(this last option is easily achieved with the iterrecords() method.)
-Any subsequent parameters passed to setValues() are the column names and values to set.
-For example:</p>
-<blockquote>
-<div><p>extracted = ensemble.extract(residueNames=&#8217;MET&#8217;, atomNames=&#8217;CB&#8217;)
-for record in extracted.iterrecords():</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>if record[‘x’] &gt; 999:</dt>
-<dd>ensemble.setValues(record, x=999, y=999, z=999)</dd>
-</dl>
-</div></blockquote>
-</div></blockquote>
-<p>Just like extract(), exactly matching the source of your selector/selecting ensemble and the
-ensemble you call setValues() on is vital to prevent unpredictable behavior.
-You have been warned!</p>
-<p>There are currently no insert functions.  You can, if you wish, append a row to the ensemble
-using setValues and passing an index value not currently in the ensemble:</p>
-<blockquote>
-<div>maxEnsembleIndexValue = ensemble.index.max()
-ensemble.setValues(maxEnsembleIndexValue+1, x=0, y=1, z=2)</div></blockquote>
-</div></blockquote>
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble.Ensemble.amideNitrogenSelector">
-<code class="descname">amideNitrogenSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.amideNitrogenSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects only the amide nitrogen.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble.Ensemble.amideProtonSelector">
-<code class="descname">amideProtonSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.amideProtonSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects only the amide proton.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble.Ensemble.as_namedTuples">
-<code class="descname">as_namedTuples</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.as_namedTuples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.as_namedTuples" title="Permalink to this definition">¶</a></dt>
-<dd><p>An tuple of named tuples over the records (atoms) in the ensemble</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble.Ensemble.backboneSelector">
-<code class="descname">backboneSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.backboneSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects backbone atoms.</p>
-<dl class="docutils">
-<dt>The selector is specific for:</dt>
-<dd>Ca, C&#8217;, O, Nh, Hn</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble.Ensemble.extract">
-<code class="descname">extract</code><span class="sig-paren">(</span><em>selector: pandas.core.series.Series = None</em>, <em>columns: int | float</em>, <em>Iterable[Union[int</em>, <em>float</em>, <em>str]] = None</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; ccpn.core.Ensemble.Ensemble<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.extract" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extracts a copy of a subset of atoms from the Ensemble</p>
-<dl class="docutils">
-<dt>Params:</dt>
-<dd><dl class="first last docutils">
-<dt>selector</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Boolean Pandas series the same length as the number of rows in the ensemble</span><dd>If no selector is given,  pass the keyword args on to the selector function
-and use the resulting selector to extract a sub-ensemble.</dd>
-</dl>
-</dd>
-</dl>
-<p>Returns a new Ensemble</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="ccpn.core.Ensemble.Ensemble.from_pdb">
-<em class="property">classmethod </em><code class="descname">from_pdb</code><span class="sig-paren">(</span><em>filename: str</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.from_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.from_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create an Ensemble from a Pandas dataframe representing a pdb file</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble.Ensemble.iterrecords">
-<code class="descname">iterrecords</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; ccpn.core.Ensemble.Ensemble<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.iterrecords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.iterrecords" title="Permalink to this definition">¶</a></dt>
-<dd><p>An iterator over the rows (atoms) in the ensemble</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble.Ensemble.methylSelector">
-<code class="descname">methylSelector</code><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.methylSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects atoms in methyl groups.</p>
-<dl class="docutils">
-<dt>The selector is specific for:</dt>
-<dd>Ala: Cb and attached protons
-Leu: Both Cd&#8217;s and attached protons
-Met: Ce and attached protons
-Thr: Cg and attached protons
-Val: Both Cg&#8217;s and attached protons</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble.Ensemble.records">
-<code class="descname">records</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; Tuple[Ensemble]<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.records" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble.Ensemble.selector">
-<code class="descname">selector</code><span class="sig-paren">(</span><em>chainCodes=None</em>, <em>residueNames=None</em>, <em>sequenceIds=None</em>, <em>atomNames=None</em>, <em>modelNumbers=None</em>, <em>ids=None</em>, <em>elements=None</em>, <em>func=None</em>, <em>inverse=False</em><span class="sig-paren">)</span> &rarr; pandas.core.series.Series<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.selector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a boolean selector restricted to rows matching the parameters specified</p>
-<p>Returns Pandas Series</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble.Ensemble.setValues">
-<code class="descname">setValues</code><span class="sig-paren">(</span><em>accessor: int | Ensemble</em>, <em>pandas.core.series.Series</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Ensemble.setValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Ensemble.setValues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Allows you to easily set values (in place) for fields in the Ensemble</p>
-<dl class="docutils">
-<dt>Params:</dt>
-<dd><dl class="first docutils">
-<dt>accessor</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, Ensemble, Selector</span><dd><p class="first">If an integer is given, the value will be set on the row at that index
-If an single row Ensemble is given, the value will be set on the row that matches.
-If a selector that matches a single row is given, the value will be set on that
-matching row</p>
-<p class="last">Multi-row Ensembles or selectors are not allowed. (consider using
-Ensemble.iterrecords() to iterate)</p>
-</dd>
-</dl>
-<p class="last">kwargs : columns on which to set the values</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
-<dt id="ccpn.core.Ensemble.Model">
-<em class="property">class </em><code class="descclassname">ccpn.core.Ensemble.</code><code class="descname">Model</code><span class="sig-paren">(</span><em>ensemble</em>, <em>modelNumber</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<p>A view of a single model within an ensemble.</p>
-<p>Once created, a Model <em>should</em> behave exactly like an Ensemble.
-If it doesn&#8217;t, please report it as a bug.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.core.Ensemble.pdb2df">
-<code class="descclassname">ccpn.core.Ensemble.</code><code class="descname">pdb2df</code><span class="sig-paren">(</span><em>filename: str</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="reference internal" href="../_modules/ccpn/core/Ensemble.html#pdb2df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble.pdb2df" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a Pandas dataframe from a pdb file.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-ccpn.core.Ensemble_bak">
-<span id="ccpn-core-ensemble-bak-module"></span><h2>ccpn.core.Ensemble_bak module<a class="headerlink" href="#module-ccpn.core.Ensemble_bak" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ccpn.core.Ensemble_bak.Ensemble">
-<em class="property">class </em><code class="descclassname">ccpn.core.Ensemble_bak.</code><code class="descname">Ensemble</code><span class="sig-paren">(</span><em>*args</em>, <em>*</em>, <em>name=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#Ensemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pandas.core.frame.DataFrame</span></code></p>
-<p>A struture Ensemble</p>
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.amideNitrogenSelector">
-<code class="descname">amideNitrogenSelector</code><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.amideNitrogenSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects only the amide nitrogen.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.amideProtonSelector">
-<code class="descname">amideProtonSelector</code><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.amideProtonSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects only the amide proton.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.backboneSelector">
-<code class="descname">backboneSelector</code><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.backboneSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects backbone atoms.</p>
-<dl class="docutils">
-<dt>The selector is specific for:</dt>
-<dd>Ca, C&#8217;, O, Nh, Hn</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.extract">
-<code class="descname">extract</code><span class="sig-paren">(</span><em>selector=None</em>, <em>columns=None</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#Ensemble.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.extract" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extracts a copy of a subset of atoms from the Ensemble</p>
-<dl class="docutils">
-<dt>Params:</dt>
-<dd><dl class="first last docutils">
-<dt>selector</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Boolean Pandas series the same length as the number of rows in the ensemble</span><dd>If no selector is given,  pass the keyword args on to the selector function
-and use the resulting selector to extract a sub-ensemble.</dd>
-</dl>
-</dd>
-</dl>
-<p>Returns a new Ensemble</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.from_pdb">
-<em class="property">classmethod </em><code class="descname">from_pdb</code><span class="sig-paren">(</span><em>filename: str</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#Ensemble.from_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.from_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create an Ensemble from a pdb file</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.listFromString">
-<code class="descname">listFromString</code><span class="sig-paren">(</span><em>string: str</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#Ensemble.listFromString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.listFromString" title="Permalink to this definition">¶</a></dt>
-<dd><p>Convenience function to turn a string into a list of items.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.methylSelector">
-<code class="descname">methylSelector</code><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.methylSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects atoms in methyl groups.</p>
-<dl class="docutils">
-<dt>The selector is specific for:</dt>
-<dd>Ala: Cb and attached protons
-Leu: Both Cd&#8217;s and attached protons
-Met: Ce and attached protons
-Thr: Cg and attached protons
-Val: Both Cg&#8217;s and attached protons</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.records">
-<code class="descname">records</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#Ensemble.records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.records" title="Permalink to this definition">¶</a></dt>
-<dd><p>An iterator over the rows (atoms) of the ensemble</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.selector">
-<code class="descname">selector</code><span class="sig-paren">(</span><em>chainCodes=None</em>, <em>residueNames=None</em>, <em>sequenceIds=None</em>, <em>atomNames=None</em>, <em>modelNumbers=None</em>, <em>ids=None</em>, <em>elements=None</em>, <em>func=None</em>, <em>inverse=False</em><span class="sig-paren">)</span> &rarr; pandas.core.series.Series<a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#Ensemble.selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.selector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a boolean selector restricted to rows matching the parameters specified</p>
-<p>Returns Pandas Series</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.Ensemble_bak.Ensemble.setValues">
-<code class="descname">setValues</code><span class="sig-paren">(</span><em>accessor</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#Ensemble.setValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.Ensemble.setValues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Allows you to easily set values (in place) for fields in the Ensemble</p>
-<dl class="docutils">
-<dt>Params:</dt>
-<dd><dl class="first docutils">
-<dt>accessor</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, Ensemble, Selector</span><dd><p class="first">If an integer is given, the value will be set on the row at that index
-If an single row Ensemble is given, the value will be set on the row that matches.
-If a selector that matches a single row is given, the value will be set on that
-matching row</p>
-<p class="last">Multi-row Ensembles or selectors are not allowed.
-(consider using Ensemble.records() to iterate)</p>
-</dd>
-</dl>
-<p class="last">kwargs : columns on which to set the values</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.core.Ensemble_bak.pdb2df">
-<code class="descclassname">ccpn.core.Ensemble_bak.</code><code class="descname">pdb2df</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Ensemble_bak.html#pdb2df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Ensemble_bak.pdb2df" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a pandas dataframe from a pdb file.</p>
-</dd></dl>
-
-</div>
 <div class="section" id="ccpn-core-integral-module">
 <h2>ccpn.core.Integral module<a class="headerlink" href="#ccpn-core-integral-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-ccpn.core.Integral"></span><dl class="class">
@@ -1719,6 +1282,12 @@ known to not suffer from chained assignment.</p>
 <code class="descname">className</code><em class="property"> = 'Model'</em><a class="headerlink" href="#ccpn.core.Model.Model.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Model.Model.clearData">
+<code class="descname">clearData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Model.html#Model.clearData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Model.Model.clearData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all data for model</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Model.Model.comment">
 <code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Model.Model.comment" title="Permalink to this definition">¶</a></dt>
@@ -1771,83 +1340,6 @@ StructureEnsemble containing Model.</p>
 If it doesn&#8217;t, please report it as a bug.</p>
 <p>Note that ModelData objects are only valid when linked to an existing StructureEnsemble
 and that self._modelNumber must match</p>
-</dd></dl>
-
-</div>
-<div class="section" id="ccpn-core-model-bak-module">
-<h2>ccpn.core.Model_bak module<a class="headerlink" href="#ccpn-core-model-bak-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.Model_bak"></span><dl class="class">
-<dt id="ccpn.core.Model_bak.Model">
-<em class="property">class </em><code class="descclassname">ccpn.core.Model_bak.</code><code class="descname">Model</code><a class="reference internal" href="../_modules/ccpn/core/Model_bak.html#Model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Model_bak.Model" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>ccpn.Model - Structural Model, or one member of the structure ensemble.</p>
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.atomNameData">
-<code class="descname">atomNameData</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.atomNameData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-atomCount length numpy array of model-specific atom names.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.bFactorData">
-<code class="descname">bFactorData</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.bFactorData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-atomCount length numpy array of B factors.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.className">
-<code class="descname">className</code><em class="property"> = 'Model'</em><a class="headerlink" href="#ccpn.core.Model_bak.Model.className" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.coordinateData">
-<code class="descname">coordinateData</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.coordinateData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-atomCount * 3 numpy array of coordinates.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.occupancyData">
-<code class="descname">occupancyData</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.occupancyData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-atomCount length numpy array of occupancies.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.serial">
-<code class="descname">serial</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.serial" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int</em>, <em>immutable</em> - 
-ID number of Model, used in Pid and to identify the Model.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.shortClassName">
-<code class="descname">shortClassName</code><em class="property"> = 'MD'</em><a class="headerlink" href="#ccpn.core.Model_bak.Model.shortClassName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Short class name, for PID.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.structureEnsemble">
-<code class="descname">structureEnsemble</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.structureEnsemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>ccpn.core.StructureEnsemble.StructureEnsemble</em>, <em>immutable</em> - 
-StructureEnsemble containing Model.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.Model_bak.Model.title">
-<code class="descname">title</code><a class="headerlink" href="#ccpn.core.Model_bak.Model.title" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-title of Model (not used in PID).</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
@@ -2579,6 +2071,13 @@ possible - in the example that all four protons could be bound to either of the 
 figureOfMerit of Peak, between 0.0 and 1.0 inclusive.</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="ccpn.core.Peak.Peak.getInAxisOrder">
+<code class="descname">getInAxisOrder</code><span class="sig-paren">(</span><em>attributeName: str</em>, <em>axisCodes: Sequence[str] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.getInAxisOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.getInAxisOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get attributeName in order defined by axisCodes :
+(default order if None)</p>
+</dd></dl>
+
 <dl class="attribute">
 <dt id="ccpn.core.Peak.Peak.height">
 <code class="descname">height</code><a class="headerlink" href="#ccpn.core.Peak.Peak.height" title="Permalink to this definition">¶</a></dt>
@@ -2659,6 +2158,13 @@ Restraints corresponding to Peak</p>
 <code class="descname">serial</code><a class="headerlink" href="#ccpn.core.Peak.Peak.serial" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>int</em>, <em>immutable</em> - 
 serial number of Peak, used in Pid and to identify the Peak.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Peak.Peak.setInAxisOrder">
+<code class="descname">setInAxisOrder</code><span class="sig-paren">(</span><em>attributeName: str, values: Sequence[T_co], axisCodes: Sequence[str] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Peak.html#Peak.setInAxisOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Peak.Peak.setInAxisOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set attributeName from values in order defined by axisCodes
+(default order if None)</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -2770,7 +2276,7 @@ PeakListViews showing Spectrum</p>
 
 <dl class="method">
 <dt id="ccpn.core.PeakList.PeakList.pickPeaksNd">
-<code class="descname">pickPeaksNd</code><span class="sig-paren">(</span><em>positions: Sequence[float] = None</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>fitMethod: str = 'gaussian'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em>, <em>minDropfactor: float = 0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksNd" title="Permalink to this definition">¶</a></dt>
+<code class="descname">pickPeaksNd</code><span class="sig-paren">(</span><em>regionToPick: Sequence[float] = None</em>, <em>doPos: bool = True</em>, <em>doNeg: bool = True</em>, <em>fitMethod: str = 'gaussian'</em>, <em>excludedRegions=None</em>, <em>excludedDiagonalDims=None</em>, <em>excludedDiagonalTransform=None</em>, <em>minDropfactor: float = 0.1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/PeakList.html#PeakList.pickPeaksNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.PeakList.PeakList.pickPeaksNd" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -2909,6 +2415,12 @@ e.g. to disable &#8216;object modified&#8217; notifiers during object creation</
 <dt id="ccpn.core.Project.Project.className">
 <code class="descname">className</code><em class="property"> = 'Project'</em><a class="headerlink" href="#ccpn.core.Project.Project.className" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Project.Project.complexes">
+<code class="descname">complexes</code><a class="headerlink" href="#ccpn.core.Project.Project.complexes" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>(&#8216;ccpn.core.Complex.Complex,)</em>  - contained Complex objects in creation order. This may differ from the standard sorting order</p>
+</dd></dl>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.createChain">
@@ -3060,6 +2572,12 @@ and return the result</p>
 <dt id="ccpn.core.Project.Project.getChemicalShiftList">
 <code class="descname">getChemicalShiftList</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.ChemicalShiftList.ChemicalShiftList<a class="headerlink" href="#ccpn.core.Project.Project.getChemicalShiftList" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get contained &#8216;ccpn.core.ChemicalShiftList.ChemicalShiftList object by relative ID</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Project.Project.getComplex">
+<code class="descname">getComplex</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Complex.Complex<a class="headerlink" href="#ccpn.core.Project.Project.getComplex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get contained &#8216;ccpn.core.Complex.Complex object by relative ID</p>
 </dd></dl>
 
 <dl class="method">
@@ -3382,8 +2900,8 @@ Use Project.loadData or Project.createDummySpectrum instead</p>
 
 <dl class="method">
 <dt id="ccpn.core.Project.Project.newStructureEnsemble">
-<code class="descname">newStructureEnsemble</code><span class="sig-paren">(</span><em>ensembleId: int = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.StructureEnsemble_bak.StructureEnsemble<a class="headerlink" href="#ccpn.core.Project.Project.newStructureEnsemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create new, empty StructureEnsemble</p>
+<code class="descname">newStructureEnsemble</code><span class="sig-paren">(</span><em>serial: int = None</em>, <em>label: str = None</em>, <em>data: ccpn.util.StructureData.EnsembleData = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.StructureEnsemble.StructureEnsemble<a class="headerlink" href="#ccpn.core.Project.Project.newStructureEnsemble" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create new StructureEnsemble</p>
 </dd></dl>
 
 <dl class="method">
@@ -3819,6 +3337,14 @@ Chain containing residue.</p>
 <code class="descname">comment</code><a class="headerlink" href="#ccpn.core.Residue.Residue.comment" title="Permalink to this definition">¶</a></dt>
 <dd><p>- <em>str</em>, <em>mutable</em> - 
 Free-form text comment</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.core.Residue.Residue.configuration">
+<code class="descname">configuration</code><a class="headerlink" href="#ccpn.core.Residue.Residue.configuration" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str=None</em>, <em>mutable</em> - 
+Residue conformation or other non-covalent distinction.</p>
+<p>Example: cis/trans/None for the peptide bonds N-terminal to a residue</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -4860,6 +4386,13 @@ Gaussian broadening per dimension. Always None for sampled dimensions.</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.getInAxisOrder">
+<code class="descname">getInAxisOrder</code><span class="sig-paren">(</span><em>attributeName: str</em>, <em>axisCodes: Sequence[str] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.getInAxisOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getInAxisOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get attributeName in order defined by axisCodes :
+(default order if None)</p>
+</dd></dl>
+
+<dl class="method">
 <dt id="ccpn.core.Spectrum.Spectrum.getIntegral">
 <code class="descname">getIntegral</code><span class="sig-paren">(</span><em>relativeId: str</em><span class="sig-paren">)</span> &rarr; ccpn.core.Integral.Integral<a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.getIntegral" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get contained &#8216;ccpn.core.Integral.Integral object by relative ID</p>
@@ -5211,6 +4744,13 @@ ccpn.Sample used to acquire ccpn.Spectrum</p>
 <dd><p>- <em>float</em>, <em>mutable</em> - 
 Scaling factor for intensities and volumes.
 Intensities and volumes should be <em>multiplied</em> by scale before comparison.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.Spectrum.Spectrum.setInAxisOrder">
+<code class="descname">setInAxisOrder</code><span class="sig-paren">(</span><em>attributeName: str, values: Sequence[T_co], axisCodes: Sequence[str] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/Spectrum.html#Spectrum.setInAxisOrder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.Spectrum.Spectrum.setInAxisOrder" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set attributeName from values in order defined by axisCodes
+(default order if None)</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -5660,310 +5200,6 @@ Spectrum containing spectrumReference.</p>
 <div class="section" id="ccpn-core-structureensemble-module">
 <h2>ccpn.core.StructureEnsemble module<a class="headerlink" href="#ccpn-core-structureensemble-module" title="Permalink to this headline">¶</a></h2>
 <span class="target" id="module-ccpn.core.StructureEnsemble"></span><dl class="class">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData">
-<em class="property">class </em><code class="descclassname">ccpn.core.StructureEnsemble.</code><code class="descname">EnsembleData</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pandas.core.frame.DataFrame</span></code></p>
-<p>Structure Ensemble data - as a Pandas DataFrame</p>
-<p>The structure ensemble is based on a Pandas DataFrame.  All of the functionality of DataFrames
-is available, but we have added a number of convenience methods for working with the data.</p>
-<p>In general, there are three things you may want to do with an ensemble:
-1.     Select a sub-set of atoms within the ensemble
-2.     Access the data within the ensemble
-3.     Write data to the ensemble
-We will cover each of these in turn below.</p>
-<ol class="arabic simple">
-<li>Selecting sub-sets of atoms within the ensemble:</li>
-</ol>
-<blockquote>
-<div><p>Subsets of atoms can be extracted by creating a selector, which is nothing more than a Pandas
-Series object. These can be thought of as a table with the same number of rows as the ensemble
-you want to select from, and containing a single column of True/False values, where True
-represents a value to be included in the selection. We provide a .selector() function that will
-return a selector based on criteria you provide.  Please note that
-although the criteria names are plural, single values are also allowed.</p>
-<p>The following criteria are currently supported:
-* chainCodes</p>
-<blockquote>
-<div>allowed values: ‘A’; ‘A,C’; ‘A, C’; [‘A’, ‘C’]
-not allowed: ‘A-C’ (currently); [‘A, B’, ‘C’] (currently)
-Note that this is case sensitive, so ‘a’ will likely not select anything</div></blockquote>
-<ul>
-<li><p class="first">residueNames
-allowed values: ‘MET’; ‘MET,ALA’; ‘MET, ALA’; [‘MET’, ’ALA’]
-not allowed: ‘MET-ALA’; [‘MET, ALA’, ‘GLU’] (currently)
-Note that this is case sensitive, so ‘met’ will likely not select anything</p>
-</li>
-<li><p class="first">sequenceIds
-allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
-not allowed: [1, 2, ‘4-7’] (currently);</p>
-</li>
-<li><p class="first">atomNames
-allowed values: ‘H’; ‘H,N’; ‘H, N’; [‘H’, ‘N’]
-not allowed: ‘H-N’; [‘H, N’, ‘CA’] (currently)</p>
-</li>
-<li><p class="first">modelNumbers
-allowed values: 1; ‘1’; ‘1,2’; ‘1, 2’; ‘4-7’; ‘1, 2, 4-7’; [‘1’, ‘2’]; [1, 2]
-not allowed: [1, 2, ‘4-7’] (currently);</p>
-</li>
-<li><p class="first">ids
-allowed values: ‘A.3.LEU.N’; ‘A.3.LEU.N, A.3.LEU.CA’;</p>
-<blockquote>
-<div><p>‘A.3.LEU.N, A.3.LEU.CA’; [‘A.3.LEU.N’, ‘A.3.LEU.CA’]</p>
-</div></blockquote>
-<p>not allowed: ‘A.3.LEU.N-‘A.3.LEU.CA’; ‘A.3.LEU.N, CA’; [‘A.3.LEU.N, A.3.LEU.CA’, ‘A.3.LEU.CB’]</p>
-</li>
-<li><p class="first">elements
-allowed values: ‘H’; ‘H,C’; ‘H, C’; [‘H’, ‘C’]
-not allowed: ‘H-N’; [‘H, N’, ‘C’]</p>
-</li>
-</ul>
-<p>In addition to these criteria, functions taking a record and returning True or False can
-be supplied via the func keyword argument.
-For example:</p>
-<blockquote>
-<div>ensemble.selector(func=lambda r: (r[‘bFactor’]&lt; 70) and (r[‘bFactor’]&gt;60))</div></blockquote>
-<dl class="docutils">
-<dt>which will select everything with a bFactor between 60 and 70 exclusive.</dt>
-<dd>The selector can be converted to a filter by setting the inverse keyword to True, so that
-any record that matches the criteria are excluded from the selection.</dd>
-<dt>Finally, selectors can be combined using Boolean operations.  The following statement:</dt>
-<dd>s = ensemble.selector(atomNames=’N, CA’)</dd>
-<dt>is equivalent to:</dt>
-<dd>s1 = ensemble.selector(atomNames=’CA’)
-s2 = ensemble.selector(atomNames=’N’)
-s = s1 | s2  # Matches either s1 OR s2</dd>
-<dt>While this statement:</dt>
-<dd>s = ensemble.selector(atomNames=’N, CA’, modelNumbers = ‘1-3’)</dd>
-<dt>is equivalent to:</dt>
-<dd>s1 = ensemble.selector(atomNames=’N, CA’)
-s2 = ensemble.selector(modelNumbers = ‘1-3’)
-s = s1 &amp; s2  # Matches both s1 AND s2</dd>
-</dl>
-<p>Because certain selections are quite common, we provide several pre-packaged selections,
-these include:</p>
-<blockquote>
-<div>ensemble.backboneSelector
-ensemble.amideProtonSelector
-ensemble.amideNitrogenSelector
-ensemble.methylSelector</div></blockquote>
-<dl class="docutils">
-<dt>Note that selection on chains, residues and atoms, including the pre-packaged selectors</dt>
-<dd>refer to the names that match the coordinates, which may <em>not</em> match the data in the rest
-of your project.</dd>
-</dl>
-<p>There is a separate set of columns (&#8216;nmrChainCode&#8217;, &#8216;nmrSequenceCode&#8217;, &#8216;nmrResidueName&#8217;,
-&#8216;nmrAtomName&#8217; that do match the data in the rest of the project.</p>
-<p>Once you have a selector, you can use it to extract a copy of the rows you want from the
-ensemble via ensemble.extract(). extract() accepts a selector and a list of columns to extract.
-If no selector is provided, extract() will use any criteria provided to generate a selector
-on-the-fly for selection (in fact, this is the recommended usage pattern.)</p>
-<p>The extract() method has some important caveats:
-1. It is very important to remember that extract() gives a COPY of the data, not the original</p>
-<blockquote>
-<div>data. If you change the data in the extracted ensemble, the original data will remain
-unaltered.</div></blockquote>
-<ol class="arabic simple" start="2">
-<li>If you use a selector created from one ensemble on a different ensemble, it will fail if they
-don’t have exactly the same number of records.  If they do have the same number of records,
-you will get the records with the corresponding numbers, which is probably not what you want.</li>
-<li>In order to avoid the problem in 2., the recommended usage pattern is to let extract()
-create the selector on-the-fly.</li>
-<li>If you must create complex selectors, please make sure that you create the selector from the
-exact ensemble you wish to extract from.</li>
-</ol>
-</div></blockquote>
-<ol class="arabic simple" start="2">
-<li>There are several ways to access the data within the ensemble (or an extracted subset</li>
-</ol>
-<blockquote>
-<div><p>thereof.) If your ensemble has multiple records, copies of the columns can be accessed by name.
-For example:</p>
-<blockquote>
-<div>occupancies = ensemble[&#8216;occupancy&#8217;]  # Gives a Pandas Series; for a list use list(occupancies)</div></blockquote>
-<p>Alternatively, you can convert the records into a tuple of namedTuples using the
-as_namedTuples() method.</p>
-<p>If you have a single record, the values can be accessed by column name.
-For example:</p>
-<blockquote>
-<div>atomName = singleRecordEnsemble[‘atomName’]</div></blockquote>
-<p>Instead, it’s often better to loop over copies of all the records in a subset using the
-iterrecords() iterator:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>for record in ensemble.iterrecords():</dt>
-<dd>print(record[‘x’], record[‘y’], record[‘z’])</dd>
-</dl>
-</div></blockquote>
-<dl class="docutils">
-<dt>or the itertuples() iterator:</dt>
-<dd><dl class="first last docutils">
-<dt>for record in ensemble.itertuples():</dt>
-<dd>print(record.x, record.y, record.z)</dd>
-</dl>
-</dd>
-</dl>
-<p>Finally, all of the standard Pandas methods for accessing the data are still available.
-We leave it to the interested coder to investigate that.</p>
-<ol class="arabic simple" start="3">
-<li>Writing data to the ensemble is by far the most tricky operation.  There are two primary
-issues to be dealt with:  putting data in the right place within the ensemble, and making
-sure you’re writing to the ensemble and not a copy of the ensemble.</li>
-</ol>
-<p>The easiest case is probably the least common for users: creating an ensemble from scratch.
-In this case, the best way to create the ensemble is to assign several equal-length lists or
-tuples to columns within the ensemble:</p>
-<blockquote>
-<div>ensemble = EnsembleData()
-ensemble[‘modelNumber’] = [1,1,1,2,2,2]
-ensemble[‘chainCode’] = [‘A’, ‘A’, ‘A’, ‘A’, ‘A’, ‘A’]
-# Etc,…
-ensemble = ensemble.reset_index(drop=True)  # Cleanup the indexing</div></blockquote>
-<p>More commonly, users may want to alter values in a pre-existing ensemble.  The method
-setValues() can be used for this.  The first parameter to setValues() tells setValues() which
-record to change, and can be an index, a single record selector or a single record ensemble
-(this last option is easily achieved with the iterrecords() method.)
-Any subsequent keyword parameters passed to setValues() are the column names and values to set.
-For example:</p>
-<blockquote>
-<div><p>extracted = ensemble.extract(residueNames=&#8217;MET&#8217;, atomNames=&#8217;CB&#8217;)
-for record in extracted.iterrecords():</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>if record[‘x’] &gt; 999:</dt>
-<dd>ensemble.setValues(record, x=999, y=999, z=999)</dd>
-</dl>
-</div></blockquote>
-</div></blockquote>
-<p>Just like extract(), exactly matching the source of your selector/selecting ensemble and the
-ensemble you call setValues() on is vital to prevent unpredictable behavior.
-You have been warned!</p>
-<p>There are currently no insert functions.  You can, if you wish, append a row to the ensemble
-using setValues and passing an index value not currently in the ensemble:</p>
-<blockquote>
-<div>maxEnsembleIndexValue = ensemble.index.max()
-ensemble.setValues(maxEnsembleIndexValue+1, x=0, y=1, z=2)</div></blockquote>
-</div></blockquote>
-<p>ADVANCED: Pandas experts should note that we override __setattr__, __setitem__, and __str__,
-so some behaviours will be different. Specifically columns with reserved names are type-checked,
-and you cannot add new columns with data that match only part of the existing rows.</p>
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.MAX_PRINT_SERIES_LENGTH">
-<code class="descname">MAX_PRINT_SERIES_LENGTH</code><em class="property"> = 4</em><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.MAX_PRINT_SERIES_LENGTH" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.amideNitrogenSelector">
-<code class="descname">amideNitrogenSelector</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.amideNitrogenSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects only the amide nitrogen.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.amideProtonSelector">
-<code class="descname">amideProtonSelector</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.amideProtonSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects only the amide proton.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.as_namedtuples">
-<code class="descname">as_namedtuples</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; Tuple[Tuple, ...]<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData.as_namedtuples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.as_namedtuples" title="Permalink to this definition">¶</a></dt>
-<dd><p>An tuple of namedtuples containing the records (atoms) in the ensemble</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.backboneSelector">
-<code class="descname">backboneSelector</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.backboneSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects backbone atoms.</p>
-<dl class="docutils">
-<dt>The selector is specific for:</dt>
-<dd>Ca, C&#8217;, O, Nh, Hn</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.extract">
-<code class="descname">extract</code><span class="sig-paren">(</span><em>selector: pandas.core.series.Series = None</em>, <em>*columnNames: str</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; ccpn.core.StructureEnsemble.EnsembleData<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData.extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.extract" title="Permalink to this definition">¶</a></dt>
-<dd><p>Extracts a copy of a subset of atoms from the EnsembleData</p>
-<p>Params:</p>
-<blockquote>
-<div><dl class="docutils">
-<dt>selector</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">Boolean Pandas series the same length as the number of rows in the ensemble</span><dd>If no selector is given, the keyword arguments are passed on to the selector
-function and used to make a selector to use.</dd>
-<dt><a href="#id1"><span class="problematic" id="id2">*</span></a>columnNames: All positional arguments indicate the columns to extract.</dt>
-<dd>If there are no columnNames, all columns are extracted.</dd>
-</dl>
-<p><a href="#id3"><span class="problematic" id="id4">**</span></a>kwargs: ALl keyword-value arguments are passed to the selector function.</p>
-</div></blockquote>
-<p>Returns a new EnsembleData</p>
-</dd></dl>
-
-<dl class="classmethod">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.from_pdb">
-<em class="property">classmethod </em><code class="descname">from_pdb</code><span class="sig-paren">(</span><em>filename: str</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData.from_pdb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.from_pdb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create an EnsembleData from a Pandas DataFrame representing a pdb file</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.iterrecords">
-<code class="descname">iterrecords</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; ccpn.core.StructureEnsemble.EnsembleData<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData.iterrecords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.iterrecords" title="Permalink to this definition">¶</a></dt>
-<dd><p>An iterator over the records (atoms) in the ensemble</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.methylSelector">
-<code class="descname">methylSelector</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.methylSelector" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>pandas.core.series.Series</em>, <em>immutable</em> - 
-Return a selector that selects atoms in methyl groups.</p>
-<dl class="docutils">
-<dt>The selector is specific for:</dt>
-<dd>Ala: Cb and attached protons
-Leu: Both Cd&#8217;s and attached protons
-Met: Ce and attached protons
-Thr: Cg and attached protons
-Val: Both Cg&#8217;s and attached protons</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.records">
-<code class="descname">records</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &rarr; Tuple[EnsembleData, ...]<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData.records"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.records" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.selector">
-<code class="descname">selector</code><span class="sig-paren">(</span><em>chainCodes=None</em>, <em>residueNames=None</em>, <em>sequenceIds=None</em>, <em>atomNames=None</em>, <em>modelNumbers=None</em>, <em>ids=None</em>, <em>elements=None</em>, <em>func=None</em>, <em>inverse=False</em><span class="sig-paren">)</span> &rarr; pandas.core.series.Series<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData.selector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.selector" title="Permalink to this definition">¶</a></dt>
-<dd><p>Make a boolean selector restricted to rows matching the parameters specified.</p>
-<p>NB Incompatible values of the selection parameters may raise various errors.</p>
-<p>Returns Pandas Series of booleans</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble.EnsembleData.setValues">
-<code class="descname">setValues</code><span class="sig-paren">(</span><em>accessor: int | EnsembleData</em>, <em>pandas.core.series.Series</em>, <em>**kwargs</em><span class="sig-paren">)</span> &rarr; None<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#EnsembleData.setValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.EnsembleData.setValues" title="Permalink to this definition">¶</a></dt>
-<dd><p>Allows you to easily set values (in place) for fields in the EnsembleData</p>
-<dl class="docutils">
-<dt>Params:</dt>
-<dd><dl class="first docutils">
-<dt>accessor</dt>
- <span class="classifier-delimiter">:</span> <span class="classifier">int, EnsembleData, Selector</span><dd><p class="first">If an integer is given, the value will be set on the row at that index
-If a single row EnsembleData is given, the value will be set on the matching row.
-If a selector that matches a single row is given, the value will be set on that
-matching row</p>
-<p class="last">Multi-row EnsembleData or selectors are not allowed.
-(consider using EnsembleData.iterrecords() to iterate)</p>
-</dd>
-</dl>
-<p class="last">kwargs : columns on which to set the values</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="class">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble">
 <em class="property">class </em><code class="descclassname">ccpn.core.StructureEnsemble.</code><code class="descname">StructureEnsemble</code><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#StructureEnsemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
@@ -5983,7 +5219,7 @@ Free-form text comment</p>
 <dl class="attribute">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.data">
 <code class="descname">data</code><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.data" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>ccpn.core.StructureEnsemble.EnsembleData</em>, <em>mutable</em> - 
+<dd><p>- <em>ccpn.util.StructureData.EnsembleData</em>, <em>mutable</em> - 
 EnsembleData (Pandas DataFrame) with structure data.</p>
 <p>Note that modifying the data via setValues, &#8216;data[column] = &#8216; or &#8216;data.column = &#8216;
 will be echoed and put on the undo stack.
@@ -6011,10 +5247,14 @@ title of Model -  a line of free-form text.</p>
 
 <dl class="method">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.newModel">
-<code class="descname">newModel</code><span class="sig-paren">(</span><em>title: str = None</em>, <em>comment: str = None</em>, <em>coordinateData: numpy.ndarray = None</em>, <em>bFactorData: Sequence[float] = None</em>, <em>occupancyData: Sequence[float] = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Model_bak.Model<a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.newModel" title="Permalink to this definition">¶</a></dt>
+<code class="descname">newModel</code><span class="sig-paren">(</span><em>serial: int = None</em>, <em>label: str = None</em>, <em>comment: str = None</em><span class="sig-paren">)</span> &rarr; ccpn.core.Model.Model<a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.newModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create new Model</p>
-<p>CoordinateData can be a numpy.ndarray of the right shape,
-or any nested list or tuple representation that contains the right number of elements</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.core.StructureEnsemble.StructureEnsemble.resetModels">
+<code class="descname">resetModels</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#StructureEnsemble.resetModels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.resetModels" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove models without data, add models to reflect modelNumbers present</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -6027,197 +5267,6 @@ ID number of StructureEnsemble, used in Pid and to identify the StructureEnsembl
 <dl class="attribute">
 <dt id="ccpn.core.StructureEnsemble.StructureEnsemble.shortClassName">
 <code class="descname">shortClassName</code><em class="property"> = 'SE'</em><a class="headerlink" href="#ccpn.core.StructureEnsemble.StructureEnsemble.shortClassName" title="Permalink to this definition">¶</a></dt>
-<dd><p>Short class name, for PID.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="ccpn.core.StructureEnsemble.pdb2df">
-<code class="descclassname">ccpn.core.StructureEnsemble.</code><code class="descname">pdb2df</code><span class="sig-paren">(</span><em>filename: str</em><span class="sig-paren">)</span> &rarr; pandas.core.frame.DataFrame<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble.html#pdb2df"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble.pdb2df" title="Permalink to this definition">¶</a></dt>
-<dd><p>Create a Pandas dataframe from a pdb file.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="ccpn-core-structureensemble-bak-module">
-<h2>ccpn.core.StructureEnsemble_bak module<a class="headerlink" href="#ccpn-core-structureensemble-bak-module" title="Permalink to this headline">¶</a></h2>
-<span class="target" id="module-ccpn.core.StructureEnsemble_bak"></span><dl class="class">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble">
-<em class="property">class </em><code class="descclassname">ccpn.core.StructureEnsemble_bak.</code><code class="descname">StructureEnsemble</code><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ccpn.core._implementation.AbstractWrapperObject.AbstractWrapperObject</span></code></p>
-<p>Ensemble of coordinate structures.</p>
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.addAtomId">
-<code class="descname">addAtomId</code><span class="sig-paren">(</span><em>atomId</em>, <em>coordinateData: numpy.ndarray = None</em>, <em>occupancyData: Sequence[float] = None</em>, <em>bFactorData: Sequence[float] = None</em>, <em>atomNameData: Sequence[str] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.addAtomId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.addAtomId" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add atom with atomId. Atom is inserted at the end of the matching chain or residue
-(if any) otherwise at the end of the atomId list.
-Data matrices are filled with NaN or with the atom Name (for atomNameData)</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.addAtomIds">
-<code class="descname">addAtomIds</code><span class="sig-paren">(</span><em>atomIds: Sequence[str], override: bool = False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.addAtomIds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.addAtomIds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add atoms matching atomIds (in order) to empty structureEnsemble.
-Coordinate data to be added later.
-If override is True you can add to non-empty ensembles, and consistency is not checked.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.addChain">
-<code class="descname">addChain</code><span class="sig-paren">(</span><em>chain: ccpn.core.Chain.Chain</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.addChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.addChain" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add atoms from Chain (in order) to empty structureEnsemble.
-Coordinate data to be added later</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.atomIds">
-<code class="descname">atomIds</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.atomIds" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>Tuple[str, ...]</em>, <em>immutable</em> - 
-Tuple of atom id (&#8216;chainCode.sequenceCode.residueType.atomName&#8217; for atoms making up
-structure ensemble. Note that the identifier uses IUPAC atom names and Coordinate-linked
-chain and sequence specifiers, which may not match the Chains.
-The atom IDs and their order is the same for all Models in the ensemble.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.atomNameData">
-<code class="descname">atomNameData</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.atomNameData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-modelCount * atomCount  numpy array of model-specific atom names.
-Intended for storing IUPAC atom names that vary from model to model
-NB the atomNameData array is a cached copy.
-It can be modified, but modifications will be kept in cache till the attribute is
-set or the project is saved.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.bFactorData">
-<code class="descname">bFactorData</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.bFactorData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-modelCount * atomCount  numpy array of atom B factors.
-NB the occupancyData array is a cached copy.
-It can be modified, but modifications will be kept in cache till the attribute is
-set or the project is saved.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.className">
-<code class="descname">className</code><em class="property"> = 'StructureEnsemble'</em><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.className" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.comment">
-<code class="descname">comment</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.comment" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>str</em>, <em>mutable</em> - 
-Free-form text comment</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.coordinateData">
-<code class="descname">coordinateData</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.coordinateData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-modelCount * atomCount * 3 numpy array of coordinates.
-NB the coordinateData array is a cached copy.
-It can be  modified, but modifications will be kept in cache till the attribute is
-set or the project is saved.</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.ensembleId">
-<code class="descname">ensembleId</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.ensembleId" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>int</em>, <em>immutable</em> - 
-ID number of StructureEnsemble, used in Pid and to identify the StructureEnsemble.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomBFactors">
-<code class="descname">getAtomBFactors</code><span class="sig-paren">(</span><em>atomId</em><span class="sig-paren">)</span> &rarr; numpy.ndarray=None<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.getAtomBFactors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomBFactors" title="Permalink to this definition">¶</a></dt>
-<dd><p>get nModels array of bFactors for atom atomId</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomCoordinates">
-<code class="descname">getAtomCoordinates</code><span class="sig-paren">(</span><em>atomId: str</em><span class="sig-paren">)</span> &rarr; numpy.ndarray=None<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.getAtomCoordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomCoordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>get nModels * 3 array of coordinates for atom atomId</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomOccupancies">
-<code class="descname">getAtomOccupancies</code><span class="sig-paren">(</span><em>atomId</em><span class="sig-paren">)</span> &rarr; numpy.ndarray=None<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.getAtomOccupancies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomOccupancies" title="Permalink to this definition">¶</a></dt>
-<dd><p>get nModels array of occupancies for atom atomId</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomSpecificNames">
-<code class="descname">getAtomSpecificNames</code><span class="sig-paren">(</span><em>atomId</em><span class="sig-paren">)</span> &rarr; numpy.ndarray=None<a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.getAtomSpecificNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.getAtomSpecificNames" title="Permalink to this definition">¶</a></dt>
-<dd><p>get nModels array of model-specific names for atom atomId</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.occupancyData">
-<code class="descname">occupancyData</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.occupancyData" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>numpy.ndarray</em>, <em>mutable</em> - 
-modelCount * atomCount  numpy array of atom occupancies.
-NB the occupancyData array is a cached copy.
-It can be  modified, but modifications will be kept in cache till the attribute is
-set or the project is saved.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.removeAtomId">
-<code class="descname">removeAtomId</code><span class="sig-paren">(</span><em>atomId</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.removeAtomId"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.removeAtomId" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove atom with atomId, adjusting data matrices to fit</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.removeAtomIds">
-<code class="descname">removeAtomIds</code><span class="sig-paren">(</span><em>atomIds: Sequence[str]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.removeAtomIds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.removeAtomIds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove atoms with atomIds, adjusting data matrices to fit</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.replaceAtomIds">
-<code class="descname">replaceAtomIds</code><span class="sig-paren">(</span><em>atomIds: Sequence[str]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.replaceAtomIds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.replaceAtomIds" title="Permalink to this definition">¶</a></dt>
-<dd><p>Replace atomIds with new list of the same length,
-without modifying coordinates and other data</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.residueIds">
-<code class="descname">residueIds</code><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.residueIds" title="Permalink to this definition">¶</a></dt>
-<dd><p>- <em>Tuple[str, ...]</em>, <em>immutable</em> - 
-Tuple of atom id (&#8216;chainCode.sequenceCode.residueType&#8217; for residues making up
-structure ensemble
-The residue IDs and their order is the same for all Models in the ensemble.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomBFactors">
-<code class="descname">setAtomBFactors</code><span class="sig-paren">(</span><em>atomId: str</em>, <em>value: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.setAtomBFactors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomBFactors" title="Permalink to this definition">¶</a></dt>
-<dd><p>set nModels array of bFactors for atom atomId</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomCoordinates">
-<code class="descname">setAtomCoordinates</code><span class="sig-paren">(</span><em>atomId: str</em>, <em>value: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.setAtomCoordinates"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomCoordinates" title="Permalink to this definition">¶</a></dt>
-<dd><p>set nModels * 3 array of coordinates for atom atomId</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomOccupancies">
-<code class="descname">setAtomOccupancies</code><span class="sig-paren">(</span><em>atomId: str</em>, <em>value: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.setAtomOccupancies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomOccupancies" title="Permalink to this definition">¶</a></dt>
-<dd><p>set nModels array of occupancies for atom atomId</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomSpecificNames">
-<code class="descname">setAtomSpecificNames</code><span class="sig-paren">(</span><em>atomId: str</em>, <em>value: numpy.ndarray</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/core/StructureEnsemble_bak.html#StructureEnsemble.setAtomSpecificNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.setAtomSpecificNames" title="Permalink to this definition">¶</a></dt>
-<dd><p>set nModels array of specific atom names for atom atomId</p>
-</dd></dl>
-
-<dl class="attribute">
-<dt id="ccpn.core.StructureEnsemble_bak.StructureEnsemble.shortClassName">
-<code class="descname">shortClassName</code><em class="property"> = 'SE'</em><a class="headerlink" href="#ccpn.core.StructureEnsemble_bak.StructureEnsemble.shortClassName" title="Permalink to this definition">¶</a></dt>
 <dd><p>Short class name, for PID.</p>
 </dd></dl>
 
@@ -6532,12 +5581,9 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-complex-module">ccpn.core.Complex module</a></li>
 <li><a class="reference internal" href="#ccpn-core-data-module">ccpn.core.Data module</a></li>
 <li><a class="reference internal" href="#ccpn-core-dataset-module">ccpn.core.DataSet module</a></li>
-<li><a class="reference internal" href="#ccpn-core-ensemble-module">ccpn.core.Ensemble module</a></li>
-<li><a class="reference internal" href="#module-ccpn.core.Ensemble_bak">ccpn.core.Ensemble_bak module</a></li>
 <li><a class="reference internal" href="#ccpn-core-integral-module">ccpn.core.Integral module</a></li>
 <li><a class="reference internal" href="#ccpn-core-integrallist-module">ccpn.core.IntegralList module</a></li>
 <li><a class="reference internal" href="#ccpn-core-model-module">ccpn.core.Model module</a></li>
-<li><a class="reference internal" href="#ccpn-core-model-bak-module">ccpn.core.Model_bak module</a></li>
 <li><a class="reference internal" href="#ccpn-core-nmratom-module">ccpn.core.NmrAtom module</a></li>
 <li><a class="reference internal" href="#ccpn-core-nmrchain-module">ccpn.core.NmrChain module</a></li>
 <li><a class="reference internal" href="#ccpn-core-nmrresidue-module">ccpn.core.NmrResidue module</a></li>
@@ -6557,7 +5603,6 @@ User-defined compound code</p>
 <li><a class="reference internal" href="#ccpn-core-spectrumhit-module">ccpn.core.SpectrumHit module</a></li>
 <li><a class="reference internal" href="#ccpn-core-spectrumreference-module">ccpn.core.SpectrumReference module</a></li>
 <li><a class="reference internal" href="#ccpn-core-structureensemble-module">ccpn.core.StructureEnsemble module</a></li>
-<li><a class="reference internal" href="#ccpn-core-structureensemble-bak-module">ccpn.core.StructureEnsemble_bak module</a></li>
 <li><a class="reference internal" href="#ccpn-core-substance-module">ccpn.core.Substance module</a></li>
 </ul>
 </li>

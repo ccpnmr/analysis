@@ -454,6 +454,11 @@ Current strip</p>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
 <p>Class for setting FrameWork input arguments directly</p>
 <dl class="attribute">
+<dt id="ccpn.framework.Framework.Arguments.debug">
+<code class="descname">debug</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.framework.Framework.Arguments.debug" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
 <dt id="ccpn.framework.Framework.Arguments.interface">
 <code class="descname">interface</code><em class="property"> = 'NoUi'</em><a class="headerlink" href="#ccpn.framework.Framework.Arguments.interface" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -556,7 +561,7 @@ Current strip</p>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.displayProjectSummary">
-<code class="descname">displayProjectSummary</code><span class="sig-paren">(</span><em>position: str = 'left'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.displayProjectSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.displayProjectSummary" title="Permalink to this definition">¶</a></dt>
+<code class="descname">displayProjectSummary</code><span class="sig-paren">(</span><em>position: str = 'left'</em>, <em>relativeTo: ccpn.ui.gui.modules.CcpnModule.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.displayProjectSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.displayProjectSummary" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays Project summary module on left of main window.</p>
 </dd></dl>
 
@@ -568,11 +573,6 @@ Current strip</p>
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.getByPid">
 <code class="descname">getByPid</code><span class="sig-paren">(</span><em>pid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.getByPid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.getByPid" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Framework.Framework.getPluginMenuItems">
-<code class="descname">getPluginMenuItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.getPluginMenuItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.getPluginMenuItems" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -631,11 +631,6 @@ If not path then opens a file dialog box and loads project from selected file.</
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.openProject">
 <code class="descname">openProject</code><span class="sig-paren">(</span><em>path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.openProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.openProject" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ccpn.framework.Framework.Framework.printToFile">
-<code class="descname">printToFile</code><span class="sig-paren">(</span><em>spectrumDisplay=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.printToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.printToFile" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="method">
@@ -800,7 +795,7 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showAtomSelector">
-<code class="descname">showAtomSelector</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showAtomSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showAtomSelector" title="Permalink to this definition">¶</a></dt>
+<code class="descname">showAtomSelector</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.modules.CcpnModule.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showAtomSelector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showAtomSelector" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays Atom Selector.</p>
 </dd></dl>
 
@@ -821,7 +816,7 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showChemicalShiftTable">
-<code class="descname">showChemicalShiftTable</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showChemicalShiftTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showChemicalShiftTable" title="Permalink to this definition">¶</a></dt>
+<code class="descname">showChemicalShiftTable</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.modules.CcpnModule.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showChemicalShiftTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showChemicalShiftTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays Chemical Shift table.</p>
 </dd></dl>
 
@@ -875,11 +870,6 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="ccpn.framework.Framework.Framework.showParassignSetup">
-<code class="descname">showParassignSetup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showParassignSetup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showParassignSetup" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showPeakPickPopup">
 <code class="descname">showPeakPickPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showPeakPickPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showPeakPickPopup" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays Peak Picking Popup.</p>
@@ -887,7 +877,7 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showPeakTable">
-<code class="descname">showPeakTable</code><span class="sig-paren">(</span><em>position: str = 'left'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em>, <em>selectedList: ccpn.core.PeakList.PeakList = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showPeakTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showPeakTable" title="Permalink to this definition">¶</a></dt>
+<code class="descname">showPeakTable</code><span class="sig-paren">(</span><em>position: str = 'left'</em>, <em>relativeTo: ccpn.ui.gui.modules.CcpnModule.CcpnModule = None</em>, <em>selectedList: ccpn.core.PeakList.PeakList = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showPeakTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showPeakTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays Peak table on left of main window with specified list selected.</p>
 </dd></dl>
 
@@ -909,13 +899,13 @@ _fillRecentProjectsMenu in GuiMainWindow</p>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showRestraintTable">
-<code class="descname">showRestraintTable</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em>, <em>selectedList: ccpn.core.PeakList.PeakList = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showRestraintTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showRestraintTable" title="Permalink to this definition">¶</a></dt>
+<code class="descname">showRestraintTable</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.modules.CcpnModule.CcpnModule = None</em>, <em>selectedList: ccpn.core.PeakList.PeakList = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showRestraintTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showRestraintTable" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays Peak table on left of main window with specified list selected.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="ccpn.framework.Framework.Framework.showSequenceGraph">
-<code class="descname">showSequenceGraph</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.widgets.Module.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showSequenceGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showSequenceGraph" title="Permalink to this definition">¶</a></dt>
+<code class="descname">showSequenceGraph</code><span class="sig-paren">(</span><em>position: str = 'bottom'</em>, <em>relativeTo: ccpn.ui.gui.modules.CcpnModule.CcpnModule = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/framework/Framework.html#Framework.showSequenceGraph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.framework.Framework.Framework.showSequenceGraph" title="Permalink to this definition">¶</a></dt>
 <dd><p>Displays assigner at the bottom of the screen, relative to another module if nextTo is specified.</p>
 </dd></dl>
 

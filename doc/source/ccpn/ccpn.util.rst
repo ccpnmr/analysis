@@ -11,7 +11,7 @@ Subpackages
 
 .. toctree::
 
-    ccpn.util.Bmrb
+    ccpn.util.nef
 
 Submodules
 ----------
@@ -52,6 +52,14 @@ ccpn.util.Constants module
 --------------------------
 
 .. automodule:: ccpn.util.Constants
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.GitTools module
+-------------------------
+
+.. automodule:: ccpn.util.GitTools
     :members:
     :undoc-members:
     :show-inheritance:
@@ -148,6 +156,14 @@ ccpn.util.SphinxExtensions module
 ---------------------------------
 
 .. automodule:: ccpn.util.SphinxExtensions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+ccpn.util.StructureData module
+------------------------------
+
+.. automodule:: ccpn.util.StructureData
     :members:
     :undoc-members:
     :show-inheritance:

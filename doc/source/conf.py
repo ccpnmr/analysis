@@ -243,7 +243,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'CCPN.tex', 'CCPN Documentation',
-   'Rasmus Fogh, Wayne Boucher, Simon Skinner, Geerten Vuister', 'manual'),
+   'Wayne Boucher, Ed Brooksbank, Rasmus Fogh, Luca Mureddu, TJ Ragan, Geerten Vuister', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -273,7 +273,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'ccpn', 'CCPN Documentation',
-     ['Rasmus Fogh, Wayne Boucher, Simon Skinner, Geerten Vuister'], 1)
+     ['Wayne Boucher, Ed Brooksbank, Rasmus Fogh, Luca Mureddu, TJ Ragan, Geerten Vuister'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -287,8 +287,8 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'CCPN', 'CCPN Documentation',
-   'Rasmus Fogh, Wayne Boucher, Simon Skinner, Geerten Vuister', 'CCPN', 'One line description of project.',
-   'Miscellaneous'),
+   'Wayne Boucher, Ed Brooksbank, Rasmus Fogh, Luca Mureddu, TJ Ragan, Geerten Vuister', 'CCPN',
+   'One line description of project.', 'Miscellaneous'),
 ]
 
 # Documents to append as an appendix to all manuals.

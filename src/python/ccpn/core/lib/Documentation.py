@@ -27,18 +27,23 @@ __author__ = 'rhf22'
 
 import typing
 
-from ccpn.framework import Version
-from ccpn.util import Path as corePath
 import subprocess
 import os
+import re
 import shutil
 from sphinx import apidoc
+from ccpn.framework import Version
+from ccpn.util import Path as corePath
 
 joinPath = corePath.joinPath
 
 
 # Relative path to documentation directory
 documentationPath = 'doc'
+
+ll = ('__pycache__', 'testing', 'api', 'xml', 'data', 'macros', 'chemBuild', 'Bmrb',
+                      'v_\d+_\d+_.*')
+skipSubDirectories = re.compile('|'.join(ll))
 
 def refreshSphinxDocumentation():
   """(Re)create sphinx documentation. Locations are hardwired"""
@@ -47,12 +52,17 @@ def refreshSphinxDocumentation():
   topDirectory = corePath.getTopDirectory()
   docDirectory = joinPath(topDirectory, documentationPath)
 
+  # Direwcteories that should not be documented
+  excludeTopDirs = ('chemBuild', '__pycache__')
+
+  inputDirectories = list(x for x in os.scandir(pythonDirectory)
+                          if x.is_dir() and x.name not in excludeTopDirs)
+
   # Remove sphinx-apidoc files
   outputDirs = {}
-  for ss in ('ccpn',):
-  # for ss in ('ccpn', 'ccpnmodel'):
-    inDirectory = joinPath(docDirectory, 'source', ss)
-    outputDirs[ss] = inDirectory
+  for dirEntry in inputDirectories:
+    inDirectory = joinPath(docDirectory, 'source', dirEntry.name)
+    outputDirs[dirEntry.name] = inDirectory
     if os.path.exists(inDirectory):
       print ("Removing %s" % inDirectory)
       shutil.rmtree(inDirectory)
@@ -75,44 +85,30 @@ def refreshSphinxDocumentation():
   precommand.extend(('-R', Version.revision))
 
   # Generate documentation - ccpn:
-  module = 'ccpn'
-  target = joinPath(pythonDirectory, module)
-  skipDirs = getNamedSubdirectories(target, 'testing')
-  command = precommand + ['-H','CCPN', target] + skipDirs
-  # Additional directories to skip
-  command.append(joinPath(pythonDirectory, 'ccpn/macros'))
-  command[2] = outputDirs[module]
-  apidoc.main(command)
-
-
-  # # Generate documentation - ccpn:
-  # module = 'ccpnmodel'
-  # target = joinPath(pythonDirectory, module)
-  # skipDirs = getNamedSubdirectories(target, ('testing', 'v_'))
-  # command = precommand + ['-H', 'CCPN storage implementation', target] + skipDirs
-  # # Additional directories to skip
-  # command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/memops'))
-  # command.append(joinPath(pythonDirectory, 'ccpnmodel/ccpncore/xml'))
-  # command[2] = outputDirs[module]
-  # apidoc.main(command)
-
+  for dirEntry in inputDirectories:
+    module = dirEntry.name
+    target = dirEntry.path
+    skipDirs = getNamedSubdirectories(target, skipSubDirectories)
+    command = precommand + ['-H','CCPN', target] + skipDirs
+    if module == 'ccpnmodel':
+      # Skip an additional directory
+      command.append(os.path.join(target, 'ccpncore', 'memops', 'scripts', 'model'))
+    command[2] = outputDirs[module]
+    apidoc.main(command)
 
   # rebuild docs
   subprocess.call(['make', '-C', docDirectory, 'html'])
 
-def getNamedSubdirectories(path, prefixes=()) -> typing.List[str]:
+def getNamedSubdirectories(path, matchExpression=None) -> typing.List[str]:
   """Get a list of all subdirectories of path whose basename starts with one of the prefixes
 
   Does not look inside the selected subdirectories"""
 
-  if not prefixes:
-    return
-
   result = []
 
-  for root, dirs, files in os.walk(path):
-    for ss in prefixes:
-      if os.path.basename(root).startswith(ss):
+  if matchExpression is not None:
+    for root, dirs, files in os.walk(path):
+      if matchExpression.fullmatch(os.path.basename(root)) is not None:
         result.append(root)
         del dirs[:]
   #

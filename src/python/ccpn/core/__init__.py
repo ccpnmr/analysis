@@ -117,7 +117,7 @@ coordinate structure defined by a **Model** object.
 Common Class elements
 ^^^^^^^^^^^^^^^^^^^^^
 
-All classes in this module are subclasses of the :ref:`ccpn-AbstractWrapperObject-ref`,
+All classes in this module are subclasses of the core._implementation.AbstractWrapperObject,
 and inherit the following elements:
 
 **project** - *ccpn.core.Project*
@@ -295,7 +295,7 @@ import collections
 _coreImportOrder = (
   'Project',  'Spectrum',  'SpectrumReference',  'SpectrumGroup',  'PeakList',  'Peak',
   'IntegralList',  'Integral',  'PseudoDimension',  'SpectrumHit',  'Sample',  'SampleComponent',
-  'Substance',  'Chain',  'Residue', 'Atom',  'NmrChain',  'NmrResidue',  'NmrAtom',
+  'Substance',  'Chain',  'Residue', 'Atom',  'Complex', 'NmrChain',  'NmrResidue',  'NmrAtom',
   'ChemicalShiftList',  'ChemicalShift',  'DataSet',  'RestraintList',  'Restraint',
   'RestraintContribution',  'CalculationStep',  'Data',  'StructureEnsemble',  'Model', 'Note'
 )

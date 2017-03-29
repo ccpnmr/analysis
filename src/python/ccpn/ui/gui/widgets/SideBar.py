@@ -58,7 +58,7 @@ from ccpn.ui.gui.guiSettings import sidebarFont
 # Also parents must appear before their children
 
 _classNamesInSidebar = ['SpectrumGroup', 'Spectrum', 'PeakList', 'IntegralList',
-                        'Sample', 'SampleComponent', 'Substance', 'Chain',
+                        'Sample', 'SampleComponent', 'Substance', 'Complex', 'Chain',
                         'NmrChain', 'NmrResidue', 'NmrAtom', 'ChemicalShiftList',
                         'StructureEnsemble', 'Model', 'DataSet', 'RestraintList', 'Note', ]
 
@@ -70,7 +70,7 @@ classesInSideBar = OrderedDict(((x.shortClassName, x) for x in _coreClassMap.val
 #                     'CL', 'SE', 'MO', 'DS',
 #                     'RL', 'NO')
 
-classesInTopLevel = ('SG', 'SP', 'SA', 'SU', 'MC', 'NC', 'CL', 'SE', 'DS', 'NO')
+classesInTopLevel = ('SG', 'SP', 'SA', 'SU', 'MC', 'MX', 'NC', 'CL', 'SE', 'DS', 'NO')
 
 # NBNB TBD FIXME
 # 1)This function (and the NEW_ITEM_DICT) it uses gets the create_new
@@ -100,6 +100,7 @@ NEW_ITEM_DICT = {
   'Chemical Shift Lists': 'newChemicalShiftList',
   'DataSets': 'newDataSet',
   'SpectrumGroups': 'newSpectrumGroup',
+  'Complexes': 'newComplex',
 }
 ### Flag example code removed in revision 7686
 
@@ -147,6 +148,13 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     self.newChainItem = QtGui.QTreeWidgetItem(self.chainItem)
     self.newChainItem.setFlags(self.newChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.newChainItem.setText(0, '<New Chain>')
+    self.complexItem = dd['MX'] = QtGui.QTreeWidgetItem(self.projectItem)
+    self.complexItem.setFlags(self.complexItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    self.complexItem.setText(0, "Complexes")
+    # TODO make COmplexEditor, install it in _createNewObject, and uncomment this
+    # self.newComplex = QtGui.QTreeWidgetItem(self.complexItem)
+    # self.newComplex.setFlags(self.newComplex.flags() ^ QtCore.Qt.ItemIsDragEnabled)
+    # self.newComplex.setText(0, "<New Complex>")
     self.nmrChainItem = dd['NC'] = QtGui.QTreeWidgetItem(self.projectItem)
     self.nmrChainItem.setFlags(self.nmrChainItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
     self.nmrChainItem.setText(0, "NmrChains")
@@ -201,6 +209,7 @@ class SideBar(DropBase, QtGui.QTreeWidget):
                                         onceOnly=True)
     project.duplicateNotifier('SpectrumGroup', 'create', notifier)
     project.duplicateNotifier('SpectrumGroup', 'delete', notifier)
+    # TODO Add similar set of notifiers, and similar function for Complex/Chain
 
 
   def _refreshSidebarSpectra(self, dummy:Project):
@@ -340,52 +349,6 @@ class SideBar(DropBase, QtGui.QTreeWidget):
       # Object type is not in sidebar
       return None
 
-    # if shortClassName == 'SP':
-    #   # Spectrum - special behaviour - put them under SpectrumGroups, if any
-    #   spectrumGroups = obj.spectrumGroups
-    #   if spectrumGroups:
-    #     for sg in spectrumGroups:
-    #       for sgitem in self._findItems(str(sg.pid)):
-    #         self._addItem(sgitem, str(obj.pid))
-    #
-    #     return
-    #
-    # if shortClassName in classesInTopLevel:
-    #   itemParent = self._typeToItem.get(shortClassName)
-    #   newItem = self._addItem(itemParent, obj.pid)
-    #
-    #   if shortClassName in ['SP', 'SA', 'NC']:
-    #     newObjectItem = QtGui.QTreeWidgetItem(newItem)
-    #     newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)
-    #     newObjectItem.setText(0, "<New>")
-    #
-    # elif shortClassName == 'PL':
-    #   for itemParent in self._findItems(obj.spectrum.pid):
-    #     self._addItem(itemParent, obj.pid)
-    #
-    # elif shortClassName == 'SC':
-    #   for itemParent in self._findItems(obj.sample.pid):
-    #     self._addItem(itemParent, obj.pid)
-    #
-    # elif shortClassName == 'NR':
-    #   for itemParent in self._findItems(obj.nmrChain.pid):
-    #     self._addItem(itemParent, obj.pid)
-    #
-    # elif shortClassName == 'NA':
-    #   for itemParent in self._findItems(obj.nmrResidue.pid):
-    #     self._addItem(itemParent, obj.pid)
-    #
-    # elif shortClassName == 'RL':
-    #   for itemParent in self._findItems(obj.dataSet.pid):
-    #     self._addItem(itemParent, obj.pid)
-    #
-    # elif shortClassName == 'MO':
-    #   for itemParent in self._findItems(obj.structureEnsemble.pid):
-    #     self._addItem(itemParent, obj.pid)
-    #
-    # else:
-    #   # Object type is not in sidebar
-    #   return None
 
   def _itemObjects(self, item, recursive=False):
 

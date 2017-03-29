@@ -21,23 +21,17 @@ __version__ = "$Revision$"
 #=========================================================================================
 # Start of code
 #=========================================================================================
-__author__ = 'simon'
+
 import os
 from ccpn.util import Path
 from PyQt4 import QtGui
-from ccpn.ui.gui.widgets.Base import Base
-from ccpn.ui.gui.widgets.ButtonList import ButtonList
 from ccpn.ui.gui.widgets.Label import Label
 
 
-class AboutPopup(QtGui.QDialog, Base):
+class AboutPopup(QtGui.QDialog):
   def __init__(self, parent=None, **kw):
     super(AboutPopup, self).__init__(parent)
-    Base.__init__(self, **kw)
-    splashPng = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),
-                             'ccpnmr-splash-screen.png')
-    splashPix = QtGui.QPixmap(splashPng)
-    self.setFixedSize(671, 659)
-    self.label = Label(self, grid=(0, 0), gridSpan=(10, 12))
-    self.label.setPixmap(splashPix)
-    self.buttonList = ButtonList(self, ['Close'], [self.accept], grid=(9, 10), gridSpan=(1, 1))
+
+    pathPNG = os.path.join(Path.getPathToImport('ccpn.ui.gui.widgets'),'About_CcpNmr.png')
+    self.label = Label(self)
+    self.label.setPixmap(QtGui.QPixmap(pathPNG))

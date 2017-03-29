@@ -1072,7 +1072,7 @@ class ChemBuildMain(QtGui.QMainWindow):
     if self.compound:
       if not self.compound.ccpCode:
         msg = 'Cannot export CCPN ChemComp XML file.\n'
-        msg += 'CCPN Code not set'
+        msg += "'CCPN Code' not set. \n Right Panel > Compound Info tab > CCPN Code "
         QtGui.QMessageBox.warning(self, "Abort", msg)
         return
     

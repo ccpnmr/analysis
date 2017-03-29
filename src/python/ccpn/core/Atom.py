@@ -188,7 +188,7 @@ def _newAtom(self:Residue, name:str, elementSymbol:str=None) -> 'Atom':
   if elementSymbol is None:
     elementSymbol = commonUtil.name2ElementSymbol(name)
   apiAtom = self._wrappedData.newAtom(name=name, elementSymbol=elementSymbol)
-  apiAtom._expandNewAtom()
+  apiAtom.expandNewAtom()
   #
   return self._project._data2Obj[apiAtom]
 #

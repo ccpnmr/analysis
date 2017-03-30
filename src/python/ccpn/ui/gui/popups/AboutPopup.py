@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Luca Mureddu $"
+__date__ = "$Date: 2017-03-30 11:28:58 +0100 (Thu, March 30, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -34,12 +33,12 @@ from ccpn.ui.gui.widgets.ButtonList import ButtonList
 TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
 | 
             **Please cite: **
-            Skinner et al, J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y
+            Skinner et al., J Biomol NMR (2016) 66:111–124; DOI 10.1007/s10858-016-0060-y
 
             **Written by: **
             Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan, Simon P Skinner & Geerten W Vuister
 
-            **This programs uses:**
+            **This program uses:**
             The CCPN data model: J Biomol NMR (2006) 36:147–155, DOI 10.1007/s10858-006-9076-z 
             PyQtGraph (http://www.pyqtgraph.org)
             PyQt (http://pyqt.sourceforge.net)
@@ -47,7 +46,7 @@ TEXT = ''' Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - 2017
 
             **Disclaimer:**
             This program is offered 'as-is'. Under no circumstances will the authors, CCPN, the Department of Molecular 
-            and Cell Biology, or the University of Leicester be liable of any damage, loss of data, loss of revenue or 
+            and Cell Biology, or the University of Leicester be liable for any damage, loss of data, loss of revenue or 
             any other undesired consequences originating from the usage of this software.
         '''
 

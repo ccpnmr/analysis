@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: TJ Ragan $"
-__date__ = "$Date: 2017-03-22 13:00:57 +0000 (Wed, March 22, 2017) $"
+__date__ = "$Date: 2017-04-04 09:51:15 +0100 (Tue, April 04, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -363,25 +363,38 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
                                       callback=self.application.clearRecentMacros))
 
 
+  def _addPluginSubMenu(self, Plugin):
+    targetMenu = pluginsMenu = self.getMenuAction('Plugins')
+    if '...' in Plugin.PLUGINNAME:
+      package, name = Plugin.PLUGINNAME.split('...')
+      try:
+        targetMenu = self.getMenuAction(package, topMenuAction=pluginsMenu)
+      except ValueError:
+        targetMenu = self._addMenu(package, targetMenu=pluginsMenu)
+    else:
+      name = Plugin.PLUGINNAME
+    action = Action(self, text=name, translate=False,
+                    callback=partial(self.startPlugin, Plugin=Plugin))
+    targetMenu.addAction(action)
+
+
   def _fillPluginsMenu(self):
     from ccpn.framework.lib.ExtensionLoader import getPlugins
-    targetMenu = pluginsMenu = self.getMenuAction('Plugins')
+    from ccpn.framework.PathsAndUrls import pluginPath
+
+    pluginsMenu = self.getMenuAction('Plugins')
     pluginsMenu.clear()
 
-    Plugins = getPlugins()
+    Plugins = getPlugins(pluginPath)
     Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
-    for Plugin in Plugins:  # TODO: add user extension path
-      if '...' in Plugin.PLUGINNAME:
-        package, name = Plugin.PLUGINNAME.split('...')
-        try:
-          targetMenu = self.getMenuAction(package, topMenuAction=pluginsMenu)
-        except ValueError:
-          targetMenu = self._addMenu(package, targetMenu=pluginsMenu)
-      else:
-        name = Plugin.PLUGINNAME
-      action = Action(self, text=name, translate=False,
-                      callback=partial(self.startPlugin, Plugin=Plugin))
-      targetMenu.addAction(action)
+    for Plugin in Plugins:
+      self._addPluginSubMenu(Plugin)
+
+    pluginsMenu.addSeparator()
+    Plugins = getPlugins(self.application.preferences.general.userPluginPath)
+    Plugins = sorted(Plugins, key=lambda p:p.PLUGINNAME)
+    for Plugin in Plugins:
+      self._addPluginSubMenu(Plugin)
     pluginsMenu.addSeparator()
     pluginsMenu.addAction(Action(pluginsMenu, text='Reload',
                                       callback=self._fillPluginsMenu))
@@ -398,7 +411,7 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
         from ccpn.ui.gui.modules.PluginModule import PluginModule
         pluginModule = PluginModule(interactor=plugin, application=self.application)
     else:
-      pluginModule = plugin.guiModule(name=plugin.PLUGINNAME,
+      pluginModule = plugin.guiModule(name=plugin.PLUGINNAME, parent=self,
                                       interactor=plugin, application=self.application)
     plugin.ui = pluginModule
     self.application.ui.pluginModules.append(pluginModule)

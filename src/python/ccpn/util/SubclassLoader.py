@@ -18,6 +18,7 @@ def loadSubclasses(path: str, baseclass, levels=2) -> set:
   extensions = []
   savedPythonPath = sys.path
   try:
+    path = os.path.expanduser(path)
     for root, dirs, files in os.walk(path):
       levels -= 1
       if levels == 0:

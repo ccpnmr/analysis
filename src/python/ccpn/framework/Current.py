@@ -232,7 +232,7 @@ Use print(current) to get a list of attribute, value pairs')
         if value not in values:
           setField(self, values + [value])
       #
-      setattr(cls, 'add' + param.className, adder)
+      setattr(cls, 'add' + singular[0].upper() + singular[1:], adder)
 
       def remover(self, value):
         """Remove %s from current.%s""" % (singular, plural)
@@ -241,7 +241,7 @@ Use print(current) to get a list of attribute, value pairs')
           values.remove(value)
         setField(self, values)
       #
-      setattr(cls, 'remove' + param.className, remover)
+      setattr(cls, 'remove' + singular[0].upper() + singular[1:], remover)
 
       def clearer(self):
         """Clear current.%s""" % plural

@@ -1,0 +1,225 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.lib.Strip &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.lib.Strip</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShift</span> <span class="kn">import</span> <span class="n">ChemicalShift</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiStrip</span> <span class="kn">import</span> <span class="n">GuiStrip</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib</span> <span class="kn">import</span> <span class="n">Window</span>
+
+
+<span class="k">def</span> <span class="nf">_getCurrentZoomRatio</span><span class="p">(</span><span class="n">viewRange</span><span class="p">):</span>
+  <span class="n">xRange</span><span class="p">,</span> <span class="n">yRange</span> <span class="o">=</span> <span class="n">viewRange</span>
+  <span class="n">xMin</span><span class="p">,</span> <span class="n">xMax</span> <span class="o">=</span> <span class="n">xRange</span>
+  <span class="n">xRatio</span> <span class="o">=</span> <span class="p">(</span><span class="n">xMax</span> <span class="o">-</span> <span class="n">xMin</span><span class="p">)</span>
+  <span class="n">yMin</span><span class="p">,</span> <span class="n">yMax</span> <span class="o">=</span> <span class="n">yRange</span>
+  <span class="n">yRatio</span> <span class="o">=</span> <span class="p">(</span><span class="n">yMax</span> <span class="o">-</span> <span class="n">yMin</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">xRatio</span><span class="p">,</span> <span class="n">yRatio</span>
+
+<div class="viewcode-block" id="navigateToPositionInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.navigateToPositionInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="n">axisCodes</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="n">widths</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Takes a strip, a list of positions and optionally, a parallel list of axisCodes.</span>
+<span class="sd">  Navigates to specified positions in strip using axisCodes, if specified, otherwise it navigates</span>
+<span class="sd">  to the positions in the displayed axis order of the strip.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">axisCodes</span><span class="p">:</span>
+    <span class="n">axisCodes</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span>
+
+  <span class="c1"># below does not work for the Navigate To right mouse menu option because in the width</span>
+  <span class="c1"># setting further down, stripAxisIndex is not necessarily the same as ii</span>
+  <span class="c1"># so the width in the z axis can be set to some huge number by mistake</span>
+  <span class="c1"># if widths is None:</span>
+  <span class="c1">#   widths = _getCurrentZoomRatio(strip.viewBox.viewRange())</span>
+
+  <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">axisCodes</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">stripAxisIndex</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisCodes</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+      <span class="k">continue</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">positions</span><span class="p">)</span><span class="o">&gt;</span><span class="n">ii</span><span class="p">:</span> <span class="c1"># this used to say 1 rather than ii (coupled with the else below)</span>
+      <span class="k">if</span> <span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">position</span> <span class="o">=</span> <span class="n">positions</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+    <span class="c1">#else: # what in the world is the case this is trying to deal with??</span>
+           <span class="c1"># why would you want to set all the positions to the same thing??</span>
+    <span class="c1">#  strip.orderedAxes[stripAxisIndex].position = positions[0]</span>
+
+    <span class="k">if</span> <span class="n">widths</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]:</span> <span class="c1"># FIXME this can be out of range</span>
+          <span class="c1"># if this item in the list contains a float, set the axis width to that float value</span>
+          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+          <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">],</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1"># if the list item is a str with value, full, reset the corresponding axis</span>
+            <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
+              <span class="n">strip</span><span class="o">.</span><span class="n">resetAxisRange</span><span class="p">(</span><span class="n">stripAxisIndex</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">widths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;default&#39;</span> <span class="ow">and</span> <span class="n">stripAxisIndex</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+              <span class="c1"># if the list item is a str with value, default, set width to 5ppm for heteronuclei and 0.5ppm for 1H</span>
+              <span class="k">if</span> <span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span> <span class="ow">or</span>
+                  <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axisCode</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;15N&#39;</span><span class="p">):</span>
+                <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mi">5</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">[</span><span class="n">stripAxisIndex</span><span class="p">]</span><span class="o">.</span><span class="n">width</span> <span class="o">=</span> <span class="mf">0.5</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">continue</span></div>
+
+
+
+<div class="viewcode-block" id="matchAxesAndNmrAtoms"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.matchAxesAndNmrAtoms">[docs]</a><span class="k">def</span> <span class="nf">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span><span class="s1">&#39;GuiStrip&#39;</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]):</span>
+
+  <span class="n">shiftDict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">shiftList</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">chemicalShiftList</span>
+  <span class="k">for</span> <span class="n">axis</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">:</span>
+    <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">atom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">atom</span><span class="o">.</span><span class="n">_apiResonance</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2IsotopeCode</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">):</span>
+        <span class="n">shift</span> <span class="o">=</span> <span class="n">shiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">atom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shift</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">isPositionWithinfBounds</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">shift</span><span class="p">,</span> <span class="n">axis</span><span class="p">):</span>
+          <span class="n">shiftDict</span><span class="p">[</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">shift</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">shiftDict</span></div>
+
+<div class="viewcode-block" id="isPositionWithinfBounds"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.isPositionWithinfBounds">[docs]</a><span class="k">def</span> <span class="nf">isPositionWithinfBounds</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span><span class="s1">&#39;GuiStrip&#39;</span><span class="p">,</span> <span class="n">shift</span><span class="p">:</span><span class="n">ChemicalShift</span><span class="p">,</span> <span class="n">axis</span><span class="p">:</span><span class="nb">object</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Determines whether a given shift is within the bounds of the specified axis of the specified</span>
+<span class="sd">  strip.</span>
+
+<span class="sd">  NBNB Bug Fixed by Rasmus 13/3/2016.</span>
+<span class="sd">  This was not used then. Maybe it should be?</span>
+
+<span class="sd">  Modified to use aliasingLimits instead of spectrumLimits. Rasmus, 24/7/2016</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">minima</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">maxima</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">axisIndex</span> <span class="o">=</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">axis</span><span class="o">.</span><span class="n">code</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+    <span class="n">spectrumIndices</span> <span class="o">=</span> <span class="n">spectrumView</span><span class="o">.</span><span class="n">_displayOrderSpectrumDimensionIndices</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">spectrumIndices</span><span class="p">[</span><span class="n">axisIndex</span><span class="p">]</span>
+    <span class="n">minima</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">maxima</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">aliasingLimits</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">True</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">minima</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">shift</span><span class="o">.</span><span class="n">value</span> <span class="o">&lt;=</span> <span class="nb">max</span><span class="p">(</span><span class="n">maxima</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="navigateToNmrAtomsInStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.Strip.navigateToNmrAtomsInStrip">[docs]</a><span class="k">def</span> <span class="nf">navigateToNmrAtomsInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">:</span><span class="s1">&#39;GuiStrip&#39;</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">widths</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="n">markPositions</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Takes an NmrResidue and optional spectrum displays and strips and navigates the strips</span>
+<span class="sd">  and spectrum displays to the positions specified by the peak.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;no strip specified&#39;</span><span class="p">)</span>
+    <span class="k">return</span>
+
+  <span class="n">shiftDict</span> <span class="o">=</span> <span class="n">matchAxesAndNmrAtoms</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">)</span>
+  <span class="c1"># atomPositions = shiftDict[strip.axisOrder[2]]</span>
+  <span class="n">atomPositions</span> <span class="o">=</span> <span class="p">[[</span><span class="n">x</span><span class="o">.</span><span class="n">value</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">shiftDict</span><span class="p">[</span><span class="n">axisCode</span><span class="p">]]</span> <span class="k">for</span> <span class="n">axisCode</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">axisOrder</span><span class="p">]</span>
+  <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">atomPos</span> <span class="ow">in</span> <span class="n">atomPositions</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">atomPos</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomPos</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">atomPos</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">atomPos</span><span class="p">)</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">atomPos</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+  <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">widths</span><span class="o">=</span><span class="n">widths</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">markPositions</span><span class="p">:</span>
+    <span class="n">Window</span><span class="o">.</span><span class="n">markPositions</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="nb">list</span><span class="p">(</span><span class="n">shiftDict</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,372 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.popups.PreferencesPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.popups.PreferencesPopup</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">json</span><span class="o">,</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.memops</span> <span class="kn">import</span> <span class="n">Implementation</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">COLOUR_SCHEMES</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.Translation</span> <span class="kn">import</span> <span class="n">languages</span>
+
+
+<div class="viewcode-block" id="PreferencesPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PreferencesPopup.PreferencesPopup">[docs]</a><span class="k">class</span> <span class="nc">PreferencesPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PreferencesPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span> <span class="o">=</span> <span class="n">preferences</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">oldPreferences</span> <span class="o">=</span> <span class="n">preferences</span>
+
+    <span class="n">row</span><span class="o">=</span><span class="mi">0</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataPathLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Data Path&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setDataPath</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">dataPath</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataPathButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getDataPath</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">,</span> <span class="n">hPolicy</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Auxiliary Files Path &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesData</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesDataButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAuxiliaryFilesPath</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">,</span> <span class="n">hPolicy</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">auxiliaryFilesPath</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setAuxiliaryFilesPath</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">macroPathLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Macro Path&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">macroPathData</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">macroPathData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userMacroPath</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">macroPathDataButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getMacroFilesPath</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">,</span> <span class="n">hPolicy</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">macroPathData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setMacroFilesPath</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pluginPathLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Plugin Path&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pluginPathData</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pluginPathData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userPluginPath</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pluginPathDataButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getPluginFilesPath</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">,</span> <span class="n">hPolicy</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">pluginPathData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setPluginFilesPath</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">extensionPathLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Extension Path&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">extensionPathData</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">extensionPathData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userExtensionPath</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">extensionPathDataButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getExtensionFilesPath</span><span class="p">,</span> <span class="n">icon</span><span class="o">=</span><span class="s1">&#39;icons/directory&#39;</span><span class="p">,</span> <span class="n">hPolicy</span><span class="o">=</span><span class="s1">&#39;fixed&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">extensionPathData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setExtensionFilesPath</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">languageLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Language&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">languages</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">language</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">languageBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeLanguage</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># self.editorLabel = Label(self, text=&quot;Editor &quot;, grid=(5, 0))</span>
+    <span class="c1"># self.edi</span>
+    <span class="c1"># torData = LineEdit(self, text=self.preferences.general.editor, grid=(5, 1), gridSpan=(1, 1))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Colour Scheme &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeBox</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeBox</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeBox</span><span class="o">.</span><span class="n">addItems</span><span class="p">(</span><span class="n">COLOUR_SCHEMES</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeBox</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeBox</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourSchemeBox</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeColourScheme</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">useNativeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Use Native File Dialogs: &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">useNativeBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">useNative</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">useNativeBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;useNative&#39;</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">useNativeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Use Native Web Browser: &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">useNativeBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">useNativeWebbrowser</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">useNativeBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;useNativeWebbrowser&#39;</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveLayoutLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Show ToolBar(s): &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveLayoutBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showToolbar</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoSaveLayoutBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;showToolbar&#39;</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumBorderLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Show Spectrum Border: &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumBorderBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showSpectrumBorder</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumBorderBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;showSpectrumBorder&#39;</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupEnabledLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Auto Backup On: &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupEnabledBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">checked</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">autoBackupEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupEnabledBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_toggleGeneralOptions</span><span class="p">,</span> <span class="s1">&#39;autoBackupEnabled&#39;</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupFrequencyLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Auto Backup Freq (mins)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupFrequencyData</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupFrequencyData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">autoBackupFrequency</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoBackupFrequencyData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setAutoBackupFrequency</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">regionPaddingLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Spectral Padding (%)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">regionPaddingData</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">regionPaddingData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">stripRegionPadding</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">regionPaddingData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setRegionPadding</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">dropFactorLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s2">&quot;Peak Picking Drop (%)&quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dropFactorData</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dropFactorData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%.0f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">peakDropFactor</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dropFactorData</span><span class="o">.</span><span class="n">editingFinished</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_setDropFactor</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">buttonBox</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">def</span> <span class="nf">_getDataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])):</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select Data File&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">currentDataPath</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                           <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">directory</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">dataPath</span> <span class="o">=</span> <span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_setDataPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">isModified</span><span class="p">():</span>
+      <span class="n">newPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataPathText</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">dataPath</span> <span class="o">=</span> <span class="n">newPath</span>
+      <span class="n">dataUrl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_apiNmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">findFirstDataLocationStore</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;remoteData&#39;</span><span class="p">)</span>
+      <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newPath</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getAuxiliaryFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesData</span><span class="o">.</span><span class="n">text</span><span class="p">())):</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select Data File&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">currentDataPath</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                           <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">auxiliaryFilesPath</span> <span class="o">=</span> <span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_setAuxiliaryFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+      <span class="n">newPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">auxiliaryFilesData</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">auxiliaryFilesPath</span> <span class="o">=</span> <span class="n">newPath</span>
+
+  <span class="k">def</span> <span class="nf">_getMacroFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">macroPathData</span><span class="o">.</span><span class="n">text</span><span class="p">())):</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">macroPathData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select Data File&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">currentDataPath</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                           <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">macroPathData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userMacroPath</span> <span class="o">=</span> <span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_getPluginFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pluginPathData</span><span class="o">.</span><span class="n">text</span><span class="p">())):</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pluginPathData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select Data File&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">currentDataPath</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                           <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pluginPathData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">pluginMacroPath</span> <span class="o">=</span> <span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_getExtensionFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extensionPathData</span><span class="o">.</span><span class="n">text</span><span class="p">())):</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">extensionPathData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">currentDataPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select Data File&#39;</span><span class="p">,</span> <span class="n">directory</span><span class="o">=</span><span class="n">currentDataPath</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">acceptMode</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                           <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+    <span class="n">directory</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">extensionPathData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userExtensionPath</span> <span class="o">=</span> <span class="n">directory</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_setMacroFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">newPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">macroPathData</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userMacroPath</span> <span class="o">=</span> <span class="n">newPath</span>
+
+  <span class="k">def</span> <span class="nf">_setPluginFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">newPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pluginPathData</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userPluginPath</span> <span class="o">=</span> <span class="n">newPath</span>
+
+  <span class="k">def</span> <span class="nf">_setExtensionFilesPath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">newPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extensionPathData</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">userExtensionPath</span> <span class="o">=</span> <span class="n">newPath</span>
+
+  <span class="k">def</span> <span class="nf">_changeLanguage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">language</span> <span class="o">=</span> <span class="p">(</span><span class="n">LANGUAGES</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
+
+  <span class="k">def</span> <span class="nf">_changeColourScheme</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="p">(</span><span class="n">COLOUR_SCHEMES</span><span class="p">[</span><span class="n">value</span><span class="p">])</span>
+
+  <span class="k">def</span> <span class="nf">_toggleGeneralOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preference</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">[</span><span class="n">preference</span><span class="p">]</span> <span class="o">=</span> <span class="n">checked</span>
+    <span class="k">if</span> <span class="n">preference</span> <span class="o">==</span> <span class="s1">&#39;showToolbar&#39;</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">spectrumDisplay</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">:</span>
+        <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">preference</span> <span class="o">==</span> <span class="s1">&#39;showSpectrumBorder&#39;</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+          <span class="n">spectrumView</span><span class="o">.</span><span class="n">_setBorderItemHidden</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">preference</span> <span class="o">==</span> <span class="s1">&#39;autoBackupEnabled&#39;</span><span class="p">:</span>
+      <span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+      <span class="n">application</span><span class="o">.</span><span class="n">updateAutoBackup</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_setAutoBackupFrequency</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">frequency</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">autoBackupFrequencyData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">autoBackupFrequency</span> <span class="o">=</span> <span class="n">frequency</span>
+    <span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="n">application</span><span class="o">.</span><span class="n">updateAutoBackup</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_setRegionPadding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">padding</span> <span class="o">=</span> <span class="mf">0.01</span><span class="o">*</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regionPaddingData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">stripRegionPadding</span> <span class="o">=</span> <span class="n">padding</span>
+
+  <span class="k">def</span> <span class="nf">_setDropFactor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">dropFactor</span> <span class="o">=</span> <span class="mf">0.01</span><span class="o">*</span><span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dropFactorData</span><span class="o">.</span><span class="n">text</span><span class="p">())</span>
+    <span class="k">except</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">peakDropFactor</span> <span class="o">=</span> <span class="n">dropFactor</span>
+
+  <span class="k">def</span> <span class="nf">_toggleSpectralOptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">preference</span><span class="p">,</span> <span class="n">checked</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="n">preference</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">checked</span><span class="p">)</span></div>
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.spectrum.BlockData &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.spectrum.BlockData</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Utilities for dealing with blocked data files</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="c1"># NBNB TBD must be replaced with numpy (array is deprecated from Python 3.4</span>
+<span class="kn">import</span> <span class="nn">array</span> <span class="kn">as</span> <span class="nn">array</span>
+
+<span class="c1"># def cumulativeArray(array):</span>
+<span class="c1">#   &quot;&quot;&quot; get total size and strides array.</span>
+<span class="c1">#   NB assumes fastest moving index first</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   ndim = len(array)</span>
+<span class="c1">#   cumul = ndim * [0]</span>
+<span class="c1">#   n = 1</span>
+<span class="c1">#   for i,size in enumerate(array):</span>
+<span class="c1">#     cumul[i] = n</span>
+<span class="c1">#     n = n * size</span>
+<span class="c1">#</span>
+<span class="c1">#   return (n, cumul)</span>
+<span class="c1">#</span>
+<span class="c1"># def arrayOfIndex(index, cumul):</span>
+<span class="c1">#   &quot;&quot;&quot; Get from 1D index to point address tuple</span>
+<span class="c1">#   NB assumes fastest moving index first</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   ndim = len(cumul)</span>
+<span class="c1">#   array = ndim * [0]</span>
+<span class="c1">#   # 26 May 2011: below uses cumul in backwards fashion so breaks Analysis usage</span>
+<span class="c1">#   # go back to previous (slower) code for now</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#   for i,c in enumerate(cumul):</span>
+<span class="c1">#     array[i], index = divmod(index, c)</span>
+<span class="c1"># &quot;&quot;&quot;</span>
+<span class="c1">#   for i in range(ndim-1, -1, -1):</span>
+<span class="c1">#     c = cumul[i]</span>
+<span class="c1">#     array[i], index = divmod(index, c)</span>
+<span class="c1">#     # futureproofed (&#39;/&#39; behaviour to chagne</span>
+<span class="c1">#     #array[i] = index / c</span>
+<span class="c1">#     #index = index % c</span>
+<span class="c1">#</span>
+<span class="c1">#   #array.reverse()</span>
+<span class="c1">#</span>
+<span class="c1">#   #return tuple(reversed(array))</span>
+<span class="c1">#   return tuple(array)</span>
+<span class="c1">#</span>
+<span class="c1"># def indexOfArray(array, cumul):</span>
+<span class="c1">#   &quot;&quot;&quot; Get from point address tuple to 1D index</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   return sum(x[0]*x[1] for x in zip(array, cumul))</span>
+<span class="c1">#</span>
+<span class="c1">#   #index = 0</span>
+<span class="c1">#   #for i in range(len(array)):</span>
+<span class="c1">#   #  index += array[i] * cumul[i]</span>
+<span class="c1">#   #</span>
+<span class="c1">#   #return index</span>
+<span class="c1">#</span>
+<span class="c1"># def determineShape(value):</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#   Get shape from matrix of nested sequences. A sequence is defined as</span>
+<span class="c1">#   anything that works with len(value) and value[0] and is not a string or dict.</span>
+<span class="c1">#   From Python 2.6 we could use abstract base classes</span>
+<span class="c1">#   # NB, uses 0th element to get lengths</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#   result = []</span>
+<span class="c1">#   while not isinstance(value, basestring) and not hasattr(value, &#39;keys&#39;):</span>
+<span class="c1">#     try:</span>
+<span class="c1">#       length = len(value)</span>
+<span class="c1">#       value = value[0]</span>
+<span class="c1">#       result.append(length)</span>
+<span class="c1">#     except TypeError:</span>
+<span class="c1">#       break</span>
+<span class="c1">#   #</span>
+<span class="c1">#   return result</span>
+<span class="c1">#</span>
+<span class="c1"># def strides(shape):</span>
+<span class="c1">#   &quot;&quot;&quot; convert shape array to stride array.</span>
+<span class="c1">#   NB assumes slowest varying index *first*</span>
+<span class="c1">#   NB equivalent to cumulativeArray function</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#   ndim = len(shape)</span>
+<span class="c1">#   result = ndim * [0]</span>
+<span class="c1">#   n = 1</span>
+<span class="c1">#   for i,size in enumerate(reversed(shape)):</span>
+<span class="c1">#     result[i] = n</span>
+<span class="c1">#     n = n * size</span>
+<span class="c1">#</span>
+<span class="c1">#   result.reverse()</span>
+<span class="c1">#   #</span>
+<span class="c1">#   return result</span>
+<span class="c1">#</span>
+<span class="c1"># def flatten(value, ndim=None):</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#   Reduce nested sequence to a single list in correct traversal order</span>
+<span class="c1">#   # NB the sequence must be nested to at least ndim depth everywhere,</span>
+<span class="c1">#   but need not be regular</span>
+<span class="c1">#   &quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   if ndim is None:</span>
+<span class="c1">#     shape = determineShape(value)</span>
+<span class="c1">#     ndim = len(shape)</span>
+<span class="c1">#</span>
+<span class="c1">#   if ndim &lt;= 1:</span>
+<span class="c1">#     result = list(value)</span>
+<span class="c1">#</span>
+<span class="c1">#   else:</span>
+<span class="c1">#     for dummy in range(ndim-1):</span>
+<span class="c1">#       result = list(value[0])</span>
+<span class="c1">#       for seq in value[1:]:</span>
+<span class="c1">#         result.extend(seq)</span>
+<span class="c1">#       value = result</span>
+<span class="c1">#   #</span>
+<span class="c1">#   return result</span>
+
+  
+
+<div class="viewcode-block" id="determineBlockSizes"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.BlockData.determineBlockSizes">[docs]</a><span class="k">def</span> <span class="nf">determineBlockSizes</span><span class="p">(</span><span class="n">npoints</span><span class="p">,</span> <span class="n">totalBlockSize</span><span class="o">=</span><span class="mi">4096</span><span class="p">):</span>
+
+  <span class="n">ndim</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">npoints</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">ndim</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[]</span>
+  <span class="k">elif</span> <span class="p">(</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span> <span class="n">totalBlockSize</span> <span class="p">]</span>
+
+  <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="n">ndim</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="n">totalBlockSize</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span> <span class="c1"># unlikely</span>
+    <span class="n">blockSizes</span> <span class="o">=</span> <span class="n">ndim</span> <span class="o">*</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">blockSizes</span> <span class="o">=</span> <span class="n">ndim</span> <span class="o">*</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+ 
+  <span class="k">while</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="n">totalBlockSize</span><span class="p">:</span>
+    <span class="n">i_max</span> <span class="o">=</span> <span class="n">r_max</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">):</span>
+      <span class="n">r</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">npoints</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">/</span> <span class="n">blockSizes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">r</span> <span class="o">&gt;</span> <span class="n">r_max</span><span class="p">):</span>
+        <span class="n">i_max</span> <span class="o">=</span> <span class="n">i</span>
+        <span class="n">r_max</span> <span class="o">=</span> <span class="n">r</span>
+    <span class="n">blockSizes</span><span class="p">[</span><span class="n">i_max</span><span class="p">]</span> <span class="o">*=</span> <span class="mi">2</span>
+    <span class="n">n</span> <span class="o">*=</span> <span class="mi">2</span>
+
+  <span class="k">return</span> <span class="n">blockSizes</span></div>
+<span class="c1">#</span>
+<span class="c1"># def writeBlockData(file, data, npoints, blockSizes = None):</span>
+<span class="c1">#</span>
+<span class="c1">#   ndim = len(npoints)</span>
+<span class="c1">#</span>
+<span class="c1">#   (npts, cumulPoints) = cumulativeArray(npoints)</span>
+<span class="c1">#</span>
+<span class="c1">#   if (npts != len(data)):</span>
+<span class="c1">#     raise Exception(&#39;npoints = %s so should have len(data) = %d but it is %d&#39; \</span>
+<span class="c1">#                     % (npoints, npts, len(data)))</span>
+<span class="c1">#</span>
+<span class="c1">#   if (not blockSizes):</span>
+<span class="c1">#     blockSizes = determineBlockSizes(npoints)</span>
+<span class="c1">#</span>
+<span class="c1">#   if (len(blockSizes) != ndim):</span>
+<span class="c1">#     raise Exception(&#39;len(npoints) = %s but len(blockSizes) = %d&#39; \</span>
+<span class="c1">#                     % (ndim, len(blockSizes)))</span>
+<span class="c1">#</span>
+<span class="c1">#   (blkSize, cumulBlockSize) = cumulativeArray(blockSizes)</span>
+<span class="c1">#</span>
+<span class="c1">#   nblocks = [ 1 + (npoints[i] - 1)/blockSizes[i] for i in range(ndim) ]</span>
+<span class="c1">#   (nblks, cumulBlocks) = cumulativeArray(nblocks)</span>
+<span class="c1">#</span>
+<span class="c1">#   fp = open(file, &#39;wb&#39;)</span>
+<span class="c1">#</span>
+<span class="c1">#   x = array.array(&#39;f&#39;)</span>
+<span class="c1">#   npts = nblks * blkSize</span>
+<span class="c1">#   for n in range(npts):</span>
+<span class="c1">#     blk = n / blkSize</span>
+<span class="c1">#     pnt = n % blkSize</span>
+<span class="c1">#     y = arrayOfIndex(blk, cumulBlocks)</span>
+<span class="c1">#     z = arrayOfIndex(pnt, cumulBlockSize)</span>
+<span class="c1">#     point = [ blockSizes[i]*y[i] + z[i] for i in range(ndim) ]</span>
+<span class="c1">#     for i in range(ndim):</span>
+<span class="c1">#       if (point[i] &gt;= npoints[i]):</span>
+<span class="c1">#         d = 0</span>
+<span class="c1">#         break</span>
+<span class="c1">#     else:</span>
+<span class="c1">#       ind = indexOfArray(point, cumulPoints)</span>
+<span class="c1">#       d = data[ind]</span>
+<span class="c1">#     x.append(d)</span>
+<span class="c1">#</span>
+<span class="c1">#   fp.write(x.tostring())</span>
+<span class="c1">#   fp.close()</span>
+<span class="c1">#</span>
+<span class="c1"># if (__name__ == &#39;__main__&#39;):</span>
+<span class="c1">#</span>
+<span class="c1">#   file = &#39;test.bin&#39;</span>
+<span class="c1">#   npoints = [ 64, 32 ]</span>
+<span class="c1">#   n = npoints[0] * npoints[1]</span>
+<span class="c1">#   data = range(n)</span>
+<span class="c1">#   writeBlockData(file, data, npoints)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

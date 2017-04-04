@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.Base &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.Base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+
+<span class="kn">from</span> <span class="nn">ccpn.framework.Translation</span> <span class="kn">import</span> <span class="n">Translation</span>
+
+<span class="kn">from</span> <span class="nn">pyqtgraph.dockarea</span> <span class="kn">import</span> <span class="n">Dock</span>
+
+<span class="n">HALIGN_DICT</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">&#39;left&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
+  <span class="s1">&#39;right&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
+  <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
+  <span class="s1">&#39;l&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">,</span>
+  <span class="s1">&#39;r&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignRight</span><span class="p">,</span>
+  <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignHCenter</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">VALIGN_DICT</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">&#39;top&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
+  <span class="s1">&#39;bottom&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
+  <span class="s1">&#39;center&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
+  <span class="s1">&#39;centre&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
+  <span class="s1">&#39;t&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignTop</span><span class="p">,</span>
+  <span class="s1">&#39;b&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignBottom</span><span class="p">,</span>
+  <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignVCenter</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">POLICY_DICT</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s1">&#39;fixed&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Fixed</span><span class="p">,</span>
+  <span class="s1">&#39;minimum&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Minimum</span><span class="p">,</span>
+  <span class="s1">&#39;maximum&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Maximum</span><span class="p">,</span>
+  <span class="s1">&#39;preferred&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Preferred</span><span class="p">,</span>
+  <span class="s1">&#39;expanding&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Expanding</span><span class="p">,</span>
+  <span class="s1">&#39;minimumExpanding&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">MinimumExpanding</span><span class="p">,</span>
+  <span class="s1">&#39;ignored&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSizePolicy</span><span class="o">.</span><span class="n">Ignored</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">FRAME_DICT</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="c1"># Shadow</span>
+  <span class="s1">&#39;plain&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Plain</span><span class="p">,</span>
+  <span class="s1">&#39;raised&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Raised</span><span class="p">,</span>
+  <span class="s1">&#39;sunken&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Sunken</span><span class="p">,</span>
+  <span class="c1"># Shapes</span>
+  <span class="s1">&#39;noFrame&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">,</span>
+  <span class="s1">&#39;box&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Box</span><span class="p">,</span>
+  <span class="s1">&#39;panel&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">Panel</span><span class="p">,</span>
+  <span class="s1">&#39;styledPanel&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">StyledPanel</span><span class="p">,</span>
+  <span class="s1">&#39;hLine&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">HLine</span><span class="p">,</span>
+  <span class="s1">&#39;vLine&#39;</span><span class="p">:</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">VLine</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="Base"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base">[docs]</a><span class="k">class</span> <span class="nc">Base</span><span class="p">():</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">),</span> <span class="n">stretch</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span>
+               <span class="n">hAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">hPolicy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">vPolicy</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">fShape</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fShadow</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">bgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">fgColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="c1"># Tool tips</span>
+    <span class="k">if</span> <span class="n">tipText</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="n">tipText</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Dock</span><span class="p">):</span>
+      <span class="k">return</span>
+
+    <span class="n">parent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;parent&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="bp">None</span> <span class="c1"># Not all Qt objects have a parent</span>
+    <span class="c1"># print(&#39;parent&#39;,parent)</span>
+    <span class="k">if</span> <span class="n">parent</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isFloatWidget</span><span class="p">:</span>
+      <span class="c1"># Setup gridding within parent</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">Dock</span><span class="p">):</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">widgetArea</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">layout</span><span class="p">:</span>
+        <span class="n">layout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+        <span class="c1"># layout.setSpacing(2)</span>
+
+        <span class="c1"># setContentsMargin(left, top, right, bottom)</span>
+        <span class="c1">#layout.setContentsMargins(2,2,2,2)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setContentsMargins</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">parent</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span> <span class="n">layout</span> <span class="p">)</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layout</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">):</span>
+        <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getRowCol</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">rowStr</span><span class="p">,</span> <span class="n">colStr</span> <span class="o">=</span> <span class="n">stretch</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setRowStretch</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">rowStr</span><span class="p">)</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">setColumnStretch</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">colStr</span><span class="p">)</span>
+
+        <span class="n">rowSpan</span><span class="p">,</span> <span class="n">colSpan</span> <span class="o">=</span> <span class="n">gridSpan</span>
+        <span class="n">hAlign</span> <span class="o">=</span> <span class="n">HALIGN_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hAlign</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="n">vAlign</span> <span class="o">=</span> <span class="n">VALIGN_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vAlign</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">align</span> <span class="o">=</span> <span class="n">hAlign</span> <span class="o">|</span> <span class="n">vAlign</span>
+        <span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">rowSpan</span><span class="p">,</span> <span class="n">colSpan</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Alignment</span><span class="p">(</span><span class="n">align</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">hPolicy</span> <span class="ow">or</span> <span class="n">vPolicy</span><span class="p">:</span>
+      <span class="n">hPolicy</span> <span class="o">=</span> <span class="n">POLICY_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hPolicy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">vPolicy</span> <span class="o">=</span> <span class="n">POLICY_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">vPolicy</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSizePolicy</span><span class="p">(</span><span class="n">hPolicy</span><span class="p">,</span> <span class="n">vPolicy</span><span class="p">)</span>
+
+    <span class="c1"># Setup colour overrides (styles used primarily)</span>
+    <span class="k">if</span> <span class="n">bgColor</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">rgb</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">bgColor</span><span class="p">)</span><span class="o">.</span><span class="n">getRgb</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">);&quot;</span> <span class="o">%</span>  <span class="n">rgb</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">fgColor</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setAutoFillBackground</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">rgb</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">fgColor</span><span class="p">)</span><span class="o">.</span><span class="n">getRgb</span><span class="p">()[:</span><span class="mi">3</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;foreground-color: rgb(</span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">, </span><span class="si">%d</span><span class="s2">);&quot;</span> <span class="o">%</span>  <span class="n">rgb</span><span class="p">)</span>
+
+    <span class="c1"># define frame styles</span>
+    <span class="k">if</span> <span class="n">fShape</span> <span class="ow">or</span> <span class="n">fShadow</span><span class="p">:</span>
+      <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">      Define frame properties:</span>
+<span class="sd">      TODO: GWV: routine is called but appears not to change much in the appearance</span>
+<span class="sd">      &quot;&quot;&quot;</span>
+      <span class="n">shape</span> <span class="o">=</span> <span class="n">FRAME_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fShape</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="o">.</span><span class="n">NoFrame</span><span class="p">)</span>
+      <span class="n">shadow</span> <span class="o">=</span> <span class="n">FRAME_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fShadow</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="c1">#print(&#39;Base.framestyle&gt;&#39;, shape | shadow)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setFrameStyle</span><span class="p">(</span><span class="n">shape</span> <span class="o">|</span> <span class="n">shadow</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setMidLineWidth</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getRowCol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">(),</span> <span class="n">Dock</span><span class="p">):</span>
+      <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">layout</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">layout</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">grid</span><span class="p">:</span>
+      <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="o">=</span> <span class="n">grid</span>
+      <span class="k">if</span> <span class="n">row</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">1</span>
+
+      <span class="k">if</span> <span class="n">col</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">row</span> <span class="o">=</span> <span class="n">layout</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+      <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span></div>
+
+
+
+
+
+
+ 
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

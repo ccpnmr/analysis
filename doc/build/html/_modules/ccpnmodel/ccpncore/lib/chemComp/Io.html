@@ -1,0 +1,395 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.chemComp.Io &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.chemComp.Io</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;!/O functions for ChemComp handling</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;Code for ChemComp I/O&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1"># Convenient I/O functions</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span>  <span class="n">Url</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Api</span> <span class="k">as</span> <span class="n">apiIo</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span> <span class="k">as</span> <span class="n">corePath</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.format.xml</span> <span class="kn">import</span> <span class="n">XmlIO</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Constants</span> <span class="kn">import</span> <span class="n">standardResidueCcpCodes</span>
+
+
+<div class="viewcode-block" id="fetchChemComp"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.fetchChemComp">[docs]</a><span class="k">def</span> <span class="nf">fetchChemComp</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">partialLoad</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; get ChemComp corresponding to molType,ccpCode, </span>
+<span class="sd">  looking 1) in memory, 2) in Repositories on lookup path,</span>
+<span class="sd">  3)  downloading from PDBe ChemComp server.</span>
+<span class="sd">  For 3) save new ChemComp in first Repository on PackageLocator lookup path</span>
+<span class="sd">  Do 3) only if download==True</span>
+
+<span class="sd">  partialLoad controls if only the TopObject (default) or the entire file is loaded</span>
+<span class="sd">  </span>
+<span class="sd">  copyFile can be set to False to avoid copying file from central archive (good for testing)</span>
+<span class="sd">  </span>
+<span class="sd">  Optimised to avoid mass reading.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  
+  <span class="c1"># First get it if already loaded</span>
+  <span class="c1"># 1 May 10: below returns None if chemComp not already loaded</span>
+  <span class="c1"># and then XmlIO.loadFromFile sets chemComp.isModified to True</span>
+  <span class="c1"># which means that chemComp is saved</span>
+  <span class="c1">#chemComp = project.getByNavigation((&#39;chemComps&#39;,(molType,ccpCode)))</span>
+  <span class="n">chemComp</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstChemComp</span><span class="p">(</span><span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">chemComp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># try to load it from an existing repository - avoiding mass loading</span>
+    <span class="n">packageName</span> <span class="o">=</span> <span class="s1">&#39;ccp.molecule.ChemComp&#39;</span>  
+    <span class="n">chemCompFileSearchString</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">+</span><span class="si">%s</span><span class="s2">+*.xml&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">molType</span><span class="p">,</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">getCcpFileString</span><span class="p">(</span><span class="n">ccpCode</span><span class="p">))</span>
+    
+    <span class="n">chemCompXmlFile</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">findCcpXmlFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">packageName</span><span class="p">,</span> <span class="n">chemCompFileSearchString</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">chemCompXmlFile</span><span class="p">:</span>
+      <span class="n">chemComp</span> <span class="o">=</span> <span class="n">XmlIO</span><span class="o">.</span><span class="n">loadFromFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">chemCompXmlFile</span><span class="p">,</span> <span class="n">partialLoad</span><span class="o">=</span><span class="n">partialLoad</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">chemComp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">molType</span> <span class="o">==</span> <span class="s1">&#39;dummy&#39;</span><span class="p">:</span>
+        <span class="n">chemComp</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newNonStdChemComp</span><span class="p">(</span><span class="n">molType</span><span class="o">=</span><span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">,</span> <span class="n">code3Letter</span><span class="o">=</span><span class="n">ccpCode</span><span class="p">)</span>
+        <span class="n">chemComp</span><span class="o">.</span><span class="n">newChemCompVar</span><span class="p">(</span><span class="n">linking</span><span class="o">=</span><span class="s1">&#39;dummy&#39;</span><span class="p">,</span> <span class="n">descriptor</span><span class="o">=</span><span class="s1">&#39;neutral&#39;</span><span class="p">,</span> <span class="n">isDefaultVar</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                                <span class="n">formalCharge</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">isParamagnetic</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">isAromatic</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="n">download</span><span class="p">:</span>
+
+        <span class="n">ccLocator</span> <span class="o">=</span> <span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">findFirstPackageLocator</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="n">packageName</span><span class="p">)</span> <span class="ow">or</span>
+                     <span class="n">project</span><span class="o">.</span><span class="n">findFirstPackageLocator</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">))</span>
+        <span class="n">repository</span> <span class="o">=</span> <span class="n">ccLocator</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">()</span>
+
+        <span class="n">fileFound</span> <span class="o">=</span> <span class="n">downloadChemCompInfoFromCcpForge</span><span class="p">(</span><span class="n">repository</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fileFound</span><span class="p">:</span>
+          <span class="n">chemComp</span> <span class="o">=</span> <span class="n">XmlIO</span><span class="o">.</span><span class="n">loadFromFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">fileFound</span><span class="p">,</span>  <span class="n">partialLoad</span><span class="o">=</span><span class="n">partialLoad</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">chemComp</span></div>
+  
+<div class="viewcode-block" id="getChemCompArchiveXmlFilePath"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.getChemCompArchiveXmlFilePath">[docs]</a><span class="k">def</span> <span class="nf">getChemCompArchiveXmlFilePath</span><span class="p">(</span><span class="n">chemCompPath</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">):</span>
+    
+  <span class="n">chemCompXmlFilePath</span> <span class="o">=</span> <span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">chemCompPath</span><span class="p">,</span><span class="n">molType</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">molType</span> <span class="o">==</span> <span class="s1">&#39;other&#39;</span><span class="p">:</span>
+    <span class="n">chemCompXmlFilePath</span> <span class="o">=</span> <span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">chemCompXmlFilePath</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  
+  <span class="k">return</span> <span class="n">chemCompXmlFilePath</span></div>
+
+ 
+<div class="viewcode-block" id="getChemCompCoordArchiveXmlFilePath"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.getChemCompCoordArchiveXmlFilePath">[docs]</a><span class="k">def</span> <span class="nf">getChemCompCoordArchiveXmlFilePath</span><span class="p">(</span><span class="n">chemCompPath</span><span class="p">,</span><span class="n">sourceName</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">):</span>
+    
+  <span class="n">chemCompXmlFilePath</span> <span class="o">=</span> <span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">chemCompPath</span><span class="p">,</span><span class="n">sourceName</span><span class="p">,</span><span class="n">molType</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">molType</span> <span class="o">==</span> <span class="s1">&#39;other&#39;</span><span class="p">:</span>
+    <span class="n">chemCompXmlFilePath</span> <span class="o">=</span> <span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">chemCompXmlFilePath</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  
+  <span class="k">return</span> <span class="n">chemCompXmlFilePath</span></div>
+
+<div class="viewcode-block" id="fetchChemCompCoord"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.fetchChemCompCoord">[docs]</a><span class="k">def</span> <span class="nf">fetchChemCompCoord</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">sourceName</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">partialLoad</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; get ChemComp corresponding to molType,ccpCode,</span>
+<span class="sd">  looking 1) in memory, 2) in Repositories on lookup path,</span>
+<span class="sd">  3) in allChemCompCoordPath directory, 4) downloading from PDBe ChemComp server.</span>
+<span class="sd">  For 3) and 4) save new ChemComp in first Repository on PAckageLocator lookup path</span>
+<span class="sd">  Do 4) only if download==True</span>
+
+<span class="sd">  partialLoad controls if only the TopObject (default) or the entire file is loaded</span>
+<span class="sd">  </span>
+<span class="sd">  copyFile can be set to False to avoid copying file from central archive (good for testing)</span>
+<span class="sd">  </span>
+<span class="sd">  Optimised to avoid mass reading.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  
+  <span class="c1"># First get it if already loaded</span>
+  <span class="n">chemCompCoord</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByNavigation</span><span class="p">((</span><span class="s1">&#39;chemCompCoords&#39;</span><span class="p">,(</span><span class="n">sourceName</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">)))</span>
+  
+  <span class="k">if</span> <span class="n">chemCompCoord</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># try to load it from an existing repository - avoiding mass loading</span>
+    <span class="n">packageName</span> <span class="o">=</span> <span class="s1">&#39;ccp.molecule.ChemCompCoord&#39;</span>  
+    <span class="n">chemCompCoordFileSearchString</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">+</span><span class="si">%s</span><span class="s2">+</span><span class="si">%s</span><span class="s2">+*.xml&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">commonUtil</span><span class="o">.</span><span class="n">getCcpFileString</span><span class="p">(</span><span class="n">sourceName</span><span class="p">),</span>
+                                                        <span class="n">molType</span><span class="p">,</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">getCcpFileString</span><span class="p">(</span><span class="n">ccpCode</span><span class="p">))</span>
+    
+    <span class="n">chemCompCoordXmlFile</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">findCcpXmlFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">packageName</span><span class="p">,</span>
+                                                 <span class="n">chemCompCoordFileSearchString</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">chemCompCoordXmlFile</span><span class="p">:</span>
+      <span class="n">chemCompCoord</span> <span class="o">=</span> <span class="n">XmlIO</span><span class="o">.</span><span class="n">loadFromFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">chemCompCoordXmlFile</span><span class="p">,</span>
+                                         <span class="n">partialLoad</span><span class="o">=</span><span class="n">partialLoad</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">chemCompCoord</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">download</span><span class="p">:</span>
+        
+      <span class="n">ccLocator</span> <span class="o">=</span> <span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">findFirstPackageLocator</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="n">packageName</span><span class="p">)</span> <span class="ow">or</span>
+                   <span class="n">project</span><span class="o">.</span><span class="n">findFirstPackageLocator</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">))</span>
+      <span class="n">repository</span> <span class="o">=</span> <span class="n">ccLocator</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">()</span>
+
+      <span class="n">fileFound</span> <span class="o">=</span> <span class="n">downloadChemCompInfoFromCcpForge</span><span class="p">(</span><span class="n">repository</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span>
+                                                   <span class="n">sourceName</span><span class="o">=</span><span class="n">sourceName</span><span class="p">)</span>
+               
+      <span class="k">if</span> <span class="n">fileFound</span><span class="p">:</span>
+        <span class="n">chemCompCoord</span> <span class="o">=</span> <span class="n">XmlIO</span><span class="o">.</span><span class="n">loadFromFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">fileFound</span><span class="p">,</span>  <span class="n">partialLoad</span><span class="o">=</span><span class="n">partialLoad</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">chemCompCoord</span></div>
+
+<div class="viewcode-block" id="getCcpForgeUrls"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.getCcpForgeUrls">[docs]</a><span class="k">def</span> <span class="nf">getCcpForgeUrls</span><span class="p">(</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">,</span><span class="n">sourceName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Creates the URL info for ChemComp(Coord) downloads from CcpForge</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">ccpForgeUrl</span> <span class="o">=</span> <span class="s2">&quot;http://ccpforge.cse.rl.ac.uk/gf/project/ccpn-chemcomp/scmcvs/?action=browse&amp;root=ccpn-chemcomp&amp;pathrev=MAIN&amp;path=/&quot;</span>
+  <span class="n">checkOutDir</span> <span class="o">=</span> <span class="s2">&quot;~checkout~&quot;</span>    
+  <span class="n">archiveDir</span> <span class="o">=</span> <span class="s2">&quot;ccpn-chemcomp/data/pdbe/chemComp/archive/&quot;</span>
+  
+  <span class="c1">#%2Acheckout%2A%2Fccpn-chemcomp%2Fdata%2Fpdbe%2FchemComp%2Farchive%2FChemComp%2Fprotein%2Fprotein%252B004%252Bpdbe_ccpnRef_2010-09-23-14-41-20-237_00001.xml&amp;revision=1.1</span>
+  
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">sourceName</span><span class="p">:</span>
+    <span class="n">fileType</span> <span class="o">=</span> <span class="s1">&#39;ChemComp&#39;</span>
+    <span class="n">subPath</span> <span class="o">=</span> <span class="n">getChemCompArchiveXmlFilePath</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">)</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">fileType</span> <span class="o">=</span> <span class="s1">&#39;ChemCompCoord&#39;</span>
+    <span class="n">subPath</span> <span class="o">=</span> <span class="n">getChemCompCoordArchiveXmlFilePath</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="n">sourceName</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">)</span>
+  
+  <span class="c1"># wb104: 15 Dec 2010: need to use joinPath because otherwise does not</span>
+  <span class="c1"># work on Windows, but cannot stick ccpForgeUrl in joinPath() because</span>
+  <span class="c1"># that would convert http:// to http:/</span>
+  <span class="n">ccpForgeDirUrl</span> <span class="o">=</span> <span class="n">ccpForgeUrl</span><span class="o">+</span><span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">archiveDir</span><span class="p">,</span><span class="n">fileType</span><span class="p">,</span><span class="n">subPath</span><span class="p">)</span>
+  <span class="n">ccpForgeDownloadUrl</span> <span class="o">=</span> <span class="n">ccpForgeUrl</span><span class="o">+</span><span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">checkOutDir</span><span class="p">,</span><span class="n">archiveDir</span><span class="p">,</span><span class="n">fileType</span><span class="p">,</span><span class="n">subPath</span><span class="p">)</span>
+  
+  <span class="k">return</span> <span class="n">fileType</span><span class="p">,</span> <span class="n">ccpForgeDirUrl</span><span class="p">,</span> <span class="n">ccpForgeDownloadUrl</span></div>
+
+<div class="viewcode-block" id="findCcpForgeDownloadLink"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.findCcpForgeDownloadLink">[docs]</a><span class="k">def</span> <span class="nf">findCcpForgeDownloadLink</span><span class="p">(</span><span class="n">dirData</span><span class="p">,</span> <span class="n">fileType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span> <span class="n">ccpForgeDownloadUrl</span><span class="p">):</span>
+  
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Finds the relevant XML file name and download link for the ChemComp(Coord) from the repository</span>
+<span class="sd">  directory data off CcpForge.</span>
+<span class="sd">  Works by ccpCode only, assuming that info comes from right directory!</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">fileHtmlPatt</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s2">&quot;a name=</span><span class="se">\&quot;</span><span class="s2">([^</span><span class="se">\&quot;</span><span class="s2">]+)</span><span class="se">\&quot;</span><span class="s2">\s+href=</span><span class="se">\&quot;</span><span class="s2">([^</span><span class="se">\&quot;</span><span class="s2">]+)</span><span class="se">\&quot;</span><span class="s2">\s+title=</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">)</span>
+  
+  <span class="n">urlLocation</span> <span class="o">=</span> <span class="n">chemCompXmlFile</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="k">for</span> <span class="n">urlDirLine</span> <span class="ow">in</span> <span class="n">dirData</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">):</span>
+    
+    <span class="n">fileHtmlSearch</span> <span class="o">=</span> <span class="n">fileHtmlPatt</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">urlDirLine</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">fileHtmlSearch</span><span class="p">:</span>
+      <span class="n">chemCompXmlFile</span> <span class="o">=</span> <span class="n">fileHtmlSearch</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="n">fileType</span> <span class="o">==</span> <span class="s1">&#39;ChemComp&#39;</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">tmpMolType</span><span class="p">,</span><span class="n">tmpCcpCode</span><span class="p">,</span><span class="n">suffix</span><span class="p">)</span> <span class="o">=</span> <span class="n">chemCompXmlFile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">tmpSourceName</span><span class="p">,</span><span class="n">tmpMolType</span><span class="p">,</span><span class="n">tmpCcpCode</span><span class="p">,</span><span class="n">suffix</span><span class="p">)</span> <span class="o">=</span> <span class="n">chemCompXmlFile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;+&quot;</span><span class="p">)</span>
+                
+      <span class="k">if</span> <span class="n">ccpCode</span> <span class="o">==</span> <span class="n">tmpCcpCode</span><span class="p">:</span>
+        
+        <span class="n">urlLocation</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&amp;content-type=text/plain&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ccpForgeDownloadUrl</span><span class="p">,</span>
+                                                         <span class="n">chemCompXmlFile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;+&#39;</span><span class="p">,</span><span class="s1">&#39;%252B&#39;</span><span class="p">))</span>
+        <span class="k">break</span>        
+  
+  <span class="k">return</span> <span class="n">urlLocation</span><span class="p">,</span> <span class="n">chemCompXmlFile</span></div>
+
+<div class="viewcode-block" id="downloadChemCompInfoFromCcpForge"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.downloadChemCompInfoFromCcpForge">[docs]</a><span class="k">def</span> <span class="nf">downloadChemCompInfoFromCcpForge</span><span class="p">(</span><span class="n">repository</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span> <span class="n">sourceName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Fetch chemComp &#39;molType&#39;, &#39;ccpCode&#39; or, if sourceName given, the corresponding chemCompCoord, </span>
+<span class="sd">  to local repository &#39;repository&#39;</span>
+<span class="sd">  from chemCompServer</span>
+<span class="sd">  contexts</span>
+<span class="sd">  Returns name of copied file, or None if unsuccessful</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">_logger</span>
+    
+  <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+  
+  <span class="p">(</span><span class="n">fileType</span><span class="p">,</span> <span class="n">ccpForgeDirUrl</span><span class="p">,</span> <span class="n">ccpForgeDownloadUrl</span><span class="p">)</span> <span class="o">=</span> <span class="n">getCcpForgeUrls</span><span class="p">(</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">,</span>
+                                                                    <span class="n">sourceName</span><span class="o">=</span><span class="n">sourceName</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">sourceName</span><span class="p">:</span>
+    <span class="c1"># For displaying error info</span>
+    <span class="n">sourceText</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">, &quot;</span> <span class="o">%</span> <span class="n">sourceName</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">sourceText</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+    
+  <span class="k">try</span><span class="p">:</span>
+
+    <span class="k">try</span><span class="p">:</span>
+      <span class="c1"># Get the file list, needs to be decomposed to get direct links</span>
+      <span class="n">dirData</span> <span class="o">=</span> <span class="n">Url</span><span class="o">.</span><span class="n">fetchUrl</span><span class="p">(</span><span class="n">ccpForgeDirUrl</span><span class="p">)</span>
+
+      <span class="n">urlLocation</span><span class="p">,</span> <span class="n">chemCompXmlFile</span> <span class="o">=</span> <span class="n">findCcpForgeDownloadLink</span><span class="p">(</span><span class="n">dirData</span><span class="p">,</span><span class="n">fileType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">,</span>
+                                                                <span class="n">ccpForgeDownloadUrl</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">urlLocation</span><span class="p">:</span>
+
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">data</span> <span class="o">=</span> <span class="n">Url</span><span class="o">.</span><span class="n">fetchUrl</span><span class="p">(</span><span class="n">urlLocation</span><span class="p">)</span>
+
+          <span class="k">try</span><span class="p">:</span>
+            <span class="n">saveChemCompPath</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">getFileLocation</span><span class="p">(</span><span class="s1">&#39;ccp.molecule.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fileType</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">saveChemCompPath</span><span class="p">):</span>
+              <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">saveChemCompPath</span><span class="p">)</span>
+  
+            <span class="n">chemCompFile</span> <span class="o">=</span> <span class="n">corePath</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">saveChemCompPath</span><span class="p">,</span><span class="n">chemCompXmlFile</span><span class="p">)</span>
+            <span class="n">fout</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">chemCompFile</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">fout</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+  
+            <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Downloaded </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2"> from server </span><span class="si">%s</span><span class="s2">, written to file </span><span class="si">%s</span><span class="s2">!&quot;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="n">fileType</span><span class="p">,</span><span class="n">sourceText</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">,</span><span class="n">ccpForgeDownloadUrl</span><span class="p">,</span><span class="n">chemCompFile</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">chemCompFile</span>
+  
+          <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot write </span><span class="si">%s</span><span class="s2"> XML file </span><span class="si">%s%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span>  <span class="o">%</span>
+                         <span class="p">(</span><span class="n">fileType</span><span class="p">,</span><span class="n">sourceText</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+  
+        <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+          <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot read </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">fileType</span><span class="p">,</span><span class="n">sourceText</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+      
+        
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot find </span><span class="si">%s</span><span class="s2"> XML file </span><span class="si">%s%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">.&quot;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="n">fileType</span><span class="p">,</span><span class="n">sourceText</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">))</span>
+      
+    <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot read directory information for </span><span class="si">%s%s</span><span class="s2">, </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">&quot;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="n">sourceText</span><span class="p">,</span><span class="n">molType</span><span class="p">,</span><span class="n">ccpCode</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+
+  <span class="k">except</span> <span class="ne">IOError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Cannot connect to download server </span><span class="si">%s</span><span class="s2">, or file does not exist...: </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                 <span class="o">%</span> <span class="p">(</span><span class="n">ccpForgeDownloadUrl</span><span class="p">,</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+    <span class="k">raise</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="fetchStdChemComps"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.html#ccpnmodel.ccpncore.lib.chemComp.Io.fetchStdChemComps">[docs]</a><span class="k">def</span> <span class="nf">fetchStdChemComps</span><span class="p">(</span><span class="n">project</span><span class="p">,</span><span class="n">molTypes</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+  <span class="n">chemComps</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">molTypes</span><span class="p">:</span>
+  
+    <span class="n">molTypes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;protein&#39;</span><span class="p">,</span><span class="s1">&#39;RNA&#39;</span><span class="p">,</span><span class="s1">&#39;DNA&#39;</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">molType</span> <span class="ow">in</span> <span class="n">molTypes</span><span class="p">:</span>
+  
+    <span class="k">if</span> <span class="n">standardResidueCcpCodes</span><span class="o">.</span><span class="n">has_key</span><span class="p">(</span><span class="n">molType</span><span class="p">):</span>
+  
+      <span class="k">for</span> <span class="n">ccpCode</span> <span class="ow">in</span> <span class="n">standardResidueCcpCodes</span><span class="p">[</span><span class="n">molType</span><span class="p">]:</span>
+        <span class="n">chemComp</span> <span class="o">=</span> <span class="n">fetchChemComp</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">molType</span><span class="p">,</span> <span class="n">ccpCode</span><span class="p">,</span> <span class="n">download</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">chemComp</span><span class="p">:</span>
+          <span class="n">chemComps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chemComp</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">chemComps</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

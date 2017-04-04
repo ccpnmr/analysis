@@ -1,0 +1,776 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype</h1><div class="highlight"><pre>
+<span></span>
+<span class="sd">&quot;&quot;&quot;Functions for calculating axisCodes for NmrExpPrototypes, adn necessary utilities.</span>
+<span class="sd">For normal cases, use only refExpFimRefCodeMap function, and get axisCodes from</span>
+<span class="sd">refExpDimRefs and the map.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="kn">import</span> <span class="nn">ccpn.util.Constants</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">operator</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Constants</span>
+
+<span class="c1"># Dictionary of experiment names that should come first in the list</span>
+<span class="c1">#  - with optional remapping of names</span>
+<span class="n">priorityNameRemapping</span> <span class="o">=</span> <span class="p">{</span>
+<span class="c1"># C,H experiments</span>
+<span class="s1">&#39;13C HSQC/HMQC&#39;</span><span class="p">:</span><span class="s1">&#39;13C HSQC/HMQC&#39;</span><span class="p">,</span>
+
+<span class="c1"># C,H,H experiments</span>
+<span class="s1">&#39;13C NOESY-HSQC&#39;</span><span class="p">:</span><span class="s1">&#39;13C NOESY-HSQC&#39;</span><span class="p">,</span>
+<span class="s1">&#39;13C HSQC-NOESY&#39;</span><span class="p">:</span><span class="s1">&#39;13C HSQC-NOESY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HcCH-TOCSY&#39;</span><span class="p">:</span><span class="s1">&#39;HcCH-TOCSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HCcH-TOCSY&#39;</span><span class="p">:</span><span class="s1">&#39;HCcH-TOCSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HcCH-COSY&#39;</span><span class="p">:</span><span class="s1">&#39;HcCH-COSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HCcH-COSY&#39;</span><span class="p">:</span><span class="s1">&#39;HCcH-COSY&#39;</span><span class="p">,</span>
+
+<span class="c1"># H,N experiments</span>
+<span class="s1">&#39;15N HSQC/HMQC&#39;</span><span class="p">:</span><span class="s1">&#39;15N HSQC/HMQC&#39;</span><span class="p">,</span>
+
+<span class="c1"># H,H,N experiments</span>
+<span class="s1">&#39;15N HSQC-TOCSY&#39;</span><span class="p">:</span><span class="s1">&#39;15N HSQC-TOCSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;15N TOCSY-HSQC&#39;</span><span class="p">:</span><span class="s1">&#39;15N TOCSY-HSQC&#39;</span><span class="p">,</span>
+<span class="s1">&#39;15N NOESY-HSQC&#39;</span><span class="p">:</span><span class="s1">&#39;15N NOESY-HSQC&#39;</span><span class="p">,</span>
+<span class="s1">&#39;15N HSQC-NOESY&#39;</span><span class="p">:</span><span class="s1">&#39;15N HSQC-NOESY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HBcb/HAcacoNH&#39;</span><span class="p">:</span><span class="s1">&#39;HB/HAcoNH&#39;</span><span class="p">,</span>
+
+<span class="c1"># C,H,N experiments</span>
+<span class="s1">&#39;HNCA/CB&#39;</span><span class="p">:</span><span class="s1">&#39;HNCA/CB&#39;</span><span class="p">,</span>
+<span class="s1">&#39;hCca-TOCSY-coNH&#39;</span><span class="p">:</span><span class="s1">&#39;hCcacoNH-TOCSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Hcca-TOCSY-coNH&#39;</span><span class="p">:</span><span class="s1">&#39;HccacoNH-TOCSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;hCc-TOCSY-NH&#39;</span><span class="p">:</span><span class="s1">&#39;hCcaNH-TOCSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;Hcc-TOCSY-NH&#39;</span><span class="p">:</span><span class="s1">&#39;HccaNH-TOCSY&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HNcoCA/CB&#39;</span><span class="p">:</span><span class="s1">&#39;HNcoCA/CB&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HNCA&#39;</span><span class="p">:</span><span class="s1">&#39;HNCA&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HNcaCO&#39;</span><span class="p">:</span><span class="s1">&#39;HNcaCO&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HNcoCA&#39;</span><span class="p">:</span><span class="s1">&#39;HNcoCA&#39;</span><span class="p">,</span>
+<span class="s1">&#39;HNCO&#39;</span><span class="p">:</span><span class="s1">&#39;HNCO&#39;</span><span class="p">,</span>
+<span class="s1">&#39;hbCB/haCAcoNH&#39;</span><span class="p">:</span><span class="s1">&#39;CB/CAcoNH&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="resetAllAxisCodes"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.resetAllAxisCodes">[docs]</a><span class="k">def</span> <span class="nf">resetAllAxisCodes</span><span class="p">(</span><span class="n">nmrProject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Reset all axisCodes (ExpDimRef.name) in project to be unique, match the isotope,</span>
+<span class="sd">  and match the standard Prototype where a prototype is known&quot;&quot;&quot;</span>
+
+  <span class="n">stdCodeMap</span> <span class="o">=</span> <span class="n">refExpDimRefCodeMap</span><span class="p">(</span><span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">experiment</span> <span class="ow">in</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">sortedExperiments</span><span class="p">():</span>
+
+    <span class="k">if</span> <span class="n">experiment</span><span class="o">.</span><span class="n">refExperiment</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># No prototype - just use nucleus as axis code</span>
+
+      <span class="n">foundCodes</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">expDim</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">expDims</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">expDimRef</span> <span class="ow">in</span> <span class="n">expDim</span><span class="o">.</span><span class="n">expDimRefs</span><span class="p">:</span>
+          <span class="n">isotopeCodes</span> <span class="o">=</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">isotopeCodes</span>
+
+          <span class="c1"># Get axis code</span>
+          <span class="k">if</span> <span class="n">expDimRef</span><span class="o">.</span><span class="n">measurementType</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;shift&#39;</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">isotopeCodes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># Normal shift axis, use nucleus to set</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">isotope2Nucleus</span><span class="p">(</span><span class="n">isotopeCodes</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Different type of axis.</span>
+            <span class="c1"># For simplicity set to axis_1, axis_2, ... for now</span>
+            <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;WARNING, non-std axis - axisCode set to &#39;axis&#39;&quot;</span><span class="p">)</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;axis&#39;</span>
+            <span class="n">foundCodes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+          <span class="c1"># add index for duplicates</span>
+          <span class="n">indx</span> <span class="o">=</span> <span class="n">foundCodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">indx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">foundCodes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">indx</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">foundCodes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">indx</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">indx</span><span class="p">))</span>
+
+          <span class="c1"># Set the attribute</span>
+          <span class="n">expDimRef</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">code</span>
+
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># We have a prototype - use standard axisCode map</span>
+      <span class="k">for</span> <span class="n">expDim</span> <span class="ow">in</span> <span class="n">experiment</span><span class="o">.</span><span class="n">expDims</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">expDimRef</span> <span class="ow">in</span> <span class="n">expDim</span><span class="o">.</span><span class="n">expDimRefs</span><span class="p">:</span>
+          <span class="n">expDimRef</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">stdCodeMap</span><span class="p">[</span><span class="n">expDimRef</span><span class="o">.</span><span class="n">refExpDimRef</span><span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="refExpDimRefCodeMap"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.refExpDimRefCodeMap">[docs]</a><span class="k">def</span> <span class="nf">refExpDimRefCodeMap</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get RefExpDimRef: axisCode map for all NmrExpPrototypes in project&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="k">for</span> <span class="n">nxp</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">sortedNmrExpPrototypes</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">isReversed</span> <span class="ow">in</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">:</span>
+      <span class="n">refExperiments</span> <span class="o">=</span> <span class="n">nxp</span><span class="o">.</span><span class="n">findAllRefExperiments</span><span class="p">(</span><span class="n">isReversed</span><span class="o">=</span><span class="n">isReversed</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">refExperiments</span><span class="p">:</span>
+        <span class="n">measurementMap</span> <span class="o">=</span> <span class="n">_measurementCodeMap</span><span class="p">(</span><span class="n">nxp</span><span class="p">,</span> <span class="n">forReversed</span><span class="o">=</span><span class="n">isReversed</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">re</span> <span class="ow">in</span> <span class="n">refExperiments</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">red</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">refExpDims</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">redr</span> <span class="ow">in</span> <span class="n">red</span><span class="o">.</span><span class="n">refExpDimRefs</span><span class="p">:</span>
+              <span class="n">result</span><span class="p">[</span><span class="n">redr</span><span class="p">]</span> <span class="o">=</span> <span class="n">measurementMap</span><span class="p">[</span><span class="n">redr</span><span class="o">.</span><span class="n">expMeasurement</span><span class="p">]</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="k">def</span> <span class="nf">_measurementCodeMap</span><span class="p">(</span><span class="n">nmrExpPrototype</span><span class="p">,</span> <span class="n">forReversed</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get expMeasurement:axisCode map&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">measurements</span> <span class="o">=</span> <span class="n">_orderedMeasurements</span><span class="p">(</span><span class="n">nmrExpPrototype</span><span class="p">,</span> <span class="n">forReversed</span><span class="o">=</span><span class="n">forReversed</span><span class="p">)</span>
+
+  <span class="n">foundCodes</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="c1"># get axisCodes per expMeasurement</span>
+  <span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="n">measurements</span><span class="p">:</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">rawAxisCode</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+    <span class="n">indx</span> <span class="o">=</span> <span class="n">foundCodes</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">indx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">foundCodes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">indx</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="n">foundCodes</span><span class="p">[</span><span class="n">code</span><span class="p">]</span> <span class="o">=</span> <span class="n">indx</span>
+      <span class="n">code</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">indx</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">[</span><span class="n">measurement</span><span class="p">]</span> <span class="o">=</span> <span class="n">code</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+
+<span class="k">def</span> <span class="nf">_connectedShiftMeasurements</span><span class="p">(</span><span class="n">expMeasurement</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;find expMeasurements that are of type Shift, match a HX bond, and onebonded to the input measurement&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">nmrExpPrototype</span> <span class="o">=</span> <span class="n">expMeasurement</span><span class="o">.</span><span class="n">nmrExpPrototype</span>
+
+  <span class="k">if</span> <span class="n">expMeasurement</span><span class="o">.</span><span class="n">measurementType</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">!=</span> <span class="s1">&#39;shift&#39;</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+  <span class="n">atomSites</span> <span class="o">=</span> <span class="n">expMeasurement</span><span class="o">.</span><span class="n">atomSites</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">atomSites</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;WARNING</span><span class="si">%s</span><span class="s2"> Shift must have single AtomSite, has: </span><span class="si">%s</span><span class="s2">&quot;</span>
+           <span class="o">%</span> <span class="p">(</span><span class="n">expMeasurement</span><span class="o">.</span><span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">atomSites</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">atomSites</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">result</span>
+
+  <span class="n">expSite</span> <span class="o">=</span> <span class="n">atomSites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">expIsotope</span> <span class="o">=</span> <span class="n">expSite</span><span class="o">.</span><span class="n">isotopeCode</span>
+  <span class="n">sites</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">if</span> <span class="n">expIsotope</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="s1">&#39;19F&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">expSite</span><span class="o">.</span><span class="n">findAllExpTransfers</span><span class="p">(</span><span class="n">transferType</span><span class="o">=</span><span class="s1">&#39;onebond&#39;</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">et</span><span class="o">.</span><span class="n">atomSites</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">expSite</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;13C&#39;</span><span class="p">,</span> <span class="s1">&#39;15N&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">site</span><span class="o">.</span><span class="n">maxNumber</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+          <span class="k">break</span>
+
+  <span class="k">elif</span> <span class="n">expIsotope</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;13C&#39;</span><span class="p">,</span> <span class="s1">&#39;15N&#39;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">expSite</span><span class="o">.</span><span class="n">findAllExpTransfers</span><span class="p">(</span><span class="n">transferType</span><span class="o">=</span><span class="s1">&#39;onebond&#39;</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">et</span><span class="o">.</span><span class="n">atomSites</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">expSite</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;1H&#39;</span><span class="p">,</span> <span class="s1">&#39;19F&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">site</span><span class="o">.</span><span class="n">maxNumber</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">sites</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">site</span><span class="p">)</span>
+          <span class="k">break</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">expMeasurements</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">measurementType</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;shift&#39;</span>
+            <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">findFirstAtomSite</span><span class="p">()</span> <span class="ow">in</span> <span class="n">sites</span><span class="p">]</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span> <span class="nf">_orderedMeasurements</span><span class="p">(</span><span class="n">nmrExpPrototype</span><span class="p">,</span> <span class="n">forReversed</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get ExpMeasurements in order: acquisition first, furthest from acquisition last,</span>
+<span class="sd">  connected measurements grouped together. If forReversed, get with acquisition last</span>
+<span class="sd">  (for reversed experiments&quot;&quot;&quot;</span>
+
+  <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">expMeasurement</span>
+        <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">stepNumber</span><span class="p">,</span><span class="n">x</span><span class="p">)</span>
+                         <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">findFirstExpGraph</span><span class="p">()</span><span class="o">.</span><span class="n">expSteps</span><span class="p">)]</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">forReversed</span><span class="p">:</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+
+  <span class="n">measurements</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">measurement</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">measurements</span><span class="p">:</span>
+      <span class="n">measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">me</span> <span class="ow">in</span> <span class="n">_connectedShiftMeasurements</span><span class="p">(</span><span class="n">measurement</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">me</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">measurements</span><span class="p">:</span>
+          <span class="n">measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">me</span><span class="p">)</span>
+
+  <span class="c1"># we do not search all expGraphs, so just add missing measurements to the end</span>
+  <span class="c1"># this is a heuristic, not a rigid ordering</span>
+  <span class="k">for</span> <span class="n">measurement</span> <span class="ow">in</span> <span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">expMeasurements</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">measurement</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">measurements</span><span class="p">:</span>
+      <span class="n">measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">measurement</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">me</span> <span class="ow">in</span> <span class="n">_connectedShiftMeasurements</span><span class="p">(</span><span class="n">measurement</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">me</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">measurements</span><span class="p">:</span>
+          <span class="n">measurements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">me</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">measurements</span>
+
+
+<div class="viewcode-block" id="rawAxisCode"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.rawAxisCode">[docs]</a><span class="k">def</span> <span class="nf">rawAxisCode</span><span class="p">(</span><span class="n">expMeasurement</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get raw expMeasurement axisCode (without number suffixes) from NmrExpPrototype.ExpMeasurement&quot;&quot;&quot;</span>
+
+  <span class="n">em</span> <span class="o">=</span> <span class="n">expMeasurement</span>
+  <span class="n">emType</span> <span class="o">=</span> <span class="n">em</span><span class="o">.</span><span class="n">measurementType</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+  <span class="n">tag</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">measurementType2ElementCode</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">emType</span><span class="p">,</span> <span class="n">emType</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;delay&#39;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tag</span>
+  <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;shift&#39;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">atomSiteAxisCode</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">em</span><span class="o">.</span><span class="n">atomSites</span><span class="p">))</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">tag</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">isotope2Nucleus</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">isotopeCode</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">em</span><span class="o">.</span><span class="n">atomSites</span><span class="p">))</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<span class="c1"># def nucleusCode(expMeasurement):</span>
+<span class="c1">#   &quot;&quot;&quot;Get nucleusCode from NmrExpPrototype.ExpMeasurement&quot;&quot;&quot;</span>
+<span class="c1">#   from ccpn.util import Constants</span>
+<span class="c1">#</span>
+<span class="c1">#   em = expMeasurement</span>
+<span class="c1">#   emType = em.measurementType.lower()</span>
+<span class="c1">#</span>
+<span class="c1">#   tag = Constants.measurementType2ElementCode.get(emType, emType)</span>
+<span class="c1">#   if tag == &#39;delay&#39;:</span>
+<span class="c1">#     result = tag</span>
+<span class="c1">#   else:</span>
+<span class="c1">#     records = [Constants.isotopeRecords.get(x.isotopeCode.upper() for x in em.atomSites)]</span>
+<span class="c1">#     if None in records:</span>
+<span class="c1">#       raise ValueError(&quot;Invalid NmrExpPrototype, unknown isotopeCode for atomSite at %s &quot;</span>
+<span class="c1">#                        % expMeasurement)</span>
+<span class="c1">#     else:</span>
+<span class="c1">#       result = &#39;&#39;.join(sorted(x.symbol for x in records))</span>
+<span class="c1">#       if tag != &#39;shift&#39;:</span>
+<span class="c1">#         result = tag + result.lower()</span>
+<span class="c1">#   #</span>
+<span class="c1">#   return result</span>
+
+
+<div class="viewcode-block" id="isotope2Nucleus"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.isotope2Nucleus">[docs]</a><span class="k">def</span> <span class="nf">isotope2Nucleus</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;remove integer prefix from integer+string string&quot;&quot;&quot;</span>
+  <span class="n">record</span> <span class="o">=</span> <span class="n">Constants</span><span class="o">.</span><span class="n">isotopeRecords</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">isotopeCode</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Isotope </span><span class="si">%s</span><span class="s2"> not recognised&quot;</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">record</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="atomSiteAxisCode"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.atomSiteAxisCode">[docs]</a><span class="k">def</span> <span class="nf">atomSiteAxisCode</span><span class="p">(</span><span class="n">atomSite</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get axisCode (without number suffixes) from NmrExPrototype.AtomSite&quot;&quot;&quot;</span>
+
+  <span class="n">name</span> <span class="o">=</span> <span class="n">atomSite</span><span class="o">.</span><span class="n">name</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">nucleus</span> <span class="o">=</span> <span class="n">isotope2Nucleus</span><span class="p">(</span><span class="n">atomSite</span><span class="o">.</span><span class="n">isotopeCode</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;CA&#39;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;CA&#39;</span>
+
+  <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;CO&#39;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;CO&#39;</span>
+
+  <span class="k">elif</span> <span class="n">nucleus</span> <span class="ow">in</span> <span class="s1">&#39;HF&#39;</span><span class="p">:</span>
+    <span class="c1"># H or F, check if bound to C or N</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">atomSite</span><span class="o">.</span><span class="n">findAllExpTransfers</span><span class="p">(</span><span class="n">transferType</span><span class="o">=</span><span class="s1">&#39;onebond&#39;</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">et</span><span class="o">.</span><span class="n">atomSites</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">atomSite</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;13C&#39;</span><span class="p">:</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;c&#39;</span>
+          <span class="k">elif</span> <span class="n">site</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;15N&#39;</span><span class="p">:</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;n&#39;</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+          <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">maxNumber</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="n">ss</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">site</span><span class="o">.</span><span class="n">minNumber</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+
+          <span class="k">break</span>
+
+    <span class="c1"># In rare cases we get both - this is nonsense, so remove them</span>
+    <span class="k">for</span> <span class="n">tags</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;n&#39;</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">),(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span><span class="s1">&#39;-c&#39;</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">tags</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+          <span class="k">while</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+            <span class="n">ll</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="c1"># Now remove the &#39;-x&#39; tags - they were there to catch the above problem</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="s1">&#39;-c&#39;</span><span class="p">):</span>
+      <span class="k">while</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="n">ll</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ll</span><span class="p">)))</span>
+
+  <span class="k">elif</span> <span class="n">nucleus</span> <span class="ow">in</span> <span class="s1">&#39;CN&#39;</span><span class="p">:</span>
+
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">et</span> <span class="ow">in</span> <span class="n">atomSite</span><span class="o">.</span><span class="n">findAllExpTransfers</span><span class="p">(</span><span class="n">transferType</span><span class="o">=</span><span class="s1">&#39;onebond&#39;</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">site</span> <span class="ow">in</span> <span class="n">et</span><span class="o">.</span><span class="n">atomSites</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">site</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">atomSite</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;1H&#39;</span><span class="p">:</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;h&#39;</span>
+          <span class="k">elif</span> <span class="n">site</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;19F&#39;</span><span class="p">:</span>
+            <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;f&#39;</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+          <span class="k">if</span> <span class="n">site</span><span class="o">.</span><span class="n">maxNumber</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="o">+</span><span class="n">ss</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">site</span><span class="o">.</span><span class="n">minNumber</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+              <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+          <span class="k">break</span>
+
+    <span class="c1"># In rare cases we get both - this is nonsense, so remove them</span>
+    <span class="k">for</span> <span class="n">tags</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;-h&#39;</span><span class="p">),(</span><span class="s1">&#39;f&#39;</span><span class="p">,</span><span class="s1">&#39;-f&#39;</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">tags</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">:</span>
+          <span class="k">while</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+            <span class="n">ll</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="c1"># Now remove the &#39;-x&#39; tags - they were there to catch the above problem</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;-h&#39;</span><span class="p">,</span> <span class="s1">&#39;-f&#39;</span><span class="p">):</span>
+      <span class="k">while</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="n">ll</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">+=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">ll</span><span class="p">)))</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="testExpPrototypes"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.testExpPrototypes">[docs]</a><span class="k">def</span> <span class="nf">testExpPrototypes</span><span class="p">(</span><span class="n">resetCodes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Test functions and make diagnostic output&quot;&quot;&quot;</span>
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Api</span> <span class="k">as</span> <span class="n">apiIo</span>
+  <span class="n">project</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">newProject</span><span class="p">(</span><span class="s2">&quot;ExpPrototypeTest&quot;</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="n">codeMap</span> <span class="o">=</span> <span class="n">refExpDimRefCodeMap</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+  <span class="n">axisCodeSet</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+  <span class="n">useNames</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">synonyms</span><span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">nmrExpPrototype</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">sortedNmrExpPrototypes</span><span class="p">():</span>
+  <span class="c1"># for nmrExpPrototype in project.findAllNmrExpPrototypes(serial=292):</span>
+    <span class="c1"># print(&quot;nmrExpPrototype: %s %s &quot; % (nmrExpPrototype, nmrExpPrototype._ID))</span>
+    <span class="k">for</span> <span class="n">refExperiment</span> <span class="ow">in</span> <span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">sortedRefExperiments</span><span class="p">():</span>
+      <span class="c1"># print(&quot;refExperiment: %s %s &quot; % (refExperiment, refExperiment._ID))</span>
+
+      <span class="c1"># check axis codes</span>
+      <span class="n">codes</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">red</span> <span class="ow">in</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">sortedRefExpDims</span><span class="p">():</span>
+        <span class="c1"># print(&quot;red: %s %s&quot; % (red, red._ID))</span>
+        <span class="k">for</span> <span class="n">redr</span> <span class="ow">in</span> <span class="n">red</span><span class="o">.</span><span class="n">sortedRefExpDimRefs</span><span class="p">():</span>
+          <span class="c1"># print(&quot;redr: %s %s &quot; % ( redr, redr._ID))</span>
+          <span class="n">code</span> <span class="o">=</span> <span class="n">codeMap</span><span class="p">[</span><span class="n">redr</span><span class="p">]</span>
+          <span class="n">codes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+          <span class="n">axisCodeSet</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">codes</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">codes</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">resetCodes</span><span class="p">:</span>
+          <span class="c1"># Codes are unique - set them</span>
+          <span class="k">for</span> <span class="n">red</span> <span class="ow">in</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">sortedRefExpDims</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">redr</span> <span class="ow">in</span> <span class="n">red</span><span class="o">.</span><span class="n">sortedRefExpDimRefs</span><span class="p">():</span>
+              <span class="n">redr</span><span class="o">.</span><span class="n">axisCode</span> <span class="o">=</span> <span class="n">codeMap</span><span class="p">[</span><span class="n">redr</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Duplicate code in </span><span class="si">%s</span><span class="s2">: </span><span class="si">%s</span><span class="s2">. SKIPPING&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">codes</span><span class="p">))</span>
+
+      <span class="c1"># print (&quot;TEST %s %s&quot; % (refExperiment.name, codes))</span>
+
+      <span class="c1"># check for duplicate synonyms and collect all synonyms</span>
+      <span class="n">key</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span>
+      <span class="n">usename</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">synonym</span> <span class="ow">or</span> <span class="n">key</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">useNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">usename</span><span class="p">,</span> <span class="p">[])</span>
+      <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+      <span class="n">useNames</span><span class="p">[</span><span class="n">usename</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span>
+      <span class="k">if</span> <span class="n">usename</span> <span class="o">!=</span> <span class="n">key</span><span class="p">:</span>
+        <span class="n">synonyms</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">usename</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
+
+  <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;All axisCodes: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">axisCodeSet</span><span class="p">)))</span>
+
+  <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">useNames</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">print</span> <span class="p">(</span><span class="s2">&quot;Duplicate name: </span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+
+  <span class="c1"># for tt in sorted(synonyms):</span>
+  <span class="c1">#   print (&quot;SYNONYM: %s %s&quot; % tt)</span>
+
+  <span class="k">if</span> <span class="n">resetCodes</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">saveModified</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="experimentSynonymSummary"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.experimentSynonymSummary">[docs]</a><span class="k">def</span> <span class="nf">experimentSynonymSummary</span><span class="p">():</span>
+  <span class="sd">&quot;&quot;&quot;1) set of atomSiteNames appearing</span>
+<span class="sd">  2) List of dimensionCount, synonym, name, atomNames for refExperiments sorted by name &quot;&quot;&quot;</span>
+
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Api</span> <span class="k">as</span> <span class="n">apiIo</span>
+  <span class="n">project</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">newProject</span><span class="p">(</span><span class="s2">&quot;ExpPrototypeTest&quot;</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="c1"># NBNB</span>
+  <span class="c1"># 1) Some refExperiments have no synonym - use the name instead for these</span>
+
+  <span class="n">result</span><span class="o">=</span> <span class="p">[]</span>
+  <span class="c1"># atomSiteNames = set()</span>
+  <span class="n">allAxisCodes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+  <span class="c1"># Sort refExperiments by name</span>
+  <span class="n">refExperiments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">nmrExpPrototypes</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">refExperiments</span><span class="p">],</span>
+                               <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)))</span>
+  <span class="k">for</span> <span class="n">refExperiment</span> <span class="ow">in</span> <span class="n">refExperiments</span><span class="p">:</span>
+      <span class="c1"># print(&quot;refExperiment: %s %s &quot; % (refExperiment, refExperiment._ID))</span>
+      <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;NORM&#39;</span>
+      <span class="c1"># siteNames = []</span>
+      <span class="n">axisCodes</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">synonym</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">synonym</span>
+      <span class="k">for</span> <span class="n">red</span> <span class="ow">in</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">sortedRefExpDims</span><span class="p">():</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">axisCode</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">red</span><span class="o">.</span><span class="n">sortedRefExpDimRefs</span><span class="p">()]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="n">axisCodes</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+          <span class="n">allAxisCodes</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">axisCodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ll</span><span class="p">))</span>
+          <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;CPLX&#39;</span>
+
+      <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">typ</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">refExpDims</span><span class="p">),</span> <span class="n">synonym</span> <span class="ow">or</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+              <span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">axisCodes</span><span class="p">]</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+          <span class="c1"># ss = &#39;,&#39;.join(tuple(x.name for x in redr.expMeasurement.atomSites))</span>
+          <span class="c1"># siteNames.append(ss)</span>
+          <span class="c1"># atomSiteNames.add(ss)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">allAxisCodes</span><span class="p">,</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="fetchIsotopeRefExperimentMap"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.fetchIsotopeRefExperimentMap">[docs]</a><span class="k">def</span> <span class="nf">fetchIsotopeRefExperimentMap</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="s1">&#39;MemopsRoot&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;fetch {tuple(sortedNucleusCodes):RefExperiment} dictionary for project</span>
+<span class="sd">  The key is a tuple of element names (&#39;C, Br, H, D, T, ...) or either of J, MQ, ALT, or delay</span>
+
+<span class="sd">  NB, each list value is sorted ad-hoc to bring the most common experiments to the top.</span>
+<span class="sd">  Do NOT sort or reorder the result&quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;_isotopeRefExperimentMap&#39;</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_isotopeRefExperimentMap</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+
+    <span class="n">tuples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">expPrototype</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">sortedNmrExpPrototypes</span><span class="p">():</span>
+      <span class="n">expGraph</span> <span class="o">=</span> <span class="n">expPrototype</span><span class="o">.</span><span class="n">sortedExpGraphs</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">expSteps</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">expGraph</span><span class="o">.</span><span class="n">expSteps</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;stepNumber&#39;</span><span class="p">))</span>
+      <span class="n">atomSiteCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">expPrototype</span><span class="o">.</span><span class="n">atomSites</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">refExperiment</span> <span class="ow">in</span> <span class="n">expPrototype</span><span class="o">.</span><span class="n">sortedRefExperiments</span><span class="p">():</span>
+
+        <span class="c1"># ExpSteps in order of traversal</span>
+        <span class="n">expMeasurements</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">expMeasurement</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">expSteps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">isReversed</span><span class="p">:</span>
+          <span class="n">expMeasurements</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+        <span class="c1"># We now have expMeasurements in traversal order, from start to acquisition</span>
+
+        <span class="c1"># Sort key for simple (e.g. shift)</span>
+        <span class="c1"># versus compound (e.g. coupling, MQ, or reduced-dimensionality) axes</span>
+        <span class="n">axisCodes</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">axisCodes</span>
+        <span class="n">multiAxisCodeSort</span> <span class="o">=</span> <span class="mi">100</span> <span class="k">if</span> <span class="bp">None</span> <span class="ow">in</span> <span class="n">axisCodes</span> <span class="k">else</span> <span class="nb">max</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">axisCodes</span><span class="p">)</span>
+
+        <span class="c1"># Sort key for start and acquisition dimensions</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">expMeasurements</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">atomSites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isotopeCode</span>
+        <span class="k">for</span> <span class="n">acqNucleusCode</span> <span class="ow">in</span> <span class="n">ss</span><span class="p">:</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">acqNucleusCode</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+            <span class="k">break</span>
+        <span class="k">if</span> <span class="n">acqNucleusCode</span> <span class="o">==</span> <span class="s1">&#39;H&#39;</span><span class="p">:</span>
+          <span class="n">ll</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">expMeasurements</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">atomSites</span><span class="p">)</span>
+          <span class="n">startsOnProton</span> <span class="o">=</span> <span class="p">(</span><span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="s1">&#39;1H&#39;</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="bp">False</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">startsOnProton</span><span class="p">:</span>
+            <span class="c1"># Proton start and end -= sort first</span>
+            <span class="n">nucleusAcquisitionSort</span> <span class="o">=</span> <span class="o">-</span><span class="mi">30</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Proton end only - sort third</span>
+            <span class="n">nucleusAcquisitionSort</span> <span class="o">=</span> <span class="o">-</span><span class="mi">10</span>
+        <span class="k">elif</span> <span class="n">acqNucleusCode</span> <span class="o">==</span> <span class="s1">&#39;C&#39;</span><span class="p">:</span>
+          <span class="c1"># Carbon detection - sort second</span>
+          <span class="n">nucleusAcquisitionSort</span> <span class="o">=</span> <span class="o">-</span><span class="mi">20</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># Other. Sort last, grouping by acquisition nucleus</span>
+          <span class="n">nucleusAcquisitionSort</span> <span class="o">=</span> <span class="nb">ord</span><span class="p">(</span><span class="n">acqNucleusCode</span><span class="p">)</span>
+
+        <span class="n">refExperimentName</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span>
+        <span class="c1"># Ad-hoc - give absolute priority for preferred experiments</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">synonym</span> <span class="ow">or</span> <span class="n">refExperimentName</span><span class="p">)</span> <span class="ow">in</span> <span class="n">priorityNameRemapping</span><span class="p">:</span>
+          <span class="n">multiAxisCodeSort</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100</span>
+
+        <span class="c1"># Ad hoc modifications - to get more common experiments first:</span>
+        <span class="n">downgrade</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;base&#39;</span><span class="p">,</span><span class="s1">&#39;coupling&#39;</span><span class="p">,</span> <span class="s1">&#39;[n&#39;</span><span class="p">)</span>
+        <span class="n">adhoc</span> <span class="o">=</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="ow">in</span> <span class="n">refExperimentName</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">downgrade</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;{C&#39;</span> <span class="ow">in</span> <span class="n">refExperimentName</span><span class="p">:</span>
+          <span class="c1"># Give higher priority to CA|Cca experiments</span>
+          <span class="n">atomSiteCountMod</span> <span class="o">=</span> <span class="n">atomSiteCount</span> <span class="o">-</span><span class="mi">1</span>
+          <span class="k">if</span> <span class="s1">&#39;co&#39;</span> <span class="ow">in</span> <span class="n">refExperimentName</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span>
+            <span class="c1"># Move CB/CA CO experiments yet one more level up</span>
+            <span class="n">atomSiteCountMod</span> <span class="o">-=</span> <span class="mf">0.5</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">atomSiteCountMod</span> <span class="o">=</span> <span class="n">atomSiteCount</span>
+
+        <span class="c1"># Put result on tuples list, with sorting keys in position</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">nucleusCodes</span><span class="p">))</span>
+        <span class="n">tt</span> <span class="o">=</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">multiAxisCodeSort</span><span class="p">,</span> <span class="n">nucleusAcquisitionSort</span><span class="p">,</span> <span class="n">adhoc</span><span class="p">,</span> <span class="n">atomSiteCountMod</span><span class="p">,</span>
+              <span class="nb">len</span><span class="p">(</span><span class="n">refExperimentName</span><span class="p">),</span><span class="n">refExperiment</span><span class="p">)</span>
+        <span class="n">tuples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tt</span><span class="p">)</span>
+
+    <span class="c1"># Sort tuples by arranged sort codes</span>
+    <span class="n">tuples</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">tuples</span><span class="p">:</span>
+      <span class="c1"># Get actual result out and in dict</span>
+
+      <span class="n">refExperiment</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">key</span> <span class="o">=</span> <span class="n">tt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[])</span>
+      <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">refExperiment</span><span class="p">)</span>
+      <span class="n">result</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span>
+
+      <span class="c1"># print(key, refExperiment.name, refExperiment.synonym)</span>
+
+    <span class="n">project</span><span class="o">.</span><span class="n">_isotopeRefExperimentMap</span> <span class="o">=</span> <span class="n">result</span>
+
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="c1"># ExperimentClassification namedtuple, showing which groups a given RefExperiment falls into</span>
+<span class="n">ExperimentClassification</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;ExperimentCharacteristic&#39;</span><span class="p">,</span>
+                                                  <span class="p">(</span><span class="s1">&#39;dimensionCount&#39;</span><span class="p">,</span> <span class="s1">&#39;acquisitionNucleus&#39;</span><span class="p">,</span>
+                                                   <span class="s1">&#39;isThroughSpace&#39;</span><span class="p">,</span><span class="s1">&#39;isRelayed&#39;</span><span class="p">,</span>
+                                                   <span class="s1">&#39;isRelaxation&#39;</span><span class="p">,</span> <span class="s1">&#39;isQuantification&#39;</span><span class="p">,</span> <span class="s1">&#39;isJResolved&#39;</span><span class="p">,</span>
+                                                   <span class="s1">&#39;isMultipleQuantum&#39;</span><span class="p">,</span> <span class="s1">&#39;isProjection&#39;</span><span class="p">,</span>
+                                                   <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;synonym&#39;</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="getExpClassificationDict"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.getExpClassificationDict">[docs]</a><span class="k">def</span> <span class="nf">getExpClassificationDict</span><span class="p">(</span><span class="n">nmrProject</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Get a dictionary of dictionaries of dimensionCount:sortedNuclei:ExperimentClassification named tuples.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">classificationDict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">nmrExpProtoType</span> <span class="ow">in</span> <span class="n">nmrProject</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">sortedNmrExpPrototypes</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">refExperiment</span> <span class="ow">in</span> <span class="n">nmrExpProtoType</span><span class="o">.</span><span class="n">sortedRefExperiments</span><span class="p">():</span>
+      <span class="n">dimensionCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">refExpDims</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">dimensionCount</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">classificationDict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">classificationDict</span><span class="p">[</span><span class="n">dimensionCount</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="n">nucleusCodes</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">nucleusCodes</span><span class="p">))</span>
+      <span class="k">if</span> <span class="n">nucleusCodes</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">classificationDict</span><span class="p">[</span><span class="n">dimensionCount</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">classificationDict</span><span class="p">[</span><span class="n">dimensionCount</span><span class="p">][</span><span class="n">nucleusCodes</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">classification</span> <span class="o">=</span> <span class="n">getExperimentClassification</span><span class="p">(</span><span class="n">refExperiment</span><span class="p">)</span>
+      <span class="n">classificationDict</span><span class="p">[</span><span class="n">dimensionCount</span><span class="p">][</span><span class="n">nucleusCodes</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">classification</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">classificationDict</span></div>
+
+
+<div class="viewcode-block" id="getExperimentClassification"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.getExperimentClassification">[docs]</a><span class="k">def</span> <span class="nf">getExperimentClassification</span><span class="p">(</span><span class="n">refExperiment</span><span class="p">:</span><span class="s1">&#39;RefExperiment&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ExperimentClassification</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Get ExperimentClassification namedtuple, showing which groups a given RefExperiment falls into</span>
+
+<span class="sd">  The field names should be self-explanatory, except for &#39;isQuantification&#39; - this covers</span>
+<span class="sd">  experiments that are classified as &#39;quantification&#39; in the NmrExpPrototype description, and are</span>
+<span class="sd">  *not* relaxation measurements. In practice these are J-measurement experiments (for now).&quot;&quot;&quot;</span>
+
+  <span class="n">nmrExpPrototype</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">nmrExpPrototype</span>
+  <span class="n">transferTypes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">transferType</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">expGraphs</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">x</span><span class="o">.</span><span class="n">expTransfers</span><span class="p">)</span>
+  <span class="n">measurementTypes</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">measurementType</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">expMeasurements</span><span class="p">)</span>
+
+  <span class="n">dimensionCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">refExpDims</span><span class="p">)</span>
+
+  <span class="n">expMeasurement</span> <span class="o">=</span> <span class="n">_orderedMeasurements</span><span class="p">(</span><span class="n">nmrExpPrototype</span><span class="p">,</span> <span class="n">forReversed</span><span class="o">=</span><span class="n">refExperiment</span><span class="o">.</span><span class="n">isReversed</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="n">acquisitionNucleus</span> <span class="o">=</span> <span class="n">expMeasurement</span><span class="o">.</span><span class="n">atomSites</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isotopeCode</span>
+
+  <span class="n">isThroughSpace</span> <span class="o">=</span> <span class="s1">&#39;through-space&#39;</span> <span class="ow">in</span> <span class="n">transferTypes</span>
+
+  <span class="n">isRelayed</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;relayed&#39;</span> <span class="ow">in</span> <span class="n">transferTypes</span> <span class="ow">or</span> <span class="s1">&#39;relayed-alternate&#39;</span> <span class="ow">in</span> <span class="n">transferTypes</span><span class="p">)</span>
+
+  <span class="n">isRelaxation</span> <span class="o">=</span> <span class="p">(</span><span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">category</span> <span class="o">==</span> <span class="s1">&#39;quantification&#39;</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">measurementTypes</span>
+                                                                        <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)))</span>
+
+  <span class="n">isQuantification</span> <span class="o">=</span> <span class="p">(</span><span class="n">nmrExpPrototype</span><span class="o">.</span><span class="n">category</span> <span class="o">==</span> <span class="s1">&#39;quantification&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">isRelaxation</span><span class="p">)</span>
+
+  <span class="n">isJResolved</span> <span class="o">=</span> <span class="s1">&#39;JCoupling&#39;</span> <span class="ow">in</span> <span class="n">measurementTypes</span>
+
+  <span class="n">isMultipleQuantum</span> <span class="o">=</span> <span class="s1">&#39;MQShift&#39;</span> <span class="ow">in</span> <span class="n">measurementTypes</span>
+
+  <span class="n">isProjection</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.2D.&#39;</span> <span class="ow">in</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;.3D.&#39;</span> <span class="ow">in</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="n">name</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="n">synonym</span> <span class="o">=</span> <span class="n">refExperiment</span><span class="o">.</span><span class="n">synonym</span> <span class="ow">or</span> <span class="n">name</span>
+
+  <span class="c1"># NEW - bug fix:</span>
+  <span class="n">synonym</span> <span class="o">=</span> <span class="n">priorityNameRemapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">synonym</span><span class="p">,</span> <span class="n">synonym</span><span class="p">)</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="n">ExperimentClassification</span><span class="p">(</span><span class="n">dimensionCount</span><span class="p">,</span> <span class="n">acquisitionNucleus</span><span class="p">,</span> <span class="n">isThroughSpace</span><span class="p">,</span> <span class="n">isRelayed</span><span class="p">,</span>
+                                    <span class="n">isRelaxation</span><span class="p">,</span> <span class="n">isQuantification</span><span class="p">,</span> <span class="n">isJResolved</span><span class="p">,</span> <span class="n">isMultipleQuantum</span><span class="p">,</span>
+                                    <span class="n">isProjection</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">synonym</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="testExperimentFilter"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.html#ccpnmodel.ccpncore.lib.spectrum.NmrExpPrototype.testExperimentFilter">[docs]</a><span class="k">def</span> <span class="nf">testExperimentFilter</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
+  <span class="n">allData</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">counters</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">nxp</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">sortedNmrExpPrototypes</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">rx</span> <span class="ow">in</span> <span class="n">nxp</span><span class="o">.</span><span class="n">sortedRefExperiments</span><span class="p">():</span>
+      <span class="n">filterData</span> <span class="o">=</span> <span class="n">getExperimentClassification</span><span class="p">(</span><span class="n">rx</span><span class="p">)</span>
+      <span class="n">allData</span><span class="p">[</span><span class="n">rx</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterData</span>
+
+  <span class="n">fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">allData</span><span class="o">.</span><span class="n">values</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_fields</span>
+  <span class="n">byColumns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">allData</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
+
+  <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">field</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+    <span class="n">counters</span><span class="p">[</span><span class="n">field</span><span class="p">]</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">byColumns</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">counters</span></div>
+
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="k">pass</span>
+
+  <span class="n">counter</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">()</span>
+
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io.Api</span> <span class="kn">import</span> <span class="n">newProject</span>
+  <span class="n">project</span> <span class="o">=</span> <span class="n">newProject</span><span class="p">(</span><span class="s2">&quot;ExpPrototypeTest&quot;</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">sortedChemComps</span><span class="p">():</span>
+    <span class="n">counter</span><span class="p">[</span><span class="s1">&#39;ChemComp&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">cc</span><span class="o">.</span><span class="n">namingSystems</span><span class="p">:</span>
+      <span class="n">counter</span><span class="p">[</span><span class="n">ns</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="bp">False</span><span class="p">:</span> <span class="c1">#cc.className == &#39;StdChemComp&#39;:</span>
+      <span class="k">for</span> <span class="n">ccv</span> <span class="ow">in</span> <span class="n">cc</span><span class="o">.</span><span class="n">sortedChemCompVars</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">ccv</span><span class="o">.</span><span class="n">isDefaultVar</span><span class="p">:</span>
+        <span class="c1">#   print (&#39;@~@~&#39;, cc.molType, cc.code3Letter, cc.code1Letter, ccv.linking, ccv.descriptor)</span>
+          <span class="n">ll</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ccv</span><span class="o">.</span><span class="n">chemAtoms</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">className</span> <span class="o">==</span> <span class="s1">&#39;ChemAtom&#39;</span> <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">))</span>
+          <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">cc</span><span class="o">.</span><span class="n">molType</span><span class="p">,</span> <span class="n">cc</span><span class="o">.</span><span class="n">code3Letter</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">code1Letter</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ccv</span><span class="o">.</span><span class="n">isDefaultVar</span><span class="p">),</span>
+                            <span class="n">ccv</span><span class="o">.</span><span class="n">linking</span><span class="p">,</span> <span class="n">ccv</span><span class="o">.</span><span class="n">descriptor</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ll</span><span class="p">))))</span>
+
+  <span class="c1"># for item in sorted(testExperimentFilter(project).items()):</span>
+  <span class="c1">#   pass</span>
+  <span class="c1">#   # print (&#39;\n%s:\n%s&#39; % item)</span>
+
+  <span class="c1"># counter = collections.Counter()</span>
+  <span class="c1"># for nxp in project.nmrExpPrototypes:</span>
+  <span class="c1">#   for xx in nxp.atomSites:</span>
+  <span class="c1">#     counter[(xx.name, xx.isotopeCode)] += 1</span>
+
+  <span class="c1"># for item in sorted(counter.items()):</span>
+  <span class="c1">#   print (&#39;@~@~&#39;, item)</span>
+
+  <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="n">ala</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstChemComp</span><span class="p">(</span><span class="n">code3Letter</span><span class="o">=</span><span class="s1">&#39;ALA&#39;</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">ns</span> <span class="ow">in</span> <span class="n">ala</span><span class="o">.</span><span class="n">namingSystems</span><span class="p">:</span>
+    <span class="n">dd</span><span class="p">[</span><span class="n">ns</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">asn</span> <span class="ow">in</span> <span class="n">ns</span><span class="o">.</span><span class="n">atomSysNames</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">asn</span><span class="o">.</span><span class="n">atomName</span>
+      <span class="n">sysName</span> <span class="o">=</span> <span class="n">asn</span><span class="o">.</span><span class="n">sysName</span>
+      <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">sysName</span><span class="p">:</span>
+        <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">name</span><span class="p">,</span> <span class="n">sysName</span><span class="p">))</span>
+
+  <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">ll</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="k">print</span> <span class="p">(</span><span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">ll</span><span class="p">)</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

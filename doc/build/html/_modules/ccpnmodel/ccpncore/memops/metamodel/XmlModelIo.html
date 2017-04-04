@@ -1,0 +1,1227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.metamodel.XmlModelIo &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.metamodel.XmlModelIo</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Read and write models from XML</span>
+
+<span class="sd">NB while ObjectDomain is in use this file must work under Jython (Python 2.1)</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">IntType</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">IntType</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+  <span class="n">IntType</span> <span class="o">=</span> <span class="nb">int</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">MetaModel</span><span class="p">,</span> <span class="n">TextWriter_py_2_1</span>
+
+<span class="n">MemopsError</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="c1"># from ccpnmodel.ccpncore.memops.metamodel import TaggedValues</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.ModelPortal</span> <span class="kn">import</span> <span class="n">ModelPortal</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">ModelTraverse_py_2_1</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+
+<span class="c1">#from ccpn.util import Path</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">baseDataTypeModule</span> <span class="o">=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">baseDataTypeModule</span>
+<span class="n">infinity</span> <span class="o">=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span>
+<span class="n">XINCLUDE_FALLBACK</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">ElementInclude</span><span class="o">.</span><span class="n">XINCLUDE_FALLBACK</span>
+<span class="n">XINCLUDE_INCLUDE</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">ElementInclude</span><span class="o">.</span><span class="n">XINCLUDE_INCLUDE</span>
+
+<span class="n">modelBaseDir</span> <span class="o">=</span> <span class="s1">&#39;xml/memops&#39;</span>
+
+
+<span class="c1">######################################################################</span>
+<span class="c1"># hack for Python 2.1 compatibility  NBNB                            #</span>
+<span class="c1">######################################################################</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="mi">0</span>
+  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">True</span>
+
+<span class="n">xmlTrue</span> <span class="o">=</span> <span class="s1">&#39;true&#39;</span>
+<span class="n">xmlFalse</span> <span class="o">=</span> <span class="s1">&#39;false&#39;</span>
+
+<div class="viewcode-block" id="bool2str"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.bool2str">[docs]</a><span class="k">def</span> <span class="nf">bool2str</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">value</span> <span class="ow">and</span> <span class="s1">&#39;true&#39;</span> <span class="ow">or</span> <span class="s1">&#39;false&#39;</span></div>
+
+<div class="viewcode-block" id="str2bool"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.str2bool">[docs]</a><span class="k">def</span> <span class="nf">str2bool</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+  <span class="k">if</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;True&#39;</span><span class="p">,</span> <span class="s1">&#39;true&#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">True</span>
+  <span class="k">elif</span> <span class="n">value</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;False&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">False</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;String &#39;</span><span class="si">%s</span><span class="s2">&#39; is not legal for a Boolean&quot;</span> <span class="o">%</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="writeModel"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.writeModel">[docs]</a><span class="k">def</span> <span class="nf">writeModel</span><span class="p">(</span><span class="n">topPackage</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">modelPortal</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rootFileName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+               <span class="n">rootDirName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">releaseVersion</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">skipImplicit</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">versionTag</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;write XML file version of model</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="k">if</span> <span class="n">modelPortal</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">topPackage</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;writeModel must have either modelPortal or topPackage parameter&quot;</span>
+      <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">modelPortal</span> <span class="o">=</span> <span class="n">ModelPortal</span><span class="p">(</span><span class="n">topPackage</span><span class="p">)</span>
+      <span class="n">modelPortal</span><span class="o">.</span><span class="n">setModelFlavour</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">,</span><span class="s1">&#39;xmlmodel&#39;</span><span class="p">)</span>
+
+
+  <span class="n">xmlModelGen</span> <span class="o">=</span> <span class="n">XmlModelGen</span><span class="p">(</span><span class="n">modelPortal</span><span class="o">=</span><span class="n">modelPortal</span><span class="p">,</span> <span class="n">rootFileName</span><span class="o">=</span><span class="n">rootFileName</span><span class="p">,</span>
+                            <span class="n">versionTag</span><span class="o">=</span><span class="n">versionTag</span><span class="p">,</span>
+                            <span class="n">rootDirName</span><span class="o">=</span><span class="n">rootDirName</span><span class="p">,</span> <span class="n">releaseVersion</span><span class="o">=</span><span class="n">releaseVersion</span><span class="p">,</span>
+                            <span class="n">scriptName</span><span class="o">=</span><span class="s1">&#39;XmlModelIo&#39;</span><span class="p">,</span> <span class="n">skipImplicit</span><span class="o">=</span><span class="n">skipImplicit</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+                        
+  <span class="n">xmlModelGen</span><span class="o">.</span><span class="n">processModel</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="readModel"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.readModel">[docs]</a><span class="k">def</span> <span class="nf">readModel</span><span class="p">(</span><span class="n">versionTag</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rootFileName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rootDirName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+              <span class="n">excludePackageNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">includePackageNames</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+              <span class="n">checkValidity</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;XML model reader</span>
+<span class="sd">  excludePackageNames is a tuple or list of package qualifiedNames</span>
+<span class="sd">  that will be ignored together with their contents.</span>
+<span class="sd">  includePackageNames is a tuple or list of package qualifiedNames</span>
+<span class="sd">  that will be used together with their contents and containers, </span>
+<span class="sd">  with all other packages being ignored.</span>
+<span class="sd">  NB only leaf package names should be put in includePackageNames.</span>
+<span class="sd">  The names of containing packages will be added automatically.</span>
+<span class="sd">  Putting e.g. &#39;ccp&#39; in includePackageNames will *not* cause</span>
+<span class="sd">  packages contained in ccp to be included.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+  
+  <span class="c1"># expand included files so you also get containers</span>
+  <span class="k">if</span> <span class="n">includePackageNames</span><span class="p">:</span>
+    <span class="n">newIncludes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">includePackageNames</span><span class="p">:</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+      <span class="k">while</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ss</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">newIncludes</span><span class="p">:</span>
+          <span class="n">newIncludes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+        <span class="n">ll</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">includePackageNames</span> <span class="o">=</span> <span class="n">newIncludes</span>
+  
+  <span class="n">xmlModelRead</span> <span class="o">=</span> <span class="n">XmlModelRead</span><span class="p">(</span><span class="n">rootFileName</span><span class="o">=</span><span class="n">rootFileName</span><span class="p">,</span>
+                              <span class="n">rootDirName</span><span class="o">=</span><span class="n">rootDirName</span><span class="p">,</span>
+                              <span class="n">versionTag</span><span class="o">=</span><span class="n">versionTag</span><span class="p">,</span>
+                              <span class="n">scriptName</span><span class="o">=</span><span class="s1">&#39;XmlModelIo&#39;</span><span class="p">,</span>
+                              <span class="n">excludePackageNames</span><span class="o">=</span><span class="n">excludePackageNames</span><span class="p">,</span>
+                              <span class="n">releaseVersion</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                              <span class="n">includePackageNames</span><span class="o">=</span><span class="n">includePackageNames</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+  
+  
+  <span class="n">topPackage</span> <span class="o">=</span> <span class="n">xmlModelRead</span><span class="o">.</span><span class="n">readModel</span><span class="p">()</span>
+  
+  <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+  <span class="c1"># print(&#39;Model read finished. Duration %s &#39; % (end-start))</span>
+  
+  <span class="k">if</span> <span class="n">checkValidity</span><span class="p">:</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">topPackage</span><span class="o">.</span><span class="n">checkValid</span><span class="p">()</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Model validity checked. Duration </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">))</span>
+  <span class="c1"># else:</span>
+  <span class="c1">#   print(&quot;Model validity check skipped&quot;)</span>
+    
+  
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">topPackage</span></div>
+
+
+<div class="viewcode-block" id="TempHolder"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.TempHolder">[docs]</a><span class="k">class</span> <span class="nc">TempHolder</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot; class for temporary storage of parameter data</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="XmlModelRead"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelRead">[docs]</a><span class="k">class</span> <span class="nc">XmlModelRead</span><span class="p">(</span><span class="n">TextWriter_py_2_1</span><span class="o">.</span><span class="n">TextWriter_py_2_1</span><span class="p">):</span>
+
+  <span class="c1">#codeDirName = metaConstants.xmlCodeDir</span>
+  <span class="n">codeDirName</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="n">classNameMapping</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">clazz</span> <span class="ow">in</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">nonAbstractClasses</span><span class="p">:</span>
+    <span class="n">classNameMapping</span><span class="p">[</span><span class="n">clazz</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">clazz</span>
+ 
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;To make this work under python 2.1 we need to inline the inits</span>
+<span class="sd">    of several other files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># set input attributes</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    
+    <span class="c1"># in-line set xml settings (in lieu of Language init)</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">TextWriter_py_2_1</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;xmlmodel&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    
+    <span class="c1"># in-line version of TextWriter init</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">TextWriter_py_2_1</span><span class="o">.</span><span class="n">mandatoryAttributes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot; TextWriter lacks mandatory </span><span class="si">%s</span><span class="s2"> attribute&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>     
+    
+    <span class="c1"># special parameters: optional with default values</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootFileName</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootDirName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getModelDirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versionTag</span><span class="p">),</span>
+                                   <span class="n">modelBaseDir</span><span class="p">,</span>
+                                   <span class="n">metaConstants</span><span class="o">.</span><span class="n">rootPackageDirName</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootDirName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootFileName</span><span class="p">)</span>
+
+    
+    <span class="c1"># process self.includePackageNames, including container names</span>
+    <span class="n">inclNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">includePackageNames</span>
+    <span class="k">if</span> <span class="n">inclNames</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">inclNames</span><span class="p">:</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)):</span>
+          <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ll</span><span class="p">[:</span><span class="n">ii</span><span class="p">])</span>
+          <span class="k">if</span> <span class="n">ss</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">inclNames</span><span class="p">:</span>
+            <span class="n">inclNames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indents</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">errorMsg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># used so that do not print out two &#39;\n&#39; in a row</span>
+  
+<div class="viewcode-block" id="XmlModelRead.readModel"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelRead.readModel">[docs]</a>  <span class="k">def</span> <span class="nf">readModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; read model and return top package. </span>
+<span class="sd">    self.objMap is left as a complete guid:object map of the model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># set up</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">objMap</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">delayedLoadData</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+    <span class="c1"># parse XML file and recurse over xIncluded files</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">loadXmlFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileName</span><span class="p">)</span>
+    
+    <span class="c1"># load delayed data</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">loadDelayedData</span><span class="p">()</span>
+    
+    <span class="c1"># finalise objects</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">finaliseObjects</span><span class="p">()</span>
+
+    <span class="c1">#</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xmlRoot</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+    
+    
+<div class="viewcode-block" id="XmlModelRead.loadXmlFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelRead.loadXmlFile">[docs]</a>  <span class="k">def</span> <span class="nf">loadXmlFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">absFilename</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Recursively load XML file and all Xincluded XML files,</span>
+<span class="sd">    creating Memops model objects from contents</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># set up</span>
+    <span class="n">classNameMapping</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">classNameMapping</span>
+    <span class="n">objMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objMap</span>
+    <span class="n">delayedLoadData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayedLoadData</span>
+    <span class="n">currentDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">absFilename</span><span class="p">)</span>
+    
+    <span class="c1"># get tree:</span>
+    <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">absFilename</span><span class="p">,</span><span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+    <span class="n">elemtree</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">ElementTree</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">fp</span><span class="p">)</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    
+    <span class="c1"># process elements</span>
+    <span class="c1"># depth-first search.</span>
+    <span class="c1"># NB - we are using our own iterator instead of ElementTrees for </span>
+    <span class="c1"># 1) Python 2.1 compatibility, 2) as we do not need all elements</span>
+    
+    <span class="n">eList</span> <span class="o">=</span> <span class="p">[</span><span class="n">elemtree</span><span class="o">.</span><span class="n">getroot</span><span class="p">()]</span>
+    <span class="k">for</span> <span class="n">modelElem</span> <span class="ow">in</span> <span class="n">eList</span><span class="p">:</span>
+          
+      <span class="c1"># MetaModelElement - set up</span>
+      <span class="n">xmlTag</span> <span class="o">=</span> <span class="n">modelElem</span><span class="o">.</span><span class="n">tag</span>
+      <span class="n">clazz</span> <span class="o">=</span> <span class="n">classNameMapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">xmlTag</span><span class="p">)</span>
+      <span class="n">parameterData</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">parameterData</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="n">_tempData</span> <span class="o">=</span> <span class="p">{}</span>
+
+      <span class="c1"># process attributes</span>
+      <span class="k">for</span> <span class="n">tag</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">modelElem</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># process attribute</span>
+        <span class="n">pType</span> <span class="o">=</span> <span class="n">parameterData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;container&#39;</span><span class="p">:</span>
+          <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">elif</span> <span class="n">pType</span> <span class="o">==</span> <span class="s1">&#39;Boolean&#39;</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">val</span> <span class="o">==</span> <span class="n">xmlTrue</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+          <span class="k">elif</span> <span class="n">val</span> <span class="o">==</span> <span class="n">xmlFalse</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># NB will give error message later</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">elif</span> <span class="n">pType</span> <span class="o">==</span> <span class="s1">&#39;Token&#39;</span><span class="p">:</span>
+          <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">elif</span> <span class="n">pType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">_tempData</span> <span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">pType</span> <span class="ow">is</span> <span class="n">IntType</span><span class="p">:</span>
+            <span class="c1"># NB should be unnecessary,</span>
+            <span class="c1">#    required for Jython 2.1 in ObjectDomain</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">params</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">pType</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+
+      <span class="c1"># check container and make object</span>
+      <span class="n">contId</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;container&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">contId</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># RootObject or error</span>
+        <span class="k">if</span> <span class="n">xmlTag</span> <span class="o">==</span> <span class="s1">&#39;MetaPackage&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">objMap</span><span class="p">:</span>
+          <span class="n">currentObj</span> <span class="o">=</span> <span class="n">clazz</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+          <span class="n">objMap</span><span class="p">[</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;guid&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">currentObj</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">xmlRoot</span> <span class="o">=</span> <span class="n">currentObj</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+           <span class="s2">&quot;No container for </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2">: attributes are:</span><span class="se">\n</span><span class="si">%s</span><span class="s2">&quot;</span>
+           <span class="o">%</span> <span class="p">(</span><span class="n">xmlTag</span><span class="p">,</span> <span class="n">absFilename</span><span class="p">,</span> <span class="n">modelElem</span><span class="o">.</span><span class="n">attrib</span><span class="p">)</span>
+          <span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">container</span> <span class="o">=</span> <span class="n">objMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">contId</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="c1"># container not yet created - postpone</span>
+          <span class="n">currentObj</span> <span class="o">=</span> <span class="n">TempHolder</span><span class="p">()</span>
+          <span class="n">currentObj</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+          <span class="n">currentObj</span><span class="o">.</span><span class="n">_clazz</span> <span class="o">=</span> <span class="n">clazz</span>
+          <span class="n">delayedLoadData</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">currentObj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">params</span><span class="p">[</span><span class="s1">&#39;container&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">container</span>
+          <span class="n">currentObj</span> <span class="o">=</span> <span class="n">clazz</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+          <span class="n">objMap</span><span class="p">[</span><span class="n">params</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;guid&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">currentObj</span>
+
+      <span class="c1"># set _tempData</span>
+      <span class="n">currentObj</span><span class="o">.</span><span class="n">_tempData</span> <span class="o">=</span> <span class="n">_tempData</span>
+        
+      <span class="c1"># handle contained elements</span>
+      <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">modelElem</span><span class="p">:</span>
+        <span class="n">tag</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">tag</span>
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">is</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">ElementTree</span><span class="o">.</span><span class="n">Comment</span><span class="p">:</span>
+          <span class="k">continue</span>
+        <span class="k">if</span> <span class="n">classNameMapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="c1"># Element content - handle directly</span>
+        
+          <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="n">XINCLUDE_FALLBACK</span><span class="p">:</span>
+            <span class="c1"># fallback handled as part of include</span>
+            <span class="k">pass</span>
+ 
+          <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="n">XINCLUDE_INCLUDE</span><span class="p">:</span>
+            <span class="c1"># read XML file pointed to</span>
+ 
+            <span class="c1"># check if file should be read - NB leafPackages only</span>
+            <span class="n">packageName</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">packageName</span><span class="p">:</span>
+              <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">includePackageNames</span>
+                  <span class="ow">and</span> <span class="ow">not</span> <span class="n">packageName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">includePackageNames</span><span class="p">):</span>
+                <span class="k">continue</span>
+              <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">excludePackageNames</span>
+                  <span class="ow">and</span> <span class="n">packageName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">excludePackageNames</span><span class="p">):</span>
+                <span class="k">continue</span>
+            
+            <span class="c1"># load file</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHref</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span>
+              <span class="n">href</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">currentDir</span><span class="p">,</span> <span class="n">href</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+              <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Error in &#39;</span><span class="p">,</span> <span class="n">currentObj</span><span class="p">,</span> <span class="s1">&#39;in &#39;</span><span class="p">,</span> <span class="n">currentDir</span><span class="p">)</span>
+              <span class="k">raise</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">loadXmlFile</span><span class="p">(</span><span class="n">href</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">IOError</span><span class="p">:</span>
+              <span class="c1"># file not found - try fallback</span>
+              <span class="n">fallback</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">XINCLUDE_FALLBACK</span><span class="p">)</span>
+              <span class="k">if</span> <span class="n">fallback</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Error in file </span><span class="si">%s</span><span class="s2"> - include file </span><span class="si">%s</span><span class="s2"> not found&quot;</span>
+                                  <span class="o">%</span> <span class="p">(</span><span class="n">absFilename</span><span class="p">,</span> <span class="n">href</span><span class="p">))</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">href</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getHref</span><span class="p">(</span><span class="n">fallback</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">href</span><span class="p">:</span>
+                  <span class="c1"># empty fallback - means we can skip</span>
+                  <span class="c1"># NB vulnerable to parser errors, </span>
+                  <span class="c1">#    but they would surely be found elsewhere</span>
+                  <span class="n">href</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">normpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">currentDir</span><span class="p">,</span> <span class="n">href</span><span class="p">))</span>
+                  <span class="bp">self</span><span class="o">.</span><span class="n">loadXmlFile</span><span class="p">(</span><span class="n">href</span><span class="p">)</span>
+ 
+          <span class="k">elif</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;documentation&#39;</span><span class="p">:</span>
+            <span class="c1">#</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">currentObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span><span class="p">)</span>
+ 
+          <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># StringDict, List, or single link</span>
+
+            <span class="n">pData</span> <span class="o">=</span> <span class="n">parameterData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+            <span class="n">pType</span> <span class="o">=</span> <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">pType</span> <span class="o">==</span> <span class="s1">&#39;StringDict&#39;</span><span class="p">:</span>
+              <span class="c1"># StringDict - convert and set attribtue</span>
+              <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
+              <span class="k">for</span> <span class="n">ee</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">:</span>
+                <span class="n">dd</span><span class="p">[</span><span class="n">ee</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tag&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="n">ee</span><span class="o">.</span><span class="n">text</span>
+              <span class="nb">setattr</span><span class="p">(</span><span class="n">currentObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">dd</span><span class="p">)</span>
+ 
+            <span class="k">elif</span> <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hicard&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+              <span class="c1"># single link - dereference later</span>
+              <span class="n">currentObj</span><span class="o">.</span><span class="n">_tempData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">text</span>
+ 
+            <span class="k">else</span><span class="p">:</span>
+              <span class="c1"># List - dereference later</span>
+              <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">ee</span><span class="o">.</span><span class="n">text</span> <span class="k">for</span> <span class="n">ee</span> <span class="ow">in</span> <span class="n">elem</span><span class="p">]</span>
+              <span class="n">currentObj</span><span class="o">.</span><span class="n">_tempData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">ll</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># Child model element - add to node list</span>
+          <span class="n">eList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span></div>
+        
+  
+<div class="viewcode-block" id="XmlModelRead.getHref"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelRead.getHref">[docs]</a>  <span class="k">def</span> <span class="nf">getHref</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">mandatory</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get href attribute value. </span>
+<span class="sd">    NB this is a hack to handle known bugs innamespace handling for xmllib, </span>
+<span class="sd">    conf. elementtree.SimpleXMLTreeBuilder.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;href&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">tag</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">tag</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;href&#39;</span><span class="p">:</span>
+          <span class="n">result</span> <span class="o">=</span> <span class="n">val</span>
+          <span class="k">break</span>
+      <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING - suspected xmllib bug. tag </span><span class="si">%s</span><span class="s2"> found&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">mandatory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;Probable xmllib bug - </span>
+<span class="s2">no href attribute found for </span><span class="si">%s</span><span class="s2"> element</span>
+<span class="s2"> attributes were </span><span class="si">%s</span><span class="s2">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">tag</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">attrib</span><span class="p">))</span>
+
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+  
+  
+<div class="viewcode-block" id="XmlModelRead.loadDelayedData"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelRead.loadDelayedData">[docs]</a>  <span class="k">def</span> <span class="nf">loadDelayedData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;create objects that have been postponed, because their container was</span>
+<span class="sd">    not available</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># set up</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayedLoadData</span>
+    <span class="n">objMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objMap</span>
+    
+    <span class="c1"># loop over delayed data in reverse order till list is empty</span>
+    <span class="k">while</span> <span class="n">ll</span><span class="p">:</span>
+      <span class="n">ii</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+      <span class="n">modified</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="k">while</span> <span class="n">ii</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">ii</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        
+        <span class="n">container</span> <span class="o">=</span> <span class="n">objMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">container</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">container</span><span class="p">:</span>
+          <span class="c1"># remove temp info and create object</span>
+          <span class="n">modified</span> <span class="o">=</span> <span class="bp">True</span>
+          <span class="k">del</span> <span class="n">ll</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+          <span class="n">obj</span><span class="o">.</span><span class="n">container</span> <span class="o">=</span> <span class="n">container</span>
+          <span class="n">_tempData</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_tempData</span>
+          <span class="n">clazz</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_clazz</span>
+          <span class="k">del</span> <span class="n">obj</span><span class="o">.</span><span class="n">_tempData</span>
+          <span class="k">del</span> <span class="n">obj</span><span class="o">.</span><span class="n">_clazz</span>
+          <span class="n">newObj</span> <span class="o">=</span> <span class="n">clazz</span><span class="p">(</span><span class="o">**</span><span class="n">obj</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+          <span class="n">newObj</span><span class="o">.</span><span class="n">_tempData</span> <span class="o">=</span> <span class="n">_tempData</span>
+          <span class="n">objMap</span><span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">guid</span><span class="p">]</span> <span class="o">=</span> <span class="n">newObj</span>
+          
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">modified</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Object-Container pairs:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+          <span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">guid</span><span class="p">,</span> <span class="s1">&#39; ; &#39;</span><span class="p">,</span> <span class="n">x</span><span class="o">.</span><span class="n">container</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+         <span class="s2">&quot;Delayed load data do not load (no container). </span><span class="si">%s</span><span class="s2"> objects remain&quot;</span>
+         <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span>
+        <span class="p">)</span></div>
+  
+<div class="viewcode-block" id="XmlModelRead.finaliseObjects"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelRead.finaliseObjects">[docs]</a>  <span class="k">def</span> <span class="nf">finaliseObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set remaining parameters from _tempData</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+    <span class="n">objMap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objMap</span>
+    
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objMap</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      
+      <span class="n">_tempData</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_tempData</span>
+      <span class="k">if</span> <span class="n">_tempData</span><span class="p">:</span>
+      
+        <span class="n">valueTypeData</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">parameterData</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">parameterData</span>
+        
+        <span class="k">while</span> <span class="n">_tempData</span><span class="p">:</span>
+          <span class="c1"># set up</span>
+          <span class="n">tag</span><span class="p">,</span><span class="n">val</span> <span class="o">=</span> <span class="n">_tempData</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+          <span class="n">pData</span> <span class="o">=</span> <span class="n">parameterData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+          <span class="n">pType</span> <span class="o">=</span> <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+          
+          <span class="c1"># convert single value to list</span>
+          <span class="n">hicard</span> <span class="o">=</span>  <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hicard&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">hicard</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+           <span class="n">val</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">]</span>
+          
+          <span class="c1"># process values</span>
+          <span class="k">if</span> <span class="n">pType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># valueType parameter - postpone for handling after links are set</span>
+            <span class="n">valueTypeData</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">tag</span><span class="p">,</span> <span class="n">hicard</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+          
+          <span class="k">else</span><span class="p">:</span>
+          
+            <span class="k">if</span> <span class="n">pType</span> <span class="o">==</span> <span class="s1">&#39;Boolean&#39;</span><span class="p">:</span>
+              <span class="c1"># Boolean  parameter</span>
+              <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)):</span>
+                <span class="n">vv</span> <span class="o">=</span> <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">vv</span> <span class="o">==</span> <span class="n">xmlTrue</span><span class="p">:</span>
+                  <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="k">elif</span> <span class="n">vv</span> <span class="o">==</span> <span class="n">xmlFalse</span><span class="p">:</span>
+                  <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;illegal Boolean </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> parameter </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                    <span class="o">%</span> <span class="p">(</span><span class="n">vv</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">tag</span><span class="p">))</span>
+                                    
+            <span class="k">elif</span> <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isLink&#39;</span><span class="p">):</span>
+              <span class="c1"># Link parameter</span>
+              <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                  <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">objMap</span><span class="p">[</span><span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]]</span> 
+                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+                   <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> parameter </span><span class="si">%s</span><span class="s2"> - link to nonexisting object </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+                   <span class="p">)</span>
+            
+            <span class="k">else</span><span class="p">:</span>
+              <span class="c1"># primitive data type parameter</span>
+              <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)):</span>
+                <span class="k">try</span><span class="p">:</span>
+                  <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">pType</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+                <span class="k">except</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+                   <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> parameter </span><span class="si">%s</span><span class="s2"> - error converting </span><span class="si">%s</span><span class="s2">&quot;</span>
+                    <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+                   <span class="p">)</span>
+            
+            <span class="c1"># set parameter</span>
+            <span class="k">if</span> <span class="n">hicard</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+              <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> 
+            <span class="k">else</span><span class="p">:</span>
+              <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">val</span><span class="p">)</span> 
+          
+        <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">hicard</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">valueTypeData</span><span class="p">:</span>
+          <span class="c1"># valueType, type externally determined</span>
+          
+          <span class="c1"># get fromString function</span>
+          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataType</span><span class="p">):</span>
+            <span class="n">valueType</span> <span class="o">=</span> <span class="n">obj</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">valueType</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">valueType</span>
+          <span class="n">typeCode</span> <span class="o">=</span> <span class="n">valueType</span><span class="o">.</span><span class="n">typeCodes</span><span class="p">[</span><span class="s1">&#39;python&#39;</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">typeCode</span> <span class="o">==</span> <span class="s1">&#39;Boolean&#39;</span><span class="p">:</span>
+            <span class="n">fromString</span> <span class="o">=</span> <span class="n">str2bool</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">fromString</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">baseDataTypeModule</span><span class="p">,</span>
+                                 <span class="n">typeCode</span><span class="p">)</span><span class="o">.</span><span class="n">fromString</span>
+          
+          <span class="c1"># convert values</span>
+          <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)):</span>
+            <span class="k">try</span><span class="p">:</span>
+              <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span> <span class="o">=</span> <span class="n">fromString</span><span class="p">(</span><span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+              <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+               <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> parameter </span><span class="si">%s</span><span class="s2"> - error converting </span><span class="si">%s</span><span class="s2">&quot;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">[</span><span class="n">ii</span><span class="p">])</span>
+               <span class="p">)</span>
+            
+          <span class="c1"># set parameter</span>
+          <span class="k">if</span> <span class="n">hicard</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">val</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span><span class="n">val</span><span class="p">)</span></div></div>
+        
+        
+<div class="viewcode-block" id="XmlModelGen"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen">[docs]</a><span class="k">class</span> <span class="nc">XmlModelGen</span><span class="p">(</span><span class="n">TextWriter_py_2_1</span><span class="o">.</span><span class="n">TextWriter_py_2_1</span><span class="p">,</span> 
+                  <span class="n">ModelTraverse_py_2_1</span><span class="o">.</span><span class="n">ModelTraverse_py_2_1</span><span class="p">):</span>
+
+  <span class="c1">#codeDirName = metaConstants.xmlCodeDir</span>
+  <span class="n">codeDirName</span> <span class="o">=</span> <span class="bp">None</span>
+  
+  <span class="n">_xmlSpecialTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;guid&#39;</span><span class="p">,</span> <span class="s1">&#39;container&#39;</span><span class="p">,</span> <span class="s1">&#39;documentation&#39;</span><span class="p">)</span>
+ 
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    
+    <span class="sd">&quot;&quot;&quot;To make this work under python 2.1 we need to inline the inits</span>
+<span class="sd">    of several other files.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># XmlModelGen init</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addModelFlavour</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">,</span> <span class="s1">&#39;xmlmodel&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">kw</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="c1"># TopObject and DataRoot for us below</span>
+    <span class="n">ic</span> <span class="o">=</span> <span class="n">metaConstants</span>
+    <span class="n">Impl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+     <span class="p">[</span><span class="n">ic</span><span class="o">.</span><span class="n">modellingPackageName</span><span class="p">,</span><span class="n">ic</span><span class="o">.</span><span class="n">implementationPackageName</span><span class="p">]</span>
+    <span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">DataRoot</span> <span class="o">=</span> <span class="n">Impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">ic</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">TopObject</span> <span class="o">=</span> <span class="n">Impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">ic</span><span class="o">.</span><span class="n">topObjClassName</span><span class="p">)</span>
+    
+    <span class="c1"># in-line set xml settings (in lieu of Language init)</span>
+    <span class="n">settings</span> <span class="o">=</span> <span class="n">TextWriter_py_2_1</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;xmlmodel&#39;</span><span class="p">]</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    
+    <span class="c1"># in-line version of TextWriter init</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">TextWriter_py_2_1</span><span class="o">.</span><span class="n">mandatoryAttributes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot; TextWriter lacks mandatory </span><span class="si">%s</span><span class="s2"> attribute&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+
+    <span class="c1"># special parameters: optional with default values</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootFileName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rootFileName</span> <span class="o">=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">rootPackageDirName</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootDirName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">rootDirName</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">getModelDirectory</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">versionTag</span><span class="p">)</span>
+
+    
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipImplicit</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">skipImplicit</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indents</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">errorMsg</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="o">=</span> <span class="bp">False</span> <span class="c1"># used so that do not print out two &#39;\n&#39; in a row</span>
+
+    
+    <span class="c1"># in-line version of ModelTraverse init</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">ModelTraverse_py_2_1</span><span class="o">.</span><span class="n">mandatoryAttributes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot; ModelTraverse lacks mandatory </span><span class="si">%s</span><span class="s2"> attribute&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+
+    <span class="c1"># has to be done this way to allow for different initialisation orders</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;modelFlavours&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="c1"># input check</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="p">,</span> <span class="n">ModelPortal</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;ModelTraverse input </span><span class="si">%s</span><span class="s2"> is not a ModelPortal&quot;</span>
+                        <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="p">)</span>
+    
+    <span class="c1"># link varNames for easier access, and check modelPortal has been processed.</span>
+    <span class="c1"># NBNB check if needed</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;varNames&#39;</span><span class="p">):</span>
+      <span class="c1"># this must have been called from ModelAdapt</span>
+      <span class="k">pass</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="p">,</span> <span class="s1">&#39;varNames&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">varNames</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">operationData</span>
+
+    
+    <span class="c1"># set xml tag lists</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span> <span class="o">=</span> <span class="p">{</span>
+     <span class="s1">&#39;xmlAttrs&#39;</span><span class="p">:{},</span>
+     <span class="s1">&#39;stringDictElements&#39;</span><span class="p">:{},</span>
+     <span class="s1">&#39;plainElements&#39;</span><span class="p">:{},</span>
+     <span class="s1">&#39;listElements&#39;</span><span class="p">:{},</span>
+    <span class="p">}</span>
+    
+    <span class="k">for</span> <span class="n">clazz</span> <span class="ow">in</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">nonAbstractClasses</span><span class="p">:</span> 
+      
+      <span class="n">xmlAttrs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;xmlAttrs&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">stringDictElements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;stringDictElements&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">plainElements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;plainElements&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">listElements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;listElements&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    
+      <span class="n">parameterData</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">parameterData</span>
+ 
+      <span class="k">for</span> <span class="n">tag</span><span class="p">,</span><span class="n">parData</span> <span class="ow">in</span> <span class="n">parameterData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+ 
+        <span class="n">parType</span> <span class="o">=</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+ 
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlSpecialTags</span><span class="p">:</span>
+          <span class="c1"># special handling</span>
+          <span class="k">continue</span>
+ 
+        <span class="k">elif</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;setterFunc&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;unsettable&#39;</span><span class="p">:</span>
+          <span class="c1"># ignore</span>
+          <span class="k">continue</span>
+ 
+        <span class="k">elif</span> <span class="n">parType</span> <span class="o">==</span> <span class="s1">&#39;content&#39;</span><span class="p">:</span>
+          <span class="c1"># ignore</span>
+          <span class="k">continue</span>
+ 
+        <span class="k">elif</span> <span class="n">parType</span> <span class="o">==</span> <span class="s1">&#39;StringDict&#39;</span><span class="p">:</span>
+          <span class="n">stringDictElements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+          
+        <span class="k">elif</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hicard&#39;</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="n">listElements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+ 
+        <span class="k">elif</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isLink&#39;</span><span class="p">):</span>
+          <span class="n">plainElements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+ 
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># xml attribute</span>
+          <span class="n">xmlAttrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+ 
+      <span class="c1"># adapt results</span>
+      <span class="n">xmlAttrs</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+      <span class="n">stringDictElements</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+      <span class="n">listElements</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+      <span class="n">plainElements</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+      <span class="n">plainElements</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;documentation&#39;</span><span class="p">)</span>
+      
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### code Looping over objects</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+
+<div class="viewcode-block" id="XmlModelGen.processBranchPackage"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.processBranchPackage">[docs]</a>  <span class="k">def</span> <span class="nf">processBranchPackage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    
+    <span class="c1"># Implicit elements are generally not written</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipImplicit</span> <span class="ow">and</span> <span class="n">package</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
+      <span class="k">return</span>
+    
+    <span class="n">packageFile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packageFile</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">)</span>
+    
+    <span class="c1"># clear out old model files - NBNB TBD check</span>
+    <span class="k">if</span> <span class="n">package</span><span class="o">.</span><span class="n">container</span> <span class="ow">and</span> <span class="n">package</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># this is top level package </span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">clearOutDir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getObjDirName</span><span class="p">(</span><span class="n">package</span><span class="p">),</span> <span class="n">forceClearOut</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    
+    <span class="c1"># write package</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">startXmlFile</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">startXmlElement</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    
+    <span class="c1"># handle XInclude statements for contents</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="s2">&quot;Start packages contained in </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">package</span><span class="o">.</span><span class="n">container</span><span class="p">:</span>
+      <span class="c1"># non-root package</span>
+      <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">containedPackages</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeXmlInclude</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pp</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">packageFile</span><span class="p">),</span> 
+                             <span class="n">objName</span><span class="o">=</span><span class="n">pp</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">isMandatory</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># root package</span>
+      <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">package</span><span class="o">.</span><span class="n">containedPackages</span><span class="p">:</span>
+        <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getObjFileName</span><span class="p">(</span><span class="n">pp</span><span class="p">,</span> <span class="n">absoluteName</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">addSuffix</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeXmlInclude</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;../&#39;</span><span class="p">,</span> <span class="n">fileName</span><span class="p">),</span> <span class="n">objName</span><span class="o">=</span><span class="n">pp</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span>
+                             <span class="n">isMandatory</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+      
+    <span class="c1"># end file</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="s2">&quot;End packages contained in </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">package</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">endXmlElement</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">endXmlFile</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="XmlModelGen.processLeafPackage"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.processLeafPackage">[docs]</a>  <span class="k">def</span> <span class="nf">processLeafPackage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for LeafPackage</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Implicit elements are generally not written</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipImplicit</span> <span class="ow">and</span> <span class="n">package</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
+      <span class="k">return</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">startXmlFile</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">startXmlElement</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    
+    <span class="c1"># handle XInclude statements for contents</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;dataTypes&#39;</span><span class="p">,</span> <span class="s1">&#39;constants&#39;</span><span class="p">,</span> <span class="s1">&#39;exceptions&#39;</span><span class="p">,</span><span class="s1">&#39;dataObjTypes&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;classes&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="s2">&quot;Start </span><span class="si">%s</span><span class="s2"> contained in </span><span class="si">%s</span><span class="s2"> &quot;</span> 
+                        <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">package</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()))</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeXmlInclude</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="s2">&quot;End </span><span class="si">%s</span><span class="s2"> contained in </span><span class="si">%s</span><span class="s2"> &quot;</span> 
+                        <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">package</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()))</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">endXmlElement</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">endXmlFile</span><span class="p">()</span>
+    
+    <span class="c1"># write content files</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;dataTypes&#39;</span><span class="p">,</span> <span class="s1">&#39;constants&#39;</span><span class="p">,</span> <span class="s1">&#39;exceptions&#39;</span><span class="p">,</span><span class="s1">&#39;dataObjTypes&#39;</span><span class="p">,</span> 
+                <span class="s1">&#39;classes&#39;</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">metaObj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">package</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processPackageContent</span><span class="p">(</span><span class="n">metaObj</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="XmlModelGen.processPackageContent"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.processPackageContent">[docs]</a>  <span class="k">def</span> <span class="nf">processPackageContent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions package content</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Implicit elements are generally not written</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipImplicit</span> <span class="ow">and</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
+      <span class="k">return</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">startXmlFile</span><span class="p">(</span><span class="n">metaObj</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeElementRecursive</span><span class="p">(</span><span class="n">metaObj</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">endXmlFile</span><span class="p">()</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="XmlModelGen.writeElementRecursive"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.writeElementRecursive">[docs]</a>  <span class="k">def</span> <span class="nf">writeElementRecursive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions package content</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Implicit elements are generally not written</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">skipImplicit</span> <span class="ow">and</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">isImplicit</span><span class="p">:</span>
+      <span class="k">return</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">startXmlElement</span><span class="p">(</span><span class="n">metaObj</span><span class="p">)</span>
+    
+    <span class="c1"># handle constraints</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">ConstrainedElement</span><span class="p">):</span>
+      <span class="n">constraints</span> <span class="o">=</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">constraints</span>
+      <span class="k">if</span> <span class="n">constraints</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="s2">&quot;Start constraints for </span><span class="si">%s</span><span class="s2">: &quot;</span> <span class="o">%</span> <span class="n">metaObj</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">constraints</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">startXmlElement</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">endXmlElement</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="s2">&quot;End constraints for </span><span class="si">%s</span><span class="s2">: &quot;</span> <span class="o">%</span> <span class="n">metaObj</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaClass</span><span class="p">):</span>
+      <span class="n">supertypes</span> <span class="o">=</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">getAllSupertypes</span><span class="p">()</span>
+    
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">TopObject</span> <span class="ow">in</span> <span class="n">supertypes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">DataRoot</span> <span class="ow">in</span> <span class="n">supertypes</span><span class="p">:</span>
+        <span class="c1"># handle special case - currentTopObject link and its operations</span>
+        <span class="c1">#  stored on wrong side</span>
+ 
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DataRoot</span><span class="o">.</span><span class="n">_MetaModelElement__elementDict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+              <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">)</span>
+              <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">valueType</span> <span class="ow">is</span> <span class="n">metaObj</span>
+              <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">otherRole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">writeElementRecursive</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+ 
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">DataRoot</span><span class="o">.</span><span class="n">_MetaModelElement__elementDict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+              <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaOperation</span><span class="p">)</span>
+              <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">)</span>
+              <span class="ow">and</span> <span class="n">x</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">valueType</span> <span class="ow">is</span> <span class="n">metaObj</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">writeElementRecursive</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    
+    <span class="c1"># handle normal cases</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">_MetaModelElement__elementDict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="n">ll</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">ll</span><span class="p">:</span>
+    
+      <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+ 
+      <span class="k">for</span> <span class="n">junk</span><span class="p">,</span><span class="n">obj</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+ 
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">):</span>
+ 
+          <span class="c1"># handle interpackage crosslinks</span>
+          <span class="n">otherRole</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">otherRole</span>
+          <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DataRoot</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getAllSupertypes</span><span class="p">()</span> 
+                <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">TopObject</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">getAllSupertypes</span><span class="p">()):</span>
+              <span class="c1"># handle special case</span>
+              <span class="c1"># - currentTopObject link is stored on wrong side</span>
+              <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="k">pass</span>
+ 
+          <span class="k">elif</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">canAccess</span><span class="p">(</span><span class="n">otherRole</span><span class="p">):</span>
+            <span class="c1"># interpackage link handled from the other side. Skip.</span>
+            <span class="k">continue</span>
+ 
+          <span class="k">elif</span> <span class="ow">not</span> <span class="n">otherRole</span><span class="o">.</span><span class="n">canAccess</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+            <span class="c1"># interpackage link handled from this side</span>
+            <span class="c1"># write reverse role first.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeElementRecursive</span><span class="p">(</span><span class="n">otherRole</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaOperation</span><span class="p">):</span>
+          <span class="n">target</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">target</span>
+          <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">DataRoot</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getAllSupertypes</span><span class="p">()</span> 
+              <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">)</span>  
+              <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">TopObject</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">getAllSupertypes</span><span class="p">()):</span>
+            <span class="c1"># handle special case</span>
+            <span class="c1"># - getter for currentTopObject link is stored on wrong side</span>
+            <span class="k">continue</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeElementRecursive</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">endXmlElement</span><span class="p">(</span><span class="n">metaObj</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### other code</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+ 
+<div class="viewcode-block" id="XmlModelGen.startXmlFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.startXmlFile">[docs]</a>  <span class="k">def</span> <span class="nf">startXmlFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+    
+    <span class="c1"># do actual work</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">openFile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getObjFileName</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;&lt;?xml version=&quot;1.0&quot;?&gt;&#39;</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeMultilineComment</span><span class="p">(</span>
+     <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getVersionString</span><span class="p">(</span><span class="n">metaobj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="s1">&#39;?&#39;</span><span class="p">)</span> <span class="o">+</span>
+     <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> 
+     <span class="bp">self</span><span class="o">.</span><span class="n">getCreditsString</span><span class="p">(</span><span class="n">metaobj</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">programType</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)),</span>
+     <span class="n">compress</span><span class="o">=</span><span class="bp">False</span>
+    <span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+ 
+<div class="viewcode-block" id="XmlModelGen.endXmlFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.endXmlFile">[docs]</a>  <span class="k">def</span> <span class="nf">endXmlFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeNewline</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">closeFile</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="XmlModelGen.startXmlElement"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.startXmlElement">[docs]</a>  <span class="k">def</span> <span class="nf">startXmlElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Write start of XML element for MetaObj.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># starting indentation level</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">*</span> <span class="s1">&#39; &#39;</span>
+    <span class="n">indx</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">ind</span>
+    
+    <span class="n">clazz</span> <span class="o">=</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">__class__</span>
+    
+    <span class="c1"># write start element</span>
+    <span class="c1"># first element-independent lines</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&lt;</span><span class="si">%s</span><span class="s1"> name=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> 
+                                    <span class="n">metaObj</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> guid=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">indx</span><span class="p">,</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">guid</span><span class="p">))</span>
+    <span class="n">container</span> <span class="o">=</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">container</span>
+    <span class="k">if</span> <span class="n">container</span><span class="p">:</span>
+      <span class="c1"># NB not all elements are inside the element of their container</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> container=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">indx</span><span class="p">,</span> <span class="n">container</span><span class="o">.</span><span class="n">guid</span><span class="p">))</span>
+    
+    <span class="c1"># then get lines for other attributes</span>
+    <span class="n">strings</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;xmlAttrs&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]:</span>
+      <span class="n">val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toXmlString</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">val</span><span class="p">:</span>
+        <span class="n">strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39; </span><span class="si">%s</span><span class="s1">=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+    <span class="n">strings</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">compactStringList</span><span class="p">(</span><span class="n">strings</span><span class="p">,</span> <span class="n">maxChars</span><span class="o">=</span><span class="mi">80</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">indent</span><span class="p">)</span>
+    
+    <span class="c1"># then write lines to file</span>
+    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">strings</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">indx</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># write contents</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;plainElements&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writePlainXmlElement</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;listElements&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeList</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_xmlInfo</span><span class="p">[</span><span class="s1">&#39;stringDictElements&#39;</span><span class="p">][</span><span class="n">clazz</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeStringDict</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span></div>
+  
+<div class="viewcode-block" id="XmlModelGen.endXmlElement"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.endXmlElement">[docs]</a>  <span class="k">def</span> <span class="nf">endXmlElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Write end of XML element for MetaObj.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;&lt;/</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span></div>
+    
+  
+<div class="viewcode-block" id="XmlModelGen.writePlainXmlElement"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.writePlainXmlElement">[docs]</a>  <span class="k">def</span> <span class="nf">writePlainXmlElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; write xmlElement for metaObj.tag</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">ss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">toXmlString</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ss</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1">&gt;</span><span class="si">%s</span><span class="s1">&lt;/</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">tag</span><span class="p">))</span></div>
+    
+  
+<div class="viewcode-block" id="XmlModelGen.writeStringDict"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.writeStringDict">[docs]</a>  <span class="k">def</span> <span class="nf">writeStringDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; write StringDict element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span><span class="n">tag</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+    
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+    
+      <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+    
+      <span class="n">items</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+      <span class="n">items</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+      
+      <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="c1"># convert key</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;amp;&quot;</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;quot;&quot;</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;lt;&quot;</span><span class="p">)</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;gt;&quot;</span><span class="p">)</span>
+        <span class="c1">#convert val</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;amp;&quot;</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;lt;&quot;</span><span class="p">)</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;gt;&quot;</span><span class="p">)</span>
+        <span class="c1"># write element. NB strings can *not* be indented</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;&lt;item tag=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/item&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">))</span>
+        
+      <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;&lt;/</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span></div>
+  
+  
+<div class="viewcode-block" id="XmlModelGen.writeList"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.writeList">[docs]</a>  <span class="k">def</span> <span class="nf">writeList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; write List element</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+    
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;&lt;</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+    
+      <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+ 
+      <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="c1"># write element. NB strings can *not* be indented</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;&lt;item&gt;</span><span class="si">%s</span><span class="s1">&lt;/item&gt;&#39;</span> 
+                      <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">toXmlString</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">val</span><span class="p">)))</span>
+ 
+      <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s2">&quot;&lt;/</span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span></div>
+  
+  
+<div class="viewcode-block" id="XmlModelGen.toXmlString"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.toXmlString">[docs]</a>  <span class="k">def</span> <span class="nf">toXmlString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Convert metaObj.tag to string ready to write to XML</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pData</span> <span class="o">=</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">parameterData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+    <span class="n">parType</span> <span class="o">=</span> <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;type&#39;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span>  <span class="s1">&#39;&#39;</span>
+    
+    <span class="k">if</span> <span class="n">parType</span> <span class="o">==</span> <span class="s1">&#39;Boolean&#39;</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">xmlTrue</span> <span class="ow">or</span> <span class="n">xmlFalse</span>
+    
+    <span class="k">elif</span> <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isLink&#39;</span><span class="p">):</span>
+      <span class="c1"># link</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">guid</span>
+    
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">parType</span><span class="p">:</span>
+      <span class="c1"># valueType, type externally determined</span>
+      <span class="c1"># NB all legal cases will fit with this</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataType</span><span class="p">):</span>
+        <span class="n">dataType</span> <span class="o">=</span> <span class="n">metaObj</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">dataType</span> <span class="o">=</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">valueType</span>
+      <span class="n">typeCode</span> <span class="o">=</span> <span class="n">dataType</span><span class="o">.</span><span class="n">typeCodes</span><span class="p">[</span><span class="s1">&#39;python&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">typeCode</span> <span class="o">==</span> <span class="s1">&#39;Boolean&#39;</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">value</span> <span class="ow">and</span> <span class="n">xmlTrue</span> <span class="ow">or</span> <span class="n">xmlFalse</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">toString</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">baseDataTypeModule</span><span class="p">,</span><span class="n">typeCode</span><span class="p">)</span><span class="o">.</span><span class="n">toString</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">toString</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># all other types</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+    
+    <span class="c1"># xmlify result</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;amp;&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;quot;&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;lt;&quot;</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;gt;&quot;</span><span class="p">)</span>
+    
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+  
+<div class="viewcode-block" id="XmlModelGen.writeXmlInclude"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.XmlModelIo.XmlModelGen.writeXmlInclude">[docs]</a>  <span class="k">def</span> <span class="nf">writeXmlInclude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filePath</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">isMandatory</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write an XML include statement pointing to the file. </span>
+<span class="sd">    If inclusion is non-mandatory (default), the fallback will be </span>
+<span class="sd">    an empty string.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="k">if</span> <span class="n">isMandatory</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">objName</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span>
+       <span class="s1">&#39;&lt;xi:include href=&quot;</span><span class="si">%s</span><span class="s1">&quot; xmlns:xi=&quot;http://www.w3.org/2001/XInclude&quot;/&gt;&#39;</span>
+       <span class="o">%</span> <span class="n">filePath</span>
+      <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span>
+       <span class="s1">&#39;&lt;xi:include href=&quot;</span><span class="si">%s</span><span class="s1">&quot; xmlns:xi=&quot;http://www.w3.org/2001/XInclude&quot;&gt;&#39;</span>
+       <span class="o">%</span> <span class="n">filePath</span>
+      <span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+      <span class="k">if</span> <span class="n">objName</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="n">objName</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">isMandatory</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;&lt;xi:fallback&gt;&lt;/xi:fallback&gt;&#39;</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;&lt;/xi:include&gt;&#39;</span><span class="p">)</span></div></div>
+      
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

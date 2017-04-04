@@ -1,0 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.GitTools &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.util.GitTools</h1><div class="highlight"><pre>
+<span></span><span class="c1"># =========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1"># =========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-05-16 02:12:40 +0100 (Mon, 16 May 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, TJ Ragan, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1"># =========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1"># =========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: TJ Ragan $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-10 10:27:30 +0000 (Fri, March 10, 2017) $&quot;</span>
+
+<span class="c1"># =========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1"># =========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">subprocess</span> <span class="kn">import</span> <span class="n">Popen</span><span class="p">,</span> <span class="n">PIPE</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getcwd</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpnCodePath</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">analysisAssignPath</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">analysisScreenPath</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">analysisStructurePath</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">analysisMetabolomicsPath</span>
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpnmodelPythonPath</span>
+
+
+<div class="viewcode-block" id="runGitCommand"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.GitTools.runGitCommand">[docs]</a><span class="k">def</span> <span class="nf">runGitCommand</span><span class="p">(</span><span class="n">command</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">workingDir</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="k">if</span> <span class="n">workingDir</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">workingDir</span> <span class="o">=</span> <span class="n">getcwd</span><span class="p">()</span>
+
+  <span class="n">gitCommand</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;git&#39;</span><span class="p">,</span> <span class="p">]</span> <span class="o">+</span> <span class="n">command</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+  <span class="n">gitQuery</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">(</span><span class="n">gitCommand</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">workingDir</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
+  <span class="n">gitStatus</span><span class="p">,</span> <span class="n">error</span> <span class="o">=</span> <span class="n">gitQuery</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+  <span class="k">if</span> <span class="n">gitQuery</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">gitStatus</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="getCurrentGitCommit"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.GitTools.getCurrentGitCommit">[docs]</a><span class="k">def</span> <span class="nf">getCurrentGitCommit</span><span class="p">(</span><span class="n">workingDir</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Get the current git commit hash.</span>
+<span class="sd">  This function returns the git commit hash for the repository where it&#39;s called.</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+  <span class="k">return</span> <span class="n">runGitCommand</span><span class="p">(</span><span class="s1">&#39;rev-parse HEAD&#39;</span><span class="p">,</span> <span class="n">workingDir</span><span class="o">=</span><span class="n">workingDir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getCurrentGitAuthor"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.GitTools.getCurrentGitAuthor">[docs]</a><span class="k">def</span> <span class="nf">getCurrentGitAuthor</span><span class="p">(</span><span class="n">workingDir</span><span class="p">:</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Get the current git commit hash.</span>
+<span class="sd">  This function returns the git commit hash for the repository where it&#39;s called.</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+  <span class="k">return</span> <span class="n">runGitCommand</span><span class="p">(</span><span class="s1">&#39;config user.name&#39;</span><span class="p">,</span> <span class="n">workingDir</span><span class="o">=</span><span class="n">workingDir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getAllRepositoriesGitCommit"><a class="viewcode-back" href="../../../ccpn/ccpn.util.html#ccpn.util.GitTools.getAllRepositoriesGitCommit">[docs]</a><span class="k">def</span> <span class="nf">getAllRepositoriesGitCommit</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">  Return a dictionary of the current commit hashes for all the CCPN repositories</span>
+<span class="sd">  &#39;&#39;&#39;</span>
+  <span class="n">repos</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;analysis&#39;</span><span class="p">:</span> <span class="n">ccpnCodePath</span><span class="p">,</span>
+           <span class="s1">&#39;ccpnmodel&#39;</span><span class="p">:</span> <span class="n">ccpnmodelPythonPath</span><span class="p">,</span>
+           <span class="s1">&#39;AnalysisAssign&#39;</span><span class="p">:</span> <span class="n">analysisAssignPath</span><span class="p">,</span>
+           <span class="s1">&#39;AnalysisScreen&#39;</span><span class="p">:</span> <span class="n">analysisScreenPath</span><span class="p">,</span>
+           <span class="s1">&#39;AnalysisMetabolomics&#39;</span><span class="p">:</span> <span class="n">analysisMetabolomicsPath</span><span class="p">,</span>
+           <span class="s1">&#39;AnalysisStructure&#39;</span><span class="p">:</span> <span class="n">analysisStructurePath</span><span class="p">,</span>
+          <span class="p">}</span>
+
+  <span class="n">commits</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">repos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">commits</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">getCurrentGitCommit</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">except</span> <span class="n">FileNotFoundError</span><span class="p">:</span>
+      <span class="k">pass</span>
+
+  <span class="k">return</span> <span class="n">commits</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

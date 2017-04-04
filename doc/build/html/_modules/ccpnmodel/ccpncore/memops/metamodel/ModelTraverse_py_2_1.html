@@ -1,0 +1,729 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1 &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;  Version for python version &gt;= 2.1</span>
+
+<span class="sd">Operations on the model in memory, adapting the basic model for a </span>
+<span class="sd">particular language and implementation. </span>
+
+<span class="sd">Includes general model querying functions the depend on context.</span>
+<span class="sd">Includes default version of standard information, such as operations data,</span>
+<span class="sd">variable names, etc.</span>
+
+<span class="sd">Does no output.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">MetaModel</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="n">MemopsError</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span>
+
+<span class="c1">######################################################################</span>
+<span class="c1"># hack for Python 2.1 compatibility  NBNB                            #</span>
+<span class="c1">######################################################################</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="n">dd</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()</span>
+  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="mi">0</span>
+  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">True</span>
+  <span class="k">del</span> <span class="n">dd</span>
+ 
+<span class="n">mandatoryAttributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;modelPortal&#39;</span><span class="p">,)</span>
+
+<div class="viewcode-block" id="ModelTraverse_py_2_1"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1">[docs]</a><span class="k">class</span> <span class="nc">ModelTraverse_py_2_1</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot; Tools for traversing a model - loops and calls empty functions</span>
+<span class="sd">  Also model query functions that may need overriding elsewhere.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+    
+  <span class="c1"># set some general info</span>
+  <span class="c1"># special metaClasses and metaPackages</span>
+  <span class="n">implPackageName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">modellingPackageName</span><span class="p">,</span>
+                               <span class="n">metaConstants</span><span class="o">.</span><span class="n">implementationPackageName</span><span class="p">)</span>
+  <span class="n">dataRootName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">implPackageName</span><span class="p">,</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">)</span>
+  <span class="n">baseClassName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">implPackageName</span><span class="p">,</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">baseClassName</span><span class="p">)</span>
+  <span class="n">rootClassName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">implPackageName</span><span class="p">,</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">rootClassName</span><span class="p">)</span>
+  <span class="n">baseDataTypeObjName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">implPackageName</span><span class="p">,</span> 
+                                   <span class="n">metaConstants</span><span class="o">.</span><span class="n">baseDataTypeObjName</span><span class="p">)</span>
+  <span class="n">topObjClassName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">implPackageName</span><span class="p">,</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">topObjClassName</span><span class="p">)</span>
+  <span class="n">dataObjClassName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">implPackageName</span><span class="p">,</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">dataObjClassName</span><span class="p">)</span>
+  <span class="n">implObjClassName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">implPackageName</span><span class="p">,</span> 
+                              <span class="n">metaConstants</span><span class="o">.</span><span class="n">implObjClassName</span><span class="p">)</span>
+    
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### code executing model processing.</span>
+  <span class="c1">### To be overridden in subclasses</span>
+  <span class="c1">### Does no active work, except for checking the model flavour</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1"># Only function in this section to be called from ourside the class</span>
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processModel"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processModel">[docs]</a>  <span class="k">def</span> <span class="nf">processModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; top function that does all actions. Only function that should</span>
+<span class="sd">    be called from outside the module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># check model flavours</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">checkModelFlavour</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+
+    <span class="n">pp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">topPackage</span>
+    <span class="c1"># Normally we rely on topObjClassName etc. but in this file only</span>
+    <span class="c1"># this kind of attribute is needed</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">implPackage</span> <span class="o">=</span> <span class="n">impl</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">implPackageName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">topObject</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">topObjClassName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataRoot</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">rootClass</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">rootClassName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">baseClass</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">baseClassName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataObject</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">dataObjClassName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">implObject</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">implObjClassName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">baseDataType</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">baseDataTypeObjName</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">anyObject</span> <span class="o">=</span> <span class="n">impl</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s1">&#39;Any&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># branch packages</span>
+    <span class="k">for</span> <span class="n">package</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">branchPackages</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processBranchPackage</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+    
+    <span class="c1"># leaf packages.</span>
+    <span class="c1"># Note that import order means that superclasses, datatypes etc.</span>
+    <span class="c1"># are processed before they are needed</span>
+    <span class="k">for</span> <span class="n">package</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">leafPackagesByImport</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">initLeafPackage</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processLeafPackage</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">endLeafPackage</span><span class="p">(</span><span class="n">package</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+    
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processBranchPackage"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processBranchPackage">[docs]</a>  <span class="k">def</span> <span class="nf">processBranchPackage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for branch package</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.initLeafPackage"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.initLeafPackage">[docs]</a>  <span class="k">def</span> <span class="nf">initLeafPackage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for start of LeafPackage</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processLeafPackage"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processLeafPackage">[docs]</a>  <span class="k">def</span> <span class="nf">processLeafPackage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;  processing actions for body of leaf package</span>
+<span class="sd"> </span>
+<span class="sd">    NB programmers note:</span>
+<span class="sd">    Processing may rely on the model being valid and all subclasses being known</span>
+<span class="sd">    at the time of processing the superclass.</span>
+<span class="sd">    Any overriding that adds classes must maintain this.</span>
+<span class="sd"> </span>
+<span class="sd">    Also note that DataTypes are needed in many other elements, and that</span>
+<span class="sd">    exceptions are needed for operations. The processing order matters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># data types</span>
+    <span class="c1"># Note that inheritance order means that </span>
+    <span class="c1"># supertypes are processed before subtypes</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">dataTypesByInheritance</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processDataType</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+    
+    <span class="c1"># constants</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">constantsAlphabetic</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processConstant</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+    
+    <span class="c1"># exceptions</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">exceptionsByInheritance</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processException</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+    
+    <span class="c1"># dataObjTypes</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">dataObjTypesByInheritance</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">initDataObjType</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processDataObjType</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">endDataObjType</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+      
+    <span class="c1"># classes</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">classesByInheritance</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">initClass</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processClass</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">endClass</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.endLeafPackage"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.endLeafPackage">[docs]</a>  <span class="k">def</span> <span class="nf">endLeafPackage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">package</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for end of LeafPackage</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processDataType"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processDataType">[docs]</a>  <span class="k">def</span> <span class="nf">processDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for data type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processConstant"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processConstant">[docs]</a>  <span class="k">def</span> <span class="nf">processConstant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">constant</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for constant</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processException"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processException">[docs]</a>  <span class="k">def</span> <span class="nf">processException</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for exception</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">exception</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processParameter</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">exception</span><span class="p">)</span></div>
+    
+    
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.initClass"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.initClass">[docs]</a>  <span class="k">def</span> <span class="nf">initClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for start of class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processClass"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processClass">[docs]</a>  <span class="k">def</span> <span class="nf">processClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for body of class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># attributes</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getAllAttributes</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processAttribute</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+    
+    <span class="c1"># roles</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getAllRoles</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processRole</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+    
+    <span class="c1"># operations</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getAllOperations</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">initOperation</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processOperation</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">endOperation</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.endClass"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.endClass">[docs]</a>  <span class="k">def</span> <span class="nf">endClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for end of class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.initDataObjType"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.initDataObjType">[docs]</a>  <span class="k">def</span> <span class="nf">initDataObjType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for start of class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processDataObjType"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processDataObjType">[docs]</a>  <span class="k">def</span> <span class="nf">processDataObjType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for body of class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># attributes</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getAllAttributes</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processAttribute</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+    
+    <span class="c1"># operations</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getAllOperations</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">initOperation</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processOperation</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">endOperation</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.endDataObjType"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.endDataObjType">[docs]</a>  <span class="k">def</span> <span class="nf">endDataObjType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for end of class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processAttribute"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processAttribute">[docs]</a>  <span class="k">def</span> <span class="nf">processAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attribute</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for attribute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processRole"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processRole">[docs]</a>  <span class="k">def</span> <span class="nf">processRole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">role</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for role</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.initOperation"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.initOperation">[docs]</a>  <span class="k">def</span> <span class="nf">initOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for start of operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processOperation"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processOperation">[docs]</a>  <span class="k">def</span> <span class="nf">processOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for body of operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processParameter</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.endOperation"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.endOperation">[docs]</a>  <span class="k">def</span> <span class="nf">endOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for end of operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.processParameter"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.processParameter">[docs]</a>  <span class="k">def</span> <span class="nf">processParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">inElement</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for operation/exception parameter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">pass</span></div>
+    
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### code for calling from subclasses - not intended for overriding</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelTraverse_py_2_1.addModelFlavour"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.addModelFlavour">[docs]</a>  <span class="k">def</span> <span class="nf">addModelFlavour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add model flavour to local requirements, checking for conflicts</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;modelFlavours&#39;</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span> <span class="o">=</span> <span class="p">{}</span>
+    
+    <span class="n">flav</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">flav</span> <span class="o">==</span> <span class="n">val</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="k">elif</span> <span class="n">flav</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;attempt to reset modelFlavour </span><span class="si">%s</span><span class="s2">:</span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2">)&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">flav</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+      <span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### overridable model queries</span>
+  <span class="c1">### for use outside the class</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.getFuncname"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.getFuncname">[docs]</a>  <span class="k">def</span> <span class="nf">getFuncname</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get function calling name for operation</span>
+<span class="sd">    </span>
+<span class="sd">    the name is the operation name of the corresponding operation with</span>
+<span class="sd">    opSubType==None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">getFuncname</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="ModelTraverse_py_2_1.valueVar"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.valueVar">[docs]</a>  <span class="k">def</span> <span class="nf">valueVar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">element</span><span class="p">,</span> <span class="n">doInstance</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+
+    <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">doInstance</span> <span class="ow">and</span> <span class="n">element</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="n">var</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">prefix</span><span class="p">:</span>
+      <span class="n">var</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">var</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">var</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+    <span class="k">return</span> <span class="n">var</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelTraverse_py_2_1.defineFunc"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.defineFunc">[docs]</a>  <span class="k">def</span> <span class="nf">defineFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;write function definition</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">funcName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFuncname</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getFuncParams</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+    <span class="n">docString</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDocString</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+    <span class="n">returnType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getReturnType</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+    <span class="n">throwsTypes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getThrowsTypes</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+    
+    <span class="c1"># TBD: exceptions</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">startFunc</span><span class="p">(</span><span class="n">funcName</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">docString</span><span class="p">,</span> <span class="n">returnType</span><span class="p">,</span> <span class="n">throwsTypes</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="ModelTraverse_py_2_1.getImportName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.getImportName">[docs]</a>  <span class="k">def</span> <span class="nf">getImportName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">oo</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subDirs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="n">subDirs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">codeDirName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">subDirs</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">subDirs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">codeDirName</span><span class="p">]</span>
+        
+    <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">topPackage</span><span class="p">:</span>
+      <span class="c1"># root package - special case - use memops package instead</span>
+      <span class="n">oo</span> <span class="o">=</span> <span class="n">oo</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">modellingPackageName</span><span class="p">)</span>
+      
+        
+    <span class="k">return</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">getReferenceName</span><span class="p">(</span><span class="n">oo</span><span class="p">,</span> <span class="n">pp</span><span class="p">,</span> <span class="n">subDirs</span><span class="o">=</span><span class="n">subDirs</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelTraverse_py_2_1.getPartitioningLinkages"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.getPartitioningLinkages">[docs]</a>  <span class="k">def</span> <span class="nf">getPartitioningLinkages</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputRole</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get chains of roles leading upwards from inputRole.container</span>
+<span class="sd">    and inputRole.valueType to reach an object that must be shared from both</span>
+<span class="sd">    sides. </span>
+<span class="sd">    Return values are (uplinks, partitionRoles)</span>
+<span class="sd">    </span>
+<span class="sd">    Examples: if &lt;xyz&gt; indicates a MetaRole names &#39;xyz&#39;, we have  :</span>
+<span class="sd">    </span>
+<span class="sd">    For ccp.molecule.Molecule.MolResLinkEnd.molResLink, the return is</span>
+<span class="sd">    [[&lt;molResidue&gt;,&lt;molecule&gt;],[&lt;molecule&gt;]],[None,None]</span>
+<span class="sd">    </span>
+<span class="sd">    while for ccp/nmr.NmrConstraint.AbstractConstraintList.experiments it is</span>
+<span class="sd">    [[&lt;nmrConstraintStore&gt;],[&lt;nmrProject&gt;]],[&lt;nmrProject&gt;,&lt;nmrConstraintStores&gt;])</span>
+<span class="sd">    </span>
+<span class="sd">    Note that the roles in uplinks[0], uplinks[1] and *either*  </span>
+<span class="sd">    partitionRoles[0] *or* partitionRoles[1] (if either is set) combine to make </span>
+<span class="sd">    a chain of links that connect inputRole.container and inputRole.valueType</span>
+<span class="sd">    </span>
+<span class="sd">    For MetaRoles contained in classes without a parentRole, the uplinks are</span>
+<span class="sd">    [&lt;topObject&gt;,&lt;memopsRoot&gt;]</span>
+<span class="sd">    </span>
+<span class="sd">    NB - as written this code checks that:</span>
+
+<span class="sd">    - no partitioning links between parent and descendant</span>
+
+<span class="sd">    - No two partitioning links (inherited or not) between same pair of classes</span>
+
+<span class="sd">    - If two partitioning links span the same up-down path in the parent tree,</span>
+<span class="sd">      one link cannot be lower in the tree in one branch and higher in the other</span>
+<span class="sd">      Doing the checks in MetaModel would be better (and faster) but would</span>
+<span class="sd">      require partially duplicating some quite complicated code.</span>
+<span class="sd">      The code will be slow, considering that it is called for every writeModifier</span>
+<span class="sd">      and some getValue for roles.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># get list of uplinks and list of the classes they point to</span>
+    <span class="n">startClasses</span> <span class="o">=</span> <span class="p">(</span><span class="n">inputRole</span><span class="o">.</span><span class="n">container</span><span class="p">,</span><span class="n">inputRole</span><span class="o">.</span><span class="n">valueType</span><span class="p">)</span>
+    <span class="n">classes</span> <span class="o">=</span> <span class="p">([],[])</span>
+    <span class="n">uplinks</span> <span class="o">=</span> <span class="p">([],[])</span>
+    <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">ul</span> <span class="o">=</span> <span class="n">uplinks</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
+      <span class="n">cl</span> <span class="o">=</span> <span class="n">classes</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
+      <span class="n">cc</span> <span class="o">=</span> <span class="n">startClasses</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
+      <span class="n">pr</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">parentRole</span>
+      <span class="k">if</span> <span class="n">pr</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># class has no parent link </span>
+        <span class="c1"># the best we can do is to go directly to the TopObject</span>
+        <span class="c1"># we will miss some things, but it cannot be helped</span>
+        <span class="n">ul</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">]))</span>
+        <span class="n">topObjClass</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">topObjectClass</span>
+        <span class="n">cl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">topObjClass</span><span class="p">)</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">topObjClass</span><span class="o">.</span><span class="n">parentRole</span>
+      <span class="k">while</span> <span class="n">pr</span><span class="p">:</span>
+        <span class="n">ul</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pr</span><span class="p">)</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">valueType</span>
+        <span class="n">cl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cc</span><span class="p">)</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">parentRole</span>
+    
+    <span class="c1"># Find index of lowest common partitioning class</span>
+    <span class="c1"># - loops starts from end of list</span>
+    <span class="c1"># NB, MemopsRoot is partitioning so we always get one</span>
+    <span class="n">sentinel</span> <span class="o">=</span> <span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">len</span><span class="p">(</span><span class="n">classes</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">ii</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="n">indexcc</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">ii</span> <span class="o">&gt;=</span> <span class="n">sentinel</span><span class="p">:</span>
+      <span class="n">cc</span> <span class="o">=</span> <span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">ii</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">cc</span> <span class="ow">is</span> <span class="n">classes</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">ii</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">cc</span><span class="o">.</span><span class="n">partitionsChildren</span><span class="p">:</span>
+          <span class="n">indexcc</span> <span class="o">=</span> <span class="n">ii</span>
+        <span class="n">ii</span> <span class="o">-=</span> <span class="mi">1</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">break</span>
+
+    <span class="c1"># get lists of non-shared parents. NB indexcc is negative</span>
+    <span class="n">separate</span> <span class="o">=</span> <span class="p">(</span><span class="n">classes</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="n">indexcc</span><span class="p">],</span> <span class="n">classes</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="n">indexcc</span><span class="p">])</span>
+
+    <span class="c1"># find partitioning links, if any</span>
+    <span class="n">partitionRoles</span> <span class="o">=</span> <span class="p">[</span><span class="bp">None</span><span class="p">,</span><span class="bp">None</span><span class="p">]</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">],[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">]]</span>
+    <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+      <span class="n">spx</span> <span class="o">=</span> <span class="n">separate</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
+      <span class="n">spz</span> <span class="o">=</span> <span class="n">separate</span><span class="p">[</span><span class="mi">1</span><span class="o">-</span><span class="n">ic</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spx</span><span class="p">)):</span>
+        <span class="n">cc</span> <span class="o">=</span> <span class="n">spx</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">cc</span><span class="o">.</span><span class="n">getAllRoles</span><span class="p">():</span>
+          <span class="k">if</span> <span class="n">role</span><span class="o">.</span><span class="n">partitionsChildren</span><span class="p">:</span>
+            <span class="n">valueType</span> <span class="o">=</span> <span class="n">role</span><span class="o">.</span><span class="n">valueType</span>
+            <span class="k">for</span> <span class="n">jj</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">spz</span><span class="p">)):</span>
+              <span class="n">cc2</span> <span class="o">=</span> <span class="n">spz</span><span class="p">[</span><span class="n">jj</span><span class="p">]</span>
+              <span class="k">if</span> <span class="n">valueType</span> <span class="ow">in</span> <span class="n">cc2</span><span class="o">.</span><span class="n">getAllSupertypes</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">indices</span><span class="p">[</span><span class="n">ic</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ii</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="n">ic</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">jj</span><span class="p">:</span>
+                  <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+                   <span class="s2">&quot;Partitioning roles </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> incompatible for </span><span class="si">%s</span><span class="s2">&quot;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="n">partitionRoles</span><span class="p">[</span><span class="n">ic</span><span class="p">],</span> <span class="n">role</span><span class="p">,</span> <span class="n">inputRole</span><span class="p">)</span>
+                  <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                  <span class="n">indices</span><span class="p">[</span><span class="n">ic</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ii</span>
+                  <span class="n">indices</span><span class="p">[</span><span class="n">ic</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">jj</span>
+                  <span class="n">partitionRoles</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span>
+                  <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="k">for</span> <span class="n">cc3</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">[</span><span class="n">ic</span><span class="p">][</span><span class="n">ii</span><span class="p">:]:</span>
+                <span class="k">if</span> <span class="n">valueType</span> <span class="ow">in</span> <span class="n">cc3</span><span class="o">.</span><span class="n">getAllSupertypes</span><span class="p">():</span>
+                  <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+                   <span class="s2">&quot;Partitioning role </span><span class="si">%s</span><span class="s2"> connects ancestor and descendant&quot;</span>
+                   <span class="o">%</span> <span class="p">(</span><span class="n">role</span><span class="p">,)</span>
+                  <span class="p">)</span>
+              <span class="k">continue</span>
+            <span class="k">break</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">continue</span>
+      <span class="c1"># break</span>
+     
+    <span class="c1"># select partitioning link, get both roles, and further check compatibility</span>
+    <span class="k">if</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># no link </span>
+      <span class="n">resultIndices</span> <span class="o">=</span> <span class="p">(</span><span class="n">indexcc</span><span class="p">,</span> <span class="n">indexcc</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># one-way link</span>
+      <span class="n">resultIndices</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">resultIndices</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    
+    <span class="k">elif</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># one-way link</span>
+      <span class="n">resultIndices</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      
+    <span class="k">elif</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+      <span class="c1"># link starting on 0 has priority (might be the same link, of course)</span>
+      <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">otherRole</span>
+      <span class="n">resultIndices</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+    <span class="k">elif</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+      <span class="c1"># link starting on 1 has priority</span>
+      <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">otherRole</span>
+      <span class="n">resultIndices</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">resultIndices</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+      
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Partitioning roles </span><span class="si">%s</span><span class="s2"> and </span><span class="si">%s</span><span class="s2"> are incompatible&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">partitionRoles</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">partitionRoles</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    
+    <span class="c1"># set uplinks lists</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">([],</span><span class="n">partitionRoles</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ic</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">):</span>
+      
+      <span class="n">topObjRole</span> <span class="o">=</span> <span class="n">startClasses</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;topObject&#39;</span><span class="p">])</span>
+      <span class="n">topObjClass</span> <span class="o">=</span> <span class="n">startClasses</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">topObjectClass</span>
+      <span class="n">ir</span> <span class="o">=</span> <span class="n">resultIndices</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
+      <span class="n">cl</span> <span class="o">=</span> <span class="n">classes</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">cl</span><span class="p">[</span><span class="n">ir</span><span class="p">]</span> <span class="ow">is</span> <span class="n">cl</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="c1"># lowest parent is last element - Memopsroot.</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">startClasses</span><span class="p">[</span><span class="n">ic</span><span class="p">]</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;root&#39;</span><span class="p">])])</span>
+      <span class="k">elif</span> <span class="n">cl</span><span class="p">[</span><span class="n">ir</span><span class="p">]</span> <span class="ow">is</span> <span class="n">topObjClass</span><span class="p">:</span>
+        <span class="c1"># lowest parent is TopObject. Go there directly</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">topObjRole</span><span class="p">])</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># normal case</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">uplinks</span><span class="p">[</span><span class="n">ic</span><span class="p">][:</span><span class="n">ir</span><span class="o">+</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1">#  Convenience functions, calling other Language functions only</span>
+  <span class="c1"># (Language-independent)</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="ModelTraverse_py_2_1.valueIsNone"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.valueIsNone">[docs]</a>  <span class="k">def</span> <span class="nf">valueIsNone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comparison</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s1">&#39;is&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noneValue</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="ModelTraverse_py_2_1.valueIsNotNone"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.ModelTraverse_py_2_1.ModelTraverse_py_2_1.valueIsNotNone">[docs]</a>  <span class="k">def</span> <span class="nf">valueIsNotNone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var</span><span class="p">):</span>
+  
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">comparison</span><span class="p">(</span><span class="n">var</span><span class="p">,</span> <span class="s1">&#39;is not&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">noneValue</span><span class="p">)</span></div></div>
+
+  <span class="c1">###########################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

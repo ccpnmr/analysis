@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Python-specific version of ModelAdapt</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt</span> <span class="kn">import</span> <span class="n">ModelAdapt</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">MetaModel</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+
+<div class="viewcode-block" id="PyModelAdapt"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt.PyModelAdapt">[docs]</a><span class="k">class</span> <span class="nc">PyModelAdapt</span><span class="p">(</span><span class="n">ModelAdapt</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Python-specific version of ModelAdapt</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class constructor.</span>
+<span class="sd">    Automatically processes model.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># model flavour (must be done first) </span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addModelFlavour</span><span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">,</span><span class="s1">&#39;python&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># superclass init call</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PyModelAdapt</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    
+    <span class="c1"># adapt variableName data. </span>
+    <span class="c1"># NB this variable is used in handcode</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;other&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;value&#39;</span>
+  
+    <span class="c1"># MetaModelElement corresponding to class</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;metaclass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;_metaclass&#39;</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;packageName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;_packageName&#39;</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;fieldNames&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;_fieldNames&#39;</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;packageShortName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;_packageShortName&#39;</span>
+
+    <span class="c1"># new variable - used for dataDict optimisation</span>
+    <span class="c1"># NB this variable is used in handcode</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;dataDict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;dataDict&#39;</span>
+    
+    <span class="c1"># adapt opData</span>
+    <span class="n">operationData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span>
+    
+    <span class="c1"># new, init</span>
+    <span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">][</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;__init__&#39;</span>
+            
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### functions overriding ModelAdapt</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="PyModelAdapt.initComplexDataType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt.PyModelAdapt.initComplexDataType">[docs]</a>  <span class="k">def</span> <span class="nf">initComplexDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">complexDataType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># super function call</span>
+    <span class="n">ModelAdapt</span><span class="o">.</span><span class="n">initComplexDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">complexDataType</span><span class="p">)</span>
+    
+    <span class="c1"># add metaclass attribute</span>
+    <span class="k">if</span> <span class="n">complexDataType</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootClassName</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addMetaClassAttr</span><span class="p">(</span><span class="n">complexDataType</span><span class="p">)</span>    </div>
+  
+  <span class="n">initClass</span> <span class="o">=</span> <span class="n">initComplexDataType</span>     
+  
+  <span class="n">initDataObjType</span> <span class="o">=</span> <span class="n">initComplexDataType</span>    
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="PyModelAdapt.addMetaClassAttr"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt.PyModelAdapt.addMetaClassAttr">[docs]</a>  <span class="k">def</span> <span class="nf">addMetaClassAttr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    
+    <span class="c1"># add metaclass implementation attribute</span>
+    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span>
+     <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;metaclass&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;baseName&#39;</span><span class="p">:</span><span class="s1">&#39;metaclass&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;documentation&#39;</span><span class="p">:</span><span class="s1">&#39;metaclass: MetaModel object containing class description&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;isImplementation&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+     <span class="s1">&#39;changeability&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">frozen</span><span class="p">,</span>
+     <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+     <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span>
+     <span class="s1">&#39;container&#39;</span><span class="p">:</span><span class="n">clazz</span><span class="p">,</span>
+     <span class="s1">&#39;valueType&#39;</span><span class="p">:</span><span class="n">clazz</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="s1">&#39;memops.Implementation.Any&#39;</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newElement</span><span class="p">(</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaAttribute</span><span class="p">,</span> <span class="o">**</span><span class="n">dd</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="PyModelAdapt.addDataObjTypeOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt.PyModelAdapt.addDataObjTypeOperations">[docs]</a>  <span class="k">def</span> <span class="nf">addDataObjTypeOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add operations not linked to an element (e.g. init, delete, checkValid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">ModelAdapt</span><span class="o">.</span><span class="n">addDataObjTypeOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">supertypes</span><span class="p">:</span>
+      <span class="c1"># constructor (will be abstact and will raise an exception)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+      
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="PyModelAdapt.addClassOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt.PyModelAdapt.addClassOperations">[docs]</a>  <span class="k">def</span> <span class="nf">addClassOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add operations not linked to an element (e.g. init, delete, checkValid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">ModelAdapt</span><span class="o">.</span><span class="n">addClassOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">supertypes</span><span class="p">:</span>
+      <span class="c1"># constructor (will be abstact and will raise an exception)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseClassName</span><span class="p">:</span>
+      <span class="c1"># special case</span>
+      
+      <span class="c1"># getByNavigation</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="s1">&#39;opType&#39;</span><span class="p">:</span><span class="s1">&#39;otherQuery&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;isQuery&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+      <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;getByNavigation&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;isImplicit&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+      <span class="s1">&#39;documentation&#39;</span><span class="p">:</span><span class="s2">&quot;&quot;&quot;Return object or element given a navigation sequence, or None if none found</span>
+<span class="s2">    </span>
+<span class="s2">Intended to provide fast, one-function-call access to</span>
+<span class="s2">long range navigation, mainly for UML-embedded code.</span>
+<span class="s2">NB there is no error checking on the input. </span>
+<span class="s2">The function may fail without proper warning for incorrect input.</span>
+<span class="s2">Also the function bypasses the API on get commands, so that load is</span>
+<span class="s2">not triggered on MemopsRoot-&gt;TopObject links or partially filled</span>
+<span class="s2">interpackage crosslinks</span>
+<span class="s2">Programmer beware!</span>
+
+<span class="s2">Navigation starts at self and follows the navigation sequence,</span>
+<span class="s2">which consists of either string tags, or (tag,key) tuples.</span>
+<span class="s2">- For a string tag the function gets the corresponding element.</span>
+<span class="s2">Except at the end of the navigation sequence, this assumes that </span>
+<span class="s2">the element has hicard==1, and is a link or complex data type attribute.</span>
+<span class="s2">If the result evaluates false, a getattr is done instead.</span>
+<span class="s2">This may trigger loading and follow derived links.</span>
+<span class="s2">- For a (tag,key) tuple this assumes that the tag is the name of a </span>
+<span class="s2">child link, and gets the child with the given key.</span>
+<span class="s2">If no children are found and the object has an attribute isLoaded==False, </span>
+<span class="s2">object.load() is tried.</span>
+<span class="s2">- If at any stage in the lookup no object is found, None is returned</span>
+<span class="s2">    &quot;&quot;&quot;</span><span class="p">,</span>
+      <span class="s1">&#39;codeStubs&#39;</span><span class="p">:{</span><span class="s1">&#39;python&#39;</span><span class="p">:</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">isa = isinstance</span>
+
+<span class="s2">result = self</span>
+
+<span class="s2">for xx in navigation:</span>
+<span class="s2">  dd = result.__dict__</span>
+<span class="s2">  if isa(xx,str):</span>
+<span class="s2">    # xx is a role name - get the link</span>
+<span class="s2">    result = dd.get(xx) or getattr(result,xx)</span>
+<span class="s2">  </span>
+<span class="s2">  else:</span>
+<span class="s2">    # xx must be a (childlink,key) tuple. </span>
+<span class="s2">    tag,key = xx</span>
+<span class="s2">    dd2 = dd[tag]</span>
+<span class="s2">    if not dd2 and dd.get(&#39;isLoaded&#39;) == False:</span>
+<span class="s2">      # we might need to load this</span>
+<span class="s2">      try:</span>
+<span class="s2">        result.load()</span>
+<span class="s2">      except AttributeError:</span>
+<span class="s2">        pass</span>
+<span class="s2">    # Now get the child</span>
+<span class="s2">    result = dd2.get(key)</span>
+<span class="s2">  </span>
+<span class="s2">  if result is None:</span>
+<span class="s2">    break</span>
+<span class="s2">else:</span>
+
+<span class="s2">  # freeze internal representations</span>
+<span class="s2">  if isa(result, list):</span>
+<span class="s2">    result = tuple(result)</span>
+<span class="s2">  elif isa(result, set):</span>
+<span class="s2">    result = frozenset(result)</span>
+<span class="s2">  elif isa(result, dict):</span>
+<span class="s2">    result = frozenset(result.values())&quot;&quot;&quot;</span><span class="p">}</span>
+      <span class="p">}</span> 
+      <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newElement</span><span class="p">(</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaOperation</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="n">inClass</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+      
+      <span class="n">op</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">op</span>
+      
+      <span class="n">anyType</span> <span class="o">=</span> <span class="n">inClass</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="s1">&#39;memops.Implementation.Any&#39;</span><span class="p">)</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+                <span class="s1">&#39;isImplicit&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;valueType&#39;</span><span class="p">:</span><span class="n">anyType</span><span class="p">}</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">newElement</span><span class="p">(</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaParameter</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="n">op</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+      
+      <span class="n">params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;navigation&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+                <span class="s1">&#39;isImplicit&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;valueType&#39;</span><span class="p">:</span><span class="n">anyType</span><span class="p">,</span>
+                <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span>
+                <span class="s1">&#39;taggedValues&#39;</span><span class="p">:{</span><span class="s1">&#39;isSubdivided&#39;</span><span class="p">:</span><span class="s1">&#39;True&#39;</span><span class="p">},}</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">newElement</span><span class="p">(</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaParameter</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="n">op</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># ###########################################################################</span>
+  <span class="c1">#</span>
+  <span class="c1"># def getOpData(self, target, opType, inClass=None):</span>
+  <span class="c1">#   &quot;&quot;&quot; Get opData for opType, taking special cases into account</span>
+  <span class="c1">#</span>
+  <span class="c1">#   NB should probably be removed. Try it.</span>
+  <span class="c1">#   &quot;&quot;&quot;</span>
+  <span class="c1">#</span>
+  <span class="c1">#   return ModelAdapt.getOpData(self, target, opType, inClass)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if (opType == &#39;init&#39; and isinstance(target, MetaModel.MetaClass)</span>
+  <span class="c1">#       and not target.isAbstract and target.parentRole is None):</span>
+  <span class="c1">#     # Project init - must have optional parent to avoid</span>
+  <span class="c1">#     # validity problems if the number of parameters change</span>
+  <span class="c1">#     result = copy.deepcopy(self.operationData[opType])</span>
+  <span class="c1">#     result[&#39;opType&#39;] = opType</span>
+  <span class="c1">#     result[&#39;target&#39;] = target</span>
+  <span class="c1">#     for subData in result[&#39;subOps&#39;].values():</span>
+  <span class="c1">#       subData[&#39;parameters&#39;][0][&#39;defaultValue&#39;] = None</span>
+  <span class="c1">#</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     result = ModelAdapt.getOpData(self, target, opType, inClass)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   #</span>
+  <span class="c1">#   return result</span>
+  <span class="c1">#</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="PyModelAdapt.getOpDocumentation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.PyModelAdapt.PyModelAdapt.getOpDocumentation">[docs]</a>  <span class="k">def</span> <span class="nf">getOpDocumentation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                         <span class="n">copyElemDoc</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get documentation for generated operation</span>
+<span class="sd">    copyElemDoc defaults to False in Python</span>
+<span class="sd">    we have the element documentation on the properties</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">ModelAdapt</span><span class="o">.</span><span class="n">getOpDocumentation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">,</span> 
+                                         <span class="n">copyElemDoc</span><span class="p">)</span></div></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### internal code</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

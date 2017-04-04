@@ -1,0 +1,743 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.util.nef package &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../index.html" />
+    <link rel="up" title="ccpn.util package" href="ccpn.util.html" />
+    <link rel="next" title="CCPN" href="../ccpnmodel/modules.html" />
+    <link rel="prev" title="ccpn.util package" href="ccpn.util.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../ccpnmodel/modules.html" title="CCPN"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.util.html" title="ccpn.util package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.util.html" accesskey="U">ccpn.util package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ccpn.util.nef">
+<span id="ccpn-util-nef-package"></span><h1>ccpn.util.nef package<a class="headerlink" href="#module-ccpn.util.nef" title="Permalink to this headline">¶</a></h1>
+<p>Module Documentation here</p>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpn.util.nef.GenericStarParser">
+<span id="ccpn-util-nef-genericstarparser-module"></span><h2>ccpn.util.nef.GenericStarParser module<a class="headerlink" href="#module-ccpn.util.nef.GenericStarParser" title="Permalink to this headline">¶</a></h2>
+<p>Star-type file parser, agnostic between cif, mmcif, star, nef, etc.
+Returns a nested data structure that matches the file,
+with DataExtent, DataBlock, SaveFrame, and Loop objects.
+Additional support for distinguishing between None, True, False, and int/float values
+and the strings that match their representations.</p>
+<p>Usage:</p>
+<p>parse(text, mode) to parse a text representation</p>
+<p>parseFile(fileName, mode) to load and parse a file</p>
+<div class="section" id="reading-behaviour">
+<h3>Reading behaviour<a class="headerlink" href="#reading-behaviour" title="Permalink to this headline">¶</a></h3>
+<p>follows the specification in
+International Tables for Crystallography volume G section 2.1
+with the following exceptions:</p>
+<blockquote>
+<div><ul class="simple">
+<li>Nested loops are NOT supported</li>
+<li>Global blocks are treated as simple data blocks. If the first data block in the file is
+a <a href="#id1"><span class="problematic" id="id2">global_</span></a>, is is named &#8216;<a href="#id3"><span class="problematic" id="id4">global_</span></a>&#8216;; globals elsewhere are named global_1, global_2, etc.
+This may cause trouble downstream if there is a DataBlock named e.g. &#8216;data_global_1&#8217;.</li>
+</ul>
+</div></blockquote>
+<p>The object structure returned is:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
+  <span class="n">DataBlock</span>
+    <span class="n">Item</span>
+    <span class="n">Loop</span>
+    <span class="n">SaveFrame</span>
+      <span class="n">Item</span>
+      <span class="n">Loop</span>
+</pre></div>
+</div>
+<p>DataExtent, DataBlock and SaveFrame are Python OrderedDict with an additional &#8216;name&#8217; attribute
+DataBlocks and SaveFrames are entered in their container using their name as the key.</p>
+<p>Loop is an object with a &#8216;columns&#8217; list, a &#8216;data&#8217; list-of-row-OrderedDict, and a name attribute
+set equal to the name of the first column. A loop is entered in its container under each
+column name, so that e.g. aSaveFrame[&#8216;_Loopx.loopcol1&#8217;] and aSaveFrame[&#8216;_Loopx.loopcol2&#8217;] both
+exist and both correspond to the same loop object.</p>
+<p>Items are entered as a string key - string value pair.</p>
+<p>All tags are preserved &#8216;as is&#8217; (i.e. without stripping leading &#8216;_&#8217;, &#8216;<a href="#id5"><span class="problematic" id="id6">data_</span></a>&#8216;, or &#8216;<a href="#id7"><span class="problematic" id="id8">save_</span></a>&#8216;),
+basically to avoid the theoretical risk that a SaveFrame name might clash with
+an item name or loop column, or a DataBLock with a Global. Duplicate tags raise an error.</p>
+<p>Quoted values are returned as str,
+whereas unquoted values are returned as a str subtype UnquotedValue(str)
+This allows later distinction between null, unknown, saveframe_reference and the
+equivalent quoted strings.</p>
+</div>
+<div class="section" id="writing-behaviour">
+<h3>Writing behaviour<a class="headerlink" href="#writing-behaviour" title="Permalink to this headline">¶</a></h3>
+<p>follows the specification in
+International Tables for Crystallography volume G section 2.1
+with the following exceptions and additions.</p>
+<blockquote>
+<div><ul>
+<li><p class="first">Strings of type UnquotedValue are written as-is, without quoting them.</p>
+</li>
+<li><p class="first">Note that e.g. &#8216; &#8220;say&#8221; &#8216;what&#8217;?&#8217;    or    &#8221; &#8216;say&#8221;&#8216;&#8220;what&#8221;?&#8221; are
+valid quoted strings according to the standard, since  the end-quote marker
+is a quotation marker FOLLOWED BY WHITESPACE.</p>
+</li>
+<li><p class="first">Strings that cannot be quoted on one line (e.g.   &#8216;&#8217;&#8217; &#8220;say&#8221; &#8216;what&#8217; &#8216;&#8217;&#8217;   )
+are converted to  multiline strings by appending a newline</p>
+</li>
+<li><p class="first">Strings with internal linebreaks but no terminal linebreak
+are converted by appending a linebreak</p>
+</li>
+<li><p class="first">Strings that cannot be quoted as multiline strings because they contain
+a line starting with &#8216;;&#8217; are converted by prepending a space (&#8216; &#8216;) to each line</p>
+</li>
+<li><p class="first">Values None, True, False, NaN, Infinity and -Infinity are converted to
+UNQUOTED strings &#8216;.&#8217;, &#8216;true&#8217;, &#8216;false&#8217;, &#8216;NaN&#8217;, &#8216;Infinity&#8217; and &#8216;-Infinity&#8217;, respectively.</p>
+</li>
+<li><p class="first">Normal (not unquoted) strings that evaluate to a float are written in quotes.
+Also the literal strings &#8216;.&#8217;, &#8216;true&#8217;, &#8216;false&#8217;, &#8216;NaN&#8217;, &#8216;Infinity&#8217; and &#8216;-Infinity&#8217;
+are always written in quotes.</p>
+<p>This makes it possible (but NOT mandatory) to distinguish the null,  boolean and float values
+from the equivalent strings</p>
+</li>
+</ul>
+</div></blockquote>
+<p>The toString functions in this module will work with loop rows implemented as
+either tuples, lists, or OrderedDicts, and accept an optional tag prefix for
+DataBlocks, SaveFrames, and Loops, to prepend to item and column names.</p>
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.DataBlock">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">DataBlock</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="ccpn.util.nef.GenericStarParser.StarContainer"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.StarContainer</span></code></a></p>
+<p>DataBlock for general STAR object tree</p>
+<dl class="attribute">
+<dt id="ccpn.util.nef.GenericStarParser.DataBlock.tagPrefix">
+<code class="descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.DataBlock.toString">
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = ''</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataBlock.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataBlock.toString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.DataExtent">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">DataExtent</code><span class="sig-paren">(</span><em>name='Root'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="ccpn.util.nef.GenericStarParser.NamedOrderedDict"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.NamedOrderedDict</span></code></a></p>
+<p>Top level container for general STAR object tree</p>
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.DataExtent.toString">
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = ''</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#DataExtent.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.DataExtent.toString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">GeneralStarParser</code><span class="sig-paren">(</span><em>text: str</em>, <em>enforceSaveFrameStop: bool = True</em>, <em>enforceLoopStop: bool = False</em>, <em>padIncompleteLoops: bool = False</em>, <em>allowSquareBracketStrings=False</em>, <em>lowerCaseTags=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Parser for text corresponding to a STAR file with one or more data blocks,
+producing a nested object structure matching the file (see module documentation for details:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">DataExtent</span>
+  <span class="n">DataBlock</span>
+    <span class="n">Loop</span>
+    <span class="n">Item</span>
+  <span class="n">SaveFrame</span>
+    <span class="n">Loop</span>
+    <span class="n">Item</span>
+</pre></div>
+</div>
+<p>Parameters (default values correspond to the International Tables for Crystallography standard):</p>
+<ul class="simple">
+<li><em>text</em> Text to parse</li>
+<li><em>enforceSaveFrameStop</em> : True. Raise an error for missing &#8216;<a href="#id9"><span class="problematic" id="id10">save_</span></a>&#8216; terminators - Yes/No</li>
+<li><em>enforceLoopStop</em> : False. Raise an error for missing &#8216;<a href="#id11"><span class="problematic" id="id12">stop_</span></a>&#8216; terminators - Yes/No</li>
+<li><em>padIncompleteLoops</em> : False.  Pad final loop row with &#8216;.&#8217; for missing values - Yes/No</li>
+<li><em>allowSquareBracketStrings</em> : False.  Allow values starting &#8216;[&#8216; or &#8216;]&#8217; - Yes/No</li>
+<li><em>lowerCaseTags</em> : True. Convert all data and object names to lower case</li>
+</ul>
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser.parse">
+<code class="descname">parse</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser.processDataName">
+<code class="descname">processDataName</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.processDataName"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.processDataName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.GeneralStarParser.processValue">
+<code class="descname">processValue</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#GeneralStarParser.processValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.GeneralStarParser.processValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.Loop">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">Loop</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>columns: list = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Loop for general STAR object tree
+Attributes are:</p>
+<ul class="simple">
+<li>name: string</li>
+<li>columns:  List of string column headers</li>
+<li>data: List-of-rows, where rows are OrderedDicts</li>
+</ul>
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.Loop.addColumn">
+<code class="descname">addColumn</code><span class="sig-paren">(</span><em>value: str</em>, <em>extendData=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.addColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.addColumn" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.nef.GenericStarParser.Loop.columns">
+<code class="descname">columns</code><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.columns" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>list</em>, <em>immutable</em> - 
+Column names</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.Loop.newRow">
+<code class="descname">newRow</code><span class="sig-paren">(</span><em>values=None</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.GenericStarParser.LoopRow<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.newRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.newRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new row, initialised from values</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.Loop.removeColumn">
+<code class="descname">removeColumn</code><span class="sig-paren">(</span><em>value: str</em>, <em>removeData=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.removeColumn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.removeColumn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove column from loop. Will NOT work properly if called during parsing.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.nef.GenericStarParser.Loop.tagPrefix">
+<code class="descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.Loop.toString">
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = '   '</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#Loop.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.Loop.toString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stringifier function for loop.</p>
+<p>Accepts (subtypes of) Loop with data as sequence of rows,
+where rows can be tuples, lists, or OrderedDicts.
+In all cases the values must be in the order given by the columns attribute</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.LoopRow">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">LoopRow</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#LoopRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.LoopRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></code></p>
+<p>Loop row - OrderedDict with additional functionality</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.NamedOrderedDict">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">NamedOrderedDict</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">collections.OrderedDict</span></code></p>
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem">
+<code class="descname">addItem</code><span class="sig-paren">(</span><em>tag: str</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#NamedOrderedDict.addItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict.addItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.SaveFrame">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">SaveFrame</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="ccpn.util.nef.GenericStarParser.StarContainer"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.StarContainer</span></code></a></p>
+<p>SaveFrame for general STAR object tree</p>
+<dl class="attribute">
+<dt id="ccpn.util.nef.GenericStarParser.SaveFrame.tagPrefix">
+<code class="descname">tagPrefix</code><em class="property"> = None</em><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.SaveFrame.toString">
+<code class="descname">toString</code><span class="sig-paren">(</span><em>indent: str = '   '</em>, <em>separator: str = '  '</em><span class="sig-paren">)</span> &rarr; str<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#SaveFrame.toString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.SaveFrame.toString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.StarContainer">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">StarContainer</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.NamedOrderedDict" title="ccpn.util.nef.GenericStarParser.NamedOrderedDict"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.NamedOrderedDict</span></code></a></p>
+<p>DataBlock or SaveFrame containing items and loops</p>
+<dl class="method">
+<dt id="ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues">
+<code class="descname">multiColumnValues</code><span class="sig-paren">(</span><em>columns</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarContainer.multiColumnValues"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarContainer.multiColumnValues" title="Permalink to this definition">¶</a></dt>
+<dd><p>get tuple of orderedDict of values for columns.
+Will work whether columns are in a loop or single values
+If columns match a single loop or nothing, return the loop data.
+Otherwise return a tuple with a single OrderedDict.
+If no column matches return None
+If columns match more than one loop throw an error</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="ccpn.util.nef.GenericStarParser.StarSyntaxError">
+<em class="property">exception </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">StarSyntaxError</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#StarSyntaxError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.StarSyntaxError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ValueError</span></code></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.GenericStarParser.UnquotedValue">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">UnquotedValue</code><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#UnquotedValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.UnquotedValue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">str</span></code></p>
+<p>A plain string - the only difference is the type: &#8216;UnquotedValue&#8217;.
+Used to distinguish values from STAR files that were not quoted.
+STAR special values (like null,  unknown, ...) are only recognised if unquoted strings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.GenericStarParser.extractMatchingNameSequence">
+<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">extractMatchingNameSequence</code><span class="sig-paren">(</span><em>name: str</em>, <em>matchNames: list</em><span class="sig-paren">)</span> &rarr; list<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#extractMatchingNameSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.extractMatchingNameSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get list of matchNames matching &#8216;name_1&#8217;, &#8216;name_2&#8217;, ..., in order.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.GenericStarParser.parse">
+<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parse</code><span class="sig-paren">(</span><em>text</em>, <em>mode='standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.GenericStarParser.DataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parse"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Parse STAR text string &#8216;text&#8217;.
+Standard settings allow skipping &#8216;<a href="#id13"><span class="problematic" id="id14">stop_</span></a>&#8216; tags and strings starting with &#8216;[&#8216; or &#8216;]&#8217;,
+but require &#8216;<a href="#id15"><span class="problematic" id="id16">save_</span></a>&#8216; termination of SaveFrames and throw an error if the number of loop
+values do not match the number of columns.</p>
+<p>&#8216;strict&#8217; and &#8216;lenient&#8217; modes are available; mode=&#8217;IUCr&#8217; follows the IUCr standard, which
+is like standard except that strings starting with &#8216;[&#8216; and &#8216;]&#8217; are not allowed</p>
+<p>See GeneralStarParser class for details and control of individual settings</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.GenericStarParser.parseFile">
+<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">parseFile</code><span class="sig-paren">(</span><em>fileName: str</em>, <em>mode: str = 'standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.GenericStarParser.DataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#parseFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.parseFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>load generic STAR file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.GenericStarParser.valueToStarString">
+<code class="descclassname">ccpn.util.nef.GenericStarParser.</code><code class="descname">valueToStarString</code><span class="sig-paren">(</span><em>value</em>, <em>quoteNumberStrings=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/GenericStarParser.html#valueToStarString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.GenericStarParser.valueToStarString" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert value to properly quoted STAR string</p>
+<p>if quoteNumberStrings, strings that evaluate to a float (e.g. &#8216;1&#8217;, &#8216;2.7e5&#8217;, ...)
+are put in quotes</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-ccpn.util.nef.Specification">
+<span id="ccpn-util-nef-specification-module"></span><h2>ccpn.util.nef.Specification module<a class="headerlink" href="#module-ccpn.util.nef.Specification" title="Permalink to this headline">¶</a></h2>
+<p>Code for handling NEF specification and metadata</p>
+<dl class="class">
+<dt id="ccpn.util.nef.Specification.CifDicConverter">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">CifDicConverter</code><span class="sig-paren">(</span><em>inputText</em>, <em>skipExamples=True</em>, <em>additionalBlocks=()</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Converts mmcif .dic file, with program-specific additions datablocks
+into a single NEF data structure, containing:</p>
+<p>1) a nef_specification saveframe, containing a dictionary_history loop and a
+item_type_list loop</p>
+<ol class="arabic" start="2">
+<li><p class="first">A saveframe for each saveframe_dategory in the specification. Each saveframe contains</p>
+<blockquote>
+<div><p>items:
+_nef_saveframe.sf_framecode
+_nef_saveframe.sf_category
+_nef_saveframe.is_mandatory
+_nef_saveframe.description
+_nef_saveframe.example</p>
+<p>A table for contained loops:</p>
+<dl class="docutils">
+<dt><a href="#id17"><span class="problematic" id="id18">loop_</span></a></dt>
+<dd><blockquote class="first">
+<div><p>_nef_loop.category
+_nef_loop.is_mandatory
+_nef_loop.description
+_nef_loop.example</p>
+</div></blockquote>
+<p class="last">And a table for contained items and loop columns:</p>
+</dd>
+<dt><a href="#id19"><span class="problematic" id="id20">loop_</span></a></dt>
+<dd><p class="first">_nef_item.name
+_nef_item.loop_category
+_nef_item.type_code
+_nef_item.is_mandatory
+_nef_item.is_key
+_nef_item.example_1
+_nef_item.example_2
+_nef_item.description</p>
+<p class="last">The loop_category defines which loop the item belongs to
+(if empty it belongs directly inside the saveframe)</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ol>
+<dl class="method">
+<dt id="ccpn.util.nef.Specification.CifDicConverter.convertToNef">
+<code class="descname">convertToNef</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.convertToNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.convertToNef" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert RCSB .cif file into a nef specification summary file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.Specification.CifDicConverter.extractGeneralDataFrame">
+<code class="descname">extractGeneralDataFrame</code><span class="sig-paren">(</span><em>rcsbDataBlock</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractGeneralDataFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractGeneralDataFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>extract general data saveframe</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.Specification.CifDicConverter.extractItemDescription">
+<code class="descname">extractItemDescription</code><span class="sig-paren">(</span><em>inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractItemDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractItemDescription" title="Permalink to this definition">¶</a></dt>
+<dd><p>extract item description</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.Specification.CifDicConverter.extractLoopDescription">
+<code class="descname">extractLoopDescription</code><span class="sig-paren">(</span><em>inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractLoopDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractLoopDescription" title="Permalink to this definition">¶</a></dt>
+<dd><p>extract loop description</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.Specification.CifDicConverter.extractSaveFrameDescription">
+<code class="descname">extractSaveFrameDescription</code><span class="sig-paren">(</span><em>inputSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#CifDicConverter.extractSaveFrameDescription"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.CifDicConverter.extractSaveFrameDescription" title="Permalink to this definition">¶</a></dt>
+<dd><p>extract saveframe description</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.Specification.extractByCategories">
+<code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">extractByCategories</code><span class="sig-paren">(</span><em>rcsbDataBlock</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#extractByCategories"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.extractByCategories" title="Permalink to this definition">¶</a></dt>
+<dd><p>get saveFrames describing SaveFrames, Loops, and items, respectively</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.Specification.getCcpnSpecification">
+<code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">getCcpnSpecification</code><span class="sig-paren">(</span><em>filePath</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataBlock<a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#getCcpnSpecification"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.getCcpnSpecification" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get NEF specification summary with ccpn-specific additions</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.Specification.transferLoop">
+<code class="descclassname">ccpn.util.nef.Specification.</code><code class="descname">transferLoop</code><span class="sig-paren">(</span><em>genericContainer</em>, <em>saveFrame</em>, <em>inputTags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/Specification.html#transferLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.Specification.transferLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>transfer _category.tag_x, ... to loop named category with tags tag_x etc.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.util.nef.StarIo">
+<span id="ccpn-util-nef-stario-module"></span><h2>ccpn.util.nef.StarIo module<a class="headerlink" href="#module-ccpn.util.nef.StarIo" title="Permalink to this headline">¶</a></h2>
+<p>I/O for NEF and NmrStar formats</p>
+<dl class="class">
+<dt id="ccpn.util.nef.StarIo.NmrDataBlock">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrDataBlock</code><span class="sig-paren">(</span><em>name=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.DataBlock" title="ccpn.util.nef.GenericStarParser.DataBlock"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.DataBlock</span></code></a></p>
+<p>DataBlock (OrderedDict)for NMRSTAR/NEF object tree</p>
+<dl class="method">
+<dt id="ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame">
+<code class="descname">addSaveFrame</code><span class="sig-paren">(</span><em>saveFrame: ccpn.util.nef.StarIo.NmrSaveFrame</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.addSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.addSaveFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add existing NmrSaveFrame to the DataBlock</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame">
+<code class="descname">newSaveFrame</code><span class="sig-paren">(</span><em>name: str</em>, <em>category: str</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrSaveFrame<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataBlock.newSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataBlock.newSaveFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make new NmrSaveFrame and add it to the DataBlock</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.StarIo.NmrDataExtent">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrDataExtent</code><span class="sig-paren">(</span><em>name='Root'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrDataExtent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrDataExtent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.DataExtent" title="ccpn.util.nef.GenericStarParser.DataExtent"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.DataExtent</span></code></a></p>
+<p>Top level container (OrderedDict) for NMRSTAR/NEF object tree</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.StarIo.NmrLoop">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrLoop</code><span class="sig-paren">(</span><em>name: str = None</em>, <em>columns: list = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.Loop" title="ccpn.util.nef.GenericStarParser.Loop"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.Loop</span></code></a></p>
+<p>Loop for NMRSTAR/NEF object tree</p>
+<p>The contents, self.data is a list of OrderedDicts matching the column names.
+rows can be modified or deleted from data, but adding new rows directly is likely to
+break - use the newRow function.</p>
+<dl class="attribute">
+<dt id="ccpn.util.nef.StarIo.NmrLoop.category">
+<code class="descname">category</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.category" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+Loop category tag - synonym for name (unlike the case of SaveFrame)</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.nef.StarIo.NmrLoop.tagPrefix">
+<code class="descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoop.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+Prefix to use before item tags on output</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.StarIo.NmrLoopRow">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrLoopRow</code><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrLoopRow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrLoopRow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.LoopRow" title="ccpn.util.nef.GenericStarParser.LoopRow"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.LoopRow</span></code></a></p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.util.nef.StarIo.NmrSaveFrame">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">NmrSaveFrame</code><span class="sig-paren">(</span><em>name=None</em>, <em>category=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.util.nef.GenericStarParser.SaveFrame" title="ccpn.util.nef.GenericStarParser.SaveFrame"><code class="xref py py-class docutils literal"><span class="pre">ccpn.util.nef.GenericStarParser.SaveFrame</span></code></a></p>
+<p>SaveFrame (OrderedDict)for NMRSTAR/NEF object tree</p>
+<dl class="method">
+<dt id="ccpn.util.nef.StarIo.NmrSaveFrame.newLoop">
+<code class="descname">newLoop</code><span class="sig-paren">(</span><em>name</em>, <em>columns</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrLoop<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#NmrSaveFrame.newLoop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.newLoop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make new NmrLoop and add it to the NmrSaveFrame</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.nef.StarIo.NmrSaveFrame.tagPrefix">
+<code class="descname">tagPrefix</code><a class="headerlink" href="#ccpn.util.nef.StarIo.NmrSaveFrame.tagPrefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>str</em>, <em>immutable</em> - 
+Prefix to use before item tags on output</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="ccpn.util.nef.StarIo.StarValidationError">
+<em class="property">exception </em><code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">StarValidationError</code><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#StarValidationError"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.StarValidationError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">ValueError</span></code></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.StarIo.parseNef">
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNef</code><span class="sig-paren">(</span><em>text: str</em>, <em>mode='standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNef"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNef" title="Permalink to this definition">¶</a></dt>
+<dd><p>load NEF from string</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.StarIo.parseNefFile">
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNefFile</code><span class="sig-paren">(</span><em>fileName: str</em>, <em>mode: str = 'standard'</em>, <em>wrapInDataBlock: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNefFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNefFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse NEF from file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.StarIo.parseNmrStar">
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStar</code><span class="sig-paren">(</span><em>text: str</em>, <em>mode='standard'</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStar" title="Permalink to this definition">¶</a></dt>
+<dd><p>load NMRSTAR file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.StarIo.parseNmrStarFile">
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">parseNmrStarFile</code><span class="sig-paren">(</span><em>fileName: str</em>, <em>mode: str = 'standard'</em>, <em>wrapInDataBlock: bool = False</em><span class="sig-paren">)</span> &rarr; ccpn.util.nef.StarIo.NmrDataExtent<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#parseNmrStarFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.parseNmrStarFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>parse NMRSTAR from file</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.StarIo.splitNefSequence">
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">splitNefSequence</code><span class="sig-paren">(</span><em>rows: Sequence[dict]</em><span class="sig-paren">)</span> &rarr; List[List[dict]]<a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#splitNefSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.splitNefSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Split a sequence of nef_sequence dicts assumed to belong to the same chain
+into a list of lists of sequentially linked stretches following the NEF rules</p>
+<p>Note that missing linkings are treated as &#8216;middle&#8217; and missing start/end tags
+are ignored, with the first/last residue treated, effectively, as linking &#8216;break&#8217;</p>
+<p>Only unknown linking values and incorrect pairs of &#8216;cyclic&#8217; tags raise an error</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.StarIo.string2FramecodeString">
+<code class="descclassname">ccpn.util.nef.StarIo.</code><code class="descname">string2FramecodeString</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarIo.html#string2FramecodeString"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarIo.string2FramecodeString" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.util.nef.StarTokeniser">
+<span id="ccpn-util-nef-startokeniser-module"></span><h2>ccpn.util.nef.StarTokeniser module<a class="headerlink" href="#module-ccpn.util.nef.StarTokeniser" title="Permalink to this headline">¶</a></h2>
+<p>STAR file tokenizer</p>
+<p># Copyright © 2011, 2013 Global Phasing Ltd. All rights reserved.
+#
+# Author: Peter Keller
+#
+# This file forms part of the GPhL StarTools library.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+#  Redistributions of source code must retain the above copyright
+#  notice, this list of conditions and the following disclaimer.
+#
+#  Redistributions in binary form must reproduce the above copyright
+#  notice, this list of conditions and the following disclaimer in the
+#  documentation and/or other materials provided with the
+#  distribution.
+#
+#  If the regular expression used to match STAR/CIF data in the
+#  redistribution is not identical to that in the original version,
+#  this fact must be stated wherever the copyright notice is
+#  reproduced.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# &#8220;AS IS&#8221; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT,
+# INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+# STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+# OF THE POSSIBILITY OF SUCH DAMAGE.</p>
+<p>&#8216;&#8217;&#8217;
+Created on 25 Nov 2013</p>
+<p>&#64;author: pkeller
+&#8216;&#8217;&#8216;</p>
+<p>#
+# Modified by Rasmus Fogh, CCPN project, 5/2/2016
+#</p>
+<dl class="class">
+<dt id="ccpn.util.nef.StarTokeniser.StarToken">
+<em class="property">class </em><code class="descclassname">ccpn.util.nef.StarTokeniser.</code><code class="descname">StarToken</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<p>StarToken named tuple (with fields &#8216;type&#8217;, &#8216;value&#8217;) returned by the STAR token iterator</p>
+<dl class="attribute">
+<dt id="ccpn.util.nef.StarTokeniser.StarToken.type">
+<code class="descname">type</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.util.nef.StarTokeniser.StarToken.value">
+<code class="descname">value</code><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.StarToken.value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpn.util.nef.StarTokeniser.getTokenIterator">
+<code class="descclassname">ccpn.util.nef.StarTokeniser.</code><code class="descname">getTokenIterator</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/util/nef/StarTokeniser.html#getTokenIterator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.util.nef.StarTokeniser.getTokenIterator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterator that returns an iterator over all STAR tokens in a generic STAR file</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ccpn.util.nef package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.nef.GenericStarParser">ccpn.util.nef.GenericStarParser module</a><ul>
+<li><a class="reference internal" href="#reading-behaviour">Reading behaviour</a></li>
+<li><a class="reference internal" href="#writing-behaviour">Writing behaviour</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-ccpn.util.nef.Specification">ccpn.util.nef.Specification module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.nef.StarIo">ccpn.util.nef.StarIo module</a></li>
+<li><a class="reference internal" href="#module-ccpn.util.nef.StarTokeniser">ccpn.util.nef.StarTokeniser module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ccpn.util.html"
+                        title="previous chapter">ccpn.util package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="../ccpnmodel/modules.html"
+                        title="next chapter">CCPN</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ccpn/ccpn.util.nef.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="../ccpnmodel/modules.html" title="CCPN"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.util.html" title="ccpn.util package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.util.html" >ccpn.util package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

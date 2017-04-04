@@ -1,0 +1,390 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.SequenceModule &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.SequenceModule</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This file contains SequenceModule module</span>
+
+<span class="sd">intial version by Simon;</span>
+<span class="sd">modified by Geerten 1-9/12/2016</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Residue</span> <span class="kn">import</span> <span class="n">Residue</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">textFontHuge</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showYesNo</span>
+
+
+<div class="viewcode-block" id="SequenceModule"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.SequenceModule">[docs]</a><span class="k">class</span> <span class="nc">SequenceModule</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  The module displays all chains in the project as one-letter amino acids. The one letter residue</span>
+<span class="sd">  sequence codes are all instances of the GuiChainResidue class and the style applied to a residue</span>
+<span class="sd">  indicates its assignment state and, when coupled with the Sequence Graph module, indicates if a</span>
+<span class="sd">  stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and</span>
+<span class="sd">  QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">):</span>
+    <span class="c1">#CcpnModule.__init__(self, size=(10, 30), name=&#39;Sequence&#39;, closable=False)</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Sequence&#39;</span><span class="p">,</span> <span class="n">closable</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">colourScheme</span>
+    <span class="c1">#self.label.hide()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QScrollArea</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsScene</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsView</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setAlignment</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QRect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">380</span><span class="p">,</span> <span class="mi">1000</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">horizontalLayout2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;QScrollArea QScrollBar::horizontal {max-height: 20px;}</span>
+<span class="s2">                          QScrollArea QScrollBar::vertical{max-width:20px;}</span>
+<span class="s2">                      &quot;&quot;&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residueCount</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="p">)</span>
+    <span class="c1"># connect graphics scene dragMoveEvent to CcpnModule dragMoveEvent - required for drag-and-drop</span>
+    <span class="c1"># assignment routines.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">dragMoveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dragMoveEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widgetHeight</span> <span class="o">=</span> <span class="mi">0</span> <span class="c1"># dynamically calculated from the number of chains</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_addChainLabel</span><span class="p">(</span><span class="n">placeholder</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_addChainLabel</span><span class="p">(</span><span class="n">chain</span><span class="p">)</span>
+
+    <span class="c1">#GWV: removed fixed height restrictions but maximum height instead</span>
+    <span class="c1">#self.setFixedHeight(2*self.widgetHeight)</span>
+    <span class="c1">#self.scrollContents.setFixedHeight(2*self.widgetHeight)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollContents</span><span class="o">.</span><span class="n">setMaximumHeight</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_highlightPossibleStretches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">residues</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Residue</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    CCPN INTERNAL called in predictSequencePosition method of SequenceGraph.</span>
+<span class="sd">    Highlights regions on the sequence specified by the list of residues passed in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">res1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">residueDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="n">res1</span><span class="o">.</span><span class="n">_styleResidue</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">residues</span><span class="p">:</span>
+      <span class="n">guiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">residueDict</span><span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">]</span>
+      <span class="n">guiResidue</span><span class="o">.</span><span class="n">_styleResidue</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#e4e15b&#39;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#009a00&#39;</span>
+    <span class="n">guiResidues</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">residues</span><span class="p">:</span>
+      <span class="n">guiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">residueDict</span><span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">]</span>
+      <span class="n">guiResidues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">guiResidue</span><span class="p">)</span>
+      <span class="n">guiResidue</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="s1">&#39;&lt;div style=&quot;color: </span><span class="si">%s</span><span class="s1">;text-align: center; padding: 0px;&quot;&gt;&#39;</span> <span class="o">%</span> <span class="n">colour</span><span class="o">+</span>
+                           <span class="n">residue</span><span class="o">.</span><span class="n">shortName</span><span class="o">+</span><span class="s1">&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_addChainLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">chain</span><span class="p">:</span><span class="n">Chain</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates and adds a GuiChainLabel to the sequence module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">chainLabel</span> <span class="o">=</span> <span class="n">GuiChainLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="p">,</span> <span class="n">position</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">widgetHeight</span><span class="p">],</span> <span class="n">chain</span><span class="o">=</span><span class="n">chain</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="n">placeholder</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">chainLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chainLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widgetHeight</span> <span class="o">+=</span> <span class="p">(</span><span class="mf">0.8</span><span class="o">*</span><span class="p">(</span><span class="n">chainLabel</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">height</span><span class="p">()))</span></div>
+
+
+<div class="viewcode-block" id="GuiChainLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.GuiChainLabel">[docs]</a><span class="k">class</span> <span class="nc">GuiChainLabel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  This class is acts as an anchor for each chain displayed in the Sequence Module.</span>
+<span class="sd">  On instantiation an instance of the GuiChainResidue class is created for each residue in the chain</span>
+<span class="sd">  along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span> <span class="n">chain</span><span class="p">,</span> <span class="n">placeholder</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">chain</span> <span class="o">=</span> <span class="n">chain</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">colourScheme</span>
+    <span class="c1">#print(&#39;&gt;&gt;&#39;, self.colourScheme)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour1</span> <span class="o">=</span> <span class="s1">&#39;#bec4f3&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour2</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+      <span class="c1">#colour = &#39;#bd8413&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour1</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour2</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDefaultTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colour1</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">if</span> <span class="n">placeholder</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;No Chains in Project!&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">chain</span><span class="o">.</span><span class="n">compoundName</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="s1">&#39;&lt;div style=&gt;&lt;strong&gt;&#39;</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">text</span><span class="o">+</span><span class="s1">&#39; &lt;/strong&gt;&lt;/div&gt;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">textFontHuge</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residueDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">chain</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+        <span class="n">newResidue</span> <span class="o">=</span> <span class="n">GuiChainResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">residue</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">boundingRect</span><span class="p">()</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">i</span><span class="p">,</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">scene</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">newResidue</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residueDict</span><span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">]</span> <span class="o">=</span> <span class="n">newResidue</span>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="GuiChainResidue"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue">[docs]</a><span class="k">class</span> <span class="nc">GuiChainResidue</span><span class="p">(</span><span class="n">DropBase</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="p">):</span>
+
+  <span class="n">fontSize</span> <span class="o">=</span> <span class="mi">20</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">residue</span><span class="p">,</span> <span class="n">scene</span><span class="p">,</span> <span class="n">labelPosition</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">yPosition</span><span class="p">):</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsTextItem</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">DropBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residue</span> <span class="o">=</span> <span class="n">residue</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+    <span class="c1">#font = QtGui.QFont(&#39;Lucida Console&#39;, GuiChainResidue.fontSize)</span>
+    <span class="c1">#font.setStyleHint(QtGui.QFont.Monospace)</span>
+    <span class="c1">#self.setFont(font)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">textFontHuge</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">colourScheme</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour1</span> <span class="o">=</span> <span class="s1">&#39;#bec4f3&#39;</span>  <span class="c1"># un-assigned</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour2</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>  <span class="c1"># assigned</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour3</span> <span class="o">=</span> <span class="s1">&#39;#e4e15b&#39;</span>  <span class="c1"># drag-enter event</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+      <span class="c1">#self.colour1 = &#39;#bd8413&#39;</span>
+      <span class="c1">#self.colour2 = &#39;#666e98&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour1</span> <span class="o">=</span> <span class="s1">&#39;black&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour2</span> <span class="o">=</span> <span class="s1">&#39;#555D85&#39;</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">colour3</span> <span class="o">=</span> <span class="s1">&#39;#009a00&#39;</span>  <span class="c1"># drag-enter event</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDefaultTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colour1</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setPlainText</span><span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">shortName</span><span class="p">)</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">labelPosition</span><span class="o">+</span><span class="p">(</span><span class="mi">20</span><span class="o">*</span><span class="n">index</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setPos</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QPointF</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">yPosition</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residueNumber</span> <span class="o">=</span> <span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span>
+    <span class="n">scene</span><span class="o">.</span><span class="n">dragLeaveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragLeaveEvent</span>
+    <span class="n">scene</span><span class="o">.</span><span class="n">dragEnterEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragEnterEvent</span>
+    <span class="n">scene</span><span class="o">.</span><span class="n">dropEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dropEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scene</span> <span class="o">=</span> <span class="n">scene</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QGraphicsItem</span><span class="o">.</span><span class="n">ItemIsSelectable</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">flags</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_styleResidue</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_styleResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A convenience function for applying the correct styling to GuiChainResidues depending on their state.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="s1">&#39;&lt;div style=&quot;color: </span><span class="si">%s</span><span class="s1">; text-align: center;&quot;&gt;&lt;strong&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">colour2</span> <span class="o">+</span>
+                   <span class="bp">self</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">shortName</span><span class="o">+</span><span class="s1">&#39;&lt;/strong&gt;&lt;/div&gt;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="s1">&#39;&lt;div style=&quot;color: </span><span class="si">%s</span><span class="s1">; &quot;text-align: center;&quot;&gt;&#39;</span><span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">colour1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">residue</span><span class="o">.</span><span class="n">shortName</span><span class="o">+</span><span class="s1">&#39;&lt;/div&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_setFontBold</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets font to bold, necessary as QtGui.QGraphicsTextItems are used for display of residue</span>
+<span class="sd">    one letter codes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTextCharFormat</span><span class="p">()</span>
+    <span class="n">format</span><span class="o">.</span><span class="n">setFontWeight</span><span class="p">(</span><span class="mi">75</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textCursor</span><span class="p">()</span><span class="o">.</span><span class="n">mergeCharFormat</span><span class="p">(</span><span class="n">format</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A re-implementation of the QGraphicsTextItem.dragEnterEvent to facilitate the correct colouring</span>
+<span class="sd">    of GuiChainResidues during drag-and-drop.</span>
+<span class="sd">    Required for processNmrChains to work properly.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">GuiChainResidue</span><span class="p">):</span>
+      <span class="n">item</span><span class="o">.</span><span class="n">setDefaultTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">colour3</span><span class="p">))</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_dragLeaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A re-implementation of the QGraphicsTextItem.dragLeaveEvent to facilitate the correct colouring</span>
+<span class="sd">    of GuiChainResidues during drag-and-drop.</span>
+<span class="sd">    Required for processNmrChains to work properly.</span>
+<span class="sd">    GWV: TODO: this need to call the _StyleResidue function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#666e98&#39;</span>
+    <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">GuiChainResidue</span><span class="p">):</span>
+      <span class="n">item</span><span class="o">.</span><span class="n">setDefaultTextColor</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">colour</span><span class="p">))</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="GuiChainResidue.processNmrChains"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue.processNmrChains">[docs]</a>  <span class="k">def</span> <span class="nf">processNmrChains</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and</span>
+<span class="sd">    all succeeding residues according to the length of the list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;dark&#39;</span><span class="p">:</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#f7ffff&#39;</span>
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">==</span> <span class="s1">&#39;light&#39;</span><span class="p">:</span>
+      <span class="n">colour</span> <span class="o">=</span> <span class="s1">&#39;#666e98&#39;</span>
+    <span class="n">guiRes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scene</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">scenePos</span><span class="p">())</span>
+    <span class="n">nmrChain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">residues</span> <span class="o">=</span> <span class="p">[</span><span class="n">guiRes</span><span class="o">.</span><span class="n">residue</span><span class="p">]</span>
+    <span class="n">toAssign</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span> <span class="k">if</span> <span class="s1">&#39;-1&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">]</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">showYesNo</span><span class="p">(</span><span class="s1">&#39;Assignment&#39;</span><span class="p">,</span> <span class="s1">&#39;Assign </span><span class="si">%s</span><span class="s1"> to residue </span><span class="si">%s</span><span class="s1">?&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">toAssign</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">residues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">id</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">ii</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">toAssign</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">resid</span> <span class="o">=</span> <span class="n">residues</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+        <span class="nb">next</span> <span class="o">=</span> <span class="n">resid</span><span class="o">.</span><span class="n">nextResidue</span>
+        <span class="n">residues</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">)</span>
+      <span class="n">nmrChain</span><span class="o">.</span><span class="n">assignConnectedResidues</span><span class="p">(</span><span class="n">guiRes</span><span class="o">.</span><span class="n">residue</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">residues</span><span class="p">):</span>
+        <span class="n">guiResidue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">residueDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">)</span>
+        <span class="n">guiResidue</span><span class="o">.</span><span class="n">setHtml</span><span class="p">(</span><span class="s1">&#39;&lt;div style=&quot;color: </span><span class="si">%s</span><span class="s1">; text-align: center;&quot;&gt;&lt;strong&gt;&#39;</span> <span class="o">%</span> <span class="n">colour</span> <span class="o">+</span>
+                             <span class="n">res</span><span class="o">.</span><span class="n">shortName</span><span class="o">+</span><span class="s1">&#39;&lt;/strong&gt;&lt;/div&gt;&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">appBase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">appBase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">appBase</span><span class="p">,</span> <span class="s1">&#39;backboneModule&#39;</span><span class="p">):</span>
+        <span class="n">nmrResidueTable</span> <span class="o">=</span> <span class="n">appBase</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">nmrResidueTable</span>
+        <span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">objectLists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span>
+        <span class="n">nmrResidueTable</span><span class="o">.</span><span class="n">nmrChainPulldown</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">residues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">overlay</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">sequenceGraph</span><span class="o">.</span><span class="n">resetSequenceGraph</span><span class="p">()</span></div></div>
+
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

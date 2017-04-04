@@ -1,0 +1,676 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.metamodel.Util &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.metamodel.Util</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Utilities to manipulate models (metamodel instances)</span>
+
+<span class="sd">To handle inheritance etc. and to extract information not</span>
+<span class="sd">stored in simply accessible for.</span>
+
+<span class="sd">======================COPYRIGHT/LICENSE START==========================</span>
+
+<span class="sd">Io.py: MetaModel implementation for CCPN data model and code generation framework</span>
+
+<span class="sd">Copyright (C) 2005 Rasmus Fogh (CCPN Project)</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">This library is free software; you can redistribute it and/or</span>
+<span class="sd">modify it under the terms of the GNU Lesser General Public</span>
+<span class="sd">License as published by the Free Software Foundation; either</span>
+<span class="sd">version 2.1 of the License, or (at your option) any later version.</span>
+<span class="sd"> </span>
+<span class="sd">A copy of this license can be found in ../../../license/LGPL.license</span>
+<span class="sd"> </span>
+<span class="sd">This library is distributed in the hope that it will be useful,</span>
+<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="sd">Lesser General Public License for more details.</span>
+<span class="sd"> </span>
+<span class="sd">You should have received a copy of the GNU Lesser General Public</span>
+<span class="sd">License along with this library; if not, write to the Free Software</span>
+<span class="sd">Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</span>
+
+
+<span class="sd">======================COPYRIGHT/LICENSE END============================</span>
+
+<span class="sd">for further information, please contact :</span>
+
+<span class="sd">- CCPN website (http://www.ccpn.ac.uk/)</span>
+
+<span class="sd">- email: ccpn@bioc.cam.ac.uk</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">If you are using this software for academic purposes, we suggest</span>
+<span class="sd">quoting the following references:</span>
+
+<span class="sd">===========================REFERENCE START=============================</span>
+<span class="sd">R. Fogh, J. Ionides, E. Ulrich, W. Boucher, W. Vranken, J.P. Linge, M.</span>
+<span class="sd">Habeck, W. Rieping, T.N. Bhat, J. Westbrook, K. Henrick, G. Gilliland,</span>
+<span class="sd">H. Berman, J. Thornton, M. Nilges, J. Markley and E. Laue (2002). The</span>
+<span class="sd">CCPN project: An interim report on a data model for the NMR community</span>
+<span class="sd">(Progress report). Nature Struct. Biol. 9, 416-418.</span>
+
+<span class="sd">Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne</span>
+<span class="sd">Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and</span>
+<span class="sd">Ernest D. Laue (2005). A framework for scientific data modeling and automated</span>
+<span class="sd">software development. Bioinformatics 21, 1678-1684.</span>
+
+<span class="sd">===========================REFERENCE END===============================</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#</span>
+<span class="c1">#  ALl utilities required in OBjectcomean, so working under Python2.1</span>
+<span class="c1">#</span>
+
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="n">strftime</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">strftime</span>
+
+
+<span class="c1">######################################################################</span>
+<span class="c1"># hack for Python 2.1 compatibility                                                        #</span>
+<span class="c1">######################################################################</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="c1"># Python 2.1 only</span>
+  <span class="n">ListType</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">ListType</span>
+  <span class="n">DictType</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">DictType</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+  <span class="c1"># PYthon &gt;= 2.5</span>
+  <span class="n">ListType</span> <span class="o">=</span> <span class="nb">list</span>
+  <span class="n">DictType</span> <span class="o">=</span> <span class="nb">dict</span>
+
+<span class="c1"># Python 2.1 compatibility</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="nb">basestring</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="nb">str</span>
+
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">etree</span> <span class="k">as</span> <span class="n">ElementTree</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">xml.etree</span> <span class="kn">import</span> <span class="n">ElementTree</span> <span class="c1"># in python &gt;=2.5</span>
+  <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># effbot&#39;s pure Python module. Python 2.1. In ObjectDomain only</span>
+    <span class="kn">from</span> <span class="nn">elementtree</span> <span class="kn">import</span> <span class="n">ElementTree</span>
+
+<span class="k">try</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">lxml</span> <span class="kn">import</span> <span class="n">ElementInclude</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">xml.etree</span> <span class="kn">import</span> <span class="n">ElementInclude</span> <span class="c1"># in python &gt;=2.5</span>
+  <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="c1"># effbot&#39;s pure Python module. Python 2.1. In ObjectDomain only</span>
+    <span class="kn">from</span> <span class="nn">elementtree</span> <span class="kn">import</span> <span class="n">ElementInclude</span>
+
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="n">MemopsError</span> <span class="o">=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">MemopsError</span>
+
+<div class="viewcode-block" id="sortByAttribute"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.sortByAttribute">[docs]</a><span class="k">def</span> <span class="nf">sortByAttribute</span><span class="p">(</span><span class="n">objList</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; sorts list of objects on value of obj.tag. Returns new list</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># replaces sortByName and sortByQualName</span>
+  
+  <span class="n">ll</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">tag</span><span class="p">),</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">]</span>
+  <span class="n">ll</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="sortByMethodCall"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.sortByMethodCall">[docs]</a><span class="k">def</span> <span class="nf">sortByMethodCall</span><span class="p">(</span><span class="n">objList</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; sorts list of objects on value of obj.tag(). Returns new list</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># replaces sortByName and sortByQualName</span>
+  
+  <span class="n">ll</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">tag</span><span class="p">)(),</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">]</span>
+  <span class="n">ll</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+  <span class="k">return</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="sortByInheritance"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.sortByInheritance">[docs]</a><span class="k">def</span> <span class="nf">sortByInheritance</span><span class="p">(</span><span class="n">objList</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; partially sort objList so that supertype comes before subtype</span>
+<span class="sd">  </span>
+<span class="sd">  NB signature has changed. No &#39;container&#39; parameter any longer -</span>
+<span class="sd">  the routine always sorts the entire list presented to it.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="k">return</span> <span class="n">topologicalSortSubgraph</span><span class="p">(</span><span class="n">objList</span><span class="p">,</span> <span class="s1">&#39;subtypes&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="sortByDataObjTypeDependency"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.sortByDataObjTypeDependency">[docs]</a><span class="k">def</span> <span class="nf">sortByDataObjTypeDependency</span><span class="p">(</span><span class="n">objList</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; partially sort objList so that dependent MetaDataObjTypes come after</span>
+<span class="sd">  the ones they depend on.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="k">return</span> <span class="n">topologicalSortSubgraph</span><span class="p">(</span><span class="n">objList</span><span class="p">,</span> <span class="s1">&#39;subtypes&#39;</span><span class="p">,</span> 
+                                 <span class="n">func</span><span class="o">=</span><span class="n">dataObjTypeDependencies</span><span class="p">)</span></div>
+        
+        
+<div class="viewcode-block" id="checkLinkCircularity"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.checkLinkCircularity">[docs]</a><span class="k">def</span> <span class="nf">checkLinkCircularity</span><span class="p">(</span><span class="n">myself</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; check for circular relationships in -to-one links</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">target</span> <span class="o">=</span> <span class="n">myself</span>
+  <span class="k">while</span> <span class="n">target</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">prev</span> <span class="o">=</span> <span class="n">target</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">prev</span><span class="p">,</span><span class="n">tag</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="n">myself</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is (indirectly) its own </span><span class="si">%s</span><span class="s2">&quot;</span> 
+                                  <span class="o">%</span> <span class="p">(</span><span class="n">myself</span><span class="p">,</span><span class="n">tag</span><span class="p">))</span></div>
+        
+        
+<div class="viewcode-block" id="topologicalSortSubgraph"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.topologicalSortSubgraph">[docs]</a><span class="k">def</span> <span class="nf">topologicalSortSubgraph</span><span class="p">(</span><span class="n">objList</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">func</span><span class="o">=</span><span class="nb">getattr</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Assumes that func(obj,tag) is a list of objects, of which</span>
+<span class="sd">  some (but not all) may be in objList. This corresponds to a subset of</span>
+<span class="sd">  the nodes of a graph in edge-list representation.</span>
+<span class="sd">  The function returns a copy of objList sorted so that </span>
+<span class="sd">  if &#39;objA in func(objB,tag)&#39; then objB is before objA in the list.</span>
+<span class="sd">  If the graph contains cycles an error is raised.</span>
+<span class="sd">  The algorithm is linear in the number of objects and the number of edges.</span>
+<span class="sd">  </span>
+<span class="sd">  See http://www.bitformation.com/art/python_toposort.html or </span>
+<span class="sd">  http://www.brpreiss.com/books/opus7/html/page555.html for the sources for this</span>
+<span class="sd">  algorithm</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="c1"># set up inLinkCount dictionary</span>
+  <span class="n">inLinkCount</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">:</span>
+    <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+  
+  <span class="c1"># populate inLinkCount dictionary, ignoring out-of-subgraph links</span>
+  <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">obj2</span> <span class="ow">in</span> <span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">inLinkCount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj2</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+  
+  <span class="c1"># prime result list</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj</span><span class="p">]:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+  
+  <span class="c1"># process nodes in order, expanding result list</span>
+  <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+    <span class="k">del</span> <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">obj2</span> <span class="ow">in</span> <span class="n">func</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">inLinkCount</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj2</span><span class="p">]</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">inLinkCount</span><span class="p">[</span><span class="n">obj2</span><span class="p">]:</span>
+          <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj2</span><span class="p">)</span>
+        
+  <span class="c1"># check for cycles</span>
+  <span class="k">if</span> <span class="n">inLinkCount</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Cycles in &#39;</span><span class="si">%s</span><span class="s2">&#39; graph. Objects involved were </span><span class="si">%s</span><span class="s2">&quot;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">inLinkCount</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="dataObjTypeDependencies"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.dataObjTypeDependencies">[docs]</a><span class="k">def</span> <span class="nf">dataObjTypeDependencies</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; return dataObjypes that depend on this one. </span>
+<span class="sd">  For use in topologicalSortSubgraph</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.MetaModel</span> <span class="kn">import</span> <span class="n">MetaDataObjType</span>
+  
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">MetaDataObjType</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+     <span class="s2">&quot;dataObjTypeDependencies called with non-MetaDataObjType object </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">obj</span><span class="p">)</span>
+  
+  <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tag</span><span class="p">))</span>
+  <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">getAllAttributes</span><span class="p">():</span>
+    <span class="n">valueType</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">valueType</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">valueType</span><span class="p">,</span> <span class="n">MetaDataObjType</span><span class="p">):</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">valueType</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+  
+<div class="viewcode-block" id="parseCardinality"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.parseCardinality">[docs]</a><span class="k">def</span> <span class="nf">parseCardinality</span><span class="p">(</span><span class="n">cardString</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; parse cardinality string expression and get locard and hicard</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  
+  <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">cardString</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;..&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">tag</span><span class="p">))</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;inValid content in cardinality string </span><span class="si">%s</span><span class="s2">&quot;</span>
+         <span class="o">%</span> <span class="n">cardString</span>
+        <span class="p">)</span>
+  
+  <span class="c1">#</span>
+  <span class="k">if</span> <span class="n">result</span> <span class="o">==</span> <span class="p">[</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span>
+  
+  <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    
+  <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;inValid cardinality string </span><span class="si">%s</span><span class="s2">&quot;</span>
+     <span class="o">%</span> <span class="n">cardString</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="SimpleGuidGenerator"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.SimpleGuidGenerator">[docs]</a><span class="k">class</span> <span class="nc">SimpleGuidGenerator</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot; Generator for simple, low-quality GUIDs </span>
+<span class="sd">  (operator_organisation_timeStamp_serial)</span>
+<span class="sd">  Only appropriate for controlled environments.&quot;&quot;&quot;</span>
+  
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">organisation</span><span class="p">,</span> <span class="n">initialSerial</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">initialSerial</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">initialSerial</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">operator</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">organisation</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">organisation</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeSerial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialSerial</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeStamp</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="c1"># check for characters not allowed in XML storage</span>
+    <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">xmlDisallowedChars</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+         <span class="s2">&quot;operator </span><span class="si">%s</span><span class="s2"> contains disallowed character </span><span class="si">%s</span><span class="s2">&quot;</span>
+         <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span><span class="n">char</span><span class="p">)</span>
+        <span class="p">)</span>
+      <span class="k">if</span> <span class="n">char</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">organisation</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+         <span class="s2">&quot;organisation </span><span class="si">%s</span><span class="s2"> contains disallowed character </span><span class="si">%s</span><span class="s2">&quot;</span>
+         <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span><span class="n">char</span><span class="p">)</span>
+        <span class="p">)</span>
+  
+<div class="viewcode-block" id="SimpleGuidGenerator.newGuid"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.SimpleGuidGenerator.newGuid">[docs]</a>  <span class="k">def</span> <span class="nf">newGuid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; generate new GUID. Writeable in XML without character escapes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">timeStamp</span> <span class="o">=</span> <span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">-%H:%M:%S&quot;</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">timeStamp</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeStamp</span><span class="p">:</span>
+      <span class="n">serial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeSerial</span> <span class="o">+</span> <span class="mi">1</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeSerial</span> <span class="o">=</span> <span class="n">serial</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeStamp</span> <span class="o">=</span> <span class="n">timeStamp</span>
+      <span class="n">serial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lastTimeSerial</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initialSerial</span>
+      
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%s</span><span class="s2">_</span><span class="si">%05d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">organisation</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">operator</span><span class="p">,</span> 
+                               <span class="n">timeStamp</span><span class="p">,</span> <span class="n">serial</span><span class="p">)</span></div></div>
+  
+
+<div class="viewcode-block" id="topObjLinksByImport"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.topObjLinksByImport">[docs]</a><span class="k">def</span> <span class="nf">topObjLinksByImport</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get child link names of root in import order</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="n">leafPackages</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">root</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">topPackage</span><span class="p">()]</span>
+  
+  <span class="c1"># take all packages</span>
+  <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
+    <span class="n">childPackages</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">containedPackages</span>
+    <span class="k">if</span> <span class="n">childPackages</span><span class="p">:</span>
+      <span class="n">packages</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">childPackages</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">leafPackages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+  
+  <span class="c1"># sort leafPackages by import (imported before importing)</span>
+  <span class="n">ll</span> <span class="o">=</span> <span class="n">topologicalSortSubgraph</span><span class="p">(</span><span class="n">leafPackages</span><span class="p">,</span> <span class="s1">&#39;accessedPackages&#39;</span><span class="p">)</span>
+  
+  <span class="c1"># get desired names</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">topObjectClass</span>
+    <span class="k">if</span> <span class="n">cc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">pr</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">parentRole</span>
+      <span class="k">if</span> <span class="n">pr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">ot</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">otherRole</span>
+        <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ot</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<span class="c1">###########################################################################</span>
+
+<span class="c1"># Utilities working on</span>
+
+<span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="getOperation"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getOperation">[docs]</a><span class="k">def</span> <span class="nf">getOperation</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; get existing operation. If none found return None</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">container</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">container</span>
+    <span class="k">if</span> <span class="n">container</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaPackage&#39;</span><span class="p">:</span>
+      <span class="n">inClass</span> <span class="o">=</span> <span class="n">target</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">inClass</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">container</span>
+  
+  <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="n">inClass</span><span class="o">.</span><span class="n">getAllOperations</span><span class="p">():</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">target</span> <span class="ow">is</span> <span class="n">target</span> <span class="ow">and</span> <span class="n">op</span><span class="o">.</span><span class="n">opType</span> <span class="o">==</span> <span class="n">opType</span>
+        <span class="ow">and</span> <span class="n">op</span><span class="o">.</span><span class="n">opSubType</span> <span class="o">==</span> <span class="n">opSubType</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">op</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="bp">None</span></div>
+
+<span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="getFuncname"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getFuncname">[docs]</a><span class="k">def</span> <span class="nf">getFuncname</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; get function calling name for operation</span>
+<span class="sd">  </span>
+<span class="sd">  the name is the operation name of the corresponding operation with</span>
+<span class="sd">  opSubType==None</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">inClass</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">container</span>
+  
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaOperation&#39;</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Illegal parameter for getFuncname : </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">op</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">opSubType</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="n">getOperation</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">op</span><span class="o">.</span><span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;No operation with opSubType None corresponds to </span><span class="si">%s</span><span class="s2">&quot;</span>
+     <span class="o">%</span> <span class="n">op</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">op</span><span class="o">.</span><span class="n">name</span></div>
+  
+<span class="c1">###########################################################################</span>
+
+<span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="getReturnPar"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getReturnPar">[docs]</a><span class="k">def</span> <span class="nf">getReturnPar</span><span class="p">(</span><span class="n">op</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; select and return MetaParameter with direction &#39;return&#39;, if any</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">for</span> <span class="n">par</span> <span class="ow">in</span> <span class="n">op</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+    
+    <span class="k">if</span> <span class="n">par</span><span class="o">.</span><span class="n">direction</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">par</span>
+
+  <span class="k">return</span> <span class="bp">None</span></div>
+
+<span class="c1">###########################################################################</span>
+
+<span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="getReferenceName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.getReferenceName">[docs]</a><span class="k">def</span> <span class="nf">getReferenceName</span><span class="p">(</span><span class="n">oo</span><span class="p">,</span> <span class="n">pp</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">subDirs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; get name to refer to an object oo from package pp</span>
+<span class="sd">  If pp is not None the routine will return a short form of the name whenever</span>
+<span class="sd">  oo is contained within pp.</span>
+<span class="sd">  Otherwise the routine returns the full import name.</span>
+<span class="sd">  NB the function is used also to generate names for documentation.</span>
+<span class="sd">  Unless oo is an object contained within a package, the result will</span>
+<span class="sd">  not be valid for the purpose of importing oo.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">pathStart</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ccpnmodel.ccpncore&#39;</span><span class="p">]</span>
+
+  <span class="k">if</span> <span class="n">pp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">oo</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">pp</span><span class="p">):</span>
+    <span class="c1"># pp passed in and oo directly available from pp. Return short name</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">oo</span><span class="o">.</span><span class="n">name</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># no shortcuts - return fully qualified import name</span>
+    <span class="n">qname</span> <span class="o">=</span> <span class="n">oo</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">qname</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="n">qname</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">subDirs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">subDirs</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">pathList</span> <span class="o">=</span> <span class="n">qname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+      <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">pathStart</span> <span class="o">+</span> <span class="n">subDirs</span> <span class="o">+</span> <span class="n">pathList</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">name</span></div>
+
+<span class="c1">###########################################################################</span>
+
+<span class="c1">#  General utilities used in Python 2.1 related code</span>
+
+<span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="coerceToList"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.coerceToList">[docs]</a><span class="k">def</span> <span class="nf">coerceToList</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+  
+  <span class="c1"># wrap non-iterables into list</span>
+  <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">StringType</span><span class="p">):</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+      <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">params</span><span class="p">]</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">params</span></div>
+
+<span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="semideepcopy"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.semideepcopy">[docs]</a><span class="k">def</span> <span class="nf">semideepcopy</span><span class="p">(</span><span class="n">dd</span><span class="p">,</span> <span class="n">doneDict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; does a semi-deep copy of a nested dictionary, for copying mappings.</span>
+<span class="sd">  Dictionaries are copied recursively, .</span>
+<span class="sd">  Lists are copied, but not recursively.</span>
+<span class="sd">  In either case a single copy is made from a single object</span>
+<span class="sd">  no matter how many times it appears.</span>
+<span class="sd">  Keys and other values are passed unchanged</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">doneDict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">doneDict</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="n">key</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">dd</span><span class="p">)</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">doneDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">doneDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">kk</span><span class="p">,</span><span class="n">val</span> <span class="ow">in</span> <span class="n">dd</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">DictType</span><span class="p">):</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">kk</span><span class="p">]</span> <span class="o">=</span> <span class="n">semideepcopy</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">doneDict</span><span class="p">)</span>
+
+      <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">ListType</span><span class="p">):</span>
+        <span class="n">key2</span> <span class="o">=</span> <span class="nb">id</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+        <span class="n">newval</span> <span class="o">=</span> <span class="n">doneDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key2</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">newval</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">newval</span> <span class="o">=</span> <span class="n">val</span><span class="p">[:]</span>
+          <span class="n">doneDict</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span> <span class="o">=</span> <span class="n">newval</span>
+
+        <span class="n">result</span><span class="p">[</span><span class="n">kk</span><span class="p">]</span> <span class="o">=</span> <span class="n">newval</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">kk</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="lowerFirst"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.lowerFirst">[docs]</a><span class="k">def</span> <span class="nf">lowerFirst</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;lowercase first letter</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="upperFirst"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.upperFirst">[docs]</a><span class="k">def</span> <span class="nf">upperFirst</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;uppercase first letter</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">return</span> <span class="n">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">s</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span></div>
+
+
+<div class="viewcode-block" id="compactStringList"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.compactStringList">[docs]</a><span class="k">def</span> <span class="nf">compactStringList</span><span class="p">(</span><span class="n">stringList</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">maxChars</span><span class="o">=</span><span class="mi">80</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; compact stringList into shorter list of longer strings,</span>
+<span class="sd">  each either made from a single start string, or no longer than maxChars</span>
+
+<span class="sd">  From previous breakString function.</span>
+<span class="sd">  Modified to speed up and add parameter defaults, Rasmus Fogh 28 Aug 2003</span>
+<span class="sd">  Modified to split into two functions</span>
+<span class="sd">  and to add separator to end of each line, Rasmus Fogh 12 Sep 03</span>
+<span class="sd">  Modified to separate string breaking from list modification</span>
+<span class="sd">  Rasmus Fogh 29/6/06</span>
+<span class="sd">  Modified to return single-element lists unchanged</span>
+<span class="sd">  Rasmus Fogh 29/6/06</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">stringList</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">result</span>
+  <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">stringList</span><span class="p">)</span> <span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+    <span class="k">return</span> <span class="n">stringList</span><span class="p">[:]</span>
+
+  <span class="n">seplength</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">separator</span><span class="p">)</span>
+
+  <span class="n">nchars</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stringList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="n">start</span><span class="o">=</span><span class="mi">0</span>
+  <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">stringList</span><span class="p">)):</span>
+    <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">stringList</span><span class="p">[</span><span class="n">n</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">nchars</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="n">start</span><span class="p">)</span><span class="o">*</span><span class="n">seplength</span> <span class="o">&gt;</span> <span class="n">maxChars</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stringList</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">n</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]))</span>
+      <span class="n">start</span> <span class="o">=</span> <span class="n">n</span>
+      <span class="n">nchars</span> <span class="o">=</span> <span class="n">i</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">nchars</span> <span class="o">+=</span> <span class="n">i</span>
+  <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">stringList</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">stringList</span><span class="p">)]))</span>
+
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="breakString"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Util.breakString">[docs]</a><span class="k">def</span> <span class="nf">breakString</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="n">joiner</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">maxChars</span><span class="o">=</span><span class="mi">72</span><span class="p">):</span>
+
+  <span class="sd">&quot;&quot;&quot; Splits text on separator and then joins pieces back together using joiner</span>
+<span class="sd">      so that each piece either single element or no longer than maxChars</span>
+
+<span class="sd">      Modified to speed up and add parameter defaults, Rasmus Fogh 28 Aug 2003</span>
+<span class="sd">      Modified to split into two functions</span>
+<span class="sd">      and to add separator to end of each line</span>
+<span class="sd">      Modified to separate string breaking from list modification</span>
+<span class="sd">      Rasmus Fogh 29/6/06</span>
+<span class="sd">      Added special case for text empty or None</span>
+<span class="sd">      Rasmus Fogh 07/07/06</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+  <span class="n">t</span> <span class="o">=</span> <span class="n">compactStringList</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">separator</span><span class="p">),</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">,</span>
+                        <span class="n">maxChars</span><span class="o">=</span><span class="n">maxChars</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">joiner</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">t</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

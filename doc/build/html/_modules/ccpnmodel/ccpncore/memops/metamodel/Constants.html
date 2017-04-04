@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.metamodel.Constants &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.metamodel.Constants</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="kn">import</span> <span class="nn">string</span>
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="c1"># Python 2.1 dual-use constants</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">IntType</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">IntType</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">StringType</span>
+  <span class="n">TupleType</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">TupleType</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+  <span class="n">IntType</span> <span class="o">=</span> <span class="nb">int</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="nb">str</span>
+  <span class="n">TupleType</span> <span class="o">=</span> <span class="nb">tuple</span>
+
+<span class="c1"># General constants</span>
+
+<div class="viewcode-block" id="DummyClass"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Constants.DummyClass">[docs]</a><span class="k">class</span> <span class="nc">DummyClass</span><span class="p">:</span>
+  <span class="k">pass</span></div>
+<span class="n">sentinel</span> <span class="o">=</span> <span class="n">DummyClass</span><span class="p">()</span>
+
+
+<span class="c1"># Errors - must be here to avoid circular import problem from Util/MetaModel</span>
+<div class="viewcode-block" id="MemopsError"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.Constants.MemopsError">[docs]</a><span class="k">class</span> <span class="nc">MemopsError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Base class for all Memops Errors</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># TODO reorganise error system</span>
+  <span class="k">pass</span></div>
+
+
+<span class="n">trueString</span> <span class="o">=</span> <span class="s1">&#39;True&#39;</span>
+<span class="n">falseString</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
+
+<span class="c1"># Special constants</span>
+<span class="n">infinity</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+
+
+
+<span class="c1"># Directory names for Python code api subdirectories</span>
+<span class="n">apiCodeDir</span> <span class="o">=</span> <span class="s1">&#39;api&#39;</span>
+
+<span class="c1"># Directory names for Python code xml subdirectories</span>
+<span class="n">xmlCodeDir</span> <span class="o">=</span> <span class="s1">&#39;xml&#39;</span>
+
+<span class="c1"># documentation directories</span>
+<span class="n">imageDir</span> <span class="o">=</span> <span class="s1">&#39;doc/graphics&#39;</span>
+<span class="n">docDir</span> <span class="o">=</span> <span class="s1">&#39;apidoc&#39;</span>
+
+<span class="n">configFilePath</span> <span class="o">=</span> <span class="s1">&#39;config/ccpnConfig.json&#39;</span>
+
+
+<span class="c1"># names of basic data types</span>
+<span class="n">int_code</span> <span class="o">=</span> <span class="s1">&#39;Int&#39;</span>
+<span class="n">float_code</span> <span class="o">=</span> <span class="s1">&#39;Float&#39;</span>
+<span class="n">ieee_float_code</span> <span class="o">=</span> <span class="s1">&#39;IeeeFloat&#39;</span>
+<span class="n">string_code</span> <span class="o">=</span> <span class="s1">&#39;String&#39;</span>
+<span class="n">boolean_code</span> <span class="o">=</span> <span class="s1">&#39;Boolean&#39;</span>
+<span class="n">datetime_code</span> <span class="o">=</span> <span class="s1">&#39;DateTime&#39;</span>
+<span class="n">dict_code</span> <span class="o">=</span> <span class="s1">&#39;Dict&#39;</span>
+<span class="n">multiple_code</span> <span class="o">=</span> <span class="s1">&#39;Multiple&#39;</span>
+<span class="n">typeCode_enumeration</span> <span class="o">=</span> <span class="p">[</span><span class="n">int_code</span><span class="p">,</span> <span class="n">float_code</span><span class="p">,</span> <span class="n">ieee_float_code</span><span class="p">,</span>
+ <span class="n">string_code</span><span class="p">,</span> <span class="n">boolean_code</span><span class="p">,</span> <span class="n">datetime_code</span><span class="p">,</span> <span class="n">dict_code</span><span class="p">,</span> <span class="n">multiple_code</span><span class="p">,</span>
+<span class="p">]</span>
+<span class="n">typeCode_enumeration</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+<span class="c1"># NB it might be better to avoid this as it puts (can cause circular imports with &#39;Multiple&#39; data type)</span>
+<span class="n">baseDataTypeModule</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span>
+ <span class="s1">&#39;ccpnmodel.ccpncore.memops.baseDataTypes&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="nb">locals</span><span class="p">(),</span> <span class="n">typeCode_enumeration</span>
+<span class="p">)</span>
+
+<span class="c1"># NBNB TBD the codes for &#39;Dict and List are short-term hacks</span>
+
+<span class="c1"># names of jdbc data types.</span>
+<span class="c1"># jdbcTypeCode_enumeration = [</span>
+<span class="c1">#  &#39;CLOB&#39;, &#39;VARCHAR&#39;, &#39;BIT&#39;, &#39;INTEGER&#39;, &#39;BIGINT&#39;, &#39;FLOAT&#39;, &#39;DOUBLE&#39;, &#39;TIMESTAMP&#39;,</span>
+<span class="c1">#  &#39;Dict&#39;,&#39;List&#39;</span>
+<span class="c1"># ]</span>
+<span class="c1"># jdbcTypeCode_enumeration.sort()</span>
+
+<span class="c1"># names of java data types.</span>
+<span class="n">javaTypeCode_enumeration</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;java.lang.Integer&#39;</span><span class="p">,</span>
+<span class="s1">&#39;java.lang.Float&#39;</span><span class="p">,</span><span class="s1">&#39;java.lang.String&#39;</span><span class="p">,</span><span class="s1">&#39;java.lang.Boolean&#39;</span><span class="p">,</span>
+<span class="s1">&#39;java.util.Map&#39;</span><span class="p">,</span> <span class="s1">&#39;java.util.Collection&#39;</span>
+<span class="p">]</span>
+<span class="n">javaTypeCode_enumeration</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+<span class="c1"># names of java simple data types.</span>
+<span class="c1"># NB the simpleType for strings is the empty string</span>
+<span class="n">javaSimpleTypeCode_enumeration</span> <span class="o">=</span> <span class="p">[</span>
+<span class="c1"># TBD: is excluding None (which is not allowed in Python 3 because of sort()) a problem?</span>
+<span class="c1"># &#39;int&#39;,&#39;long&#39;,&#39;float&#39;,&#39;double&#39;,&#39;boolean&#39;, None</span>
+ <span class="s1">&#39;int,&#39;&#39;float&#39;</span><span class="p">,</span><span class="s1">&#39;boolean&#39;</span>
+<span class="p">]</span>
+<span class="n">javaSimpleTypeCode_enumeration</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+<span class="c1"># names of xml data types.</span>
+<span class="n">xmlTypeCode_enumeration</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;string&#39;</span><span class="p">,</span> <span class="s1">&#39;boolean&#39;</span><span class="p">,</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span> <span class="s1">&#39;float&#39;</span><span class="p">,</span> <span class="s1">&#39;Dict&#39;</span><span class="p">,</span><span class="s1">&#39;List&#39;</span><span class="p">]</span>
+<span class="n">xmlTypeCode_enumeration</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+<span class="c1"># dictionary of all typeCodes and their enumeration, to simplify processing</span>
+<span class="n">typeCodes</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s1">&#39;typeCode&#39;</span><span class="p">:</span><span class="n">typeCode_enumeration</span><span class="p">,</span>
+ <span class="c1"># &#39;jdbcTypeCode&#39;:jdbcTypeCode_enumeration,</span>
+ <span class="c1"># &#39;javaTypeCode&#39;:javaTypeCode_enumeration,</span>
+ <span class="c1"># &#39;javaSimpleTypeCode&#39;:javaSimpleTypeCode_enumeration,</span>
+ <span class="s1">&#39;xmlTypeCode&#39;</span><span class="p">:</span><span class="n">xmlTypeCode_enumeration</span>
+<span class="p">}</span>
+
+
+<span class="c1"># MetaModel constants</span>
+
+<span class="c1"># visibility enumeration</span>
+<span class="n">public_visibility</span> <span class="o">=</span> <span class="s1">&#39;public_vis&#39;</span>
+<span class="n">protected_visibility</span> <span class="o">=</span> <span class="s1">&#39;protected_vis&#39;</span>
+<span class="n">private_visibility</span> <span class="o">=</span> <span class="s1">&#39;private_vis&#39;</span>
+<span class="n">visibility_enumeration</span> <span class="o">=</span> <span class="p">(</span> <span class="n">public_visibility</span><span class="p">,</span> <span class="n">protected_visibility</span><span class="p">,</span>
+ <span class="n">private_visibility</span>
+<span class="p">)</span>
+
+<span class="c1"># scope enumeration</span>
+<span class="n">instance_level</span> <span class="o">=</span> <span class="s1">&#39;instance_level&#39;</span>
+<span class="n">classifier_level</span> <span class="o">=</span> <span class="s1">&#39;classifier_level&#39;</span>
+<span class="n">scope_enumeration</span> <span class="o">=</span> <span class="p">(</span><span class="n">instance_level</span><span class="p">,</span> <span class="n">classifier_level</span><span class="p">)</span>
+
+<span class="c1"># aggregation enumeration</span>
+<span class="n">no_aggregation</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">composite_aggregation</span> <span class="o">=</span> <span class="s1">&#39;composite&#39;</span>
+<span class="n">aggregation_enumeration</span> <span class="o">=</span> <span class="p">(</span> <span class="n">no_aggregation</span><span class="p">,</span> <span class="n">composite_aggregation</span> <span class="p">)</span>
+
+<span class="c1"># direction enumeration</span>
+<span class="n">in_direction</span> <span class="o">=</span> <span class="s1">&#39;in_dir&#39;</span>
+<span class="n">out_direction</span> <span class="o">=</span> <span class="s1">&#39;out_dir&#39;</span>
+<span class="n">inout_direction</span> <span class="o">=</span> <span class="s1">&#39;inout_dir&#39;</span>
+<span class="n">return_direction</span> <span class="o">=</span> <span class="s1">&#39;return_dir&#39;</span>
+<span class="n">direction_enumeration</span> <span class="o">=</span> <span class="p">(</span> <span class="n">in_direction</span><span class="p">,</span> <span class="n">out_direction</span><span class="p">,</span> <span class="n">inout_direction</span><span class="p">,</span> 
+ <span class="n">return_direction</span>
+<span class="p">)</span>
+
+<span class="c1"># changeability enumeration</span>
+<span class="n">changeable</span> <span class="o">=</span> <span class="s1">&#39;changeable&#39;</span>
+<span class="n">frozen</span> <span class="o">=</span> <span class="s1">&#39;frozen&#39;</span>
+<span class="n">add_only</span> <span class="o">=</span> <span class="s1">&#39;add_only&#39;</span>
+<span class="n">changeability_enumeration</span> <span class="o">=</span> <span class="p">(</span><span class="n">changeable</span><span class="p">,</span> <span class="n">frozen</span><span class="p">,</span> <span class="n">add_only</span><span class="p">)</span>
+
+<span class="c1"># role hierarchy enumeration</span>
+<span class="n">parent_hierarchy</span> <span class="o">=</span> <span class="s1">&#39;parent&#39;</span>
+<span class="n">child_hierarchy</span> <span class="o">=</span> <span class="s1">&#39;child&#39;</span>
+<span class="n">no_hierarchy</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">hierarchy_enumeration</span> <span class="o">=</span> <span class="p">(</span> <span class="n">parent_hierarchy</span><span class="p">,</span> <span class="n">child_hierarchy</span><span class="p">,</span> <span class="n">no_hierarchy</span> <span class="p">)</span>
+
+
+<span class="c1"># valid characters for names. </span>
+<span class="c1"># NB avoiding string.ascii_xxx attributes </span>
+<span class="c1">#    as we need 2.1 compatibility for ObjectDomain</span>
+<span class="n">lowercase</span> <span class="o">=</span> <span class="s2">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>
+<span class="n">uppercase</span> <span class="o">=</span> <span class="s2">&quot;ABCDEFGHIJKLMNOPQRSTUVWXYZ&quot;</span>
+<span class="n">underscore</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span>
+<span class="n">validNameChars</span> <span class="o">=</span> <span class="n">uppercase</span> <span class="o">+</span> <span class="n">lowercase</span> <span class="o">+</span> <span class="n">string</span><span class="o">.</span><span class="n">digits</span> <span class="o">+</span> <span class="n">underscore</span>
+
+<span class="c1"># Putting this in a single string is incompatible with Emacs python mode </span>
+<span class="c1"># (wish they would fix it)</span>
+<span class="n">xmlDisallowedChars</span> <span class="o">=</span> <span class="s2">&quot;&amp;&#39;&lt;&gt;&quot;</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+
+
+<span class="c1"># tags for &#39;code&#39; dictionaries, </span>
+<span class="c1"># with code for different languages/implementations</span>
+<span class="n">codeStubTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">)</span>
+
+<span class="c1"># maximum length of various names.</span>
+<span class="n">maxTagLength</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="n">maxClassNameLength</span> <span class="o">=</span> <span class="mi">32</span>
+<span class="n">maxShortNameLength</span> <span class="o">=</span> <span class="mi">4</span>
+
+<span class="c1"># names of attributes with special treatment:</span>
+<span class="n">id_attribute</span> <span class="o">=</span> <span class="s1">&#39;_ID&#39;</span>
+<span class="n">lastid_attribute</span> <span class="o">=</span> <span class="s1">&#39;_lastId&#39;</span>
+<span class="n">serial_attribute</span> <span class="o">=</span> <span class="s1">&#39;serial&#39;</span>
+<span class="n">serialdict_attribute</span> <span class="o">=</span> <span class="s1">&#39;serialDict&#39;</span>
+<span class="n">details_attribute</span> <span class="o">=</span> <span class="s1">&#39;details&#39;</span>
+<span class="n">timestamp_attribute</span> <span class="o">=</span> <span class="s1">&#39;timestamp&#39;</span>
+<span class="n">guid_attribute</span> <span class="o">=</span> <span class="s1">&#39;guid&#39;</span>
+           
+<span class="c1"># Implementation directory, file, and class names:</span>
+<span class="n">rootPackageDirName</span> <span class="o">=</span> <span class="s1">&#39;RootPackage&#39;</span>
+<span class="n">modellingPackageName</span> <span class="o">=</span> <span class="s1">&#39;memops&#39;</span>
+<span class="n">implementationPackageName</span> <span class="o">=</span> <span class="s1">&#39;Implementation&#39;</span>
+<span class="n">rootPackageName</span> <span class="o">=</span> <span class="s1">&#39;Root&#39;</span>
+
+<span class="n">dataRootName</span> <span class="o">=</span> <span class="s1">&#39;MemopsRoot&#39;</span>
+<span class="n">baseClassName</span> <span class="o">=</span> <span class="s1">&#39;MemopsObject&#39;</span>
+<span class="n">rootClassName</span> <span class="o">=</span> <span class="s1">&#39;ComplexDataType&#39;</span>
+<span class="n">topObjClassName</span> <span class="o">=</span> <span class="s1">&#39;TopObject&#39;</span>
+<span class="n">dataObjClassName</span> <span class="o">=</span> <span class="s1">&#39;DataObject&#39;</span>
+<span class="n">implObjClassName</span> <span class="o">=</span> <span class="s1">&#39;ImplementationObject&#39;</span>
+<span class="n">baseDataTypeObjName</span> <span class="o">=</span> <span class="s1">&#39;MemopsDataTypeObject&#39;</span>
+
+<span class="n">repositoryRole</span> <span class="o">=</span> <span class="s1">&#39;repositories&#39;</span>
+<span class="n">packageLocatorRole</span> <span class="o">=</span> <span class="s1">&#39;packageLocators&#39;</span>
+
+<span class="n">implementationClassNames</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataRootName</span><span class="p">,</span> <span class="n">baseClassName</span><span class="p">,</span> <span class="n">topObjClassName</span><span class="p">,</span>
+                            <span class="n">dataObjClassName</span><span class="p">,</span> <span class="n">implObjClassName</span><span class="p">,]</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

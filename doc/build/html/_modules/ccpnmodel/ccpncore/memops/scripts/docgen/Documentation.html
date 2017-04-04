@@ -1,0 +1,754 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.scripts.docgen.Documentation &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.scripts.docgen.Documentation</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Language-independent parts for Documentation Generation </span>
+<span class="sd">using MOF-style MetaModel.</span>
+
+
+<span class="sd">======================COPYRIGHT/LICENSE START==========================</span>
+
+<span class="sd">Documentation.py: Code generation for CCPN framework</span>
+
+<span class="sd">Copyright (C) 2007 Rasmus Fogh (CCPN Project)</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">This library is free software; you can redistribute it and/or</span>
+<span class="sd">modify it under the terms of the GNU General Public</span>
+<span class="sd">License as published by the Free Software Foundation; either</span>
+<span class="sd">version 2 of the License, or (at your option) any later version.</span>
+<span class="sd"> </span>
+<span class="sd">A copy of this license can be found in ../../../license/GPL.license</span>
+<span class="sd"> </span>
+<span class="sd">This library is distributed in the hope that it will be useful,</span>
+<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="sd">General Public License for more details.</span>
+<span class="sd"> </span>
+<span class="sd">You should have received a copy of the GNU General Public</span>
+<span class="sd">License along with this library; if not, write to the Free Software</span>
+<span class="sd">Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</span>
+
+
+<span class="sd">======================COPYRIGHT/LICENSE END============================</span>
+
+<span class="sd">for further information, please contact :</span>
+
+<span class="sd">- CCPN website (http://www.ccpn.ac.uk/)</span>
+
+<span class="sd">- email: ccpn@bioc.cam.ac.uk</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">If you are using this software for academic purposes, we suggest</span>
+<span class="sd">quoting the following references:</span>
+
+<span class="sd">===========================REFERENCE START=============================</span>
+<span class="sd">R. Fogh, J. Ionides, E. Ulrich, W. Boucher, W. Vranken, J.P. Linge, M.</span>
+<span class="sd">Habeck, W. Rieping, T.N. Bhat, J. Westbrook, K. Henrick, G. Gilliland,</span>
+<span class="sd">H. Berman, J. Thornton, M. Nilges, J. Markley and E. Laue (2002). The</span>
+<span class="sd">CCPN project: An interim report on a data model for the NMR community</span>
+<span class="sd">(Progress report). Nature Struct. Biol. 9, 416-418.</span>
+
+<span class="sd">Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne</span>
+<span class="sd">Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and</span>
+<span class="sd">Ernest D. Laue (2005). A framework for scientific data modeling and automated</span>
+<span class="sd">software development. Bioinformatics 21, 1678-1684.</span>
+
+<span class="sd">===========================REFERENCE END===============================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops</span> <span class="kn">import</span> <span class="n">Version</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">MetaModel</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.TextWriter</span> <span class="kn">import</span> <span class="n">TextWriter</span>
+
+
+<span class="n">MemopsError</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span>
+
+<span class="n">mandatoryAttributes</span> <span class="o">=</span> <span class="p">()</span>
+
+<div class="viewcode-block" id="Documentation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation">[docs]</a><span class="k">class</span> <span class="nc">Documentation</span><span class="p">(</span><span class="n">TextWriter</span><span class="p">):</span>
+
+  <span class="n">color1</span><span class="o">=</span><span class="s1">&#39;#F0CC99&#39;</span>
+  <span class="n">color2</span><span class="o">=</span><span class="s1">&#39;#794E83&#39;</span>
+  <span class="n">styleSheetFile</span> <span class="o">=</span> <span class="s1">&#39;htmldoc.css&#39;</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">mandatoryAttributes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Documentation lacks mandatory </span><span class="si">%s</span><span class="s2"> attribute&quot;</span> <span class="o">%</span> <span class="n">tag</span><span class="p">)</span>
+
+    <span class="nb">super</span><span class="p">(</span><span class="n">Documentation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># TBD: does this belong in this class?</span>
+<div class="viewcode-block" id="Documentation.writeHeader"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeHeader">[docs]</a>  <span class="k">def</span> <span class="nf">writeHeader</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scriptName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">headerComment</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">styleSheetDir</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="n">styleSheetFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">styleSheetFile</span>
+    <span class="k">if</span> <span class="n">styleSheetDir</span><span class="p">:</span>
+      <span class="n">styleSheetFile</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">styleSheetDir</span><span class="p">,</span> <span class="n">styleSheetFile</span><span class="p">)</span>
+
+    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="s1">&#39;scriptName&#39;</span>        <span class="p">:</span> <span class="n">scriptName</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;headerComment&#39;</span>     <span class="p">:</span> <span class="n">headerComment</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;date&#39;</span>              <span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(),</span>
+      <span class="s1">&#39;title&#39;</span>             <span class="p">:</span> <span class="n">title</span> <span class="ow">or</span> <span class="s1">&#39;CCPN&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;styleSheetFile&#39;</span>    <span class="p">:</span> <span class="n">styleSheetFile</span><span class="p">,</span>
+    <span class="p">}</span>
+  
+    <span class="n">headerTemplate</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;</span>
+<span class="s2">&quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</span>
+<span class="s2">&lt;!--Generated by </span><span class="si">%(scriptName)s</span><span class="s2"> on </span><span class="si">%(date)s</span><span class="s2">--&gt;</span>
+<span class="s2">&lt;!--</span><span class="si">%(headerComment)s</span><span class="s2">--&gt;</span>
+<span class="s2">&lt;HTML&gt;</span>
+<span class="s2">&lt;head&gt;</span>
+<span class="s2">  &lt;title&gt;</span><span class="si">%(title)s</span><span class="s2">&lt;/title&gt;</span>
+<span class="s2">  &lt;link rel=stylesheet type=&quot;text/css&quot; href=&quot;</span><span class="si">%(styleSheetFile)s</span><span class="s2">&quot;&gt;</span>
+<span class="s2">  &lt;script language=&quot;JavaScript&quot;&gt;</span>
+<span class="s2">    function wopn(href){ window.open(href,&#39;&#39;,&#39;width=880,height=500,top=300,left=300,resizable=0,toolbar=0,location=0,directories=0,status=0,menubar=0,scrollbars=1&#39;)}</span>
+<span class="s2">  &lt;/script&gt;</span>
+<span class="s2">&lt;/head&gt;</span>
+<span class="s2">&lt;body&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">headerTemplate</span> <span class="o">%</span> <span class="n">dd</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># TBD: does this belong in this class?</span>
+<div class="viewcode-block" id="Documentation.writeFooter"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeFooter">[docs]</a>  <span class="k">def</span> <span class="nf">writeFooter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataModelVersion</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">releaseVersion</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+        <span class="n">scriptName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objName</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  
+    <span class="k">if</span> <span class="n">releaseVersion</span><span class="p">:</span>
+      <span class="n">releaseName</span> <span class="o">=</span> <span class="n">releaseVersion</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span>
+      <span class="n">releaseLine</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">    &amp;nbsp;</span><span class="si">%s</span><span class="s2">&amp;nbsp;&lt;em&gt;&amp;nbsp;release,&lt;/em&gt;&amp;nbsp;</span>
+<span class="s2">    &lt;em&gt;version&lt;/em&gt;&amp;nbsp;&amp;nbsp;</span><span class="si">%s</span><span class="s2">&quot;&quot;&quot;</span> 
+     <span class="o">%</span> <span class="p">(</span><span class="n">releaseName</span><span class="p">,</span> <span class="n">releaseVersion</span><span class="p">)</span>
+      <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">releaseLine</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">      &amp;nbsp;&quot;&quot;&quot;</span>
+  
+    <span class="n">dd</span> <span class="o">=</span> <span class="p">{</span>
+      <span class="s1">&#39;scriptName&#39;</span>        <span class="p">:</span> <span class="n">scriptName</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;objName&#39;</span>           <span class="p">:</span> <span class="n">objName</span> <span class="ow">or</span> <span class="s1">&#39;?&#39;</span><span class="p">,</span>
+      <span class="s1">&#39;dataModelVersion&#39;</span>  <span class="p">:</span> <span class="n">dataModelVersion</span> <span class="ow">or</span> <span class="n">Version</span><span class="o">.</span><span class="n">currentModelVersion</span><span class="p">,</span>
+      <span class="s1">&#39;releaseLine&#39;</span>       <span class="p">:</span> <span class="n">releaseLine</span><span class="p">,</span>
+      <span class="s1">&#39;color&#39;</span>             <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">color2</span><span class="p">,</span>
+      <span class="s1">&#39;date&#39;</span>              <span class="p">:</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(),</span>
+    <span class="p">}</span>
+  
+    <span class="n">footerTemplate</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+
+<span class="s2">&lt;table width=&quot;100</span><span class="si">%%</span><span class="s2">&quot; cellpadding=2&gt;</span>
+<span class="s2">  &lt;tr&gt;&lt;td colspan=2 width=&quot;100</span><span class="si">%%</span><span class="s2">&quot; bgcolor=</span><span class="si">%(color)s</span><span class="s2">&gt;&lt;/td&gt;&lt;/tr&gt;</span>
+<span class="s2">  &lt;tr&gt;</span>
+<span class="s2">    &lt;td&gt;&lt;h5&gt;</span>
+<span class="s2">    </span><span class="si">%(releaseLine)s</span><span class="s2"></span>
+<span class="s2">    &lt;em&gt;Data Model Version&lt;/em&gt;&amp;nbsp;</span><span class="si">%(dataModelVersion)s</span><span class="s2"></span>
+<span class="s2">    &lt;/h5&gt;&lt;/td&gt;</span>
+<span class="s2">    &lt;td align=right&gt;&lt;a href=&#39;#toplink&#39;&gt;&lt;span style=&quot;font-size:9pt&quot;&gt;Go&amp;nbsp;to&amp;nbsp;Top&amp;nbsp;&amp;nbsp;&lt;/span&gt;&lt;/a&gt;</span>
+<span class="s2">    &lt;/td&gt;</span>
+<span class="s2">  &lt;/tr&gt;</span>
+<span class="s2">&lt;/table&gt;</span>
+
+<span class="s2">&lt;div class=&quot;leftbanner&quot;&gt;</span>
+<span class="s2">&lt;table width=100</span><span class="si">%%</span><span class="s2"> cellspacing=0 cellpadding=2 border=0&gt;</span>
+<span class="s2">  &lt;tr&gt;&lt;td bgcolor=</span><span class="si">%(color)s</span><span class="s2"> style=&quot;white-space: nowrap&quot;&gt;</span>
+<span class="s2">    &lt;em&gt;&amp;nbsp;&amp;nbsp;Autogenerated by&lt;/em&gt;&amp;nbsp;&amp;nbsp;</span><span class="si">%(scriptName)s</span><span class="s2">&amp;nbsp;</span>
+<span class="s2">    &lt;em&gt;on&lt;/em&gt;&amp;nbsp;&amp;nbsp;</span><span class="si">%(date)s</span><span class="s2">&amp;nbsp;</span>
+<span class="s2">    &amp;nbsp;</span>
+<span class="s2">    &lt;em&gt;from data model package&lt;/em&gt;&amp;nbsp;&amp;nbsp;</span><span class="si">%(objName)s</span><span class="s2">&amp;nbsp;&amp;nbsp;</span>
+<span class="s2">  &lt;/td&gt;&lt;/tr&gt;</span>
+<span class="s2">&lt;/table&gt;</span>
+<span class="s2">&lt;/div&gt;</span>
+<span class="s2">&lt;table width=100</span><span class="si">%%</span><span class="s2"> cellspacing=0 cellpadding=2 border=0&gt;</span>
+<span class="s2">  &lt;tr valign=top&gt;</span>
+<span class="s2">    &lt;td&gt;&lt;h6&gt;&amp;nbsp;&amp;nbsp;Work done by the &lt;a href=&quot;mailto:ccpn-dev@mole.bio.cam.ac.uk&quot;&gt;CCPN team&lt;/a&gt;.&lt;/h6&gt;&lt;/td&gt;</span>
+<span class="s2">    &lt;td align=right&gt;&lt;h6&gt;&lt;a target=&quot;blank&quot; href=&quot;http://www.ccpn.ac.uk&quot;&gt;www.ccpn.ac.uk&lt;/a&gt;&amp;nbsp;&amp;nbsp;&lt;/h6&gt;&lt;/td&gt;</span>
+<span class="s2">  &lt;/tr&gt;</span>
+<span class="s2">&lt;/table&gt;</span>
+<span class="s2">&lt;br&gt;</span>
+
+<span class="s2">&lt;/body&gt;</span>
+<span class="s2">&lt;/HTML&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span>
+  
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">footerTemplate</span> <span class="o">%</span> <span class="n">dd</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeHorizontalLine"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeHorizontalLine">[docs]</a>  <span class="k">def</span> <span class="nf">writeHorizontalLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">horizontalLine</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;table borderwidth=&quot;1&quot; width=&quot;100</span><span class="si">%%</span><span class="s2">&quot;&gt;&lt;tr&gt;&lt;td width=&quot;100</span><span class="si">%%</span><span class="s2">&quot; bgcolor=</span><span class="si">%s</span><span class="s2">&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">color2</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">horizontalLine</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeVerticalBar"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeVerticalBar">[docs]</a>  <span class="k">def</span> <span class="nf">writeVerticalBar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartTable"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartTable">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">tableAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;table</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">tableAttrs</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndTable"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndTable">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/table&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartRow"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartRow">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">rowAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;tr</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">rowAttrs</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndRow"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndRow">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndRow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/tr&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartCell"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartCell">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartCell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">cellAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;td</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">cellAttrs</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndCell"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndCell">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndCell</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/td&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeCell"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeCell">[docs]</a>  <span class="k">def</span> <span class="nf">writeCell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cellString</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">cellAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeStartCell</span><span class="p">(</span><span class="o">**</span><span class="n">cellAttrs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">cellString</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeEndCell</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartStyle"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartStyle">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">styleAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;span</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">styleAttrs</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndStyle"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndStyle">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndStyle</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/span&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStyleString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStyleString">[docs]</a>  <span class="k">def</span> <span class="nf">writeStyleString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">styleString</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">styleAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeStartStyle</span><span class="p">(</span><span class="o">**</span><span class="n">styleAttrs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">styleString</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeEndStyle</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEmphasisString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEmphasisString">[docs]</a>  <span class="k">def</span> <span class="nf">writeEmphasisString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emphasisString</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getEmphasisString</span><span class="p">(</span><span class="n">emphasisString</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStrongString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStrongString">[docs]</a>  <span class="k">def</span> <span class="nf">writeStrongString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strongString</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getStrongString</span><span class="p">(</span><span class="n">strongString</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartSection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartSection">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartSection</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">sectionAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeStartTable</span><span class="p">(</span><span class="o">**</span><span class="n">sectionAttrs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeStartRow</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeStartCell</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndSection"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndSection">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndSection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeEndCell</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeEndRow</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeEndTable</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartDiv"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartDiv">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartDiv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">divAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;div</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">divAttrs</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndDiv"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndDiv">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndDiv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/div&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartParagraph"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartParagraph">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartParagraph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">paragraphAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;p</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">paragraphAttrs</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndParagraph"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndParagraph">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndParagraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/p&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartCenter"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartCenter">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartCenter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">centerAttrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;center</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">centerAttrs</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndCenter"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndCenter">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndCenter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">INDENT</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/center&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeStartIndent"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeStartIndent">[docs]</a>  <span class="k">def</span> <span class="nf">writeStartIndent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;ul&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeEndIndent"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeEndIndent">[docs]</a>  <span class="k">def</span> <span class="nf">writeEndIndent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&lt;/ul&gt;&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeLink"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeLink">[docs]</a>  <span class="k">def</span> <span class="nf">writeLink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getLinkString</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeAnchorLink"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeAnchorLink">[docs]</a>  <span class="k">def</span> <span class="nf">writeAnchorLink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getAnchorLinkString</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeHeading"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeHeading">[docs]</a>  <span class="k">def</span> <span class="nf">writeHeading</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getHeadingString</span><span class="p">(</span><span class="n">heading</span><span class="p">,</span> <span class="n">level</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeBreak"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeBreak">[docs]</a>  <span class="k">def</span> <span class="nf">writeBreak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getBreakString</span><span class="p">(</span><span class="n">n</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.writeNonBreakingSpaces"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeNonBreakingSpaces">[docs]</a>  <span class="k">def</span> <span class="nf">writeNonBreakingSpaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getNonBreakingSpaces</span><span class="p">(</span><span class="n">n</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getHeadingString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getHeadingString">[docs]</a>  <span class="k">def</span> <span class="nf">getHeadingString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39;&lt;h</span><span class="si">%s</span><span class="s1">&gt;</span><span class="si">%s</span><span class="s1">&lt;/h</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getBreakString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getBreakString">[docs]</a>  <span class="k">def</span> <span class="nf">getBreakString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="s1">&#39;&lt;br&gt;&#39;</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getNonBreakingSpaces"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getNonBreakingSpaces">[docs]</a>  <span class="k">def</span> <span class="nf">getNonBreakingSpaces</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">n</span> <span class="o">*</span> <span class="s1">&#39;&amp;nbsp;&#39;</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getAttrString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getAttrString">[docs]</a>  <span class="k">def</span> <span class="nf">getAttrString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+
+    <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attrs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="n">keys</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+    <span class="n">substitutionDict</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;_class&#39;</span><span class="p">:</span> <span class="s1">&#39;class&#39;</span> <span class="p">}</span>
+    <span class="n">attrString</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=&quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">substitutionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">attrs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">keys</span> <span class="p">])</span>
+    <span class="k">if</span> <span class="n">attrString</span><span class="p">:</span>
+      <span class="n">attrString</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">attrString</span>
+
+    <span class="k">return</span> <span class="n">attrString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getLinkString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getLinkString">[docs]</a>  <span class="k">def</span> <span class="nf">getLinkString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+
+    <span class="n">linkString</span> <span class="o">=</span> <span class="s1">&#39;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="si">%s</span><span class="s1">&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">attrs</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">linkString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getAnchorLinkString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getAnchorLinkString">[docs]</a>  <span class="k">def</span> <span class="nf">getAnchorLinkString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+
+    <span class="n">linkString</span> <span class="o">=</span> <span class="s1">&#39;&lt;a name=&quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="si">%s</span><span class="s1">&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">attrs</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">linkString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getStyleString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getStyleString">[docs]</a>  <span class="k">def</span> <span class="nf">getStyleString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">styleString</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">styleAttrs</span><span class="p">):</span>
+
+    <span class="n">styleString</span> <span class="o">=</span> <span class="s1">&#39;&lt;span</span><span class="si">%s</span><span class="s1">&gt;</span><span class="si">%s</span><span class="s1">&lt;/span&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">styleAttrs</span><span class="p">),</span> <span class="n">styleString</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">styleString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getImageString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getImageString">[docs]</a>  <span class="k">def</span> <span class="nf">getImageString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">attrs</span><span class="p">):</span>
+
+    <span class="n">imageString</span> <span class="o">=</span> <span class="s1">&#39;&lt;img </span><span class="si">%s</span><span class="s1">/&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">getAttrString</span><span class="p">(</span><span class="o">**</span><span class="n">attrs</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">imageString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getEmphasisString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getEmphasisString">[docs]</a>  <span class="k">def</span> <span class="nf">getEmphasisString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">emphasisString</span><span class="p">):</span>
+
+    <span class="n">emphasisString</span> <span class="o">=</span> <span class="s1">&#39;&lt;em&gt;</span><span class="si">%s</span><span class="s1">&lt;/em&gt;&#39;</span> <span class="o">%</span> <span class="n">emphasisString</span>
+
+    <span class="k">return</span> <span class="n">emphasisString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getStrongString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getStrongString">[docs]</a>  <span class="k">def</span> <span class="nf">getStrongString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strongString</span><span class="p">):</span>
+
+    <span class="n">strongString</span> <span class="o">=</span> <span class="s1">&#39;&lt;strong&gt;</span><span class="si">%s</span><span class="s1">&lt;/strong&gt;&#39;</span> <span class="o">%</span> <span class="n">strongString</span>
+
+    <span class="k">return</span> <span class="n">strongString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getSmallString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getSmallString">[docs]</a>  <span class="k">def</span> <span class="nf">getSmallString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">smallString</span><span class="p">):</span>
+
+    <span class="n">smallString</span> <span class="o">=</span> <span class="s1">&#39;&lt;small&gt;</span><span class="si">%s</span><span class="s1">&lt;/small&gt;&#39;</span> <span class="o">%</span> <span class="n">smallString</span>
+
+    <span class="k">return</span> <span class="n">smallString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.getItalicString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.getItalicString">[docs]</a>  <span class="k">def</span> <span class="nf">getItalicString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">italicString</span><span class="p">):</span>
+
+    <span class="n">italicString</span> <span class="o">=</span> <span class="s1">&#39;&lt;i&gt;</span><span class="si">%s</span><span class="s1">&lt;/i&gt;&#39;</span> <span class="o">%</span> <span class="n">italicString</span>
+
+    <span class="k">return</span> <span class="n">italicString</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="Documentation.normaliseString"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.normaliseString">[docs]</a>  <span class="k">def</span> <span class="nf">normaliseString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ss</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; convert documentation from string to XML-ready string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">ss</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&amp;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;amp;&quot;</span><span class="p">)</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;lt;&quot;</span><span class="p">)</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;quot;&quot;</span><span class="p">)</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;gt;&quot;</span><span class="p">)</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;br&gt;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;  &quot;</span><span class="p">,</span> <span class="s2">&quot;&amp;nbsp;&amp;nbsp;&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="c1"># in case None passed in</span>
+
+    <span class="k">return</span> <span class="n">ss</span></div>
+
+
+<div class="viewcode-block" id="Documentation.writeGnuLicense"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeGnuLicense">[docs]</a>  <span class="k">def</span> <span class="nf">writeGnuLicense</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;h3&gt;License&lt;/h3&gt;</span>
+<span class="s2">&lt;table&gt;</span>
+<span class="s2">  &lt;tr&gt;</span>
+<span class="s2">    &lt;td&gt;&lt;img src=&quot;http://www.gnu.org/graphics/philosophical-gnu-sm.jpg&quot;/&gt;&lt;/td&gt;</span>
+<span class="s2">    &lt;td&gt;&lt;p&gt;The GNU &lt;b&gt;L&lt;/b&gt;esser &lt;b&gt;G&lt;/b&gt;eneral &lt;b&gt;P&lt;/b&gt;ublic &lt;b&gt;L&lt;/b&gt;icense has been chosen. The &lt;a href=&quot;http://www.gnu.org/licenses/lgpl.html&quot; target=&quot;blank&quot;&gt;LGPL&lt;/a&gt; is a derivative of the GPL that was designed for software libraries. Unlike the GPL, a LGPL-ed program can be incorporated into a proprietary program.&lt;/p&gt;</span>
+<span class="s2">        &lt;ul&gt;</span>
+<span class="s2">          &lt;li&gt;Can be mixed with non-free software. The LGPL, allows someone to merge your program with their own proprietary software, but without allowing people to make modifications to your own code private.&lt;br/&gt;&lt;br/&gt;&lt;/li&gt;</span>
+<span class="s2">          &lt;li&gt;Modifications cannot be taken private.&lt;br/&gt;&lt;br/&gt;&lt;/li&gt;</span>
+<span class="s2">          &lt;li&gt;Cannot be re-licensed by anyone.&lt;br/&gt;&lt;br/&gt;&lt;/li&gt;</span>
+<span class="s2">          &lt;li&gt;Does not contain special privileges for the original copyright holder over your modifications.&lt;/li&gt;</span>
+<span class="s2">        &lt;/ul&gt;</span>
+<span class="s2">    &lt;/td&gt;</span>
+<span class="s2">  &lt;/tr&gt;</span>
+<span class="s2">&lt;/table&gt;</span>
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Documentation.writeDiagramHelpContent"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.docgen.html#ccpnmodel.ccpncore.memops.scripts.docgen.Documentation.Documentation.writeDiagramHelpContent">[docs]</a>  <span class="k">def</span> <span class="nf">writeDiagramHelpContent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">&lt;h3&gt;Help&lt;/h3&gt;</span>
+
+<span class="s2">&lt;p&gt;&lt;/p&gt;&lt;b&gt;How to use this documentation?&lt;/b&gt; There is an entry for every package in the left navigation bar. Each package contains overview diagram as well as overview and detailed class diagrams of the individual subpackages.</span>
+<span class="s2">&lt;ul&gt;</span>
+<span class="s2">  &lt;li&gt;Colors denote the packages. A package is a collection of classes, data types and possibly other packages. It is used for subdividing the contents of the model.&lt;/li&gt;</span>
+<span class="s2">  &lt;li&gt;&lt;b&gt;Boxes&lt;/b&gt; show classes with their name (in bold) and attributes.&lt;/li&gt;</span>
+<span class="s2">  &lt;li&gt;&lt;b&gt;Black lines&lt;/b&gt; represent relationships between two classes that can indicate one or two-way navigation, depending on the presence of an arrow showing the direction of the navigability.&lt;/li&gt;</span>
+<span class="s2">  &lt;li&gt;Multiplicity is specified at the respective end of the association. Examples are &#39;0..1&#39; (zero or one), &#39;2&#39; (exactly 2), &#39;1..*&#39; (1 to infinity) or &#39;*&#39; (0 to infinity). If no multiplicity is given, it defaults to &#39;0..1&#39;.&lt;/li&gt;</span>
+<span class="s2">  &lt;li&gt;The role of the association is represented by a name at either or both ends. If no name is given, it defaults to the name of the class at the other end, starting with lower case, with a final s (for plural) where appropriate. &lt;/li&gt;</span>
+<span class="s2">  &lt;li&gt;&lt;b&gt;Diamonds&lt;/b&gt; represent a composition association where the containing class is on the diamond side of the line e.g. one instance of ccp.Sample.Sample can contain many ccp.Sample.SampleComponent entities.&lt;/li&gt;</span>
+<span class="s2">  &lt;li&gt;&lt;b&gt;Orange lines&lt;/b&gt; show inheritance between classes e.g. ccp.SampleComponent.AbstractComponent is the superclass of all subtype components.&lt;/li&gt;</span>
+<span class="s2">&lt;/ul&gt;</span>
+
+<span class="s2">&lt;p&gt;&lt;/p&gt;&lt;b&gt;What is the &#39;data model&#39;?&lt;/b&gt; The data model itself is an abstract description of all the data commonly used. This abstract description is represented and maintained graphically using the Unified Modelling Language (UML).</span>
+
+<span class="s2">&lt;p&gt;&lt;/p&gt;&lt;b&gt;What are &#39;packages&#39;?&lt;/b&gt; The data model is split up in packages. Each of these packages describes a &#39;unit&#39; of information that can be shared by other packages. For example, the description of a template molecule is done in the &#39;ccp.Molecule&#39; package, the description of a molecular system with &#39;real&#39; molecules is done in the &#39;ccp.MolSystem&#39; package. The &#39;ccp.Nmr&#39; package uses information from the &#39;ccp.MolSystem&#39; package, which could be shared by an &#39;Xray&#39; package if it was available.</span>
+
+<span class="s2">&lt;p&gt;&lt;/p&gt;This documentation may not cover all known model packages. Some diagrams may contain classes from model packages that are not covered in the present documentation. If so, you should assume that these classes are not relevant to your purpose.</span>
+
+<span class="s2">&quot;&quot;&quot;</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

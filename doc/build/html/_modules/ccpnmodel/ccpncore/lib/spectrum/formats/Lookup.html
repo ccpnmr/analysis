@@ -1,0 +1,559 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.spectrum.formats.Lookup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.spectrum.formats.Lookup</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">csv</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="c1"># from PyQt4 import QtCore, QtGui</span>
+
+
+<span class="c1"># if project._appBase.applicationName == &#39;Screen&#39;:</span>
+<span class="c1"># if project._appBase.applicationName == &#39;Metabolomics&#39;:</span>
+
+
+<span class="c1"># def readXls(project, path=None):</span>
+<span class="c1">#</span>
+<span class="c1">#   ex = pd.ExcelFile(path)</span>
+<span class="c1">#   for p,f in screenExcelSheetProcessors.items():</span>
+<span class="c1">#     if p in ex.sheet_names:</span>
+<span class="c1">#       e = ex.parse(p)</span>
+<span class="c1">#       e.fillna(&#39;Empty&#39;,inplace=True)</span>
+<span class="c1">#       f(project, e)</span>
+
+<div class="viewcode-block" id="readXls"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.readXls">[docs]</a><span class="k">def</span> <span class="nf">readXls</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+  <span class="n">ex</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">ex</span><span class="o">.</span><span class="n">sheet_names</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;Metabolomics&#39;</span><span class="p">]:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;loading metabolomics...&#39;</span><span class="p">)</span>
+    <span class="n">readXlsMetabolomics</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">readXlsScreen</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+<span class="n">screeningSheetNames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Reference&#39;</span><span class="p">,</span> <span class="s1">&#39;STD_Samples&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="readXlsScreen"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.readXlsScreen">[docs]</a><span class="k">def</span> <span class="nf">readXlsScreen</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+  <span class="n">ex</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">ExcelFile</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">sheetName</span> <span class="ow">in</span> <span class="n">screeningSheetNames</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">sheetName</span> <span class="ow">in</span> <span class="n">ex</span><span class="o">.</span><span class="n">sheet_names</span><span class="p">:</span>
+      <span class="n">dataFrame</span> <span class="o">=</span> <span class="n">ex</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">sheetName</span><span class="p">)</span>
+      <span class="n">dataFrame</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">&#39;Empty&#39;</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+      <span class="n">workingDirectoryPath</span> <span class="o">=</span> <span class="n">getWorkingDirectoryPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+      <span class="n">brukerDirs</span> <span class="o">=</span> <span class="n">getBrukerTopDirs</span><span class="p">(</span><span class="n">workingDirectoryPath</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">sheetName</span> <span class="o">==</span> <span class="s1">&#39;Reference&#39;</span><span class="p">:</span>
+        <span class="n">dataDicts</span> <span class="o">=</span>  <span class="n">createSpectrumDataDicts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">,</span> <span class="n">brukerDirs</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">)</span>
+        <span class="n">loadReferenceSheet</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataDicts</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">sheetName</span> <span class="o">==</span> <span class="s1">&#39;STD_Samples&#39;</span><span class="p">:</span>
+        <span class="n">loadSTDSheet</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">,</span> <span class="n">brukerDirs</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="getWorkingDirectoryPath"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getWorkingDirectoryPath">[docs]</a><span class="k">def</span> <span class="nf">getWorkingDirectoryPath</span><span class="p">(</span><span class="n">xlsPath</span><span class="p">):</span>
+  <span class="n">xlsLookupPath</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">xlsPath</span><span class="p">)</span>
+  <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">xlsLookupPath</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getBrukerTopDirs"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getBrukerTopDirs">[docs]</a><span class="k">def</span> <span class="nf">getBrukerTopDirs</span><span class="p">(</span><span class="n">workingDirectoryPath</span><span class="p">):</span>
+  <span class="n">dirs</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">workingDirectoryPath</span><span class="p">))</span>
+  <span class="n">excludedFiles</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.DS_Store&#39;</span><span class="p">,</span> <span class="s1">&#39;.xls&#39;</span><span class="p">)</span>
+  <span class="n">brukerDirs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">dir</span> <span class="k">for</span> <span class="nb">dir</span> <span class="ow">in</span> <span class="n">dirs</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">dir</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">excludedFiles</span><span class="p">)]</span>
+  <span class="k">return</span> <span class="n">brukerDirs</span></div>
+
+
+<div class="viewcode-block" id="createSpectrumDataDicts"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.createSpectrumDataDicts">[docs]</a><span class="k">def</span> <span class="nf">createSpectrumDataDicts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">,</span> <span class="n">brukerDirs</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">):</span>
+  <span class="n">dataDicts</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">spectrumName</span><span class="p">,</span> <span class="n">spectrumPath</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">brukerDirs</span><span class="p">,</span> <span class="n">getFullFilePaths</span><span class="p">(</span><span class="n">brukerDirs</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">))</span> <span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]:</span>
+      <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+          <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;name&#39;</span><span class="p">:</span>
+              <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">spectrumName</span><span class="p">):</span>
+                <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">spectrumPath</span><span class="p">)</span>
+                <span class="n">dataDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">spectrum</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span><span class="n">data</span><span class="p">}</span>
+                <span class="n">dataDicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataDict</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">dataDicts</span></div>
+
+<div class="viewcode-block" id="getFullFilePaths"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getFullFilePaths">[docs]</a><span class="k">def</span> <span class="nf">getFullFilePaths</span><span class="p">(</span><span class="n">brukerDirs</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">):</span>
+  <span class="n">fullPaths</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">spectrumName</span> <span class="ow">in</span> <span class="n">brukerDirs</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">workingDirectoryPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">spectrumName</span>
+    <span class="k">for</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">dirnames</span><span class="p">,</span> <span class="n">filenames</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+      <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">filenames</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">filename</span> <span class="o">==</span> <span class="s1">&#39;1r&#39;</span><span class="p">:</span>
+          <span class="n">fullPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirname</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span>
+          <span class="n">fullPaths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fullPath</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">fullPaths</span></div>
+
+
+
+<div class="viewcode-block" id="readXlsMetabolomics"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.readXlsMetabolomics">[docs]</a><span class="k">def</span> <span class="nf">readXlsMetabolomics</span><span class="p">(</span><span class="n">ex</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+  <span class="n">metsSheet</span> <span class="o">=</span> <span class="n">getMetabolomicsSheet</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>
+  <span class="n">dataLocations</span> <span class="o">=</span> <span class="n">getRelativeBrukerDataLocations</span><span class="p">(</span><span class="n">metsSheet</span><span class="p">)</span>
+  <span class="n">spectra</span> <span class="o">=</span> <span class="n">loadBrukerSpectra</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">dataLocations</span><span class="p">)</span>
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">spectrumNames</span> <span class="o">=</span> <span class="n">getSpectrumNamesFromDf</span><span class="p">(</span><span class="n">metsSheet</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">spectrumNames</span><span class="p">)):</span>
+      <span class="n">spectrum</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+  <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+    <span class="k">pass</span>
+  <span class="n">groups</span> <span class="o">=</span> <span class="n">getAllSpectrumGroupAssignments</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">metsSheet</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">groups</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="n">v</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getMetabolomicsSheet"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getMetabolomicsSheet">[docs]</a><span class="k">def</span> <span class="nf">getMetabolomicsSheet</span><span class="p">(</span><span class="n">excelFile</span><span class="p">):</span>
+  <span class="n">sheet</span> <span class="o">=</span> <span class="n">excelFile</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s1">&#39;Metabolomics&#39;</span><span class="p">)</span>
+  <span class="n">sheet</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">regex</span><span class="o">=</span><span class="s1">&#39;^# .*&#39;</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+  <span class="n">sheet</span> <span class="o">=</span> <span class="n">sheet</span><span class="o">.</span><span class="n">dropna</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;all&#39;</span><span class="p">)</span>
+  <span class="n">sheet</span><span class="p">[</span><span class="s1">&#39;expno&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sheet</span><span class="p">[</span><span class="s1">&#39;expno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+  <span class="n">sheet</span><span class="p">[</span><span class="s1">&#39;procno&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sheet</span><span class="p">[</span><span class="s1">&#39;procno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">sheet</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">sheet</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">sheet</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">sheet</span></div>
+
+<div class="viewcode-block" id="getRelativeBrukerDataLocations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getRelativeBrukerDataLocations">[docs]</a><span class="k">def</span> <span class="nf">getRelativeBrukerDataLocations</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+  <span class="n">expnos</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;expno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+  <span class="n">procnos</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;procno&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">expnos</span><span class="p">,</span> <span class="n">procnos</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="loadBrukerSpectra"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.loadBrukerSpectra">[docs]</a><span class="k">def</span> <span class="nf">loadBrukerSpectra</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">locations</span><span class="p">):</span>
+  <span class="n">specs</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="c1"># path = os.path.join(os.path.split(path)[:-1])[0]</span>
+  <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">location</span> <span class="ow">in</span> <span class="n">locations</span><span class="p">:</span>
+    <span class="n">specLocation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">location</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;pdata&#39;</span><span class="p">,</span> <span class="n">location</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">specs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">specLocation</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">specs</span></div>
+
+<div class="viewcode-block" id="getSpectrumNamesFromDf"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getSpectrumNamesFromDf">[docs]</a><span class="k">def</span> <span class="nf">getSpectrumNamesFromDf</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+  <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getAllGroupsFromDf"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getAllGroupsFromDf">[docs]</a><span class="k">def</span> <span class="nf">getAllGroupsFromDf</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+  <span class="n">groupsDf</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;group &#39;</span><span class="p">)]]</span>
+  <span class="n">groupsDf</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">groupsDf</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+  <span class="n">groupsLists</span> <span class="o">=</span> <span class="n">groupsDf</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">)</span>
+  <span class="n">groups</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">groupsLists</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">g</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+      <span class="n">groups</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">g</span><span class="p">))))</span>
+  <span class="k">return</span> <span class="n">groups</span></div>
+
+<div class="viewcode-block" id="getSpecrumGroupsByName"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getSpecrumGroupsByName">[docs]</a><span class="k">def</span> <span class="nf">getSpecrumGroupsByName</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+  <span class="n">row</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">name</span><span class="p">]</span>
+  <span class="k">return</span> <span class="n">getAllGroupsFromDf</span><span class="p">(</span><span class="n">row</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="getAllSpectrumGroupAssignments"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getAllSpectrumGroupAssignments">[docs]</a><span class="k">def</span> <span class="nf">getAllSpectrumGroupAssignments</span><span class="p">(</span><span class="n">spectra</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+  <span class="n">assembledGroups</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="p">[]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">getAllGroupsFromDf</span><span class="p">(</span><span class="n">df</span><span class="p">)}</span>
+  <span class="c1"># print(df)</span>
+  <span class="c1"># print(spectrum)</span>
+  <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+    <span class="n">groups</span> <span class="o">=</span> <span class="n">getSpecrumGroupsByName</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+      <span class="n">assembledGroups</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+  <span class="k">return</span> <span class="n">assembledGroups</span></div>
+
+<span class="c1"># def readXls(project, path=None):</span>
+<span class="c1">#   ex = pd.ExcelFile(path)</span>
+<span class="c1">#   excelSheet = ex.parse(ex.sheet_names[0])</span>
+<span class="c1">#   excelSheet.fillna(&#39;Empty&#39;,inplace=True)</span>
+<span class="c1">#   createDataDict(project, excelSheet)</span>
+<span class="c1">#</span>
+<span class="c1">#   if len(ex.sheet_names) &gt; 1:</span>
+<span class="c1">#     secondSheetExcel = ex.parse(ex.sheet_names[1])</span>
+<span class="c1">#     secondSheetExcel.fillna(&#39;Empty&#39;,inplace=True)</span>
+<span class="c1">#     createSampleDicts(project, secondSheetExcel)</span>
+
+<div class="viewcode-block" id="readCsv"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.readCsv">[docs]</a><span class="k">def</span> <span class="nf">readCsv</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+  <span class="n">csv_in</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+  <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">csv_in</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">reader</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;procs&#39;</span><span class="p">:</span>
+      <span class="n">filename</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+      <span class="n">filename</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+      <span class="n">filenamePath</span> <span class="o">=</span> <span class="s1">&#39;/&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+      <span class="n">spectrum</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">filenamePath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="loadReferenceSheet"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.loadReferenceSheet">[docs]</a><span class="k">def</span> <span class="nf">loadReferenceSheet</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataDicts</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39; dispatch data to the project&#39;&#39;&#39;</span>
+  <span class="n">createGroupNameDicts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataDicts</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">applicationName</span> <span class="o">==</span> <span class="s1">&#39;AnalysisScreen&#39;</span><span class="p">:</span>
+      <span class="n">createNewSubstance</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataDicts</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="createGroupNameDicts"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.createGroupNameDicts">[docs]</a><span class="k">def</span> <span class="nf">createGroupNameDicts</span><span class="p">(</span><span class="n">project</span><span class="p">,</span><span class="n">dataDicts</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39; creates dicts group name with its spectrum &#39;&#39;&#39;</span>
+  <span class="n">groupNameDicts</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">dataDict</span> <span class="ow">in</span> <span class="n">dataDicts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="n">groupNameDict</span><span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">groupName</span><span class="p">):</span><span class="n">spectrum</span> <span class="k">for</span> <span class="n">header</span><span class="p">,</span> <span class="n">groupName</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="s1">&#39;groupName&#39;</span><span class="p">}</span>
+      <span class="n">groupNameDicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">groupNameDict</span><span class="p">)</span>
+  <span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">groupNameDicts</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="newSpectrumGroup"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.newSpectrumGroup">[docs]</a><span class="k">def</span> <span class="nf">newSpectrumGroup</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">groupNameDicts</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39;creates new spectrum group for the project. If more groups have the same name they are merged&#39;&#39;&#39;</span>
+  <span class="n">newGroupsDict</span> <span class="o">=</span> <span class="p">{}</span>
+  <span class="k">for</span> <span class="n">groupName</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">k</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">groupNameDicts</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">d</span><span class="p">):</span>
+    <span class="n">newGroupsDict</span><span class="p">[</span><span class="n">groupName</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="n">groupName</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">groupNameDicts</span> <span class="k">if</span> <span class="n">groupName</span> <span class="ow">in</span> <span class="n">d</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">groupName</span><span class="p">,</span> <span class="n">spectra</span> <span class="ow">in</span> <span class="n">newGroupsDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">groupName</span><span class="p">,</span> <span class="n">spectra</span><span class="p">)</span>
+    <span class="n">newSpectrumGroup</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">groupName</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="n">spectra</span><span class="p">)</span></div>
+
+
+
+
+<span class="k">def</span> <span class="nf">_loadSTDtoProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">):</span>
+  <span class="sd">&#39;&#39;&#39;creates new sample for the project and associate all value in a dict&#39;&#39;&#39;</span>
+  <span class="n">STDs_Off_Res_SP</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">STDs_ON_Res_SP</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s2">&quot;index&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;SampleName&#39;</span><span class="p">:</span>
+          <span class="n">sample</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newSample</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+          <span class="n">loadSTDspectra</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span><span class="n">data</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">)</span>
+          <span class="n">STDs_Off_Res_SP</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getSTDoffResonance</span><span class="p">(</span><span class="n">sample</span><span class="p">))</span>
+          <span class="n">STDs_ON_Res_SP</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">getSTDonResonance</span><span class="p">(</span><span class="n">sample</span><span class="p">))</span>
+          <span class="k">for</span> <span class="n">sampleProperty</span> <span class="ow">in</span> <span class="n">sampleProperties</span><span class="p">:</span>
+            <span class="n">sampleProperty</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+  <span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="s1">&#39;STD_OFF_RES&#39;</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="n">STDs_Off_Res_SP</span><span class="p">)</span>
+  <span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="s1">&#39;STD_ON_RES&#39;</span><span class="p">,</span> <span class="n">spectra</span><span class="o">=</span><span class="n">STDs_ON_Res_SP</span><span class="p">)</span>
+  <span class="n">project</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="p">(</span><span class="s1">&#39;STD_DIFF&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="getSTDoffResonance"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getSTDoffResonance">[docs]</a><span class="k">def</span> <span class="nf">getSTDoffResonance</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="getSTDonResonance"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.getSTDonResonance">[docs]</a><span class="k">def</span> <span class="nf">getSTDonResonance</span><span class="p">(</span><span class="n">sample</span><span class="p">):</span>
+  <span class="k">return</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="loadSTDSheet"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.loadSTDSheet">[docs]</a><span class="k">def</span> <span class="nf">loadSTDSheet</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">,</span> <span class="n">brukerDirs</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">):</span>
+  <span class="n">_loadSTDtoProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="createNewSubstance"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.createNewSubstance">[docs]</a><span class="k">def</span> <span class="nf">createNewSubstance</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataDicts</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">dataDict</span> <span class="ow">in</span> <span class="n">dataDicts</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">spectrum</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="n">dataDict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="n">expType</span> <span class="o">=</span> <span class="p">([[</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;expType&#39;</span><span class="p">])</span>
+      <span class="n">newSubstance</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newSubstance</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">labeling</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">expType</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+      <span class="c1"># newChain = project.createChain(sequence=str(&#39;A&#39;),compoundName=str(spectrum.name), molType=&#39;protein&#39;)</span>
+      <span class="n">newSubstance</span><span class="o">.</span><span class="n">referenceSpectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">spectrum</span><span class="p">]</span>
+      <span class="n">dispatchSubstanceProperties</span><span class="p">(</span><span class="n">newSubstance</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="dispatchSubstanceProperties"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.dispatchSubstanceProperties">[docs]</a><span class="k">def</span> <span class="nf">dispatchSubstanceProperties</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">substanceProperty</span> <span class="ow">in</span> <span class="n">substanceProperties</span><span class="p">:</span>
+    <span class="n">substanceProperty</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="dispatchSampleProperties"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.dispatchSampleProperties">[docs]</a><span class="k">def</span> <span class="nf">dispatchSampleProperties</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="k">for</span> <span class="n">sampleProperty</span> <span class="ow">in</span> <span class="n">sampleProperties</span><span class="p">:</span>
+    <span class="n">sampleProperty</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="addSampleComponents"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.addSampleComponents">[docs]</a><span class="k">def</span> <span class="nf">addSampleComponents</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">sampleComponents</span> <span class="o">=</span> <span class="p">[[</span><span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span><span class="p">]</span> <span class="k">for</span> <span class="n">header</span><span class="p">,</span> <span class="n">sampleComponentName</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">header</span> <span class="o">==</span> <span class="s1">&#39;sampleComponents&#39;</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sampleComponents</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
+    <span class="n">sampleComponent</span> <span class="o">=</span> <span class="n">sample</span><span class="o">.</span><span class="n">newSampleComponent</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;-1&#39;</span><span class="p">),</span> <span class="n">labeling</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="createStdSpectrumGroup"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.createStdSpectrumGroup">[docs]</a><span class="k">def</span> <span class="nf">createStdSpectrumGroup</span><span class="p">(</span><span class="n">project</span><span class="p">,):</span>
+  <span class="n">spectra</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">sample</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">samples</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="n">spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">spectrumGroup</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;STD&#39;</span><span class="p">:</span>
+      <span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">spectra</span></div>
+
+<div class="viewcode-block" id="loadSTDspectra"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.loadSTDspectra">[docs]</a><span class="k">def</span> <span class="nf">loadSTDspectra</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">):</span>
+  <span class="n">stdOffSpectrumName</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                   <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;spectrumOFF_Resonance&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="n">stdOnSpectrumName</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;spectrumON_Resonance&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="n">brukerDirNames</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">stdOffSpectrumName</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="n">stdOnSpectrumName</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])]</span>
+  <span class="n">fullPaths</span> <span class="o">=</span> <span class="n">getFullFilePaths</span><span class="p">(</span><span class="n">brukerDirNames</span><span class="p">,</span> <span class="n">workingDirectoryPath</span><span class="p">)</span>
+  <span class="n">spectra</span> <span class="o">=</span> <span class="p">[</span><span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span>  <span class="n">path</span> <span class="ow">in</span> <span class="n">fullPaths</span><span class="p">]</span>
+  <span class="n">sample</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="n">spectra</span></div>
+
+
+<div class="viewcode-block" id="setSamplepH"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSamplepH">[docs]</a><span class="k">def</span> <span class="nf">setSamplepH</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">samplePH</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+              <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;pH&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">samplePH</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">ph</span> <span class="o">=</span> <span class="n">samplePH</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleIonicStrength"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleIonicStrength">[docs]</a><span class="k">def</span> <span class="nf">setSampleIonicStrength</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">ionicStrength</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                   <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;ionicStrength&#39;</span><span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ionicStrength</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">ph</span> <span class="o">=</span> <span class="n">ionicStrength</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleAmount"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleAmount">[docs]</a><span class="k">def</span> <span class="nf">setSampleAmount</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">amount</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;amount&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">amount</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleAmountUnit"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleAmountUnit">[docs]</a><span class="k">def</span> <span class="nf">setSampleAmountUnit</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">amountUnit</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;amountUnit&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">amountUnit</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">amountUnit</span> <span class="o">=</span> <span class="n">amountUnit</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleCreationDate"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleCreationDate">[docs]</a><span class="k">def</span> <span class="nf">setSampleCreationDate</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">creationDate</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                  <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;creationDate&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">creationDate</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">creationDate</span> <span class="o">=</span> <span class="n">creationDate</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleBatchIdentifier"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleBatchIdentifier">[docs]</a><span class="k">def</span> <span class="nf">setSampleBatchIdentifier</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">batchIdentifier</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;batchIdentifier&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">batchIdentifier</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">batchIdentifier</span> <span class="o">=</span> <span class="n">batchIdentifier</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSamplePlateIdentifier"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSamplePlateIdentifier">[docs]</a><span class="k">def</span> <span class="nf">setSamplePlateIdentifier</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">plateIdentifier</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;plateIdentifier&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">plateIdentifier</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+   <span class="n">sample</span><span class="o">.</span><span class="n">plateIdentifier</span> <span class="o">=</span> <span class="n">plateIdentifier</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleRowNumber"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleRowNumber">[docs]</a><span class="k">def</span> <span class="nf">setSampleRowNumber</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">rowNumber</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+               <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;rowNumber&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rowNumber</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">rowNumber</span> <span class="o">=</span> <span class="n">rowNumber</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleColumnNumberr"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleColumnNumberr">[docs]</a><span class="k">def</span> <span class="nf">setSampleColumnNumberr</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">columnNumber</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                  <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;columnNumber&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">columnNumber</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">columnNumber</span> <span class="o">=</span> <span class="n">columnNumber</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSampleComment"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSampleComment">[docs]</a><span class="k">def</span> <span class="nf">setSampleComment</span><span class="p">(</span><span class="n">sample</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">comments</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+              <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;sampleComments&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">sample</span><span class="o">.</span><span class="n">comments</span> <span class="o">=</span> <span class="n">comments</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<span class="n">sampleProperties</span> <span class="o">=</span> <span class="p">[</span><span class="n">addSampleComponents</span><span class="p">,</span> <span class="n">setSamplepH</span><span class="p">,</span>
+  <span class="n">setSampleIonicStrength</span><span class="p">,</span> <span class="n">setSampleAmount</span><span class="p">,</span> <span class="n">setSampleAmountUnit</span><span class="p">,</span> <span class="n">setSampleCreationDate</span><span class="p">,</span>
+  <span class="n">setSampleBatchIdentifier</span><span class="p">,</span> <span class="n">setSampleRowNumber</span><span class="p">,</span> <span class="n">setSampleColumnNumberr</span><span class="p">,</span> <span class="n">setSampleComment</span><span class="p">]</span>
+
+<span class="c1">### Setting Substance properties</span>
+
+<div class="viewcode-block" id="setSubstanceType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceType">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceType</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceType</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                   <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceType&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceType</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+   <span class="n">substance</span><span class="o">.</span><span class="n">substanceType</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">substanceType</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="setSubstanceSynonyms"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceSynonyms">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceSynonyms</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceSynonyms</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                       <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceSynonyms&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceSynonyms</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">synonyms</span> <span class="o">=</span> <span class="n">substanceSynonyms</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceComment"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceComment">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceComment</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">comments</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+              <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceComments&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">comments</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">comments</span> <span class="o">=</span> <span class="n">comments</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceUserCode"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceUserCode">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceUserCode</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">userCode</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+              <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceUserCode&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">userCode</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">userCode</span> <span class="o">=</span> <span class="n">userCode</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceSmiles"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceSmiles">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceSmiles</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">smiles</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceSmiles&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">smiles</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">smiles</span> <span class="o">=</span> <span class="n">smiles</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceInChi"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceInChi">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceInChi</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">inChi</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+           <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceInChi&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">inChi</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">inChi</span> <span class="o">=</span> <span class="n">inChi</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceCasNumber"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceCasNumber">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceCasNumber</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceCasNumber</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceCasNumber&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceCasNumber</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">casNumber</span> <span class="o">=</span> <span class="n">substanceCasNumber</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceEmpiricalFormula"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceEmpiricalFormula">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceEmpiricalFormula</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceEmpiricalFormula</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                               <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceEmpiricalFormula&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceEmpiricalFormula</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">empiricalFormula</span> <span class="o">=</span> <span class="n">substanceEmpiricalFormula</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceMolecularMass"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceMolecularMass">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceMolecularMass</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceMolecularMass</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                            <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;molecularMass&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceMolecularMass</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">molecularMass</span> <span class="o">=</span> <span class="n">substanceMolecularMass</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceHAtomCount"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceHAtomCount">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceHAtomCount</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceHAtomCount</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                         <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceHAtomCount&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceHAtomCount</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">atomCount</span> <span class="o">=</span> <span class="n">substanceHAtomCount</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceBondCount"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceBondCount">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceBondCount</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceBondCount</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceBondCount&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceBondCount</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">bondCount</span> <span class="o">=</span> <span class="n">substanceBondCount</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceRingCount"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceRingCount">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceRingCount</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceRingCount</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substanceRingCount&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceRingCount</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">ringCount</span> <span class="o">=</span> <span class="n">substanceRingCount</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceHBondDonorCount"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceHBondDonorCount">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceHBondDonorCount</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceHBondDonorCount</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                              <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;Hdonor&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceHBondDonorCount</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">hBondDonorCount</span> <span class="o">=</span> <span class="n">substanceHBondDonorCount</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceHBondAcceptorCount"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceHBondAcceptorCount">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceHBondAcceptorCount</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceHBondDonorCount</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                              <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;Hacceptor&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceHBondDonorCount</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">hBondAcceptorCount</span> <span class="o">=</span> <span class="n">substanceHBondDonorCount</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstancePolarSurfaceArea"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstancePolarSurfaceArea">[docs]</a><span class="k">def</span> <span class="nf">setSubstancePolarSurfaceArea</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substancePolarSurfaceArea</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                               <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;substancePolarSurfaceArea&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substancePolarSurfaceArea</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">polarSurfaceArea</span> <span class="o">=</span> <span class="n">substancePolarSurfaceArea</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="setSubstanceLogPartitionCoefficient"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.spectrum.formats.html#ccpnmodel.ccpncore.lib.spectrum.formats.Lookup.setSubstanceLogPartitionCoefficient">[docs]</a><span class="k">def</span> <span class="nf">setSubstanceLogPartitionCoefficient</span><span class="p">(</span><span class="n">substance</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+  <span class="n">substanceLogPartitionCoefficient</span> <span class="o">=</span> <span class="p">[[</span><span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span> <span class="k">for</span> <span class="n">excelHeader</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                                      <span class="k">if</span> <span class="n">excelHeader</span> <span class="o">==</span> <span class="s1">&#39;cLogP&#39;</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;Empty&#39;</span><span class="p">]</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">substanceLogPartitionCoefficient</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+    <span class="n">substance</span><span class="o">.</span><span class="n">logPartitionCoefficient</span> <span class="o">=</span> <span class="n">substanceLogPartitionCoefficient</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span></div>
+
+<span class="n">substanceProperties</span> <span class="o">=</span> <span class="p">[</span><span class="n">setSubstanceType</span><span class="p">,</span> <span class="n">setSubstanceComment</span><span class="p">,</span> <span class="n">setSubstanceSynonyms</span><span class="p">,</span> <span class="n">setSubstanceUserCode</span><span class="p">,</span>
+  <span class="n">setSubstanceSmiles</span><span class="p">,</span> <span class="n">setSubstanceInChi</span><span class="p">,</span> <span class="n">setSubstanceCasNumber</span><span class="p">,</span> <span class="n">setSubstanceEmpiricalFormula</span><span class="p">,</span>
+  <span class="n">setSubstanceMolecularMass</span><span class="p">,</span> <span class="n">setSubstanceHAtomCount</span><span class="p">,</span> <span class="n">setSubstanceBondCount</span><span class="p">,</span> <span class="n">setSubstanceRingCount</span><span class="p">,</span>
+  <span class="n">setSubstanceLogPartitionCoefficient</span><span class="p">,</span><span class="n">setSubstancePolarSurfaceArea</span><span class="p">,</span>
+  <span class="n">setSubstanceHBondDonorCount</span><span class="p">,</span> <span class="n">setSubstanceHBondAcceptorCount</span><span class="p">]</span>
+
+
+<span class="c1">### Loading obj in SideBar</span>
+
+<span class="c1"># Feb 2106 Rasmus Fogh. No longer needed</span>
+
+<span class="c1"># def loadSpectrumInSideBar(project, spectrum):</span>
+<span class="c1">#   &#39;&#39;&#39; load the spectrum in the sidebar &#39;&#39;&#39;</span>
+<span class="c1">#   peakList = spectrum.newPeakList()</span>
+<span class="c1">#   sideBar = project._appBase.mainWindow.sideBar</span>
+<span class="c1">#   spectra = sideBar.spectrumItem</span>
+<span class="c1">#   newSpectrumItem = sideBar.addItem(spectra, spectrum)</span>
+<span class="c1">#   peakListItem = QtGui.QTreeWidgetItem(newSpectrumItem)</span>
+<span class="c1">#   peakListItem.setText(0, peakList.pid)</span>
+
+<span class="c1"># def loadSampleInSideBar(project, sample):</span>
+<span class="c1">#   sideBar = project._appBase.mainWindow.sideBar</span>
+<span class="c1">#   sampleSideBar = sideBar.samplesItem</span>
+<span class="c1">#   sampleItem =  sideBar.addItem(sampleSideBar, sample)</span>
+<span class="c1">#   for sampleComponent in sample.sampleComponents[0:]:</span>
+<span class="c1">#     sideBar.addItem(sampleItem, sampleComponent)</span>
+<span class="c1">#</span>
+<span class="c1"># def loadSpectrumGroupInSideBar(project, newSpectrumGroup):</span>
+<span class="c1">#   sideBar = project._appBase.mainWindow.sideBar</span>
+<span class="c1">#   spectrumGroupItem = sideBar.spectrumGroupItem</span>
+<span class="c1">#   newGroupItem =  sideBar.addItem(spectrumGroupItem, newSpectrumGroup)</span>
+<span class="c1">#   for spectrum in newSpectrumGroup.spectra:</span>
+<span class="c1">#     sideBar.addItem(newGroupItem, spectrum)</span>
+<span class="c1">#     peakList = spectrum.newPeakList()</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

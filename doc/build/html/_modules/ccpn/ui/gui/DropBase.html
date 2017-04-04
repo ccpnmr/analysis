@@ -1,0 +1,243 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.DropBase &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.DropBase</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">ccpnUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.Base</span> <span class="kn">import</span> <span class="n">Base</span> <span class="k">as</span> <span class="n">GuiBase</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showWarning</span>
+
+
+<div class="viewcode-block" id="DropBase"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase">[docs]</a><span class="k">class</span> <span class="nc">DropBase</span><span class="p">(</span><span class="n">GuiBase</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appBase</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="n">GuiBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appBase</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DropBase.dragEnterEvent"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase.dragEnterEvent">[docs]</a>  <span class="k">def</span> <span class="nf">dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DropBase.dropEvent"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase.dropEvent">[docs]</a>  <span class="k">def</span> <span class="nf">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Catch dropEvent and dispatch to processing&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib</span> <span class="kn">import</span> <span class="n">Qt</span> <span class="k">as</span> <span class="n">qtUtil</span>
+
+    <span class="n">data</span><span class="p">,</span> <span class="n">dataType</span> <span class="o">=</span> <span class="n">qtUtil</span><span class="o">.</span><span class="n">interpretEvent</span><span class="p">(</span><span class="n">event</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">data</span> <span class="ow">and</span> <span class="n">dataType</span><span class="p">:</span>
+      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">processDropData</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dataType</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CcpnModule</span><span class="p">):</span><span class="c1"># restore the native  module drop event.</span>
+        <span class="n">CcpnModule</span><span class="o">.</span><span class="n">dropEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="DropBase.processDropData"><a class="viewcode-back" href="../../../../ccpn/ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase.processDropData">[docs]</a>  <span class="k">def</span> <span class="nf">processDropData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">dataType</span><span class="o">=</span><span class="s1">&#39;pids&#39;</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Process dropped-in data</span>
+<span class="sd">    Separate function so it can be called from command line as well.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span>
+    <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;text&#39;</span><span class="p">:</span>
+      <span class="c1"># data is a text string</span>
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;processText&#39;</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processText</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">if</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;pids&#39;</span><span class="p">:</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="n">data</span>
+
+      <span class="k">elif</span> <span class="n">dataType</span> <span class="o">==</span> <span class="s1">&#39;urls&#39;</span><span class="p">:</span>
+        <span class="c1"># data is list-of-urls</span>
+        <span class="c1"># Load Urls one by one with normal loaders</span>
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+          <span class="n">loaded</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">loaded</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">Project</span><span class="o">.</span><span class="n">Project</span><span class="p">):</span>
+            <span class="c1"># We have loaded a new project</span>
+            <span class="k">return</span>
+
+          <span class="c1"># if loaded and loaded[0] is self._appBase.project:</span>
+          <span class="c1">#   # We have loaded a new project</span>
+          <span class="c1">#   return</span>
+
+          <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;project.loadData(&#39;</span><span class="si">%s</span><span class="s2">&#39;)&quot;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span><span class="o">.</span><span class="n">pythonConsole</span><span class="o">.</span><span class="n">writeConsoleCommand</span><span class="p">(</span><span class="s2">&quot;project.loadData(&#39;</span><span class="si">%s</span><span class="s2">&#39;)&quot;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+
+          <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;project.loadData(&#39;</span><span class="si">%s</span><span class="s2">&#39;)&quot;</span> <span class="o">%</span> <span class="n">url</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">loaded</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">loaded</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+              <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;processText&#39;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">processText</span><span class="p">(</span><span class="n">loaded</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">newPids</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">loaded</span><span class="p">]</span>
+              <span class="n">projects</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">newPids</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;PR:&#39;</span><span class="p">)]</span>
+              <span class="k">if</span> <span class="n">projects</span><span class="p">:</span>
+                <span class="n">pids</span> <span class="o">=</span> <span class="n">projects</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">newPids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                  <span class="n">showWarning</span><span class="p">(</span><span class="s1">&#39;Incorrect data load&#39;</span><span class="p">,</span>
+                              <span class="s2">&quot;Attempt to load project together with other data. Other data ignored&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+              <span class="k">else</span><span class="p">:</span>
+                <span class="n">pids</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">newPids</span><span class="p">)</span>
+
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">CcpnModule</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">overlay</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+          <span class="n">pluralClassName</span> <span class="o">=</span> <span class="n">ccpnUtil</span><span class="o">.</span><span class="n">pid2PluralName</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+
+          <span class="c1"># NBNB Code to put other data types in side bar must go here</span>
+
+          <span class="k">if</span> <span class="n">pluralClassName</span> <span class="o">==</span> <span class="s1">&#39;spectra&#39;</span><span class="p">:</span>
+            <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span>
+            <span class="c1"># self._appBase.mainWindow.sideBar.addSpectrum(spectrum)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;processDropData does not recognise dataType </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">dataType</span><span class="p">)</span>
+
+      <span class="c1"># process pids</span>
+      <span class="k">if</span> <span class="n">pids</span><span class="p">:</span>
+
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">ccpnUtil</span><span class="o">.</span><span class="n">pid2PluralName</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">]</span>
+        <span class="n">tags</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="o">+</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">tags</span><span class="p">]</span>
+        <span class="k">if</span>  <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">tags</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+          <span class="c1"># All pids of same type - process entire list with a single process call</span>
+          <span class="n">funcName</span> <span class="o">=</span> <span class="s1">&#39;process&#39;</span> <span class="o">+</span> <span class="n">tags</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcName</span><span class="p">):</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">funcName</span><span class="p">)(</span><span class="n">pids</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+          <span class="k">elif</span> <span class="n">funcName</span> <span class="o">==</span> <span class="s1">&#39;processProjects&#39;</span><span class="p">:</span>
+            <span class="c1"># We never need to process a project</span>
+            <span class="k">pass</span>
+          <span class="k">elif</span> <span class="n">dataType</span> <span class="o">!=</span> <span class="s1">&#39;urls&#39;</span><span class="p">:</span>
+            <span class="c1"># Added RHF 16/2/2016. If we have loaded data that is OK, and no warning needed.</span>
+            <span class="c1"># Why warn if we drop a spectrum file on the side bar?</span>
+            <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Dropped data not processed - no </span><span class="si">%s</span><span class="s2"> function defined for </span><span class="si">%s</span><span class="s2">&quot;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="n">funcName</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># Treat each Pid separately (but still pass it in a list - NBNB)</span>
+          <span class="c1"># If we need special functions for multi-type processing they must go here.</span>
+          <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">tag</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tags</span><span class="p">):</span>
+            <span class="n">funcName</span> <span class="o">=</span> <span class="s1">&#39;process&#39;</span> <span class="o">+</span> <span class="n">tag</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">funcName</span><span class="p">):</span>
+              <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">funcName</span><span class="p">)([</span><span class="n">pids</span><span class="p">[</span><span class="n">ii</span><span class="p">]],</span> <span class="n">event</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">dataType</span> <span class="o">!=</span> <span class="s1">&#39;urls&#39;</span><span class="p">:</span>
+              <span class="c1"># Added RHF 16/2/2016. If we have loaded data that is OK, and no warning needed.</span>
+              <span class="c1"># Why warn if we drop a spectrum file on the side bar?</span>
+              <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Dropped data </span><span class="si">%s</span><span class="s2"> not processed - no </span><span class="si">%s</span><span class="s2"> function defined for </span><span class="si">%s</span><span class="s2">&quot;</span>
+              <span class="o">%</span> <span class="p">(</span><span class="n">pid</span><span class="p">,</span> <span class="n">funcName</span><span class="p">,</span> <span class="bp">self</span><span class="p">))</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.PeakTable &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.PeakTable</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiTableGenerator</span> <span class="kn">import</span> <span class="n">GuiTableGenerator</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.peakUtils</span> <span class="kn">import</span> <span class="n">getPeakPosition</span><span class="p">,</span> <span class="n">getPeakAnnotation</span><span class="p">,</span> <span class="n">getPeakLinewidth</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SelectObjectsPopup</span> <span class="kn">import</span> <span class="n">SelectObjectsPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GroupBox</span> <span class="kn">import</span> <span class="n">GroupBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+
+<span class="n">UNITS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ppm&#39;</span><span class="p">,</span> <span class="s1">&#39;Hz&#39;</span><span class="p">,</span> <span class="s1">&#39;point&#39;</span><span class="p">]</span>
+
+<div class="viewcode-block" id="PeakTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakTable">[docs]</a><span class="k">class</span> <span class="nc">PeakTable</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">maxSettingsState</span> <span class="o">=</span> <span class="mi">2</span>
+  <span class="n">settingsOnTop</span> <span class="o">=</span> <span class="bp">True</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">selectedList</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Peak List&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">_ccpnApplication</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Project has no peaklists. Peak table cannot be displayed&#39;</span><span class="p">)</span>
+      <span class="k">return</span>
+
+    <span class="c1"># settingsWidget</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span> <span class="o">=</span> <span class="n">GroupBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingsWidget</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">columnsLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="s1">&#39;Columns to display&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="n">serialCheckLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Serial&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">serialCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">assignCheckLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Assign&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">assignCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">[</span><span class="s1">&#39;assign&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">positionCheckLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Position&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">positionCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">heightCheckLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">heightCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">volumeCheckLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Volume&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">volumeCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">[</span><span class="s1">&#39;volume&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">linewidthCheckLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Line Width&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">linewidthCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">[</span><span class="s1">&#39;linewidth&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">11</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">detailsCheckLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Details&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">12</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">detailsCheckBox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">[</span><span class="s1">&#39;details&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectionBox</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c1"># mainWidget</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span> <span class="o">=</span> <span class="n">PeakListSimple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainWidget</span><span class="p">,</span> <span class="n">selectedList</span><span class="o">=</span><span class="n">selectedList</span><span class="p">,</span> <span class="n">columnSettings</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">:</span>
+      <span class="n">peakList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">peakListPulldown</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">peakListPulldown</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">checkBox</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkBoxDict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="n">checkBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">updateTable</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implementation of closeModule function from CcpnModule to unregister notification on current.peaks</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#self.current.unRegisterNotify(self.peakList._selectPeakInTable, &#39;peak&#39;)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">_deregisterNotifiers</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="PeakListSimple"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakListSimple">[docs]</a><span class="k">class</span> <span class="nc">PeakListSimple</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">,</span> <span class="n">DropBase</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectedList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">columnSettings</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+      
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">_ccpnApplication</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">columnSettings</span> <span class="o">=</span> <span class="n">columnSettings</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">sampledDims</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">selectedList</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectedList</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">selectedList</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">selectedList</span> <span class="o">=</span> <span class="n">selectedList</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Peak List&#39;</span><span class="p">)</span>
+
+    <span class="n">widget1</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="n">widget1</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+    <span class="n">widget1</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">widget1</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListPulldown</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="n">widget2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">l2</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="n">widget2</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">l2</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39; Position Unit&#39;</span><span class="p">)</span>
+    <span class="n">widget2</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">posUnitPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="n">UNITS</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refreshTable</span><span class="p">)</span>
+    <span class="n">widget2</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">posUnitPulldown</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">widget2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">subtractPeakListsButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Subtract </span><span class="se">\n</span><span class="s1">PeakLists&#39;</span><span class="p">,</span>
+                                          <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_subtractPeakLists</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">deletePeakButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Delete </span><span class="se">\n</span><span class="s1">Selected&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_deleteSelectedPeaks</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widget3</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">l3</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widget3</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">l3</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widget3</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">subtractPeakListsButton</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">widget3</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deletePeakButton</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span> <span class="o">=</span> <span class="n">GuiTableGenerator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objectLists</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span><span class="p">,</span> <span class="n">actionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_actionCallback</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectionCallback</span><span class="p">,</span>
+                                       <span class="n">getColumnsFunction</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">getExtraColumns</span><span class="p">,</span> <span class="n">selector</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListPulldown</span><span class="p">,</span>
+                                       <span class="n">multiSelect</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">unitPulldown</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">posUnitPulldown</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="p">()</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">selectedList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakListPulldown</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">selectedList</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">__registerNotifiers</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListPulldown</span><span class="o">.</span><span class="n">activated</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">updateSelectionOnTable</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="PeakListSimple.updateSelectionOnTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakListSimple.updateSelectionOnTable">[docs]</a>  <span class="k">def</span> <span class="nf">updateSelectionOnTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PeakListSimple.getExtraColumns"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.PeakTable.PeakListSimple.getExtraColumns">[docs]</a>  <span class="k">def</span> <span class="nf">getExtraColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="p">):</span>
+
+      <span class="n">columns</span> <span class="o">=</span> <span class="p">[]</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnSettings</span><span class="p">[</span><span class="s1">&#39;serial&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="s1">&#39;serial&#39;</span><span class="p">))</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnSettings</span><span class="p">[</span><span class="s1">&#39;height&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Height&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">height</span><span class="p">))</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnSettings</span><span class="p">[</span><span class="s1">&#39;volume&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">columns</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;Volume&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">:</span> <span class="n">pk</span><span class="o">.</span><span class="n">volume</span><span class="p">))</span>
+
+      <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Peak serial number&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;Magnitude of spectrum intensity at peak center (interpolated), unless user edited&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;Integral of spectrum intensity around peak location, according to chosen volume method&#39;</span><span class="p">,</span>
+              <span class="s1">&#39;Textual notes about the peak&#39;</span><span class="p">]</span>
+      <span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
+      <span class="n">numDim</span> <span class="o">=</span> <span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnSettings</span><span class="p">[</span><span class="s1">&#39;assign&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numDim</span><span class="p">):</span>
+          <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+          <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;Assign F</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span><span class="n">getPeakAnnotation</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">))</span>
+          <span class="n">columns</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+          <span class="n">tipTexts</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s1">&#39;NmrAtom assignments of peak in dimension </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
+          <span class="n">k</span><span class="o">+=</span><span class="mi">1</span>
+
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnSettings</span><span class="p">[</span><span class="s1">&#39;position&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numDim</span><span class="p">):</span>
+          <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+          <span class="n">sampledDim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sampledDims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">sampledDim</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Sampled</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sampledDim</span><span class="o">.</span><span class="n">conditionVaried</span>
+            <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Value of sampled plane&#39;</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">sampledDim</span>
+
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="s1">&#39;Pos F</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span>
+            <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Peak position in dimension </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">posUnitPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span>
+          <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">:</span><span class="n">getPeakPosition</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">unit</span><span class="p">))</span>
+          <span class="n">columns</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+          <span class="n">tipTexts</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">tipText</span><span class="p">)</span>
+          <span class="n">k</span><span class="o">+=</span><span class="mi">1</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnSettings</span><span class="p">[</span><span class="s1">&#39;linewidth&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">numDim</span><span class="p">):</span>
+          <span class="n">j</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+          <span class="n">c</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;LW F</span><span class="si">%d</span><span class="s1"> (Hz)&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="o">=</span><span class="n">i</span><span class="p">:</span><span class="n">getPeakLinewidth</span><span class="p">(</span><span class="n">pk</span><span class="p">,</span> <span class="n">dim</span><span class="p">))</span>
+          <span class="n">columns</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+          <span class="n">tipTexts</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="s1">&#39;NmrAtom assignments of peak in dimension </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">j</span><span class="p">)</span>
+          <span class="n">k</span><span class="o">+=</span><span class="mi">1</span>
+
+      <span class="k">return</span> <span class="n">columns</span><span class="p">,</span> <span class="n">tipTexts</span></div>
+
+
+  <span class="k">def</span> <span class="nf">__registerNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">,</span> <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">registerNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">,</span> <span class="s1">&#39;peaks&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_deregisterNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;Peak&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshPeakTable</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_updatePeakLists</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">unRegisterNotify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectOnTableCurrentPeaks</span><span class="p">,</span> <span class="s1">&#39;peaks&#39;</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_updatePeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">objectLists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">_updateSelectorContents</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_subtractPeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Subtracts a selected peak list from the peak list currently displayed in the peak table and</span>
+<span class="sd">    produces a new peak list attached to the spectrum of the selected peak list.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">peakList1</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+
+    <span class="n">availablePeakLists</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakList</span> <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">peakList1</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span>
+                         <span class="k">if</span> <span class="n">peakList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">peakList1</span><span class="p">]</span>
+
+    <span class="n">selectPeakListPopup</span> <span class="o">=</span> <span class="n">SelectObjectsPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="n">availablePeakLists</span><span class="p">)</span>
+    <span class="n">selectPeakListPopup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
+      <span class="n">peakList1</span><span class="o">.</span><span class="n">_subtractPeakLists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">peakList</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">_updateSelectorContents</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_deleteSelectedPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">for</span> <span class="n">peakObject</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">():</span>
+      <span class="n">peakObject</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_refreshTable</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; If current strip contains the double clicked peak will navigateToPositionInStrip &#39;&#39;&#39;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.lib.Strip</span> <span class="kn">import</span> <span class="n">navigateToPositionInStrip</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">navigateToPositionInStrip</span><span class="p">(</span><span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">,</span> <span class="n">positions</span><span class="o">=</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Impossible to navigate to peak position. Set a current strip first&#39;</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_selectionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peaks</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    set as current the selected peaks on the table</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">peaks</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">clearPeaks</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">peaks</span> <span class="o">=</span> <span class="n">peaks</span>
+
+    <span class="c1"># if peaks is not None :</span>
+    <span class="c1">#   self.application.current.peaks = peaks</span>
+    <span class="c1">#   self._deselectNonCurrentPeaks()</span>
+    <span class="c1">#   self._selectCurrentPeaks()</span>
+    <span class="c1">#</span>
+    <span class="c1"># if peaks is None:</span>
+    <span class="c1">#   self.application.current.clearPeaks()</span>
+    <span class="c1">#   self._deselectNonCurrentPeaks()</span>
+
+  <span class="c1">#</span>
+  <span class="c1"># def _selectCurrentPeaks(self):</span>
+  <span class="c1">#   if len(self.application.current.peaks) &gt;0:</span>
+  <span class="c1">#     for peak in self.application.current.peaks:</span>
+  <span class="c1">#       peak.isSelected = True</span>
+
+  <span class="c1"># def _deselectNonCurrentPeaks(self):</span>
+  <span class="c1">#   for peak in self.project.peaks:</span>
+  <span class="c1">#     if peak not in self.application.current.peaks:</span>
+  <span class="c1">#       peak.isSelected = False</span>
+
+
+  <span class="k">def</span> <span class="nf">_selectOnTableCurrentPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentPeaks</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; highlight current peaks on the opened peak table &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">currentPeaks</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">_highLightObjs</span><span class="p">(</span><span class="n">currentPeaks</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_refreshTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c1"># TODO: filter calls to only update if changes to the currently displayed peaklist</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">updateTable</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">_refreshPeakTable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak</span><span class="p">,</span> <span class="n">dummy</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c1"># Dummy argument needed as the function is called for rename notifiers</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakTable</span><span class="o">.</span><span class="n">updateTable</span><span class="p">()</span></div>
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

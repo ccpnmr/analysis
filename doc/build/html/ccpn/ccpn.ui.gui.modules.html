@@ -1,0 +1,1747 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules package &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../index.html" />
+    <link rel="up" title="ccpn.ui.gui package" href="ccpn.ui.gui.html" />
+    <link rel="next" title="ccpn.ui.gui.modules.spectrumItems package" href="ccpn.ui.gui.modules.spectrumItems.html" />
+    <link rel="prev" title="ccpn.ui.gui.lib.chemometrics package" href="ccpn.ui.gui.lib.chemometrics.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.ui.gui.modules.spectrumItems.html" title="ccpn.ui.gui.modules.spectrumItems package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.ui.gui.lib.chemometrics.html" title="ccpn.ui.gui.lib.chemometrics package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.ui.html" >ccpn.ui package</a> &raquo;</li>
+          <li class="nav-item nav-item-4"><a href="ccpn.ui.gui.html" accesskey="U">ccpn.ui.gui package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ccpn.ui.gui.modules">
+<span id="ccpn-ui-gui-modules-package"></span><h1>ccpn.ui.gui.modules package<a class="headerlink" href="#module-ccpn.ui.gui.modules" title="Permalink to this headline">¶</a></h1>
+<dl class="function">
+<dt id="ccpn.ui.gui.modules.importCcpnModules">
+<code class="descclassname">ccpn.ui.gui.modules.</code><code class="descname">importCcpnModules</code><span class="sig-paren">(</span><em>modulesDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules.html#importCcpnModules"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.importCcpnModules" title="Permalink to this definition">¶</a></dt>
+<dd><p>moduleDict = Dict with module name class: guiModule name
+return a list with imported CCPN gui Modules</p>
+</dd></dl>
+
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="ccpn.ui.gui.modules.spectrumItems.html">ccpn.ui.gui.modules.spectrumItems package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.modules.spectrumItems.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.modules.spectrumItems.html#module-ccpn.ui.gui.modules.spectrumItems.GuiPeakListView">ccpn.ui.gui.modules.spectrumItems.GuiPeakListView module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="ccpn.ui.gui.modules.spectrumItems.html#module-ccpn.ui.gui.modules.spectrumItems.IntegralListItem">ccpn.ui.gui.modules.spectrumItems.IntegralListItem module</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.CcpnModule">
+<span id="ccpn-ui-gui-modules-ccpnmodule-module"></span><h2>ccpn.ui.gui.modules.CcpnModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.CcpnModule" title="Permalink to this headline">¶</a></h2>
+<p>This file contains CcpnModule base class</p>
+<p>intial version by Simon;
+Extensively modified by Geerten 1-12/12/2016</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.CcpnModule.</code><code class="descname">CcpnModule</code><span class="sig-paren">(</span><em>name</em>, <em>logger=None</em>, <em>buttonParent=None</em>, <em>buttonGrid=None</em>, <em>closable=True</em>, <em>closeFunc=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.dockarea.Dock.Dock</span></code></p>
+<p>Base class for CCPN modules
+sets self.application, self.current, self.project and self.mainWindow</p>
+<p>Overide parameters for settings widget as needed</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.HORIZONTAL">
+<code class="descname">HORIZONTAL</code><em class="property"> = 'horizontal'</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.HORIZONTAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.VERTICAL">
+<code class="descname">VERTICAL</code><em class="property"> = 'vertical'</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.VERTICAL" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.dropEvent">
+<code class="descname">dropEvent</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.dropEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.dropEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.labelOrientation">
+<code class="descname">labelOrientation</code><em class="property"> = 'horizontal'</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.labelOrientation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.maxSettingsState">
+<code class="descname">maxSettingsState</code><em class="property"> = 3</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.maxSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.moduleName">
+<code class="descname">moduleName</code><em class="property"> = ''</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.moduleName" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.placeSettingsButton">
+<code class="descname">placeSettingsButton</code><span class="sig-paren">(</span><em>buttonParent</em>, <em>buttonGrid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.placeSettingsButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.placeSettingsButton" title="Permalink to this definition">¶</a></dt>
+<dd><p>Depreciated</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.resizeEvent">
+<code class="descname">resizeEvent</code><span class="sig-paren">(</span><em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.resizeEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.resizeEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.settingsOnTop">
+<code class="descname">settingsOnTop</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.settingsOnTop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModule.toggleSettingsWidget">
+<code class="descname">toggleSettingsWidget</code><span class="sig-paren">(</span><em>button=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModule.toggleSettingsWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule.toggleSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles display of settings widget in module.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.CcpnModule.</code><code class="descname">CcpnModuleLabel</code><span class="sig-paren">(</span><em>name</em>, <em>module</em>, <em>showCloseButton=True</em>, <em>closeCallback=None</em>, <em>showSettingsButton=False</em>, <em>settingsCallback=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModuleLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.dockarea.Dock.DockLabel</span></code></p>
+<p>Subclassing DockLabel to modify appearance and functionality</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.backgroundColour">
+<code class="descname">backgroundColour</code><em class="property"> = '#555D85'</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.backgroundColour" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.foregroundColour">
+<code class="descname">foregroundColour</code><em class="property"> = '#fdfdfc'</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.foregroundColour" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.labelSize">
+<code class="descname">labelSize</code><em class="property"> = 16</em><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.labelSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.paintEvent">
+<code class="descname">paintEvent</code><span class="sig-paren">(</span><em>ev</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModuleLabel.paintEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.paintEvent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copied from the parent VerticlLabel class to allow for modification in StyleSheet</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.updateStyle">
+<code class="descname">updateStyle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CcpnModule.html#CcpnModuleLabel.updateStyle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModuleLabel.updateStyle" title="Permalink to this definition">¶</a></dt>
+<dd><p>Copied from the parent class to allow for modification in StyleSheet
+However, that appears not to work;</p>
+<p>TODO: this routine needs fixing so that colourschemes
+are taken from the stylesheet</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.ChemicalShiftTable">
+<span id="ccpn-ui-gui-modules-chemicalshifttable-module"></span><h2>ccpn.ui.gui.modules.ChemicalShiftTable module<a class="headerlink" href="#module-ccpn.ui.gui.modules.ChemicalShiftTable" title="Permalink to this headline">¶</a></h2>
+<p>This file contains ChemicalShiftTable class</p>
+<p>intial version by Simon;
+extensively modified by Geerten 1-7/12/2016</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftTable.</code><code class="descname">ChemicalShiftTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>chemicalShiftLists=None</em>, <em>name='Chemical Shift Table'</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftTable.html#ChemicalShiftTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftTable.ChemicalShiftTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<p>Alternative proposal to the ChemicalShiftTable</p>
+</dd></dl>
+
+</div>
+<div class="section" id="ccpn-ui-gui-modules-chemicalshiftsmappingmodule-module">
+<h2>ccpn.ui.gui.modules.ChemicalShiftsMappingModule module<a class="headerlink" href="#ccpn-ui-gui-modules-chemicalshiftsmappingmodule-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.ui.gui.modules.ChemicalShiftsMappingModule"></span><dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">BarGraphWidget</code><span class="sig-paren">(</span><em>xValues=None</em>, <em>yValues=None</em>, <em>objects=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addBarItems">
+<code class="descname">addBarItems</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.addBarItems"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addBarItems" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addLegend">
+<code class="descname">addLegend</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.addLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addLegend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addLegendItem">
+<code class="descname">addLegendItem</code><span class="sig-paren">(</span><em>pen='r'</em>, <em>name=''</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.addLegendItem"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addLegendItem" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addThresholdLine">
+<code class="descname">addThresholdLine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.addThresholdLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addThresholdLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.setValue">
+<code class="descname">setValue</code><span class="sig-paren">(</span><em>xValues</em>, <em>yValues</em>, <em>objects</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.setValue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.setValue" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.setViewBoxLimits">
+<code class="descname">setViewBoxLimits</code><span class="sig-paren">(</span><em>xMin</em>, <em>xMax</em>, <em>yMin</em>, <em>yMax</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.setViewBoxLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.setViewBoxLimits" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.showLegend">
+<code class="descname">showLegend</code><span class="sig-paren">(</span><em>value: False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.showLegend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.showLegend" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.showThresholdLine">
+<code class="descname">showThresholdLine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.showThresholdLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.showThresholdLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.updateViewBoxLimits">
+<code class="descname">updateViewBoxLimits</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#BarGraphWidget.updateViewBoxLimits"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.updateViewBoxLimits" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates with default paarameters. Minimum values to show the data only</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">ChemicalShiftsMapping</code><span class="sig-paren">(</span><em>project=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#ChemicalShiftsMapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">InputDataBoundary</code><span class="sig-paren">(</span><em>application</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputDataBoundary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Converts CCPN objects into dataFrame</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.calculateChemicalShift">
+<code class="descname">calculateChemicalShift</code><span class="sig-paren">(</span><em>data</em>, <em>paramName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputDataBoundary.calculateChemicalShift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.calculateChemicalShift" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.createPeakListDF">
+<code class="descname">createPeakListDF</code><span class="sig-paren">(</span><em>peakList</em>, <em>paramName</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputDataBoundary.createPeakListDF"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.createPeakListDF" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>peakList</strong> &#8211; ccpnPeakList obj</li>
+<li><strong>paramName</strong> &#8211; str.  EG. Temperature, Concentration</li>
+<li><strong>value</strong> &#8211; parameter value</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">dataframe of &#8216;residueNumber&#8217;, &#8216;Nh&#8217;, &#8216;Hn&#8217;, &#8216;Hpos&#8217;, &#8216;Npos&#8217;, &#8216;height&#8217;, &#8216;paramValue&#8217;</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.getChemicalShifts">
+<code class="descname">getChemicalShifts</code><span class="sig-paren">(</span><em>shifts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputDataBoundary.getChemicalShifts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.getChemicalShifts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.getSources">
+<code class="descname">getSources</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputDataBoundary.getSources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.getSources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.setSources">
+<code class="descname">setSources</code><span class="sig-paren">(</span><em>peakList</em>, <em>param: str</em>, <em>value: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputDataBoundary.setSources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.setSources" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataInteractor">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">InputDataInteractor</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputDataInteractor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataInteractor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataInteractor.Tuple">
+<em class="property">class </em><code class="descname">Tuple</code><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataInteractor.Tuple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">typing.Final</span></code></p>
+<p>Tuple type; Tuple[X, Y] is the cross-product type of X and Y.</p>
+<p>Example: Tuple[T1, T2] is a tuple of two elements corresponding
+to type variables T1 and T2.  Tuple[int, float, str] is a tuple
+of an int, a float and a string.</p>
+<p>To specify a variable-length tuple of homogeneous type, use Sequence[T].</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataInteractor.sources">
+<code class="descclassname">InputDataInteractor.</code><code class="descname">sources</code><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataInteractor.sources" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>Tuple[pandas.core.frame.DataFrame, ...]</em>, <em>mutable</em> -</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">InputWidget</code><span class="sig-paren">(</span><em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget.getParams">
+<code class="descname">getParams</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputWidget.getParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget.getParams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget.setParams">
+<code class="descname">setParams</code><span class="sig-paren">(</span><em>names</em>, <em>peakListObjs</em>, <em>select=None</em>, <em>value=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#InputWidget.setParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget.setParams" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ChemicalShiftsMappingModule.</code><code class="descname">SettingWidget</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#SettingWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.addInputWidget">
+<code class="descname">addInputWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#SettingWidget.addInputWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.addInputWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.deleteInputWidget">
+<code class="descname">deleteInputWidget</code><span class="sig-paren">(</span><em>iw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#SettingWidget.deleteInputWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.deleteInputWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.getInputPeakLists">
+<code class="descname">getInputPeakLists</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#SettingWidget.getInputPeakLists"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.getInputPeakLists" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.initUIinputWidget">
+<code class="descname">initUIinputWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ChemicalShiftsMappingModule.html#SettingWidget.initUIinputWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.initUIinputWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.CopyPeaksModule">
+<span id="ccpn-ui-gui-modules-copypeaksmodule-module"></span><h2>ccpn.ui.gui.modules.CopyPeaksModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.CopyPeaksModule" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.CopyPeaksModule.</code><code class="descname">CopyPeaksModule</code><span class="sig-paren">(</span><em>project</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CopyPeaksModule.html#CopyPeaksModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule.clearSelections">
+<code class="descname">clearSelections</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CopyPeaksModule.html#CopyPeaksModule.clearSelections"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule.clearSelections" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule.populatePeakListsWidget">
+<code class="descname">populatePeakListsWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CopyPeaksModule.html#CopyPeaksModule.populatePeakListsWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule.populatePeakListsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule.populatePeakWidget">
+<code class="descname">populatePeakWidget</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CopyPeaksModule.html#CopyPeaksModule.populatePeakWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CopyPeaksModule.CopyPeaksModule.populatePeakWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.CreateSequence">
+<span id="ccpn-ui-gui-modules-createsequence-module"></span><h2>ccpn.ui.gui.modules.CreateSequence module<a class="headerlink" href="#module-ccpn.ui.gui.modules.CreateSequence" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.CreateSequence.CreateSequence">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.CreateSequence.</code><code class="descname">CreateSequence</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/CreateSequence.html#CreateSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.CreateSequence.CreateSequence" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDialog</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.DataPlottingModule">
+<span id="ccpn-ui-gui-modules-dataplottingmodule-module"></span><h2>ccpn.ui.gui.modules.DataPlottingModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.DataPlottingModule" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.DataPlottingModule.DataPlottingModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.DataPlottingModule.</code><code class="descname">DataPlottingModule</code><span class="sig-paren">(</span><em>moduleArea</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/DataPlottingModule.html#DataPlottingModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.DataPlottingModule.DataPlottingModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">pyqtgraph.dockarea.Dock.Dock</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="ccpn-ui-gui-modules-guiblankdisplay-module">
+<h2>ccpn.ui.gui.modules.GuiBlankDisplay module<a class="headerlink" href="#ccpn-ui-gui-modules-guiblankdisplay-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.ui.gui.modules.GuiBlankDisplay"></span><p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiBlankDisplay.</code><code class="descname">GuiBlankDisplay</code><span class="sig-paren">(</span><em>moduleArea</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiBlankDisplay.html#GuiBlankDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = False</em><a class="headerlink" href="#ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSamples">
+<code class="descname">processSamples</code><span class="sig-paren">(</span><em>pids: Sequence[str], event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiBlankDisplay.html#GuiBlankDisplay.processSamples"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSamples" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display sample spectra defined by list of Pid strings. This function will allow to drop a sample on a
+blankDisplay and display all in once its spectra</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSpectra">
+<code class="descname">processSpectra</code><span class="sig-paren">(</span><em>pids: Sequence[str], event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiBlankDisplay.html#GuiBlankDisplay.processSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSpectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display spectra defined by list of Pid strings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSpectrum">
+<code class="descname">processSpectrum</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiBlankDisplay.html#GuiBlankDisplay.processSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Process dropped spectrum</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSpectrumGroups">
+<code class="descname">processSpectrumGroups</code><span class="sig-paren">(</span><em>pids: Sequence[str], event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiBlankDisplay.html#GuiBlankDisplay.processSpectrumGroups"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiBlankDisplay.GuiBlankDisplay.processSpectrumGroups" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiMainWindow">
+<span id="ccpn-ui-gui-modules-guimainwindow-module"></span><h2>ccpn.ui.gui.modules.GuiMainWindow module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiMainWindow" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiMainWindow.</code><code class="descname">GuiMainWindow</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QMainWindow</span></code>, <a class="reference internal" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow" title="ccpn.ui.gui.modules.GuiWindow.GuiWindow"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiWindow.GuiWindow</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.clearLogFile">
+<code class="descname">clearLogFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.clearLogFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.clearLogFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.displayProjectSummary">
+<code class="descname">displayProjectSummary</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.displayProjectSummary"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.displayProjectSummary" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.getMenuAction">
+<code class="descname">getMenuAction</code><span class="sig-paren">(</span><em>menuString</em>, <em>topMenuAction=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.getMenuAction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.getMenuAction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.loadProject">
+<code class="descname">loadProject</code><span class="sig-paren">(</span><em>projectDir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.loadProject"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.loadProject" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a loadProject dialog box if project directory is not specified.
+Loads the selected project.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.newMacroFromLog">
+<code class="descname">newMacroFromLog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.newMacroFromLog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.newMacroFromLog" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays macro editor with contents of the log.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.printToFile">
+<code class="descname">printToFile</code><span class="sig-paren">(</span><em>spectrumDisplayOrStrip=None</em>, <em>path=None</em>, <em>width=800</em>, <em>height=800</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.printToFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.printToFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.redo">
+<code class="descname">redo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.redo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.redo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.runMacro">
+<code class="descname">runMacro</code><span class="sig-paren">(</span><em>macroFile: str = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.runMacro"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.runMacro" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs a macro if a macro is specified, or opens a dialog box for selection of a macro file and then
+runs the selected macro.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.saveLogFile">
+<code class="descname">saveLogFile</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.saveLogFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.saveLogFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.startPlugin">
+<code class="descname">startPlugin</code><span class="sig-paren">(</span><em>Plugin</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.startPlugin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.startPlugin" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.undo">
+<code class="descname">undo</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiMainWindow.html#GuiMainWindow.undo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiMainWindow.GuiMainWindow.undo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiModule">
+<span id="ccpn-ui-gui-modules-guimodule-module"></span><h2>ccpn.ui.gui.modules.GuiModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiModule" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiModule.GuiModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiModule.</code><code class="descname">GuiModule</code><span class="sig-paren">(</span><em>position='right'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiModule.html#GuiModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiModule.GuiModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.Base.Base" title="ccpn.ui.gui.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.Base.Base</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiPopupGenerator">
+<span id="ccpn-ui-gui-modules-guipopupgenerator-module"></span><h2>ccpn.ui.gui.modules.GuiPopupGenerator module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiPopupGenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiPopupGenerator.</code><code class="descname">PopupGenerator</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiPopupGenerator.html#PopupGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDialog</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.addWidgetLine">
+<code class="descname">addWidgetLine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiPopupGenerator.html#PopupGenerator.addWidgetLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.addWidgetLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.createPopupFromJson">
+<code class="descname">createPopupFromJson</code><span class="sig-paren">(</span><em>jsonFile</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiPopupGenerator.html#PopupGenerator.createPopupFromJson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.createPopupFromJson" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.removeWidgetLine">
+<code class="descname">removeWidgetLine</code><span class="sig-paren">(</span><em>row</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiPopupGenerator.html#PopupGenerator.removeWidgetLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.removeWidgetLine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.renderPopup">
+<code class="descname">renderPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiPopupGenerator.html#PopupGenerator.renderPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.renderPopup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.saveToJson">
+<code class="descname">saveToJson</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiPopupGenerator.html#PopupGenerator.saveToJson"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.saveToJson" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.writeButtonLines">
+<code class="descname">writeButtonLines</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiPopupGenerator.html#PopupGenerator.writeButtonLines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiPopupGenerator.PopupGenerator.writeButtonLines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiSpectrumDisplay">
+<span id="ccpn-ui-gui-modules-guispectrumdisplay-module"></span><h2>ccpn.ui.gui.modules.GuiSpectrumDisplay module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiSpectrumDisplay" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiSpectrumDisplay.</code><code class="descname">GuiSpectrumDisplay</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <a class="reference internal" href="#ccpn.ui.gui.modules.GuiModule.GuiModule" title="ccpn.ui.gui.modules.GuiModule.GuiModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiModule.GuiModule</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.duplicateStrip">
+<code class="descname">duplicateStrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.duplicateStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.duplicateStrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new strip identical to the last one created and adds it to right of the display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.hideToolbar">
+<code class="descname">hideToolbar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.hideToolbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.hideToolbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>hide the toolbar</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.removeStrip">
+<code class="descname">removeStrip</code><span class="sig-paren">(</span><em>strip=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.removeStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.removeStrip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.resetXZooms">
+<code class="descname">resetXZooms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.resetXZooms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.resetXZooms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms X axis of current strip to show entire region</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.resetYZooms">
+<code class="descname">resetYZooms</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.resetYZooms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.resetYZooms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms Y axis of current strip to show entire region</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.showToolbar">
+<code class="descname">showToolbar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.showToolbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.showToolbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>show the toolbar</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleCrossHair">
+<code class="descname">toggleCrossHair</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.toggleCrossHair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleCrossHair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether cross hair is displayed in all strips of spectrum display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleGrid">
+<code class="descname">toggleGrid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.toggleGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether grid is displayed in all strips of spectrum display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.togglePhaseConsole">
+<code class="descname">togglePhaseConsole</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.togglePhaseConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.togglePhaseConsole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether phasing console is displayed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleToolbar">
+<code class="descname">toggleToolbar</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumDisplay.html#GuiSpectrumDisplay.toggleToolbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleToolbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggle the toolbar</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiSpectrumView">
+<span id="ccpn-ui-gui-modules-guispectrumview-module"></span><h2>ccpn.ui.gui.modules.GuiSpectrumView module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiSpectrumView" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiSpectrumView.</code><code class="descname">GuiSpectrumView</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView.html#GuiSpectrumView"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.Base.Base" title="ccpn.ui.gui.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.Base.Base</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QGraphicsItem</span></code></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.boundingRect">
+<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView.html#GuiSpectrumView.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.boundingRect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.paint">
+<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView.html#GuiSpectrumView.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.paint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.refreshData">
+<code class="descname">refreshData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView.html#GuiSpectrumView.refreshData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.refreshData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.setVisible">
+<code class="descname">setVisible</code><span class="sig-paren">(</span><em>visible</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView.html#GuiSpectrumView.setVisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView.setVisible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiSpectrumView.</code><code class="descname">SpectrumViewParams</code><span class="sig-paren">(</span><em>valuePerPoint</em>, <em>totalPointCount</em>, <em>minAliasedFrequency</em>, <em>maxAliasedFrequency</em>, <em>dataDim</em><span class="sig-paren">)</span><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.dataDim">
+<code class="descname">dataDim</code><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.dataDim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.maxAliasedFrequency">
+<code class="descname">maxAliasedFrequency</code><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.maxAliasedFrequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.minAliasedFrequency">
+<code class="descname">minAliasedFrequency</code><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.minAliasedFrequency" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.totalPointCount">
+<code class="descname">totalPointCount</code><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.totalPointCount" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.valuePerPoint">
+<code class="descname">valuePerPoint</code><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView.SpectrumViewParams.valuePerPoint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiSpectrumView1d">
+<span id="ccpn-ui-gui-modules-guispectrumview1d-module"></span><h2>ccpn.ui.gui.modules.GuiSpectrumView1d module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiSpectrumView1d" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiSpectrumView1d.</code><code class="descname">GuiSpectrumView1d</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView1d.html#GuiSpectrumView1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView" title="ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.getSliceData">
+<code class="descname">getSliceData</code><span class="sig-paren">(</span><em>spectrum=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView1d.html#GuiSpectrumView1d.getSliceData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.getSliceData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets slice data for drawing 1d spectrum using specified spectrum.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.refreshData">
+<code class="descname">refreshData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView1d.html#GuiSpectrumView1d.refreshData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.refreshData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.removePhasingTraces">
+<code class="descname">removePhasingTraces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView1d.html#GuiSpectrumView1d.removePhasingTraces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.removePhasingTraces" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.update">
+<code class="descname">update</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumView1d.html#GuiSpectrumView1d.update"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumView1d.GuiSpectrumView1d.update" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiSpectrumViewNd">
+<span id="ccpn-ui-gui-modules-guispectrumviewnd-module"></span><h2>ccpn.ui.gui.modules.GuiSpectrumViewNd module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiSpectrumViewNd" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiSpectrumViewNd.</code><code class="descname">GuiSpectrumViewNd</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumViewNd.html#GuiSpectrumViewNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView" title="ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiSpectrumView.GuiSpectrumView</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.boundingRect">
+<code class="descname">boundingRect</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumViewNd.html#GuiSpectrumViewNd.boundingRect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.boundingRect" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.paint">
+<code class="descname">paint</code><span class="sig-paren">(</span><em>painter</em>, <em>option</em>, <em>widget=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumViewNd.html#GuiSpectrumViewNd.paint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.paint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.refreshData">
+<code class="descname">refreshData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumViewNd.html#GuiSpectrumViewNd.refreshData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.refreshData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.removePhasingTraces">
+<code class="descname">removePhasingTraces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumViewNd.html#GuiSpectrumViewNd.removePhasingTraces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.removePhasingTraces" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.setVisible">
+<code class="descname">setVisible</code><span class="sig-paren">(</span><em>visible</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiSpectrumViewNd.html#GuiSpectrumViewNd.setVisible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.setVisible" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.traceScale">
+<code class="descname">traceScale</code><a class="headerlink" href="#ccpn.ui.gui.modules.GuiSpectrumViewNd.GuiSpectrumViewNd.traceScale" title="Permalink to this definition">¶</a></dt>
+<dd><p>- <em>float</em>, <em>mutable</em> - 
+Scale for trace in this spectrumView</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiStrip">
+<span id="ccpn-ui-gui-modules-guistrip-module"></span><h2>ccpn.ui.gui.modules.GuiStrip module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiStrip" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiStrip.</code><code class="descname">GuiStrip</code><span class="sig-paren">(</span><em>useOpenGL=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.removePhasingTraces">
+<code class="descname">removePhasingTraces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.removePhasingTraces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.removePhasingTraces" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.resetZoom">
+<code class="descname">resetZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.resetZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.resetZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms both axis of strip to the specified region</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.showPeaks">
+<code class="descname">showPeaks</code><span class="sig-paren">(</span><em>peakList: ccpn.core.PeakList.PeakList</em>, <em>peaks: List[ccpn.core.Peak.Peak] = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.showPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.showPeaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.showSpectrum">
+<code class="descname">showSpectrum</code><span class="sig-paren">(</span><em>guiSpectrumView</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.showSpectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.showSpectrum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.showZoomPopup">
+<code class="descname">showZoomPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.showZoomPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.showZoomPopup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates and displays a popup for zooming to a region in the strip.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.sigClicked">
+<code class="descname">sigClicked</code><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.sigClicked" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.toggleGrid">
+<code class="descname">toggleGrid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.toggleGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.toggleGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether grid is visible in the strip.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.turnOffPhasing">
+<code class="descname">turnOffPhasing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.turnOffPhasing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.turnOffPhasing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.turnOnPhasing">
+<code class="descname">turnOnPhasing</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.turnOnPhasing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.turnOnPhasing" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.zoomToRegion">
+<code class="descname">zoomToRegion</code><span class="sig-paren">(</span><em>xRegion: Tuple[float, float], yRegion: Tuple[float, float]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.zoomToRegion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.zoomToRegion" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms strip to the specified region</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.zoomX">
+<code class="descname">zoomX</code><span class="sig-paren">(</span><em>x1: float</em>, <em>x2: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.zoomX"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.zoomX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms x axis of strip to the specified region</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip.GuiStrip.zoomY">
+<code class="descname">zoomY</code><span class="sig-paren">(</span><em>y1: float</em>, <em>y2: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip.html#GuiStrip.zoomY"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip.zoomY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms y axis of strip to the specified region</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiStrip1d">
+<span id="ccpn-ui-gui-modules-guistrip1d-module"></span><h2>ccpn.ui.gui.modules.GuiStrip1d module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiStrip1d" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiStrip1d.</code><code class="descname">GuiStrip1d</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip1d.html#GuiStrip1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip" title="ccpn.ui.gui.modules.GuiStrip.GuiStrip"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiStrip.GuiStrip</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d.resetXZoom">
+<code class="descname">resetXZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip1d.html#GuiStrip1d.resetXZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d.resetXZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms x axis to maximum value of data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d.resetYZoom">
+<code class="descname">resetYZoom</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip1d.html#GuiStrip1d.resetYZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d.resetYZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Zooms y axis to maximum of data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d.showExportDialog">
+<code class="descname">showExportDialog</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStrip1d.html#GuiStrip1d.showExportDialog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStrip1d.GuiStrip1d.showExportDialog" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiStripDisplay1d">
+<span id="ccpn-ui-gui-modules-guistripdisplay1d-module"></span><h2>ccpn.ui.gui.modules.GuiStripDisplay1d module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiStripDisplay1d" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiStripDisplay1d.</code><code class="descname">GuiStripDisplay1d</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplay1d.html#GuiStripDisplay1d"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay" title="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d.processSpectra">
+<code class="descname">processSpectra</code><span class="sig-paren">(</span><em>pids: Sequence[str], event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplay1d.html#GuiStripDisplay1d.processSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d.processSpectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>Display spectra defined by list of Pid strings</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d.showPeaks">
+<code class="descname">showPeaks</code><span class="sig-paren">(</span><em>peakListView</em>, <em>peaks</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplay1d.html#GuiStripDisplay1d.showPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplay1d.GuiStripDisplay1d.showPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays specified peaks in all strips of the display using peakListView</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="ccpn-ui-gui-modules-guistripdisplaynd-module">
+<h2>ccpn.ui.gui.modules.GuiStripDisplayNd module<a class="headerlink" href="#ccpn-ui-gui-modules-guistripdisplaynd-module" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-ccpn.ui.gui.modules.GuiStripDisplayNd"></span><p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiStripDisplayNd.</code><code class="descname">GuiStripDisplayNd</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay" title="ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.addContourLevel">
+<code class="descname">addContourLevel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.addContourLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.addContourLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increases number of contours by 1 for all spectra visible in the display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.addStrip">
+<code class="descname">addStrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.addStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.addStrip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a new strip by duplicating the first strip in the display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.hideSpinSystemLabel">
+<code class="descname">hideSpinSystemLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.hideSpinSystemLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.hideSpinSystemLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>NBNB do we still need this?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.lowerContourBase">
+<code class="descname">lowerContourBase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.lowerContourBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.lowerContourBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decreases contour base level for all spectra visible in the display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.raiseContourBase">
+<code class="descname">raiseContourBase</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.raiseContourBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.raiseContourBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increases contour base level for all spectra visible in the display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.removeContourLevel">
+<code class="descname">removeContourLevel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.removeContourLevel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.removeContourLevel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decreases number of contours by 1 for all spectra visible in the display.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.showPeaks">
+<code class="descname">showPeaks</code><span class="sig-paren">(</span><em>peakListView: ccpn.ui.gui.modules.spectrumItems.GuiPeakListView.GuiPeakListView, peaks: List[ccpn.core.Peak.Peak]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.showPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.showPeaks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Displays specified peaks in all strips of the display using peakListView</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.showSpinSystemLabel">
+<code class="descname">showSpinSystemLabel</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripDisplayNd.html#GuiStripDisplayNd.showSpinSystemLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripDisplayNd.GuiStripDisplayNd.showSpinSystemLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>NBNB do we still need this?</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiStripNd">
+<span id="ccpn-ui-gui-modules-guistripnd-module"></span><h2>ccpn.ui.gui.modules.GuiStripNd module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiStripNd" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiStripNd.</code><code class="descname">GuiStripNd</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.GuiStrip.GuiStrip" title="ccpn.ui.gui.modules.GuiStrip.GuiStrip"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.GuiStrip.GuiStrip</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.changeZPlane">
+<code class="descname">changeZPlane</code><span class="sig-paren">(</span><em>n: int = 0</em>, <em>planeCount: int = None</em>, <em>position: float = None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd.changeZPlane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.changeZPlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the position of the z axis of the strip by number of planes or a ppm position, depending
+on which is specified.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.nextZPlane">
+<code class="descname">nextZPlane</code><span class="sig-paren">(</span><em>n: int = 0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd.nextZPlane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.nextZPlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Increases z ppm position by one plane</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.prevZPlane">
+<code class="descname">prevZPlane</code><span class="sig-paren">(</span><em>n: int = 0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd.prevZPlane"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.prevZPlane" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decreases z ppm position by one plane</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.resetAxisRange">
+<code class="descname">resetAxisRange</code><span class="sig-paren">(</span><em>axis</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd.resetAxisRange"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.resetAxisRange" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.resetZoom">
+<code class="descname">resetZoom</code><span class="sig-paren">(</span><em>axis=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd.resetZoom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.resetZoom" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resets zoom of strip axes to limits of maxima and minima of the limits of the displayed spectra.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.toggleHorizontalTrace">
+<code class="descname">toggleHorizontalTrace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd.toggleHorizontalTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.toggleHorizontalTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether or not horizontal trace is displayed.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.toggleVerticalTrace">
+<code class="descname">toggleVerticalTrace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiStripNd.html#GuiStripNd.toggleVerticalTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiStripNd.GuiStripNd.toggleVerticalTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether or not vertical trace is displayed.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiTableGenerator">
+<span id="ccpn-ui-gui-modules-guitablegenerator-module"></span><h2>ccpn.ui.gui.modules.GuiTableGenerator module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiTableGenerator" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiTableGenerator.GuiTableGenerator">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiTableGenerator.</code><code class="descname">GuiTableGenerator</code><span class="sig-paren">(</span><em>parent</em>, <em>objectLists</em>, <em>actionCallback</em>, <em>columns=None</em>, <em>getColumnsFunction=None</em>, <em>selector=None</em>, <em>tipTexts=None</em>, <em>objectType=None</em>, <em>multiSelect=False</em>, <em>unitPulldown=None</em>, <em>selectionCallback=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiTableGenerator.html#GuiTableGenerator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiTableGenerator.GuiTableGenerator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiTableGenerator.GuiTableGenerator.setTableCallback">
+<code class="descname">setTableCallback</code><span class="sig-paren">(</span><em>callback</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiTableGenerator.html#GuiTableGenerator.setTableCallback"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiTableGenerator.GuiTableGenerator.setTableCallback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiTableGenerator.GuiTableGenerator.updateTable">
+<code class="descname">updateTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiTableGenerator.html#GuiTableGenerator.updateTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiTableGenerator.GuiTableGenerator.updateTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update contents of the table, including addition/deletion of objects.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.GuiWindow">
+<span id="ccpn-ui-gui-modules-guiwindow-module"></span><h2>ccpn.ui.gui.modules.GuiWindow module<a class="headerlink" href="#module-ccpn.ui.gui.modules.GuiWindow" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.GuiWindow.</code><code class="descname">GuiWindow</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.clearMarks">
+<code class="descname">clearMarks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.clearMarks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.clearMarks" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears all marks in all windows for the current task.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.createMark">
+<code class="descname">createMark</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.createMark"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.createMark" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a mark at the current cursor position in the current strip.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.deleteBlankDisplay">
+<code class="descname">deleteBlankDisplay</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.deleteBlankDisplay"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.deleteBlankDisplay" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes blank display from main window modulearea if one is present.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.deleteSelectedPeaks">
+<code class="descname">deleteSelectedPeaks</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.deleteSelectedPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.deleteSelectedPeaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.getCurrentPositionAndStrip">
+<code class="descname">getCurrentPositionAndStrip</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.getCurrentPositionAndStrip"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.getCurrentPositionAndStrip" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.loadData">
+<code class="descname">loadData</code><span class="sig-paren">(</span><em>paths=None</em>, <em>text=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.loadData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.loadData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens a file dialog box and loads data from selected file.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.newPhasingTrace">
+<code class="descname">newPhasingTrace</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.newPhasingTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.newPhasingTrace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.refitCurrentPeaks">
+<code class="descname">refitCurrentPeaks</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.refitCurrentPeaks"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.refitCurrentPeaks" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.removePhasingTraces">
+<code class="descname">removePhasingTraces</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.removePhasingTraces"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.removePhasingTraces" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes all phasing traces from all strips.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.setPhasingPivot">
+<code class="descname">setPhasingPivot</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.setPhasingPivot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.setPhasingPivot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.setUserShortcuts">
+<code class="descname">setUserShortcuts</code><span class="sig-paren">(</span><em>preferences=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.setUserShortcuts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.setUserShortcuts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleCrossHair">
+<code class="descname">toggleCrossHair</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.toggleCrossHair"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleCrossHair" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether crosshairs are displayed in all spectrum di</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleCrossHairAll">
+<code class="descname">toggleCrossHairAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.toggleCrossHairAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleCrossHairAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether crosshairs are displayed in all windows.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleGrid">
+<code class="descname">toggleGrid</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.toggleGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleGrid" title="Permalink to this definition">¶</a></dt>
+<dd><p>toggle grid for the spectrum displays in this window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleGridAll">
+<code class="descname">toggleGridAll</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.toggleGridAll"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleGridAll" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles grid display in all windows</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleHTrace">
+<code class="descname">toggleHTrace</code><span class="sig-paren">(</span><em>window: ccpn.ui.gui.modules.GuiWindow.GuiWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.toggleHTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleHTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether horizontal traces are displayed in the specified window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.togglePhaseConsole">
+<code class="descname">togglePhaseConsole</code><span class="sig-paren">(</span><em>window: ccpn.ui.gui.modules.GuiWindow.GuiWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.togglePhaseConsole"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.togglePhaseConsole" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether the phasing console is displayed in the specified window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleVTrace">
+<code class="descname">toggleVTrace</code><span class="sig-paren">(</span><em>window: ccpn.ui.gui.modules.GuiWindow.GuiWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.toggleVTrace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.toggleVTrace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Toggles whether vertical traces are displayed in the specified window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.traceScaleDown">
+<code class="descname">traceScaleDown</code><span class="sig-paren">(</span><em>window: ccpn.ui.gui.modules.GuiWindow.GuiWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.traceScaleDown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.traceScaleDown" title="Permalink to this definition">¶</a></dt>
+<dd><p>Halves the scale for all traces in the specified window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.traceScaleScale">
+<code class="descname">traceScaleScale</code><span class="sig-paren">(</span><em>window: ccpn.ui.gui.modules.GuiWindow.GuiWindow</em>, <em>scale: float</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.traceScaleScale"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.traceScaleScale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the scale of a trace in all spectrum displays of the window.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.GuiWindow.GuiWindow.traceScaleUp">
+<code class="descname">traceScaleUp</code><span class="sig-paren">(</span><em>window: ccpn.ui.gui.modules.GuiWindow.GuiWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/GuiWindow.html#GuiWindow.traceScaleUp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.GuiWindow.GuiWindow.traceScaleUp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Doubles the scale for all traces in the specified window.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.MacroEditor">
+<span id="ccpn-ui-gui-modules-macroeditor-module"></span><h2>ccpn.ui.gui.modules.MacroEditor module<a class="headerlink" href="#module-ccpn.ui.gui.modules.MacroEditor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.MacroEditor.MacroEditor">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.MacroEditor.</code><code class="descname">MacroEditor</code><span class="sig-paren">(</span><em>parent</em>, <em>mainWindow</em>, <em>name</em>, <em>showRecordButtons=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/MacroEditor.html#MacroEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.MacroEditor.MacroEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.NmrResidueTable">
+<span id="ccpn-ui-gui-modules-nmrresiduetable-module"></span><h2>ccpn.ui.gui.modules.NmrResidueTable module<a class="headerlink" href="#module-ccpn.ui.gui.modules.NmrResidueTable" title="Permalink to this headline">¶</a></h2>
+<p>This file contains NmrResidueTable class</p>
+<p>intial version by Simon;
+extensively modified by Geerten 1-7/12/2016</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NmrResidueTable.</code><code class="descname">NmrResidueTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>callback=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NmrResidueTable.html#NmrResidueTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Widget.Widget" title="ccpn.ui.gui.widgets.Widget.Widget"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Widget.Widget</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.updateTable">
+<code class="descname">updateTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NmrResidueTable.html#NmrResidueTable.updateTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTable.updateTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NmrResidueTable.</code><code class="descname">NmrResidueTableModule</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>callback=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NmrResidueTable.html#NmrResidueTableModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NmrResidueTable.NmrResidueTableModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<p>This class implements the module by wrapping a NmrResidueTable instance</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.NotesEditor">
+<span id="ccpn-ui-gui-modules-noteseditor-module"></span><h2>ccpn.ui.gui.modules.NotesEditor module<a class="headerlink" href="#module-ccpn.ui.gui.modules.NotesEditor" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.NotesEditor.NotesEditor">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.NotesEditor.</code><code class="descname">NotesEditor</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>name='Notes Editor'</em>, <em>note=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/NotesEditor.html#NotesEditor"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.NotesEditor.NotesEditor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.ObjectAssigner">
+<span id="ccpn-ui-gui-modules-objectassigner-module"></span><h2>ccpn.ui.gui.modules.ObjectAssigner module<a class="headerlink" href="#module-ccpn.ui.gui.modules.ObjectAssigner" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.New">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ObjectAssigner.</code><code class="descname">New</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#New"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.New" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Small &#8216;fake&#8217; object to get a non-nmrAtom in the objectTable.
+Maybe this should be solved differently. It works well though.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.NotOnLine">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ObjectAssigner.</code><code class="descname">NotOnLine</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#NotOnLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.NotOnLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Small &#8216;fake&#8217; object to get a message the user in the assignment
+Table that a specific dimension can not be assigned in one go
+since the frequencies of the peaks in this dimension are not on
+one line (i.e. the C frequencies of the CA and CB in a strip for
+instance).
+Maybe this should be solved differently. It works well though.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ObjectAssigner.</code><code class="descname">ObjectAssigner</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>dim</em>, <em>objects</em>, <em>opts</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAssignmentWidget">
+<code class="descname">createAssignmentWidget</code><span class="sig-paren">(</span><em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createAssignmentWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAssignmentWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAtomTypePulldown">
+<code class="descname">createAtomTypePulldown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createAtomTypePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createAtomTypePulldown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createChainPulldown">
+<code class="descname">createChainPulldown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createChainPulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createChainPulldown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyListWidget">
+<code class="descname">createEmptyListWidget</code><span class="sig-paren">(</span><em>dim</em>, <em>grid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createEmptyListWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyListWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be used to add a new listWidget before
+setting the content.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyNmrAtomsTable">
+<code class="descname">createEmptyNmrAtomsTable</code><span class="sig-paren">(</span><em>grid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createEmptyNmrAtomsTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyNmrAtomsTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be used to add a new table before setting
+the content.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyWidgetLabel">
+<code class="descname">createEmptyWidgetLabel</code><span class="sig-paren">(</span><em>dim</em>, <em>objects</em>, <em>grid</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createEmptyWidgetLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createEmptyWidgetLabel" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createResTypePulldown">
+<code class="descname">createResTypePulldown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createResTypePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createResTypePulldown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createSeqCodePulldown">
+<code class="descname">createSeqCodePulldown</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.createSeqCodePulldown"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.createSeqCodePulldown" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.getNmrAtom">
+<code class="descname">getNmrAtom</code><span class="sig-paren">(</span><em>dim</em>, <em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.getNmrAtom"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.getNmrAtom" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setAtomType">
+<code class="descname">setAtomType</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.setAtomType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setAtomType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setNmrChain">
+<code class="descname">setNmrChain</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.setNmrChain"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setNmrChain" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setResidueType">
+<code class="descname">setResidueType</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.setResidueType"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setResidueType" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setSequenceCode">
+<code class="descname">setSequenceCode</code><span class="sig-paren">(</span><em>item</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ObjectAssigner.html#ObjectAssigner.setSequenceCode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ObjectAssigner.ObjectAssigner.setSequenceCode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.PeakAssigner">
+<span id="ccpn-ui-gui-modules-peakassigner-module"></span><h2>ccpn.ui.gui.modules.PeakAssigner module<a class="headerlink" href="#module-ccpn.ui.gui.modules.PeakAssigner" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PeakAssigner.NotOnLine">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakAssigner.</code><code class="descname">NotOnLine</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakAssigner.html#NotOnLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakAssigner.NotOnLine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<p>Small &#8216;fake&#8217; object to get a message the user in the assignment
+Table that a specific dimension can not be assigned in one go
+since the frequencies of the peaks in this dimension are not on
+one line (i.e. the C frequencies of the CA and CB in a strip for
+instance).</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PeakAssigner.PeakAssigner">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakAssigner.</code><code class="descname">PeakAssigner</code><span class="sig-paren">(</span><em>parent=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakAssigner.html#PeakAssigner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakAssigner.PeakAssigner" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<p>Module for assignment of nmrAtoms to the different axes of a peak.
+Module responds to current.peak</p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.getDeltaShift">
+<code class="descname">getDeltaShift</code><span class="sig-paren">(</span><em>nmrAtom: ccpn.core.NmrAtom.NmrAtom</em>, <em>dim: int</em><span class="sig-paren">)</span> &rarr; float<a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakAssigner.html#PeakAssigner.getDeltaShift"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.getDeltaShift" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculation of delta shift to add to the table.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.maxSettingsState">
+<code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.maxSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.settingsOnTop">
+<code class="descname">settingsOnTop</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.PeakAssigner.PeakAssigner.settingsOnTop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.PeakTable">
+<span id="ccpn-ui-gui-modules-peaktable-module"></span><h2>ccpn.ui.gui.modules.PeakTable module<a class="headerlink" href="#module-ccpn.ui.gui.modules.PeakTable" title="Permalink to this headline">¶</a></h2>
+<p>Module Documentation here</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PeakTable.PeakListSimple">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakTable.</code><code class="descname">PeakListSimple</code><span class="sig-paren">(</span><em>parent=None</em>, <em>selectedList=None</em>, <em>columnSettings=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakListSimple"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListSimple" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PeakTable.PeakListSimple.getExtraColumns">
+<code class="descname">getExtraColumns</code><span class="sig-paren">(</span><em>peakList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakListSimple.getExtraColumns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListSimple.getExtraColumns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PeakTable.PeakListSimple.updateSelectionOnTable">
+<code class="descname">updateSelectionOnTable</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakListSimple.updateSelectionOnTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakListSimple.updateSelectionOnTable" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PeakTable.PeakTable">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PeakTable.</code><code class="descname">PeakTable</code><span class="sig-paren">(</span><em>project</em>, <em>selectedList=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PeakTable.html#PeakTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.PeakTable.PeakTable.includeSettingsWidget">
+<code class="descname">includeSettingsWidget</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakTable.includeSettingsWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.PeakTable.PeakTable.maxSettingsState">
+<code class="descname">maxSettingsState</code><em class="property"> = 2</em><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakTable.maxSettingsState" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.PeakTable.PeakTable.settingsOnTop">
+<code class="descname">settingsOnTop</code><em class="property"> = True</em><a class="headerlink" href="#ccpn.ui.gui.modules.PeakTable.PeakTable.settingsOnTop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.PipelineModule">
+<span id="ccpn-ui-gui-modules-pipelinemodule-module"></span><h2>ccpn.ui.gui.modules.PipelineModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.PipelineModule" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PipelineModule.FilterMethods">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PipelineModule.</code><code class="descname">FilterMethods</code><span class="sig-paren">(</span><em>parent=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#FilterMethods"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.FilterMethods" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QDialog</span></code></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.FilterMethods.updateMethodCheckBoxes">
+<code class="descname">updateMethodCheckBoxes</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#FilterMethods.updateMethodCheckBoxes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.FilterMethods.updateMethodCheckBoxes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.FilterMethods.updateSelectAllCheckBox">
+<code class="descname">updateSelectAllCheckBox</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#FilterMethods.updateSelectAllCheckBox"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.FilterMethods.updateSelectAllCheckBox" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PipelineModule.</code><code class="descname">GuiPipeline</code><span class="sig-paren">(</span><em>application=None</em>, <em>pipelineMethods=None</em>, <em>project=None</em>, <em>templates=None</em>, <em>appSpecificMethods=True</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline.eventFilter">
+<code class="descname">eventFilter</code><span class="sig-paren">(</span><em>source</em>, <em>event</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline.eventFilter"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.eventFilter" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter to disable the wheel event in the methods pulldown. Otherwise each scroll would add a box!</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline.filterMethodPopup">
+<code class="descname">filterMethodPopup</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline.filterMethodPopup"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.filterMethodPopup" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline.keyPressEvent">
+<code class="descname">keyPressEvent</code><span class="sig-paren">(</span><em>KeyEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline.keyPressEvent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.keyPressEvent" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline.openJsonFile">
+<code class="descname">openJsonFile</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline.openJsonFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.openJsonFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline.runPipeline">
+<code class="descname">runPipeline</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline.runPipeline"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.runPipeline" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline.setMethodPullDownData">
+<code class="descname">setMethodPullDownData</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline.setMethodPullDownData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.setMethodPullDownData" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.GuiPipeline.settingsPipelineWidgets">
+<code class="descname">settingsPipelineWidgets</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#GuiPipeline.settingsPipelineWidgets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.GuiPipeline.settingsPipelineWidgets" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PipelineModule.PipelineWorker">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PipelineModule.</code><code class="descname">PipelineWorker</code><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#PipelineWorker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.PipelineWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtCore.QObject</span></code></p>
+<p>Object managing the  auto run pipeline simulation</p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.PipelineModule.PipelineWorker.stepIncreased">
+<code class="descname">stepIncreased</code><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.PipelineWorker.stepIncreased" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.PipelineWorker.stop">
+<code class="descname">stop</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#PipelineWorker.stop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.PipelineWorker.stop" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PipelineModule.PipelineWorker.task">
+<code class="descname">task</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PipelineModule.html#PipelineWorker.task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PipelineModule.PipelineWorker.task" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.PluginModule">
+<span id="ccpn-ui-gui-modules-pluginmodule-module"></span><h2>ccpn.ui.gui.modules.PluginModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.PluginModule" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PluginModule.PluginModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PluginModule.</code><code class="descname">PluginModule</code><span class="sig-paren">(</span><em>interactor</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PluginModule.html#PluginModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.PluginModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PluginModule.PluginModule.addRunButton">
+<code class="descname">addRunButton</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PluginModule.html#PluginModule.addRunButton"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.PluginModule.addRunButton" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PluginModule.PluginModule.issueMessage">
+<code class="descname">issueMessage</code><span class="sig-paren">(</span><em>message</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PluginModule.html#PluginModule.issueMessage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.PluginModule.issueMessage" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.PluginModule.TestQt">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.PluginModule.</code><code class="descname">TestQt</code><span class="sig-paren">(</span><em>w=100</em>, <em>h=100</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PluginModule.html#TestQt"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.TestQt" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.PluginModule.TestQt.showWidget">
+<code class="descname">showWidget</code><span class="sig-paren">(</span><em>widget</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/PluginModule.html#TestQt.showWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.PluginModule.TestQt.showWidget" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.ReferenceChemicalShifts">
+<span id="ccpn-ui-gui-modules-referencechemicalshifts-module"></span><h2>ccpn.ui.gui.modules.ReferenceChemicalShifts module<a class="headerlink" href="#module-ccpn.ui.gui.modules.ReferenceChemicalShifts" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ReferenceChemicalShifts.ReferenceChemicalShifts">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ReferenceChemicalShifts.</code><code class="descname">ReferenceChemicalShifts</code><span class="sig-paren">(</span><em>project</em>, <em>moduleArea</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ReferenceChemicalShifts.html#ReferenceChemicalShifts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ReferenceChemicalShifts.ReferenceChemicalShifts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.ResidueInformation">
+<span id="ccpn-ui-gui-modules-residueinformation-module"></span><h2>ccpn.ui.gui.modules.ResidueInformation module<a class="headerlink" href="#module-ccpn.ui.gui.modules.ResidueInformation" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ResidueInformation.ResidueInformation">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ResidueInformation.</code><code class="descname">ResidueInformation</code><span class="sig-paren">(</span><em>parent=None</em>, <em>project=None</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ResidueInformation.html#ResidueInformation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ResidueInformation.ResidueInformation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.RestraintTable">
+<span id="ccpn-ui-gui-modules-restrainttable-module"></span><h2>ccpn.ui.gui.modules.RestraintTable module<a class="headerlink" href="#module-ccpn.ui.gui.modules.RestraintTable" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.RestraintTable.RestraintTable">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.RestraintTable.</code><code class="descname">RestraintTable</code><span class="sig-paren">(</span><em>parent=None</em>, <em>restraintLists=None</em>, <em>name='Restraint Table'</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/RestraintTable.html#RestraintTable"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.RestraintTable.RestraintTable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.SequenceModule">
+<span id="ccpn-ui-gui-modules-sequencemodule-module"></span><h2>ccpn.ui.gui.modules.SequenceModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.SequenceModule" title="Permalink to this headline">¶</a></h2>
+<p>This file contains SequenceModule module</p>
+<p>intial version by Simon;
+modified by Geerten 1-9/12/2016</p>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.SequenceModule.GuiChainLabel">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.SequenceModule.</code><code class="descname">GuiChainLabel</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>scene</em>, <em>position</em>, <em>chain</em>, <em>placeholder=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/SequenceModule.html#GuiChainLabel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.SequenceModule.GuiChainLabel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QGraphicsTextItem</span></code></p>
+<p>This class is acts as an anchor for each chain displayed in the Sequence Module.
+On instantiation an instance of the GuiChainResidue class is created for each residue in the chain
+along with a dictionary mapping Residue objects and GuiChainResidues, which is required for assignment.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.SequenceModule.GuiChainResidue">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.SequenceModule.</code><code class="descname">GuiChainResidue</code><span class="sig-paren">(</span><em>parent</em>, <em>project</em>, <em>residue</em>, <em>scene</em>, <em>labelPosition</em>, <em>index</em>, <em>yPosition</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/SequenceModule.html#GuiChainResidue"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="ccpn.ui.gui.html#ccpn.ui.gui.DropBase.DropBase" title="ccpn.ui.gui.DropBase.DropBase"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.DropBase.DropBase</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QGraphicsTextItem</span></code></p>
+<dl class="attribute">
+<dt id="ccpn.ui.gui.modules.SequenceModule.GuiChainResidue.fontSize">
+<code class="descname">fontSize</code><em class="property"> = 20</em><a class="headerlink" href="#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue.fontSize" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.SequenceModule.GuiChainResidue.processNmrChains">
+<code class="descname">processNmrChains</code><span class="sig-paren">(</span><em>data: List[str], event: PyQt4.QtGui.QMouseEvent</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/SequenceModule.html#GuiChainResidue.processNmrChains"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.SequenceModule.GuiChainResidue.processNmrChains" title="Permalink to this definition">¶</a></dt>
+<dd><p>Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
+all succeeding residues according to the length of the list.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.SequenceModule.SequenceModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.SequenceModule.</code><code class="descname">SequenceModule</code><span class="sig-paren">(</span><em>project</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/SequenceModule.html#SequenceModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.SequenceModule.SequenceModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<p>The module displays all chains in the project as one-letter amino acids. The one letter residue
+sequence codes are all instances of the GuiChainResidue class and the style applied to a residue
+indicates its assignment state and, when coupled with the Sequence Graph module, indicates if a
+stretch of residues matches a given stretch of connected NmrResidues. The QGraphicsScene and
+QGraphicsView instances provide the canvas on to which the amino acids representations are drawn.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.ShortcutModule">
+<span id="ccpn-ui-gui-modules-shortcutmodule-module"></span><h2>ccpn.ui.gui.modules.ShortcutModule module<a class="headerlink" href="#module-ccpn.ui.gui.modules.ShortcutModule" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ShortcutModule.ShortcutModule">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ShortcutModule.</code><code class="descname">ShortcutModule</code><span class="sig-paren">(</span><em>mainWindow</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ShortcutModule.html#ShortcutModule"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ShortcutModule.ShortcutModule" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ccpn.ui.gui.modules.CcpnModule.CcpnModule" title="ccpn.ui.gui.modules.CcpnModule.CcpnModule"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.modules.CcpnModule.CcpnModule</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ShortcutModule.ShortcutModule.save">
+<code class="descname">save</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ShortcutModule.html#ShortcutModule.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ShortcutModule.ShortcutModule.save" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ShortcutModule.ShortcutModule.saveAndQuit">
+<code class="descname">saveAndQuit</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ShortcutModule.html#ShortcutModule.saveAndQuit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ShortcutModule.ShortcutModule.saveAndQuit" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ccpn.ui.gui.modules.ShortcutModule.ShortcutWidget">
+<em class="property">class </em><code class="descclassname">ccpn.ui.gui.modules.ShortcutModule.</code><code class="descname">ShortcutWidget</code><span class="sig-paren">(</span><em>parent</em>, <em>mainWindow</em>, <em>**kw</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ShortcutModule.html#ShortcutWidget"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ShortcutModule.ShortcutWidget" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">PyQt4.QtGui.QWidget</span></code>, <a class="reference internal" href="ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Base.Base" title="ccpn.ui.gui.widgets.Base.Base"><code class="xref py py-class docutils literal"><span class="pre">ccpn.ui.gui.widgets.Base.Base</span></code></a></p>
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ShortcutModule.ShortcutWidget.getShortcuts">
+<code class="descname">getShortcuts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ShortcutModule.html#ShortcutWidget.getShortcuts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ShortcutModule.ShortcutWidget.getShortcuts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="ccpn.ui.gui.modules.ShortcutModule.ShortcutWidget.validateFunction">
+<code class="descname">validateFunction</code><span class="sig-paren">(</span><em>i</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/ShortcutModule.html#ShortcutWidget.validateFunction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.ShortcutModule.ShortcutWidget.validateFunction" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-ccpn.ui.gui.modules.peakUtils">
+<span id="ccpn-ui-gui-modules-peakutils-module"></span><h2>ccpn.ui.gui.modules.peakUtils module<a class="headerlink" href="#module-ccpn.ui.gui.modules.peakUtils" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="ccpn.ui.gui.modules.peakUtils.getPeakAnnotation">
+<code class="descclassname">ccpn.ui.gui.modules.peakUtils.</code><code class="descname">getPeakAnnotation</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em>, <em>separator='</em>, <em>'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/peakUtils.html#getPeakAnnotation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.peakUtils.getPeakAnnotation" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.modules.peakUtils.getPeakLinewidth">
+<code class="descclassname">ccpn.ui.gui.modules.peakUtils.</code><code class="descname">getPeakLinewidth</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/peakUtils.html#getPeakLinewidth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.peakUtils.getPeakLinewidth" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpn.ui.gui.modules.peakUtils.getPeakPosition">
+<code class="descclassname">ccpn.ui.gui.modules.peakUtils.</code><code class="descname">getPeakPosition</code><span class="sig-paren">(</span><em>peak</em>, <em>dim</em>, <em>unit='ppm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpn/ui/gui/modules/peakUtils.html#getPeakPosition"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpn.ui.gui.modules.peakUtils.getPeakPosition" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ccpn.ui.gui.modules package</a><ul>
+<li><a class="reference internal" href="#subpackages">Subpackages</a></li>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.CcpnModule">ccpn.ui.gui.modules.CcpnModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ChemicalShiftTable">ccpn.ui.gui.modules.ChemicalShiftTable module</a></li>
+<li><a class="reference internal" href="#ccpn-ui-gui-modules-chemicalshiftsmappingmodule-module">ccpn.ui.gui.modules.ChemicalShiftsMappingModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.CopyPeaksModule">ccpn.ui.gui.modules.CopyPeaksModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.CreateSequence">ccpn.ui.gui.modules.CreateSequence module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.DataPlottingModule">ccpn.ui.gui.modules.DataPlottingModule module</a></li>
+<li><a class="reference internal" href="#ccpn-ui-gui-modules-guiblankdisplay-module">ccpn.ui.gui.modules.GuiBlankDisplay module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiMainWindow">ccpn.ui.gui.modules.GuiMainWindow module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiModule">ccpn.ui.gui.modules.GuiModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiPopupGenerator">ccpn.ui.gui.modules.GuiPopupGenerator module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiSpectrumDisplay">ccpn.ui.gui.modules.GuiSpectrumDisplay module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiSpectrumView">ccpn.ui.gui.modules.GuiSpectrumView module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiSpectrumView1d">ccpn.ui.gui.modules.GuiSpectrumView1d module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiSpectrumViewNd">ccpn.ui.gui.modules.GuiSpectrumViewNd module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiStrip">ccpn.ui.gui.modules.GuiStrip module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiStrip1d">ccpn.ui.gui.modules.GuiStrip1d module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiStripDisplay1d">ccpn.ui.gui.modules.GuiStripDisplay1d module</a></li>
+<li><a class="reference internal" href="#ccpn-ui-gui-modules-guistripdisplaynd-module">ccpn.ui.gui.modules.GuiStripDisplayNd module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiStripNd">ccpn.ui.gui.modules.GuiStripNd module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiTableGenerator">ccpn.ui.gui.modules.GuiTableGenerator module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.GuiWindow">ccpn.ui.gui.modules.GuiWindow module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.MacroEditor">ccpn.ui.gui.modules.MacroEditor module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.NmrResidueTable">ccpn.ui.gui.modules.NmrResidueTable module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.NotesEditor">ccpn.ui.gui.modules.NotesEditor module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ObjectAssigner">ccpn.ui.gui.modules.ObjectAssigner module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PeakAssigner">ccpn.ui.gui.modules.PeakAssigner module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PeakTable">ccpn.ui.gui.modules.PeakTable module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PipelineModule">ccpn.ui.gui.modules.PipelineModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.PluginModule">ccpn.ui.gui.modules.PluginModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ReferenceChemicalShifts">ccpn.ui.gui.modules.ReferenceChemicalShifts module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ResidueInformation">ccpn.ui.gui.modules.ResidueInformation module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.RestraintTable">ccpn.ui.gui.modules.RestraintTable module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.SequenceModule">ccpn.ui.gui.modules.SequenceModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.ShortcutModule">ccpn.ui.gui.modules.ShortcutModule module</a></li>
+<li><a class="reference internal" href="#module-ccpn.ui.gui.modules.peakUtils">ccpn.ui.gui.modules.peakUtils module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ccpn.ui.gui.lib.chemometrics.html"
+                        title="previous chapter">ccpn.ui.gui.lib.chemometrics package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ccpn.ui.gui.modules.spectrumItems.html"
+                        title="next chapter">ccpn.ui.gui.modules.spectrumItems package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ccpn/ccpn.ui.gui.modules.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpn.ui.gui.modules.spectrumItems.html" title="ccpn.ui.gui.modules.spectrumItems package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ccpn.ui.gui.lib.chemometrics.html" title="ccpn.ui.gui.lib.chemometrics package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpn.html" >ccpn package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpn.ui.html" >ccpn.ui package</a> &raquo;</li>
+          <li class="nav-item nav-item-4"><a href="ccpn.ui.gui.html" >ccpn.ui.gui package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

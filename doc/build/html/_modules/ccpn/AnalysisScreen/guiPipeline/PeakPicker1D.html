@@ -1,0 +1,297 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.AnalysisScreen.guiPipeline.PeakPicker1D &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.AnalysisScreen.guiPipeline.PeakPicker1D</h1><div class="highlight"><pre>
+<span></span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span> <span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PipelineWidgets</span> <span class="kn">import</span> <span class="n">PipelineBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<span class="n">WidgetSetters</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+                            <span class="p">(</span><span class="s1">&#39;CheckBox&#39;</span><span class="p">,</span>      <span class="s1">&#39;setChecked&#39;</span><span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;PulldownList&#39;</span><span class="p">,</span>  <span class="s1">&#39;set&#39;</span>       <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;LineEdit&#39;</span><span class="p">,</span>      <span class="s1">&#39;setText&#39;</span>   <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;Label&#39;</span><span class="p">,</span>         <span class="s1">&#39;setText&#39;</span>   <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;DoubleSpinbox&#39;</span><span class="p">,</span> <span class="s1">&#39;setValue&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;Spinbox&#39;</span><span class="p">,</span>       <span class="s1">&#39;setValue&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;Slider&#39;</span><span class="p">,</span>        <span class="s1">&#39;setValue&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;RadioButtons&#39;</span><span class="p">,</span>  <span class="s1">&#39;setIndex&#39;</span>  <span class="p">),</span>
+                            <span class="p">(</span><span class="s1">&#39;TextEditor&#39;</span><span class="p">,</span>    <span class="s1">&#39;setText&#39;</span>   <span class="p">),</span>
+                           <span class="p">])</span>
+
+<div class="viewcode-block" id="PeakPicker1D"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.PeakPicker1D.PeakPicker1D">[docs]</a><span class="k">class</span> <span class="nc">PeakPicker1D</span><span class="p">(</span><span class="n">PipelineBox</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PeakPicker1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="n">PipelineBox</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setMainLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createWidgets</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_setParams</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span> <span class="o">=</span> <span class="n">parent</span>
+
+<div class="viewcode-block" id="PeakPicker1D.methodName"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.PeakPicker1D.PeakPicker1D.methodName">[docs]</a>  <span class="k">def</span> <span class="nf">methodName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="s1">&#39;Peak picker 1D&#39;</span></div>
+
+<div class="viewcode-block" id="PeakPicker1D.applicationsSpecific"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.PeakPicker1D.PeakPicker1D.applicationsSpecific">[docs]</a>  <span class="k">def</span> <span class="nf">applicationsSpecific</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;AnalysisScreen&#39;</span><span class="p">,</span> <span class="s1">&#39;AnalysisMetabolomics&#39;</span><span class="p">]</span></div>
+
+  <span class="k">def</span> <span class="nf">_setMainLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QGridLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">layout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_createWidgets</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraOption</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+                                            <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Spectra&#39;</span><span class="p">,</span> <span class="s1">&#39;Groups&#39;</span><span class="p">],</span>
+                                            <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                            <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">showSpectraOption</span><span class="p">,</span>
+                                            <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">pickNegativeCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Pick negative peaks&#39;</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraOption</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pickNegativeCheckBox</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setSelectionScrollArea</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrumCheckBoxes</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addSpectrumGroupsCheckBoxes</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_setSelectionScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFrame</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="p">)</span>
+
+<div class="viewcode-block" id="PeakPicker1D.getWidgetsParams"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.PeakPicker1D.PeakPicker1D.getWidgetsParams">[docs]</a>  <span class="k">def</span> <span class="nf">getWidgetsParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+                          <span class="p">(</span><span class="s1">&#39;pickNegativeCheckBox&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickNegativeCheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">()),</span>
+                          <span class="p">(</span><span class="s1">&#39;selectSpectraOption&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraOption</span><span class="o">.</span><span class="n">getIndex</span><span class="p">()),</span>
+                          <span class="p">(</span><span class="s1">&#39;spCheckBoxes&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span> <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()]),</span>
+                          <span class="p">(</span><span class="s1">&#39;sgCheckBoxes&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span> <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">()])</span>
+                          <span class="p">])</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span></div>
+
+
+<div class="viewcode-block" id="PeakPicker1D.runMethod"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.PeakPicker1D.PeakPicker1D.runMethod">[docs]</a>  <span class="k">def</span> <span class="nf">runMethod</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Running &#39;</span><span class="p">,</span>  <span class="bp">self</span><span class="o">.</span><span class="n">methodName</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_pickPeaks</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getAllSelectedSpectra</span><span class="p">())</span></div>
+
+
+  <span class="k">def</span> <span class="nf">_setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">widgetName</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">widgetName</span> <span class="o">==</span> <span class="s1">&#39;spCheckBoxes&#39;</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">updateSpectraCheckBoxes</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">widgetName</span> <span class="o">==</span> <span class="s1">&#39;sgCheckBoxes&#39;</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">updateSpectraCheckBoxes</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span><span class="p">)</span>
+
+        <span class="n">widget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">widgetName</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">widget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="n">WidgetSetters</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+          <span class="n">setWidget</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">WidgetSetters</span><span class="p">[</span><span class="n">widget</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">])</span>
+          <span class="n">setWidget</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">widgetName</span> <span class="o">==</span> <span class="s1">&#39;selectSpectraOption&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">showSpectraOption</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">widgetName</span> <span class="o">!=</span> <span class="s1">&#39;spCheckBoxes&#39;</span> <span class="ow">and</span>  <span class="n">widgetName</span> <span class="o">!=</span> <span class="s1">&#39;sgCheckBoxes&#39;</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Value not set for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1">. Insert it on the &quot;WidgetSetters&quot; dictionary &#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">()))</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">widgetName</span> <span class="o">!=</span> <span class="s1">&#39;spCheckBoxes&#39;</span> <span class="ow">and</span> <span class="n">widgetName</span> <span class="o">!=</span> <span class="s1">&#39;sgCheckBoxes&#39;</span><span class="p">:</span>
+          <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Impossible to restore </span><span class="si">%s</span><span class="s1"> value for </span><span class="si">%s</span><span class="s1">. Check paramas dictionary in getWidgetParams&#39;</span> <span class="o">%</span><span class="p">(</span><span class="n">widgetName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">()))</span>
+
+
+<div class="viewcode-block" id="PeakPicker1D.showSpectraOption"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.PeakPicker1D.PeakPicker1D.showSpectraOption">[docs]</a>  <span class="k">def</span> <span class="nf">showSpectraOption</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectSpectraOption</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Spectra&#39;</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spGroupsCheckBox</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span><span class="p">:</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span><span class="p">:</span>
+        <span class="n">sg</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span><span class="p">:</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span><span class="p">:</span>
+        <span class="n">sg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spGroupsCheckBox</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_addSpectrumCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select All&#39;</span><span class="p">,</span><span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checkAllSpectra</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumCheckBox</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addSpectrumGroupsCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spGroupsCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Select All SG&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spGroupsCheckBox</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spGroupsCheckBox</span><span class="o">.</span><span class="n">stateChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_checkAllSpectrumGroups</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sg</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumGroups</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollAreaWidgetContents</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">pid</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupCheckBox</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupCheckBox</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_checkAllSpectrumGroups</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+          <span class="n">sg</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">sg</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_checkAllSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">state</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Checked</span><span class="p">:</span>
+          <span class="n">cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getSelectedSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">spectra</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allCheckBoxes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">spectrum</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;SP:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
+        <span class="n">spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">spectra</span>
+
+
+  <span class="k">def</span> <span class="nf">_getSpectrumGroupsSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">spectra</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">allSG_CheckBoxes</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">sg</span><span class="o">.</span><span class="n">isChecked</span><span class="p">():</span>
+        <span class="n">spectrumGroup</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">text</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+          <span class="n">spectra</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">spectrumGroup</span><span class="o">.</span><span class="n">spectra</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">spectra</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">list</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">spectra</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">spectra</span>
+
+  <span class="k">def</span> <span class="nf">_getAllSelectedSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getSelectedSpectra</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getSpectrumGroupsSpectra</span><span class="p">()))</span>
+
+
+<div class="viewcode-block" id="PeakPicker1D.updateSpectraCheckBoxes"><a class="viewcode-back" href="../../../../ccpn/ccpn.AnalysisScreen.guiPipeline.html#ccpn.AnalysisScreen.guiPipeline.PeakPicker1D.PeakPicker1D.updateSpectraCheckBoxes">[docs]</a>  <span class="k">def</span> <span class="nf">updateSpectraCheckBoxes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ids</span><span class="p">,</span> <span class="n">checkBoxes</span><span class="p">):</span>
+    <span class="k">for</span> <span class="nb">id</span> <span class="ow">in</span> <span class="n">ids</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">cb</span> <span class="ow">in</span> <span class="n">checkBoxes</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">cb</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="nb">id</span><span class="p">:</span>
+          <span class="n">cb</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_pickPeaks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">spectra</span><span class="p">):</span>
+    <span class="n">negativePeaks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pickNegativeCheckBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">ignoredRegions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getIgnoredRegions</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="n">spectra</span><span class="p">:</span>
+      <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pickPeaks1dFiltered</span><span class="p">(</span><span class="n">ignoredRegions</span><span class="o">=</span><span class="n">ignoredRegions</span><span class="p">,</span> <span class="n">negativePeaks</span><span class="o">=</span><span class="n">negativePeaks</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_getIgnoredRegions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">ignoredRegions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">currentPipeline</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pipelineModule</span><span class="o">.</span><span class="n">currentRunningPipeline</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">box</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">currentPipeline</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">box</span><span class="o">.</span><span class="n">methodName</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Exclude Signal Free Regions&#39;</span><span class="p">:</span>
+          <span class="n">ignoredRegions</span> <span class="o">+=</span> <span class="n">value</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">ignoredRegions</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ignoredRegions</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

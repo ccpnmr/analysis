@@ -1,0 +1,228 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.Util &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.Util</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;API (data storage) level miscellaneous utilities</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+
+<span class="n">apiTopModule</span> <span class="o">=</span> <span class="s1">&#39;ccpnmodel.ccpncore.api&#39;</span>
+
+<span class="c1"># def _resetParentLink(apiObject, downLink:str, tag:str, value):</span>
+<span class="c1">#   &quot;&quot;&quot;Change single-attribute key of apiObject with property name tag to value</span>
+<span class="c1">#</span>
+<span class="c1">#   downLink is the name of the link from parent to obj&quot;&quot;&quot;</span>
+<span class="c1">#</span>
+<span class="c1">#   parent = apiObject.parent</span>
+<span class="c1">#   siblings = getattr(parent, downLink)</span>
+<span class="c1">#   if any(x for x in siblings if x is not apiObject and getattr(x, tag) == value):</span>
+<span class="c1">#     raise ValueError(&quot;Cannot rename %s - pre-existing object with key %s:%s&quot;</span>
+<span class="c1">#         % apiObject, tag, value)</span>
+<span class="c1">#</span>
+<span class="c1">#   oldKey = getattr(apiObject, tag)</span>
+<span class="c1">#   root = apiObject.root</span>
+<span class="c1">#   root.__dict__[&#39;override&#39;] = True</span>
+<span class="c1">#</span>
+<span class="c1">#   # Set up for undo</span>
+<span class="c1">#   undo = root._undo</span>
+<span class="c1">#   if undo is not None:</span>
+<span class="c1">#     undo.increaseBlocking()</span>
+<span class="c1">#</span>
+<span class="c1">#   try:</span>
+<span class="c1">#     parentDict = parent.__dict__[downLink]</span>
+<span class="c1">#     del parentDict[oldKey]</span>
+<span class="c1">#     setattr(apiObject, tag, value)</span>
+<span class="c1">#     parentDict[value] = apiObject</span>
+<span class="c1">#</span>
+<span class="c1">#   finally:</span>
+<span class="c1">#     # reset override and set isModified</span>
+<span class="c1">#     root.__dict__[&#39;override&#39;] = False</span>
+<span class="c1">#     apiObject.topObject.__dict__[&#39;isModified&#39;] = True</span>
+<span class="c1">#     if undo is not None:</span>
+<span class="c1">#       undo.decreaseBlocking()</span>
+<span class="c1">#</span>
+<span class="c1">#   if undo is not None:</span>
+<span class="c1">#     undo.newItem(_resetParentLink, _resetParentLink, undoArgs=(apiObject, downLink, tag, oldKey),</span>
+<span class="c1">#                  redoArgs=(apiObject, downLink, tag, value))</span>
+<span class="c1">#</span>
+<span class="c1">#   # call notifiers:</span>
+
+
+<span class="k">def</span> <span class="nf">_resetParentLink</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">downLink</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span><span class="n">OrderedDict</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Change apiObject with key attributes and values given in keys (OrderedDIct)</span>
+
+<span class="sd">  downLink is the name of the link from parent to obj</span>
+
+<span class="sd">  #CCPNINTERNAL</span>
+<span class="sd">  Used in core.Data, core.Sample, core.SpectrumGroup, core.Substance,</span>
+<span class="sd">  core.SampleComponent, core.SpectrumHit</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">parent</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">parent</span>
+  <span class="n">siblings</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">downLink</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">siblings</span>
+         <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">apiObject</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> <span class="o">==</span> <span class="n">z</span> <span class="k">for</span> <span class="n">y</span><span class="p">,</span><span class="n">z</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">())):</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot rename </span><span class="si">%s</span><span class="s2"> - pre-existing object with keys </span><span class="si">%s</span><span class="s2">&quot;</span>
+        <span class="o">%</span> <span class="n">apiObject</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
+
+  <span class="n">undoKeys</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span><span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)</span>
+  <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="n">tag</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">keys</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">oldKey</span> <span class="o">=</span> <span class="n">undoKeys</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+    <span class="n">newKey</span> <span class="o">=</span> <span class="n">keys</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">oldKey</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">undoKeys</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+    <span class="n">newKey</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">keys</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+  <span class="n">root</span> <span class="o">=</span> <span class="n">apiObject</span><span class="o">.</span><span class="n">root</span>
+  <span class="n">root</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;override&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+
+  <span class="c1"># Set up for undo</span>
+  <span class="n">undo</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">_undo</span>
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">parentDict</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="n">downLink</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">parentDict</span><span class="p">[</span><span class="n">oldKey</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">keys</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+    <span class="n">parentDict</span><span class="p">[</span><span class="n">newKey</span><span class="p">]</span> <span class="o">=</span> <span class="n">apiObject</span>
+
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="c1"># reset override and set isModified</span>
+    <span class="n">root</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;override&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">apiObject</span><span class="o">.</span><span class="n">topObject</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;isModified&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="n">_resetParentLink</span><span class="p">,</span> <span class="n">_resetParentLink</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">downLink</span><span class="p">,</span> <span class="n">undoKeys</span><span class="p">),</span>
+                 <span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">apiObject</span><span class="p">,</span> <span class="n">downLink</span><span class="p">,</span><span class="n">keys</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="getConfigParameter"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.Util.getConfigParameter">[docs]</a><span class="k">def</span> <span class="nf">getConfigParameter</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;get configuration parameter, from reading configuration file</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="nb">file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getTopDirectory</span><span class="p">(),</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">configFilePath</span><span class="p">)</span>
+  <span class="n">dd</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="nb">open</span><span class="p">(</span><span class="nb">file</span><span class="p">))</span>
+  <span class="k">return</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;configuration&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="getClassFromFullName"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.Util.getClassFromFullName">[docs]</a><span class="k">def</span> <span class="nf">getClassFromFullName</span><span class="p">(</span><span class="n">qualifiedName</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Get Api class from fully qualified (dot-separated) name</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">pathList</span> <span class="o">=</span> <span class="n">qualifiedName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+  <span class="n">mod</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">apiTopModule</span><span class="p">]</span> <span class="o">+</span> <span class="n">pathList</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),{},{},[</span><span class="n">pathList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+  <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">mod</span><span class="p">,</span><span class="n">pathList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

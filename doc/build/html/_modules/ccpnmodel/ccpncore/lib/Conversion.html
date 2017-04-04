@@ -1,0 +1,244 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.Conversion &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.Conversion</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">======================COPYRIGHT/LICENSE START==========================</span>
+
+<span class="sd">Conversion.py: Data compatibility handling</span>
+
+<span class="sd">Copyright (C) 2007-2014 Rasmus Fogh (CCPN project)</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">This library is free software; you can redistribute it and/or</span>
+<span class="sd">modify it under the terms of the GNU Lesser General Public</span>
+<span class="sd">License as published by the Free Software Foundation; either</span>
+<span class="sd">version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="sd">A copy of this license can be found in ../../../../license/LGPL.license.</span>
+
+<span class="sd">This library is distributed in the hope that it will be useful,</span>
+<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="sd">Lesser General Public License for more details.</span>
+
+<span class="sd">You should have received a copy of the GNU Lesser General Public</span>
+<span class="sd">License along with this library; if not, write to the Free Software</span>
+<span class="sd">Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</span>
+
+<span class="sd">======================COPYRIGHT/LICENSE END============================</span>
+
+<span class="sd">To obtain more information about this code:</span>
+
+<span class="sd">- CCPN website (http://www.ccpn.ac.uk)</span>
+
+<span class="sd">- contact Rasmus Fogh (ccpn@bioc.cam.ac.uk)</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">If you are using this software for academic purposes, we suggest</span>
+<span class="sd">quoting the following reference:</span>
+
+<span class="sd">===========================REFERENCE START=============================</span>
+<span class="sd">Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne</span>
+<span class="sd">Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and</span>
+<span class="sd">Ernest D. Laue (2005). A framework for scientific data modeling and</span>
+<span class="sd">automated software development. Bioinformatics 21, 1678-1684.</span>
+<span class="sd">===========================REFERENCE END===============================</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops</span> <span class="kn">import</span> <span class="n">Version</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.ApiError</span> <span class="kn">import</span> <span class="n">ApiError</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;rhf22&#39;</span>
+
+
+
+<div class="viewcode-block" id="getConversionInfo"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.Conversion.getConversionInfo">[docs]</a><span class="k">def</span> <span class="nf">getConversionInfo</span><span class="p">(</span><span class="n">fromVersionString</span><span class="p">,</span> <span class="n">toVersionString</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; get dictionary with elemsTreatedAsOld, extraMapChanges function</span>
+<span class="sd">  and correctData function to go from fromVersion to toVersion</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+
+  <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fromVersionString</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">):</span>
+    <span class="n">fromVersion</span> <span class="o">=</span> <span class="n">fromVersionString</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">fromVersion</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">fromVersionString</span><span class="p">)</span>
+
+  <span class="c1"># HACK - 2,0,6 is  aside branch, and a lot of extra work to upgrade correctly.</span>
+  <span class="c1"># Treating it as identical to 2.0.5 should (hopefully) work most of the time.</span>
+  <span class="c1"># Alternatively one could try treating it as 2.1.0 instead</span>
+  <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">fromVersion</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;2.0.6&#39;</span><span class="p">:</span>
+    <span class="n">fromVersion</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="s1">&#39;2.0.5&#39;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">toVersionString</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">toVersionString</span><span class="p">,</span> <span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">):</span>
+      <span class="n">toVersion</span> <span class="o">=</span> <span class="n">toVersionString</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">toVersion</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">toVersionString</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">toVersion</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">currentModelVersion</span>
+
+  <span class="k">if</span> <span class="n">toVersion</span> <span class="o">&gt;</span> <span class="n">fromVersion</span><span class="p">:</span>
+
+    <span class="c1"># get modules to load code from</span>
+    <span class="n">imp</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span>
+    <span class="n">toModule</span> <span class="o">=</span> <span class="n">imp</span><span class="p">(</span><span class="s1">&#39;ccpnmodel.</span><span class="si">%s</span><span class="s1">.upgrade&#39;</span> <span class="o">%</span> <span class="n">toVersion</span><span class="o">.</span><span class="n">getDirName</span><span class="p">())</span>
+    <span class="n">versions</span> <span class="o">=</span> <span class="p">[</span><span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span>  <span class="n">toModule</span><span class="o">.</span><span class="n">versionSequence</span><span class="p">]</span>
+    <span class="n">i1</span> <span class="o">=</span> <span class="n">versions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">fromVersion</span><span class="p">)</span>
+    <span class="n">i2</span> <span class="o">=</span> <span class="n">versions</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">toVersion</span><span class="p">)</span>
+    <span class="n">activeVersions</span> <span class="o">=</span> <span class="n">versions</span><span class="p">[</span><span class="n">i1</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">i2</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">versionModules</span> <span class="o">=</span> <span class="p">[</span><span class="n">imp</span><span class="p">(</span><span class="s1">&#39;ccpnmodel.</span><span class="si">%s</span><span class="s1">.upgrade&#39;</span> <span class="o">%</span> <span class="n">x</span><span class="o">.</span><span class="n">getDirName</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">activeVersions</span><span class="p">]</span>
+
+    <span class="c1"># make extraMapChanges function</span>
+    <span class="k">def</span> <span class="nf">extraMapChanges</span><span class="p">(</span><span class="n">globalMapping</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot; mapping changes for series of version changes:&quot;&quot;&quot;</span>
+      <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">mm</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">enumerate</span><span class="p">(</span><span class="n">versionModules</span><span class="p">))):</span>
+        <span class="n">mm</span><span class="o">.</span><span class="n">extraMapChanges</span><span class="p">(</span><span class="n">globalMapping</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;extraMapChanges&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">extraMapChanges</span>
+
+    <span class="c1"># get correctData function</span>
+    <span class="k">def</span> <span class="nf">correctData</span><span class="p">(</span><span class="n">topObj</span><span class="p">,</span> <span class="n">delayDataDict</span><span class="p">,</span> <span class="n">toNewObjDict</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+      <span class="sd">&quot;&quot;&quot; get correctData function for version list&quot;&quot;&quot;</span>
+      <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="n">versionModules</span><span class="p">:</span>
+        <span class="n">mm</span><span class="o">.</span><span class="n">correctData</span><span class="p">(</span><span class="n">topObj</span><span class="p">,</span> <span class="n">delayDataDict</span><span class="p">,</span> <span class="n">toNewObjDict</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="n">mapping</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;correctData&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">correctData</span>
+
+    <span class="c1"># get elementPairings</span>
+    <span class="c1"># result[&#39;elementPairings&#39;] = toModule.elementPairings</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;elementPairings&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">mm</span><span class="o">.</span><span class="n">elementPairings</span>
+                                                       <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="n">versionModules</span><span class="p">)))</span>
+
+    <span class="c1"># get elemsTreatedAsOld</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;elemsTreatedAsOld&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">mm</span><span class="o">.</span><span class="n">elemsTreatedAsOld</span> <span class="k">for</span> <span class="n">mm</span> <span class="ow">in</span> <span class="n">versionModules</span><span class="p">))</span>
+
+
+  <span class="k">elif</span> <span class="n">toVersion</span> <span class="o">&lt;</span> <span class="n">fromVersion</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Data downgrading from </span><span class="si">%s</span><span class="s2"> to </span><span class="si">%s</span><span class="s2"> not implemented yet&quot;</span>
+                              <span class="o">%</span> <span class="p">(</span><span class="n">fromVersion</span><span class="p">,</span> <span class="n">toVersion</span><span class="p">))</span>
+
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="setNmrExpPrototypeLink"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.lib.html#ccpnmodel.ccpncore.lib.Conversion.setNmrExpPrototypeLink">[docs]</a><span class="k">def</span> <span class="nf">setNmrExpPrototypeLink</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">topObjByGuid</span><span class="p">,</span> <span class="n">delayDataDict</span><span class="p">,</span>
+                           <span class="n">linkmapper</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; redirect certain NmrExpPrototype links to other experiments</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">tag</span> <span class="o">==</span> <span class="s1">&#39;refExpDim&#39;</span><span class="p">:</span>
+    <span class="c1"># After model changes this is no longer set</span>
+    <span class="k">return</span>
+
+  <span class="n">doGet</span> <span class="o">=</span> <span class="n">delayDataDict</span><span class="o">.</span><span class="n">get</span>
+  <span class="n">objDataDict</span> <span class="o">=</span> <span class="n">doGet</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+  <span class="n">inDataList</span> <span class="o">=</span> <span class="n">objDataDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">inDataList</span><span class="p">:</span>
+    <span class="n">keyList</span> <span class="o">=</span> <span class="n">inDataList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">linkmapper</span><span class="p">(</span><span class="n">keyList</span><span class="p">)</span>
+    <span class="n">guid</span> <span class="o">=</span> <span class="n">keyList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># set link</span>
+    <span class="n">oo</span> <span class="o">=</span> <span class="n">topObjByGuid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guid</span><span class="p">)</span>
+    <span class="n">clazz</span> <span class="o">=</span> <span class="n">keyList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s1">&#39;class&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># NB naughty - _packageName is a private attribute.</span>
+      <span class="c1"># But getPackageName is not static</span>
+      <span class="n">obj</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">refreshTopObjects</span><span class="p">(</span><span class="n">clazz</span><span class="o">.</span><span class="n">_packageName</span><span class="p">)</span>
+      <span class="n">oo</span> <span class="o">=</span> <span class="n">topObjByGuid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">oo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># If the experiment is not found, hopefully it wil be picked up at a later</span>
+      <span class="c1"># compatibility step.</span>
+      <span class="c1"># Aftere V3 these links are derived, settable, and must be set properly</span>
+      <span class="c1"># obj.__dict__[tag] = clazz.getByKey(oo, keyList[1:-1])</span>
+      <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">tag</span><span class="p">,</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getByKey</span><span class="p">(</span><span class="n">oo</span><span class="p">,</span> <span class="n">keyList</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+      <span class="k">del</span> <span class="n">objDataDict</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

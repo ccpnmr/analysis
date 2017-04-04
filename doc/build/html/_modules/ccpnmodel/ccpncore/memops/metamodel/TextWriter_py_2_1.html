@@ -1,0 +1,703 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1 &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Version for Python version &gt;= 2.1</span>
+<span class="sd">    </span>
+<span class="sd">    no __init__ here,  must be in subclasses.</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">MetaModel</span>
+
+<span class="n">MemopsError</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span>
+
+<span class="c1">######################################################################</span>
+<span class="c1"># hack for Python 2.1 compatibility  NBNB                            #</span>
+<span class="c1">######################################################################</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="mi">0</span>
+  <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">True</span>
+
+<span class="n">mandatoryAttributes</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;language&#39;</span><span class="p">,</span> <span class="s1">&#39;startComment&#39;</span><span class="p">,</span> <span class="s1">&#39;endComment&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">,</span> <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;endStatement&#39;</span><span class="p">,</span> <span class="s1">&#39;fileSuffix&#39;</span><span class="p">,</span> <span class="s1">&#39;packageFile&#39;</span><span class="p">,</span> <span class="s1">&#39;baseDirName&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;classesInPackage&#39;</span><span class="p">,</span> <span class="s1">&#39;releaseVersion&#39;</span><span class="p">,</span> <span class="s1">&#39;scriptName&#39;</span><span class="p">,</span><span class="s1">&#39;rootFileName&#39;</span><span class="p">,</span> <span class="s1">&#39;rootDirName&#39;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># settings for various contexts</span>
+<span class="n">settings</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s1">&#39;python&#39;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="c1"># TextWriter settings :</span>
+  <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startComment&#39;</span><span class="p">:</span> <span class="s1">&#39;#&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&quot;&quot;&quot;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&quot;&quot;&quot;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endStatement&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;fileSuffix&#39;</span><span class="p">:</span> <span class="s1">&#39;py&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;packageFile&#39;</span><span class="p">:</span> <span class="s1">&#39;package&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;baseDirName&#39;</span><span class="p">:</span><span class="bp">None</span><span class="p">,</span>
+  <span class="s1">&#39;classesInPackage&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+   <span class="c1"># LanguageInterface settings :</span>
+   <span class="s1">&#39;noneValue&#39;</span><span class="p">:</span> <span class="s1">&#39;None&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;java&#39;</span><span class="p">:</span> <span class="p">{</span>
+   <span class="c1"># TextWriter settings :</span>
+  <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startComment&#39;</span><span class="p">:</span> <span class="s1">&#39;//&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="mi">75</span> <span class="o">*</span> <span class="s1">&#39;*&#39;</span><span class="p">),</span>
+  <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">75</span> <span class="o">*</span> <span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">),</span>
+  <span class="s1">&#39;endStatement&#39;</span><span class="p">:</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;fileSuffix&#39;</span><span class="p">:</span> <span class="s1">&#39;java&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;packageFile&#39;</span><span class="p">:</span> <span class="s1">&#39;_package&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;baseDirName&#39;</span><span class="p">:</span><span class="s1">&#39;java&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;classesInPackage&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+  <span class="c1"># LanguageInterface settings :</span>
+  <span class="s1">&#39;noneValue&#39;</span><span class="p">:</span> <span class="s1">&#39;null&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;c&#39;</span><span class="p">:</span> <span class="p">{</span>
+   <span class="c1"># TextWriter settings :</span>
+  <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startComment&#39;</span><span class="p">:</span> <span class="s1">&#39;//&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="mi">75</span> <span class="o">*</span> <span class="s1">&#39;*&#39;</span><span class="p">),</span>
+  <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">75</span> <span class="o">*</span> <span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">),</span>
+  <span class="s1">&#39;endStatement&#39;</span><span class="p">:</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;fileSuffix&#39;</span><span class="p">:</span> <span class="s1">&#39;c&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;packageFile&#39;</span><span class="p">:</span> <span class="s1">&#39;_package&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;baseDirName&#39;</span><span class="p">:</span><span class="s1">&#39;c&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;classesInPackage&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+  <span class="c1"># LanguageInterface settings :</span>
+  <span class="s1">&#39;noneValue&#39;</span><span class="p">:</span> <span class="s1">&#39;NULL&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;sql&#39;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;sql&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startComment&#39;</span><span class="p">:</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+  <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+  <span class="s1">&#39;endStatement&#39;</span><span class="p">:</span> <span class="s1">&#39;;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;fileSuffix&#39;</span><span class="p">:</span> <span class="s1">&#39;sql&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;packageFile&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;baseDirName&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+  <span class="s1">&#39;classesInPackage&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+   <span class="c1"># LanguageInterface settings :</span>
+   <span class="s1">&#39;noneValue&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;hbm&#39;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;hbm&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;!--&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endComment&#39;</span><span class="p">:</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;!--&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endStatement&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;fileSuffix&#39;</span><span class="p">:</span> <span class="s1">&#39;hbm.xml&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;packageFile&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;baseDirName&#39;</span><span class="p">:</span> <span class="bp">None</span><span class="p">,</span>
+  <span class="s1">&#39;classesInPackage&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+   <span class="c1"># LanguageInterface settings :</span>
+   <span class="s1">&#39;noneValue&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;xmlmodel&#39;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="c1"># Used to write out Model.xml</span>
+  <span class="c1"># TextWriter settings :</span>
+  <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;xmlmodel&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;!--&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endComment&#39;</span><span class="p">:</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;!--&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endStatement&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;fileSuffix&#39;</span><span class="p">:</span> <span class="s1">&#39;xml&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;packageFile&#39;</span><span class="p">:</span> <span class="s1">&#39;package&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;baseDirName&#39;</span><span class="p">:</span><span class="s1">&#39;xml&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;classesInPackage&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+   <span class="c1"># LanguageInterface settings :</span>
+   <span class="s1">&#39;noneValue&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;html&#39;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="c1"># Used to write out HTML documentation</span>
+  <span class="c1"># TextWriter settings :</span>
+  <span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;!--&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endComment&#39;</span><span class="p">:</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;startMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;&lt;!--&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endMultilineComment&#39;</span><span class="p">:</span> <span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;endStatement&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;fileSuffix&#39;</span><span class="p">:</span> <span class="s1">&#39;html&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;packageFile&#39;</span><span class="p">:</span> <span class="s1">&#39;package&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;baseDirName&#39;</span><span class="p">:</span><span class="s1">&#39;doc&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;classesInPackage&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+   <span class="c1"># LanguageInterface settings :</span>
+   <span class="s1">&#39;noneValue&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1">[docs]</a><span class="k">class</span> <span class="nc">TextWriter_py_2_1</span><span class="p">:</span>
+
+  <span class="c1"># these are files or directories that may not be present in a directory  </span>
+  <span class="c1"># that is supposed to be cleared out.</span>
+  <span class="n">clearOutGuards</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CVS&#39;</span><span class="p">,)</span>
+
+  <span class="n">INDENT</span> <span class="o">=</span> <span class="mi">2</span>
+
+  <span class="n">DEBUG_OUTPUT</span> <span class="o">=</span> <span class="bp">False</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># internal function</span>
+<div class="viewcode-block" id="TextWriter_py_2_1.clearOutDir"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.clearOutDir">[docs]</a>  <span class="k">def</span> <span class="nf">clearOutDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">topDirName</span><span class="p">,</span> <span class="n">forceClearOut</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; NB DANGEROUS! clears out contents of topDirName - as in &#39;cd topDirName; \rm -rf \*&#39;</span>
+<span class="sd">    </span>
+<span class="sd">    if forceClearOut directories are cleared even if they contain clearOutGuards</span>
+<span class="sd">    The clearOutGuards are not deleted or entered into even so.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># initial checks</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">topDirName</span><span class="p">):</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">topDirName</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;clearOutDir input </span><span class="si">%s</span><span class="s2"> is not a directory&quot;</span> 
+                          <span class="o">%</span> <span class="n">topDirName</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span>
+    
+    
+    <span class="n">stem</span><span class="p">,</span><span class="n">base</span> <span class="o">=</span>  <span class="n">topDirName</span><span class="p">,</span><span class="s1">&#39;&#39;</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="n">base</span><span class="p">:</span>
+      <span class="n">stem</span><span class="p">,</span><span class="n">base</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">stem</span><span class="p">)</span>
+    <span class="k">while</span> <span class="n">base</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">base</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clearOutGuards</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> may not be cleared out - contains </span><span class="si">%s</span><span class="s2">&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">topDirName</span><span class="p">,</span><span class="n">base</span><span class="p">))</span>
+      <span class="n">stem</span><span class="p">,</span><span class="n">base</span> <span class="o">=</span>  <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">stem</span><span class="p">)</span>
+    
+    <span class="c1"># setup</span>
+    <span class="n">dirs</span> <span class="o">=</span> <span class="p">[</span><span class="n">topDirName</span><span class="p">]</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="c1"># depth-first search</span>
+    <span class="k">for</span> <span class="n">dirName</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+      <span class="n">ll</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dirName</span><span class="p">)</span>
+      
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">forceClearOut</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clearOutGuards</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;cannot clear out </span><span class="si">%s</span><span class="s2">, contains file or directory </span><span class="si">%s</span><span class="s2">&quot;</span>
+                              <span class="o">%</span> <span class="p">(</span><span class="n">dirName</span><span class="p">,</span><span class="n">ss</span><span class="p">))</span>
+      
+      <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">clearOutGuards</span><span class="p">:</span>
+          <span class="n">fullname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dirName</span><span class="p">,</span><span class="n">name</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">fullname</span><span class="p">):</span>
+            <span class="n">dirs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fullname</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fullname</span><span class="p">)</span>
+      
+    <span class="c1"># remove files</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+      <span class="c1"># NBNB TODO cannot be done till  directories are reorganised</span>
+      <span class="c1">#os.remove(name)</span>
+      <span class="k">pass</span>
+      
+    
+    <span class="c1"># remove dirs (except first one)</span>
+    <span class="n">dirs</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span>
+    <span class="n">dirs</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">dirs</span><span class="p">:</span>
+      <span class="c1"># NBNB TODO cannot be done till  directories are reorganised</span>
+      <span class="c1">#os.rmdir(name)</span>
+      <span class="k">pass</span></div>
+      
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># internal function</span>
+<div class="viewcode-block" id="TextWriter_py_2_1.createDir"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.createDir">[docs]</a>  <span class="k">def</span> <span class="nf">createDir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dirName</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; set up as recursive function (instead of using os.makedirs)</span>
+<span class="sd">    as some implementations might want to do other things in each directory.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirName</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">createDir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">dirName</span><span class="p">))</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">dirName</span><span class="p">)</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Current directory =&#39;</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>
+        <span class="k">raise</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.getDirDepth"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.getDirDepth">[docs]</a>  <span class="k">def</span> <span class="nf">getDirDepth</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">dirDepth</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fileName</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getTopDirectory</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
+
+    <span class="k">return</span> <span class="n">dirDepth</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.openFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.openFile">[docs]</a>  <span class="k">def</span> <span class="nf">openFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;trying to open file &#39;</span><span class="si">%s</span><span class="s2">&#39; while another file &#39;</span><span class="si">%s</span><span class="s2">&#39; is still open&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span><span class="p">))</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="n">fileName</span> <span class="o">=</span> <span class="n">fileName</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">createDir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">fileName</span><span class="p">))</span>
+
+    <span class="c1"># TODO: if only have one fp what is point of having multiple indents?</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.closeFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.closeFile">[docs]</a>  <span class="k">def</span> <span class="nf">closeFile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;trying to close file which is not open&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fileName</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">indent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">indents</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">#  convenience function to allow debug output</span>
+<div class="viewcode-block" id="TextWriter_py_2_1.writeToFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.writeToFile">[docs]</a>  <span class="k">def</span> <span class="nf">writeToFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ss</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">DEBUG_OUTPUT</span><span class="p">:</span>
+      <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">ss</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startComment</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span>
+          <span class="n">ss</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startMultilineComment</span><span class="p">)):</span>
+        <span class="kn">import</span> <span class="nn">inspect</span>
+        <span class="n">stack</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">stack</span><span class="p">()</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">lineNo</span><span class="p">,</span> <span class="n">function</span><span class="p">)</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="n">n</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+          <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span>
+          <span class="n">fileRoot</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fileName</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">__name__</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">fileRoot</span><span class="p">):</span> <span class="c1"># a bit dangerous this</span>
+            <span class="k">break</span>
+          <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+ 
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+          <span class="k">try</span><span class="p">:</span>
+            <span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">lineNo</span><span class="p">,</span> <span class="n">function</span><span class="p">)</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[</span><span class="n">n</span><span class="o">+</span><span class="n">m</span><span class="p">][</span><span class="mi">1</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">fileRoot</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">fileName</span><span class="p">)[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span>
+          <span class="k">except</span><span class="p">:</span>
+            <span class="k">return</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%d</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">indent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">startComment</span><span class="p">,</span> <span class="n">fileRoot</span><span class="p">,</span> <span class="n">lineNo</span><span class="p">,</span>
+                                                <span class="n">function</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">endComment</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.write"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.write">[docs]</a>  <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ss</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Refactored for speed Rasmus Fogh 24/11/06</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;trying to write line but no file is open&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">ss</span><span class="p">:</span>
+      
+      <span class="n">indent</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span>
+      
+      <span class="n">lines</span> <span class="o">=</span> <span class="n">ss</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+      
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">ss</span><span class="p">:</span>
+          <span class="c1">##self.fp.write(indent+ss+&#39;\n&#39;)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">writeToFile</span><span class="p">(</span><span class="n">indent</span><span class="o">+</span><span class="n">ss</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="o">=</span> <span class="bp">False</span>
+          
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">compress</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">indent</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="o">=</span> <span class="bp">True</span>
+        
+      <span class="k">else</span><span class="p">:</span>
+      
+        <span class="c1"># check first line</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">compress</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">ss</span><span class="p">:</span>
+          <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+          <span class="k">del</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">indent</span> <span class="o">+</span> <span class="n">ss</span> 
+        
+        <span class="c1"># check last line</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">ss</span>
+        <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        
+        <span class="c1"># write lines</span>
+        <span class="c1">##self.fp.write((&#39;\n&#39; + indent).join(lines))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToFile</span><span class="p">((</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">indent</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.writeOne"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.writeOne">[docs]</a>  <span class="k">def</span> <span class="nf">writeOne</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ss</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Write one line and handle indentation - faster than &#39;write&#39;</span>
+<span class="sd">    Prepends the indentation and appends a linebreak, doing no checks or strips</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;trying to write line but no file is open&quot;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span><span class="p">)</span>
+    <span class="c1">##self.fp.write(ss)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">writeToFile</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.writeNewline"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.writeNewline">[docs]</a>  <span class="k">def</span> <span class="nf">writeNewline</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">previousLineEmpty</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.writeComment"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.writeComment">[docs]</a>  <span class="k">def</span> <span class="nf">writeComment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">comment</span><span class="p">:</span>
+      <span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">comment</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeOne</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startComment</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">endComment</span><span class="p">))</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.writeMultilineComment"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.writeMultilineComment">[docs]</a>  <span class="k">def</span> <span class="nf">writeMultilineComment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">comment</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">comment</span><span class="p">:</span>
+      <span class="n">comment</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">startMultilineComment</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">endMultilineComment</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">writeComment</span><span class="p">(</span><span class="n">comment</span><span class="p">)</span>
+   
+    <span class="k">else</span><span class="p">:</span>    
+      <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">startMultilineComment</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">comment</span><span class="p">,</span> <span class="n">compress</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">endMultilineComment</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.writeStatement"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.writeStatement">[docs]</a>  <span class="k">def</span> <span class="nf">writeStatement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">endStatement</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.openObjFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.openObjFile">[docs]</a>  <span class="k">def</span> <span class="nf">openObjFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">):</span>
+    
+    <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getObjFileName</span><span class="p">(</span><span class="n">metaObj</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">openFile</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.getObjFileName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.getObjFileName">[docs]</a>  <span class="k">def</span> <span class="nf">getObjFileName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">absoluteName</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">addSuffix</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get filename for metaObj</span>
+<span class="sd">    If absoluteName is True the file name is absolute</span>
+<span class="sd">    otherwise it is relative to the relevant baseDir</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># absolute or relative path</span>
+    <span class="k">if</span> <span class="n">absoluteName</span><span class="p">:</span>
+      <span class="n">pathList</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">rootDirName</span><span class="p">]</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">baseDirName</span><span class="p">:</span>
+        <span class="n">pathList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseDirName</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">pathList</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">codeDirName</span><span class="p">:</span>
+      <span class="n">pathList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">codeDirName</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">metaObj</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># Root package only</span>
+      <span class="n">pathList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">modellingPackageName</span><span class="p">)</span>
+      <span class="n">pathList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootFileName</span><span class="p">)</span>
+      
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># any other object</span>
+      <span class="n">pathList</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">metaObj</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">))</span>
+      
+      <span class="c1"># special handling for ModelElements that may correspond to directories:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">)</span> 
+          <span class="ow">and</span> <span class="p">(</span><span class="n">metaObj</span><span class="o">.</span><span class="n">containedPackages</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">classesInPackage</span><span class="p">)):</span>
+        <span class="n">pathList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">packageFile</span><span class="p">)</span>
+      
+      <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metaObj</span><span class="o">.</span><span class="n">container</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot; file names not implemented for objects of type </span><span class="si">%s</span><span class="s2">&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">metaObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,))</span>
+
+    <span class="c1"># add suffix</span>
+    <span class="k">if</span> <span class="n">addSuffix</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">:</span>
+      <span class="n">pathList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">pathList</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">)</span>
+
+    <span class="c1">#join</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">pathList</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.getObjDirName"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.getObjDirName">[docs]</a>  <span class="k">def</span> <span class="nf">getObjDirName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaObj</span><span class="p">,</span> <span class="n">absoluteName</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+
+    <span class="n">fileName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getObjFileName</span><span class="p">(</span><span class="n">metaObj</span><span class="p">,</span> <span class="n">absoluteName</span><span class="o">=</span><span class="n">absoluteName</span><span class="p">)</span>
+    <span class="n">dirName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">fileName</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">dirName</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.getVersionString"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.getVersionString">[docs]</a>  <span class="k">def</span> <span class="nf">getVersionString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaobj</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">scriptName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that returns the version header that should be inserted in</span>
+<span class="sd">    each generated file. Parameters are the metaobj, the name and revision</span>
+<span class="sd">    of the generating script, and the date. Name defaults to</span>
+<span class="sd">    self.scriptName, if this is set.</span>
+<span class="sd">    Date defaults to the current date - it is a parameter mainly to</span>
+<span class="sd">    allow the suppression of date writing (for Model.py files).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">unknown</span> <span class="o">=</span> <span class="s1">&#39;?&#39;</span>
+    
+    <span class="k">if</span> <span class="n">date</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">date</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">ctime</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+
+    <span class="n">dataModelVersion</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">dataModelVersion</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">releaseVersion</span><span class="p">:</span>
+      <span class="n">rname</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">releaseVersion</span><span class="o">.</span><span class="n">name</span> <span class="ow">or</span> <span class="n">unknown</span>
+      <span class="n">releaseLine</span> <span class="o">=</span> <span class="s1">&#39;Release </span><span class="si">%s</span><span class="s1"> version </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">rname</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">releaseVersion</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">releaseLine</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="n">metaobj</span><span class="p">:</span>
+      <span class="n">pkgLine</span> <span class="o">=</span> <span class="s1">&#39;  from data model element </span><span class="si">%s</span><span class="s1">&#39;</span>  <span class="o">%</span> <span class="n">metaobj</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">pkgLine</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    
+    <span class="k">if</span> <span class="n">scriptName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">scriptName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scriptName</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">scriptName</span><span class="p">:</span>
+      <span class="n">scriptName</span> <span class="o">=</span> <span class="n">unknown</span>
+
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+     <span class="s1">&#39;#######################################################################&#39;</span>
+    <span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">releaseLine</span><span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;CCPN Data Model version </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">dataModelVersion</span><span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Autogenerated by </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">scriptName</span><span class="p">,</span> <span class="n">date</span><span class="p">))</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pkgLine</span><span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;#######################################################################&#39;</span><span class="p">)</span>
+    <span class="c1">#lines.append(&#39;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~&#39;)</span>
+    <span class="c1">#lines.append(&#39;- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -&#39;)</span>
+
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="TextWriter_py_2_1.getCreditsString"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.TextWriter_py_2_1.TextWriter_py_2_1.getCreditsString">[docs]</a>  <span class="k">def</span> <span class="nf">getCreditsString</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metaobj</span><span class="p">,</span> <span class="n">programType</span><span class="p">):</span>
+
+    <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.license</span> <span class="kn">import</span> <span class="n">headers</span>
+    <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.license</span> <span class="kn">import</span> <span class="n">data</span>
+   
+    <span class="n">descriptor</span> <span class="o">=</span> <span class="n">metaobj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span>
+    <span class="n">dirDepth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDirDepth</span><span class="p">()</span>
+    <span class="n">package</span> <span class="o">=</span> <span class="n">metaobj</span>
+    <span class="k">while</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">package</span><span class="p">,</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaPackage</span><span class="p">):</span>
+      <span class="n">package</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">container</span>
+    <span class="n">packageGroup</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">taggedValues</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;packageGroup&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">packageGroup</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;object </span><span class="si">%s</span><span class="s2"> package lacks packageGroup tagged value&quot;</span>
+                        <span class="o">%</span> <span class="n">metaobj</span><span class="p">)</span>
+    
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">licenseInfo</span><span class="p">[</span><span class="n">packageGroup</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;fileName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metaobj</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">fileSuffix</span><span class="p">)</span>
+    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;licenseLocation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dirDepth</span> <span class="o">*</span> <span class="s1">&#39;../&#39;</span> <span class="o">+</span> <span class="s1">&#39;license&#39;</span>
+    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;programType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">programType</span>
+    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;programFunction&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> for CCPN data model, </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> 
+     <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">language</span><span class="p">,</span> <span class="n">programType</span><span class="p">,</span> <span class="n">descriptor</span><span class="p">,</span> <span class="n">metaobj</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span>
+    <span class="p">)</span>
+    <span class="n">cr</span> <span class="o">=</span> <span class="n">dd</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;credits&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cr</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">cr</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;credits&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ss</span> <span class="o">+</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">This file was generated with the Memops software generation framework,</span>
+<span class="s2">and contains original contributions embedded in the framework</span>
+<span class="s2">&quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">headers</span><span class="o">.</span><span class="n">getHeader</span><span class="p">(</span><span class="o">**</span><span class="n">dd</span><span class="p">)</span></div></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.popups.FeedbackPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.popups.FeedbackPopup</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Luca Mureddu, Simon P Skinner &amp; Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license &quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+<span class="n">Qt</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.framework.PathsAndUrls</span> <span class="kn">import</span> <span class="n">ccpn2Url</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets</span> <span class="kn">import</span> <span class="n">MessageDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TextEditor</span> <span class="kn">import</span> <span class="n">TextEditor</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">Api</span> <span class="k">as</span> <span class="n">apiIo</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Register</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Url</span>
+
+<span class="n">LOG_FILE_TEXT</span> <span class="o">=</span> <span class="s1">&#39;Log file&#39;</span>
+<span class="n">PROJECT_DIR_TEXT</span> <span class="o">=</span> <span class="s1">&#39;Project directory&#39;</span>
+
+<span class="n">SCRIPT_URL</span> <span class="o">=</span> <span class="n">ccpn2Url</span> <span class="o">+</span> <span class="s1">&#39;/cgi-bin/feedback/submitFeedback.py&#39;</span>
+
+<span class="c1"># code below has to be synchronised with code in SCRIPT_URL</span>
+
+<div class="viewcode-block" id="FeedbackPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.FeedbackPopup.FeedbackPopup">[docs]</a><span class="k">class</span> <span class="nc">FeedbackPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="c1"># parent mandatory and that needs to have attributes _appBase and colourScheme</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Feedback Form&#39;</span><span class="p">):</span>
+     
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span> <span class="o">=</span> <span class="n">Register</span><span class="o">.</span><span class="n">loadDict</span><span class="p">()</span>
+
+    <span class="n">frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;For bug reports please submit precise information, including any error message left on the console&#39;</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;organisation&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">):</span>
+      <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: &#39;</span> <span class="o">%</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+      <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Include: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">includeFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">includeLogBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">includeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">LOG_FILE_TEXT</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">includeProjectBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="n">includeFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="n">PROJECT_DIR_TEXT</span><span class="p">,</span> <span class="n">checked</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Feedback: &#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span> <span class="o">=</span> <span class="n">TextEditor</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">frame</span><span class="p">,</span> <span class="s1">&#39;Submit&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_submitFeedback</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_submitFeedback</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    
+    <span class="n">includeLog</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeLogBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">includeProject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">includeProjectBox</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+    <span class="n">feedback</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">textEditor</span><span class="o">.</span><span class="n">get</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">feedback</span><span class="p">:</span>
+      <span class="k">return</span>
+      
+    <span class="n">appBase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">_appBase</span>
+    
+    <span class="k">if</span> <span class="n">includeProject</span><span class="p">:</span>
+      <span class="c1"># cannot use tempfile because that always hands back open object and tarfile needs actual path</span>
+      <span class="n">filePrefix</span> <span class="o">=</span> <span class="s1">&#39;feedback</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10000000</span><span class="p">)</span>
+      <span class="n">project</span> <span class="o">=</span> <span class="n">appBase</span><span class="o">.</span><span class="n">project</span>
+      <span class="n">projectPath</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">path</span>
+      <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span>
+      <span class="n">filePrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">filePrefix</span><span class="p">)</span>
+      <span class="n">fileName</span> <span class="o">=</span> <span class="n">apiIo</span><span class="o">.</span><span class="n">packageProject</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">filePrefix</span><span class="p">,</span> <span class="n">includeBackups</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">includeLogs</span><span class="o">=</span><span class="n">includeLog</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">includeLog</span><span class="p">:</span>
+      <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">logger</span><span class="p">,</span> <span class="s1">&#39;logPath&#39;</span><span class="p">):</span>
+        <span class="k">return</span>
+      <span class="n">fileName</span> <span class="o">=</span> <span class="n">logger</span><span class="o">.</span><span class="n">logPath</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">fileName</span> <span class="o">=</span> <span class="bp">None</span>
+      
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">appBase</span><span class="o">.</span><span class="n">applicationVersion</span>
+    
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;feedback&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">feedback</span>
+    
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;organisation&#39;</span><span class="p">,</span> <span class="s1">&#39;email&#39;</span><span class="p">):</span>
+      <span class="n">data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_registrationDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;None&#39;</span><span class="p">)</span>
+      
+    <span class="k">if</span> <span class="n">fileName</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">Url</span><span class="o">.</span><span class="n">uploadFile</span><span class="p">(</span><span class="n">SCRIPT_URL</span><span class="p">,</span> <span class="n">fileName</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+      <span class="k">finally</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">includeProject</span><span class="p">:</span>
+          <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">response</span> <span class="o">=</span> <span class="n">Url</span><span class="o">.</span><span class="n">fetchUrl</span><span class="p">(</span><span class="n">SCRIPT_URL</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+      
+    <span class="k">if</span> <span class="s1">&#39;Data successfully uploaded&#39;</span> <span class="ow">in</span> <span class="n">response</span><span class="p">:</span>
+      <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Success&#39;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Feedback successfully submitted&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Failure&#39;</span>
+      <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Problem submitting feedback&#39;</span>
+      
+    <span class="n">info</span> <span class="o">=</span> <span class="n">MessageDialog</span><span class="o">.</span><span class="n">showInfo</span><span class="p">(</span><span class="n">title</span><span class="p">,</span>
+          <span class="n">msg</span><span class="p">,</span> <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+      
+    <span class="c1">#print(response)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

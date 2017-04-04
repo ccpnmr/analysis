@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.popups.NmrResiduePopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.popups.NmrResiduePopup</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;simon1&#39;</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.Chain</span> <span class="kn">import</span> <span class="n">Chain</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">CCP_CODES</span><span class="p">,</span> <span class="n">ATOM_NAMES</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.AssignmentLib</span> <span class="kn">import</span> <span class="n">getNmrResiduePrediction</span><span class="p">,</span> <span class="n">getNmrAtomPrediction</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+
+
+
+<div class="viewcode-block" id="NmrResiduePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.NmrResiduePopup.NmrResiduePopup">[docs]</a><span class="k">class</span> <span class="nc">NmrResiduePopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">nmrAtom</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">NmrResiduePopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;border: 0px solid&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrAtom</span> <span class="o">=</span> <span class="n">nmrAtom</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Chain &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_selectNmrChain</span><span class="p">)</span>
+    <span class="n">nmrChains</span> <span class="o">=</span> <span class="p">[</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">nmrChain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">nmrChains</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">chain</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">chain</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">nmrChains</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">seqCodeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Sequence Code &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_getResidueType</span><span class="p">)</span>
+
+    <span class="n">residueTypeLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Residue Type &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">CCP_CODES</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+
+    <span class="n">leftOverLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Leftover Possibilities &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">leftOvers</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="n">applyButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Apply&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_assignResidue</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updatePopup</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_getResidueTypeProb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentNmrResidue</span><span class="p">):</span>
+    <span class="n">predictions</span> <span class="o">=</span> <span class="n">getNmrResiduePrediction</span><span class="p">(</span><span class="n">currentNmrResidue</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chemicalShiftLists</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">preds1</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">predictions</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">currentNmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">]</span>
+    <span class="n">predictedTypes</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">predictions</span><span class="p">]</span>
+    <span class="n">remainingResidues</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">CCP_CODES</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">predictedTypes</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">currentNmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">]</span>
+    <span class="n">possibilities</span> <span class="o">=</span> <span class="p">[</span><span class="n">currentNmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">]</span><span class="o">+</span><span class="n">preds1</span><span class="o">+</span><span class="n">remainingResidues</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">possibilities</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_updatePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;NMR Residue: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">nmrChain</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+      <span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+      <span class="n">sequenceCodes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span>
+                   <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">sequenceCodes</span><span class="p">)</span>
+      <span class="n">sequenceCode</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="n">sequenceCode</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">findText</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_getCcpCodeFromNmrResidueName</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_getResidueTypeProb</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nmrResidue</span>
+
+  <span class="k">def</span> <span class="nf">_selectNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">Chain</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">residue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">residue</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_getResidueType</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+
+  <span class="k">def</span> <span class="nf">_getResidueType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="n">residueType</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+    <span class="k">for</span> <span class="nb">type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">texts</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">type</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">residueType</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">texts</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="nb">type</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">_getCcpCodeFromNmrResidueName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">currentNmrResidue</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">currentNmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">currentNmrResidue</span><span class="o">.</span><span class="n">residueType</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_getLeftOverResidues</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">leftovers</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">residues</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">residue</span><span class="o">.</span><span class="n">residueType</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span>
+        <span class="n">leftovers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">residue</span><span class="p">)</span>
+    <span class="n">leftovers</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">residue</span><span class="o">.</span><span class="n">id</span> <span class="k">for</span> <span class="n">residue</span> <span class="ow">in</span> <span class="n">leftovers</span><span class="p">]</span>
+
+  <span class="k">def</span> <span class="nf">_assignResidue</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">chain</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainPulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">())</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">chain</span><span class="p">,</span> <span class="n">Chain</span><span class="p">):</span>
+      <span class="n">residueItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+      <span class="n">residue</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;MR:</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">shortName</span><span class="p">,</span> <span class="n">residueItem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">residueItem</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">residue</span> <span class="o">=</span> <span class="n">residue</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">seqCode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seqCodePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="n">residueType</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">residueTypePulldown</span><span class="o">.</span><span class="n">currentText</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+      <span class="n">newSeqCode</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">seqCode</span><span class="p">,</span> <span class="n">residueType</span><span class="p">])</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">newSeqCode</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidueLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="s2">&quot;NMR Residue: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;PEAK ASSIGNER&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">emptyAllTablesAndLists</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">updateTables</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">updateAssignedNmrAtomsListwidgets</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">updateWidgetLabels</span><span class="p">()</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

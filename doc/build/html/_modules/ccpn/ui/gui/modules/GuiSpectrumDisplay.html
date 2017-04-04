@@ -1,0 +1,398 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.GuiSpectrumDisplay &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.GuiSpectrumDisplay</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;simon&#39;</span>
+
+<span class="c1"># import importlib, os</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Spectrum</span> <span class="kn">import</span> <span class="n">Spectrum</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span> <span class="k">as</span> <span class="n">GuiFrame</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PhasingFrame</span> <span class="kn">import</span> <span class="n">PhasingFrame</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.GuiModule</span> <span class="kn">import</span> <span class="n">GuiModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SpectrumToolBar</span> <span class="kn">import</span> <span class="n">SpectrumToolBar</span>
+
+
+<div class="viewcode-block" id="GuiSpectrumDisplay"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay">[docs]</a><span class="k">class</span> <span class="nc">GuiSpectrumDisplay</span><span class="p">(</span><span class="n">DropBase</span><span class="p">,</span> <span class="n">GuiModule</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">GuiModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="c1"># DropBase.__init__(self, self._appBase, self.dropCallback)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">closeModule</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closeModule</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumToolBar</span> <span class="o">=</span> <span class="n">SpectrumToolBar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span><span class="c1">#, grid=(0, 0), gridSpan=(1, 2))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumToolBar</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span><span class="c1">#, grid=(0, 0), gridSpan=(1, 2))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">label</span><span class="o">.</span><span class="n">closeButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">closeModule</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumToolBar</span><span class="o">.</span><span class="n">setToolButtonStyle</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ToolButtonTextUnderIcon</span><span class="p">)</span>
+    <span class="c1"># screenWidth = QtGui.QApplication.desktop().screenGeometry().width()</span>
+    <span class="c1"># self.spectrumToolBar.setFixedWidth(screenWidth*0.5)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">resize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">())</span>
+
+    <span class="c1"># Toolbar</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span> <span class="o">=</span> <span class="n">ToolBar</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span><span class="c1">#, grid=(0, 2), gridSpan=(1, 2))</span>
+    <span class="c1"># self.spectrumUtilToolBar.setFixedWidth(screenWidth*0.4)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumToolBar</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+    <span class="c1"># grid=(0, 2), gridSpan=(1, 1))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="o">.</span><span class="n">showToolbar</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="c1"># toolBarColour = QtGui.QColor(214,215,213)</span>
+
+    <span class="c1"># position box</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">positionBox</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">positionBox</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+    <span class="c1"># scroll area</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripFrame</span> <span class="o">=</span> <span class="n">GuiFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span> <span class="o">=</span> <span class="bp">self</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripFrame</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">scrollArea</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stripFrame</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="n">includeDirection</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is1D</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">phasingFrame</span> <span class="o">=</span> <span class="n">PhasingFrame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">module</span><span class="p">,</span> <span class="n">includeDirection</span><span class="o">=</span><span class="n">includeDirection</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updatePhasing</span><span class="p">,</span> <span class="n">returnCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_updatePivot</span><span class="p">,</span>
+                                     <span class="n">directionCallback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_changedPhasingDirection</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">phasingFrame</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_updatePivot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Updates pivot in all strips contained in the spectrum display.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">_updatePivot</span><span class="p">()</span>
+    
+  <span class="k">def</span> <span class="nf">_updatePhasing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Updates phasing in all strips contained in the spectrum display.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">_updatePhasing</span><span class="p">()</span>
+    
+  <span class="k">def</span> <span class="nf">_changedPhasingDirection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Changes direction of phasing from horizontal to vertical or vice versa.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">_changedPhasingDirection</span><span class="p">()</span>
+    
+<div class="viewcode-block" id="GuiSpectrumDisplay.togglePhaseConsole"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.togglePhaseConsole">[docs]</a>  <span class="k">def</span> <span class="nf">togglePhaseConsole</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Toggles whether phasing console is displayed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">isVisible</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">phasingFrame</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">phasingFrame</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="n">isVisible</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">isVisible</span><span class="p">:</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">turnOnPhasing</span><span class="p">()</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">turnOffPhasing</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_updatePhasing</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GuiSpectrumDisplay.showToolbar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.showToolbar">[docs]</a>  <span class="k">def</span> <span class="nf">showToolbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;show the toolbar&quot;&quot;&quot;</span>
+    <span class="c1"># showing the toolbar, but we need to update the checkboxes of all strips as well.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">toolbarAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GuiSpectrumDisplay.hideToolbar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.hideToolbar">[docs]</a>  <span class="k">def</span> <span class="nf">hideToolbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;hide the toolbar&quot;&quot;&quot;</span>
+    <span class="c1"># hiding the toolbar, but we need to update the checkboxes of all strips as well.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">toolbarAction</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="GuiSpectrumDisplay.toggleToolbar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleToolbar">[docs]</a>  <span class="k">def</span> <span class="nf">toggleToolbar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Toggle the toolbar &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">showToolbar</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">hideToolbar</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Closes spectrum display and deletes it from the project.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">_unregisterStrip</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="c1"># if self._appBase.ui.mainWindow is not None:</span>
+      <span class="c1">#   mainWindow = self._appBase.ui.mainWindow</span>
+      <span class="c1"># else:</span>
+      <span class="c1">#   mainWindow = self._appBase._mainWindow</span>
+      <span class="c1"># mainWindow.addBlankDisplay()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">gui</span><span class="o">.</span><span class="n">addBlankDisplay</span><span class="p">()</span>
+    <span class="c1"># self.module.close()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_fillToolBar</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # CCPN INTERNAL - called in _fillToolBar methods of GuiStripDisplay1d and GuiStripDisplayNd</span>
+<span class="sd">    Puts icons for addition and removal of strips into the spectrum utility toolbar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">addStripAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Add Strip&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">duplicateStrip</span><span class="p">)</span> <span class="c1">#self.orderedStrips[0].clone()) # clone first strip</span>
+    <span class="n">addStripIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/plus&#39;</span><span class="p">)</span>
+    <span class="n">addStripAction</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">addStripIcon</span><span class="p">)</span>
+    <span class="n">removeStripAction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumUtilToolBar</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Remove Strip&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">removeStrip</span><span class="p">)</span> <span class="c1"># remove last strip</span>
+    <span class="n">removeStripIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/minus&#39;</span><span class="p">)</span>
+    <span class="n">removeStripAction</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">removeStripIcon</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">removeStripAction</span> <span class="o">=</span> <span class="n">removeStripAction</span>
+
+
+<div class="viewcode-block" id="GuiSpectrumDisplay.removeStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.removeStrip">[docs]</a>  <span class="k">def</span> <span class="nf">removeStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="c1"># changed 6 Jul 2016</span>
+    <span class="c1">#self.orderedStrips[-1]._unregisterStrip()</span>
+    <span class="c1">#self.orderedStrips[-1].delete()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">orderedStrips</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">strip</span><span class="p">:</span>
+        <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
+      <span class="k">if</span> <span class="n">strip</span><span class="p">:</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">_unregisterStrip</span><span class="p">()</span>
+        <span class="n">strip</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GuiSpectrumDisplay.duplicateStrip"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.duplicateStrip">[docs]</a>  <span class="k">def</span> <span class="nf">duplicateStrip</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a new strip identical to the last one created and adds it to right of the display.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">newStrip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">clone</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GuiSpectrumDisplay.resetYZooms"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.resetYZooms">[docs]</a>  <span class="k">def</span> <span class="nf">resetYZooms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Zooms Y axis of current strip to show entire region&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">resetYZoom</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="GuiSpectrumDisplay.resetXZooms"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.resetXZooms">[docs]</a>  <span class="k">def</span> <span class="nf">resetXZooms</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Zooms X axis of current strip to show entire region&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">resetXZoom</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_restoreZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Restores last saved zoom of current strip.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_restoreZoom</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_storeZoom</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Saves zoomed region of current strip.&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">_storeZoom</span><span class="p">()</span>
+    
+<div class="viewcode-block" id="GuiSpectrumDisplay.toggleCrossHair"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleCrossHair">[docs]</a>  <span class="k">def</span> <span class="nf">toggleCrossHair</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Toggles whether cross hair is displayed in all strips of spectrum display.&quot;&quot;&quot;</span>
+    <span class="c1"># toggle crosshairs for strips in this spectrumDisplay</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">_toggleCrossHair</span><span class="p">()</span></div>
+    
+<div class="viewcode-block" id="GuiSpectrumDisplay.toggleGrid"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.GuiSpectrumDisplay.GuiSpectrumDisplay.toggleGrid">[docs]</a>  <span class="k">def</span> <span class="nf">toggleGrid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Toggles whether grid is displayed in all strips of spectrum display.&quot;&quot;&quot;</span>
+    <span class="c1"># toggle grid for strips in this spectrumDisplay</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">toggleGrid</span><span class="p">()</span></div>
+    
+  <span class="k">def</span> <span class="nf">_setCrossHairPosition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axisPositionDict</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    #CCPN INTERNAL</span>
+<span class="sd">    Sets the position of the cross in all strips of spectrum display.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">_setCrossHairPosition</span><span class="p">(</span><span class="n">axisPositionDict</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="c1"># def _setActionIconColour(self, apiDataSource):</span>
+  <span class="c1">#   action = self.spectrumActionDict.get(apiDataSource)</span>
+  <span class="c1">#   if action:</span>
+  <span class="c1">#     pix=QtGui.QPixmap(QtCore.QSize(60, 10))</span>
+  <span class="c1">#     if apiDataSource.numDim &lt; 2:</span>
+  <span class="c1">#       pix.fill(QtGui.QColor(apiDataSource.sliceColour))</span>
+  <span class="c1">#     else:</span>
+  <span class="c1">#       pix.fill(QtGui.QColor(apiDataSource.positiveContourColour))</span>
+  <span class="c1">#     action.setIcon(QtGui.QIcon(pix))</span>
+
+  <span class="k">def</span> <span class="nf">_deletedPeak</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peak</span><span class="p">):</span>
+    <span class="n">apiPeak</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">_wrappedData</span>
+    <span class="c1"># NBNB TBD FIXME rewrite this to not use API peaks</span>
+    <span class="c1"># ALSO move this machinery from subclasses to this class.</span>
+    <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePeakItemDict</span><span class="p">:</span>
+      <span class="n">peakItemDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">activePeakItemDict</span><span class="p">[</span><span class="n">peakListView</span><span class="p">]</span>
+      <span class="n">peakItem</span> <span class="o">=</span> <span class="n">peakItemDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiPeak</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">peakItem</span><span class="p">:</span>
+        <span class="n">peakListView</span><span class="o">.</span><span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">scene</span><span class="p">()</span><span class="o">.</span><span class="n">removeItem</span><span class="p">(</span><span class="n">peakItem</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">peakItemDict</span><span class="p">[</span><span class="n">apiPeak</span><span class="p">]</span>
+        <span class="n">inactivePeakItems</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inactivePeakItemDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">peakListView</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">inactivePeakItems</span><span class="p">:</span>
+          <span class="n">inactivePeakItems</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">peakItem</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_resetRemoveStripAction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    # CCPN INTERNAL - called from GuiMainWindow and from GuiStrip to manage removeStrip button enabling,</span>
+<span class="sd">    and from Framework to set up initial state</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span>
+    <span class="c1"># # Rasmus HACK!</span>
+    <span class="c1"># # This code broke because it got triggered (via a current notifier) when strips</span>
+    <span class="c1"># # were deleted but self was not. A bigger fix is needed, but for now try this</span>
+    <span class="n">myStrips</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">strips</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">myStrips</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">myStrips</span><span class="p">:</span>
+      <span class="c1"># current.strip not in display, or only 1 strip in display, so disable removeStrip button</span>
+      <span class="n">enabled</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">enabled</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">removeStripAction</span><span class="o">.</span><span class="n">setEnabled</span><span class="p">(</span><span class="n">enabled</span><span class="p">)</span></div>
+
+    <span class="c1"># strips = set(self._appBase.current.strips)</span>
+    <span class="c1"># # Rasmus HACK!</span>
+    <span class="c1"># # This code broke because it got triggered (via a current notifier) when strips</span>
+    <span class="c1"># # were deleted but self was not. A bigger fix is needed, but for now try this</span>
+    <span class="c1"># myStrips = [self._project._data2Obj.get(x) for x in self._wrappedData.strips]</span>
+    <span class="c1"># myStrips = [x for x in myStrips if x is not None]</span>
+    <span class="c1"># if len(myStrips) &lt;= 1 or not strips.intersection(myStrips):</span>
+    <span class="c1"># # if not strips.intersection(self.strips) or len(self.strips) == 1:</span>
+    <span class="c1">#   # no strip in display is in current.strips, or only 1 strip in display, so disable removeStrip button</span>
+    <span class="c1">#   enabled = False</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   enabled = True</span>
+    <span class="c1"># self.removeStripAction.setEnabled(enabled)</span>
+
+<span class="k">def</span> <span class="nf">_deletedPeak</span><span class="p">(</span><span class="n">peak</span><span class="p">:</span><span class="n">Peak</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Function for notifiers.</span>
+<span class="sd">  #CCPNINTERNAL &quot;&quot;&quot;</span>
+
+  <span class="k">for</span> <span class="n">spectrumView</span> <span class="ow">in</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">spectrumViews</span><span class="p">:</span>
+    <span class="n">spectrumView</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">_deletedPeak</span><span class="p">(</span><span class="n">peak</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_spectrumHasChanged</span><span class="p">(</span><span class="n">spectrum</span><span class="p">:</span><span class="n">Spectrum</span><span class="p">):</span>
+  <span class="n">project</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">project</span>
+  <span class="n">apiDataSource</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">_wrappedData</span>
+  <span class="k">for</span> <span class="n">spectrumDisplay</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">spectrumDisplays</span><span class="p">:</span>
+    <span class="n">action</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiDataSource</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">action</span><span class="p">:</span> <span class="c1"># spectrum might not be in all displays</span>
+      <span class="c1"># update toolbar button name</span>
+      <span class="n">action</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_deletedSpectrumView</span><span class="p">(</span><span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">,</span> <span class="n">apiSpectrumView</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;tear down SpectrumDisplay when new SpectrumView is deleted - for notifiers&quot;&quot;&quot;</span>
+  <span class="n">spectrumDisplay</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_data2Obj</span><span class="p">[</span><span class="n">apiSpectrumView</span><span class="o">.</span><span class="n">spectrumDisplay</span><span class="p">]</span>
+  <span class="n">apiDataSource</span> <span class="o">=</span> <span class="n">apiSpectrumView</span><span class="o">.</span><span class="n">dataSource</span>
+
+  <span class="c1"># remove toolbar action (button)</span>
+  <span class="c1"># NBNB TBD FIXME get rid of API object from code</span>
+  <span class="n">action</span> <span class="o">=</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">apiDataSource</span><span class="p">)</span>  <span class="c1"># should always be not None</span>
+  <span class="k">if</span> <span class="n">action</span><span class="p">:</span>
+    <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumToolBar</span><span class="o">.</span><span class="n">removeAction</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+    <span class="k">del</span> <span class="n">spectrumDisplay</span><span class="o">.</span><span class="n">spectrumActionDict</span><span class="p">[</span><span class="n">apiDataSource</span><span class="p">]</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

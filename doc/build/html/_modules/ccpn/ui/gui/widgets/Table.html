@@ -1,0 +1,1506 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.Table &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.Table</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">Inherited from QTableView (http://pyqt.sourceforge.net/Docs/PyQt4/qtableview.html)</span>
+
+<span class="sd">QTableView Class Reference</span>
+<span class="sd">[QtGui module]</span>
+
+<span class="sd">The QTableView class provides a default model/view implementation of a table view. More...</span>
+
+<span class="sd">Inherits QAbstractItemView.</span>
+
+<span class="sd">Inherited by QTableWidget.</span>
+
+<span class="sd">Methods</span>
+
+<span class="sd">__init__ (self, QWidget parent = None)</span>
+<span class="sd">clearSpans (self)</span>
+<span class="sd">int columnAt (self, int x)</span>
+<span class="sd">columnCountChanged (self, int oldCount, int newCount)</span>
+<span class="sd">columnMoved (self, int column, int oldIndex, int newIndex)</span>
+<span class="sd">columnResized (self, int column, int oldWidth, int newWidth)</span>
+<span class="sd">int columnSpan (self, int row, int column)</span>
+<span class="sd">int columnViewportPosition (self, int column)</span>
+<span class="sd">int columnWidth (self, int column)</span>
+<span class="sd">currentChanged (self, QModelIndex current, QModelIndex previous)</span>
+<span class="sd">Qt.PenStyle gridStyle (self)</span>
+<span class="sd">hideColumn (self, int column)</span>
+<span class="sd">hideRow (self, int row)</span>
+<span class="sd">QHeaderView horizontalHeader (self)</span>
+<span class="sd">int horizontalOffset (self)</span>
+<span class="sd">horizontalScrollbarAction (self, int action)</span>
+<span class="sd">QModelIndex indexAt (self, QPoint p)</span>
+<span class="sd">bool isColumnHidden (self, int column)</span>
+<span class="sd">bool isCornerButtonEnabled (self)</span>
+<span class="sd">bool isIndexHidden (self, QModelIndex index)</span>
+<span class="sd">bool isRowHidden (self, int row)</span>
+<span class="sd">bool isSortingEnabled (self)</span>
+<span class="sd">QModelIndex moveCursor (self, QAbstractItemView.CursorAction cursorAction, Qt.KeyboardModifiers modifiers)</span>
+<span class="sd">paintEvent (self, QPaintEvent e)</span>
+<span class="sd">resizeColumnsToContents (self)</span>
+<span class="sd">resizeColumnToContents (self, int column)</span>
+<span class="sd">resizeRowsToContents (self)</span>
+<span class="sd">resizeRowToContents (self, int row)</span>
+<span class="sd">int rowAt (self, int y)</span>
+<span class="sd">rowCountChanged (self, int oldCount, int newCount)</span>
+<span class="sd">int rowHeight (self, int row)</span>
+<span class="sd">rowMoved (self, int row, int oldIndex, int newIndex)</span>
+<span class="sd">rowResized (self, int row, int oldHeight, int newHeight)</span>
+<span class="sd">int rowSpan (self, int row, int column)</span>
+<span class="sd">int rowViewportPosition (self, int row)</span>
+<span class="sd">scrollContentsBy (self, int dx, int dy)</span>
+<span class="sd">scrollTo (self, QModelIndex index, QAbstractItemView.ScrollHint hint = QAbstractItemView.EnsureVisible)</span>
+<span class="sd">selectColumn (self, int column)</span>
+<span class="sd">list-of-QModelIndex selectedIndexes (self)</span>
+<span class="sd">selectionChanged (self, QItemSelection selected, QItemSelection deselected)</span>
+<span class="sd">selectRow (self, int row)</span>
+<span class="sd">setColumnHidden (self, int column, bool hide)</span>
+<span class="sd">setColumnWidth (self, int column, int width)</span>
+<span class="sd">setCornerButtonEnabled (self, bool enable)</span>
+<span class="sd">setGridStyle (self, Qt.PenStyle style)</span>
+<span class="sd">setHorizontalHeader (self, QHeaderView header)</span>
+<span class="sd">setModel (self, QAbstractItemModel model)</span>
+<span class="sd">setRootIndex (self, QModelIndex index)</span>
+<span class="sd">setRowHeight (self, int row, int height)</span>
+<span class="sd">setRowHidden (self, int row, bool hide)</span>
+<span class="sd">setSelection (self, QRect rect, QItemSelectionModel.SelectionFlags command)</span>
+<span class="sd">setSelectionModel (self, QItemSelectionModel selectionModel)</span>
+<span class="sd">setShowGrid (self, bool show)</span>
+<span class="sd">setSortingEnabled (self, bool enable)</span>
+<span class="sd">setSpan (self, int row, int column, int rowSpan, int columnSpan)</span>
+<span class="sd">setVerticalHeader (self, QHeaderView header)</span>
+<span class="sd">setWordWrap (self, bool on)</span>
+<span class="sd">showColumn (self, int column)</span>
+<span class="sd">bool showGrid (self)</span>
+<span class="sd">showRow (self, int row)</span>
+<span class="sd">int sizeHintForColumn (self, int column)</span>
+<span class="sd">int sizeHintForRow (self, int row)</span>
+<span class="sd">sortByColumn (self, int column)</span>
+<span class="sd">sortByColumn (self, int column, Qt.SortOrder order)</span>
+<span class="sd">timerEvent (self, QTimerEvent event)</span>
+<span class="sd">updateGeometries (self)</span>
+<span class="sd">QHeaderView verticalHeader (self)</span>
+<span class="sd">int verticalOffset (self)</span>
+<span class="sd">verticalScrollbarAction (self, int action)</span>
+<span class="sd">QStyleOptionViewItem viewOptions (self)</span>
+<span class="sd">QRect visualRect (self, QModelIndex index)</span>
+<span class="sd">QRegion visualRegionForSelection (self, QItemSelection selection)</span>
+<span class="sd">bool wordWrap (self)</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib.CcpnSorting</span> <span class="kn">import</span> <span class="n">universalSortKey</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BasePopup</span> <span class="kn">import</span> <span class="n">BasePopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Splitter</span> <span class="kn">import</span> <span class="n">Splitter</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.TableModel</span> <span class="kn">import</span> <span class="n">ObjectTableModel</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.LineEdit</span> <span class="kn">import</span> <span class="n">LineEdit</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.RadioButtons</span> <span class="kn">import</span> <span class="n">RadioButtons</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="c1"># BG_COLOR = QtGui.QColor(&#39;#E0E0E0&#39;)</span>
+
+<div class="viewcode-block" id="ObjectTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable">[docs]</a><span class="k">class</span> <span class="nc">ObjectTable</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+
+  <span class="n">columnSizeHint</span> <span class="o">=</span> <span class="mi">30</span>  <span class="c1"># per collumn size hint (to be multiplied by number of collums</span>
+  <span class="n">rowSizeHint</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1"># total size hint (total size for all rows</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">columns</span><span class="p">,</span>
+               <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">actionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">selectionCallback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">multiSelect</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">selectRows</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">numberRows</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">autoResize</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+               <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">objects</span> <span class="ow">or</span> <span class="p">[])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">callback</span> <span class="o">=</span> <span class="n">actionCallback</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">fontMetric</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFontMetricsF</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">font</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fontMetric</span><span class="o">.</span><span class="n">boundingRect</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span> <span class="o">=</span> <span class="n">selectionCallback</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">doubleClicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">actionCallback</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAlternatingRowColors</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">autoResize</span> <span class="o">=</span> <span class="n">autoResize</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DefaultContextMenu</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setHorizontalScrollMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ScrollPerItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setVerticalScrollMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ScrollPerItem</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span> <span class="o">=</span> <span class="n">multiSelect</span>
+    <span class="k">if</span> <span class="n">multiSelect</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ExtendedSelection</span><span class="p">)</span>
+      <span class="c1"># + Continuous etc possible</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSelectionMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SingleSelection</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">selectRows</span> <span class="o">=</span> <span class="n">selectRows</span>
+    <span class="k">if</span> <span class="n">selectRows</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSelectionBehavior</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SelectRows</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setSelectionBehavior</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">SelectItems</span><span class="p">)</span>
+      <span class="c1"># + Columns possible</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setupModel</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setSortingEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sortByColumn</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AscendingOrder</span><span class="p">)</span>
+
+    <span class="n">delegate</span> <span class="o">=</span> <span class="n">ObjectTableItemDelegate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setItemDelegate</span><span class="p">(</span><span class="n">delegate</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">selectionChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">)</span>
+    <span class="c1">#model.currentRowChanged.connect(self._callback)</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verticalHeader</span><span class="p">()</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setResizeMode</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">Interactive</span><span class="p">)</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="n">rowHeight</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">+</span> <span class="mi">4</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setMinimumSectionSize</span><span class="p">(</span><span class="n">rowHeight</span><span class="p">)</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setDefaultSectionSize</span><span class="p">(</span><span class="n">rowHeight</span><span class="p">)</span>
+
+    <span class="c1"># if numberRows:</span>
+    <span class="c1"># header.setVisible(True)</span>
+    <span class="c1"># else:</span>
+    <span class="n">header</span><span class="o">.</span><span class="n">setVisible</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c1"># header = ObjectHeaderView(QtCore.Qt.Horizontal, self)</span>
+    <span class="c1"># header.setMovable(True)</span>
+    <span class="c1"># header.setMinimumSectionSize(30)</span>
+    <span class="c1"># header.setDefaultSectionSize(30)</span>
+    <span class="c1"># #header.setSortIndicatorShown(False)</span>
+    <span class="c1"># #header.setStyleSheet(&#39;QHeaderView::down-arrow { image: url(icons/sort-up.png);} QHeaderView::up-arrow { image: url(icons/sort-down.png);}&#39;)</span>
+    <span class="c1"># self.header = header</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setupHeaderStretch</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">acceptDrops</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDragDropMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">InternalMove</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDropIndicatorShown</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="c1"># context menu on header</span>
+    <span class="c1"># headers = self.horizontalHeader()</span>
+    <span class="c1"># headers.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)</span>
+    <span class="c1"># headers.customContextMenuRequested.connect(lambda: self.tableContextMenu())</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setContextMenuPolicy</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CustomContextMenu</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customContextMenuRequested</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tableContextMenu</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ObjectTable.sizeHint"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.sizeHint">[docs]</a>  <span class="k">def</span> <span class="nf">sizeHint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">columnSizeHint</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">rowSizeHint</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_setupModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">:</span>
+      <span class="n">sortDetails</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sortColumn</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sortOrder</span><span class="p">())</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">sortDetails</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="n">objModel</span> <span class="o">=</span> <span class="n">ObjectTableModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">ObjectTableProxyModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">setSourceModel</span><span class="p">(</span><span class="n">objModel</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">sortDetails</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">column</span><span class="p">,</span> <span class="n">order</span> <span class="o">=</span> <span class="n">sortDetails</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">column</span><span class="p">,</span> <span class="n">order</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setModel</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="k">return</span> <span class="n">model</span>
+
+<div class="viewcode-block" id="ObjectTable.resizeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.resizeEvent">[docs]</a>  <span class="k">def</span> <span class="nf">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span><span class="o">.</span><span class="n">isVisible</span><span class="p">():</span>
+      <span class="n">pos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+      <span class="n">y</span> <span class="o">=</span> <span class="n">pos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+      <span class="n">w</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">width</span><span class="p">()</span><span class="o">-</span><span class="n">x</span>
+      <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">height</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">h</span><span class="p">)</span>
+
+    <span class="c1"># If the table is connected to a qtgui Splitter it</span>
+    <span class="c1"># should not resize unless it is specifically asked to.</span>
+    <span class="c1"># This helps avoiding infinite repaint loops.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">Splitter</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="n">Splitter</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span> <span class="ow">or</span> \
+           <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">doResize</span> <span class="o">==</span> <span class="bp">True</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">resizeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.clearSelection"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.clearSelection">[docs]</a>  <span class="k">def</span> <span class="nf">clearSelection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">itemSelection</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="c1">#</span>
+    <span class="c1"># if self.graphPanel and self.graphPanel.isVisible():</span>
+    <span class="c1">#   graph = self.graphPanel.graph</span>
+    <span class="c1">#   graph.coordsOff()</span>
+    <span class="c1">#   rows = self.getSelectedRows()</span>
+    <span class="c1">#   vLines = []</span>
+    <span class="c1">#   hLines = []</span>
+    <span class="c1">#</span>
+    <span class="c1">#   for row in rows:</span>
+    <span class="c1">#     for dataSet in graph.dataSets:</span>
+    <span class="c1">#       x, y = dataSet.dataPoints[row][:2]</span>
+    <span class="c1">#       vLines.append(x)</span>
+    <span class="c1">#       hLines.append(y)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   graph.drawVerticalLines(vLines)</span>
+    <span class="c1">#   graph.drawHorizontalLines(hLines)</span>
+
+    <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span><span class="p">:</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCurrentIndex</span><span class="p">()</span>
+      <span class="n">row</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+      <span class="n">col</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
+
+      <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectRows</span><span class="p">:</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedRows</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+
+      <span class="k">if</span> <span class="n">selection</span><span class="p">:</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">]</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="n">objs</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">row</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">row</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+            <span class="n">objs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiSelect</span><span class="p">:</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span><span class="p">(</span><span class="n">objs</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">selectionCallback</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ObjectTable.actionCallback"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.actionCallback">[docs]</a>  <span class="k">def</span> <span class="nf">actionCallback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">itemSelection</span><span class="p">):</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCurrentIndex</span><span class="p">()</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectRows</span><span class="p">:</span>
+      <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedRows</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">selection</span><span class="p">:</span>
+      <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">]</span>
+      <span class="n">rows</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">row</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="n">rows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+      <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+
+      <span class="k">if</span> <span class="n">row</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">row</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">callback</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObjectTable.getCurrentIndex"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getCurrentIndex">[docs]</a>  <span class="k">def</span> <span class="nf">getCurrentIndex</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">index</span></div>
+
+<div class="viewcode-block" id="ObjectTable.getCurrentObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getCurrentObject">[docs]</a>  <span class="k">def</span> <span class="nf">getCurrentObject</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="n">row</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">row</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="ObjectTable.getCurrentRow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getCurrentRow">[docs]</a>  <span class="k">def</span> <span class="nf">getCurrentRow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTable.getSelectedRows"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getSelectedRows">[docs]</a>  <span class="k">def</span> <span class="nf">getSelectedRows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectRows</span><span class="p">:</span>
+      <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedRows</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">]</span>
+    <span class="c1">#rows = list(set(rows))</span>
+    <span class="c1">#rows.sort()</span>
+
+    <span class="k">return</span> <span class="n">rows</span></div>
+
+<div class="viewcode-block" id="ObjectTable.getSelectedObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getSelectedObjects">[docs]</a>  <span class="k">def</span> <span class="nf">getSelectedObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectRows</span><span class="p">:</span>
+      <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedRows</span><span class="p">(</span><span class="n">column</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">selection</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">selectedIndexes</span><span class="p">()</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
+    <span class="n">selectedObjects</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">selection</span><span class="p">:</span>
+      <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">row</span><span class="p">()</span>
+      <span class="n">selectedObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objects</span><span class="p">[</span><span class="n">row</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">selectedObjects</span></div>
+
+<div class="viewcode-block" id="ObjectTable.setCurrentRow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setCurrentRow">[docs]</a>  <span class="k">def</span> <span class="nf">setCurrentRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+
+    <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.setCurrentObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setCurrentObject">[docs]</a>  <span class="k">def</span> <span class="nf">setCurrentObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
+      <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.selectRow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.selectRow">[docs]</a>  <span class="k">def</span> <span class="nf">selectRow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+
+    <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">selectionModel</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">SelectCurrent</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.selectObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.selectObject">[docs]</a>  <span class="k">def</span> <span class="nf">selectObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
+      <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="n">selectionModel</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">SelectCurrent</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.setSelectedObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setSelectedObjects">[docs]</a>  <span class="k">def</span> <span class="nf">setSelectedObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">setCurrentObjects</span><span class="p">(</span><span class="n">selection</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.setCurrentObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setCurrentObjects">[docs]</a>  <span class="k">def</span> <span class="nf">setCurrentObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">):</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
+    <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">uniqObjs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">selection</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">objects</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">uniqObjs</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rows</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+      <span class="n">selectMode</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span>
+      <span class="n">select</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span>
+      <span class="n">getIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+      <span class="n">mapFromSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span>
+
+      <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">getIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectMode</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_highLightObjs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selection</span><span class="p">):</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
+
+    <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">uniqObjs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">selection</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">objects</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">uniqObjs</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">row</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">rows</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+      <span class="n">selectMode</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span>
+      <span class="n">select</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span>
+      <span class="n">getIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+      <span class="n">mapFromSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span>
+
+      <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">getIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectMode</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="c1"># self._callback(None)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setUpdatesEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">setFocus</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">OtherFocusReason</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="ObjectTable.setupHeaderStretch"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setupHeaderStretch">[docs]</a>  <span class="k">def</span> <span class="nf">setupHeaderStretch</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">header</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">horizontalHeader</span><span class="p">()</span>
+    <span class="n">stretch</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
+    <span class="n">setColumnWidth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setColumnWidth</span>
+    <span class="n">bbox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bbox</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">column</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+      <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">stretch</span><span class="p">:</span>
+        <span class="n">header</span><span class="o">.</span><span class="n">setResizeMode</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">header</span><span class="o">.</span><span class="n">Stretch</span><span class="p">)</span>
+        <span class="n">stretch</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">if</span> <span class="n">objects</span><span class="p">:</span>
+      <span class="n">minSize</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">(</span><span class="s1">&#39;MM&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+      <span class="n">colSizes</span> <span class="o">=</span> <span class="p">[</span><span class="nb">max</span><span class="p">(</span><span class="n">minSize</span><span class="p">,</span> <span class="n">bbox</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">heading</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">())</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span>
+      <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">objCol</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">columns</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">[:</span><span class="mi">35</span><span class="p">]</span> <span class="o">+</span> <span class="n">objects</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]:</span>
+          <span class="n">value</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">getFormatValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%.5f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">value</span>
+          <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">)):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+          <span class="n">size</span> <span class="o">=</span> <span class="n">bbox</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">width</span><span class="p">()</span>
+
+          <span class="k">if</span> <span class="n">size</span> <span class="o">&gt;</span> <span class="n">colSizes</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="n">colSizes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">size</span>
+
+      <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">width</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">colSizes</span><span class="p">):</span>
+        <span class="n">setColumnWidth</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">width</span><span class="o">+</span><span class="mi">12</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stretch</span><span class="p">:</span>
+      <span class="n">header</span><span class="o">.</span><span class="n">setStretchLastSection</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.closeEvent"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.closeEvent">[docs]</a>  <span class="k">def</span> <span class="nf">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">hideGraph</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hideFilter</span><span class="p">()</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">closeEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.destroy"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.destroy">[docs]</a>  <span class="k">def</span> <span class="nf">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">graphPanel</span><span class="o">.</span><span class="n">destroy</span><span class="p">()</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QTableView</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.tableContextMenu"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.tableContextMenu">[docs]</a>  <span class="k">def</span> <span class="nf">tableContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pos</span><span class="p">):</span>
+
+    <span class="n">menu</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QMenu</span><span class="p">()</span>
+    <span class="c1"># copyMenu =  menu.addAction(&quot;Copy Selected&quot;)</span>
+    <span class="n">exportMenu</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s2">&quot;Export Table&quot;</span><span class="p">)</span>
+    <span class="c1"># searchMenu = menu.addAction(&quot;Search&quot;)</span>
+
+    <span class="n">action</span> <span class="o">=</span> <span class="n">menu</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="n">pos</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="n">exportMenu</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">exportDialog</span><span class="p">()</span></div>
+
+    <span class="c1"># if action == searchMenu:</span>
+    <span class="c1">#   if not hasattr(self, &#39;searchPopup&#39;):</span>
+    <span class="c1">#     self.openSearchPopup()</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     if not self.searchPopup.isOpened:</span>
+    <span class="c1">#       self.openSearchPopup()</span>
+    <span class="c1"># if action == copyMenu:</span>
+    <span class="c1">#   self.copyRow()</span>
+
+<div class="viewcode-block" id="ObjectTable.openSearchPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.openSearchPopup">[docs]</a>  <span class="k">def</span> <span class="nf">openSearchPopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">searchPopup</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">searchPopup</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">searchPopup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="ObjectTable.exportDialog"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.exportDialog">[docs]</a>  <span class="k">def</span> <span class="nf">exportDialog</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">saveDialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">directory</span><span class="o">=</span><span class="s1">&#39;ccpn_Table.xlsx&#39;</span><span class="p">,</span> <span class="c1">#default saving name</span>
+                            <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span>
+                            <span class="nb">filter</span><span class="o">=</span><span class="s2">&quot;.xlsx;; .csv;; .tsv;; .json &quot;</span><span class="p">,</span>
+                            <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Save as &#39;</span><span class="p">,</span>
+                            <span class="n">acceptMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AcceptSave</span><span class="p">,</span>
+                            <span class="n">preferences</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveDialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">findExportFormats</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObjectTable.findExportFormats"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.findExportFormats">[docs]</a>  <span class="k">def</span> <span class="nf">findExportFormats</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">formatTypes</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">([</span>
+                               <span class="p">(</span><span class="s1">&#39;.xlsx&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameToExcel</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameToCsv</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s1">&#39;.tsv&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameToTsv</span><span class="p">),</span>
+                               <span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataFrameToJson</span><span class="p">)</span>
+                              <span class="p">])</span>
+
+    <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">formatTypes</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+       <span class="n">formatTypes</span><span class="p">[</span><span class="n">extension</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">tableToDataFrame</span><span class="p">(),</span> <span class="n">path</span><span class="p">)</span>
+       <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">findExportFormats</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">saveDialog</span><span class="o">.</span><span class="n">selectedNameFilter</span><span class="p">())</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Format file not supported&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.dataFrameToExcel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.dataFrameToExcel">[docs]</a>  <span class="k">def</span> <span class="nf">dataFrameToExcel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_excel</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sheet_name</span><span class="o">=</span><span class="s1">&#39;Table&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.dataFrameToCsv"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.dataFrameToCsv">[docs]</a>  <span class="k">def</span> <span class="nf">dataFrameToCsv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.dataFrameToTsv"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.dataFrameToTsv">[docs]</a>  <span class="k">def</span> <span class="nf">dataFrameToTsv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">&#39;</span><span class="se">\t</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.dataFrameToJson"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.dataFrameToJson">[docs]</a>  <span class="k">def</span> <span class="nf">dataFrameToJson</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataFrame</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">orient</span> <span class="o">=</span> <span class="s1">&#39;split&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.tableToDataFrame"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.tableToDataFrame">[docs]</a>  <span class="k">def</span> <span class="nf">tableToDataFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">heading</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">:</span>
+      <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
+    <span class="n">dataFrame</span> <span class="o">=</span> <span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dataFrame</span></div>
+
+<div class="viewcode-block" id="ObjectTable.filterRows"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.filterRows">[docs]</a>  <span class="k">def</span> <span class="nf">filterRows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">hideGraph</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span> <span class="o">=</span> <span class="n">ObjectTableFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">window</span><span class="p">()</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ObjectTable.hideFilter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.hideFilter">[docs]</a>  <span class="k">def</span> <span class="nf">hideFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTable.unfilter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.unfilter">[docs]</a>  <span class="k">def</span> <span class="nf">unfilter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">unfilterTable</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTable.getObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getObjects">[docs]</a>  <span class="k">def</span> <span class="nf">getObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filtered</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">filtered</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">origObjects</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTable.copyRow"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.copyRow">[docs]</a>  <span class="k">def</span> <span class="nf">copyRow</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">objs</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+
+      <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+        <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">x</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">])</span>
+      <span class="n">cb</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QApplication</span><span class="o">.</span><span class="n">clipboard</span><span class="p">()</span>
+      <span class="n">cb</span><span class="o">.</span><span class="n">clear</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">cb</span><span class="o">.</span><span class="n">Clipboard</span><span class="p">)</span>
+
+      <span class="n">rowsStr</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">rows</span><span class="p">)</span>
+      <span class="n">rowsStr</span> <span class="o">=</span> <span class="n">rowsStr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;],&#39;</span><span class="p">,</span> <span class="s1">&#39;]</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+      <span class="n">rowsStr</span> <span class="o">=</span> <span class="n">rowsStr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+      <span class="n">rowsStr</span> <span class="o">=</span> <span class="n">rowsStr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+      <span class="n">rowsStr</span> <span class="o">=</span> <span class="n">rowsStr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+      <span class="n">cb</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">rowsStr</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="n">cb</span><span class="o">.</span><span class="n">Clipboard</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_syncFilterObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">applyFilter</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">applyFilter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">origObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
+
+      <span class="n">status</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">status</span>
+      <span class="k">if</span> <span class="n">applyFilter</span> <span class="ow">and</span> <span class="p">(</span><span class="n">status</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterPanel</span><span class="o">.</span><span class="n">filterTable</span><span class="p">(</span><span class="n">status</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ObjectTable.replaceCurrentObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.replaceCurrentObject">[docs]</a>  <span class="k">def</span> <span class="nf">replaceCurrentObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+    <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+    <span class="n">row</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">currentIndex</span><span class="p">()</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="c1"># the visible row</span>
+    <span class="n">indexA</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">indexB</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">indexA</span><span class="p">)</span> <span class="c1"># the underlying, original</span>
+
+    <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span> <span class="o">=</span> <span class="nb">object</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_syncFilterObjects</span><span class="p">()</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">indexA</span><span class="p">,</span><span class="n">indexB</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObjectTable.setObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setObject">[docs]</a>  <span class="k">def</span> <span class="nf">setObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replaces an object in the _underlying_ list&quot;&quot;&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">object</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_syncFilterObjects</span><span class="p">()</span>
+
+    <span class="n">index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># the underlying, original</span>
+    <span class="n">indexA</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="c1"># the visible row</span>
+    <span class="n">indexB</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">indexA</span><span class="o">.</span><span class="n">row</span><span class="p">(),</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">indexA</span><span class="p">,</span><span class="n">indexB</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObjectTable.setRowObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setRowObject">[docs]</a>  <span class="k">def</span> <span class="nf">setRowObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">,</span> <span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replaces an object in the _visible_ rows&quot;&quot;&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+    <span class="n">indexA</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="c1"># the visible row</span>
+    <span class="n">indexB</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># the visible row</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">mapToSource</span><span class="p">(</span><span class="n">indexA</span><span class="p">)</span> <span class="c1"># the underlying, original</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span> <span class="o">=</span> <span class="nb">object</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_syncFilterObjects</span><span class="p">()</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">indexA</span><span class="p">,</span><span class="n">indexB</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ObjectTable.setObjectsAndColumns"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setObjectsAndColumns">[docs]</a>  <span class="k">def</span> <span class="nf">setObjectsAndColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">([])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setColumns</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="ObjectTable.setObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setObjects">[docs]</a>  <span class="k">def</span> <span class="nf">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">applyFilter</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+    <span class="n">sourceModel</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">())</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+    <span class="n">sourceModel</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">beginInsertRows</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">beginRemoveRows</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">indexA</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">indexB</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">c</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">indexA</span><span class="p">,</span><span class="n">indexB</span><span class="p">)</span> <span class="c1"># the visible rows</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">endInsertRows</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">endRemoveRows</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+      <span class="n">selectionModel</span><span class="o">.</span><span class="n">clearSelection</span><span class="p">()</span>
+      <span class="n">selectMode</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span>
+      <span class="n">select</span> <span class="o">=</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span>
+      <span class="n">getIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span><span class="o">.</span><span class="n">index</span>
+      <span class="n">mapFromSource</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">mapFromSource</span>
+
+      <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">objects</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">:</span>
+          <span class="n">index</span> <span class="o">=</span> <span class="n">getIndex</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+          <span class="n">index</span> <span class="o">=</span> <span class="n">mapFromSource</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="n">current</span><span class="p">:</span>
+            <span class="n">selectionModel</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">SelectCurrent</span><span class="p">)</span>
+
+          <span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectMode</span><span class="p">)</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">_silenceCallback</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="n">sortCol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sortColumn</span><span class="p">()</span>
+    <span class="n">sortOrder</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sortOrder</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">sortCol</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">sortCol</span><span class="p">,</span> <span class="n">sortOrder</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_syncFilterObjects</span><span class="p">(</span><span class="n">applyFilter</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setupHeaderStretch</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">autoResize</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">resizeColumnsToContents</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTable.setColumns"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.setColumns">[docs]</a>  <span class="k">def</span> <span class="nf">setColumns</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+    <span class="n">sourceModel</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">sourceModel</span><span class="p">()</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
+    <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCurrentObject</span><span class="p">()</span>
+
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">r</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+    <span class="n">sourceModel</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">columns</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">beginInsertColumns</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="n">m</span><span class="p">,</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">beginRemoveColumns</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QModelIndex</span><span class="p">(),</span> <span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">indexA</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">indexB</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">r</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">dataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">indexA</span><span class="p">,</span><span class="n">indexB</span><span class="p">)</span> <span class="c1"># the visible rows</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">headerDataChanged</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Horizontal</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="n">m</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">endInsertColumns</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">m</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
+      <span class="n">sourceModel</span><span class="o">.</span><span class="n">endRemoveColumns</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">selected</span><span class="p">:</span>
+      <span class="c1"># may need to now highlight more columns</span>
+      <span class="n">selectionModel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">selectionModel</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">selected</span><span class="p">:</span>
+        <span class="n">row</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="n">current</span><span class="p">:</span>
+          <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">SelectCurrent</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
+          <span class="n">selectionModel</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">SelectCurrent</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">selectionModel</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Select</span> <span class="o">|</span> <span class="n">selectionModel</span><span class="o">.</span><span class="n">Rows</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setupHeaderStretch</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTable.getObject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTable.getObject">[docs]</a>  <span class="k">def</span> <span class="nf">getObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">row</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">row</span><span class="p">]</span></div></div>
+
+  <span class="c1"># def dragEnterEvent(self, event):</span>
+  <span class="c1">#     event.accept()</span>
+  <span class="c1">#</span>
+  <span class="c1"># def dragMoveEvent(self, event):</span>
+  <span class="c1">#     event.accept()</span>
+  <span class="c1">#</span>
+  <span class="c1"># def startDrag(self, event):</span>
+  <span class="c1">#     print(&quot;startDrag called&quot;)</span>
+  <span class="c1">#     index = self.indexAt(event.pos())</span>
+  <span class="c1">#     print(index)</span>
+  <span class="c1">#     if not index.isValid():</span>
+  <span class="c1">#         return</span>
+  <span class="c1">#</span>
+  <span class="c1">#     self.moved_data = self.getObject(index.row())</span>
+  <span class="c1">#</span>
+  <span class="c1">#     drag = QtGui.QDrag(self)</span>
+  <span class="c1">#</span>
+  <span class="c1">#     mimeData = QtCore.QMimeData()</span>
+  <span class="c1">#     mimeData.setData(&quot;application/blabla&quot;, &quot;&quot;)</span>
+  <span class="c1">#     drag.setMimeData(mimeData)</span>
+  <span class="c1">#</span>
+  <span class="c1">#     pixmap = QtGui.QPixmap()</span>
+  <span class="c1">#     pixmap = pixmap.grabWidget(self, self.visualRect(index))</span>
+  <span class="c1">#     drag.setPixmap(pixmap)</span>
+  <span class="c1">#</span>
+  <span class="c1">#     result = drag.start(QtCore.Qt.MoveAction)</span>
+  <span class="c1">#</span>
+  <span class="c1"># # def dropEvent(self, event):</span>
+  <span class="c1"># #   print(&quot;dropEvent called&quot;)</span>
+  <span class="c1"># #   point = event.pos()</span>
+  <span class="c1"># #   print(point)</span>
+  <span class="c1">#</span>
+  <span class="c1"># def mousePressEvent(self, event):</span>
+  <span class="c1">#   if (event.button() == QtCore.Qt.LeftButton) and (</span>
+  <span class="c1">#       event.modifiers() &amp; QtCore.Qt.ControlModifier):</span>
+  <span class="c1">#       print(&quot;mousePressEvent called&quot;)</span>
+  <span class="c1">#       self.startDrag(event)</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     QtGui.QTableView.mousePressEvent(self, event)</span>
+
+
+<span class="n">EDIT_ROLE</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">EditRole</span>
+
+<div class="viewcode-block" id="ObjectTableItemDelegate"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableItemDelegate">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableItemDelegate</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+
+<div class="viewcode-block" id="ObjectTableItemDelegate.createEditor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableItemDelegate.createEditor">[docs]</a>  <span class="k">def</span> <span class="nf">createEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentWidget</span><span class="p">,</span> <span class="n">itemStyle</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span> <span class="c1"># returns the edit widget</span>
+
+    <span class="n">col</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
+    <span class="n">objCol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">columns</span><span class="p">[</span><span class="n">col</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editClass</span><span class="p">:</span>
+      <span class="n">widget</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editClass</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="n">objCol</span><span class="o">.</span><span class="n">editArgs</span><span class="p">,</span> <span class="o">**</span><span class="n">objCol</span><span class="o">.</span><span class="n">editKw</span><span class="p">)</span>
+      <span class="n">widget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">parentWidget</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">return</span> <span class="n">widget</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">objects</span><span class="p">[</span><span class="n">index</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span>
+      <span class="n">editValue</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">getEditValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">editValue</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="n">parentWidget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">widget</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Use the default, type-dependant factory</span>
+        <span class="c1"># Deals with strings, bools, date time etc.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">editor</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">createEditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parentWidget</span><span class="p">,</span> <span class="n">itemStyle</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">editor</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDoubleSpinBox</span><span class="p">):</span>
+          <span class="n">numDecimals</span> <span class="o">=</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editDecimals</span>
+
+          <span class="k">if</span> <span class="n">numDecimals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">editor</span><span class="o">.</span><span class="n">setDecimals</span><span class="p">(</span><span class="n">numDecimals</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editStep</span><span class="p">:</span>
+              <span class="n">editor</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">objCol</span><span class="o">.</span><span class="n">editStep</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">editor</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mi">10</span><span class="o">**-</span><span class="n">numDecimals</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">editor</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSpinBox</span><span class="p">):</span>
+          <span class="k">if</span> <span class="n">objCol</span><span class="o">.</span><span class="n">editStep</span><span class="p">:</span>
+            <span class="n">editor</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="n">objCol</span><span class="o">.</span><span class="n">editStep</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">editor</span></div>
+
+
+<div class="viewcode-block" id="ObjectTableItemDelegate.setEditorData"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableItemDelegate.setEditorData">[docs]</a>  <span class="k">def</span> <span class="nf">setEditorData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span> <span class="c1"># provides the widget with data</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span><span class="p">:</span>
+      <span class="n">model</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">EDIT_ROLE</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span><span class="p">,)</span>
+
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setColor&#39;</span><span class="p">):</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setColor</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="p">)</span>
+
+      <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setData&#39;</span><span class="p">):</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="p">)</span>
+
+      <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;set&#39;</span><span class="p">):</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="p">)</span>
+
+      <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setValue&#39;</span><span class="p">):</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="p">)</span>
+
+      <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;setFile&#39;</span><span class="p">):</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setFile</span><span class="p">(</span><span class="o">*</span><span class="n">value</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Widget </span><span class="si">%s</span><span class="s1"> does not expose &quot;setData&quot;, &quot;set&quot; or &quot;setValue&quot; method; &#39;</span> <span class="o">%</span> <span class="n">widget</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;required for table proxy editing&#39;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">setEditorData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTableItemDelegate.updateEditorGeometry"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableItemDelegate.updateEditorGeometry">[docs]</a>  <span class="k">def</span> <span class="nf">updateEditorGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">itemStyle</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span><span class="c1"># ensures that the editor is displayed correctly</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span><span class="p">:</span>
+      <span class="n">cellRect</span> <span class="o">=</span> <span class="n">itemStyle</span><span class="o">.</span><span class="n">rect</span>
+      <span class="n">x</span> <span class="o">=</span> <span class="n">cellRect</span><span class="o">.</span><span class="n">x</span><span class="p">()</span>
+      <span class="n">y</span> <span class="o">=</span> <span class="n">cellRect</span><span class="o">.</span><span class="n">y</span><span class="p">()</span>
+      <span class="n">hint</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">sizeHint</span><span class="p">()</span>
+
+      <span class="k">if</span> <span class="n">hint</span><span class="o">.</span><span class="n">height</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">cellRect</span><span class="o">.</span><span class="n">height</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QComboBox</span><span class="p">):</span> <span class="c1"># has a popup anyway</span>
+          <span class="n">widget</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">cellRect</span><span class="o">.</span><span class="n">topLeft</span><span class="p">())</span>
+
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">pos</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">mapToGlobal</span><span class="p">(</span><span class="n">cellRect</span><span class="o">.</span><span class="n">topLeft</span><span class="p">())</span>
+          <span class="n">widget</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Popup</span><span class="p">)</span> <span class="c1"># popup so not confined</span>
+          <span class="n">widget</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">pos</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">hint</span><span class="o">.</span><span class="n">width</span><span class="p">(),</span> <span class="n">cellRect</span><span class="o">.</span><span class="n">width</span><span class="p">())</span>
+        <span class="n">height</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">hint</span><span class="o">.</span><span class="n">height</span><span class="p">(),</span> <span class="n">cellRect</span><span class="o">.</span><span class="n">height</span><span class="p">())</span>
+        <span class="n">widget</span><span class="o">.</span><span class="n">setGeometry</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">height</span><span class="p">)</span>
+
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">updateEditorGeometry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">itemStyle</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTableItemDelegate.setModelData"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableItemDelegate.setModelData">[docs]</a>  <span class="k">def</span> <span class="nf">setModelData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span><span class="c1">#returns updated data</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">customWidget</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;get&#39;</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">get</span><span class="p">()</span>
+
+      <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">value</span><span class="p">()</span>
+
+      <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">widget</span><span class="p">,</span> <span class="s1">&#39;getFile&#39;</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">selectedFiles</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+          <span class="k">return</span>
+
+        <span class="n">value</span> <span class="o">=</span> <span class="n">files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Widget </span><span class="si">%s</span><span class="s1"> does not expose &quot;get&quot; or &quot;value&quot; method; &#39;</span> <span class="o">%</span> <span class="n">widget</span>
+        <span class="n">msg</span> <span class="o">+=</span> <span class="s1">&#39;required for table proxy editing&#39;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+      <span class="k">del</span> <span class="n">widget</span>
+      <span class="n">model</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">model</span><span class="p">()</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">EDIT_ROLE</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QStyledItemDelegate</span><span class="o">.</span><span class="n">setModelData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span></div></div>
+
+<div class="viewcode-block" id="ObjectHeaderView"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectHeaderView">[docs]</a><span class="k">class</span> <span class="nc">ObjectHeaderView</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QHeaderView</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orient</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QHeaderView</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">orient</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">parent</span></div>
+
+  <span class="c1">#def sizeHint(self):</span>
+
+  <span class="c1">#  return QtCore.QSize(30*len(self.table.columns), self.table.bbox(&#39;A&#39;).height())</span>
+
+  <span class="c1">#def minimumSize(self):</span>
+  <span class="c1">#</span>
+  <span class="c1">#  return QtCore.QSize(30*len(self.table.columns), self.table.bbox(&#39;A&#39;).height())</span>
+
+<span class="n">LESS_THAN</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QSortFilterProxyModel</span><span class="o">.</span><span class="n">lessThan</span>
+
+
+<div class="viewcode-block" id="ObjectTableProxyModel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableProxyModel">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableProxyModel</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QSortFilterProxyModel</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">):</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QSortFilterProxyModel</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">parent</span>
+
+<div class="viewcode-block" id="ObjectTableProxyModel.lessThan"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableProxyModel.lessThan">[docs]</a>  <span class="k">def</span> <span class="nf">lessThan</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leftIndex</span><span class="p">,</span> <span class="n">rightIndex</span><span class="p">):</span>
+
+    <span class="n">table</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">objCol</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="n">leftIndex</span><span class="o">.</span><span class="n">column</span><span class="p">()]</span>
+
+    <span class="k">if</span> <span class="n">objCol</span><span class="o">.</span><span class="n">orderFunc</span><span class="p">:</span>
+      <span class="n">objects</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="n">objects</span>
+      <span class="n">objA</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="n">leftIndex</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span>
+      <span class="n">objB</span> <span class="o">=</span> <span class="n">objects</span><span class="p">[</span><span class="n">rightIndex</span><span class="o">.</span><span class="n">row</span><span class="p">()]</span>
+
+      <span class="k">return</span> <span class="n">objCol</span><span class="o">.</span><span class="n">orderFunc</span><span class="p">(</span><span class="n">objA</span><span class="p">,</span> <span class="n">objB</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">LESS_THAN</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">leftIndex</span><span class="p">,</span> <span class="n">rightIndex</span><span class="p">)</span></div></div>
+
+<span class="n">TAB_FORMAT</span> <span class="o">=</span> <span class="s1">&#39;Tab-separated&#39;</span>
+<span class="n">COMMA_FORMAT</span> <span class="o">=</span> <span class="s1">&#39;Comma-separated&#39;</span>
+<span class="n">EXPORT_FORMATS</span> <span class="o">=</span> <span class="p">(</span><span class="n">TAB_FORMAT</span><span class="p">,</span> <span class="n">COMMA_FORMAT</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ObjectTableExport"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableExport">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableExport</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+
+
+  <span class="c1"># def __init__(self, table):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">table</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ObjectTableExport</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">table</span><span class="p">)</span>
+    <span class="c1"># BasePopup.__init__(self, title=&#39;Export Table Text&#39;, transient=True, modal=True)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">Tool</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">table</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Columns to export:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">gridSpan</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Row Number&#39;</span><span class="p">,]</span> <span class="o">+</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">heading</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">table</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Export format:&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">formatPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">EXPORT_FORMATS</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">300</span><span class="p">)</span></div>
+
+
+<span class="n">SEARCH_MODES</span> <span class="o">=</span> <span class="p">[</span> <span class="s1">&#39;Literal&#39;</span><span class="p">,</span><span class="s1">&#39;Case Sensitive Literal&#39;</span><span class="p">,</span><span class="s1">&#39;Regular Expression&#39;</span> <span class="p">]</span>
+
+
+
+<div class="viewcode-block" id="ObjectTableFilter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter">[docs]</a><span class="k">class</span> <span class="nc">ObjectTableFilter</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ObjectTableFilter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumHeight</span><span class="p">(</span><span class="mi">110</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">700</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowFlags</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">WindowStaysOnTopHint</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">isOpened</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="n">tablePos</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">pos</span><span class="p">()</span>
+    <span class="n">tablePos</span><span class="o">.</span><span class="n">setY</span><span class="p">(</span><span class="n">tablePos</span><span class="o">.</span><span class="n">y</span><span class="p">()</span> <span class="o">+</span> <span class="mi">30</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">tablePos</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">texts</span> <span class="o">=</span> <span class="p">[</span><span class="n">c</span><span class="o">.</span><span class="n">heading</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">]</span>
+    <span class="n">objects</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">))</span>
+    <span class="n">tIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">getCurrentIndex</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">tIndex</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">index</span> <span class="o">=</span> <span class="n">tIndex</span><span class="o">.</span><span class="n">column</span><span class="p">()</span>
+    <span class="n">gridRow</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">gridColumn</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">labelColumn</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Filter Column&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span><span class="n">gridColumn</span><span class="p">))</span>
+    <span class="n">gridColumn</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="p">,</span> <span class="n">objects</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span><span class="n">gridColumn</span><span class="p">))</span>
+    <span class="n">gridColumn</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="n">labelObjects</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Objects to filter&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span><span class="n">gridColumn</span><span class="p">))</span>
+    <span class="n">gridColumn</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">edit</span> <span class="o">=</span> <span class="n">LineEdit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span><span class="n">gridColumn</span><span class="p">))</span>
+    <span class="n">gridColumn</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="o">=</span> <span class="n">RadioButtons</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Select Only&#39;</span><span class="p">,</span> <span class="s1">&#39;Filter&#39;</span><span class="p">],</span>
+                                   <span class="n">selectedInd</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                                   <span class="n">callback</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                   <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+                                   <span class="n">tipTexts</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                                   <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span> <span class="n">gridColumn</span><span class="p">))</span>
+
+    <span class="n">gridRow</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">gridColumn</span> <span class="o">=</span> <span class="mi">4</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Search&#39;</span><span class="p">,</span><span class="n">callback</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">findOnTable</span><span class="p">,</span>  <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span><span class="n">gridColumn</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">button</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;margin:4px;&quot;</span><span class="p">)</span>
+
+    <span class="n">gridRow</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="n">gridColumn</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="nb">apply</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span><span class="s1">&#39;Cancel&#39;</span><span class="p">,</span><span class="s1">&#39;Apply&#39;</span><span class="p">],</span>
+                       <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Restore Table and Close&#39;</span><span class="p">,</span><span class="s1">&#39;Restore Table&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;Keep Filtered Table and Close. &#39;</span>
+                                 <span class="s1">&#39;NB: To show again all the table contents you will need to close and reopen it&#39;</span><span class="p">],</span>
+                       <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">closePopup</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">restoreTable</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">applyFilter</span><span class="p">],</span>
+                       <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span> <span class="n">gridColumn</span><span class="p">))</span>
+
+    <span class="n">gridRow</span> <span class="o">=</span> <span class="mi">2</span>
+    <span class="n">gridColumn</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Not Found&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">gridRow</span><span class="p">,</span> <span class="n">gridColumn</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+
+<div class="viewcode-block" id="ObjectTableFilter.closePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.closePopup">[docs]</a>  <span class="k">def</span> <span class="nf">closePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">isOpened</span> <span class="o">=</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="ObjectTableFilter.applyFilter"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.applyFilter">[docs]</a>  <span class="k">def</span> <span class="nf">applyFilter</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">isOpened</span> <span class="o">=</span> <span class="bp">False</span></div>
+
+<div class="viewcode-block" id="ObjectTableFilter.restoreTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.restoreTable">[docs]</a>  <span class="k">def</span> <span class="nf">restoreTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">origObjects</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">edit</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTableFilter.findOnTable"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.findOnTable">[docs]</a>  <span class="k">def</span> <span class="nf">findOnTable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">hideNotFoundMsg</span><span class="p">()</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">edit</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">objCol</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">colPulldown</span><span class="o">.</span><span class="n">currentObject</span><span class="p">()]</span>
+
+    <span class="n">matched</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">objects</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
+      <span class="n">value</span> <span class="o">=</span> <span class="s1">u&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">objCol</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">))</span>
+      <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="n">matched</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matched</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;Select Only&#39;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setCurrentObjects</span><span class="p">(</span><span class="n">matched</span><span class="p">)</span>
+        <span class="k">return</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setFilteredObjects</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">showNotFoundMsg</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTableFilter.setFilteredObjects"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.setFilteredObjects">[docs]</a>  <span class="k">def</span> <span class="nf">setFilteredObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">selected</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">getSelectedObjects</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">setObjects</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ObjectTableFilter.hideNotFoundMsg"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.hideNotFoundMsg">[docs]</a>  <span class="k">def</span> <span class="nf">hideNotFoundMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ObjectTableFilter.showNotFoundMsg"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.ObjectTableFilter.showNotFoundMsg">[docs]</a>  <span class="k">def</span> <span class="nf">showNotFoundMsg</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">msg</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div></div>
+
+  <span class="c1"># def handleButton(self):</span>
+  <span class="c1">#   items = self.table.model.findItems(</span>
+  <span class="c1">#     self.edit.text(), QtCore.Qt.MatchExactly)</span>
+  <span class="c1">#   if items:</span>
+  <span class="c1">#     results = &#39;\n&#39;.join(</span>
+  <span class="c1">#       &#39;row %d column %d&#39; % (item.row() + 1, item.column() + 1)</span>
+  <span class="c1">#       for item in items)</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     results = &#39;Found Nothing&#39;</span>
+
+  <span class="c1"># def close(self):</span>
+  <span class="c1">#</span>
+  <span class="c1">#   BasePopup.close(self)</span>
+
+  <span class="c1"># def unfilterTable(self):</span>
+  <span class="c1">#</span>
+  <span class="c1">#   self.table.setObjects(self.origObjects)</span>
+  <span class="c1">#   self.status = None</span>
+  <span class="c1">#</span>
+  <span class="c1"># def filterInclude(self, *event):</span>
+  <span class="c1">#</span>
+  <span class="c1">#   self.filterTable(True)</span>
+  <span class="c1">#</span>
+  <span class="c1"># def filterExclude(self, *event):</span>
+  <span class="c1">#</span>
+  <span class="c1">#   self.filterTable(False)</span>
+
+  <span class="c1"># def filterTable(self, includeMatches=True):</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if not self.origObjects:</span>
+  <span class="c1">#     self.status = None</span>
+  <span class="c1">#     return</span>
+  <span class="c1">#</span>
+  <span class="c1">#   string = self.entry.get()</span>
+  <span class="c1">#   if not string:</span>
+  <span class="c1">#     self.status = None</span>
+  <span class="c1">#     return</span>
+  <span class="c1">#</span>
+  <span class="c1">#   self.status = includeMatches</span>
+  <span class="c1">#   columns = self.table.columns</span>
+  <span class="c1">#   objCol = columns[self.colPulldown.currentObject()]</span>
+  <span class="c1">#   mode = self.filterModeRadio.get()</span>
+  <span class="c1">#   flag = re.S</span>
+  <span class="c1">#</span>
+  <span class="c1">#   def exclude(a,b,c):</span>
+  <span class="c1">#     return not re.search(a,b,c)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if includeMatches:</span>
+  <span class="c1">#     find = re.search</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     find = exclude</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if mode != SEARCH_MODES[2]:</span>
+  <span class="c1">#     string = re.escape(string)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if mode == SEARCH_MODES[0]:</span>
+  <span class="c1">#     flag = re.I</span>
+  <span class="c1">#</span>
+  <span class="c1">#   objects = []</span>
+  <span class="c1">#   objectsAppend = objects.append</span>
+  <span class="c1">#</span>
+  <span class="c1">#   if self.filterObjRadio.getIndex() == 0:</span>
+  <span class="c1">#     filterObjs = self.origObjects</span>
+  <span class="c1">#   else:</span>
+  <span class="c1">#     filterObjs = self.table.getSelectedObjects()</span>
+  <span class="c1">#</span>
+  <span class="c1">#   for  obj in filterObjs:</span>
+  <span class="c1">#     value = u&#39;%s&#39; % (objCol.getValue(obj))</span>
+  <span class="c1">#     match = find(string, value, flag)</span>
+  <span class="c1">#</span>
+  <span class="c1">#     if match:</span>
+  <span class="c1">#       objectsAppend(obj)</span>
+  <span class="c1">#</span>
+  <span class="c1">#   self.table.clearSelection()</span>
+  <span class="c1">#   self.table.setObjects(objects, None)</span>
+
+<div class="viewcode-block" id="Column"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.Column">[docs]</a><span class="k">class</span> <span class="nc">Column</span><span class="p">:</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">heading</span><span class="p">,</span> <span class="n">getValue</span><span class="p">,</span> <span class="n">getEditValue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">setEditValue</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">editClass</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editArgs</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editKw</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">getColor</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">getIcon</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">stretch</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">format</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+               <span class="n">editDecimals</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">editStep</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">alignment</span><span class="o">=</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignLeft</span><span class="p">):</span>
+               <span class="c1"># editDecimals=None, editStep=None, alignment=QtCore.Qt.AlignLeft,</span>
+               <span class="c1"># orderFunc=None):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">heading</span> <span class="o">=</span> <span class="n">heading</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getValue</span> <span class="o">=</span> <span class="n">getValue</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultText</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getEditValue</span> <span class="o">=</span> <span class="n">getEditValue</span> <span class="ow">or</span> <span class="n">getValue</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setEditValue</span> <span class="o">=</span> <span class="n">setEditValue</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editClass</span> <span class="o">=</span> <span class="n">editClass</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editArgs</span> <span class="o">=</span> <span class="n">editArgs</span> <span class="ow">or</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editKw</span> <span class="o">=</span> <span class="n">editKw</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stretch</span> <span class="o">=</span> <span class="n">stretch</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="o">=</span> <span class="n">format</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editDecimals</span> <span class="o">=</span> <span class="n">editDecimals</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">editStep</span> <span class="o">=</span> <span class="n">editStep</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">defaultIcon</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c1">#self.alignment = ALIGN_OPTS.get(alignment, alignment) | Qt.AlignVCenter</span>
+    <span class="c1"># Alignment combinations broken in PyQt4 v1.1.1</span>
+    <span class="c1"># Use better default than top left</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">alignment</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">AlignCenter</span>
+    <span class="c1"># self.orderFunc = orderFunc</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">getIcon</span> <span class="o">=</span> <span class="n">getIcon</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultIcon</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">getColor</span> <span class="o">=</span> <span class="n">getColor</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultColor</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">tipText</span> <span class="o">=</span> <span class="n">tipText</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_checkTextAttrs</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Column.orderFunc"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.Column.orderFunc">[docs]</a>  <span class="k">def</span> <span class="nf">orderFunc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objA</span><span class="p">,</span> <span class="n">objB</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span> <span class="n">universalSortKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">objA</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">universalSortKey</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">objB</span><span class="p">))</span> <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Column.getFormatValue"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.Table.Column.getFormatValue">[docs]</a>  <span class="k">def</span> <span class="nf">getFormatValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+    <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getValue</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">format</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span>
+    <span class="k">if</span> <span class="n">format</span> <span class="ow">and</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+      <span class="k">return</span> <span class="n">format</span> <span class="o">%</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">value</span></div>
+
+  <span class="k">def</span> <span class="nf">_checkTextAttrs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getValue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="n">attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getValue</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">getValue</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getEditValue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="n">attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getEditValue</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">getEditValue</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">setEditValue</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+      <span class="n">attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setEditValue</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setEditValue</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">obj</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="nb">setattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="n">attr</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getIcon</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">defaultIcon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getIcon</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">getIcon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_defaultIcon</span>
+
+  <span class="k">def</span> <span class="nf">_defaultText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="s1">&#39; &#39;</span>
+
+  <span class="k">def</span> <span class="nf">_defaultColor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="n">BG_COLOR</span>
+
+  <span class="k">def</span> <span class="nf">_defaultIcon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">defaultIcon</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

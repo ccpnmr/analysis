@@ -1,0 +1,161 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.PlaneToolbar &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.PlaneToolbar</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;simon1&#39;</span>
+
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.SpinSystemLabel</span> <span class="kn">import</span> <span class="n">SpinSystemLabel</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Spinbox</span> <span class="kn">import</span> <span class="n">Spinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ToolBar</span> <span class="kn">import</span> <span class="n">ToolBar</span>
+
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<div class="viewcode-block" id="PlaneToolbar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.PlaneToolbar.PlaneToolbar">[docs]</a><span class="k">class</span> <span class="nc">PlaneToolbar</span><span class="p">(</span><span class="n">ToolBar</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="p">,</span> <span class="n">callbacks</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="n">ToolBar</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strip</span><span class="o">.</span><span class="n">stripFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span> <span class="o">=</span> <span class="n">SpinSystemLabel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">:]),</span>
+                                      <span class="n">appBase</span><span class="o">=</span><span class="n">strip</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_appBase</span><span class="p">,</span>
+                                      <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">strip</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+                                 <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> <span class="n">vAlign</span><span class="o">=</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+    <span class="c1"># self.spinSystemLabel.dropEvent = self.dropCallback</span>
+    <span class="c1"># self.spinSystemLabel.setText(&quot;Spin systems shown here&quot;)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">15</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QFont</span><span class="p">(</span><span class="s1">&#39;Lucida Grande&#39;</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stripLabel</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="p">)</span>
+    <span class="c1"># self.spinSystemLabel.pid = self.pid</span>
+    <span class="c1"># print(self.pid)lo</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">planeLabels</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">planeCounts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">strip</span><span class="o">.</span><span class="n">orderedAxes</span><span class="p">)</span><span class="o">-</span><span class="mi">2</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">prevPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">callbacks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">i</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">prevPlaneButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">19</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">prevPlaneButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">19</span><span class="p">)</span>
+      <span class="n">planeLabel</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+      <span class="n">planeLabel</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">19</span><span class="p">)</span>
+      <span class="c1"># below does not work because it allows wheel events to behave but not manual text entry (some Qt stupidity)</span>
+      <span class="c1"># so instead use a wheelEvent to deal with the wheel events and editingFinished (in GuiStripNd) to do text</span>
+      <span class="c1">#planeLabel.valueChanged.connect(partial(callbacks[2], i))</span>
+      <span class="k">if</span> <span class="n">callbacks</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
+        <span class="n">planeLabel</span><span class="o">.</span><span class="n">wheelEvent</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_wheelEvent</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prevPlaneCallback</span> <span class="o">=</span> <span class="n">callbacks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneCallback</span> <span class="o">=</span> <span class="n">callbacks</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="n">callbacks</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">i</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span><span class="o">.</span><span class="n">setFixedWidth</span><span class="p">(</span><span class="mi">19</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span><span class="o">.</span><span class="n">setFixedHeight</span><span class="p">(</span><span class="mi">19</span><span class="p">)</span>
+      <span class="n">planeCount</span> <span class="o">=</span> <span class="n">Spinbox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">showButtons</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;c&#39;</span><span class="p">)</span>
+      <span class="n">planeCount</span><span class="o">.</span><span class="n">setMinimum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">planeCount</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+      <span class="n">planeCount</span><span class="o">.</span><span class="n">oldValue</span> <span class="o">=</span> <span class="mi">1</span>
+      <span class="n">planeCount</span><span class="o">.</span><span class="n">valueChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">callbacks</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">i</span><span class="p">))</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prevPlaneButton</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">planeLabel</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneButton</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">planeCount</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">planeLabels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">planeLabel</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">planeCounts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">planeCount</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_wheelEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="c1"># note that in Qt5 this becomes angleDelta()</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prevPlaneCallback</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prevPlaneCallback</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneCallback</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nextPlaneCallback</span><span class="p">(</span><span class="n">n</span><span class="p">)</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

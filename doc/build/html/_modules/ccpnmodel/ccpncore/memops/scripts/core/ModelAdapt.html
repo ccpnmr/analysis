@@ -1,0 +1,1272 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Operations on the model in memory, adapting the basic model for a </span>
+<span class="sd">particular language and implementation. </span>
+<span class="sd">Does no output.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.ModelTraverse</span> <span class="kn">import</span> <span class="n">ModelTraverse</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">MetaModel</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">OpTypes</span>
+
+
+<span class="n">MemopsError</span> <span class="o">=</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MemopsError</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">StringType</span>
+<span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+  <span class="n">StringType</span> <span class="o">=</span> <span class="nb">str</span>
+
+
+<div class="viewcode-block" id="ModelAdapt"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt">[docs]</a><span class="k">class</span> <span class="nc">ModelAdapt</span><span class="p">(</span><span class="n">ModelTraverse</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; This class processes and modifies an input model, specifically adding </span>
+<span class="sd">  operations that are absent in the basic model but needed for generation. </span>
+<span class="sd">  Assumes that basic model is valid. </span>
+<span class="sd">  All additions in this file are independent of language, implementation and</span>
+<span class="sd">  task. May be overridden in subclasses to handle specific changes.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="c1"># operation handling info</span>
+  
+  <span class="c1"># Names of class contents, apart from the opTypes above</span>
+  <span class="c1"># that are not inherited. - currently not in use. </span>
+  <span class="c1">#doNotInheritElements = ()</span>
+  
+  <span class="c1"># variable names and their default values (may be overridden)</span>
+  <span class="n">_varNames</span> <span class="o">=</span> <span class="p">{</span>
+  
+  <span class="c1"># common variable names</span>
+  
+  <span class="c1"># variable indiating the current object</span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;self&#39;</span><span class="p">:</span><span class="s1">&#39;self&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># synonym for&#39;self&#39; used in constraints handcode for link constraints (only)</span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;me&#39;</span><span class="p">:</span><span class="s1">&#39;self&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># collection element input or element collection.</span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;values&#39;</span><span class="p">:</span><span class="s1">&#39;values&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># non-collection element input or member of element collection.</span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;value&#39;</span><span class="p">:</span><span class="s1">&#39;value&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># synonym for&#39;value&#39; used in constraints handcode for link constraints (only). </span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;other&#39;</span><span class="p">:</span><span class="s1">&#39;other&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># return value for any function that returns a value.</span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;result&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># temporary variable where needed</span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;tempVar&#39;</span><span class="p">:</span><span class="s1">&#39;tempVar&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># Boolean saying if a constraint evaluates as valid.</span>
+  <span class="c1"># NB used in UML handcode</span>
+  <span class="s1">&#39;isValid&#39;</span><span class="p">:</span><span class="s1">&#39;isValid&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># parameters for specific functions and function types</span>
+  
+  <span class="c1"># filtering conditions input to findFirst and findAll</span>
+  <span class="s1">&#39;conditions&#39;</span><span class="p">:</span><span class="s1">&#39;conditions&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># filtering conditions input to findFirst and findAll</span>
+  <span class="s1">&#39;nConditions&#39;</span><span class="p">:</span><span class="s1">&#39;nConditions&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># keywprd,value input to init</span>
+  <span class="s1">&#39;attrlinks&#39;</span><span class="p">:</span><span class="s1">&#39;attrlinks&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># keyword,value input to init</span>
+  <span class="s1">&#39;attrDict&#39;</span><span class="p">:</span><span class="s1">&#39;attrDict&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># doCompleteCheck Boolean input to checkValid functions</span>
+  <span class="s1">&#39;complete&#39;</span><span class="p">:</span><span class="s1">&#39;complete&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># Set of objects to be deleted (for checkDelete/singleDelete calls)</span>
+  <span class="s1">&#39;objsToBeDeleted&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeDeleted&#39;</span><span class="p">,</span>
+
+  <span class="c1"># Set of objects to be undeleted (for _fullUnDelete/_singleUnDelete calls)</span>
+  <span class="s1">&#39;objsToBeUnDeleted&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeUnDeleted&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># Set of objects to check for deletion (for checkDelete/singleDelete calls)</span>
+  <span class="s1">&#39;objsToBeChecked&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeChecked&#39;</span><span class="p">,</span>
+
+  <span class="c1"># Set of objects newly created (for passing to undo machinery0</span>
+  <span class="s1">&#39;objectsCreated&#39;</span><span class="p">:</span><span class="s1">&#39;objectsCreated&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># links-to-check dictionary (for checkDelete/singleDelete calls)</span>
+  <span class="s1">&#39;linkCounter&#39;</span><span class="p">:</span><span class="s1">&#39;linkCounter&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># parameters for specific situations</span>
+  
+  <span class="c1"># variable name: are we currently not executing a constructor? </span>
+  <span class="s1">&#39;notInConstructor&#39;</span><span class="p">:</span><span class="s1">&#39;notInConstructor&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># variable name: are we currently in global override? </span>
+  <span class="s1">&#39;notOverride&#39;</span><span class="p">:</span><span class="s1">&#39;notOverride&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># variable name: are we currently in override? </span>
+  <span class="s1">&#39;override&#39;</span><span class="p">:</span><span class="s1">&#39;override&#39;</span><span class="p">,</span>
+  
+  
+  <span class="c1"># Implementation links</span>
+  
+  <span class="c1"># name of baseclass link to memopsRoot</span>
+  <span class="s1">&#39;root&#39;</span><span class="p">:</span><span class="s1">&#39;root&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># name of storage attribute. Present and used also for non-file implemnetation,</span>
+  <span class="c1"># e.g. in ModelTraverse.getPartitioningLinkages</span>
+  <span class="s1">&#39;topObject&#39;</span><span class="p">:</span><span class="s1">&#39;topObject&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># parent object of current object</span>
+  <span class="s1">&#39;parent&#39;</span><span class="p">:</span><span class="s1">&#39;parent&#39;</span><span class="p">,</span>
+
+  <span class="c1"># undo object</span>
+  <span class="s1">&#39;_undo&#39;</span><span class="p">:</span><span class="s1">&#39;_undo&#39;</span><span class="p">,</span>
+  
+  
+  <span class="c1"># Implementation attributes</span>
+  
+  <span class="c1">#</span>
+  <span class="s1">&#39;className&#39;</span><span class="p">:</span><span class="s1">&#39;className&#39;</span><span class="p">,</span>
+  
+  <span class="c1">#</span>
+  <span class="s1">&#39;packageName&#39;</span><span class="p">:</span><span class="s1">&#39;packageName&#39;</span><span class="p">,</span>
+  
+  <span class="c1">#</span>
+  <span class="s1">&#39;packageShortName&#39;</span><span class="p">:</span><span class="s1">&#39;packageShortName&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># fieldNames attribute (names of class elements)</span>
+  <span class="s1">&#39;fieldNames&#39;</span><span class="p">:</span><span class="s1">&#39;fieldNames&#39;</span><span class="p">,</span>
+  <span class="c1"># is object deleted?</span>
+  <span class="s1">&#39;isDeleted&#39;</span><span class="p">:</span><span class="s1">&#39;isDeleted&#39;</span><span class="p">,</span>
+  
+  <span class="c1"># internal attribute: are we currently executing a constructor?</span>
+  <span class="s1">&#39;inConstructor&#39;</span><span class="p">:</span><span class="s1">&#39;inConstructor&#39;</span><span class="p">,</span>
+  <span class="p">}</span>
+  
+  <span class="c1"># Std. documentation templates</span>
+  <span class="n">opDocTemplate</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2">&quot;</span>
+  <span class="n">parDocTemplate</span> <span class="o">=</span> <span class="s2">&quot; the </span><span class="si">%s</span><span class="s2">&quot;</span>
+  
+  
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+    <span class="c1"># copy setup info down, to allow modification</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_varNames</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">OpTypes</span><span class="o">.</span><span class="n">operationData</span><span class="p">)</span>
+    
+    <span class="c1"># initialise ModelTraverse</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ModelAdapt</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    
+    <span class="c1"># link varNames to modelPortal, for transport.</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">varNames</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">operationData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span>
+    
+    <span class="c1"># set model flavour (and check if it is compatible)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">setModelFlavour</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+    
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### code overriding ModelTraverse</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.processModel"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.processModel">[docs]</a>  <span class="k">def</span> <span class="nf">processModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; top function that does all actions. Only function that should</span>
+<span class="sd">    be called from outside the module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># pre-process model - handle multiple inheritance and </span>
+    <span class="c1"># select implementation-dependent classes</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">preprocessModel</span><span class="p">()</span>
+    
+    <span class="c1"># process model</span>
+    <span class="n">ModelTraverse</span><span class="o">.</span><span class="n">processModel</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    
+    <span class="c1"># final check</span>
+    
+    <span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">topPackage</span><span class="o">.</span><span class="n">checkValid</span><span class="p">()</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;ModelAdapt - Model validity check took </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">t1</span><span class="o">-</span><span class="n">t0</span><span class="p">))</span></div>
+    
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.preprocessModel"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.preprocessModel">[docs]</a>  <span class="k">def</span> <span class="nf">preprocessModel</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;pre-process model - handle multiple inheritance </span>
+<span class="sd">    and select implementation-dependent classes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">rootPackage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">topPackage</span>
+    <span class="n">rootClass</span> <span class="o">=</span> <span class="n">rootPackage</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootClassName</span><span class="p">)</span>
+    
+    <span class="k">for</span> <span class="n">package</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">leafPackagesByImport</span><span class="p">():</span>
+    
+      <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">dataObjTypesByInheritance</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+        <span class="c1"># inherit down</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xx</span><span class="o">.</span><span class="n">supertypes</span> <span class="ow">and</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">rootClass</span><span class="p">:</span>
+          <span class="n">xx</span><span class="o">.</span><span class="n">inheritDown</span><span class="p">()</span>
+          <span class="n">xx</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    
+      <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">classesByInheritance</span><span class="p">(</span><span class="n">package</span><span class="p">):</span>
+        
+        <span class="c1"># remove classes specific to other implementations</span>
+        <span class="n">forImpl</span> <span class="o">=</span> <span class="n">xx</span><span class="o">.</span><span class="n">taggedValues</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;specificImplementation&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">forImpl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> 
+            <span class="ow">and</span> <span class="n">forImpl</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFlavours</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;implementation&#39;</span><span class="p">)):</span>
+          <span class="n">xx</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      
+        <span class="c1"># inherit down</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">xx</span><span class="o">.</span><span class="n">supertypes</span> <span class="ow">and</span> <span class="n">xx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">rootClass</span><span class="p">:</span>
+          <span class="n">xx</span><span class="o">.</span><span class="n">inheritDown</span><span class="p">()</span>
+          <span class="n">xx</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+    
+    <span class="c1"># remove deleted objects from modepPortal internals</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">resetObjectDicts</span><span class="p">()</span></div>
+    
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.initComplexDataType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.initComplexDataType">[docs]</a>  <span class="k">def</span> <span class="nf">initComplexDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">complexDataType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for start of complexDataType</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">_tempOpList</span> <span class="o">=</span> <span class="n">complexDataType</span><span class="o">.</span><span class="n">operations</span></div>
+  
+  <span class="n">initClass</span> <span class="o">=</span> <span class="n">initComplexDataType</span>
+  
+  <span class="n">initDataObjType</span> <span class="o">=</span> <span class="n">initComplexDataType</span>
+    
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.processDataObjType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.processDataObjType">[docs]</a>  <span class="k">def</span> <span class="nf">processDataObjType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataObjType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># class operations - not related to elements</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addDataObjTypeOperations</span><span class="p">(</span><span class="n">dataObjType</span><span class="p">)</span>
+    
+    <span class="c1"># super function call</span>
+    <span class="n">ModelTraverse</span><span class="o">.</span><span class="n">processDataObjType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataObjType</span><span class="p">)</span>        </div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.endComplexDataType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.endComplexDataType">[docs]</a>  <span class="k">def</span> <span class="nf">endComplexDataType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">complexDataType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for end of complexDataType</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># sort contents</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sortAttributes</span><span class="p">(</span><span class="n">complexDataType</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sortOperations</span><span class="p">(</span><span class="n">complexDataType</span><span class="p">)</span>
+    
+    <span class="c1"># check all specific operations have been consumed</span>
+    <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempOpList</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span><span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">opType</span><span class="p">][</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;masterOp&#39;</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+         <span class="s2">&quot;operation </span><span class="si">%s</span><span class="s2"> with opType </span><span class="si">%s</span><span class="s2"> and target </span><span class="si">%s</span><span class="s2"> defined but not used&quot;</span>
+         <span class="o">%</span> <span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">op</span><span class="o">.</span><span class="n">opType</span><span class="p">,</span> <span class="n">op</span><span class="o">.</span><span class="n">target</span><span class="p">)</span>
+        <span class="p">)</span>
+    
+    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tempOpList</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.endDataObjType"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.endDataObjType">[docs]</a>  <span class="k">def</span> <span class="nf">endDataObjType</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataObjType</span><span class="p">):</span>
+  
+    <span class="bp">self</span><span class="o">.</span><span class="n">endComplexDataType</span><span class="p">(</span><span class="n">dataObjType</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.processClass"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.processClass">[docs]</a>  <span class="k">def</span> <span class="nf">processClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># class operations - not related to elements</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addClassOperations</span><span class="p">(</span><span class="n">clazz</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">addParentLink</span><span class="p">(</span><span class="n">clazz</span><span class="p">)</span>
+    
+    <span class="c1"># super function call</span>
+    <span class="n">ModelTraverse</span><span class="o">.</span><span class="n">processClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>        </div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.endClass"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.endClass">[docs]</a>  <span class="k">def</span> <span class="nf">endClass</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for end of class</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">sortRoles</span><span class="p">(</span><span class="n">clazz</span><span class="p">)</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">endComplexDataType</span><span class="p">(</span><span class="n">clazz</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+  
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.processAttribute"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.processAttribute">[docs]</a>  <span class="k">def</span> <span class="nf">processAttribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for attribute</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">inClass</span><span class="p">:</span>
+      <span class="c1">#get </span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addGetters</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+      <span class="c1"># set, add, remove</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addModifiers</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      
+      <span class="c1"># findFirst, findAll</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">valueType</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataObjType</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">addRoleOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.processRole"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.processRole">[docs]</a>  <span class="k">def</span> <span class="nf">processRole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for role</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># add default documentation</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">documentation</span><span class="p">:</span>
+      <span class="n">hier</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">hierarchy</span>
+      <span class="k">if</span> <span class="n">hier</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">parent_hierarchy</span><span class="p">:</span>
+        <span class="n">elem</span><span class="o">.</span><span class="n">documentation</span> <span class="o">=</span> <span class="s1">&#39;parent link&#39;</span>
+      <span class="k">elif</span> <span class="n">hier</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">child_hierarchy</span><span class="p">:</span>
+        <span class="n">elem</span><span class="o">.</span><span class="n">documentation</span> <span class="o">=</span> <span class="s1">&#39;child link to class </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">elem</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">inClass</span><span class="p">:</span>
+      <span class="c1">#get </span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addGetters</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+      <span class="c1"># set, add, remove</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addModifiers</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+      <span class="c1"># role-specific operations</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addRoleOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.processOperation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.processOperation">[docs]</a>  <span class="k">def</span> <span class="nf">processOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; processing actions for operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">op</span><span class="o">.</span><span class="n">documentation</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">opType</span> <span class="o">==</span> <span class="s1">&#39;get&#39;</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">target</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaAttribute</span><span class="p">):</span>
+          <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;attribute&#39;</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">):</span>
+          <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;link&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;Code error, should never get here)&quot;</span><span class="p">)</span>
+        <span class="n">op</span><span class="o">.</span><span class="n">documentation</span> <span class="o">=</span> <span class="s1">&#39;getter for derived </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ss</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">ModelTraverse</span><span class="o">.</span><span class="n">processOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>   </div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  <span class="c1">###</span>
+  <span class="c1">### Internal functions - may be overridden in subclasses</span>
+  <span class="c1">###</span>
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.sortAttributes"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.sortAttributes">[docs]</a>  <span class="k">def</span> <span class="nf">sortAttributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; sort attributes within clazz</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">pass</span></div>
+  
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.sortRoles"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.sortRoles">[docs]</a>  <span class="k">def</span> <span class="nf">sortRoles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; sort roles within clazz</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">clazz</span><span class="o">.</span><span class="n">_MetaClass__roleNames</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span></div>
+  
+  <span class="c1">###########################################################################</span>
+ 
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.sortOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.sortOperations">[docs]</a>  <span class="k">def</span> <span class="nf">sortOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; sort operations within class by name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">elem</span><span class="o">.</span><span class="n">_ComplexDataType__operationNames</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span></div>
+    
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.addClassOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.addClassOperations">[docs]</a>  <span class="k">def</span> <span class="nf">addClassOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add operations not linked to an element (e.g. init, delete, checkValid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">isNotRootClass</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">implPackageName</span><span class="p">:</span>
+      
+      <span class="k">if</span>  <span class="n">inClass</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">dataObjClassName</span><span class="p">:</span>
+        <span class="c1"># DataObject</span>
+      
+        <span class="c1"># full delete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;fullDelete&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+ 
+        <span class="c1"># TBD: to remove</span>
+        <span class="c1"># checkers (will be abstract)</span>
+        <span class="c1">###self.makeOperations(inClass, &#39;checkValid&#39;, inClass)</span>
+        <span class="c1">###self.makeOperations(inClass, &#39;checkAllValid&#39;, inClass)</span>
+      
+        <span class="c1"># no longer needed, in ComplexDataType instead</span>
+      <span class="c1"># elif  inClass.name == ImpConstants.baseClassName:</span>
+      <span class="c1">#</span>
+      <span class="c1">#   # checkers (will be abstract)</span>
+      <span class="c1">#   self.makeOperations(inClass, &#39;checkValid&#39;, inClass)</span>
+      <span class="c1">#   self.makeOperations(inClass, &#39;checkAllValid&#39;, inClass)</span>
+
+      <span class="k">elif</span> <span class="n">inClass</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">:</span>
+        <span class="c1"># MemopsRoot</span>
+        
+        <span class="n">isNotRootClass</span> <span class="o">=</span> <span class="bp">False</span>
+
+        <span class="c1"># full undelete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;fullUnDelete&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      
+      <span class="k">elif</span> <span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">:</span>
+        <span class="c1"># Non-abstract non-root Implementation classes</span>
+      
+        <span class="c1"># full delete</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;fullDelete&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+        
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">:</span>
+    
+      <span class="c1"># delete</span>
+      <span class="k">if</span> <span class="n">isNotRootClass</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;checkDelete&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;singleDelete&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;singleUnDelete&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+ 
+      <span class="c1"># checkers</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;checkValid&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;checkAllValid&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      
+      <span class="c1"># constructor</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+      <span class="c1"># getAttr, setAttr</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getAttr&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;setAttr&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+
+    <span class="c1"># fullKey operations - may also be for abstract classes</span>
+    <span class="n">parentRole</span> <span class="o">=</span> <span class="n">inClass</span><span class="o">.</span><span class="n">parentRole</span>
+    <span class="k">if</span> <span class="n">parentRole</span><span class="p">:</span>
+      <span class="n">ot</span> <span class="o">=</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">otherRole</span>
+      <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">keyNames</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ot</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">ot</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># any class with a full key defined, also if inherited.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getByKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+ 
+        <span class="k">if</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">inClass</span><span class="p">:</span>
+          <span class="c1"># topmost supertype with a full key defined.</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getFullKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getLocalKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+          
+    
+    <span class="k">elif</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">:</span>
+      <span class="c1"># specific for MemopsRoot</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getFullKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getLocalKey&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+      
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.addDataObjTypeOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.addDataObjTypeOperations">[docs]</a>  <span class="k">def</span> <span class="nf">addDataObjTypeOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add operations not linked to an element (e.g. init, checkValid)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># TBD: added</span>
+    <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">:</span>
+      <span class="c1">###if inClass.name == ImpConstants.baseDataTypeObjName:</span>
+      <span class="k">if</span> <span class="n">inClass</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">rootClassName</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;checkValid&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;checkAllValid&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+
+    <span class="c1"># TBD: to remove</span>
+    <span class="c1">###if not inClass.isAbstract:</span>
+    <span class="k">else</span><span class="p">:</span>
+ 
+      <span class="c1"># checkers</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;checkValid&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;checkAllValid&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      
+      <span class="c1"># constructor</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      
+      <span class="c1"># constructor</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;clone&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+      <span class="c1"># getAttr, setAttr</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;getAttr&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;setAttr&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.newElement"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.newElement">[docs]</a>  <span class="k">def</span> <span class="nf">newElement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; make new element of class clazz using parameter dict params</span>
+<span class="sd">    Sets isImplicit to True and the Guid to a dummy value, if not already set.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="n">clazz</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;isImplicit&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">isImplicit</span><span class="o">=</span><span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;guid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params</span><span class="p">:</span>
+      <span class="n">result</span><span class="o">.</span><span class="n">guid</span> <span class="o">=</span> <span class="s1">&#39;temporary_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">result</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+  
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.addParentLink"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.addParentLink">[docs]</a>  <span class="k">def</span> <span class="nf">addParentLink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">clazz</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Add element and getter for parent link (synonym for the real one)</span>
+<span class="sd">    Must be treated as special case later.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># Add &#39;parent&#39; link NB must be treated as special case later</span>
+    <span class="n">parentRole</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">parentRole</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">clazz</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="n">parentRole</span><span class="o">.</span><span class="n">isAbstract</span> <span class="p">):</span>
+      <span class="n">baseRole</span> <span class="o">=</span> <span class="n">parentRole</span>
+      
+    <span class="k">elif</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">clazz</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataRootName</span><span class="p">:</span>
+      <span class="c1"># special case - dataRoot</span>
+      <span class="n">baseRole</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="s1">&#39;root&#39;</span><span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span>
+    
+    <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">tag</span><span class="p">,</span><span class="n">pData</span> <span class="ow">in</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="o">.</span><span class="n">parameterData</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">pData</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;content&#39;</span> <span class="ow">and</span> <span class="n">pData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;setterFunc&#39;</span><span class="p">)</span> <span class="o">!=</span> <span class="s1">&#39;unsettable&#39;</span><span class="p">:</span>
+        <span class="n">dd</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">baseRole</span><span class="p">,</span><span class="n">tag</span><span class="p">)</span>
+    
+    <span class="c1"># remove some attributes</span>
+    <span class="k">del</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;otherRole&#39;</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;isImplicit&#39;</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span>
+    
+    <span class="c1"># make new MetaRole</span>
+    <span class="n">dd</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+     <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">],</span>
+     <span class="s1">&#39;baseName&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="p">[</span><span class="s1">&#39;parent&#39;</span><span class="p">],</span>
+     <span class="s1">&#39;documentation&#39;</span><span class="p">:</span><span class="s1">&#39;link to parent object&#39;</span>
+                     <span class="s1">&#39; - synonym for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">baseRole</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+     <span class="s1">&#39;isImplementation&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+     <span class="s1">&#39;aggregation&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">no_aggregation</span><span class="p">,</span>
+     <span class="s1">&#39;hierarchy&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">no_hierarchy</span><span class="p">,</span>
+    <span class="p">})</span>
+    
+    <span class="k">if</span> <span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># special case - dataRoot</span>
+      <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;container&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;valueType&#39;</span><span class="p">]</span>
+      <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;documentation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;link to parent object - returns None&quot;</span>
+      <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;locard&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+ 
+    <span class="bp">self</span><span class="o">.</span><span class="n">newElement</span><span class="p">(</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">,</span> <span class="o">**</span><span class="n">dd</span><span class="p">)</span></div>
+  
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.addGetters"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.addGetters">[docs]</a>  <span class="k">def</span> <span class="nf">addGetters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; select, and find or create &#39;get&#39; functions</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">isDerived</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">checkOpForDerived</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;get&#39;</span><span class="p">)</span>
+      
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;get&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.addModifiers"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.addModifiers">[docs]</a>  <span class="k">def</span> <span class="nf">addModifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; select, and find or create modifiers (set, add, remove)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+      
+    <span class="c1"># set</span>
+    <span class="n">makeModifiers</span> <span class="o">=</span> <span class="bp">False</span>
+    
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">isImplementation</span><span class="p">:</span>
+      <span class="k">pass</span>
+    
+    <span class="k">elif</span> <span class="n">elem</span><span class="o">.</span><span class="n">isDerived</span><span class="p">:</span>         
+      <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">changeability</span> <span class="o">!=</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkOpForDerived</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="s1">&#39;set&#39;</span><span class="p">)</span>
+        <span class="n">makeModifiers</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaAttribute</span><span class="p">)</span> <span class="ow">or</span>
+          <span class="n">elem</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">no_hierarchy</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;set&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      <span class="n">makeModifiers</span> <span class="o">=</span> <span class="bp">True</span>
+    
+    <span class="k">if</span> <span class="n">makeModifiers</span> <span class="ow">and</span> <span class="n">elem</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="c1"># add, remove</span>
+      <span class="c1"># NB add and remove can be generated from set and get if needed.</span>
+      
+      <span class="c1"># set up</span>
+      <span class="n">elems</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span><span class="p">]</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">):</span>
+        <span class="n">otherRole</span> <span class="o">=</span> <span class="n">elem</span><span class="o">.</span><span class="n">otherRole</span>
+        <span class="k">if</span> <span class="n">otherRole</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="n">elems</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">otherRole</span><span class="p">)</span>
+      
+      <span class="c1"># check if functions should be generated</span>
+      <span class="k">for</span> <span class="n">ee</span> <span class="ow">in</span> <span class="n">elems</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">ee</span><span class="o">.</span><span class="n">hicard</span> <span class="o">==</span> <span class="n">ee</span><span class="o">.</span><span class="n">locard</span> <span class="ow">or</span> <span class="n">ee</span><span class="o">.</span><span class="n">changeability</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">frozen</span><span class="p">:</span>
+          <span class="k">break</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;remove&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span></div>
+        
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.checkOpForDerived"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.checkOpForDerived">[docs]</a>  <span class="k">def</span> <span class="nf">checkOpForDerived</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; verify existence of op for derived element and check the op.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentOpData</span> <span class="o">=</span> <span class="n">opData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getOpData</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    <span class="n">op</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">getOperation</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">opType</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;no </span><span class="si">%s</span><span class="s2"> function found in </span><span class="si">%s</span><span class="s2"> for derived element </span><span class="si">%s</span><span class="s2">&quot;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+    
+    <span class="k">elif</span> <span class="n">op</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> function </span><span class="si">%s</span><span class="s2"> for derived element </span><span class="si">%s</span><span class="s2"> in </span><span class="si">%s</span><span class="s2"> found in supertype </span><span class="si">%s</span><span class="s2">&quot;</span>
+       <span class="o">%</span> <span class="p">(</span><span class="n">opType</span><span class="p">,</span> <span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">inClass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">op</span><span class="o">.</span><span class="n">container</span><span class="p">)</span>
+      <span class="p">)</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tempOpList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">checkOperation</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+ 
+    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentOpData</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.addRoleOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.addRoleOperations">[docs]</a>  <span class="k">def</span> <span class="nf">addRoleOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; select, and find or create operations specific for roles </span>
+<span class="sd">      or DataObjType attrs (findFirst, findAll, new)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+      <span class="c1"># findFirst, findAll</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;findFirst&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;findAll&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaRole</span><span class="p">):</span>
+          
+      <span class="k">if</span> <span class="n">elem</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">isOrdered</span><span class="p">:</span>
+        <span class="c1"># &#39;sorted&#39; function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">elem</span><span class="p">,</span> <span class="s1">&#39;sorted&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+      
+      <span class="c1"># factory functions </span>
+      <span class="c1"># NB assumes that all subClasses are known to the model at this stage</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">child_hierarchy</span>
+          <span class="ow">and</span> <span class="ow">not</span> <span class="n">elem</span><span class="o">.</span><span class="n">isAbstract</span><span class="p">):</span>
+        <span class="c1"># factory functions</span>
+        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">getNonAbstractSubtypes</span><span class="p">():</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">makeOperations</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s1">&#39;new&#39;</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">elem</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.makeOperations"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.makeOperations">[docs]</a>  <span class="k">def</span> <span class="nf">makeOperations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">elem</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get existing operation and check it, or create a new one</span>
+<span class="sd">    Some error checking and bookkeeping for existing operations</span>
+<span class="sd">    </span>
+<span class="sd">    NB elem passed in separately for the &#39;new&#39; operations, where it is</span>
+<span class="sd">    the childRole pointing to the class to create.</span>
+<span class="sd">    Otherwise it is set equal to the target.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+        
+    <span class="k">if</span> <span class="n">elem</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">elem</span> <span class="o">=</span> <span class="n">target</span>
+    
+    <span class="bp">self</span><span class="o">.</span><span class="n">currentOpData</span> <span class="o">=</span> <span class="n">opData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getOpData</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+    <span class="n">opSubTypes</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">opSubType</span> <span class="ow">in</span> <span class="n">opSubTypes</span><span class="p">:</span>
+      <span class="n">op</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">getOperation</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">op</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operationData</span><span class="p">[</span><span class="n">opType</span><span class="p">][</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;container&#39;</span>
+            <span class="ow">or</span> <span class="n">elem</span><span class="o">.</span><span class="n">container</span> <span class="ow">is</span> <span class="n">inClass</span><span class="p">):</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">newOperation</span><span class="p">(</span><span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># There should have been an inherited operation here.</span>
+          <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+           <span class="s2">&quot;new &#39;</span><span class="si">%s</span><span class="s2">&#39; function for </span><span class="si">%s</span><span class="s2"> made in </span><span class="si">%s</span><span class="s2">. Should have been inherited&quot;</span> 
+           <span class="o">%</span> <span class="p">(</span><span class="n">opType</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">inClass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span>
+          <span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_tempOpList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">op</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+          <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkOperation</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentOpData</span></div>
+    
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.newOperation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.newOperation">[docs]</a>  <span class="k">def</span> <span class="nf">newOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; create a new operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdOperationData</span><span class="p">(</span><span class="n">opData</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">)</span>
+    <span class="n">params</span><span class="p">[</span><span class="s1">&#39;documentation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getOpDocumentation</span><span class="p">(</span><span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> 
+                                                      <span class="n">opSubType</span><span class="p">)</span>
+    
+    <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">newElement</span><span class="p">(</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaOperation</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="n">inClass</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span>
+    
+    <span class="c1">#parameters</span>
+    <span class="k">for</span> <span class="n">parData</span> <span class="ow">in</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">][</span><span class="n">opSubType</span><span class="p">][</span><span class="s1">&#39;parameters&#39;</span><span class="p">]:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">newOpParameter</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">opParameterData</span><span class="p">(</span><span class="n">parData</span><span class="p">,</span> <span class="n">op</span><span class="p">))</span>
+    
+    <span class="c1"># NBNB TBD this needs reworking</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addOperationExceptions</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">op</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.checkOperation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.checkOperation">[docs]</a>  <span class="k">def</span> <span class="nf">checkOperation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;check an existing operation conforms to the rules, and adds missing</span>
+<span class="sd">    information (target, parameters) where it can be deduced from context.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    
+    <span class="c1"># check MetaOp input parameters</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdOperationData</span><span class="p">(</span><span class="n">opData</span><span class="p">,</span> <span class="n">opSubType</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="n">val</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+         <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> value </span><span class="si">%s</span><span class="s2"> does not conform to standard </span><span class="si">%s</span><span class="s2">&quot;</span>
+         <span class="o">%</span> <span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span>
+        <span class="p">)</span>
+     
+    <span class="c1"># MetaParameters</span>
+    <span class="n">existingParNames</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">_HasParameters__parameterNames</span><span class="p">[:]</span>
+    <span class="k">for</span> <span class="n">parData</span> <span class="ow">in</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">][</span><span class="n">opSubType</span><span class="p">][</span><span class="s1">&#39;parameters&#39;</span><span class="p">]:</span>
+      <span class="n">pInput</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">opParameterData</span><span class="p">(</span><span class="n">parData</span><span class="p">,</span> <span class="n">op</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">pInput</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="ow">in</span> <span class="n">existingParNames</span><span class="p">:</span>
+        <span class="n">existingParNames</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pInput</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">checkOpParameter</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">pInput</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]),</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">pInput</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">newOpParameter</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">pInput</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">if</span> <span class="n">existingParNames</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;non-std. parameters named </span><span class="si">%s</span><span class="s2"> found for </span><span class="si">%s</span><span class="s2">&quot;</span>
+       <span class="o">%</span> <span class="p">(</span><span class="n">existingParNames</span><span class="p">,</span> <span class="n">op</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span>
+      <span class="p">)</span></div>
+      
+    
+  <span class="c1">###########################################################################</span>
+        
+  <span class="c1">###########################################################################</span>
+  
+<div class="viewcode-block" id="ModelAdapt.stdOperationData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.stdOperationData">[docs]</a>  <span class="k">def</span> <span class="nf">stdOperationData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get data describing a normal operation for checking or creation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># NBNB TBD get rid of &#39;isQuery&#39;?</span>
+    <span class="c1"># No, it is used in ApiGen.writeExternalOp</span>
+    
+    <span class="n">opType</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;opType&#39;</span><span class="p">]</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+  
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span>
+     <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">getOperationName</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="n">opSubType</span><span class="p">),</span>
+     <span class="s1">&#39;isQuery&#39;</span><span class="p">:(</span><span class="n">opData</span><span class="p">[</span><span class="s1">&#39;group&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;query&#39;</span><span class="p">),</span>
+     <span class="s1">&#39;opType&#39;</span><span class="p">:</span><span class="n">opType</span><span class="p">,</span>
+     <span class="s1">&#39;opSubType&#39;</span><span class="p">:</span><span class="n">opSubType</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="n">target</span><span class="p">,</span>
+    <span class="p">}</span>
+    
+    <span class="n">dd</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;taggedValues&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dd</span><span class="p">:</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;taggedValues&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dd</span>
+    
+    <span class="n">isAbstract</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">isAbstract</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">isAbstract</span>
+    <span class="k">elif</span> <span class="n">opType</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;getByKey&#39;</span><span class="p">,</span> <span class="s1">&#39;getFullKey&#39;</span><span class="p">,</span> <span class="s1">&#39;getLocalKey&#39;</span><span class="p">,</span> <span class="s1">&#39;fullDelete&#39;</span><span class="p">,</span> <span class="s1">&#39;fullUnDelete&#39;</span><span class="p">):</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">ClassElement</span><span class="p">)</span> <span class="ow">or</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">operationData</span><span class="p">[</span><span class="n">opType</span><span class="p">][</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;container&#39;</span><span class="p">):</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">isAbstract</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;isAbstract&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">False</span>
+    
+    <span class="n">scope</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;scope&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">scope</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;scope&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">scope</span>
+
+    <span class="n">visibility</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;visibility&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">visibility</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;visibility&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">visibility</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.getOperationName"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOperationName">[docs]</a>  <span class="k">def</span> <span class="nf">getOperationName</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get name of operation - NB does not use actual operation object, </span>
+<span class="sd">    which may not exist yet</span>
+<span class="sd">    </span>
+<span class="sd">    Note that opSubType!=None is used as an operation name suffix.</span>
+<span class="sd">    If subOp is found and contains a &#39;suffix&#39; item, this will be used instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># get opData</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;currentOpData&#39;</span><span class="p">):</span>
+      <span class="n">opData</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">currentOpData</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">opData</span> <span class="o">=</span>  <span class="bp">self</span><span class="o">.</span><span class="n">getOpData</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">)</span>
+    
+    <span class="c1"># get main name</span>
+    <span class="n">targetType</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span>
+      
+    <span class="k">if</span> <span class="n">targetType</span> <span class="o">==</span> <span class="s1">&#39;masterOp&#39;</span><span class="p">:</span>
+      <span class="n">opName</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">name</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">opName</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">opType</span>
+      
+      <span class="k">if</span> <span class="n">targetType</span> <span class="o">!=</span> <span class="s1">&#39;container&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s1">&#39;useCollection&#39;</span> <span class="ow">in</span> <span class="n">opData</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;useCollection&#39;</span><span class="p">]:</span>
+          <span class="n">targetName</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">baseName</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">targetName</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">opName</span> <span class="o">=</span> <span class="n">opName</span> <span class="o">+</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">targetName</span><span class="p">)</span>
+    
+    <span class="c1"># handle subTypes</span>
+    <span class="k">if</span> <span class="n">opSubType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">opName</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">subOp</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">opSubType</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">subOp</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="n">opSubType</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">suffix</span> <span class="o">=</span> <span class="n">subOp</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;suffix&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">opSubType</span>
+      <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">opName</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+<div class="viewcode-block" id="ModelAdapt.getOpData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOpData">[docs]</a>  <span class="k">def</span> <span class="nf">getOpData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">inClass</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Get opData for opType, taking special cases into account</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">inClass</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">ComplexDataType</span><span class="p">):</span>
+        <span class="n">inClass</span> <span class="o">=</span> <span class="n">target</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">inClass</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">container</span>
+    
+    <span class="c1"># NB this must be a copy, as it is being modified</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">operationData</span><span class="p">[</span><span class="n">opType</span><span class="p">])</span>
+    
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;opType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">opType</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span>
+    <span class="c1">###result[&#39;visibility&#39;] = target.visibility</span>
+    
+    <span class="k">if</span> <span class="n">opType</span> <span class="o">==</span> <span class="s1">&#39;init&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">inClass</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaDataObjType</span><span class="p">)</span>
+          <span class="ow">or</span> <span class="p">(</span><span class="ow">not</span> <span class="n">inClass</span><span class="o">.</span><span class="n">isAbstract</span> <span class="ow">and</span> <span class="n">inClass</span><span class="o">.</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)):</span>
+        <span class="c1"># remove &#39;parent&#39; parameter for MemopsRoot and DataObjTypes</span>
+
+        <span class="k">for</span> <span class="n">subData</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+          <span class="k">if</span> <span class="n">subData</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]:</span> <span class="c1"># can have zero-argument constructor</span>
+            <span class="k">del</span> <span class="n">subData</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> 
+    
+    <span class="k">elif</span> <span class="n">opType</span> <span class="o">==</span> <span class="s1">&#39;getByKey&#39;</span><span class="p">:</span>
+      <span class="n">pr1</span> <span class="o">=</span> <span class="n">inClass</span><span class="o">.</span><span class="n">parentRole</span>
+      <span class="k">if</span> <span class="n">pr1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span>
+       <span class="n">pr1</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">parentRole</span> <span class="ow">is</span> <span class="bp">None</span>
+       <span class="ow">or</span> <span class="n">inClass</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">implPackageName</span>
+      <span class="p">):</span>
+        <span class="c1"># TopObject or in Implementation - change startObj typing to MemopsRoot</span>
+        <span class="k">for</span> <span class="n">subOp</span> <span class="ow">in</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+          <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">subOp</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;startObj&#39;</span><span class="p">]</span>
+          <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataRootName</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.getOpDocumentation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.getOpDocumentation">[docs]</a>  <span class="k">def</span> <span class="nf">getOpDocumentation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">opData</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">opSubType</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> 
+                         <span class="n">copyElemDoc</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; get documentation for generated operation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+  
+    <span class="n">opType</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;opType&#39;</span><span class="p">]</span>
+    <span class="n">subOpData</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;subOps&#39;</span><span class="p">][</span><span class="n">opSubType</span><span class="p">]</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+    <span class="n">template</span> <span class="o">=</span> <span class="n">subOpData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;opDocTemplate&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">template</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">template</span> <span class="o">%</span> <span class="n">target</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">opDocTemplate</span> <span class="o">%</span>
+                <span class="p">(</span><span class="n">metaUtil</span><span class="o">.</span><span class="n">upperFirst</span><span class="p">(</span><span class="n">opType</span><span class="p">),</span> <span class="n">target</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()))</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">copyElemDoc</span> <span class="ow">and</span> 
+        <span class="n">opData</span><span class="p">[</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;container&#39;</span><span class="p">,</span> <span class="s1">&#39;masterOp&#39;</span><span class="p">,</span> <span class="s1">&#39;ChildClass&#39;</span><span class="p">)):</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">documentation</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">ss</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">ss</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+    
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.newOpParameter"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.newOpParameter">[docs]</a>  <span class="k">def</span> <span class="nf">newOpParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Delegate Operation parameter creation to appropriate function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newElement</span><span class="p">(</span><span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaParameter</span><span class="p">,</span> <span class="n">container</span><span class="o">=</span><span class="n">op</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.checkOpParameter"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.checkOpParameter">[docs]</a>  <span class="k">def</span> <span class="nf">checkOpParameter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">par</span><span class="p">,</span> <span class="n">inClass</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;check an existing operation parameter conforms to the rules.</span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="c1"># parameter attributes to ignore</span>
+    <span class="n">skip</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;documentation&#39;</span><span class="p">,)</span>
+    
+    <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="o">!=</span> <span class="n">val</span><span class="p">:</span>
+          <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+           <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">.</span><span class="si">%s</span><span class="s2"> value </span><span class="si">%s</span><span class="s2"> does not conform to standard </span><span class="si">%s</span><span class="s2">&quot;</span>
+           <span class="o">%</span> <span class="p">(</span><span class="n">par</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">key</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">par</span><span class="p">,</span> <span class="n">key</span><span class="p">),</span> <span class="n">val</span><span class="p">)</span>
+          <span class="p">)</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.opParameterData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.opParameterData">[docs]</a>  <span class="k">def</span> <span class="nf">opParameterData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parData</span><span class="p">,</span> <span class="n">op</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Delegate Operation parameter creation to appropriate function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="c1"># set up</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">parData</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="s1">&#39;target&#39;</span> <span class="ow">in</span> <span class="n">parData</span><span class="p">:</span>
+    
+      <span class="c1"># use explicit target </span>
+      <span class="n">target</span> <span class="o">=</span> <span class="n">parData</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span>
+      
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">StringType</span><span class="p">):</span>
+        <span class="c1"># target is string - convert to object</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelPortal</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># no explicit parameter target in parData</span>
+      
+      <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;parent&#39;</span><span class="p">:</span>
+        <span class="c1"># special case - parent role</span>
+        <span class="c1"># the &#39;or&#39; will happen if such a parameter is used on </span>
+        <span class="c1"># a class without parentRole, which must be abstract by definetion</span>
+        <span class="c1"># - in practice an init for an abstract class</span>
+        <span class="c1"># It happens in Python, maybe nowhere else, but meanwhile this</span>
+        <span class="c1"># prevents crashes lower down</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">parentRole</span>
+                  <span class="ow">or</span> <span class="n">op</span><span class="o">.</span><span class="n">metaObjFromQualName</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">baseClassName</span><span class="p">))</span>
+            
+      <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;self&#39;</span><span class="p">:</span>
+        <span class="c1"># special case - self</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">container</span>
+      
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># use op.target</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">op</span><span class="o">.</span><span class="n">target</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaOperation</span><span class="p">):</span>
+          <span class="c1"># &#39;other&#39; op can not have parameters default to target</span>
+          <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;parameter </span><span class="si">%s</span><span class="s2"> lacks explicit target&quot;</span> <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="n">parData</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stdOpParameterData</span><span class="p">(</span><span class="n">parData</span><span class="p">)</span>
+    
+    <span class="c1"># postprocessing - name can be reset only afterwards</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;value&#39;</span><span class="p">:</span>
+      <span class="n">hicard</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;hicard&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;values&#39;</span>
+        
+    <span class="c1"># change name if it is a varName</span>
+    <span class="n">ss</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ss</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.stdOpParameterData"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.stdOpParameterData">[docs]</a>  <span class="k">def</span> <span class="nf">stdOpParameterData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parData</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span> 
+    
+    <span class="c1"># get target. </span>
+    <span class="n">target</span> <span class="o">=</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">)</span>
+    
+    <span class="c1"># valueType</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">ClassElement</span><span class="p">):</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;valueType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">valueType</span>
+    
+      <span class="k">if</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;useCollection&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">target</span><span class="o">.</span><span class="n">hicard</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># collection parameter</span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;isUnique&#39;</span><span class="p">,</span> <span class="s1">&#39;isOrdered&#39;</span><span class="p">,</span> <span class="s1">&#39;hicard&#39;</span><span class="p">,</span><span class="s1">&#39;locard&#39;</span><span class="p">):</span>
+          <span class="n">result</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;useCollection&#39;</span><span class="p">):</span>
+      <span class="c1"># error</span>
+      <span class="k">try</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">target</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+      <span class="k">except</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+      <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+       <span class="s2">&quot;parameter </span><span class="si">%(name)s</span><span class="s2"> with &#39;useCollection&#39;:</span><span class="si">%(useCollection)s</span><span class="s2"> has target &quot;</span>
+       <span class="o">%</span> <span class="n">parData</span> <span class="o">+</span> <span class="n">ss</span>
+      <span class="p">)</span>
+      
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;valueType&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">target</span>
+    
+    <span class="c1"># get values from parData, overriding if necessary  </span>
+    <span class="c1"># mandatory parameters     </span>
+    <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">MetaModel</span><span class="o">.</span><span class="n">MetaParameter</span><span class="o">.</span><span class="n">parameterData</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">parData</span><span class="p">:</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">parData</span><span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+        
+    <span class="k">if</span> <span class="s1">&#39;defaultValue&#39;</span> <span class="ow">in</span> <span class="n">parData</span><span class="p">:</span>
+      <span class="c1"># NB this would no longer work if you could have hicard!=1 here.</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;locard&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1"># tagged values</span>
+    <span class="n">tv</span> <span class="o">=</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;taggedValues&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">tv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># necessary as the dictionary may be modified elsewhere</span>
+      <span class="n">result</span><span class="p">[</span><span class="s1">&#39;taggedValues&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">tv</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    
+    <span class="c1"># add documentation</span>
+    <span class="n">result</span><span class="p">[</span><span class="s1">&#39;documentation&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parDocumentation</span><span class="p">(</span><span class="n">parData</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+      
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+    
+<div class="viewcode-block" id="ModelAdapt.parDocumentation"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.parDocumentation">[docs]</a>  <span class="k">def</span> <span class="nf">parDocumentation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parData</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; make documentation for generated parameter</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+  
+    <span class="n">result</span> <span class="o">=</span> <span class="n">parData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parDocumentation&#39;</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">parData</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parDocTemplate</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">varNames</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">result</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">varNames</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+    
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1"># internal function (should be overridden for SQL, etc.)</span>
+<div class="viewcode-block" id="ModelAdapt.addOperationExceptions"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.core.html#ccpnmodel.ccpncore.memops.scripts.core.ModelAdapt.ModelAdapt.addOperationExceptions">[docs]</a>  <span class="k">def</span> <span class="nf">addOperationExceptions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">op</span><span class="p">,</span> <span class="n">inClass</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;NBNB TBD add exceptions raised&quot;&quot;&quot;</span>
+    <span class="k">pass</span></div></div>
+
+  <span class="c1">###########################################################################</span>
+
+  <span class="c1">###########################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

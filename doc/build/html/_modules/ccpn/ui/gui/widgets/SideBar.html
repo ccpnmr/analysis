@@ -1,0 +1,732 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.SideBar &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.SideBar</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: Wayne Boucher $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2017-03-23 16:50:22 +0000 (Thu, March 23, 2017) $&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+
+<span class="kn">from</span> <span class="nn">ccpn.core._implementation.AbstractWrapperObject</span> <span class="kn">import</span> <span class="n">AbstractWrapperObject</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
+<span class="kn">from</span> <span class="nn">ccpn.core</span> <span class="kn">import</span> <span class="n">_coreClassMap</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CreateSequence</span> <span class="kn">import</span> <span class="n">CreateSequence</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.NotesEditor</span> <span class="kn">import</span> <span class="n">NotesEditor</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.DataSetPopup</span> <span class="kn">import</span> <span class="n">DataSetPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.NmrChainPopup</span> <span class="kn">import</span> <span class="n">NmrChainPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.NmrResiduePopup</span> <span class="kn">import</span> <span class="n">NmrResiduePopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.NmrAtomPopup</span> <span class="kn">import</span> <span class="n">NmrAtomPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.PeakListPropertiesPopup</span> <span class="kn">import</span> <span class="n">PeakListPropertiesPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.RestraintTypePopup</span> <span class="kn">import</span> <span class="n">RestraintTypePopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumPropertiesPopup</span> <span class="kn">import</span> <span class="n">SpectrumPropertiesPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SamplePropertiesPopup</span> <span class="kn">import</span> <span class="n">SamplePropertiesPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SampleComponentPropertiesPopup</span> <span class="kn">import</span> <span class="n">EditSampleComponentPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SubstancePropertiesPopup</span> <span class="kn">import</span> <span class="n">SubstancePropertiesPopup</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.popups.SpectrumGroupEditor</span> <span class="kn">import</span> <span class="n">SpectrumGroupEditor</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.MessageDialog</span> <span class="kn">import</span> <span class="n">showInfo</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.guiSettings</span> <span class="kn">import</span> <span class="n">sidebarFont</span>
+
+<span class="c1"># NB the order matters!</span>
+<span class="c1"># NB &#39;SG&#39; must be before &#39;SP&#39;, as SpectrumGroups must be ready before Spectra</span>
+<span class="c1"># Also parents must appear before their children</span>
+
+<span class="n">_classNamesInSidebar</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;IntegralList&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;Sample&#39;</span><span class="p">,</span> <span class="s1">&#39;SampleComponent&#39;</span><span class="p">,</span> <span class="s1">&#39;Substance&#39;</span><span class="p">,</span> <span class="s1">&#39;Chain&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;NmrChain&#39;</span><span class="p">,</span> <span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="s1">&#39;NmrAtom&#39;</span><span class="p">,</span> <span class="s1">&#39;ChemicalShiftList&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;StructureEnsemble&#39;</span><span class="p">,</span> <span class="s1">&#39;Model&#39;</span><span class="p">,</span> <span class="s1">&#39;DataSet&#39;</span><span class="p">,</span> <span class="s1">&#39;RestraintList&#39;</span><span class="p">,</span> <span class="s1">&#39;Note&#39;</span><span class="p">,</span> <span class="p">]</span>
+
+<span class="c1"># ll = [_coreClassMap[x] for x in _classNamesInSidebar]</span>
+<span class="c1"># classesInSideBar = OrderedDict(((x.shortClassName, x) for x in ll))</span>
+<span class="n">classesInSideBar</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(((</span><span class="n">x</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">_coreClassMap</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+                                <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">className</span> <span class="ow">in</span> <span class="n">_classNamesInSidebar</span><span class="p">))</span>
+<span class="c1"># classesInSideBar = (&#39;SG&#39;, &#39;SP&#39;, &#39;PL&#39;, &#39;SA&#39;, &#39;SC&#39;, &#39;SU&#39;, &#39;MC&#39;, &#39;NC&#39;, &#39;NR&#39;, &#39;NA&#39;,</span>
+<span class="c1">#                     &#39;CL&#39;, &#39;SE&#39;, &#39;MO&#39;, &#39;DS&#39;,</span>
+<span class="c1">#                     &#39;RL&#39;, &#39;NO&#39;)</span>
+
+<span class="n">classesInTopLevel</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;SG&#39;</span><span class="p">,</span> <span class="s1">&#39;SP&#39;</span><span class="p">,</span> <span class="s1">&#39;SA&#39;</span><span class="p">,</span> <span class="s1">&#39;SU&#39;</span><span class="p">,</span> <span class="s1">&#39;MC&#39;</span><span class="p">,</span> <span class="s1">&#39;NC&#39;</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;SE&#39;</span><span class="p">,</span> <span class="s1">&#39;DS&#39;</span><span class="p">,</span> <span class="s1">&#39;NO&#39;</span><span class="p">)</span>
+
+<span class="c1"># NBNB TBD FIXME</span>
+<span class="c1"># 1)This function (and the NEW_ITEM_DICT) it uses gets the create_new</span>
+<span class="c1"># function from the shortClassName of the PARENT!!!</span>
+<span class="c1"># This is the only way to do it if the create_new functions are attributes of the PARENT!!!</span>
+<span class="c1">#</span>
+<span class="c1"># 2) &lt;New&gt; in makes a new SampleComponent. This is counterintuitive!</span>
+<span class="c1"># Anyway, how do you make a new Sample?</span>
+<span class="c1"># You use the &lt;New&gt; under sample, this comment is completely inaccurate!</span>
+<span class="c1">#</span>
+<span class="c1"># Try putting in e.g. &lt;New PeakList&gt;, &lt;New SampleComponent&gt; etc. Done in version 9855.</span>
+
+<span class="n">NEW_ITEM_DICT</span> <span class="o">=</span> <span class="p">{</span>
+
+  <span class="s1">&#39;SP&#39;</span><span class="p">:</span> <span class="s1">&#39;newPeakList&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;NC&#39;</span><span class="p">:</span> <span class="s1">&#39;newNmrResidue&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;NR&#39;</span><span class="p">:</span> <span class="s1">&#39;newNmrAtom&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;DS&#39;</span><span class="p">:</span> <span class="s1">&#39;newRestraintList&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;RL&#39;</span><span class="p">:</span> <span class="s1">&#39;newRestraint&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="s1">&#39;newModel&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Notes&#39;</span><span class="p">:</span> <span class="s1">&#39;newNote&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Structures&#39;</span><span class="p">:</span> <span class="s1">&#39;newStructureEnsemble&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Samples&#39;</span><span class="p">:</span> <span class="s1">&#39;newSample&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;NmrChains&#39;</span><span class="p">:</span> <span class="s1">&#39;newNmrChain&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Chains&#39;</span><span class="p">:</span> <span class="s1">&#39;CreateSequence&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Substances&#39;</span><span class="p">:</span> <span class="s1">&#39;newSubstance&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;Chemical Shift Lists&#39;</span><span class="p">:</span> <span class="s1">&#39;newChemicalShiftList&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;DataSets&#39;</span><span class="p">:</span> <span class="s1">&#39;newDataSet&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;SpectrumGroups&#39;</span><span class="p">:</span> <span class="s1">&#39;newSpectrumGroup&#39;</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1">### Flag example code removed in revision 7686</span>
+
+<div class="viewcode-block" id="SideBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar">[docs]</a><span class="k">class</span> <span class="nc">SideBar</span><span class="p">(</span><span class="n">DropBase</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span> <span class="p">):</span>
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_typeToItem</span> <span class="o">=</span> <span class="n">dd</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setFont</span><span class="p">(</span><span class="n">sidebarFont</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">header</span><span class="p">()</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDragEnabled</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">_appBase</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setExpandsOnDoubleClick</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setDragDropMode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">InternalMove</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setMinimumWidth</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;PR&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Project&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="o">.</span><span class="n">setExpanded</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;SP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Spectra&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;SG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;SpectrumGroups&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumGroup</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumGroupItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSpectrumGroup</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New SpectrumGroup&gt;&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplesItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;SA&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplesItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplesItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">samplesItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Samples&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSample</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">samplesItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSample</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSample</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSample</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New Sample&gt;&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">substancesItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;SU&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">substancesItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substancesItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">substancesItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Substances&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSubstance</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">substancesItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSubstance</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newSubstance</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newSubstance</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New Substance&gt;&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;MC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Chains&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newChainItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newChainItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newChainItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newChainItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New Chain&gt;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrChainItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;NC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrChainItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrChainItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">nmrChainItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;NmrChains&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newNmrChainItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nmrChainItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newNmrChainItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newNmrChainItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newNmrChainItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New NmrChain&gt;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;CL&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Chemical Shift Lists&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newChemicalShiftListItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chemicalShiftListsItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newChemicalShiftListItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newChemicalShiftListItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newChemicalShiftListItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New ChemicalShiftList&gt;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;SE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">structuresItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Structures&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataSetsItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;DS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataSetsItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataSetsItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dataSetsItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;DataSets&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataSetsItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newDataSetItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New Dataset&gt;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span> <span class="o">=</span> <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;NO&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;Notes&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newNoteItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">notesItem</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newNoteItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">newNoteItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">newNoteItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;&lt;New Note&gt;&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mousePressEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dragMoveEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragMoveEvent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">dragEnterEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dragEnterEvent</span>
+
+
+
+<div class="viewcode-block" id="SideBar.setProject"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.setProject">[docs]</a>  <span class="k">def</span> <span class="nf">setProject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sets the specified project as a class attribute so it can be accessed from elsewhere</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">colourScheme</span>
+
+    <span class="c1"># Register notifiers to maintain sidebar</span>
+    <span class="k">for</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">classesInSideBar</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="n">className</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">className</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_removeItem</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">className</span> <span class="o">!=</span> <span class="s1">&#39;NmrResidue&#39;</span><span class="p">:</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">)</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="n">className</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renameItem</span><span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshParentNmrChain</span><span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;NmrResidue&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_renameNmrResidueItem</span><span class="p">)</span>
+
+    <span class="n">notifier</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;Spectrum&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refreshSidebarSpectra</span><span class="p">,</span>
+                                        <span class="n">onceOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">duplicateNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="n">notifier</span><span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">duplicateNotifier</span><span class="p">(</span><span class="s1">&#39;SpectrumGroup&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="n">notifier</span><span class="p">)</span></div>
+
+
+  <span class="k">def</span> <span class="nf">_refreshSidebarSpectra</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dummy</span><span class="p">:</span><span class="n">Project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reset spectra in sidebar - to be called from notifiers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="c1"># self._removeItem( self.project, spectrum)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_removeItem</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">spectrum</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span> <span class="o">+</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">integralLists</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_refreshParentNmrChain</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nmrResidue</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Reset NmrChain sidebar - needed when NmrResidue is created or renamed to trigger re-sort</span>
+
+<span class="sd">    Replaces normal _createItem notifier for NmrResidues&quot;&quot;&quot;</span>
+
+    <span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">_parent</span>
+
+    <span class="c1"># Remove NmrChain item and contents</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_removeItem</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">)</span>
+
+    <span class="c1"># Create NmrResidue items again - this gives them in correctly sorted order</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">nmrChain</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">nr</span> <span class="ow">in</span> <span class="n">nmrChain</span><span class="o">.</span><span class="n">nmrResidues</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">nr</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nr</span><span class="o">.</span><span class="n">nmrAtoms</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">,</span> <span class="n">pid</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a QTreeWidgetItem as a child of the item specified, which corresponds to the data object</span>
+<span class="sd">    passed in.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">newItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+    <span class="n">newItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">newItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">&amp;</span> <span class="o">~</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDropEnabled</span><span class="p">))</span>
+    <span class="n">newItem</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pid</span><span class="p">))</span>
+    <span class="n">newItem</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mousePressEvent</span>
+    <span class="k">return</span> <span class="n">newItem</span>
+  <span class="c1">#</span>
+  <span class="c1"># def renameItem(self, pid):</span>
+  <span class="c1">#   # item = FindItem</span>
+  <span class="c1">#   pass</span>
+
+<div class="viewcode-block" id="SideBar.processText"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.processText">[docs]</a>  <span class="k">def</span> <span class="nf">processText</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">event</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">newNote</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">newNote</span><span class="p">()</span>
+    <span class="n">newNote</span><span class="o">.</span><span class="n">text</span> <span class="o">=</span> <span class="n">text</span></div>
+
+
+  <span class="k">def</span> <span class="nf">_mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implementation of the mouse press event so right click can be used to delete items from the</span>
+<span class="sd">    sidebar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">button</span><span class="p">()</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">RightButton</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">_raiseContextMenu</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">()))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidget</span><span class="o">.</span><span class="n">mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_raiseContextMenu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates and raises a context menu enabling items to be deleted from the sidebar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Menu</span> <span class="kn">import</span> <span class="n">Menu</span>
+    <span class="n">contextMenu</span> <span class="o">=</span> <span class="n">Menu</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">isFloatWidget</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+    <span class="c1"># contextMenu.addAction(&#39;Delete&#39;, partial(self.removeItem, item))</span>
+    <span class="n">contextMenu</span><span class="o">.</span><span class="n">addAction</span><span class="p">(</span><span class="s1">&#39;Delete&#39;</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_deleteItemObject</span><span class="p">,</span> <span class="n">item</span><span class="p">))</span>
+    <span class="n">contextMenu</span><span class="o">.</span><span class="n">popup</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">globalPos</span><span class="p">())</span>
+
+
+  <span class="k">def</span> <span class="nf">_deleteItemObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>  <span class="n">item</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Removes the specified item from the sidebar and deletes it from the project.</span>
+<span class="sd">    NB, the clean-up of the side bar is done through notifiers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">))</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_createItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a new sidebar item from a new object.</span>
+<span class="sd">    Called by notifier when a new object is created or undeleted (so need to check for duplicates).</span>
+<span class="sd">    NB Obj may be of a type that does not have an item&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">AbstractWrapperObject</span><span class="p">):</span>
+      <span class="k">return</span>
+
+    <span class="n">shortClassName</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span>
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_parent</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">_project</span>
+
+    <span class="k">if</span> <span class="n">shortClassName</span> <span class="ow">in</span> <span class="n">classesInSideBar</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="n">project</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SP&#39;</span><span class="p">:</span>
+          <span class="c1"># Spectrum - special behaviour - put them under SpectrumGroups, if any</span>
+          <span class="n">spectrumGroups</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">spectrumGroups</span>
+          <span class="k">if</span> <span class="n">spectrumGroups</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">sg</span> <span class="ow">in</span> <span class="n">spectrumGroups</span><span class="p">:</span>
+              <span class="k">for</span> <span class="n">sgitem</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findItems</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">sg</span><span class="o">.</span><span class="n">pid</span><span class="p">)):</span>
+                <span class="n">newItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_addItem</span><span class="p">(</span><span class="n">sgitem</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">))</span>
+                <span class="n">newObjectItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">newItem</span><span class="p">)</span>
+                <span class="n">newObjectItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">newObjectItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+                <span class="n">newObjectItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New </span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="n">classesInSideBar</span><span class="p">[</span><span class="n">shortClassName</span><span class="p">]</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+
+            <span class="k">return</span>
+
+
+        <span class="n">itemParent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_typeToItem</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">shortClassName</span><span class="p">)</span>
+        <span class="n">newItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_addItem</span><span class="p">(</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+        <span class="c1"># itemParent.sortChildren(0, QtCore.Qt.AscendingOrder)</span>
+        <span class="k">if</span> <span class="n">shortClassName</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;SA&#39;</span><span class="p">,</span> <span class="s1">&#39;NC&#39;</span><span class="p">,</span> <span class="s1">&#39;DS&#39;</span><span class="p">]:</span>
+          <span class="n">newObjectItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">newItem</span><span class="p">)</span>
+          <span class="n">newObjectItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">newObjectItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+          <span class="n">newObjectItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New </span><span class="si">%s</span><span class="s2">&gt;&quot;</span> <span class="o">%</span> <span class="n">classesInSideBar</span><span class="p">[</span><span class="n">shortClassName</span><span class="p">]</span><span class="o">.</span><span class="n">_childClasses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">className</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SP&#39;</span><span class="p">:</span>
+          <span class="n">newPeakListObjectItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">newItem</span><span class="p">)</span>
+          <span class="n">newPeakListObjectItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">newPeakListObjectItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+          <span class="n">newPeakListObjectItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New PeakList&gt;&quot;</span><span class="p">)</span>
+          <span class="n">newIntegralListObjectItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">newItem</span><span class="p">)</span>
+          <span class="n">newIntegralListObjectItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">newIntegralListObjectItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+          <span class="n">newIntegralListObjectItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New IntegralList&gt;&quot;</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">itemParent</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findItems</span><span class="p">(</span><span class="n">parent</span><span class="o">.</span><span class="n">pid</span><span class="p">):</span>
+          <span class="n">newItem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_addItem</span><span class="p">(</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NR&#39;</span><span class="p">:</span>
+            <span class="n">newObjectItem</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">(</span><span class="n">newItem</span><span class="p">)</span>
+            <span class="n">newObjectItem</span><span class="o">.</span><span class="n">setFlags</span><span class="p">(</span><span class="n">newObjectItem</span><span class="o">.</span><span class="n">flags</span><span class="p">()</span> <span class="o">^</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ItemIsDragEnabled</span><span class="p">)</span>
+            <span class="n">newObjectItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;&lt;New NmrAtom&gt;&quot;</span><span class="p">)</span>
+          <span class="c1"># for i in range(itemParent.childCount()):</span>
+          <span class="c1">#   itemParent.child(i).sortChildren(0, QtCore.Qt.AscendingOrder)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># Object type is not in sidebar</span>
+      <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="c1"># if shortClassName == &#39;SP&#39;:</span>
+    <span class="c1">#   # Spectrum - special behaviour - put them under SpectrumGroups, if any</span>
+    <span class="c1">#   spectrumGroups = obj.spectrumGroups</span>
+    <span class="c1">#   if spectrumGroups:</span>
+    <span class="c1">#     for sg in spectrumGroups:</span>
+    <span class="c1">#       for sgitem in self._findItems(str(sg.pid)):</span>
+    <span class="c1">#         self._addItem(sgitem, str(obj.pid))</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return</span>
+    <span class="c1">#</span>
+    <span class="c1"># if shortClassName in classesInTopLevel:</span>
+    <span class="c1">#   itemParent = self._typeToItem.get(shortClassName)</span>
+    <span class="c1">#   newItem = self._addItem(itemParent, obj.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1">#   if shortClassName in [&#39;SP&#39;, &#39;SA&#39;, &#39;NC&#39;]:</span>
+    <span class="c1">#     newObjectItem = QtGui.QTreeWidgetItem(newItem)</span>
+    <span class="c1">#     newObjectItem.setFlags(newObjectItem.flags() ^ QtCore.Qt.ItemIsDragEnabled)</span>
+    <span class="c1">#     newObjectItem.setText(0, &quot;&lt;New&gt;&quot;)</span>
+    <span class="c1">#</span>
+    <span class="c1"># elif shortClassName == &#39;PL&#39;:</span>
+    <span class="c1">#   for itemParent in self._findItems(obj.spectrum.pid):</span>
+    <span class="c1">#     self._addItem(itemParent, obj.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1"># elif shortClassName == &#39;SC&#39;:</span>
+    <span class="c1">#   for itemParent in self._findItems(obj.sample.pid):</span>
+    <span class="c1">#     self._addItem(itemParent, obj.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1"># elif shortClassName == &#39;NR&#39;:</span>
+    <span class="c1">#   for itemParent in self._findItems(obj.nmrChain.pid):</span>
+    <span class="c1">#     self._addItem(itemParent, obj.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1"># elif shortClassName == &#39;NA&#39;:</span>
+    <span class="c1">#   for itemParent in self._findItems(obj.nmrResidue.pid):</span>
+    <span class="c1">#     self._addItem(itemParent, obj.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1"># elif shortClassName == &#39;RL&#39;:</span>
+    <span class="c1">#   for itemParent in self._findItems(obj.dataSet.pid):</span>
+    <span class="c1">#     self._addItem(itemParent, obj.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1"># elif shortClassName == &#39;MO&#39;:</span>
+    <span class="c1">#   for itemParent in self._findItems(obj.structureEnsemble.pid):</span>
+    <span class="c1">#     self._addItem(itemParent, obj.pid)</span>
+    <span class="c1">#</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#   # Object type is not in sidebar</span>
+    <span class="c1">#   return None</span>
+
+  <span class="k">def</span> <span class="nf">_itemObjects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">))]</span>
+
+    <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">childCount</span><span class="p">()):</span>
+        <span class="n">child</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">child</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">)[:</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">classesInSideBar</span><span class="p">:</span>
+          <span class="n">objects</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_itemObjects</span><span class="p">(</span><span class="n">child</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">objects</span>
+
+  <span class="k">def</span> <span class="nf">_renameItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="n">AbstractWrapperObject</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;rename item(s) from previous pid oldPid to current object pid&quot;&quot;&quot;</span>
+
+    <span class="kn">import</span> <span class="nn">sip</span>
+    <span class="n">newPid</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">pid</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findItems</span><span class="p">(</span><span class="n">oldPid</span><span class="p">):</span>
+
+      <span class="k">if</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">oldPid</span> <span class="ow">or</span> <span class="n">oldPid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_id</span> <span class="o">+</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">):</span>
+        <span class="c1"># Parent unchanged, just rename</span>
+        <span class="n">item</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">DisplayRole</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">newPid</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># parent has changed - we must move and rename the entire item tree.</span>
+        <span class="c1"># NB this is relevant for NmrAtom (NmrResidue is handled elsewhere)</span>
+        <span class="n">objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_itemObjects</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+        <span class="n">sip</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="c1"># this also removes child items</span>
+
+        <span class="c1"># NB the first object cannot be found from its pid (as it has already been renamed)</span>
+        <span class="c1"># So we do it this way</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+          <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_renameNmrResidueItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;rename NmrResidue(s) from previous pid oldPid to current object pid&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">oldPid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="p">,</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">_id</span> <span class="o">+</span> <span class="n">Pid</span><span class="o">.</span><span class="n">IDSEP</span><span class="p">):</span>
+      <span class="c1"># Parent has changed - remove items from old location</span>
+      <span class="kn">import</span> <span class="nn">sip</span>
+      <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findItems</span><span class="p">(</span><span class="n">oldPid</span><span class="p">):</span>
+        <span class="n">sip</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="c1"># this also removes child items</span>
+
+    <span class="c1">#</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_refreshParentNmrChain</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_removeItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">wrapperObject</span><span class="p">:</span><span class="n">AbstractWrapperObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Removes sidebar item(s) for object with pid objPid, but does NOT delete the object.</span>
+<span class="sd">    Called when objects are deleted.&quot;&quot;&quot;</span>
+    <span class="kn">import</span> <span class="nn">sip</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_findItems</span><span class="p">(</span><span class="n">wrapperObject</span><span class="o">.</span><span class="n">pid</span><span class="p">):</span>
+      <span class="n">sip</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_findItems</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">objPid</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QTreeWidgetItem</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Find items that match objPid - returns empty list if no matches&quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">objPid</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">classesInSideBar</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">findItems</span><span class="p">(</span><span class="n">objPid</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchExactly</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MatchRecursive</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">return</span> <span class="n">result</span>
+
+<div class="viewcode-block" id="SideBar.fillSideBar"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.fillSideBar">[docs]</a>  <span class="k">def</span> <span class="nf">fillSideBar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">:</span><span class="n">Project</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fills the sidebar with the relevant data from the project.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">projectItem</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="c1"># pid2Obj = project._pid2Obj</span>
+    <span class="k">for</span> <span class="n">className</span><span class="p">,</span> <span class="n">cls</span> <span class="ow">in</span> <span class="n">classesInSideBar</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">_pluralLinkName</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_createItem</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span></div>
+      <span class="c1"># dd = pid2Obj.get(className)</span>
+      <span class="c1"># if dd:</span>
+      <span class="c1">#   for obj in sorted(dd.values()):</span>
+      <span class="c1">#     self._createItem(obj)</span>
+
+  <span class="k">def</span> <span class="nf">_dragEnterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">enter</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">hasUrls</span><span class="p">():</span>
+      <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">item</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">itemAt</span><span class="p">(</span><span class="n">event</span><span class="o">.</span><span class="n">pos</span><span class="p">())</span>
+      <span class="k">if</span> <span class="n">item</span><span class="p">:</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">text</span><span class="p">:</span>
+          <span class="n">itemData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;pids&#39;</span><span class="p">:[</span><span class="n">text</span><span class="p">]})</span>
+          <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="s1">&#39;ccpnmr-json&#39;</span><span class="p">,</span> <span class="n">itemData</span><span class="p">)</span>
+          <span class="n">event</span><span class="o">.</span><span class="n">mimeData</span><span class="p">()</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">itemData</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">_dragMoveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Required function to enable dragging and dropping within the sidebar.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SideBar.raisePopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SideBar.SideBar.raisePopup">[docs]</a>  <span class="k">def</span> <span class="nf">raisePopup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SP&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumPropertiesPopup</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;PL&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">PeakListPropertiesPopup</span><span class="p">(</span><span class="n">peakList</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SG&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">spectrumGroup</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SA&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SamplePropertiesPopup</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SC&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">EditSampleComponentPopup</span><span class="p">(</span><span class="n">sampleComponent</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SU&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">SubstancePropertiesPopup</span><span class="p">(</span><span class="n">substance</span><span class="o">=</span><span class="n">obj</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NC&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrChainPopup</span><span class="p">(</span><span class="n">nmrChain</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NR&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrResiduePopup</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NA&#39;</span><span class="p">:</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">NmrAtomPopup</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;CL&#39;</span><span class="p">:</span>
+      <span class="n">info</span> <span class="o">=</span> <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span>
+          <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SE&#39;</span><span class="p">:</span>
+      <span class="n">info</span> <span class="o">=</span> <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span>
+          <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;MC&#39;</span><span class="p">:</span>
+      <span class="c1">#to be decided when we design structure</span>
+      <span class="n">info</span> <span class="o">=</span> <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span>
+          <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;MD&#39;</span><span class="p">:</span>
+      <span class="c1">#to be decided when we design structure</span>
+      <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span>
+          <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;DS&#39;</span><span class="p">:</span>
+      <span class="c1">#to be decided when we design structure</span>
+      <span class="n">popup</span> <span class="o">=</span> <span class="n">DataSetPopup</span><span class="p">(</span><span class="n">dataSet</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+      <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;RL&#39;</span><span class="p">:</span>
+      <span class="c1">#to be decided when we design structure</span>
+      <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span>
+          <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;RE&#39;</span><span class="p">:</span>
+      <span class="c1">#to be decided when we design structure</span>
+      <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span>
+          <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;NO&#39;</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">ui</span><span class="o">.</span><span class="n">mainWindow</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">mainWindow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">_mainWindow</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">notesEditor</span> <span class="o">=</span> <span class="n">NotesEditor</span><span class="p">(</span><span class="n">mainWindow</span><span class="o">.</span><span class="n">moduleArea</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span>
+                                     <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Notes Editor&#39;</span><span class="p">,</span> <span class="n">note</span><span class="o">=</span><span class="n">obj</span><span class="p">)</span></div>
+
+  <span class="k">def</span> <span class="nf">_createNewObject</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create new object starting from the &lt;New&gt; item</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&lt;New Integral List&gt;&quot;</span> <span class="ow">or</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&lt;New Peak List&gt;&quot;</span><span class="p">:</span>
+
+      <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&lt;New Peak List&gt;&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">newPeakList</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;&lt;New Integral List&gt;&quot;</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span><span class="o">.</span><span class="n">newIntegralList</span><span class="p">()</span>
+
+      <span class="c1"># item.parent().sortChildren(0, QtCore.Qt.AscendingOrder)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+      <span class="n">itemParent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+      <span class="n">funcName</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">if</span> <span class="n">itemParent</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># Top level object - parent is project</span>
+        <span class="k">if</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Chains&#39;</span><span class="p">:</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">CreateSequence</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">)</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+          <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Substances&#39;</span><span class="p">:</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">SubstancePropertiesPopup</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">newSubstance</span> <span class="o">=</span> <span class="bp">True</span><span class="p">)</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+          <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;SpectrumGroups&#39;</span><span class="p">:</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">SpectrumGroupEditor</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">addNew</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+          <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">itemParent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span>
+          <span class="n">funcName</span> <span class="o">=</span> <span class="n">NEW_ITEM_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">item</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Lower level object - get parent from parentItem</span>
+        <span class="k">if</span> <span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;DS&#39;</span><span class="p">:</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">RestraintTypePopup</span><span class="p">()</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+          <span class="n">restraintType</span> <span class="o">=</span> <span class="n">popup</span><span class="o">.</span><span class="n">restraintType</span>
+          <span class="n">ff</span> <span class="o">=</span> <span class="n">NEW_ITEM_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">)</span>
+          <span class="nb">getattr</span><span class="p">(</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">ff</span><span class="p">)(</span><span class="n">restraintType</span><span class="p">)</span>
+          <span class="k">return</span>
+        <span class="k">elif</span> <span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span> <span class="o">==</span> <span class="s1">&#39;SA&#39;</span><span class="p">:</span>
+          <span class="n">popup</span> <span class="o">=</span> <span class="n">EditSampleComponentPopup</span><span class="p">(</span><span class="n">project</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">,</span> <span class="n">sample</span><span class="o">=</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">newSampleComponent</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">exec_</span><span class="p">()</span>
+          <span class="n">popup</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+          <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">funcName</span> <span class="o">=</span> <span class="n">NEW_ITEM_DICT</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">itemParent</span><span class="o">.</span><span class="n">shortClassName</span><span class="p">)</span>
+
+        <span class="c1"># for i in range(item.childCount()):</span>
+
+      <span class="k">if</span> <span class="n">funcName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">newItem</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">itemParent</span><span class="p">,</span> <span class="n">funcName</span><span class="p">)()</span>
+        <span class="c1"># if funcName == &#39;newNmrResidue&#39;:</span>
+        <span class="c1">#   newItem.parent().sortChildren(0, QtCore.Qt.AscendingOrder)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">info</span> <span class="o">=</span> <span class="n">showInfo</span><span class="p">(</span><span class="s1">&#39;Not implemented yet!&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;This function has not been implemented in the current version&#39;</span><span class="p">,</span>
+            <span class="n">colourScheme</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">colourScheme</span><span class="p">)</span></div>
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

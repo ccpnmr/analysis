@@ -628,6 +628,8 @@ class Spectrum(AbstractWrapperObject):
   def isotopeCodes(self, value:Sequence):
     apiDataSource = self._wrappedData
     if len(value) == apiDataSource.numDim:
+      if value != self.isotopeCodes and self.peaks:
+        raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
       for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
         val = value[ii]

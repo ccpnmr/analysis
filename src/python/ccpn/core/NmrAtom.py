@@ -268,6 +268,13 @@ class NmrAtom(AbstractWrapperObject):
           raise ValueError("Character %s not allowed in ccpn.NmrAtom id : %s.%s.%s.%s"
                            % (Pid.altCharacter, chainCode, sequenceCode, residueType, name))
 
+      isotopeCode = self.isotopeCode
+      if name and isotopeCode not in (None, '?'):
+        # Check for isotope match
+        if name2IsotopeCode(name) not in (isotopeCode, None):
+          raise ValueError("Cannot reassign %s type NmrAtom to %s" % (isotopeCode, name))
+
+
       oldNmrResidue = self.nmrResidue
       nmrChain = self._project.fetchNmrChain(chainCode)
       if residueType:

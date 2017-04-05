@@ -223,7 +223,7 @@ class PeakList(AbstractWrapperObject):
       negLevel = spectrum.negativeContourBase if doNeg else None
 
       undo = self._project._undo
-      self._startFunctionCommandBlock('pickPeaksNd', values=locals(), defaults=defaults)
+      self._startCommandEchoBlock('pickPeaksNd', values=locals(), defaults=defaults)
       self._project.blankNotification()
       # undo.increaseBlocking()
       try:
@@ -233,7 +233,7 @@ class PeakList(AbstractWrapperObject):
                                 excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
 
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
         self._project.unblankNotification()
         # undo.decreaseBlocking()
 
@@ -292,7 +292,7 @@ class PeakList(AbstractWrapperObject):
     """
     defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('noiseThreshold', None)))
 
-    self._startFunctionCommandBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
+    self._startCommandEchoBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
     ll = []
     try:
       if ignoredRegions is None:
@@ -334,7 +334,7 @@ class PeakList(AbstractWrapperObject):
         peaks.append(self.newPeak(height=float(height), position=peakPosition))
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     return peaks
 
@@ -381,8 +381,8 @@ class PeakList(AbstractWrapperObject):
         else:
           return peak
 
-    self._startFunctionCommandBlock('subtractPeakLists', values={'peakList2':peakList2},
-                                    parName='newPeakList')
+    self._startCommandEchoBlock('subtractPeakLists', values={'peakList2':peakList2},
+                                parName='newPeakList')
 
     try:
 
@@ -405,7 +405,7 @@ class PeakList(AbstractWrapperObject):
 
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     return peakList3
 
@@ -455,8 +455,8 @@ def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
                                      )
 
   apiDataSource = self._wrappedData
-  self._startFunctionCommandBlock('newPeakList', values=locals(), defaults=defaults,
-                                  parName='newPeakList')
+  self._startCommandEchoBlock('newPeakList', values=locals(), defaults=defaults,
+                              parName='newPeakList')
   result = None
   try:
     obj = apiDataSource.newPeakList(name=title, details=comment, isSimulated=isSimulated,
@@ -473,7 +473,7 @@ def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
       result._finaliseAction('rename')
 
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return result
 

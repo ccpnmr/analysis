@@ -57,38 +57,6 @@ class GuiStripDisplay1d(GuiSpectrumDisplay):
     # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
     ###self.inactivePeakItems = set() # contains unused peakItems
     self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to set of peaks which are not being displayed
-    # below not needed in 1D???
-    #self.activePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are being displayed
-    # cannot use (wrapper) peak as key because project._data2Obj dict invalidates mapping before deleted callback is called
-    # TBD: this might change so that we can use wrapper peak (which would make nicer code in showPeaks and deletedPeak below)
-    #self.inactivePeakItems = set() # contains unused peakItems
-    #self.inactivePeakItemDict = {}  # maps peakListView to apiPeak to peakItem for peaks which are not being displayed
-
-  # def addSpectrum(self, spectrum):
-  #
-  #   apiDataSource = spectrum._wrappedData
-  #   apiSpectrumView = self._apiSpectrumDisplay.findFirstSpectrumView(dataSource=apiDataSource)
-  #
-  #   #axisCodes = spectrum.axisCodes
-  #   axisCodes = LibSpectrum.getAxisCodes(spectrum)
-  #   axisCodes = axisCodes + ('intensity',)
-  #   if axisCodes != self._apiSpectrumDisplay.axisCodes:
-  #     raise Exception('Cannot overlay that spectrum on this display')
-  #
-  #   # guiSpectrumView = GuiSpectrumView1d(self, apiStripDisplay1d)
-  #   # # guiSpectrumView.name = apiSpectrumDislay1d.name
-  #   # for guiStrip in self.guiStrips:
-  #   #   guiStrip.addSpectrum(apiStripDisplay1d, guiSpectrumView)
-  #
-  #   if not apiSpectrumView:
-  #     ##axisCodes=spectrum.axisCodes
-  #     dimensionOrdering = (1, 0) # 0 because that is the intensity axis so gets mapped to nothing in the spectrum
-  #     apiSpectrumView = self._apiSpectrumDisplay.newSpectrumView(spectrumName=apiDataSource.name,
-  #                           dimensionOrdering=dimensionOrdering)
-  #   guiSpectrumView = GuiSpectrumView1d(self, apiSpectrumView)
-  #
-  #   for guiStrip in self.guiStrips:
-  #     guiStrip.addSpectrum(spectrum, guiSpectrumView)
 
   def showPeaks(self, peakListView, peaks):
     """

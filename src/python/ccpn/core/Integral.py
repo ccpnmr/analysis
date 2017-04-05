@@ -244,8 +244,8 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
                                      ('slopes', None), ('figureOfMerit', 1.0), ('annotation', None),
                                      ('comment', None), ('limits', ()), ('pointLimits', ()) ))
 
-  self._startFunctionCommandBlock('newIntegral', values=locals(), defaults=defaults,
-                                  parName='newIntegral')
+  self._startCommandEchoBlock('newIntegral', values=locals(), defaults=defaults,
+                              parName='newIntegral')
   self._project.blankNotification() # delay notifiers till peak is fully ready
   try:
     apiPeakList = self._apiPeakList
@@ -262,7 +262,7 @@ def _newIntegral(self:IntegralList, value:List[float]=None,
 
   finally:
     self._project.unblankNotification()
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   # Do creation notifications
   result._finaliseAction('create')

@@ -156,8 +156,8 @@ def _newStructureEnsemble(self:Project, serial:int=None, label:str=None, data:En
   defaults = collections.OrderedDict((('serial', None), ('label', None), ('comment', None)))
   
   nmrProject = self._wrappedData
-  self._startFunctionCommandBlock('newStructureEnsemble', values=locals(), defaults=defaults,
-                                  parName='newStructureEnsemble')
+  self._startCommandEchoBlock('newStructureEnsemble', values=locals(), defaults=defaults,
+                              parName='newStructureEnsemble')
   undo = self._undo
   undo.increaseBlocking()
   self.blankNotification()
@@ -179,7 +179,7 @@ def _newStructureEnsemble(self:Project, serial:int=None, label:str=None, data:En
       for modelNumber in sorted(data['modelNumber'].unique()):
         result.newModel(serial=modelNumber, label='Model_%s' % modelNumber)
   finally:
-    self._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     self.unblankNotification()
     undo.decreaseBlocking()
 

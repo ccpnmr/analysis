@@ -258,7 +258,7 @@ class Residue(AbstractWrapperObject):
     """
     apiResidue = self._wrappedData
 
-    self._startFunctionCommandBlock('rename', sequenceCode)
+    self._startCommandEchoBlock('rename', sequenceCode)
     self._project.blankNotification()
     try:
       if sequenceCode is None:
@@ -281,7 +281,7 @@ class Residue(AbstractWrapperObject):
       apiResidue.seqCode = seqCode
       apiResidue.seqInsertCode = seqInsertCode
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
       self._project.unblankNotification()
     self._finaliseAction('rename')
     self._finaliseAction('change')

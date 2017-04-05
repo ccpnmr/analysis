@@ -146,13 +146,13 @@ def _newIntegralList(self:Spectrum, title:str=None, symbolColour:str=None,
                                       ('symbolColour',None), ('textColour',None)))
 
   apiDataSource = self._wrappedData
-  self._startFunctionCommandBlock('newIntegralList', values=locals(), defaults=defaults,
-                                  parName='newIntegralList')
+  self._startCommandEchoBlock('newIntegralList', values=locals(), defaults=defaults,
+                              parName='newIntegralList')
   try:
     obj = apiDataSource.newPeakList(name=title, details=comment, dataType='Integral',
                                     symbolColour=symbolColour, textColour=textColour)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return self._project._data2Obj.get(obj)
 
 Spectrum.newIntegralList = _newIntegralList

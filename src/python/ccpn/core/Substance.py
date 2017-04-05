@@ -560,7 +560,7 @@ class Substance(AbstractWrapperObject):
     elif  Pid.altCharacter in labelling:
         raise ValueError("Character %s not allowed in ccpn.Sample.labelling" % Pid.altCharacter)
 
-    self._startFunctionCommandBlock('rename', name, labelling)
+    self._startCommandEchoBlock('rename', name, labelling)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -593,7 +593,7 @@ class Substance(AbstractWrapperObject):
     finally:
       if undo is not None:
         undo.decreaseBlocking()
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     undo.newItem(self.rename, self.rename, undoArgs=(oldName,oldLabelling),
                  redoArgs=(name, labelling,))
@@ -657,8 +657,8 @@ def _newSubstance(self:Project, name:str, labelling:str=None, substanceType:str=
     'details':comment
   }
 
-  self._startFunctionCommandBlock('newSubstance', name, values=locals(), defaults=defaults,
-                                  parName='newSubstance')
+  self._startCommandEchoBlock('newSubstance', name, values=locals(), defaults=defaults,
+                              parName='newSubstance')
   try:
     if substanceType == 'Material':
       if oldSubstance is not None and oldSubstance.className != 'Substance':
@@ -691,7 +691,7 @@ def _newSubstance(self:Project, name:str, labelling:str=None, substanceType:str=
     else:
       raise ValueError("Substance type %s not recognised" % substanceType)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return self._data2Obj[apiResult]
 
@@ -706,8 +706,8 @@ def _fetchNefSubstance(self:Project, sequence:typing.Sequence[dict], name:str=No
   # TODO add sequence matching and name matching to avoid unnecessary duplicates
   apiNmrProject = self._wrappedData
 
-  self._startFunctionCommandBlock('fetchNefSubstance', values=locals(), defaults=defaults,
-                                  parName='newSubstance')
+  self._startCommandEchoBlock('fetchNefSubstance', values=locals(), defaults=defaults,
+                              parName='newSubstance')
   self._project.blankNotification()
   try:
 
@@ -721,7 +721,7 @@ def _fetchNefSubstance(self:Project, sequence:typing.Sequence[dict], name:str=No
       apiNmrProject.sampleStore.refSampleComponentStore.fetchMolComponent(apiMolecule)
     ]
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     self._project.unblankNotification()
   #
   result._finaliseAction('create')
@@ -785,9 +785,9 @@ def _createPolymerSubstance(self:Project, sequence:typing.Sequence[str], name:st
   elif apiNmrProject.root.findFirstMolecule(name=name) is not None:
     raise ValueError("Molecule name %s is already in use for API Molecule")
 
-  self._startFunctionCommandBlock('createPolymerSubstance', sequence, name,
-                                  values=locals(), defaults=defaults,
-                                  parName='newPolymerSubstance')
+  self._startCommandEchoBlock('createPolymerSubstance', sequence, name,
+                              values=locals(), defaults=defaults,
+                              parName='newPolymerSubstance')
   self._project.blankNotification()
   try:
     apiMolecule = MoleculeModify.createMolecule(apiNmrProject.root, sequence, molType=molType,
@@ -801,7 +801,7 @@ def _createPolymerSubstance(self:Project, sequence:typing.Sequence[str], name:st
                             apiMolecule, labeling=apiLabeling)]
     result.userCode = userCode
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     self._project.unblankNotification()
 
   # DO creation notifications
@@ -826,14 +826,14 @@ def _fetchSubstance(self:Project, name:str, labelling:str=None) -> Substance:
   apiRefComponentStore= self._apiNmrProject.sampleStore.refSampleComponentStore
   apiResult = apiRefComponentStore.findFirstComponent(name=name, labeling=apiLabeling)
 
-  self._startFunctionCommandBlock('fetchSubstance', name, values=values, parName='newSubstance')
+  self._startCommandEchoBlock('fetchSubstance', name, values=values, parName='newSubstance')
   try:
     if apiResult:
       result = self._data2Obj[apiResult]
     else:
       result = self.newSubstance(name=name, labelling=labelling)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return result
 #
 Project.fetchSubstance = _fetchSubstance

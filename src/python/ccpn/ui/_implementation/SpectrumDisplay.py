@@ -215,11 +215,11 @@ class SpectrumDisplay(AbstractWrapperObject):
   def resetAxisOrder(self):
     """Reset display to original axis order"""
 
-    self._startFunctionCommandBlock('resetAxisOrder')
+    self._startCommandEchoBlock('resetAxisOrder')
     try:
       self._wrappedData.resetAxisOrder()
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def findAxis(self, axisCode):
     """Find axis """
@@ -230,12 +230,12 @@ class SpectrumDisplay(AbstractWrapperObject):
     """
     spectrum = self.getByPid(spectrum) if isinstance(spectrum, str) else spectrum
 
-    self._startFunctionCommandBlock('displaySpectrum', spectrum, values=locals(),
-                                    defaults={'axisOrder':()})
+    self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
+                                defaults={'axisOrder':()})
     try:
       self.strips[0].displaySpectrum(spectrum, axisOrder=axisOrder)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
 
 # newSpectrumDisplay functions
@@ -273,8 +273,8 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     name = commonUtil.incrementName(name)
   displayPars['name'] = name
 
-  self._startFunctionCommandBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
-                                  parName='newSpectrumDisplay')
+  self._startCommandEchoBlock('newSpectrumDisplay', axisCodes, values=locals(), defaults=defaults,
+                              parName='newSpectrumDisplay')
   try:
     # Create SpectrumDisplay
     if independentStrips:
@@ -312,7 +312,7 @@ def _newSpectrumDisplay(self:Task, axisCodes:(str,), stripDirection:str='Y',
     #
     result = self._project._data2Obj.get(apiSpectrumDisplay)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   return result
 Task.newSpectrumDisplay = _newSpectrumDisplay
@@ -397,8 +397,8 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
       "Display of sampled dimension spectra is not implemented yet")
     # # NBNB TBD FIXME
 
-  window._startFunctionCommandBlock('createSpectrumDisplay', spectrum, values=inputValues,
-                                  defaults=defaults, parName='newSpectrumDisplay')
+  window._startCommandEchoBlock('createSpectrumDisplay', spectrum, values=inputValues,
+                                defaults=defaults, parName='newSpectrumDisplay')
   try:
     display = task.newSpectrumDisplay(axisCodes=displayAxisCodes,stripDirection=stripDirection,
                                       independentStrips=independentStrips,
@@ -445,7 +445,7 @@ def _createSpectrumDisplay(window:Window, spectrum:Spectrum, displayAxisCodes:Se
         apiAxis.position = position
         apiAxis.width = width
   finally:
-    window._project._appBase._endCommandBlock()
+    window._endCommandEchoBlock()
 
   # Make spectrumView. NB We need notifiers on for these
   stripSerial = 1 if independentStrips else 0
@@ -468,6 +468,7 @@ del getter
 # Notifiers:
 
 # crosslinks window, nmrResidue
+# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
   ('_modifiedLink', {'classNames':('Window','SpectrumDisplay')},
   ApiBoundDisplay._metaclass.qualifiedName(), 'setWindow'),

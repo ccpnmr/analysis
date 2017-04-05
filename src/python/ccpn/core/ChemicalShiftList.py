@@ -153,11 +153,11 @@ class ChemicalShiftList(AbstractWrapperObject):
       if previous not in (None, self):
         raise ValueError("%s already exists" % previous.longPid)
 
-      self._startFunctionCommandBlock('rename', value)
+      self._startCommandEchoBlock('rename', value)
       try:
         self._wrappedData.name = value
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
 
     else:
       raise ValueError("ChemicalShiftList name must be set")
@@ -205,8 +205,8 @@ def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm', autoUpdat
     while apiNmrProject.findFirstMeasurementList(className='ShiftList', name=name):
       name = commonUtil.incrementName(name)
 
-  self._startFunctionCommandBlock('newChemicalShiftList', values=locals(), defaults=defaults,
-                                  parName='newChemicalShiftList')
+  self._startCommandEchoBlock('newChemicalShiftList', values=locals(), defaults=defaults,
+                              parName='newChemicalShiftList')
   dd = {'name':name, 'unit':unit, 'autoUpdate':autoUpdate, 'isSimulated':isSimulated,
         'details':comment}
   result = None
@@ -222,7 +222,7 @@ def _newChemicalShiftList(self:Project, name:str=None, unit:str='ppm', autoUpdat
                                      %(result, serial))
       result._finaliseAction('rename')
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return result
 
 Project.newChemicalShiftList = _newChemicalShiftList

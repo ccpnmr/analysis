@@ -177,14 +177,14 @@ def _newModule(self:Task, moduleType:str, name:str=None, window:Window=None, com
   # Create Module
   defaults = collections.OrderedDict((('name', None), ('window', None),
                                      ('comment', None)))
-  self._startFunctionCommandBlock('newModule', moduleType, values=locals(), defaults=defaults,
-                                  parName='newModule')
+  self._startCommandEchoBlock('newModule', moduleType, values=locals(), defaults=defaults,
+                              parName='newModule')
   try:
     apiGenericModule = apiTask.newGenericModule(**params)
     #
     result = self._project._data2Obj.get(apiGenericModule)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   return result
 Task.newModule = _newModule
@@ -201,6 +201,7 @@ del getter
 # Notifiers:
 
 # crosslinks window
+# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
   ('_modifiedLink', {'classNames':('Window','Module')},
   ApiGenericModule._metaclass.qualifiedName(), 'setWindow'),
@@ -209,6 +210,7 @@ Project._apiNotifiers.append(
 # WARNING link notifiers for both Window <-> Module and Window<->SpectrumDisplay
 # are triggered together when  the change is on the Window side.
 # Programmer take care that your notified function will work for both inputs !!!
+# TODO change to calling _setupApiNotifier
 className = ApiWindow._metaclass.qualifiedName()
 Project._apiNotifiers.extend(
   ( ('_modifiedLink', {'classNames':('Module','Window')}, className, 'addModule'),

@@ -151,12 +151,12 @@ class Mark(AbstractWrapperObject):
     if unit is  None:
       unit = 'ppm'
     defaults = collections.OrderedDict((('unit', 'ppm'), ('label', None)))
-    self._startFunctionCommandBlock('newLine', position, axisCode, values=locals(),
-                                    defaults=defaults)
+    self._startCommandEchoBlock('newLine', position, axisCode, values=locals(),
+                                defaults=defaults)
     try:
       self._wrappedData.newRuler(position=position, axisCode=axisCode, unit=unit, label=label)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   # Implementation functions
   @classmethod
@@ -181,8 +181,8 @@ def _newMark(self:Task, colour:str, positions:Sequence[float], axisCodes:Sequenc
   defaults = collections.OrderedDict((('style', 'simple'), ('units', ()),
                                      ('labels', ())))
 
-  self._startFunctionCommandBlock('newMark', colour, positions, axisCodes, values=locals(),
-                                  defaults=defaults, parName='newMark')
+  self._startCommandEchoBlock('newMark', colour, positions, axisCodes, values=locals(),
+                              defaults=defaults, parName='newMark')
   try:
     apiMark = self._wrappedData.newMark(colour=colour, style=style)
 
@@ -200,7 +200,7 @@ def _newMark(self:Task, colour:str, positions:Sequence[float], axisCodes:Sequenc
     #
     result =  self._project._data2Obj.get(apiMark)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   return result
 Task.newMark = _newMark
@@ -219,8 +219,8 @@ def _newSimpleMark(self:Task, colour:str, position:float, axisCode:str, style:st
   defaults = collections.OrderedDict((('style', 'simple'), ('unit', 'ppm'),
                                      ('label', None)))
 
-  self._startFunctionCommandBlock('newSimpleMark', colour, position, axisCode, values=locals(),
-                                  defaults=defaults, parName='newMark')
+  self._startCommandEchoBlock('newSimpleMark', colour, position, axisCode, values=locals(),
+                              defaults=defaults, parName='newMark')
   try:
 
     apiMark = self._wrappedData.newMark(colour=colour, style=style)
@@ -230,7 +230,7 @@ def _newSimpleMark(self:Task, colour:str, position:float, axisCode:str, style:st
     #
     result =  self._project._data2Obj.get(apiMark)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   return result
 
@@ -239,6 +239,7 @@ Task.newSimpleMark = _newSimpleMark
 
 # Notifiers:
 # Mark changes when rulers are created or deleted
+# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.extend(
   ( ('_notifyRelatedApiObject', {'pathToObject':'mark', 'action':'change'},
     ApiRuler._metaclass.qualifiedName(), 'postInit'),

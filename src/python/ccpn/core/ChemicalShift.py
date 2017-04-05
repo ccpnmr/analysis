@@ -153,14 +153,14 @@ def _newChemicalShift(self:ChemicalShiftList, value:float, nmrAtom:NmrAtom,
   nmrAtom = self.getByPid(nmrAtom) if isinstance(nmrAtom, str) else nmrAtom
   defaults = collections.OrderedDict((('valueError', 0.0), ('figureOfMerit', 1.0),
                                       ('comment',None)))
-  self._startFunctionCommandBlock('newChemicalShift', value, nmrAtom, values=locals(),
-                                  defaults=defaults, parName='newChemicalShift')
+  self._startCommandEchoBlock('newChemicalShift', value, nmrAtom, values=locals(),
+                              defaults=defaults, parName='newChemicalShift')
   try:
     obj = self._wrappedData.newShift(value=value,
                                      resonance=nmrAtom._wrappedData, error=valueError,
                                      figOfMerit=figureOfMerit, details=comment)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return self._project._data2Obj.get(obj)
 
 ChemicalShiftList.newChemicalShift = _newChemicalShift

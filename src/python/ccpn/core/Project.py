@@ -393,6 +393,21 @@ class Project(AbstractWrapperObject):
 
   def _registerApiNotifier(self, func, apiClassOrName, apiFuncName, parameterDict=None):
     """Register notifier for immediate action on current project (only)
+
+    func must be a function taking two parameters: the ccpn.core.Project and an Api object
+    matching apiClassOrName.
+
+    'apiFuncName' is either the name of an API modifier function (a setter, adder, remover),
+    in which case the notifier is triggered by this function
+    Or it is one of the following tags:
+    ('', '__init__', 'postInit', 'preDelete', 'delete', 'startDeleteBlock', 'endDeleteBlock').
+    '' registers the notifier to any modifier function call ( setter, adder, remover),
+    __init__ and postInit triggers the notifier at the end of object creation, before resp.
+    after execution of postConstructorCode, the four delete-related tags
+    trigger notifiers at four different points in the deletion process
+    (see memops.Implementation.DataObject.delete() code for details).
+
+
     ADVANCED, but free to use. Must be unregistered when any object referenced is deleted.
     Use return value as input parameter for _unregisterApiNotifier (if desired)"""
     tt = self.__class__._apiNotifierParameters(func, apiClassOrName, apiFuncName,

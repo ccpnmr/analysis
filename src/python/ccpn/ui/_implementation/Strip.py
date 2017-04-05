@@ -173,14 +173,14 @@ class Strip(AbstractWrapperObject):
   #CCPN functions
   def clone(self):
     """create new strip that duplicates this one, appending it at the end"""
-    self._startFunctionCommandBlock('clone')
+    self._startCommandEchoBlock('clone')
     try:
       newStrip = self._project._data2Obj.get(self._wrappedData.clone())
 
       # NBNB TODO Why is this necessary? Presumably it should be the same width as the source?
       newStrip.setMinimumWidth(200)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
     
     return newStrip
 
@@ -202,12 +202,12 @@ class Strip(AbstractWrapperObject):
           % (newIndex, stripCount))
       newIndex = stripCount - 1
 
-    self._startFunctionCommandBlock('moveTo', newIndex)
+    self._startCommandEchoBlock('moveTo', newIndex)
     try:
       # management of API objects
       self._wrappedData.moveTo(newIndex)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     # NB - no echo blocking below, as none of the layout stuff is modeled (?)
 
@@ -261,11 +261,11 @@ class Strip(AbstractWrapperObject):
 
   def resetAxisOrder(self):
     """Reset display to original axis order"""
-    self._startFunctionCommandBlock('resetAxisOrder')
+    self._startCommandEchoBlock('resetAxisOrder')
     try:
       self._wrappedData.resetAxisOrder()
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
 
   def findAxis(self, axisCode):
@@ -323,15 +323,15 @@ class Strip(AbstractWrapperObject):
       stripSerial = 0
 
 
-    self._startFunctionCommandBlock('displaySpectrum', spectrum, values=locals(),
-                                    defaults={'axisOrder':()})
+    self._startCommandEchoBlock('displaySpectrum', spectrum, values=locals(),
+                                defaults={'axisOrder':()})
     try:
       # Make spectrumView
       obj = apiStrip.spectrumDisplay.newSpectrumView(spectrumName=dataSource.name,
                                                      stripSerial=stripSerial, dataSource=dataSource,
                                                      dimensionOrdering=dimensionOrdering)
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
     result =  self._project._data2Obj[apiStrip.findFirstStripSpectrumView(spectrumView=obj)]
     #
     return result
@@ -435,8 +435,8 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
         % (newIndex, stripCount))
     newIndex = None
 
-  self._startFunctionCommandBlock('copyStrip', strip, values=locals(), defaults={'newIndex':None},
-                                  parName='newStrip')
+  self._startCommandEchoBlock('copyStrip', strip, values=locals(), defaults={'newIndex':None},
+                              parName='newStrip')
   try:
     if strip.spectrumDisplay is self:
       # Within same display. Not that useful, but harmless
@@ -461,7 +461,7 @@ def _copyStrip(self:SpectrumDisplay, strip:Strip, newIndex=None) -> Strip:
             axis.position = positions[ind]
             axis.widths = widths[ind]
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return newStrip
 SpectrumDisplay.copyStrip = _copyStrip

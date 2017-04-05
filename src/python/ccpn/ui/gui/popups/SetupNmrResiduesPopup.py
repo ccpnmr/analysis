@@ -57,7 +57,7 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
 
 
   def _setupNmrResidues(self):
-    self.project._startFunctionCommandBlock('_setupNmrResidues')
+    self.project._startCommandEchoBlock('_setupNmrResidues')
     try:
       peakList = self.project.getByPid(self.peakListPulldown.currentText())
       nmrChain = self.project.getByPid(self.nmrChainPulldown.currentText())
@@ -80,4 +80,4 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
         return
     finally:
       self.accept()
-      self.project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()

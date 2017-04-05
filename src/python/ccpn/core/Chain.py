@@ -138,7 +138,7 @@ class Chain(AbstractWrapperObject):
 
     topObjectParameters = {'code':shortName,
                            'pdbOneLetterCode':shortName[0]}
-    self._startFunctionCommandBlock('clone', shortName, parName='newChain')
+    self._startCommandEchoBlock('clone', shortName, parName='newChain')
     # # Blanking notification ruins sidebar handling of new chain
     # self._project.blankNotification()
     try:
@@ -159,18 +159,18 @@ class Chain(AbstractWrapperObject):
 
     finally:
       # self._project.unblankNotification()
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
     #
     return result
                                   
 
   def _lock(self):
     """Finalize chain so that it can no longer be modified, and add missing data."""
-    self._startFunctionCommandBlock('_lock')
+    self._startCommandEchoBlock('_lock')
     try:
       self._wrappedData.molecule.isFinalised = True
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
 
   # Implementation functions
@@ -184,13 +184,13 @@ class Chain(AbstractWrapperObject):
     else:
       raise ValueError("Chain name must be set")
 
-    self._startFunctionCommandBlock('rename', value)
+    self._startCommandEchoBlock('rename', value)
     try:
       self._apiChain.renameChain(value)
       self._finaliseAction('rename')
       self._finaliseAction('change')
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def renumberResidues(self, offset:int, start:int=None,
                                   stop:int=None):
@@ -211,8 +211,8 @@ class Chain(AbstractWrapperObject):
       residues.reverse()
 
     changedResidues = []
-    self._startFunctionCommandBlock('renumberResidues', offset,
-                                    values={'start':start, 'stop':stop})
+    self._startCommandEchoBlock('renumberResidues', offset,
+                                values={'start':start, 'stop':stop})
     try:
       for residue in residues:
         sequenceCode = residue.sequenceCode
@@ -226,7 +226,7 @@ class Chain(AbstractWrapperObject):
             changedResidues.append(residue)
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
       for residue in changedResidues:
         residue._finaliseAction('rename')
         residue._finaliseAction('change')
@@ -295,8 +295,8 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
       "Substance named %s already exists. Try Substance.createChain function instead?"
       % compoundName)
 
-  self._startFunctionCommandBlock('createChain', sequence, values=locals(), defaults=defaults,
-                                  parName='newChain')
+  self._startCommandEchoBlock('createChain', sequence, values=locals(), defaults=defaults,
+                              parName='newChain')
   # # Blanking notification ruins sidebar handling of new chain
   # self._project.blankNotification()
   try:
@@ -310,7 +310,7 @@ def _createChain(self:Project, sequence:Union[str,Sequence[str]], compoundName:s
                                         details=comment)
   finally:
     # self._project.unblankNotification()
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   result = self._project._data2Obj[newApiChain]
   for residue in result.residues:
@@ -343,8 +343,8 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
   if previous is not None:
     raise ValueError("%s already exists" % previous.longPid)
 
-  self._startFunctionCommandBlock('createChain', values=locals(), defaults=defaults,
-                                  parName='newChain')
+  self._startCommandEchoBlock('createChain', values=locals(), defaults=defaults,
+                              parName='newChain')
   # # Blanking notification ruins sidebar handling of new chain
   # self._project.blankNotification()
   try:
@@ -352,7 +352,7 @@ def _createChainFromSubstance(self:Substance, shortName:str=None, role:str=None,
                                          details=comment)
   finally:
     # self._project.unblankNotification()
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   result = self._project._data2Obj[newApiChain]
   for residue in result.residues:

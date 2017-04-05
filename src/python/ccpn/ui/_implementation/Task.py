@@ -169,12 +169,12 @@ def _newTask(self:Project, name:str, nameSpace:str=None, comment:str=None) -> Ta
 
   defaults = collections.OrderedDict((('nameSpace', None), ('comment', None)))
 
-  self._startFunctionCommandBlock('newTask', name, values=locals(), defaults=defaults,
-                                  parName='newTask')
+  self._startCommandEchoBlock('newTask', name, values=locals(), defaults=defaults,
+                              parName='newTask')
   try:
     newApiTask = nmrProject.root.newGuiTask(**dd)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   return self._data2Obj.get(newApiTask)
 Project.newTask = _newTask

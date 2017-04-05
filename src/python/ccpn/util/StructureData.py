@@ -551,7 +551,7 @@ class EnsembleData(pd.DataFrame):
     containingObject = self._containingObject
     if containingObject is not None:
       # undo and echoing
-      containingObject._startFunctionCommandBlock('data.setValues', values=kwargs)
+      containingObject._startCommandEchoBlock('data.setValues', values=kwargs)
 
     try:
       # We must do this one by one - passing in the dictionary
@@ -565,7 +565,7 @@ class EnsembleData(pd.DataFrame):
 
     finally:
       if containingObject is not None:
-        containingObject._project._appBase._endCommandBlock()
+        containingObject._endCommandEchoBlock()
 
     if containingObject is not None:
       undo = containingObject._project._undo
@@ -691,7 +691,7 @@ class EnsembleData(pd.DataFrame):
         # We can make a nice-looking synonym later, if we want.
         # NB with large objects the echo will be huge and ugly.
         # But it is almost impossible to compress the great variety of value types Pandas allow.
-        containingObject._startFunctionCommandBlock('data.__setitem__', key, value)
+        containingObject._startCommandEchoBlock('data.__setitem__', key, value)
         project = containingObject._project
         project.blankNotification()
         undo = project._undo
@@ -756,7 +756,7 @@ class EnsembleData(pd.DataFrame):
         raise
       finally:
         if containingObject is not None:
-          project._appBase._endCommandBlock()
+          project._endCommandEchoBlock()
           project.unblankNotification()
           undo.decreaseBlocking()
 

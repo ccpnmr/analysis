@@ -221,8 +221,8 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
       "Unsupported value %s for SpectrumHit.concentrationUnit."
       % concentrationUnit)
 
-  self._startFunctionCommandBlock('newSpectrumHit', substanceName, values=locals(), defaults=defaults,
-                                  parName='newSpectrumHit')
+  self._startCommandEchoBlock('newSpectrumHit', substanceName, values=locals(), defaults=defaults,
+                              parName='newSpectrumHit')
   try:
     if pseudoDimension is not None:
       if not pseudoDimensionNumber:
@@ -239,7 +239,7 @@ def _newSpectrumHit(self:Spectrum, substanceName:str, pointNumber:int=0,
                                              concentrationError=concentrationError,
                                              concentrationUnit=concentrationUnit, details=comment)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   return self._project._data2Obj.get(obj)
 

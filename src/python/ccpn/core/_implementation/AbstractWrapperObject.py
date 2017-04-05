@@ -754,8 +754,11 @@ class AbstractWrapperObject():
       elif oldSerial == maxSerial:
         serialDict[downlink] = max(downdict)
 
-  def _startFunctionCommandBlock(self, funcName, *params, values=None, defaults=None, parName=None):
-    """Execute StartCommandBlock for an object creation function,
+  def _startCommandEchoBlock(self, funcName, *params, values=None, defaults=None, parName=None):
+    """Start block for command echoing, set undo waypoint, and echo command to ui and logger
+
+    *params, values, and defaults are used by coreUtil.commandParameterString to set the function
+    parameter string - see the documentation of commandParameterString for details
     """
 
     #CCPNINTERNAL
@@ -773,6 +776,10 @@ class AbstractWrapperObject():
       command = ''.join((parName, ' = ', command))
 
     project._appBase._startCommandBlock(command)
+
+  def _endCommandEchoBlock(self):
+    """End block for command echoing"""
+    self._project._appBase._endCommandBlock()
 
 
 AbstractWrapperObject.getByPid.__annotations__['return'] = AbstractWrapperObject

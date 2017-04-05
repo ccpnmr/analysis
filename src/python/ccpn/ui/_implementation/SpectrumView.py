@@ -381,6 +381,7 @@ del _findSpectrumView
 
 # Notifiers:
 # Notify SpectrumView change when ApiSpectrumView changes (underlying object is StripSpectrumView)
+# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
   ('_notifyRelatedApiObject', {'pathToObject':'stripSpectrumViews', 'action':'change'},
    ApiSpectrumView._metaclass.qualifiedName(), '')

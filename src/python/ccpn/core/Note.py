@@ -116,11 +116,11 @@ class Note(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
 
     else:
-      self._startFunctionCommandBlock('rename', value)
+      self._startCommandEchoBlock('rename', value)
       try:
         self._wrappedData.name = value
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
 
 
   # Implementation functions
@@ -138,12 +138,12 @@ def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
   if name and Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
 
-  self._startFunctionCommandBlock('newNote', values=locals(), defaults=defaults,
-                                  parName='newNote')
+  self._startCommandEchoBlock('newNote', values=locals(), defaults=defaults,
+                              parName='newNote')
   try:
     return self._data2Obj.get(self._wrappedData.newNote(text=text, name=name))
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     
     
 # Connections to parents:

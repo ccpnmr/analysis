@@ -120,8 +120,8 @@ def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -
 
   defaults = collections.OrderedDict((('title', None), ('position', ()), ('size', ())))
 
-  self._startFunctionCommandBlock('newWindow', values=locals(), defaults=defaults,
-                                  parName='newWindow')
+  self._startCommandEchoBlock('newWindow', values=locals(), defaults=defaults,
+                              parName='newWindow')
   try:
 
     newApiWindow = apiWindowStore.newWindow(title=title)
@@ -130,7 +130,7 @@ def _newWindow(self:Project, title:str=None, position:tuple=(), size:tuple=()) -
     if size:
       newApiWindow.size = size
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   result =  self._data2Obj.get(newApiWindow)
 

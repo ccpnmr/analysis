@@ -112,18 +112,22 @@ Use print(current) to get a list of attribute, value pairs')
     for field in _fields:
       notifies[field] = []
 
-    self.registerNotify(self._updateSelectedPeaks, 'peaks')
-
   def registerNotify(self, notify, field):
-    # Notifiers are attached to the Current OBJECT, not to the class
-    # They are therefore removed when a new project is created/loaded
-    # Otherwise it is the responsibility of the adder to remove them when no longer relevant
-    # for which the notifier function object must be kept around.
-    # The function is attached to the field and is executed after the field value changes
-    # In practice this goes through the setter for (the equivalent of) Current.spectra
-    # The notifier function is passed the new value of the field as its only parameter.
-    # If you need a graphics object (e.g. a module) you must make and register a bound method
-    # on the module.
+    """Register notifier function 'notify' to be called on field 'field'
+
+    E.g. current.registerNotify(highlightSelectedPeaks, 'peaks')
+    Where highlightSelectedPeaks is a function that takes a list of peaks as its only input
+
+    Notifiers are attached to the Current OBJECT, not to the class
+    They are therefore removed when a new project is created/loaded
+    Otherwise it is the responsibility of the adder to remove them when no longer relevant
+    for which the notifier function object must be kept around.
+    The function is attached to the field and is executed after the field value changes
+    In practice this goes through the setter for (the equivalent of) Current.spectra
+    The notifier function is passed the new value of the field as its only parameter.
+    If you need a graphics object (e.g. a module) you must make and register a bound method
+    on the module.
+    """
 
     self._notifies[field].append(notify)
 

@@ -184,6 +184,7 @@ del getter
 
 
 # Notifiers:
+# TODO change to calling _setupApiNotifier
 Project._apiNotifiers.append(
   ('_notifyRelatedApiObject', {'pathToObject':'stripPeakListViews', 'action':'change'},
    ApiStripPeakListView._metaclass.qualifiedName(), '')

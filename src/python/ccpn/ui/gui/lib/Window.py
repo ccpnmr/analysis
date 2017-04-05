@@ -59,7 +59,7 @@ def markPositions(project, axisCodes, atomPositions):
     """
     Takes a strip and creates marks based on the strip axes and adds annotations where appropriate.
     """
-    project._startFunctionCommandBlock('markPositions', project, axisCodes, atomPositions)
+    project._startCommandEchoBlock('markPositions', project, axisCodes, atomPositions)
     try:
       if project._appBase.ui.mainWindow is not None:
         mainWindow = project._appBase.ui.mainWindow
@@ -77,5 +77,5 @@ def markPositions(project, axisCodes, atomPositions):
 
 
     finally:
-      project._appBase._endCommandBlock()
+      project._endCommandEchoBlock()
 

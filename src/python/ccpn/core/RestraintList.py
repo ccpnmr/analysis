@@ -253,11 +253,11 @@ class RestraintList(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.RestraintList.name:" % Pid.altCharacter)
 
     else:
-      self._startFunctionCommandBlock('rename', value)
+      self._startCommandEchoBlock('rename', value)
       try:
         self._wrappedData.name = value
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
 
   @classmethod
   def _getAllWrappedData(cls, parent: DataSet)-> list:
@@ -297,8 +297,8 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
   if restraintItemLength is None:
     raise ValueError("restraintType %s not recognised" % restraintType)
 
-  self._startFunctionCommandBlock('newRestraintList', restraintType, values=locals(),
-                                  defaults=defaults, parName='newRestraintList')
+  self._startCommandEchoBlock('newRestraintList', restraintType, values=locals(),
+                              defaults=defaults, parName='newRestraintList')
   try:
     obj = self._wrappedData.newGenericConstraintList(name=name, details=comment, unit=unit,
                                                      origin=origin,
@@ -321,7 +321,7 @@ def _newRestraintList(self:DataSet, restraintType, name:str=None, origin:str=Non
                                      %(result, serial))
       result._finaliseAction('rename')
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return result
 

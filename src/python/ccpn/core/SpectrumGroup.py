@@ -96,7 +96,7 @@ class SpectrumGroup(AbstractWrapperObject):
   def rename(self, value:str):
     """Rename SpectrumGroup, changing its name and Pid"""
     oldName = self.name
-    self._startFunctionCommandBlock('rename', value)
+    self._startCommandEchoBlock('rename', value)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -115,7 +115,7 @@ class SpectrumGroup(AbstractWrapperObject):
     finally:
       if undo is not None:
         undo.decreaseBlocking()
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     undo.newItem(self.rename, self.rename, undoArgs=(oldName,),redoArgs=(value,))
 
@@ -139,15 +139,15 @@ def _newSpectrumGroup(self:Project, name:str, spectra=()) -> SpectrumGroup:
   else:
     values = {}
 
-  self._startFunctionCommandBlock('newSpectrumGroup', name, values=values,
-                                  parName='newSpectrumGroup')
+  self._startCommandEchoBlock('newSpectrumGroup', name, values=values,
+                              parName='newSpectrumGroup')
   self._project.blankNotification()
   try:
     result =  self._data2Obj.get(self._wrappedData.newSpectrumGroup(name=name))
     if spectra:
       result.spectra = spectra
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     self._project.unblankNotification()
 
   # DO creation notifications

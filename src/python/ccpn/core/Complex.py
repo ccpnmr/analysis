@@ -96,7 +96,7 @@ class Complex(AbstractWrapperObject):
   def rename(self, value:str):
     """Rename Complex, changing its name and Pid"""
     oldName = self.name
-    self._startFunctionCommandBlock('rename', value)
+    self._startCommandEchoBlock('rename', value)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -115,7 +115,7 @@ class Complex(AbstractWrapperObject):
     finally:
       if undo is not None:
         undo.decreaseBlocking()
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     undo.newItem(self.rename, self.rename, undoArgs=(oldName,),redoArgs=(value,))
 
@@ -144,15 +144,15 @@ def _newComplex(self:Project, name:str, chains=()) -> Complex:
   else:
     values = {}
 
-  self._startFunctionCommandBlock('newComplex', name, values=values,
-                                  parName='newComplex')
+  self._startCommandEchoBlock('newComplex', name, values=values,
+                              parName='newComplex')
   self._project.blankNotification()
   try:
     result =  self._data2Obj.get(self._wrappedData.molSystem.newChainGroup(name=name))
     if chains:
       result.chains = chains
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     self._project.unblankNotification()
 
   # DO creation notifications

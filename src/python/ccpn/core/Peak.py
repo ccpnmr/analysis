@@ -499,8 +499,8 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
   )
 
   undo = self._project._undo
-  self._startFunctionCommandBlock('newPeak', values=locals(), defaults=defaults,
-                                  parName='newPeak')
+  self._startCommandEchoBlock('newPeak', values=locals(), defaults=defaults,
+                              parName='newPeak')
   self._project.blankNotification()
   undo.increaseBlocking()
   try:
@@ -536,7 +536,7 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
         peakDim.lineWidth = lineWidths[ii]
 
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     self._project.unblankNotification()
     undo.decreaseBlocking()
 

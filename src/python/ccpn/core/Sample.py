@@ -232,7 +232,7 @@ class Sample(AbstractWrapperObject):
   def rename(self, value:str):
     """Rename Sample, changing its name and Pid."""
     oldName = self.name
-    self._startFunctionCommandBlock('rename', value)
+    self._startCommandEchoBlock('rename', value)
     undo = self._project._undo
     if undo is not None:
       undo.increaseBlocking()
@@ -250,7 +250,7 @@ class Sample(AbstractWrapperObject):
     finally:
       if undo is not None:
         undo.decreaseBlocking()
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     undo.newItem(self.rename, self.rename, undoArgs=(oldName,),redoArgs=(value,))
 
@@ -284,8 +284,8 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
   nmrProject = self._wrappedData
   apiSampleStore =  nmrProject.sampleStore
 
-  self._startFunctionCommandBlock('newSample', values=locals(), defaults=defaults,
-                                  parName='newSample')
+  self._startCommandEchoBlock('newSample', values=locals(), defaults=defaults,
+                              parName='newSample')
   try:
     if name is None:
       # Make default name
@@ -305,7 +305,7 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
                                             plateIdentifier=plateIdentifier,rowPosition=rowNumber,
                                             colPosition=columnNumber, details=comment)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return self._data2Obj.get(newApiSample)
 

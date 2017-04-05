@@ -153,7 +153,7 @@ class Data(AbstractWrapperObject):
     """Rename Data, changing its nmme and Pid"""
     oldName = self.name
     undo = self._project._undo
-    self._startFunctionCommandBlock('rename', value)
+    self._startCommandEchoBlock('rename', value)
     if undo is not None:
       undo.increaseBlocking()
 
@@ -168,7 +168,7 @@ class Data(AbstractWrapperObject):
         self._finaliseAction('change')
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
       if undo is not None:
         undo.decreaseBlocking()
 
@@ -199,12 +199,12 @@ def _newData(self:DataSet, name:str, attachedObjectPid:str=None,
         "Either attachedObject or attachedObjectPid must be None - values were %s and %s"
                       % (attachedObject, attachedObjectPid))
 
-  self._startFunctionCommandBlock('newData', name, values={'attachedObjectPid':attachedObjectPid},
-                                  defaults=defaults, parName='newData')
+  self._startCommandEchoBlock('newData', name, values={'attachedObjectPid':attachedObjectPid},
+                              defaults=defaults, parName='newData')
   try:
     obj = self._wrappedData.newData(name=name, attachedObjectPid=attachedObjectPid)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return project._data2Obj.get(obj)
 
 DataSet.newData = _newData

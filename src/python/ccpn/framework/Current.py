@@ -198,12 +198,14 @@ Use print(current) to get a list of attribute, value pairs')
       plural = param
       singular = param[:-1]  # It is assumed that param ends in plural 's'
       singularOnly = _currentExtraFields[param].get('singularOnly')
+      enforceType = None
     else:
       # param is a wrapper class
       plural = param._pluralLinkName
       singular = param.className
       singular = singular[0].lower() + singular[1:]
       singularOnly = _currentClasses[param].get('singularOnly')
+      enforceType = param
 
     # getter function for _field; getField(obj) returns obj._field:
     getField = operator.attrgetter('_' + plural)
@@ -212,9 +214,12 @@ Use print(current) to get a list of attribute, value pairs')
     getFieldItem = operator.itemgetter(plural)
 
     # setField(obj, value) sets obj._field = value and calls notifiers
-    def setField(self, value, plural=plural):
+    def setField(self, value, plural=plural, enforceType=enforceType):
       if len(set(value)) != len(value):
         raise ValueError( "Current %s contains duplicates: %s" % (plural, value))
+      if enforceType and any(x for x in value if not isinstance(x, enforceType)):
+        raise ValueError("Current values for %s must be of type %s"
+                         % (plural, enforceType))
       setattr(self, '_'+plural, value)
       funcs = getFieldItem(self._notifies) or ()
       for func in funcs:

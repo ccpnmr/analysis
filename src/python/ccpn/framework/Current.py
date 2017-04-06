@@ -13,8 +13,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
+__author__ = "$Author: Wayne Boucher $"
+__date__ = "$Date: 2017-04-06 17:00:45 +0100 (Thu, April 06, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -111,6 +111,8 @@ Use print(current) to get a list of attribute, value pairs')
     notifies = self._notifies = {}
     for field in _fields:
       notifies[field] = []
+
+    self.registerNotify(self._updateSelectedPeaks, 'peaks')
 
   def registerNotify(self, notify, field):
     """Register notifier function 'notify' to be called on field 'field'

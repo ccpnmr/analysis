@@ -119,6 +119,8 @@ Use print(current) to get a list of attribute, value pairs')
     for field in _fields:
       notifies[field] = []
 
+    self.registerNotify(self._updateSelectedPeaks, 'peaks')
+
   def registerNotify(self, notify, field):
     """Register notifier function 'notify' to be called on field 'field'
 

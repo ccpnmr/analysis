@@ -15,9 +15,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-07 14:05:12 +0100 (Fri, April 07, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -176,14 +175,15 @@ def peaksAreOnLine(peaks:typing.List[Peak], dim:int):
     '''Returns True when multiple peaks are located
        on a line in the given dimensions.
     '''
-
+    #print('>peaksAreOnLine>', peaks)
     if not sameAxisCodes(peaks, dim):
         return False
     # Take the two furthest peaks (in this dimension) of the selection.
     positions = sorted([peak.position[dim] for peak in peaks])
     max_difference = abs(positions[0] - positions[-1])
-    #Use the smallest tolerance of all peaks.
+    # Use the smallest tolerance of all peaks.
     tolerance = min([getAssignmentToleranceForPeakDimension(peak, dim) for peak in peaks])
+    #print('>>', positions, 'maxdiff:', max_difference, 'tolerance:', tolerance)
     if max_difference < tolerance:
         return True
     return False
@@ -192,14 +192,13 @@ def peaksAreOnLine(peaks:typing.List[Peak], dim:int):
 def sameAxisCodes(peaks:typing.List[Peak], dim:int):
     '''Checks whether all peaks have the same axisCode
        for in the given dimension.
-
     '''
 
     if len(peaks) > 1:
         # axisCode = getAxisCodeForPeakDimension(peaks[0], dim)
         axisCode = peaks[0].peakList.spectrum.axisCodes[dim]
         for peak in peaks[1:]:
-            if not commonUtil.axisCodesCompare(peak.peakList.spectrum.axisCodes[dim], axisCode):
+            if not commonUtil.axisCodesCompare(peak.peakList.spectrum.axisCodes[dim], axisCode, 1):
                 return False
     return True
 

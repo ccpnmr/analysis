@@ -18,9 +18,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: geertenv $"
-__date__ = "$Date: 2016-07-09 14:17:30 +0100 (Sat, 09 Jul 2016) $"
-__version__ = "$Revision: 9605 $"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-07 14:05:12 +0100 (Fri, April 07, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -73,7 +72,7 @@ class CcpnModule(Dock):
     self.mainWindow = self.application.ui.mainWindow
 
     # GWV: logger seems not to work??
-    self.project._logger.debug('CcpnModule.__init__: %s, %s, %s' % (self.application, self.current, self.project))
+    self.project._logger.debug('application:%s, current:%s, project:%s' % (self.application, self.current, self.project))
 
     # hide original dock label and generate a new CCPN one
     self._originalLabel = self.label

@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-10 15:35:09 +0100 (Mon, April 10, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 17:27:11 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -196,7 +196,6 @@ class TestPandasData(WrapperTesting):
     self.sorted = data.backboneSelector
     self.sorted = data.amideProtonSelector
     self.sorted = data.amideNitrogenSelector
-    # self.sorted = data.methylSelector
 
   def test_structureData_ChainCode(self):
     ensemble = self.project.newStructureEnsemble()
@@ -222,6 +221,56 @@ class TestPandasData(WrapperTesting):
       data['chainCode'] = ['A-B']
     except Exception as e:
       print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
+
+  def test_structureData_residueNames(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+    data['residueName'] = ['ALA', 'LEU', 'MET', 'THR', 'VAL']
+
+    try:
+      data['residueName'] = ['MET-ALU']   # a final check, but Pandas is catching all errors
+    except Exception as e:
+      print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
+
+  def test_structureData_methylSelectorALA(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+
+    data['atomName'] = ['CB', 'HB1', 'HB2', 'HB3']
+    data['residueName'] = 'ALA'
+    self.sorted = data.methylSelector       # this one crashes
+
+  def test_structureData_methylSelectorLEU(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+
+    data['atomName'] = ['CD1', 'HD11', 'HD12', 'HD13', 'CD2', 'HD21', 'HD22', 'HD23']
+    data['residueName'] = 'LEU'
+    self.sorted = data.methylSelector       # this one crashes
+
+  def test_structureData_methylSelectorMET(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+
+    data['atomName'] = ['CE', 'HE1', 'HE2', 'HE3']
+    data['residueName'] = 'MET'
+    self.sorted = data.methylSelector       # this one crashes
+
+  def test_structureData_methylSelectorTHR(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+
+    data['atomName'] = ['CG', 'HG1', 'HG2', 'HG3']
+    data['residueName'] = 'THR'
+    self.sorted = data.methylSelector       # this one crashes
+
+  def test_structureData_methylSelectorVAL(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+
+    data['atomName'] = ['CG1', 'HG11', 'HG12', 'HG13', 'CG2', 'HG21', 'HG22', 'HG23']
+    data['residueName'] = 'VAL'
+    self.sorted = data.methylSelector       # this one crashes
 
 #=========================================================================================
 # test_StructureData_properties

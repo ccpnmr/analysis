@@ -16,8 +16,8 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:42 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-10 17:50:11 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -489,7 +489,7 @@ class DimensionsTab(QtGui.QWidget, Base):
                                                                       spectralAssignmentToleranceData.text, i))
       # if spectrum.assignmentTolerances[i] is not None:
       #   spectralAssignmentToleranceData.setText(str("%.3f" % (spectrum.assignmentTolerances[i] or 0.0)))
-      value = spectrum.referencePoints[i]
+      value = spectrum.assignmentTolerances[i]
       spectralAssignmentToleranceData.setText('<None>' if value is None else str("%.3f" % value))
 
   def _writeLoggingMessage(self, command):

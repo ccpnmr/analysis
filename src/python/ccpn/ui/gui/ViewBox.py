@@ -54,10 +54,16 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
                 " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
+#=========================================================================================
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-10 14:11:55 +0100 (Mon, April 10, 2017) $"
+#=========================================================================================
+# Created
 #=========================================================================================
 __author__ = "$Author: Wayne Boucher $"
-__date__ = "$Date: 2017-03-22 15:13:45 +0000 (Wed, March 22, 2017) $"
+
+__date__ = "$Date: 2017-04-10 14:32:25 +0100 (Mon, April 10, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -330,14 +336,20 @@ class ViewBox(pg.ViewBox):
       orderedAxes = self.current.strip.orderedAxes
       for orderedAxis in orderedAxes[2:]:
         position.append(orderedAxis.position)
+      peaks = list(self.current.peaks)
+      peakLists = []
       for spectrumView in self.current.strip.spectrumViews:
         peakList = spectrumView.spectrum.peakLists[0]
         peak = peakList.newPeak(position=position)
         # note, the height below is not derived from any fitting
         # but is a weighted average of the values at the neighbouring grid points
         peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-        self.current.addPeak(peak)
+        #self.current.addPeak(peak)
         # peak.isSelected = True
+        peaks.append(peak)
+        peakLists.append(peakList)
+      self.current.peaks = peaks
+      for peakList in peakLists:
         self.current.strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
@@ -501,6 +513,7 @@ class ViewBox(pg.ViewBox):
             selectedRegion.append((n.region[0], n.region[1]))
 
         minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
+        peaks = list(self.current.peaks)
         for spectrumView in self.current.strip.spectrumViews:
           if not spectrumView.isVisible():
             continue
@@ -534,10 +547,14 @@ class ViewBox(pg.ViewBox):
             newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
 
           # Add the new peaks to selection
-          for peak in newPeaks:
-            # peak.isSelected = True
-            self.current.addPeak(peak)
+          #for peak in newPeaks:
+          #  # peak.isSelected = True
+          #  self.current.addPeak(peak)
+          peaks.extend(newPeaks)
 
+        self.current.peaks = peaks
+
+        for spectrumView in self.current.strip.spectrumViews:
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:
               for strip in spectrumDisplay.strips:
@@ -566,6 +583,7 @@ class ViewBox(pg.ViewBox):
           zPositions = None
         # selectedPeaks = []
         #self.current.clearPeaks()
+        peaks = list(self.current.peaks)
         for spectrumView in self.current.strip.spectrumViews:
           for peakListView in spectrumView.peakListViews:
             if not peakListView.isVisible():
@@ -585,7 +603,8 @@ class ViewBox(pg.ViewBox):
                 height = peak.height # * scale # TBD: is the scale already taken into account in peak.height???
                 if xPositions[0] < float(peak.position[xAxis]) < xPositions[1] and y0 < height < y1:
                   # peak.isSelected = True
-                  self.current.addPeak(peak)
+                  #self.current.addPeak(peak)
+                  peaks.append(peak)
             else:
               # print('***', stripAxisCodes, spectrumView.spectrum.axisCodes)
               # Fixed 13/3/2016 Rasmus Fogh
@@ -604,11 +623,13 @@ class ViewBox(pg.ViewBox):
                     # zAxis = spectrumView.spectrum.axisCodes.index(axisMapping[self.current.strip.orderedAxes[2].code])
                     if zPositions[0] < float(peak.position[zAxis]) < zPositions[1]:
                       # peak.isSelected = True
-                      self.current.addPeak(peak)
+                      #self.current.addPeak(peak)
+                      peaks.append(peak)
                   else:
                     # peak.isSelected = True
-                    self.current.addPeak(peak)
-
+                    #self.current.addPeak(peak)
+                    peaks.append(peak)
+        self.current.peaks = peaks
     elif controlMiddleMouse(event):
       # Control(Cmd)+middle drag: move a selected peak
 

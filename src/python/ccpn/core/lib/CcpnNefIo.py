@@ -1233,20 +1233,6 @@ class CcpnNefWriter:
       rowdata['serial'] = nmrChain.serial
       nmrChainLoop.newRow(rowdata)
 
-      # # NB this makes sure that connected stretches are given in order.
-      # nmrResidues = nmrChain.mainNmrResidues
-      # for nmrResidue in nmrResidues:
-      #   rowdata = self._loopRowData(nmrResidueLoopName, nmrResidue)
-      #   rowdata['serial'] = nmrResidue.serial
-      #   nmrResidueLoop.newRow(rowdata)
-      #
-      #   nmrResidues.extend(nmrResidue.offsetNmrResidues)
-      #
-      #   for nmrAtom in nmrResidue.nmrAtoms:
-      #     rowdata = self._loopRowData(nmrAtomLoopName, nmrAtom)
-      #     rowdata['serial'] = nmrAtom.serial
-      #     nmrAtomLoop.newRow(rowdata)
-
       # Use sorting - should give correct results
       for nmrResidue in sorted(nmrChain.nmrResidues):
         rowdata = self._loopRowData(nmrResidueLoopName, nmrResidue)
@@ -1686,9 +1672,6 @@ class CcpnNefWriter:
           row[tag] = lowerlimits[ii]
         for ii, tag in enumerate(multipleAttributes['upperLimits']):
           row[tag] = upperLimits[ii]
-        # row._set('slopes', integral.slopes)
-        # row._set('lower_limits', lowerlimits)
-        # row._set('upper_limits', upperLimits)
     else:
       del result['ccpn_integral_list']
       del result['ccpn_integral']
@@ -1990,22 +1973,6 @@ class CcpnNefReader:
     self._nmrResidueMap = {}
     #
     return dataBlock
-
-  # def loadNewProject(self, path:str):
-  #   """Load NEF file at path into project"""
-  #
-  #   dataBlock = self.getNefData(path)
-  #   project = self.application.newProject(dataBlock.name)
-  #   self.application._echoBlocking += 1
-  #   self.application.project._undo.increaseBlocking()
-  #   try:
-  #     self.importNewProject(project, dataBlock)
-  #   finally:
-  #     self.application._echoBlocking -= 1
-  #     self.application.project._undo.decreaseBlocking()
-  #
-  #   #
-  #   return project
 
   def _getSaveFramesInOrder(self, dataBlock:StarIo.NmrDataBlock) -> OD:
     """Get saveframes in fixed reading order as Ordereddict(category:[saveframe,])"""

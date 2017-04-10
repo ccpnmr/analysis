@@ -36,7 +36,7 @@ from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ExpDimRef as ApiExpDimRef
 
 
 class PseudoDimension(AbstractWrapperObject):
-  """ADVANCED. A sampled SPectrum axis with non-gridded values. Used to describe
+  """ADVANCED. A sampled Spectrum axis with non-gridded values. Used to describe
 sampled-value axes in pseudo-2D and nD experiments, such as the time delay axis for T1
 experiments."""
 

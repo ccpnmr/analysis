@@ -10,22 +10,21 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:32 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:45 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
-__date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2017-04-10 11:42:40 +0000 (Mon, April 10, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
+
 import collections
 from datetime import datetime
 from typing import Sequence, Tuple, Optional
@@ -244,10 +243,21 @@ class Sample(AbstractWrapperObject):
       undo.increaseBlocking()
 
     try:
-      if not value:
-        raise ValueError("Sample name must be set")
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+      # if not value:
+      #   raise ValueError("Sample name must be set")
+      # elif Pid.altCharacter in value:
+      #   raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+      #
+      if not isinstance(value, str):
+        raise TypeError("Sample name must be a string")       # ejb66
+      elif not value:
+        raise ValueError("Sample name must be set")           # ejb66
       elif Pid.altCharacter in value:
         raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+      #
+      #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+
       else:
         self._wrappedData.__dict__['name'] = value
         self._finaliseAction('rename')
@@ -300,8 +310,18 @@ def _newSample(self:Project, name:str=None, pH:float=None, ionicStrength:float=N
       while apiSampleStore.findFirstSample(name=name) is not None:
         name = commonUtil.incrementName(name)
 
-    if Pid.altCharacter in name:
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+    # if Pid.altCharacter in name:
+    #   raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+    #
+    if not isinstance(name, str):
+      raise TypeError("Sample name must be a string")     # ejb66
+    elif not name:
+      raise ValueError("Sample name must be set")         # ejb66
+    elif Pid.altCharacter in name:
       raise ValueError("Character %s not allowed in ccpn.Sample.name" % Pid.altCharacter)
+    #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
 
     newApiSample = apiSampleStore.newSample(name=name, ph=pH, ionicStrength=ionicStrength,
                                             amount=amount, amountUnit=amountUnit,

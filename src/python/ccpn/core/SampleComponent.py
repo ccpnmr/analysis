@@ -10,18 +10,16 @@ __licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/li
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
 __reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
-
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:59 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:45 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -222,7 +220,7 @@ del getter
 
 # Connections to parents:
 
-def _newSampleComponent(self:Sample, name:str, labelling:str=None, role:str=None,
+def _newSampleComponent(self:Sample, name:str=None, labelling:str=None, role:str=None,    # ejb66
                        concentration:float=None, concentrationError:float=None,
                        concentrationUnit:str=None, purity:float=None, comment:str=None,
                       ) -> SampleComponent:
@@ -239,11 +237,30 @@ def _newSampleComponent(self:Sample, name:str, labelling:str=None, role:str=None
      )
   )
 
-  for ss in (name, labelling):
-    if ss and Pid.altCharacter in ss:
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+  # for ss in (name, labelling):
+  #   if ss and Pid.altCharacter in ss:
+  #     raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
+  #                      (Pid.altCharacter, name, labelling))
+  #
+  if not isinstance(name, str):
+    raise TypeError("ccpn.SampleComponent name must be a string")     # ejb66
+  elif not name:
+    raise ValueError("ccpn.SampleComponent name must be set")         # ejb66
+  elif Pid.altCharacter in name:
+    raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
+           (Pid.altCharacter, name, labelling))
+
+  if labelling is not None:        # 'None' caught by below as default
+    if not isinstance(labelling, str):
+      raise TypeError("ccpn.SampleComponent 'labelling' name must be a string")   # ejb66
+    elif not labelling:
+      raise ValueError("ccpn.SampleComponent 'labelling' name must be set")       # ejb66
+    elif Pid.altCharacter in labelling:
       raise ValueError("Character %s not allowed in ccpn.SampleComponent id: %s.%s" %
                        (Pid.altCharacter, name, labelling))
-
+  #
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
 
   if concentrationUnit not in Constants.concentrationUnits:
     self._project._logger.warning(

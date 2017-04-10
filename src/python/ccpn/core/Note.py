@@ -15,19 +15,19 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:31 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:44 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
-__author__ = "$Author: CCPN $"
-
+__author__ = "$Author: Ed Brooksbank $"
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
 
 import collections
+import typing                   # ejb66 - added for 'header'
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -89,10 +89,18 @@ class Note(AbstractWrapperObject):
     
   @text.setter
   def text(self, value:str):
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+    # self._wrappedData.text = value
+    #
+    if value is not None:
+      if not isinstance(value, str):
+        raise TypeError("Note name text must be a string")  # ejb66 catch non-string
     self._wrappedData.text = value
+    #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
 
   @property
-  def created(self) -> str:
+  def created(self) -> typing.Optional[str]:
     """Note creation time"""
     return self._wrappedData.created.strftime(coreConstants.stdTimeFormat)
 
@@ -102,7 +110,7 @@ class Note(AbstractWrapperObject):
     return self._wrappedData.lastModified.strftime(coreConstants.stdTimeFormat)
 
   @property
-  def header(self) -> str:
+  def header(self) -> typing.Optional[str]:       # ejb66 - changed from str
     """Note header == first line of note"""
     text = self._wrappedData.text
     if text:
@@ -115,11 +123,22 @@ class Note(AbstractWrapperObject):
   # Implementation functions
   def rename(self, value:str):
     """Rename Note, changing its name and Pid."""
-    if not value:
-      raise ValueError("Note name must be set")
 
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+    # if not value:
+    #   raise ValueError("Note name must be set")
+    #
+    # elif Pid.altCharacter in value:
+    #   raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
+    #
+    if not isinstance(value, str):
+      raise TypeError("Note name must be a string")   # ejb66 catch non-string
+    elif not value:
+      raise ValueError("Note name must be set")       # ejb66 catch empty string
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
+    #
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
 
     else:
       self._startCommandEchoBlock('rename', value)
@@ -141,8 +160,18 @@ def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
 
   defaults = collections.OrderedDict((('name', None), ('text', None)))
 
-  if name and Pid.altCharacter in name:
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+  # if name and Pid.altCharacter in name:
+  #   raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
+  #
+  if not isinstance(name, str):
+    raise TypeError("Note name must be a string")     # ejb66 catch non-string
+  elif not name:
+    raise ValueError("Note name must be set")         # ejb66 catch empty string
+  elif Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
+  #
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
 
   self._startCommandEchoBlock('newNote', values=locals(), defaults=defaults,
                               parName='newNote')

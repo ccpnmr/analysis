@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:35 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 12:56:47 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -27,8 +27,9 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import math
+import sys
 from ccpn.util import StructureData
-from ccpn.core.testing.WrapperTesting import WrapperTesting
+from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr
 
 nan = math.nan
 
@@ -53,7 +54,6 @@ class TestPandasData(WrapperTesting):
     self.assertEquals(list(data.bFactor)[:4],  [1, 2,4,5])
     self.assertTrue(all(math.isnan(x) for x in data['bFactor'][-2:]))
     self.assertRaises(ValueError, data.__setitem__, 'bFactor', ll)
-
 
   def test_occupancy(self):
     ensemble = self.project.newStructureEnsemble()
@@ -193,3 +193,200 @@ class TestPandasData(WrapperTesting):
                  atomName='HG2', nmrAtomName='HG2', nmrChainCode='@12', nmrSequenceCode='12',
                  origIndex=9)
     ))
+    self.sorted = data.backboneSelector
+    self.sorted = data.amideProtonSelector
+    self.sorted = data.amideNitrogenSelector
+    # self.sorted = data.methylSelector
+
+  def test_structureData_ChainCode(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+    data['chainCode'] = ['B','B','A','A','B','B','A','A']
+
+    try:
+      data['chainCode'] = ['A,B', 'C,D']
+    except Exception as e:
+      print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
+
+    try:
+      data['chainCode'] = ['A, B, C']
+    except Exception as e:
+      print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
+
+    try:
+      data['chainCode'] = ['A,B', 'C']
+    except Exception as e:
+      print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
+
+    try:
+      data['chainCode'] = ['A-B']
+    except Exception as e:
+      print('Error on line {}'.format(sys.exc_info()[-1].tb_lineno), type(e), e)
+
+#=========================================================================================
+# test_StructureData_properties
+#=========================================================================================
+
+class TestStructureData_properties(WrapperTesting):
+
+  #=========================================================================================
+  # setUp       initialise a newStructureEnsemble
+  #=========================================================================================
+
+  def setUp(self):
+    """
+    Create a valid empty structureEnsemble
+    """
+    with self.initialSetup():
+      self.ensemble = self.project.newStructureEnsemble()
+
+
+  #=========================================================================================
+  # test_structureData_properties
+  #=========================================================================================
+
+  def test_structureData_properties_BBS(self):
+    """
+    Test that structureData attribute .serial is populated.
+    Read the attribute, if it not populated then an error is raised.
+    """
+    self.assertEquals(self.project.structureEnsembles[0].data.backboneSelector, ['CA', 'C', 'N', 'O', 'H'])
+
+  def test_structureData_properties_aPS(self):
+    """
+    Test that structureData attribute .serial is populated.
+    Read the attribute, if it not populated then an error is raised.
+    """
+    self.assertEquals(self.project.structureEnsembles[0].data.amideProtonSelector, ['H'])
+
+  #=========================================================================================
+  # test_valuetoOptionalInt      force is False
+  #=========================================================================================
+
+  def test_valuetoOptionalInt_Int(self):
+    """
+    Test that passing 42 (int) to valuetoOptionalInt returns an int.
+    """
+    self.assertEquals(StructureData.valueToOptionalInt(42), 42)
+
+  def test_valuetoOptionalInt_None(self):
+    """
+    Test that passing None to valuetoOptionalInt returns None.
+    """
+    self.assertEquals(StructureData.valueToOptionalInt(None), None)
+
+  def test_valuetoOptionalInt_NaN(self):
+    """
+    Test that passing NaN to valuetoOptionalInt returns None.
+    """
+    self.assertEquals(StructureData.valueToOptionalInt(float('NaN')), None)
+
+  def test_valuetoOptionalInt_IntFloat(self):
+    """
+    Test that passing int value float to valuetoOptionalInt returns int.
+    """
+    vtoint = StructureData.valueToOptionalInt(float(42.0))
+    self.assertIsInstance(vtoint, int)
+
+  def test_valuetoOptionalInt_Float(self):
+    """
+    Test that passing float to valuetoOptionalInt raises error.
+    """
+    with self.assertRaisesRegexp(ValueError, 'does not correspond to an integer'):
+      StructureData.valueToOptionalInt(42.42)
+
+  def test_valuetoOptionalInt_String(self):
+    """
+    Test that passing string to valuetoOptionalInt raises error.
+    Can assume that all other non-number will raise error
+    """
+    with self.assertRaisesRegexp(ValueError, 'does not correspond to an integer'):
+      StructureData.valueToOptionalInt('Invalid')
+
+  #=========================================================================================
+  # test_valuetoOptionalType      force is True - overrides the error and returns None
+  #=========================================================================================
+
+  def test_valuetoOptionalInt_forceInt(self):
+    """
+    Test that passing 42 (int) to valuetoOptionalInt returns an int.
+    """
+    self.assertEquals(StructureData.valueToOptionalInt(42, True), 42)
+
+  def test_valuetoOptionalInt_forceFloat(self):
+    """
+    Test that passing float to valuetoOptionalInt returns None.
+    """
+    self.assertEquals(StructureData.valueToOptionalInt(42.42, True), None)
+
+  def test_valuetoOptionalInt_forceFloatInt(self):
+    """
+    Test that passing int value float to valuetoOptionalInt returns int.
+    """
+    self.assertEquals(StructureData.valueToOptionalInt(float(42.0), True), 42)
+
+  def test_valuetoOptionalInt_forceString(self):
+    """
+    Test that passing string to valuetoOptionalInt returns None.
+    """
+    self.assertEquals(StructureData.valueToOptionalInt('Invalid', True), None)
+
+  #=========================================================================================
+  # test_valuetoOptionalType      force is False
+  #=========================================================================================
+
+  def test_valuetoOptionalType_None(self):
+    """
+    Test that passing None to valuetoOptionalType returns None.
+    """
+    self.assertEquals(StructureData.valueToOptionalType(None, int), None)
+
+  def test_valuetoOptionalType_Nan(self):
+    """
+    Test that passing NaN to valuetoOptionalType returns None.
+    """
+    self.assertEquals(StructureData.valueToOptionalType(float('NaN'), str), None)
+
+
+  def test_valuetoOptionalType_Int(self):
+    """
+    Test that passing 42 (int=int) to valuetoOptionalType returns 42.
+    """
+    self.assertEquals(StructureData.valueToOptionalType(42, int), 42)
+
+  def test_valuetoOptionalType_String(self):
+    """
+    Test that passing 42 (string=string) to valuetoOptionalType returns 42.
+    """
+    self.assertEquals(StructureData.valueToOptionalType('42', str), '42')
+
+  def test_valuetoOptionalType_ES(self):
+    """
+    Test that passing 42 (int<>float) to valuetoOptionalType returns None.
+    """
+    with self.assertRaisesRegexp(ValueError, 'does not correspond to type'):
+      StructureData.valueToOptionalType(42, float)
+
+  #=========================================================================================
+  # test_valuetoOptionalType      force is True
+  #=========================================================================================
+
+  def test_valuetoOptionalType_IntFloat(self):
+    """
+    Test that passing 42 (int<>float) to valuetoOptionalType returns float.
+    """
+    self.assertEquals(StructureData.valueToOptionalType(42, float, True), 42.0)
+
+  def test_valuetoOptionalType_IntString(self):
+    """
+    Test that passing 42 (int<>string) to valuetoOptionalType returns string.
+    """
+    self.assertEquals(StructureData.valueToOptionalType(42, str, True), '42')
+
+  def test_valuetoOptionalType_IntTuple(self):
+    """
+    Test that passing 42 (int<>tuple) to valuetoOptionalType raises error.
+
+    This is an expectedFailure needs to be expected type
+    """
+    StructureData.valueToOptionalType(42, tuple, True)

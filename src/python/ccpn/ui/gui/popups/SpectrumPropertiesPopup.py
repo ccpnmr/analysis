@@ -244,8 +244,19 @@ class GeneralTab(QtGui.QWidget, Base):
       self.spectrumType.addItems(list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys()))
 
       # Get the text that was used in the pulldown from the refExperiment
-      apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
-      text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
+      # NBNB This could possibly give unpredictable results
+      # if there is an experiment with experimentName (user settable!)
+      # that happens to match the synonym for a differnet experiment type.
+      # But if people will ignore our defined vocabulary, on their head be it!
+      # Anyway, tha alternative (discarded) is to look into the ExpPrototype
+      # to compare RefExperiment names and synonyums
+      # or (too ugly for words) to have a third attribute in parallel with
+      # spectrum.experimentName and spectrum.experimentType
+      text = spectrum.experimentName
+      if text not in self.pulldownItems:
+        text = spectrum.experimentType
+      # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
+      # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
       # Added to account for renaming of experiments
       text = priorityNameRemapping.get(text, text)
       self.spectrumType.setCurrentIndex(self.spectrumType.findText(text))

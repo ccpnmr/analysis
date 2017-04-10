@@ -13,12 +13,16 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
                 " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
-# Last code modification:
+# Last code modification
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-10 17:50:11 +0100 (Mon, April 10, 2017) $"
+#=========================================================================================
+# Created
+#=========================================================================================
+__author__ = "$Author: Wayne Boucher $"
 
+__date__ = "$Date: 2017-04-10 17:53:58 +0100 (Mon, April 10, 2017) $"
 #=========================================================================================
 # Start of code
 #=========================================================================================
@@ -483,7 +487,7 @@ class DimensionsTab(QtGui.QWidget, Base):
                                                                       spectralAssignmentToleranceData.text, i))
       # if spectrum.assignmentTolerances[i] is not None:
       #   spectralAssignmentToleranceData.setText(str("%.3f" % (spectrum.assignmentTolerances[i] or 0.0)))
-      value = spectrum.referencePoints[i]
+      value = spectrum.assignmentTolerances[i]
       spectralAssignmentToleranceData.setText('<None>' if value is None else str("%.3f" % value))
 
   def _writeLoggingMessage(self, command):

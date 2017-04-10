@@ -2,24 +2,22 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan",
                "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:36 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 15:41:18 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
 #=========================================================================================
 __author__ = "$Author: CCPN $"
-
 __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 # Start of code
@@ -75,15 +73,38 @@ def printCreditsText(fp, programName, version):
   """Initial text to terminal """
   from ccpn.framework.PathsAndUrls import ccpnLicenceUrl
 
-  lines = []
+  lines = []                                                    # ejb
   lines.append("%s, version: %s" % (programName, version))
   lines.append("")
-  lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
+  # lines.append("%s" % __copyright__[0:__copyright__.index('-')] + '- 2016')
+  lines.append("%s" % __copyright__)
+  lines.append("")
   lines.append("CCPN licence. See %s. Not to be distributed without prior consent!" % ccpnLicenceUrl)
   lines.append("")
-  lines.append("Written by:   %s" % __credits__)
+
+  try:
+    if isinstance(__credits__, str):
+      lines.append("Written by:   %s" % __credits__)
+    else:
+      if isinstance(__credits__, tuple):
+        lines.append("Written by:   %s" % __credits__[0])
+        for crLine in __credits__[1:]:
+          lines.append("              %s" % crLine)
+  except:
+    pass
+
   lines.append("")
-  lines.append("Please cite:  %s" % __reference__)
+  try:
+    if isinstance(__reference__, str):
+      lines.append("Please cite:  %s" % __reference__)
+    else:
+      if isinstance(__reference__, tuple):
+        lines.append("Please cite:  %s" % __reference__[0])
+        for refLine in __reference__[1:]:
+          lines.append("              %s" % refLine)
+  except:
+    pass
+
   lines.append("")
   lines.append("DISCLAIMER:   This program is offered 'as-is'. Under no circumstances will the authors, CCPN,")
   lines.append("              the Department of Molecular and Cell Biology, or the University of Leicester be")

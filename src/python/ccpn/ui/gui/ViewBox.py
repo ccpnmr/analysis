@@ -58,7 +58,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Wayne Boucher $"
-__dateModified__ = "$dateModified: 2017-04-07 15:36:24 +0100 (Fri, April 07, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-10 14:11:55 +0100 (Mon, April 10, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -337,14 +337,20 @@ class ViewBox(pg.ViewBox):
       orderedAxes = self.current.strip.orderedAxes
       for orderedAxis in orderedAxes[2:]:
         position.append(orderedAxis.position)
+      peaks = list(self.current.peaks)
+      peakLists = []
       for spectrumView in self.current.strip.spectrumViews:
         peakList = spectrumView.spectrum.peakLists[0]
         peak = peakList.newPeak(position=position)
         # note, the height below is not derived from any fitting
         # but is a weighted average of the values at the neighbouring grid points
         peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-        self.current.addPeak(peak)
+        #self.current.addPeak(peak)
         # peak.isSelected = True
+        peaks.append(peak)
+        peakLists.append(peakList)
+      self.current.peaks = peaks
+      for peakList in peakLists:
         self.current.strip.showPeaks(peakList)
 
     elif controlLeftMouse(event):
@@ -508,6 +514,7 @@ class ViewBox(pg.ViewBox):
             selectedRegion.append((n.region[0], n.region[1]))
 
         minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
+        peaks = list(self.current.peaks)
         for spectrumView in self.current.strip.spectrumViews:
           if not spectrumView.isVisible():
             continue
@@ -544,10 +551,11 @@ class ViewBox(pg.ViewBox):
           #for peak in newPeaks:
           #  # peak.isSelected = True
           #  self.current.addPeak(peak)
-          peaks = list(self.current.peaks)
           peaks.extend(newPeaks)
-          self.current.peaks = peaks
 
+        self.current.peaks = peaks
+
+        for spectrumView in self.current.strip.spectrumViews:
           for window in self.current.project.windows:
             for spectrumDisplay in window.spectrumDisplays:
               for strip in spectrumDisplay.strips:

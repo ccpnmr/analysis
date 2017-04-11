@@ -5,18 +5,17 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:43 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Luca Mureddu $"
+__dateModified__ = "$dateModified: 2017-04-11 17:22:50 +0100 (Tue, April 11, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -285,15 +284,19 @@ class SideBar(DropBase, QtGui.QTreeWidget):
     contextMenu = Menu('', self, isFloatWidget=True)
     from functools import partial
     # contextMenu.addAction('Delete', partial(self.removeItem, item))
-    contextMenu.addAction('Delete', partial(self._deleteItemObject, item))
-    contextMenu.popup(event.globalPos())
+    if item is not None:
+        objFromPid = self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole))
+        if objFromPid is not None:
+          contextMenu.addAction('Delete', partial(self._deleteItemObject, objFromPid))
+          contextMenu.exec_(self.mapToGlobal(event.pos()))
 
 
-  def _deleteItemObject(self,  item:QtGui.QTreeWidgetItem):
+  def _deleteItemObject(self,  obj):
     """Removes the specified item from the sidebar and deletes it from the project.
     NB, the clean-up of the side bar is done through notifiers
     """
-    self.project.getByPid(item.data(0, QtCore.Qt.DisplayRole)).delete()
+    if obj:
+      obj.delete()
 
   def _createItem(self, obj:AbstractWrapperObject):
     """Create a new sidebar item from a new object.

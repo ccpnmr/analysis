@@ -3,11 +3,17 @@ QWidget {
     margin: 0px 0px 0px 0px;
 
 }
+QTextEdit {
+        background-color: #f7ffff;
+        color: #122043;
+        margin: 0px 0px 0px 0px;
+        border: 1px solid #182548;
+        font-size: 1.5em;
+        }
 
 QFrame {
     background-color: #2a3358;
 }
-
 Frame {
     border: 1px solid #bec4f3;
 }
@@ -268,13 +274,6 @@ QLineEdit {
         font-size: 1.5em;
         }
 
-QTextEdit {
-        background-color: #f7ffff;
-        color: #122043;
-        margin: 0px 0px 0px 0px;
-        border: 1px solid #182548;
-        font-size: 1.5em;
-        }
 
 
 Dock  {

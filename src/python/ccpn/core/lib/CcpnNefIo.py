@@ -2749,7 +2749,7 @@ class CcpnNefReader:
         else:
           point = referencePoints[ii]
           points.append(point)
-          values.append(spectrumReference.point2Value(point))
+          values.append(spectrumReference.pointToValue(point))
     spectrum.referencePoints = points
     spectrum.referenceValues = values
 

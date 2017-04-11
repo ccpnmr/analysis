@@ -310,7 +310,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
       # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
       axisIndex = self._displayOrderSpectrumDimensionIndices[direction]
-      pivot = self.spectrum.mainSpectrumReferences[axisIndex].value2Point(pivotPpm)
+      pivot = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
     else:
       ph0 = ph1 = direction = 0
       pivot = 1
@@ -1011,7 +1011,7 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     # valueToPoint = dataDim.primaryDataDimRef.valueToPoint
 
     axisIndex = self._displayOrderSpectrumDimensionIndices[ind]
-    valueToPoint = self.spectrum.mainSpectrumReferences[axisIndex].value2Point
+    valueToPoint = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint
         
     strip = self.strip
     plotWidget = strip.plotWidget

@@ -240,11 +240,11 @@ class SpectrumReference(AbstractWrapperObject):
   def isAcquisition(self, value):
     self._wrappedData.dataDim.expDim.isAquisition = value
 
-  def point2Value(self, point:float) -> float:
+  def pointToValue(self, point:float) -> float:
     """Axis (ppm) value corresponding to point"""
     return self._wrappedData.pointToValue(point)
 
-  def value2Point(self, value:float) -> float:
+  def valueToPoint(self, value:float) -> float:
     """ Point number (float) corresponding to (ppm) value"""
     return self._wrappedData.valueToPoint(value)
 

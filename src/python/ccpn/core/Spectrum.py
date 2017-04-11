@@ -256,6 +256,16 @@ class Spectrum(AbstractWrapperObject):
     self._wrappedData.experiment.spinningRate = value
 
   @property
+  def noiseLevel(self) -> float:
+    """Estimated noise level for the spectrum,
+    defined as the estimated standard deviation of the points from the baseplane/baseline"""
+    return self._wrappedData.noiseLevel
+
+  @noiseLevel.setter
+  def noiseLevel(self, value:float):
+    self._wrappedData.noiseLevel = value
+
+  @property
   def experimentType(self) -> str:
     """Systematic experiment type descriptor (CCPN system)."""
     refExperiment = self._wrappedData.experiment.refExperiment

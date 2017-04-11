@@ -229,8 +229,8 @@ class GeneralTab(QtGui.QWidget, Base):
       Label(self, text="Date Recorded ", vAlign='t', hAlign='l', grid=(11, 0))
       Label(self, text="Noise Level ", vAlign='t', hAlign='l', grid=(12, 0))
       noiseLevelData = LineEdit(self)
-      if spectrum._apiDataSource.noiseLevel is not None:
-        noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.noiseLevel))
+      if spectrum.noiseLevel is not None:
+        noiseLevelData.setText(str('%.3d' % spectrum.noiseLevel))
       else:
         noiseLevelData.setText('None')
     else:
@@ -241,19 +241,19 @@ class GeneralTab(QtGui.QWidget, Base):
         axisCodes.append(''.join([code for code in isotopeCode if not code.isdigit()]))
 
       self.atomCodes = tuple(sorted(axisCodes))
-      self.spectrumType.addItems(list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys()))
-
+      itemsList = list(self.experimentTypes[spectrum.dimensionCount].get(self.atomCodes).keys())
+      self.spectrumType.addItems(itemsList)
       # Get the text that was used in the pulldown from the refExperiment
       # NBNB This could possibly give unpredictable results
       # if there is an experiment with experimentName (user settable!)
-      # that happens to match the synonym for a differnet experiment type.
+      # that happens to match the synonym for a different experiment type.
       # But if people will ignore our defined vocabulary, on their head be it!
       # Anyway, tha alternative (discarded) is to look into the ExpPrototype
-      # to compare RefExperiment names and synonyums
+      # to compare RefExperiment names and synonyms
       # or (too ugly for words) to have a third attribute in parallel with
       # spectrum.experimentName and spectrum.experimentType
       text = spectrum.experimentName
-      if text not in self.pulldownItems:
+      if text not in itemsList:
         text = spectrum.experimentType
       # apiRefExperiment = spectrum._wrappedData.experiment.refExperiment
       # text = apiRefExperiment and (apiRefExperiment.synonym or apiRefExperiment.name)
@@ -271,11 +271,11 @@ class GeneralTab(QtGui.QWidget, Base):
       noiseLevelData = LineEdit(self, vAlign='t', grid=(10, 1))
 
 
-      if spectrum._apiDataSource.noiseLevel is None:
-        noiseLevelData.setText(str('%.3d' % spectrum._apiDataSource.estimateNoise()))
+      if spectrum.noiseLevel is None:
+        noiseLevelData.setText(str('%.3d' % spectrum.estimateNoise()))
       else:
 
-        noiseLevelData.setText('%.3d' % spectrum._apiDataSource.noiseLevel)
+        noiseLevelData.setText('%.3d' % spectrum.noiseLevel)
 
 
   def _writeLoggingMessage(self, command):

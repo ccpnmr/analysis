@@ -5,18 +5,17 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:41:05 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-11 16:20:50 +0100 (Tue, April 11, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -28,9 +27,13 @@ __date__ = "$Date: 2016-09-07 12:42:52 +0100 (Wed, 07 Sep 2016) $"
 # Start of code
 #=========================================================================================
 
+import os
+import datetime
 from PyQt4 import QtGui, QtCore
 
 from ccpn.core.lib import Summary
+from ccpn.util import Logging
+from ccpn.util import Path
 
 from ccpn.ui.gui.widgets.Button import Button
 from ccpn.ui.gui.widgets.FileDialog import FileDialog
@@ -50,6 +53,7 @@ class ProjectSummaryPopup(QtGui.QDialog):
       modality = QtCore.Qt.ApplicationModal
       self.setWindowModality(modality)
     self.setWindowTitle(title)
+    self.resize(700, self.height())
 
     self._setupData()
 
@@ -153,17 +157,30 @@ class ProjectSummaryPopup(QtGui.QDialog):
     for n, chain in enumerate(self.chains):
       self.chainNumberDict[chain] = n+1
 
+  def _getPathPrefix(self):
+
+    directory = os.path.join(self.project.path, Path.CCPN_SUMMARIES_DIRECTORY)
+    if not os.path.exists(directory):
+      os.mkdir(directory)
+
+    now = datetime.datetime.now()
+    filePrefix = 'summary_%s_%02d%02d%02d_%02d%02d%02d' % \
+                 (self.project.name, now.year, now.month, now.day, now.hour, now.minute, now.second)
+
+    return os.path.join(directory, filePrefix)
+
+  def _showMessage(self, path):
+
+    message = 'Project summary written to file %s' % path
+
+    logger = Logging.getLogger()
+    logger.info(message)
+
+    self.parent().statusBar().showMessage(message)
+
   def _saveToPdf(self):
 
-    dialog = FileDialog(parent=self, fileMode=FileDialog.AnyFile, text='Specify Output File',
-                        preferences=self.parent().application.preferences.general)
-
-    path = dialog.selectedFile()
-    if not path:
-      return
-
-    if not path.lower().endswith('.pdf'):
-      path += '.pdf'
+    path = self._getPathPrefix() + '.pdf'
 
     printer = QtGui.QPrinter(QtGui.QPrinter.ScreenResolution)
     printer.setPaperSize(QtGui.QPrinter.A4)
@@ -177,3 +194,5 @@ class ProjectSummaryPopup(QtGui.QDialog):
     printer.newPage()
     self.chainFrame.render(painter)
     painter.end()
+
+    self._showMessage(path)

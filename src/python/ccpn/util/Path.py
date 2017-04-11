@@ -9,18 +9,17 @@ Includes extensions of sys.path functions and CCPN-specific functionality
 import glob
 
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
-__modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-07 11:40:45 +0100 (Fri, April 07, 2017) $"
+__modifiedBy__ = "$modifiedBy: Wayne Boucher $"
+__dateModified__ = "$dateModified: 2017-04-11 16:20:50 +0100 (Tue, April 11, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -50,6 +49,7 @@ CCPN_API_DIRECTORY = 'ccpnv3'
 CCPN_DIRECTORY_SUFFIX = '.ccpn'
 CCPN_BACKUP_SUFFIX = '_backup'
 CCPN_ARCHIVES_DIRECTORY = 'archives'
+CCPN_SUMMARIES_DIRECTORY = 'summaries'
 
 def normalisePath(path, makeAbsolute=None):
   """

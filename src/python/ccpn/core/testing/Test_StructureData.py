@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-10 17:27:11 +0100 (Mon, April 10, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-11 10:07:55 +0100 (Tue, April 11, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -194,8 +194,11 @@ class TestPandasData(WrapperTesting):
                  origIndex=9)
     ))
     self.sorted = data.backboneSelector
+    self.assertEquals(list(self.sorted), [False]*18)
     self.sorted = data.amideProtonSelector
+    self.assertEquals(list(self.sorted), [False]*18)
     self.sorted = data.amideNitrogenSelector
+    self.assertEquals(list(self.sorted), [False]*18)
 
   def test_structureData_ChainCode(self):
     ensemble = self.project.newStructureEnsemble()
@@ -236,9 +239,20 @@ class TestPandasData(WrapperTesting):
     ensemble = self.project.newStructureEnsemble()
     data = ensemble.data
 
-    data['atomName'] = ['CB', 'HB1', 'HB2', 'HB3']
-    data['residueName'] = 'ALA'
+    # data['atomName'] = ['CB', 'HB1', 'HB2', 'HB3', 'CA', 'C', 'N', 'O', 'H']
+    # data['residueName'] = ['ALA']*4 + ['MET']*5
+
+    data['atomName'] = ['CA', 'C', 'N', 'O', 'H']
+    data['residueName'] = ['MET']*5
     self.sorted = data.methylSelector       # this one crashes
+    self.assertEquals(list(self.sorted), [False]*6)
+
+    self.sorted = data.backboneSelector
+    self.assertEquals(list(self.sorted), [False]+[True]*4+[False])
+    self.sorted = data.amideProtonSelector
+    self.assertEquals(list(self.sorted), [False]*6)
+    self.sorted = data.amideNitrogenSelector
+    self.assertEquals(list(self.sorted), [False]*3+[True]+[False]*2)
 
   def test_structureData_methylSelectorLEU(self):
     ensemble = self.project.newStructureEnsemble()

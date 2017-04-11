@@ -19,7 +19,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-07 14:05:12 +0100 (Fri, April 07, 2017) $"
+__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -92,7 +92,7 @@ class CcpnModule(Dock):
     self.settingsWidget = None
     if self.includeSettingsWidget:
       #self.settingsWidget = Widget(parent=self, setLayout=False)  #QtGui.QWidget(self)
-      self.settingsWidget = Frame(parent=self, fShape='styledPanel', fShadow='plain')
+      self.settingsWidget = Frame(parent=self, showBorder=True, fShape='styledPanel', fShadow='plain')
       if self.settingsOnTop:
         self.addWidget(self.settingsWidget, 0, 0)
         self.addWidget(self.mainWidget, 1, 0)

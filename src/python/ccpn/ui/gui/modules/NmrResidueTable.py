@@ -1,7 +1,7 @@
 """This file contains NmrResidueTable class
 
 intial version by Simon;
-extensively modified by Geerten 1-7/12/2016
+extensively modified by Geerten 1-7/12/2016; 11/04/2017
 """
 #=========================================================================================
 # Licence, Reference and Credits
@@ -16,9 +16,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -28,7 +27,7 @@ from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList
+from ccpn.ui.gui.widgets.PulldownList import PulldownList, PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
 
 
@@ -51,8 +50,10 @@ class NmrResidueTable(Widget):
     self.nmrChains = project.nmrChains
     self.callback = callback
 
-    self.labelWidget = Label(self, "NmrChain:", grid=(0,0), gridSpan=(1,1))
-    self.nmrChainPulldown = PulldownList(self, grid=(0, 1), gridSpan=(1,1))
+    self.ncWidget = PulldownListCompoundWidget(parent=self, labelText="NmrChain:",
+                                               grid=(0,0), gridSpan=(1,2),
+                                               minimumWidths=(0,100)
+                                              )
 
     columns = [('#', lambda nmrResidue: nmrResidue.serial),
                ('NmrChain', lambda nmrResidue: nmrResidue._parent.id),
@@ -69,7 +70,7 @@ class NmrResidueTable(Widget):
     self.nmrResidueTable = GuiTableGenerator(self, self.project.nmrChains,
                                              actionCallback=self.callback,
                                              columns=columns,
-                                             selector=self.nmrChainPulldown,
+                                             selector=self.ncWidget.pulldownList,
                                              tipTexts=tipTexts,
                                              objectType='nmrResidues',
                                              selectionCallback=self._setNmrResidue,
@@ -85,7 +86,7 @@ class NmrResidueTable(Widget):
     return len(set(l1))
 
   def _setNmrResidue(self, nmrResidue, row, col):
-    self.project._appBase.current.nmrResidue = nmrResidue
+    self.current.nmrResidue = nmrResidue
 
   def updateTable(self):
     self.nmrResidueTable.updateTable()

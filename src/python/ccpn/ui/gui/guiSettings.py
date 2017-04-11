@@ -15,9 +15,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author: geertenv $"
-__date__ = "$Date: 2016-11-15 21:37:50 +0000 (Tue, 15 Nov 2016) $"
-__version__ = "$Revision: 9996 $"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -71,11 +70,16 @@ def getColourScheme():
   """
   :return: colourScheme
   """
-  application = QtCore.QCoreApplication.instance()._ccpnApplication
-  colourScheme = application.colourScheme
-  if colourScheme not in COLOUR_SCHEMES:
-    raise RuntimeError('Undefined colour scheme')
-  return colourScheme
+  app = QtCore.QCoreApplication.instance()
+  if hasattr(app,'_ccpnApplication'):
+    application = getattr(app,'_ccpnApplication')
+    colourScheme = application.colourScheme
+    if colourScheme not in COLOUR_SCHEMES:
+      raise RuntimeError('Undefined colour scheme')
+    return colourScheme
+  # for now to make the tests run
+  else:
+    return LIGHT
 
 
 def getColours():

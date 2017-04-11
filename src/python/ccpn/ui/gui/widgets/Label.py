@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -39,6 +38,7 @@ class Label(QtGui.QLabel, Base):
     margin-top: %dpx;
     margin-right: %dpx;
     margin-bottom: %dpx;
+    border: 0px;
   }
   """
 

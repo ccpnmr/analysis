@@ -14,9 +14,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -32,6 +31,7 @@ HALIGN_DICT = {
   'left': QtCore.Qt.AlignLeft,
   'right': QtCore.Qt.AlignRight,
   'center': QtCore.Qt.AlignHCenter,
+  'centre': QtCore.Qt.AlignHCenter,
   'l': QtCore.Qt.AlignLeft,
   'r': QtCore.Qt.AlignRight,
   'c': QtCore.Qt.AlignHCenter,
@@ -101,7 +101,7 @@ class Base():
 
         # setContentsMargin(left, top, right, bottom)
         #layout.setContentsMargins(2,2,2,2)
-        layout.setContentsMargins(1,1,1,1)
+        #layout.setContentsMargins(1,1,1,1)
         layout.setContentsMargins(0, 0, 0, 0)
         parent.setLayout( layout )
       if isinstance(layout, QtGui.QGridLayout):

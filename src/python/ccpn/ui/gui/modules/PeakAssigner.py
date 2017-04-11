@@ -15,9 +15,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -98,7 +97,7 @@ class PeakAssigner(CcpnModule):
 
     # Main content widgets
     self.peakLabel = Label(self.mainWidget, text='Peak:', bold=True, grid=(0,0), vAlign='center', margins=[2,5,2,5])
-    self.selectionFrame = Frame(self.mainWidget, fShape='noFrame', grid=(1, 0), vAlign='top')
+    self.selectionFrame = Frame(self.mainWidget, showBorder=True, fShape='noFrame', grid=(1, 0), vAlign='top')
     self.selectionLayout = QtGui.QGridLayout()
     self.selectionLayout.setSpacing(0)
     self.selectionLayout.setContentsMargins(0, 0, 0, 0)

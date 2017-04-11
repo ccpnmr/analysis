@@ -1053,6 +1053,12 @@ Use axisCodes to set magnetisation transfers instead.""")
   def projectedToFile(self, path:str, xDim:int=1, yDim:int=2, method:str='max', format:str=Formats.NMRPIPE):
     return self._apiDataSource.projectedToFile(path, xDim, yDim, method, format)
 
+  def get1dSpectrumData(self):
+    """Get position,scaledData numpy array for 1D spectrum.
+
+    Gives first 1D slice for nD"""
+    return self._apiDataSource.get1dSpectrumData()
+
   def reorderValues(self, values, newAxisCodeOrder):
     """Reorder values in spectrum dimension order to newAxisCodeOrder
     by matching newAxisCodeOrder to spectrum axis code order"""

@@ -51,14 +51,9 @@ class GuiSpectrumView1d(GuiSpectrumView):
         dimMapping is from spectrum numerical dimensions to spectrumPane numerical dimensions
         (for example, xDim is what gets mapped to 0 and yDim is what gets mapped to 1)
     """
-    #GuiSpectrumView.__init__(self, guiSpectrumDisplay, apiSpectrumView, dimMapping)
 
     GuiSpectrumView.__init__(self)
 
-    # if self.spectrum.sliceColour is None:
-    #   self.spectrum.sliceColour = list(spectrumColours.keys())[0]
-
-    ###self.data = self._apiDataSource.get1dSpectrumData()
     self.data = self.spectrum.positions, self.spectrum.intensities
 
     # for strip in self.strips:
@@ -219,16 +214,16 @@ class GuiSpectrumView1d(GuiSpectrumView):
     print(self.plot)
     
 
-  # TBD: should function below be removed???
-  def getSliceData(self, spectrum=None):
-    """
-    Gets slice data for drawing 1d spectrum using specified spectrum.
-    """
-    if spectrum is None:
-      apiDataSource = self._apiDataSource
-    else:
-      apiDataSource = spectrum._apiDataSource
-    return apiDataSource.get1dSpectrumData()
+  # # TBD: should function below be removed???
+  # def getSliceData(self, spectrum=None):
+  #   """
+  #   Gets slice data for drawing 1d spectrum using specified spectrum.
+  #   """
+  #   if spectrum is None:
+  #     apiDataSource = self._apiDataSource
+  #   else:
+  #     apiDataSource = spectrum._apiDataSource
+  #   return apiDataSource.get1dSpectrumData()
 
   def update(self):
     self.plot.curve.setData(self.data[0], self.data[1])

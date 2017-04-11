@@ -1,0 +1,519 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.format.compatibility.Converters1 &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.format.compatibility.Converters1</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">======================COPYRIGHT/LICENSE START==========================</span>
+
+<span class="sd">Converters1.py: Data compatibility handling</span>
+
+<span class="sd">Copyright (C) 2007 Rasmus Fogh (CCPN project)</span>
+<span class="sd"> </span>
+<span class="sd">=======================================================================</span>
+
+<span class="sd">This library is free software; you can redistribute it and/or</span>
+<span class="sd">modify it under the terms of the GNU Lesser General Public</span>
+<span class="sd">License as published by the Free Software Foundation; either</span>
+<span class="sd">version 2.1 of the License, or (at your option) any later version.</span>
+<span class="sd"> </span>
+<span class="sd">A copy of this license can be found in ../../../../license/LGPL.license.</span>
+<span class="sd"> </span>
+<span class="sd">This library is distributed in the hope that it will be useful,</span>
+<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="sd">Lesser General Public License for more details.</span>
+<span class="sd"> </span>
+<span class="sd">You should have received a copy of the GNU Lesser General Public</span>
+<span class="sd">License along with this library; if not, write to the Free Software</span>
+<span class="sd">Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</span>
+
+<span class="sd">======================COPYRIGHT/LICENSE END============================</span>
+
+<span class="sd">To obtain more information about this code:</span>
+
+<span class="sd">- CCPN website (http://www.ccpn.ac.uk)</span>
+
+<span class="sd">- contact Rasmus Fogh (ccpn@bioc.cam.ac.uk)</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">If you are using this software for academic purposes, we suggest</span>
+<span class="sd">quoting the following reference:</span>
+
+<span class="sd">===========================REFERENCE START=============================</span>
+<span class="sd">Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne</span>
+<span class="sd">Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and</span>
+<span class="sd">Ernest D. Laue (2005). A framework for scientific data modeling and </span>
+<span class="sd">automated software development. Bioinformatics 21, 1678-1684.</span>
+<span class="sd">===========================REFERENCE END===============================</span>
+<span class="sd"> </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># imports</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Conversion</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops</span> <span class="kn">import</span> <span class="n">Version</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.ApiError</span> <span class="kn">import</span> <span class="n">ApiError</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+
+<span class="n">currentVersion</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">currentModelVersion</span>
+
+<span class="n">mapInfoLocation</span> <span class="o">=</span> <span class="s1">&#39;ccpnmodel.ccpncore.memops.format.compatibility&#39;</span>
+
+
+<div class="viewcode-block" id="modifyIoMap"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.format.compatibility.html#ccpnmodel.ccpncore.memops.format.compatibility.Converters1.modifyIoMap">[docs]</a><span class="k">def</span> <span class="nf">modifyIoMap</span><span class="p">(</span><span class="n">fromVersionStr</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Adapt globalMapping to read oldVersion data</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># HACK - 2,0,6 is  aside branch, and a lot of extra work to upgrade correctly.</span>
+  <span class="c1"># Treating it as identical to 2.0.5 should (hopefully) work most of the time.</span>
+  <span class="c1"># Alternatively one could try treating it as 2.1.0 instead</span>
+  <span class="k">if</span> <span class="n">fromVersionStr</span> <span class="o">==</span> <span class="s1">&#39;2.0.6&#39;</span><span class="p">:</span>
+    <span class="n">fromVersionStr</span> <span class="o">=</span> <span class="s1">&#39;2.0.5&#39;</span>
+
+  <span class="n">fromVersion</span> <span class="o">=</span> <span class="n">Version</span><span class="o">.</span><span class="n">Version</span><span class="p">(</span><span class="n">fromVersionStr</span><span class="p">)</span>
+
+  <span class="n">infodd</span> <span class="o">=</span> <span class="n">Conversion</span><span class="o">.</span><span class="n">getConversionInfo</span><span class="p">(</span><span class="n">fromVersion</span><span class="p">,</span> <span class="n">currentVersion</span><span class="p">)</span>
+  
+  <span class="c1"># Model information by guid</span>
+  <span class="n">anApiClass</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;IMPL&#39;</span><span class="p">][</span><span class="s1">&#39;abstractTypes&#39;</span><span class="p">][</span><span class="s1">&#39;MemopsObject&#39;</span><span class="p">][</span><span class="s1">&#39;class&#39;</span><span class="p">]</span>
+  <span class="n">newElementsByGuid</span> <span class="o">=</span> <span class="n">getElementsByGuid</span><span class="p">(</span><span class="n">anApiClass</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">topPackage</span><span class="p">())</span>
+  
+  <span class="c1"># new elements retrofitted by hand and therefore treated as old </span>
+  <span class="c1"># used for e.g. changes of parent tree.</span>
+  <span class="n">elemsTreatedAsOld</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">infodd</span><span class="p">[</span><span class="s1">&#39;elemsTreatedAsOld&#39;</span><span class="p">])</span>
+
+  <span class="n">diffMap</span> <span class="o">=</span>  <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.MapInfo&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mapInfoLocation</span><span class="p">,</span><span class="n">fromVersion</span><span class="o">.</span><span class="n">getDirName</span><span class="p">()))</span>
+
+  <span class="c1"># correct maps for newly introduced elements</span>
+  <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;newElements&#39;</span><span class="p">,</span> <span class="s1">&#39;newMandatories&#39;</span><span class="p">,</span> <span class="s1">&#39;neutraliseElements&#39;</span><span class="p">):</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">diffMap</span><span class="p">,</span> <span class="n">tag</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">,</span> <span class="n">newGuid</span><span class="p">)</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">globalMapping</span> <span class="ow">and</span> <span class="n">newGuid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elemsTreatedAsOld</span><span class="p">:</span>
+        <span class="n">removeElementName</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">newElementsByGuid</span><span class="p">)</span>
+
+  <span class="c1"># correct maps for skipped elements</span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">,</span> <span class="n">newGuid</span><span class="p">,</span> <span class="n">elemType</span><span class="p">)</span> <span class="ow">in</span> <span class="n">diffMap</span><span class="o">.</span><span class="n">skipElements</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">globalMapping</span> <span class="ow">and</span> <span class="n">newGuid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elemsTreatedAsOld</span><span class="p">:</span>
+      <span class="n">fixElementMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="s1">&#39;skip&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">newElementsByGuid</span><span class="p">,</span>
+                    <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">elemType</span> <span class="o">==</span> <span class="s1">&#39;MetaClass&#39;</span><span class="p">:</span>
+        <span class="n">fixExoLinkMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="s1">&#39;skip&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">typeName</span><span class="p">)</span>
+
+  <span class="c1"># correct maps for changed valueTypes</span>
+  <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">diffMap</span><span class="o">.</span><span class="n">typeChanges</span><span class="p">:</span>
+    <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">newGuid</span><span class="p">,</span> <span class="n">elemMap</span><span class="p">,</span> <span class="n">valueTypeGuid</span><span class="p">)</span> <span class="o">=</span> <span class="n">tt</span>
+    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">globalMapping</span> <span class="ow">and</span> <span class="n">newGuid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elemsTreatedAsOld</span><span class="p">:</span>
+      <span class="n">fixElementMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">newElementsByGuid</span><span class="p">,</span>
+                         <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">,</span> <span class="n">valueTypeGuid</span><span class="o">=</span><span class="n">valueTypeGuid</span><span class="p">,</span>
+                         <span class="n">elemMap</span><span class="o">=</span><span class="n">elemMap</span><span class="p">,</span> <span class="n">overrideGuidMap</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="c1"># correct maps for renamed elements</span>
+  <span class="c1"># NB must be done after valueTypes corrections, </span>
+  <span class="c1"># as elements may be both renamed and &#39;delay&#39;ed or &#39;skip&#39;ped</span>
+  <span class="c1"># by changed valueType </span>
+  <span class="k">for</span> <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">,</span> <span class="n">newName</span><span class="p">,</span> <span class="n">newGuid</span><span class="p">)</span> <span class="ow">in</span> <span class="n">diffMap</span><span class="o">.</span><span class="n">renames</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">globalMapping</span> <span class="ow">and</span> <span class="n">newGuid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elemsTreatedAsOld</span><span class="p">:</span>
+      <span class="n">fixElementMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">newElementsByGuid</span><span class="p">,</span>
+                    <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">elemName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fixExoLinkMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">typeName</span><span class="p">)</span>
+  <span class="n">dd</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;mapsByGuid&#39;</span><span class="p">][</span><span class="s1">&#39;www.ccpn.ac.uk_Fogh_2006-08-16-18:20:12_00012&#39;</span><span class="p">]</span>
+      
+
+  <span class="c1"># correct maps for delayed elements</span>
+  <span class="c1"># NB, must be done after renaming, as we use type names to find </span>
+  <span class="c1"># appropriate maps</span>
+  <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">diffMap</span><span class="o">.</span><span class="n">delayElements</span><span class="p">:</span>
+    <span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">,</span> <span class="n">newGuid</span><span class="p">,</span> <span class="n">elemMap</span><span class="p">,</span> <span class="n">valueTypeGuid</span><span class="p">)</span> <span class="o">=</span> <span class="n">tt</span>
+    <span class="k">if</span> <span class="n">prefix</span> <span class="ow">in</span> <span class="n">globalMapping</span> <span class="ow">and</span> <span class="n">newGuid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elemsTreatedAsOld</span><span class="p">:</span>
+      <span class="n">fixElementMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="s1">&#39;delay&#39;</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">newElementsByGuid</span><span class="p">,</span>
+                    <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">,</span> <span class="n">valueTypeGuid</span><span class="o">=</span><span class="n">valueTypeGuid</span><span class="p">,</span>
+                    <span class="n">elemMap</span><span class="o">=</span><span class="n">elemMap</span><span class="p">)</span>
+
+  <span class="c1"># make extra changes</span>
+  <span class="n">infodd</span><span class="p">[</span><span class="s1">&#39;extraMapChanges&#39;</span><span class="p">](</span><span class="n">globalMapping</span><span class="p">)</span></div>
+  
+<div class="viewcode-block" id="removeElementName"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.format.compatibility.html#ccpnmodel.ccpncore.memops.format.compatibility.Converters1.removeElementName">[docs]</a><span class="k">def</span> <span class="nf">removeElementName</span><span class="p">(</span><span class="n">guid</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">newElementsByGuid</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Remove element from name lists used for selecting input</span>
+<span class="sd">  and remove element from loadMaps (in case another element with the</span>
+<span class="sd">  same signature needs the slot).</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="c1"># set up</span>
+  <span class="n">useObj</span> <span class="o">=</span> <span class="n">newElementsByGuid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guid</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">useObj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># guid does not exist. Probably was not included in model generation. </span>
+    <span class="c1"># Anyway, nothing to do.</span>
+    <span class="k">return</span>
+  <span class="n">newName</span> <span class="o">=</span> <span class="n">useObj</span><span class="o">.</span><span class="n">name</span>
+  <span class="n">mapsByGuid</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;mapsByGuid&#39;</span><span class="p">]</span>
+  
+  <span class="c1"># remove from lists in container and its subtypes</span>
+  <span class="k">if</span> <span class="n">useObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;MetaAttribute&#39;</span><span class="p">,</span> <span class="s1">&#39;MetaRole&#39;</span><span class="p">):</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">useObj</span><span class="o">.</span><span class="n">isAbstract</span> 
+        <span class="ow">or</span> <span class="p">(</span><span class="n">useObj</span><span class="o">.</span><span class="n">isDerived</span> <span class="ow">and</span> <span class="n">useObj</span><span class="o">.</span><span class="n">changeability</span> <span class="o">==</span> <span class="n">metaConstants</span><span class="o">.</span><span class="n">frozen</span><span class="p">)):</span>
+      <span class="c1"># These elements have no maps, so nothing to do</span>
+      <span class="k">return</span>
+      
+    <span class="n">subtypes</span> <span class="o">=</span> <span class="n">useObj</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getAllSubtypes</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">metaclass</span> <span class="ow">in</span> <span class="n">subtypes</span><span class="p">:</span>
+      <span class="n">containerMap</span> <span class="o">=</span>  <span class="n">mapsByGuid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metaclass</span><span class="o">.</span><span class="n">guid</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">containerMap</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="c1"># NB there might not be a map if this is (e.g.) an abstract superclass </span>
+        <span class="c1"># that does not inherit from DataObject </span>
+        <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;simpleAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;headerAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;optLinks&#39;</span><span class="p">,</span> <span class="s1">&#39;cplxAttrs&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;children&#39;</span><span class="p">):</span>
+          <span class="n">ll</span> <span class="o">=</span> <span class="n">containerMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">newName</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+            <span class="n">ll</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span>
+  
+    <span class="c1"># remove from loadMaps</span>
+    <span class="n">oldMap</span> <span class="o">=</span> <span class="n">mapsByGuid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">guid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">oldMap</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># check if there is need for concern</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">useObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaRole&#39;</span> <span class="ow">and</span> 
+          <span class="n">useObj</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">container</span> <span class="ow">in</span> <span class="n">useObj</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">importedPackages</span><span class="p">):</span>
+        <span class="c1"># interpackage link in backwards direction</span>
+        <span class="k">pass</span>
+      <span class="k">elif</span> <span class="p">(</span><span class="n">useObj</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;MetaRole&#39;</span> <span class="ow">and</span> 
+            <span class="n">useObj</span><span class="o">.</span><span class="n">hierarchy</span> <span class="o">==</span> <span class="s1">&#39;parent&#39;</span><span class="p">):</span>
+        <span class="k">pass</span>
+      <span class="k">elif</span> <span class="n">useObj</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">guid</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mapsByGuid</span><span class="p">:</span>
+        <span class="c1"># The class is not mapped. </span>
+        <span class="c1"># Could be (is?) abstract multi-inheritance class</span>
+        <span class="k">pass</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;WARNING, no previous map found for </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">useObj</span><span class="p">,</span> <span class="n">guid</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">del</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;loadMaps&#39;</span><span class="p">][</span><span class="n">oldMap</span><span class="p">[</span><span class="s1">&#39;tag&#39;</span><span class="p">]]</span></div>
+  
+  
+<div class="viewcode-block" id="fixElementMap"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.format.compatibility.html#ccpnmodel.ccpncore.memops.format.compatibility.Converters1.fixElementMap">[docs]</a><span class="k">def</span> <span class="nf">fixElementMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">newElementsByGuid</span><span class="p">,</span> 
+                  <span class="n">typeName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">elemName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">overrideGuidMap</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> 
+                  <span class="n">valueTypeGuid</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">elemMap</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; insert/modify I/O map in mapping </span>
+<span class="sd">  - newGuid is the guid to use in the new map </span>
+<span class="sd">  (new guid if element exists, old guid otherwise) </span>
+<span class="sd">  - prefix is the package shortname</span>
+<span class="sd">  - typeName is the name of the class/DataObjType (if any) </span>
+<span class="sd">  - elemName is the name of the ClassElement (if any) </span>
+<span class="sd">  - overrideGuidMap controls if an existing map should be overridden</span>
+<span class="sd">  - valueTypeGuid is the guid for a new valueType (for attr)</span>
+<span class="sd">  - elemMap is a passed-in ({typ, proc, name, eType}) I/O map for the element</span>
+<span class="sd">  </span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.format.xml</span> <span class="kn">import</span> <span class="n">XmlGen</span>
+  
+  <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;ignore&#39;</span><span class="p">:</span>
+    <span class="k">return</span>
+  
+  <span class="k">elif</span> <span class="n">action</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="s1">&#39;skip&#39;</span><span class="p">,</span> <span class="s1">&#39;delay&#39;</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;action: </span><span class="si">%s</span><span class="s2"> not supported&quot;</span> <span class="o">%</span> <span class="n">action</span><span class="p">)</span>
+  
+  <span class="n">loadMaps</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;loadMaps&#39;</span><span class="p">]</span>
+  <span class="n">mapsByGuid</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;mapsByGuid&#39;</span><span class="p">]</span>
+  <span class="n">mapping</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="n">prefix</span><span class="p">]</span>
+  
+  <span class="k">if</span> <span class="n">typeName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">return</span>
+  
+  <span class="n">xmlTag</span> <span class="o">=</span> <span class="n">XmlGen</span><span class="o">.</span><span class="n">xmlTag</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">typeName</span><span class="p">,</span> <span class="n">elemName</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">elemName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;dataType&#39;</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">typ</span> <span class="o">=</span> <span class="s1">&#39;elem&#39;</span>  
+  
+  <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;skip&#39;</span><span class="p">:</span>
+    <span class="c1"># we are skipping the element</span>
+    <span class="k">if</span> <span class="n">newGuid</span> <span class="ow">in</span> <span class="n">mapsByGuid</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: guid already has map&quot;</span> <span class="o">%</span> <span class="n">xmlTag</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">mapsByGuid</span><span class="p">[</span><span class="n">newGuid</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;guid&#39;</span><span class="p">:</span><span class="n">newGuid</span><span class="p">,</span> <span class="s1">&#39;proc&#39;</span><span class="p">:</span><span class="s1">&#39;skip&#39;</span><span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;dataType&#39;</span><span class="p">:</span>
+      <span class="c1"># put map in abstractTypes</span>
+      <span class="n">abstractTypes</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="s1">&#39;abstractTypes&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">typeName</span> <span class="ow">in</span> <span class="n">abstractTypes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmlTag</span><span class="p">,</span> <span class="n">typeName</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">abstractTypes</span><span class="p">[</span><span class="n">typeName</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span>
+  
+  <span class="k">elif</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;rename&#39;</span><span class="p">:</span>
+    <span class="c1"># this is a renaming</span>
+    
+    <span class="c1"># get previous I/O map (must exist)</span>
+    <span class="n">newMap</span> <span class="o">=</span> <span class="n">mapsByGuid</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newGuid</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">newMap</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="c1"># guid does not exist. Probably was not included in model generation. </span>
+      <span class="c1"># Anyway, nothing to do.</span>
+      <span class="k">return</span>
+    
+    <span class="c1"># clean up loadMaps</span>
+    <span class="k">del</span> <span class="n">loadMaps</span><span class="p">[</span><span class="n">newMap</span><span class="p">[</span><span class="s1">&#39;tag&#39;</span><span class="p">]]</span>
+    
+    <span class="k">if</span> <span class="n">typ</span> <span class="o">==</span> <span class="s1">&#39;elem&#39;</span><span class="p">:</span>
+      <span class="c1"># ClassElement</span>
+      <span class="n">newObj</span> <span class="o">=</span> <span class="n">newElementsByGuid</span><span class="p">[</span><span class="n">newGuid</span><span class="p">]</span>
+      <span class="n">newName</span> <span class="o">=</span> <span class="n">newObj</span><span class="o">.</span><span class="n">name</span>
+      
+      <span class="k">if</span> <span class="n">newName</span> <span class="o">!=</span> <span class="n">elemName</span><span class="p">:</span>
+        <span class="c1"># they may be equal if the container class only is being renamed</span>
+        
+        <span class="c1"># fix attribute lists and contents for container and its subtypes</span>
+        <span class="n">subtypes</span> <span class="o">=</span> <span class="n">newObj</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getAllSubtypes</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">metaclass</span> <span class="ow">in</span> <span class="n">subtypes</span><span class="p">:</span>
+          <span class="n">fixMap</span> <span class="o">=</span> <span class="n">mapsByGuid</span><span class="p">[</span><span class="n">metaclass</span><span class="o">.</span><span class="n">guid</span><span class="p">]</span>
+ 
+          <span class="c1"># fix content map</span>
+          <span class="n">contDict</span> <span class="o">=</span> <span class="n">fixMap</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">elemName</span> <span class="ow">in</span> <span class="n">contDict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmlTag</span><span class="p">,</span> <span class="n">elemName</span><span class="p">))</span>
+          <span class="n">contDict</span><span class="p">[</span><span class="n">elemName</span><span class="p">]</span> <span class="o">=</span> <span class="n">contDict</span><span class="p">[</span><span class="n">newName</span><span class="p">]</span>
+          <span class="k">del</span> <span class="n">contDict</span><span class="p">[</span><span class="n">newName</span><span class="p">]</span>
+ 
+          <span class="c1"># fix attribute lists</span>
+          <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;simpleAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;headerAttrs&#39;</span><span class="p">,</span> <span class="s1">&#39;optLinks&#39;</span><span class="p">,</span> <span class="s1">&#39;cplxAttrs&#39;</span><span class="p">):</span>
+          <span class="c1"># For technical reasons &#39;children&#39; must stay with the original name:</span>
+          <span class="c1"># for tag in (&#39;simpleAttrs&#39;, &#39;headerAttrs&#39;, &#39;optLinks&#39;, &#39;cplxAttrs&#39;,</span>
+          <span class="c1">#             &#39;children&#39;):</span>
+            <span class="n">ll</span> <span class="o">=</span> <span class="n">fixMap</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ll</span> <span class="ow">and</span> <span class="n">newName</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+              <span class="n">ll</span><span class="p">[</span><span class="n">ll</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">newName</span><span class="p">)]</span> <span class="o">=</span> <span class="n">elemName</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># classifier - still needs renaming</span>
+      <span class="c1"># as we use the type name to find the right map</span>
+      <span class="c1"># put map in abstractTypes</span>
+      <span class="n">abstractTypes</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="s1">&#39;abstractTypes&#39;</span><span class="p">]</span>
+      <span class="k">if</span> <span class="n">typeName</span> <span class="ow">in</span> <span class="n">abstractTypes</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmlTag</span><span class="p">,</span> <span class="n">typeName</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">abstractTypes</span><span class="p">[</span><span class="n">typeName</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span>
+    
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># action == &#39;delay&#39;</span>
+    <span class="c1"># we are delaying storage for use in compatibility</span>
+    <span class="k">if</span> <span class="n">typ</span> <span class="o">!=</span> <span class="s1">&#39;elem&#39;</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: only ClassElements may be &#39;delay&#39;ed&quot;</span> <span class="o">%</span> <span class="n">xmlTag</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">valueTypeGuid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">elemMap</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mapsByGuid</span><span class="p">[</span><span class="n">valueTypeGuid</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">overrideGuidMap</span><span class="p">:</span>
+      <span class="n">newMap</span> <span class="o">=</span> <span class="n">mapsByGuid</span><span class="p">[</span><span class="n">newGuid</span><span class="p">]</span>
+    
+    <span class="k">elif</span> <span class="n">newGuid</span> <span class="ow">in</span> <span class="n">mapsByGuid</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: guid </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmlTag</span><span class="p">,</span> <span class="n">newGuid</span><span class="p">))</span>
+    
+    <span class="k">elif</span> <span class="n">xmlTag</span> <span class="ow">in</span> <span class="n">loadMaps</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: xml tag already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">xmlTag</span><span class="p">,))</span>
+    
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">mapsByGuid</span><span class="p">[</span><span class="n">newGuid</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="n">containerGuid</span> <span class="o">=</span> <span class="n">mapping</span><span class="p">[</span><span class="s1">&#39;abstractTypes&#39;</span><span class="p">][</span><span class="n">typeName</span><span class="p">][</span><span class="s1">&#39;guid&#39;</span><span class="p">]</span>
+      <span class="n">newContainer</span> <span class="o">=</span> <span class="n">newElementsByGuid</span><span class="p">[</span><span class="n">containerGuid</span><span class="p">]</span>
+      <span class="n">subtypes</span> <span class="o">=</span> <span class="n">newContainer</span><span class="o">.</span><span class="n">getAllSubtypes</span><span class="p">()</span>
+      <span class="k">for</span> <span class="n">metaclass</span> <span class="ow">in</span> <span class="n">subtypes</span><span class="p">:</span>
+        <span class="c1"># put new map in content dictionary</span>
+        <span class="n">fixMap</span> <span class="o">=</span> <span class="n">mapsByGuid</span><span class="p">[</span><span class="n">metaclass</span><span class="o">.</span><span class="n">guid</span><span class="p">]</span>
+        <span class="n">contDict</span> <span class="o">=</span> <span class="n">fixMap</span><span class="p">[</span><span class="s1">&#39;content&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">elemName</span> <span class="ow">in</span> <span class="n">contDict</span><span class="p">:</span>
+          <span class="c1"># we are overriding the previous definition.The tag is already there</span>
+          <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># put tag on cplxAttrs (it does not matter which list it is on)</span>
+          <span class="n">contDict</span><span class="p">[</span><span class="n">elemName</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span>
+          <span class="n">ll</span> <span class="o">=</span> <span class="n">fixMap</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;cplxAttrs&#39;</span><span class="p">,</span> <span class="p">[])</span>
+          <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elemName</span><span class="p">)</span>
+          
+    <span class="c1"># update map contents</span>
+    <span class="n">newMap</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">elemMap</span><span class="p">)</span>
+    <span class="n">newMap</span><span class="p">[</span><span class="s1">&#39;proc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;delay&#39;</span>
+  
+  <span class="c1"># fix loadMaps</span>
+  <span class="n">loadMaps</span><span class="p">[</span><span class="n">xmlTag</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span></div>
+  
+  
+<div class="viewcode-block" id="fixExoLinkMap"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.format.compatibility.html#ccpnmodel.ccpncore.memops.format.compatibility.Converters1.fixExoLinkMap">[docs]</a><span class="k">def</span> <span class="nf">fixExoLinkMap</span><span class="p">(</span><span class="n">newGuid</span><span class="p">,</span> <span class="n">action</span><span class="p">,</span> <span class="n">prefix</span><span class="p">,</span> <span class="n">globalMapping</span><span class="p">,</span> <span class="n">typeName</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Fix exoLink maps</span>
+<span class="sd">  if action == &#39;rename&#39; enter newGuid map under (prefix, typeName) name</span>
+<span class="sd">  if action == &#39;skip&#39;, enter skip record for guid under (prefix, typeName) name</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.format.xml</span> <span class="kn">import</span> <span class="n">XmlGen</span>
+  
+  <span class="n">exoTag</span> <span class="o">=</span> <span class="n">XmlGen</span><span class="o">.</span><span class="n">xmlTag</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">typeName</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;exo&#39;</span><span class="p">)</span>
+  
+  <span class="c1"># set up</span>
+  <span class="n">exolinks</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="n">prefix</span><span class="p">][</span><span class="s1">&#39;exolinks&#39;</span><span class="p">]</span>
+  <span class="n">loadMaps</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;loadMaps&#39;</span><span class="p">]</span>
+  
+  <span class="c1"># check if slots are occupied</span>
+  <span class="k">if</span> <span class="n">typeName</span> <span class="ow">in</span> <span class="n">exolinks</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> exolink: name </span><span class="si">%s</span><span class="s2"> already in use&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">exoTag</span><span class="p">,</span> <span class="n">typeName</span><span class="p">))</span>
+  <span class="k">if</span> <span class="n">exoTag</span> <span class="ow">in</span> <span class="n">loadMaps</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> exolink: name already in use&quot;</span> <span class="o">%</span> <span class="n">exoTag</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">action</span> <span class="o">==</span> <span class="s1">&#39;skip&#39;</span><span class="p">:</span>
+    <span class="c1"># we are not replacing anything, but skippping</span>
+    <span class="n">newMap</span> <span class="o">=</span> <span class="p">{</span>
+     <span class="s1">&#39;type&#39;</span><span class="p">:</span><span class="s1">&#39;exo&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;guid&#39;</span><span class="p">:</span><span class="n">newGuid</span><span class="p">,</span>
+     <span class="s1">&#39;eType&#39;</span><span class="p">:</span><span class="s1">&#39;cplx&#39;</span><span class="p">,</span> 
+     <span class="s1">&#39;proc&#39;</span><span class="p">:</span><span class="s1">&#39;skip&#39;</span>
+    <span class="p">}</span>
+  
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># replacing an existing map</span>
+    <span class="n">newClassMap</span> <span class="o">=</span> <span class="n">globalMapping</span><span class="p">[</span><span class="s1">&#39;mapsByGuid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">newGuid</span><span class="p">)</span>
+    <span class="n">newExoTag</span> <span class="o">=</span>  <span class="n">XmlGen</span><span class="o">.</span><span class="n">xmlTag</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">newClassMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="n">var</span><span class="o">=</span><span class="s1">&#39;exo&#39;</span><span class="p">)</span>
+    <span class="c1">#newMap = globalMapping[&#39;mapsByGuid&#39;].get(newGuid)</span>
+    <span class="n">newMap</span> <span class="o">=</span> <span class="n">loadMaps</span><span class="p">[</span><span class="n">newExoTag</span><span class="p">]</span>
+    <span class="k">del</span> <span class="n">exolinks</span><span class="p">[</span><span class="n">newMap</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span>
+    <span class="c1">#del loadMaps[newMap[&#39;tag&#39;]]</span>
+  
+  <span class="c1"># set new map</span>
+  <span class="n">exolinks</span><span class="p">[</span><span class="n">typeName</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span>
+  <span class="n">loadMaps</span><span class="p">[</span><span class="n">exoTag</span><span class="p">]</span> <span class="o">=</span> <span class="n">newMap</span></div>
+  
+  
+<div class="viewcode-block" id="getElementsByGuid"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.format.compatibility.html#ccpnmodel.ccpncore.memops.format.compatibility.Converters1.getElementsByGuid">[docs]</a><span class="k">def</span> <span class="nf">getElementsByGuid</span><span class="p">(</span><span class="n">rootPackage</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; get guid:obj dictionary for MetaModelElements</span>
+<span class="sd">  in MetaModel corresponding to rootPackage</span>
+<span class="sd">  </span>
+<span class="sd">  Used in mapping of reference data.</span>
+<span class="sd">  NBNB may need version-specific expansion later to handle </span>
+<span class="sd">  difficult reference data modifications.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.MetaModel</span> <span class="kn">import</span> <span class="n">makeObjDict</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">makeObjDict</span><span class="p">(</span><span class="n">rootPackage</span><span class="p">,</span> <span class="n">ignoreImplicit</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">crucialOnly</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="minorPostProcess"><a class="viewcode-back" href="../../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.format.compatibility.html#ccpnmodel.ccpncore.memops.format.compatibility.Converters1.minorPostProcess">[docs]</a><span class="k">def</span> <span class="nf">minorPostProcess</span><span class="p">(</span><span class="n">fromVersion</span><span class="p">,</span> <span class="n">topObj</span><span class="p">,</span> <span class="n">delayDataDict</span><span class="p">,</span> <span class="n">toNewObjDict</span><span class="p">,</span> <span class="n">mapping</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; postProcess - update newRoot object tree</span>
+<span class="sd">  May be used to postprocess a file load (minor upgrade)</span>
+<span class="sd">  </span>
+<span class="sd">  topObj is a TopObject in the new tree</span>
+<span class="sd">  delayDataDict is a {newobj:{tag:value}} dictionary of delayed set elements</span>
+<span class="sd">  and children</span>
+<span class="sd">  toNewObjDict is _ID:newObj for minor upgrades</span>
+<span class="sd">  mapping is the IO mapping</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">infodd</span> <span class="o">=</span> <span class="n">Conversion</span><span class="o">.</span><span class="n">getConversionInfo</span><span class="p">(</span><span class="n">fromVersion</span><span class="p">,</span> <span class="n">currentVersion</span><span class="p">)</span>
+  <span class="n">infodd</span><span class="p">[</span><span class="s1">&#39;correctData&#39;</span><span class="p">](</span><span class="n">topObj</span><span class="p">,</span> <span class="n">delayDataDict</span><span class="p">,</span> <span class="n">toNewObjDict</span><span class="p">,</span> <span class="n">mapping</span><span class="p">)</span></div>
+
+  <span class="c1"># NBNB Hack: do data upgrade for V2-V3transition</span>
+  <span class="c1"># TBD remove for future versions</span>
+  <span class="c1"># if topObj.className == &#39;MemopsRoot&#39;:</span>
+  <span class="c1">#   topObj._isUpgraded = True</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

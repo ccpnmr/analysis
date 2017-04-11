@@ -170,19 +170,19 @@ class NmrChain(AbstractWrapperObject):
       raise ValueError("Character %s not allowed in ccpn.NmrChain.shortName" % Pid.altCharacter)
     else:
       # NB names that clash with existing NmrChains cause ValueError at the API level.
-      self._startFunctionCommandBlock('rename', value)
+      self._startCommandEchoBlock('rename', value)
       try:
         wrappedData.code = value
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
 
   def deassign(self):
     """Reset NmrChain back to its originalName, cutting all assignment links"""
-    self._startFunctionCommandBlock('deassign')
+    self._startCommandEchoBlock('deassign')
     try:
       self._wrappedData.code = None
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def assignConnectedResidues(self, firstResidue:typing.Union[Residue, str]):
     """Assign all NmrResidues in connected NmrChain sequentially,
@@ -224,13 +224,13 @@ class NmrChain(AbstractWrapperObject):
         residues.append(next)
 
     # If we get here we are OK - assign residues and delete NmrChain
-    self._startFunctionCommandBlock('assignConnectedResidues', firstResidue)
+    self._startCommandEchoBlock('assignConnectedResidues', firstResidue)
     try:
       for ii,res in enumerate(residues):
         apiStretch[ii].assignedResidue = res._wrappedData
       apiNmrChain.delete()
     finally:
-     self._project._appBase._endCommandBlock()
+     self._endCommandEchoBlock()
 
   def renumberNmrResidues(self, offset:int, start:int=None, stop:int=None):
     """Renumber nmrResidues in range start-stop (inclusive) by adding offset
@@ -248,8 +248,8 @@ class NmrChain(AbstractWrapperObject):
       nmrResidues.reverse()
 
     changedNmrResidues = []
-    self._startFunctionCommandBlock('renumberNmrResidues', offset,
-                                    values={'start':start, 'stop':stop})
+    self._startCommandEchoBlock('renumberNmrResidues', offset,
+                                values={'start':start, 'stop':stop})
     try:
       for nmrResidue in nmrResidues:
         sequenceCode = nmrResidue.sequenceCode
@@ -264,7 +264,7 @@ class NmrChain(AbstractWrapperObject):
             changedNmrResidues.append(nmrResidue)
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
       for nmrResidue in changedNmrResidues:
         nmrResidue._finaliseAction('rename')
         nmrResidue._finaliseAction('change')
@@ -332,8 +332,8 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
     shortName = None
 
   dd = {'code':shortName, 'isConnected':isConnected, 'label':label, 'details':comment}
-  self._startFunctionCommandBlock('newNmrChain', values=locals(), defaults=defaults,
-                                  parName='newNmrChain')
+  self._startCommandEchoBlock('newNmrChain', values=locals(), defaults=defaults,
+                              parName='newNmrChain')
   result = None
   try:
     newApiNmrChain = nmrProject.newNmrChain(**dd)
@@ -347,7 +347,7 @@ def _newNmrChain(self:Project, shortName:str=None, isConnected:bool=False, label
                                      %(result, shortName))
       result._finaliseAction('rename')
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   
   return result
   
@@ -356,7 +356,7 @@ def _fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
 
   If shortName is None returns a new NmrChain with name starting with '@'
   """
-  self._startFunctionCommandBlock('fetchNmrChain', shortName, parName='newNmrChain')
+  self._startCommandEchoBlock('fetchNmrChain', shortName, parName='newNmrChain')
   try:
     if not shortName:
       result = self.newNmrChain()
@@ -367,7 +367,7 @@ def _fetchNmrChain(self:Project, shortName:str=None) -> NmrChain:
       else:
         result = self._data2Obj.get(apiNmrChain)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return result
 
   

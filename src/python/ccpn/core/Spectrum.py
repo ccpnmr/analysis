@@ -634,6 +634,8 @@ class Spectrum(AbstractWrapperObject):
   def isotopeCodes(self, value:Sequence):
     apiDataSource = self._wrappedData
     if len(value) == apiDataSource.numDim:
+      if value != self.isotopeCodes and self.peaks:
+        raise ValueError("Cannot reset isotopeCodes in a Spectrum that contains peaks")
       for ii,dataDim in enumerate(apiDataSource.sortedDataDims()):
         expDimRef = dataDim.expDim.findFirstExpDimRef(serial=1)
         val = value[ii]
@@ -978,11 +980,11 @@ Use axisCodes to set magnetisation transfers instead.""")
   def rename(self, value:str):
     """Rename Spectrum, changing its name and Pid"""
     if value:
-      self._startFunctionCommandBlock('rename', value)
+      self._startCommandEchoBlock('rename', value)
       try:
         self._wrappedData.name = value
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
     else:
       raise ValueError("Spectrum name must be set")
 
@@ -996,7 +998,7 @@ Use axisCodes to set magnetisation transfers instead.""")
   def resetAssignmentTolerances(self):
     """Reset assignment tolerances to default values"""
 
-    self._startFunctionCommandBlock('resetAssignmentTolerances')
+    self._startCommandEchoBlock('resetAssignmentTolerances')
     try:
       tolerances = [[]] * self.dimensionCount
       for ii, isotopeCode in enumerate(self.isotopeCodes):
@@ -1014,7 +1016,7 @@ Use axisCodes to set magnetisation transfers instead.""")
 
       self.assignmentTolerances = tolerances
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
   def getPositionValue(self, position):
 
@@ -1096,13 +1098,13 @@ def _createDummySpectrum(self:Project, axisCodes:Sequence[str], name=None,
   else:
     values = {}
 
-  self._startFunctionCommandBlock('_createDummySpectrum', axisCodes, values=values,
-                                  parName='newSpectrum')
+  self._startCommandEchoBlock('_createDummySpectrum', axisCodes, values=values,
+                              parName='newSpectrum')
   try:
     result = self._data2Obj[self._wrappedData.createDummySpectrum(axisCodes, name=name,
                                                                   shiftList=apiShiftList)]
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return result
 
 def _spectrumMakeFirstPeakList(project:Project, dataSource:Nmr.DataSource):

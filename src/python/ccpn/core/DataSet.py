@@ -210,8 +210,8 @@ def _newDataSet(self:Project, title:str=None, programName:str=None, programVersi
   ))
   
   nmrProject = self._wrappedData
-  self._startFunctionCommandBlock('newDataSet', values=locals(), defaults=defaults,
-                                  parName='newDataSet')
+  self._startCommandEchoBlock('newDataSet', values=locals(), defaults=defaults,
+                              parName='newDataSet')
   result = None
   try:
     newApiNmrConstraintStore = nmrProject.root.newNmrConstraintStore(nmrProject=nmrProject,
@@ -231,7 +231,7 @@ def _newDataSet(self:Project, title:str=None, programName:str=None, programVersi
     #                                  %(result, serial))
     #   result._finaliseAction('rename')
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return result
     
     

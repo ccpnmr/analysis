@@ -1,0 +1,234 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.assignment.Assignment &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.assignment.Assignment</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Assignment-related library functions at API (data storage) level</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+
+<span class="k">def</span> <span class="nf">_doNamesMatchBound</span><span class="p">(</span><span class="n">lightName</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">heavyName</span><span class="p">:</span><span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;checks if lightName matches a hydrogen atom or fluorine bound to atom named heavyName</span>
+<span class="sd">  NB, a name like H11 would match both C1 or C11 - cannot be helped&quot;&quot;&quot;</span>
+
+  <span class="c1"># possible names for &#39;light&#39; atoms or pseudoatoms</span>
+  <span class="n">lightFirstChars</span> <span class="o">=</span> <span class="s1">&#39;HDTFMQ&#39;</span>
+  <span class="n">lightAppendixChars</span> <span class="o">=</span> <span class="s1">&#39;123XY#&#39;</span>
+
+  <span class="k">if</span> <span class="p">((</span><span class="n">lightName</span> <span class="o">==</span> <span class="s2">&quot;H&quot;</span> <span class="ow">and</span> <span class="n">heavyName</span> <span class="o">==</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span> <span class="ow">or</span>
+      <span class="p">(</span><span class="n">lightName</span> <span class="o">==</span> <span class="s2">&quot;H#&quot;</span> <span class="ow">and</span> <span class="n">heavyName</span> <span class="o">==</span> <span class="s2">&quot;N&quot;</span><span class="p">)</span> <span class="ow">or</span>
+      <span class="p">(</span><span class="n">lightName</span> <span class="o">==</span> <span class="s2">&quot;H2&#39;&#39;&quot;</span> <span class="ow">and</span> <span class="n">heavyName</span> <span class="o">==</span> <span class="s2">&quot;C2&#39;&quot;</span><span class="p">)</span> <span class="ow">or</span>
+      <span class="p">(</span><span class="n">lightName</span> <span class="o">==</span> <span class="s2">&quot;H5&#39;&#39;&quot;</span> <span class="ow">and</span> <span class="n">heavyName</span> <span class="o">==</span> <span class="s2">&quot;C5&#39;&quot;</span><span class="p">)):</span>
+    <span class="c1"># special cases for protein and DNA/RNA</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+  <span class="k">elif</span> <span class="ow">not</span> <span class="n">lightName</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">heavyName</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="c1"># lightName empty or heavyName too short</span>
+    <span class="c1"># Single-char heavyName is only allowed in special cases above</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+  <span class="k">elif</span> <span class="n">lightName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">lightFirstChars</span> <span class="ow">or</span> <span class="n">heavyName</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">lightFirstChars</span><span class="p">:</span>
+    <span class="c1"># incorrect nucleus code</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+  <span class="k">elif</span> <span class="n">lightName</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="n">heavyName</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+    <span class="c1"># names match except for first character.</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+  <span class="k">elif</span> <span class="n">lightName</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">heavyName</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">and</span> <span class="n">lightName</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">lightAppendixChars</span><span class="p">:</span>
+    <span class="c1"># names match except for first character, with single suffix character</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+
+<div class="viewcode-block" id="getConnectedAtoms"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.assignment.html#ccpnmodel.ccpncore.lib.assignment.Assignment.getConnectedAtoms">[docs]</a><span class="k">def</span> <span class="nf">getConnectedAtoms</span><span class="p">(</span><span class="n">spectrum</span><span class="p">):</span>
+
+  <span class="c1"># chain = self.chain</span>
+  <span class="n">connections</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="n">nDim</span> <span class="o">=</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">numDim</span>
+
+  <span class="n">maxConnectionDist</span> <span class="o">=</span> <span class="mi">1</span>
+  <span class="n">minConnectionDist</span> <span class="o">=</span> <span class="mi">0</span>
+  <span class="c1"># drawConnection = self.drawConnection</span>
+
+  <span class="n">boundDims</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">dataDim1</span><span class="p">,</span> <span class="n">dataDim2</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">getOnebondDataDims</span><span class="p">():</span>
+    <span class="n">boundDims</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">dataDim1</span><span class="o">.</span><span class="n">dim</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">dataDim2</span><span class="o">.</span><span class="n">dim</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+
+  <span class="c1"># includePredicted = self.includePredictedCheck.get()</span>
+  <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+    <span class="c1"># if (not includePredicted) and peakList.isSimulated:</span>
+    <span class="c1">#   continue</span>
+
+    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+      <span class="n">dimAtoms</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nDim</span><span class="p">):</span>
+        <span class="n">dimAtoms</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+
+      <span class="c1"># Find all assigned-to atoms per dimension of the peak:</span>
+      <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakContribs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">peakContrib</span> <span class="ow">in</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakContribs</span><span class="p">:</span>
+
+          <span class="k">for</span> <span class="n">contrib</span> <span class="ow">in</span> <span class="n">peakContrib</span><span class="o">.</span><span class="n">peakDimContribs</span><span class="p">:</span>
+            <span class="n">dim</span> <span class="o">=</span> <span class="n">contrib</span><span class="o">.</span><span class="n">peakDim</span>
+
+            <span class="n">resonanceSet</span> <span class="o">=</span> <span class="n">contrib</span><span class="o">.</span><span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSet</span>
+            <span class="k">if</span> <span class="n">resonanceSet</span><span class="p">:</span>
+              <span class="k">for</span> <span class="n">atomSet</span> <span class="ow">in</span> <span class="n">resonanceSet</span><span class="o">.</span><span class="n">atomSets</span><span class="p">:</span>
+                <span class="n">atom</span> <span class="o">=</span> <span class="n">atomSet</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">()</span>
+                <span class="n">residue</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
+                <span class="c1"># if residue.chain is chain:</span>
+                <span class="n">dimAtoms</span><span class="p">[</span><span class="n">dim</span><span class="o">.</span><span class="n">dim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="p">,</span><span class="n">residue</span><span class="p">))</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakDims</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">contrib</span> <span class="ow">in</span> <span class="n">dim</span><span class="o">.</span><span class="n">peakDimContribs</span><span class="p">:</span>
+            <span class="n">resonanceSet</span> <span class="o">=</span> <span class="n">contrib</span><span class="o">.</span><span class="n">resonance</span><span class="o">.</span><span class="n">resonanceSet</span>
+            <span class="k">if</span> <span class="n">resonanceSet</span><span class="p">:</span>
+              <span class="k">for</span> <span class="n">atomSet</span> <span class="ow">in</span> <span class="n">resonanceSet</span><span class="o">.</span><span class="n">atomSets</span><span class="p">:</span>
+                <span class="n">atom</span> <span class="o">=</span> <span class="n">atomSet</span><span class="o">.</span><span class="n">findFirstAtom</span><span class="p">()</span>
+                <span class="n">residue</span> <span class="o">=</span> <span class="n">atom</span><span class="o">.</span><span class="n">residue</span>
+                <span class="c1"># if residue.chain is chain:</span>
+                <span class="n">dimAtoms</span><span class="p">[</span><span class="n">dim</span><span class="o">.</span><span class="n">dim</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">((</span><span class="n">atom</span><span class="p">,</span><span class="n">residue</span><span class="p">))</span>
+
+      <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nDim</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nDim</span><span class="p">):</span>
+          <span class="n">atomPairs</span> <span class="o">=</span> <span class="p">[]</span>
+
+          <span class="c1"># if dimensions are bound, add pairs ofbound atoms</span>
+          <span class="k">if</span> <span class="nb">set</span><span class="p">([</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span> <span class="ow">in</span> <span class="n">boundDims</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">atomA</span><span class="p">,</span> <span class="n">residueA</span> <span class="ow">in</span> <span class="n">dimAtoms</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+              <span class="k">for</span> <span class="n">atomB</span> <span class="ow">in</span> <span class="n">atomA</span><span class="o">.</span><span class="n">boundAtoms</span><span class="p">:</span>
+                <span class="n">atomPairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">atomA</span><span class="p">,</span> <span class="n">residueA</span><span class="p">,</span> <span class="n">atomB</span><span class="p">,</span> <span class="n">atomB</span><span class="o">.</span><span class="n">residue</span><span class="p">))</span>
+              <span class="c1">#</span>
+              <span class="c1"># for atomB, residueB in dimAtoms[j]:</span>
+              <span class="c1">#</span>
+              <span class="c1">#    if _areAtomsBound(atomA, atomB):</span>
+              <span class="c1">#      atomPairs.append((atomA, residueA, atomB, residueB))</span>
+
+          <span class="c1"># If dimensions were not bound, or nothing was found, add all possible atom pairs</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">atomPairs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">atomA</span><span class="p">,</span> <span class="n">residueA</span> <span class="ow">in</span> <span class="n">dimAtoms</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+              <span class="k">for</span> <span class="n">atomB</span><span class="p">,</span> <span class="n">residueB</span> <span class="ow">in</span> <span class="n">dimAtoms</span><span class="p">[</span><span class="n">j</span><span class="p">]:</span>
+                <span class="n">atomPairs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">atomA</span><span class="p">,</span> <span class="n">residueA</span><span class="p">,</span> <span class="n">atomB</span><span class="p">,</span> <span class="n">residueB</span><span class="p">))</span>
+
+          <span class="c1"># Filter out connection distances between given limits</span>
+          <span class="k">for</span> <span class="n">atomA</span><span class="p">,</span> <span class="n">residueA</span><span class="p">,</span> <span class="n">atomB</span><span class="p">,</span> <span class="n">residueB</span> <span class="ow">in</span> <span class="n">atomPairs</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="n">atomA</span> <span class="ow">is</span> <span class="n">atomB</span><span class="p">:</span>
+              <span class="k">continue</span>
+
+            <span class="n">diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">residueA</span><span class="o">.</span><span class="n">seqId</span> <span class="o">-</span> <span class="n">residueB</span><span class="o">.</span><span class="n">seqId</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">((</span><span class="n">maxConnectionDist</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">diff</span> <span class="o">&lt;=</span> <span class="n">maxConnectionDist</span><span class="p">))</span> <span class="ow">and</span> \
+              <span class="p">(</span><span class="n">diff</span> <span class="o">&gt;=</span> <span class="n">minConnectionDist</span><span class="p">):</span>
+              <span class="n">connections</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">atomA</span><span class="p">,</span> <span class="n">atomB</span><span class="p">])</span>
+  <span class="k">return</span> <span class="n">connections</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -28,8 +28,6 @@ from ccpn.core.NmrResidue import NmrResidue
 
 from ccpn.core.lib import Pid
 
-from ccpnmodel.ccpncore.api.ccp.nmr.Nmr import ResonanceGroup as ApiResonanceGroup
-# from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip
 from ccpn.ui.gui.widgets.Label import Label
 from typing import Sequence
 from ccpn.ui.gui.DropBase import DropBase

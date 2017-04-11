@@ -251,8 +251,8 @@ def _newSampleComponent(self:Sample, name:str, labelling:str=None, role:str=None
       % concentrationUnit)
 
   apiSample = self._wrappedData
-  self._startFunctionCommandBlock('newSampleComponent', name, values=locals(), defaults=defaults,
-                                  parName='newSampleComponent')
+  self._startCommandEchoBlock('newSampleComponent', name, values=locals(), defaults=defaults,
+                              parName='newSampleComponent')
   try:
     substance = self._project.fetchSubstance(name=name, labelling=labelling)
     # NB - using substance._wrappedData.labelling because we need the API labelling value,
@@ -263,7 +263,7 @@ def _newSampleComponent(self:Sample, name:str, labelling:str=None, role:str=None
                                        concentrationUnit=concentrationUnit, details=comment,
                                        purity=purity)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return self._project._data2Obj.get(obj)
 
 Sample.newSampleComponent = _newSampleComponent

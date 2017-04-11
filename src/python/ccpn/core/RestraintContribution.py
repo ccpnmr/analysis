@@ -324,8 +324,8 @@ def _newRestraintContribution(self:Restraint, targetValue:float=None, error:floa
   )
 
   func = self._wrappedData.newGenericContribution
-  self._startFunctionCommandBlock('newRestraintContribution', values=locals(), defaults=defaults,
-                                  parName='newRestraintContribution')
+  self._startCommandEchoBlock('newRestraintContribution', values=locals(), defaults=defaults,
+                              parName='newRestraintContribution')
   self._project.blankNotification() # delay notifiers till object is fully ready
   try:
     obj = func(targetValue=targetValue, error=error, weight=weight, upperLimit=upperLimit,
@@ -336,7 +336,7 @@ def _newRestraintContribution(self:Restraint, targetValue:float=None, error:floa
     result.restraintItems = restraintItems
   finally:
     self._project.unblankNotification()
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   # Do creation notifications
   result._finaliseAction('create')

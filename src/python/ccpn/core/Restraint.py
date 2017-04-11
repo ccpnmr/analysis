@@ -272,8 +272,8 @@ def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None
     getByPid = self._project.getByPid
     peaks = [(getByPid(x) if isinstance(x, str) else x) for x in peaks]
 
-  self._startFunctionCommandBlock('newRestraint', values=locals(), defaults=defaults,
-                                  parName='newRestraint')
+  self._startCommandEchoBlock('newRestraint', values=locals(), defaults=defaults,
+                              parName='newRestraint')
   self._project.blankNotification() # delay notifiers till Restraint is fully ready
   try:
     dd = {'figureOfMerit':figureOfMerit, 'vectorLength':vectorLength, 'details':comment,
@@ -289,7 +289,7 @@ def _newRestraint(self:RestraintList, figureOfMerit:float=None, comment:str=None
                                      %(result, serial))
   finally:
     self._project.unblankNotification()
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
 
   # Do creation notifications
   if serial is not None:
@@ -325,8 +325,8 @@ def createSimpleRestraint(self:RestraintList, comment:str=None, figureOfMerit:fl
 
 
 
-  self._startFunctionCommandBlock('createSimpleRestraint', values=values, defaults=defaults,
-                                  parName='newRestraint')
+  self._startCommandEchoBlock('createSimpleRestraint', values=values, defaults=defaults,
+                              parName='newRestraint')
   try:
     restraint = self.newRestraint(comment=comment, peaks=peaks, figureOfMerit=figureOfMerit,
                                   vectorLength=vectorLength, )
@@ -336,7 +336,7 @@ def createSimpleRestraint(self:RestraintList, comment:str=None, figureOfMerit:fl
                               additionalLowerLimit=additionalLowerLimit,scale=scale,
                               restraintItems=restraintItems)
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return restraint
 

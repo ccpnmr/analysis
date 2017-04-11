@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.widgets.SpinSystemLabel &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.widgets.SpinSystemLabel</h1><div class="highlight"><pre>
+<span></span><span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;simon1&#39;</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.Project</span> <span class="kn">import</span> <span class="n">Project</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrResidue</span> <span class="kn">import</span> <span class="n">NmrResidue</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Pid</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.nmr.Nmr</span> <span class="kn">import</span> <span class="n">ResonanceGroup</span> <span class="k">as</span> <span class="n">ApiResonanceGroup</span>
+<span class="c1"># from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import Strip as ApiStrip</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.DropBase</span> <span class="kn">import</span> <span class="n">DropBase</span>
+<span class="kn">import</span> <span class="nn">json</span>
+
+
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<div class="viewcode-block" id="SpinSystemLabel"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpinSystemLabel.SpinSystemLabel">[docs]</a><span class="k">class</span> <span class="nc">SpinSystemLabel</span><span class="p">(</span><span class="n">DropBase</span><span class="p">,</span> <span class="n">Label</span><span class="p">):</span>
+
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="n">appBase</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+
+    <span class="n">Label</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="p">,</span> <span class="n">text</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="n">DropBase</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">appBase</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="n">strip</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mousePressEvent</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mousePressEvent</span>
+    <span class="c1"># self.project = appBase.project</span>
+    <span class="c1"># if dragDrop is True:</span>
+    <span class="c1">#   DropBase.__init__(self, self.parent().moduleArea.guiWindow._appBase)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">setAcceptDrops</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_mousePressEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implementation of the mouse press event to enable a strip to be dragged as a json object</span>
+<span class="sd">    containing its pid and a modifier key to encode the direction to drop the strip.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">event</span><span class="o">.</span><span class="n">accept</span><span class="p">()</span>
+    <span class="n">mimeData</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QMimeData</span><span class="p">()</span>
+    <span class="c1"># itemData = QtCore.QByteArray(self.strip.pid or &#39;None&#39;)</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">modifiers</span><span class="p">()</span> <span class="o">&amp;</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ShiftModifier</span><span class="p">:</span>
+      <span class="n">itemData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;pids&#39;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="o">+</span><span class="s1">&#39;-1&#39;</span><span class="p">]})</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">itemData</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;pids&#39;</span><span class="p">:[</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="o">+</span><span class="s1">&#39;+1&#39;</span><span class="p">]})</span>
+    <span class="n">mimeData</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="s1">&#39;ccpnmr-json&#39;</span><span class="p">,</span> <span class="n">itemData</span><span class="p">)</span>
+    <span class="n">mimeData</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">itemData</span><span class="p">)</span>
+    <span class="n">drag</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QDrag</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="n">drag</span><span class="o">.</span><span class="n">setMimeData</span><span class="p">(</span><span class="n">mimeData</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">drag</span><span class="o">.</span><span class="n">exec_</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span> <span class="o">|</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">,</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">CopyAction</span><span class="p">)</span> <span class="o">==</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">MoveAction</span><span class="p">:</span>
+      <span class="k">pass</span>
+      <span class="c1"># self.close()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SpinSystemLabel.processStrips"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.widgets.html#ccpn.ui.gui.widgets.SpinSystemLabel.SpinSystemLabel.processStrips">[docs]</a>  <span class="k">def</span> <span class="nf">processStrips</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pids</span><span class="p">:</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">event</span><span class="p">:</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QMouseEvent</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Takes a sequence of pids and if the correspond to strip pids, a new strip is created in the correct</span>
+<span class="sd">    direction specified in the sequence and the data of the source strip is displayed in the new strip.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+
+      <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">current</span>
+      <span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">project</span>
+      <span class="n">direction</span> <span class="o">=</span> <span class="n">pid</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">:]</span>
+      <span class="n">processedPid</span> <span class="o">=</span> <span class="n">pid</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+      <span class="n">wrapperObject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">processedPid</span><span class="p">)</span>
+      <span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">wrapperObject</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+      <span class="n">nr1</span> <span class="o">=</span> <span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">mainNmrResidue</span>
+      <span class="k">if</span> <span class="n">wrapperObject</span><span class="o">.</span><span class="n">pid</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">:</span>
+        <span class="k">return</span>
+      <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;-1&#39;</span><span class="p">:</span>
+        <span class="n">sinkIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">index</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">sinkIndex</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_appBase</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span><span class="o">.</span><span class="n">_wrappedData</span><span class="o">.</span><span class="n">index</span><span class="o">+</span><span class="mi">1</span>
+
+      <span class="k">if</span> <span class="n">wrapperObject</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">pid</span><span class="o">.</span><span class="n">id</span><span class="p">:</span>
+        <span class="n">wrapperObject</span><span class="o">.</span><span class="n">moveTo</span><span class="p">(</span><span class="n">sinkIndex</span><span class="p">)</span>
+
+      <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">copyStrip</span><span class="p">(</span><span class="n">wrapperObject</span><span class="p">,</span> <span class="n">sinkIndex</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">nr2</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="s1">&#39;NR:</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">nmrResidue</span><span class="p">)</span><span class="o">.</span><span class="n">mainNmrResidue</span>
+          <span class="k">if</span> <span class="n">nr1</span> <span class="ow">and</span> <span class="n">nr2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;-1&#39;</span><span class="p">:</span>
+              <span class="n">nr1</span><span class="o">.</span><span class="n">connectPrevious</span><span class="p">(</span><span class="n">nr2</span><span class="p">)</span>
+              <span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+              <span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nr2</span><span class="o">.</span><span class="n">offsetNmrResidues</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+              <span class="n">current</span><span class="o">.</span><span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nr2</span><span class="o">.</span><span class="n">nmrChain</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">nr1</span><span class="o">.</span><span class="n">connectNext</span><span class="p">(</span><span class="n">nr2</span><span class="p">)</span>
+              <span class="n">current</span><span class="o">.</span><span class="n">strip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">guiSpectrumDisplay</span><span class="o">.</span><span class="n">strips</span><span class="p">[</span><span class="n">sinkIndex</span><span class="p">]</span>
+              <span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="o">=</span> <span class="n">nr2</span>
+              <span class="n">current</span><span class="o">.</span><span class="n">nmrChain</span> <span class="o">=</span> <span class="n">nr2</span><span class="o">.</span><span class="n">nmrChain</span>
+
+            <span class="c1"># try:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">,</span> <span class="s1">&#39;backboneModule&#39;</span><span class="p">):</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">backboneModule</span><span class="o">.</span><span class="n">_navigateTo</span><span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">,</span> <span class="n">strip</span><span class="o">=</span><span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="p">)</span>
+              <span class="n">current</span><span class="o">.</span><span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">current</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+            <span class="c1"># except AttributeError:</span>
+            <span class="c1">#   project._logger.warn(&#39;Backbone module is not active&#39;)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+          <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s1">&#39;Cannot connect non-existent Nmr Residues&#39;</span><span class="p">)</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">_renameNmrResidueForGraphics</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">:</span><span class="n">NmrResidue</span><span class="p">,</span> <span class="n">oldPid</span><span class="p">:</span><span class="nb">str</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Effect rename for NmrResidue</span>
+
+<span class="sd">  For notifiers</span>
+<span class="sd">  #CCPN INTERNAL&quot;&quot;&quot;</span>
+  <span class="n">oldId</span> <span class="o">=</span> <span class="n">oldPid</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">Pid</span><span class="o">.</span><span class="n">PREFIXSEP</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+  <span class="k">for</span> <span class="n">strip</span> <span class="ow">in</span> <span class="n">nmrResidue</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">strips</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">text</span><span class="p">()</span> <span class="o">==</span> <span class="n">oldId</span><span class="p">:</span>
+      <span class="n">strip</span><span class="o">.</span><span class="n">planeToolbar</span><span class="o">.</span><span class="n">spinSystemLabel</span><span class="o">.</span><span class="n">setText</span><span class="p">(</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">_id</span><span class="p">)</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

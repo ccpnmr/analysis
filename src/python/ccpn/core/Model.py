@@ -243,8 +243,8 @@ def _newModel(self:StructureEnsemble, serial:int=None, label:str=None, comment:s
 
   structureEnsemble = self._wrappedData
 
-  self._startFunctionCommandBlock('newModel', values=locals(), defaults=defaults,
-                                  parName='newModel')
+  self._startCommandEchoBlock('newModel', values=locals(), defaults=defaults,
+                              parName='newModel')
   try:
     newApiModel = structureEnsemble.newModel(name=label, details=comment)
     result = self._project._data2Obj.get(newApiModel)
@@ -257,7 +257,7 @@ def _newModel(self:StructureEnsemble, serial:int=None, label:str=None, comment:s
                                      %(result, serial))
       result._finaliseAction('rename')
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return result
 

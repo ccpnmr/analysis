@@ -1,0 +1,1461 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.Io.Api &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.Io.Api</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Basic API (data storage) I/O functions</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot;Io-related utilities</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Logging</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.memops</span> <span class="kn">import</span> <span class="n">Implementation</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">ApiPath</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.ApiError</span> <span class="kn">import</span> <span class="n">ApiError</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+
+<span class="c1"># NBNB TBD this should be done by putting the function inside the class - later</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.ccp.general.DataLocation</span> <span class="kn">import</span> <span class="n">AbstractDataStore</span>
+
+<span class="c1"># Necessary because shutil fails in permission copying for windows file systems,</span>
+<span class="c1"># and the error is not properly caught on some VMs.</span>
+<span class="kn">import</span> <span class="nn">ccpn.util.LocalShutil</span> <span class="kn">as</span> <span class="nn">shutil</span>
+
+<span class="n">CCPN_DIRECTORY_SUFFIX</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">CCPN_DIRECTORY_SUFFIX</span>
+<span class="n">addCcpnDirectorySuffix</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">addCcpnDirectorySuffix</span>
+<span class="n">removeCcpnDirectorySuffix</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">removeCcpnDirectorySuffix</span>
+
+<span class="n">CCPN_ARCHIVES_DIRECTORY</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">CCPN_ARCHIVES_DIRECTORY</span>
+
+<div class="viewcode-block" id="DefaultIoHandler"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.DefaultIoHandler">[docs]</a><span class="k">class</span> <span class="nc">DefaultIoHandler</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Class to handle interactions with user and logging</span>
+<span class="sd">  Should be subclassed for actual functionality</span>
+<span class="sd">  This default class simply does nothing&quot;&quot;&quot;</span></div>
+
+<span class="k">def</span> <span class="nf">_createLogger</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">applicationName</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">useFileLogger</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  
+  <span class="k">if</span> <span class="n">applicationName</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">applicationName</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_applicationName</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;_applicationName&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;ccpn&#39;</span>
+    
+  <span class="k">if</span> <span class="n">useFileLogger</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">useFileLogger</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_useFileLogger</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="p">(</span><span class="n">Logging</span><span class="o">.</span><span class="n">createLogger</span><span class="p">(</span><span class="n">applicationName</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">stream</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span> <span class="k">if</span> <span class="n">useFileLogger</span>
+            <span class="k">else</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">())</span>
+  <span class="n">project</span><span class="o">.</span><span class="n">_applicationName</span> <span class="o">=</span> <span class="n">applicationName</span>
+  <span class="n">project</span><span class="o">.</span><span class="n">_useFileLogger</span> <span class="o">=</span> <span class="n">useFileLogger</span>
+  <span class="n">project</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logger</span>
+  
+  <span class="k">return</span> <span class="n">logger</span>
+  
+<span class="c1"># def ccpnProjectPath(path:str):</span>
+<span class="c1">#   if not path.endswith(CCPN_DIRECTORY_SUFFIX):</span>
+<span class="c1">#     path += CCPN_DIRECTORY_SUFFIX</span>
+<span class="c1">#   return path</span>
+<span class="c1">#</span>
+<span class="c1"># def ccpnProjectPathPrefix(path:str):</span>
+<span class="c1">#   if path.endswith(CCPN_DIRECTORY_SUFFIX):</span>
+<span class="c1">#     path = path[:-len(CCPN_DIRECTORY_SUFFIX)]</span>
+<span class="c1">#</span>
+<span class="c1">#   return path</span>
+  
+<div class="viewcode-block" id="newProject"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.newProject">[docs]</a><span class="k">def</span> <span class="nf">newProject</span><span class="p">(</span><span class="n">projectName</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">applicationName</span><span class="o">=</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,</span>
+               <span class="n">useFileLogger</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">MemopsRoot</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Create, and return, a new project using a specified path (directory).</span>
+<span class="sd">  If path is not specified it takes the current working directory.</span>
+<span class="sd">  The path can be either absolute or relative.</span>
+<span class="sd">  The &#39;userData&#39; repository is pointed to the path.</span>
+<span class="sd">  The &#39;backup&#39; repository is pointed to the path + &#39;_backup&#39; + CCPN_DIRECTORY_SUFFIX.</span>
+<span class="sd">  If either of these paths already exist (either as files or as directories):</span>
+
+<span class="sd">  If overwriteExisting:</span>
+<span class="sd">    Delete the path</span>
+<span class="sd">  Else if showYesNo:</span>
+<span class="sd">    Ask the user if it is ok to delete the path</span>
+<span class="sd">    If yes, delete.  If no return None.</span>
+<span class="sd">  Else:</span>
+<span class="sd">    Raise an IOError</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># relies on knowing that repositories to move have these names, and these values for path suffix</span>
+  <span class="n">repositoryNameMap</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;userData&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;backup&#39;</span><span class="p">:</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_BACKUP_SUFFIX</span><span class="p">}</span>
+
+  <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">repositoryNameMap</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+      <span class="n">fullPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">projectName</span><span class="p">)</span> <span class="o">+</span> <span class="n">repositoryNameMap</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+      <span class="n">fullPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">fullPath</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">absentOrRemoved</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">fullPath</span><span class="p">,</span> <span class="s1">&#39;memops&#39;</span><span class="p">,</span> <span class="s1">&#39;Implementation&#39;</span><span class="p">),</span>
+                             <span class="n">overwriteExisting</span><span class="p">):</span>
+        <span class="n">errMsg</span> <span class="o">=</span> <span class="s1">&#39;Path (&quot;</span><span class="si">%s</span><span class="s1">&quot;) contains existing project.&#39;</span> <span class="o">%</span> <span class="n">fullPath</span>
+        <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="n">errMsg</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="n">errMsg</span><span class="p">)</span>
+    <span class="n">temporaryDirectory</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">temporaryDirectory</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">TemporaryDirectory</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="s1">&#39;CcpnProject_&#39;</span><span class="p">,</span>
+                                                     <span class="n">suffix</span><span class="o">=</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">temporaryDirectory</span><span class="o">.</span><span class="n">name</span>
+    
+  <span class="n">project</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">MemopsRoot</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">projectName</span><span class="p">)</span>
+  
+  <span class="k">if</span> <span class="n">temporaryDirectory</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">_temporaryDirectory</span> <span class="o">=</span> <span class="n">temporaryDirectory</span>
+  
+  <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">repositoryNameMap</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="n">fullPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">projectName</span><span class="p">)</span>
+                             <span class="o">+</span> <span class="n">repositoryNameMap</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">repository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">repository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">fullPath</span><span class="p">)</span>
+
+  <span class="c1"># Reset DataLocations</span>
+  <span class="n">_initialiseStandardDataLocationStore</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+  <span class="c1"># NBNB PREFERENCES</span>
+  <span class="c1"># Put here code to set remotedata location from preferences:</span>
+  <span class="c1">#</span>
+  <span class="c1"># remotePath = SOMETHING</span>
+  <span class="c1"># obj = project.findFirstDataLocationStore(name=&#39;standard&#39;).findFirstDataUrl(name=&#39;remoteData&#39;)</span>
+  <span class="c1"># obj.url = Implementation.Url(path=remotePath)</span>
+
+  <span class="c1"># create logger</span>
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">_createLogger</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">useFileLogger</span><span class="p">)</span>
+  <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Located at </span><span class="si">%s</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">project</span></div>
+
+<div class="viewcode-block" id="absentOrRemoved"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.absentOrRemoved">[docs]</a><span class="k">def</span> <span class="nf">absentOrRemoved</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Check if file is present, possibly removing it first.</span>
+
+<span class="sd">  If path already exists:</span>
+<span class="sd">    If overwriteExisting:</span>
+<span class="sd">      Delete the path</span>
+<span class="sd">      Return True</span>
+<span class="sd">    Else if showYesNo:</span>
+<span class="sd">      Ask the user if it is ok to delete the path</span>
+<span class="sd">      If yes, delete and return True.  If no return False.</span>
+<span class="sd">    Else:</span>
+<span class="sd">      return False</span>
+<span class="sd">  Else:</span>
+<span class="sd">    Return True</span>
+
+<span class="sd">  This function is not intended to be used outside this module but could be.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="n">overwriteExisting</span><span class="p">:</span>
+      <span class="n">Path</span><span class="o">.</span><span class="n">deletePath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+      <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="c1"># elif showYesNo:</span>
+    <span class="c1">#   if os.path.isdir(path):</span>
+    <span class="c1">#     files = os.listdir(path)</span>
+    <span class="c1">#     n = 5</span>
+    <span class="c1">#     if len(files) &gt; n:</span>
+    <span class="c1">#       files = files[:n]</span>
+    <span class="c1">#       files.append(&#39;...&#39;)</span>
+    <span class="c1">#     ss = &#39;, &#39;.join(files)</span>
+    <span class="c1">#     message = &#39;%s already exists, remove it and all of its contents (%s) (if no, then no action taken)?&#39; % (path, ss)</span>
+    <span class="c1">#     if not showYesNo(&#39;Remove directory&#39;, message):</span>
+    <span class="c1">#       return False</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#       Path.deletePath(path)</span>
+    <span class="c1">#       return True</span>
+    <span class="c1">#   else:</span>
+    <span class="c1">#     message = &#39;%s already exists (not as a directory), remove it?&#39; % path</span>
+    <span class="c1">#     if not showYesNo(&#39;Remove file&#39;, message):</span>
+    <span class="c1">#       return False</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#       Path.deletePath(path)</span>
+    <span class="c1">#       return True</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">False</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<div class="viewcode-block" id="loadProject"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.loadProject">[docs]</a><span class="k">def</span> <span class="nf">loadProject</span><span class="p">(</span><span class="n">path</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">projectName</span><span class="p">:</span><span class="nb">str</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">askFile</span><span class="p">:</span><span class="s2">&quot;function&quot;</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                <span class="n">askDir</span><span class="p">:</span><span class="s2">&quot;function&quot;</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">suppressGeneralDataDir</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">fixDataStores</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">applicationName</span><span class="o">=</span><span class="s1">&#39;ccpn&#39;</span><span class="p">,</span>
+                <span class="n">useFileLogger</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">MemopsRoot</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Loads a project file and checks and deletes unwanted project repositories and</span>
+<span class="sd">  changes the project repository path if the project has moved.  Returns the project.</span>
+<span class="sd">  (The project repository path is effectively the userData repository.)</span>
+<span class="sd">  askFile (if not None) has signature askFile(title, message, initial_value = &#39;&#39;)</span>
+<span class="sd">  askDir (if not None) has signature askDir(title, message, initial_value = &#39;&#39;)</span>
+<span class="sd">  Throws an IOError if there is an I/O error.</span>
+<span class="sd">  Throws an ApiError if there is an API exception.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.format.xml</span> <span class="kn">import</span> <span class="n">XmlIO</span>
+
+  <span class="k">def</span> <span class="nf">isGeneralDataWriteable</span><span class="p">(</span><span class="n">generalDataRep</span><span class="p">):</span>
+    <span class="n">ppath</span> <span class="o">=</span> <span class="n">generalDataRep</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+    <span class="k">return</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">isWindowsOS</span><span class="p">()</span> <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">access</span><span class="p">(</span><span class="n">ppath</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">W_OK</span><span class="o">|</span><span class="n">os</span><span class="o">.</span><span class="n">X_OK</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">isGeneralDataOk</span><span class="p">(</span><span class="n">proj</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">suppressGeneralDataDir</span><span class="p">:</span>
+      <span class="k">return</span> <span class="bp">True</span>
+    <span class="n">generalDataRep</span> <span class="o">=</span> <span class="n">proj</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;generalData&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">generalDataRep</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">isGeneralDataWriteable</span><span class="p">(</span><span class="n">generalDataRep</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">True</span>
+
+  <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="c1"># Copies V2 projects to V3-compliant location, does some path clean-up and returns new path</span>
+  <span class="n">path</span> <span class="o">=</span> <span class="n">copyV2ToV3Location</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+  <span class="n">debugMessages</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">infoMessages</span> <span class="o">=</span> <span class="p">[]</span>
+
+  <span class="c1"># check if path exists and is directory</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;path &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;path &quot;</span><span class="si">%s</span><span class="s1">&quot; is not a directory&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+
+  <span class="n">projectFile</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getProjectFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">projectName</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">projectName</span><span class="p">:</span>
+    <span class="c1"># projectName was specified so projectFile better exist</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">projectFile</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;project file &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="n">projectFile</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># projectName was not specified so default projectFile might not exist</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">projectFile</span><span class="p">):</span>
+      <span class="n">projectFiles</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getPossibleProjectFiles</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">projectFiles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; contains no project file&#39;</span> <span class="o">%</span> <span class="n">path</span><span class="p">)</span>
+      <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">projectFiles</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">projectFile</span> <span class="o">=</span> <span class="n">projectFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+      <span class="k">elif</span> <span class="n">askFile</span><span class="p">:</span>
+        <span class="n">projectFile</span> <span class="o">=</span> <span class="n">askFile</span><span class="p">(</span><span class="s1">&#39;Select project file&#39;</span><span class="p">,</span> <span class="s1">&#39;Select project file&#39;</span><span class="p">,</span>
+                              <span class="n">initial_value</span><span class="o">=</span><span class="n">projectFiles</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">projectFile</span><span class="p">:</span> <span class="c1"># cancelled</span>
+          <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Cancelled&#39;</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; contains </span><span class="si">%d</span><span class="s1"> project files, not sure which to use&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">path</span><span class="p">,</span>
+                                                                                 <span class="nb">len</span><span class="p">(</span><span class="n">projectFiles</span><span class="p">)))</span>
+
+    <span class="c1"># TBD: should projectName be based on projectFile or on path???</span>
+    <span class="c1"># the way it is set here do not need to change project.name</span>
+    <span class="c1"># but if you used the path then you would need to change it</span>
+    <span class="n">projectName</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getTopObjIdFromFileName</span><span class="p">(</span><span class="n">projectFile</span><span class="p">)</span>
+
+  <span class="c1"># doing the loadProject twice has a bit of an overhead, but not much</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="c1"># below assumes TopObjects exist where stated, so might fail</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">XmlIO</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">projectName</span><span class="p">,</span> <span class="n">partialLoad</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+  <span class="k">except</span><span class="p">:</span>
+    <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;First loading attempt failed - compatibility problem?&quot;</span><span class="p">)</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">areAllTopObjectsPresent</span><span class="p">(</span><span class="n">project</span><span class="p">)</span> <span class="ow">or</span>
+      <span class="ow">not</span> <span class="n">isGeneralDataOk</span><span class="p">(</span><span class="n">project</span><span class="p">)):</span>
+    <span class="c1"># if not all loaded (shell) TopObjects can be found, try again</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Some files unfindable - project may have moved.&quot;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">project</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Re-trying load, skipping cached TopObjects:&quot;</span><span class="p">)</span>
+    <span class="n">project</span> <span class="o">=</span> <span class="n">XmlIO</span><span class="o">.</span><span class="n">loadProject</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">projectName</span><span class="p">,</span> <span class="n">partialLoad</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+  <span class="c1"># try and fix project repository path, if needed</span>
+  <span class="n">packageLocator</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">packageLocator</span>
+  <span class="n">repositories</span> <span class="o">=</span> <span class="n">packageLocator</span><span class="o">.</span><span class="n">repositories</span>
+  <span class="k">for</span> <span class="n">repository</span> <span class="ow">in</span> <span class="n">repositories</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span> <span class="o">==</span> <span class="n">path</span><span class="p">:</span>
+      <span class="n">oldPath</span> <span class="o">=</span> <span class="n">path</span>
+      <span class="k">break</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># change first repository path to point to this one, and also change backup</span>
+    <span class="n">repository</span> <span class="o">=</span> <span class="n">repositories</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">oldPath</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+    <span class="n">infoMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Project file has moved; adjusting ...&#39;</span><span class="p">)</span>
+    <span class="n">repository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+    <span class="c1"># Necessary because activeRepositories are not set right</span>
+    <span class="c1"># if file names do not match:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;activeRepositories&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">repository</span><span class="p">)</span>
+
+  <span class="n">projectRepository</span> <span class="o">=</span> <span class="n">repository</span>
+
+  <span class="c1"># check backup path</span>
+  <span class="n">backupRepository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;backup&quot;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">backupRepository</span><span class="p">:</span>
+    <span class="n">backupUrl</span> <span class="o">=</span> <span class="n">backupRepository</span><span class="o">.</span><span class="n">url</span>
+    <span class="n">oldBackupPath</span> <span class="o">=</span> <span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">backupUrl</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">newBackupPath</span> <span class="o">=</span> <span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">+</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_BACKUP_SUFFIX</span>
+    <span class="n">oldPathPrefix</span> <span class="o">=</span> <span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">oldPath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">oldBackupPath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">oldPathPrefix</span><span class="p">):</span> <span class="c1"># hopefully true</span>
+      <span class="k">if</span> <span class="n">path</span> <span class="o">!=</span> <span class="n">oldPath</span><span class="p">:</span>
+        <span class="n">oldBackupPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">oldBackupPath</span><span class="p">)</span>
+        <span class="n">newBackupPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">newBackupPath</span><span class="p">)</span>
+        <span class="n">infoMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Backup changed to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">newBackupPath</span><span class="p">))</span>
+        <span class="n">backupRepository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newBackupPath</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">oldBackupPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">oldBackupPath</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">oldBackupPath</span><span class="p">):</span>
+        <span class="n">newBackupPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">newBackupPath</span><span class="p">)</span>
+        <span class="n">infoMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Backup changed to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">newBackupPath</span><span class="p">))</span>
+        <span class="n">backupRepository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newBackupPath</span><span class="p">)</span>
+
+  <span class="c1"># check if project repository is called &#39;userData&#39;</span>
+  <span class="k">if</span> <span class="n">projectRepository</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;userData&#39;</span><span class="p">:</span>
+    <span class="n">infoMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Project has non-standard repository name &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span>
+                           <span class="n">projectRepository</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+  <span class="c1"># repoint dataStores that are in same directory as project</span>
+  <span class="c1"># (but only if old path does not exist and new one does)</span>
+  <span class="k">if</span> <span class="n">path</span> <span class="o">!=</span> <span class="n">oldPath</span><span class="p">:</span>
+    <span class="n">oldDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">oldPath</span><span class="p">)</span>
+    <span class="n">newDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">dataLocationStore</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">dataLocationStores</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">dataStores</span><span class="p">:</span>
+        <span class="n">fullPath</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">fullPath</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">fullPath</span><span class="p">):</span>
+          <span class="n">dataUrl</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">dataUrl</span>
+          <span class="n">dataLocation</span> <span class="o">=</span> <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span>
+          <span class="k">if</span> <span class="p">(</span><span class="n">dataLocation</span> <span class="o">==</span> <span class="n">oldDirectory</span> <span class="ow">or</span>
+              <span class="p">(</span><span class="n">dataLocation</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">oldDirectory</span><span class="p">)</span> <span class="ow">and</span> <span class="n">dataLocation</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">oldDirectory</span><span class="p">)]</span> <span class="o">==</span>
+                <span class="n">Path</span><span class="o">.</span><span class="n">dirsep</span><span class="p">)):</span>
+            <span class="n">newDataUrlPath</span> <span class="o">=</span> <span class="n">newDirectory</span> <span class="o">+</span> <span class="n">dataLocation</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">oldDirectory</span><span class="p">):]</span>
+            <span class="n">newPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">newDataUrlPath</span><span class="p">,</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newPath</span><span class="p">):</span>
+              <span class="n">infoMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Data &quot;</span><span class="si">%s</span><span class="s1">&quot;: changed path to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span>
+                                  <span class="p">(</span><span class="n">dataStore</span><span class="o">.</span><span class="n">dataLocationStore</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">newDataUrlPath</span><span class="p">))</span>
+              <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">clone</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newDataUrlPath</span><span class="p">)</span>
+
+  <span class="c1"># change refData to current one if need be</span>
+  <span class="n">refDataRepository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;refData&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">refDataRepository</span><span class="p">:</span>
+    <span class="n">oldPath</span> <span class="o">=</span> <span class="n">refDataRepository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+    <span class="n">newPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">getPathToImport</span><span class="p">(</span><span class="s1">&#39;ccpnmodel&#39;</span><span class="p">),</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">newPath</span> <span class="o">!=</span> <span class="n">oldPath</span><span class="p">:</span>
+      <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;refData has been changed from &quot;</span><span class="si">%s</span><span class="s1">&quot; to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">oldPath</span><span class="p">,</span> <span class="n">newPath</span><span class="p">))</span>
+      <span class="n">refDataRepository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newPath</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Project has no repository with name &quot;refData&quot;&#39;</span><span class="p">)</span>
+
+  <span class="c1"># change generalData to current one if need be</span>
+  <span class="n">generalDataRepository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;generalData&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">generalDataRepository</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">suppressGeneralDataDir</span><span class="p">:</span>
+    <span class="n">oldPath</span> <span class="o">=</span> <span class="n">generalDataRepository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">oldPath</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">isGeneralDataWriteable</span><span class="p">(</span><span class="n">generalDataRepository</span><span class="p">):</span>
+      <span class="n">newPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~/.ccpn/data&#39;</span><span class="p">))</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newPath</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
+      <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;generalData has been changed from &quot;</span><span class="si">%s</span><span class="s1">&quot; to &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">oldPath</span><span class="p">,</span> <span class="n">newPath</span><span class="p">))</span>
+      <span class="n">generalDataRepository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newPath</span><span class="p">)</span>
+
+  <span class="c1"># check other repository paths</span>
+  <span class="k">for</span> <span class="n">repository</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">repositories</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">repository</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">projectRepository</span><span class="p">,</span> <span class="n">refDataRepository</span><span class="p">,</span> <span class="n">backupRepository</span><span class="p">,</span> <span class="n">generalDataRepository</span><span class="p">):</span>
+      <span class="n">oldPath</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">repository</span><span class="o">.</span><span class="n">stored</span><span class="p">:</span>
+        <span class="c1"># title = &#39;Repository being deleted&#39;</span>
+        <span class="c1"># msg = &#39;Repository &quot;%s&quot; with path &quot;%s&quot; has no packageLocators, deleting&#39; % (repository.name, oldPath)</span>
+        <span class="n">repository</span><span class="o">.</span><span class="n">delete</span><span class="p">()</span>
+      <span class="k">elif</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">oldPath</span><span class="p">):</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Repository &quot;</span><span class="si">%s</span><span class="s1">&quot; path &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">repository</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">oldPath</span><span class="p">)</span>
+        <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+        <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;List of packageLocators for repository &quot;</span><span class="si">%s</span><span class="s1">&quot;:&#39;</span> <span class="o">%</span> <span class="n">repository</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">packageLocator</span> <span class="ow">in</span> <span class="n">repository</span><span class="o">.</span><span class="n">stored</span><span class="p">:</span>
+          <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">packageLocator</span><span class="o">.</span><span class="n">targetName</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">askDir</span><span class="p">:</span>
+          <span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Repository path does not exist&#39;</span>
+          <span class="n">newPath</span> <span class="o">=</span> <span class="n">askDir</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;: enter new path&#39;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">oldPath</span><span class="p">)</span>
+          <span class="k">while</span> <span class="n">newPath</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newPath</span><span class="p">):</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Path &quot;</span><span class="si">%s</span><span class="s1">&quot; does not exist&#39;</span> <span class="o">%</span> <span class="n">newPath</span>
+            <span class="n">newPath</span> <span class="o">=</span> <span class="n">askDir</span><span class="p">(</span><span class="n">title</span><span class="p">,</span> <span class="n">msg</span> <span class="o">+</span> <span class="s1">&#39;: enter new path&#39;</span><span class="p">,</span> <span class="n">initial_value</span><span class="o">=</span><span class="n">newPath</span><span class="p">)</span>
+          <span class="k">if</span> <span class="n">newPath</span><span class="p">:</span>
+            <span class="n">repository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">newPath</span><span class="p">))</span>
+            <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;New path set: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">newPath</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="c1"># check and fix dataLocationStores</span>
+  <span class="k">if</span> <span class="n">fixDataStores</span><span class="p">:</span>
+    <span class="n">dataStores</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dataLocationStore</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">dataLocationStores</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">dataStores</span><span class="p">:</span>
+
+        <span class="c1"># # We cannot prune these, as it causes them to be loaded out of turn.</span>
+        <span class="c1"># # NBNB keep this comment, to remind of the problem</span>
+        <span class="c1"># if hasattr(dataStore, &#39;nmrDataSources&#39;) and not dataStore.nmrDataSources:</span>
+        <span class="c1">#   debugMessages.append(&#39;deleting empty dataStore %s with path %s&#39;</span>
+        <span class="c1">#                           % (dataStore, dataStore.fullPath))</span>
+        <span class="c1">#   dataStore.delete()</span>
+        <span class="c1"># # We do not use these, and if we ever did, who knows what else they might be used for</span>
+        <span class="c1"># # elif isinstance(dataStore, MimeTypeDataStore) and not dataStore.nmrDataSourceImages:</span>
+        <span class="c1"># #   debugMessages.append(&#39;deleting empty dataStore %s with path %s&#39;</span>
+        <span class="c1"># #                          % (dataStore, dataStore.fullPath))</span>
+        <span class="c1"># #   dataStore.delete()</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#   dataStores.append(dataStore)</span>
+        <span class="n">dataStores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dataStore</span><span class="p">)</span>
+
+    <span class="n">badDataStores</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataStore</span> <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataStores</span>
+                     <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dataStore</span><span class="o">.</span><span class="n">fullPath</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">badDataStores</span><span class="p">:</span>
+      <span class="c1"># find DataUrls involved</span>
+      <span class="n">dataUrls</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataStore</span><span class="o">.</span><span class="n">dataUrl</span> <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">badDataStores</span><span class="p">)</span>
+      <span class="c1"># NBNB change here to possibly start a directory higher NBNB TBD</span>
+      <span class="c1"># NB the following gets you the project directory (the one containing memops/)</span>
+      <span class="n">startDir</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">packageLocator</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">()</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span>
+
+      <span class="k">for</span> <span class="n">dataUrl</span> <span class="ow">in</span> <span class="n">dataUrls</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dataUrl</span><span class="o">.</span><span class="n">dataStores</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">badDataStores</span><span class="p">):</span>
+          <span class="c1"># all DataStores for this DataUrl are bad</span>
+          <span class="c1"># we can make changes without affecting &#39;good&#39; DataStores</span>
+
+          <span class="c1"># Look for an obvious place the data may have moved to</span>
+          <span class="n">dataStores</span> <span class="o">=</span>  <span class="n">dataUrl</span><span class="o">.</span><span class="n">sortedDataStores</span><span class="p">()</span>
+          <span class="n">fullPaths</span> <span class="o">=</span> <span class="p">[</span><span class="n">dataStore</span><span class="o">.</span><span class="n">fullPath</span> <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataStores</span><span class="p">]</span>
+          <span class="n">baseDir</span><span class="p">,</span> <span class="n">newPaths</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">suggestFileLocations</span><span class="p">(</span><span class="n">fullPaths</span><span class="p">,</span><span class="n">startDir</span><span class="o">=</span><span class="n">startDir</span><span class="p">)</span>
+
+          <span class="k">if</span> <span class="n">baseDir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># We have a file location that fits all missing files.</span>
+            <span class="c1"># Change dataStores to use it</span>
+            <span class="n">debugMessages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;resetting data locations to: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">baseDir</span><span class="p">)</span>
+
+            <span class="n">AbstractDataStore</span><span class="o">.</span><span class="n">changeDataStoreUrl</span><span class="p">(</span><span class="n">dataStores</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">baseDir</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">ii</span><span class="p">,</span><span class="n">dataStore</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">dataStores</span><span class="p">):</span>
+              <span class="n">dataStore</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">newPaths</span><span class="p">[</span><span class="n">ii</span><span class="p">]</span>
+
+  <span class="c1"># Special hack for moving data of renamed packages on upgrade</span>
+  <span class="k">for</span> <span class="n">newName</span><span class="p">,</span> <span class="n">oldName</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">_movedPackageNames</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+    <span class="n">movePackageData</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">newName</span><span class="p">,</span> <span class="n">oldName</span><span class="p">)</span>
+      
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">_createLogger</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">applicationName</span><span class="p">,</span> <span class="n">useFileLogger</span><span class="p">)</span>
+
+  <span class="c1"># initialise standard DataUrls and move dataStores to standard DataUrls where possible.</span>
+  <span class="n">_initialiseStandardDataLocationStore</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+  <span class="n">_compressDataLocations</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">debugMessages</span><span class="p">:</span>
+    <span class="c1"># log warnings</span>
+    <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">debugMessages</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">infoMessages</span><span class="p">:</span>
+    <span class="c1"># info messages</span>
+    <span class="k">for</span> <span class="n">msg</span> <span class="ow">in</span> <span class="n">infoMessages</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+
+  <span class="c1"># NBNB Hack: do data upgrade for V2-V3transition</span>
+  <span class="c1"># TBD FIXME remove for future versions</span>
+  <span class="k">if</span> <span class="n">project</span><span class="o">.</span><span class="n">_upgradedFromV2</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">ccpnmodel.v_3_0_2.upgrade</span> <span class="kn">import</span> <span class="n">correctFinalResult</span>
+    <span class="n">correctFinalResult</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">checkAllValid</span><span class="p">()</span>
+
+    <span class="c1"># Necessary to avoid having a V2 project inside  V3 directory structure</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">saveModified</span><span class="p">()</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">project</span></div>
+
+<div class="viewcode-block" id="cleanupProject"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.cleanupProject">[docs]</a><span class="k">def</span> <span class="nf">cleanupProject</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Clean up project preparatory to closing (close log handlers etc.)&quot;&quot;&quot;</span>
+
+  <span class="c1"># delete temporary project directory, if there is one</span>
+  <span class="n">deleteTemporaryDirectory</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+  <span class="c1"># clear loggers</span>
+  <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;_logger&#39;</span><span class="p">):</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
+    <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">[:]:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">removeHandler</span><span class="p">(</span><span class="n">handler</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="deleteTemporaryDirectory"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.deleteTemporaryDirectory">[docs]</a><span class="k">def</span> <span class="nf">deleteTemporaryDirectory</span><span class="p">(</span><span class="n">project</span><span class="p">):</span>
+  
+  <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;_temporaryDirectory&#39;</span><span class="p">):</span>  
+    <span class="n">project</span><span class="o">.</span><span class="n">_temporaryDirectory</span><span class="o">.</span><span class="n">cleanup</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">project</span><span class="o">.</span><span class="n">_temporaryDirectory</span> </div>
+  
+<div class="viewcode-block" id="saveProject"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.saveProject">[docs]</a><span class="k">def</span> <span class="nf">saveProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">newPath</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">changeBackup</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">createFallback</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">checkValid</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">changeDataLocations</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                <span class="n">useFileLogger</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Save the userData for a project to a location given by newPath (the url.path</span>
+<span class="sd">  of the userData repository) if set, or the existing location if not.</span>
+<span class="sd">  Return True if save succeeded otherwise return False (or throw error)</span>
+
+<span class="sd">  NB Changes to project in the function can NOT be undone, but previous contents of the undo</span>
+<span class="sd">  queue are left active, so you can undo backwards.</span>
+
+<span class="sd">  If userData does not exist then throws IOError.</span>
+<span class="sd">  If newPath is not specified then it is set to oldPath.</span>
+<span class="sd">  If newProjectName is not specified then it is set to oldProjectName if</span>
+<span class="sd">  newPath==oldPath, otherwise it is set to basename(newPath).</span>
+<span class="sd">  If changeBackup, then also changes backup URL path for project.</span>
+<span class="sd">  If createFallback, then makes copy of existing modified topObjects</span>
+<span class="sd">  files (in newPath, not oldPath) before doing save::</span>
+
+<span class="sd">    If newPath != oldPath and newPath exists (either as file or as directory):</span>
+<span class="sd">      If overwriteExisting:</span>
+<span class="sd">        Delete the newPath.</span>
+<span class="sd">      Else if showYesNo:</span>
+<span class="sd">        Ask the user if it is ok to delete the newPath</span>
+<span class="sd">        If yes, delete.  If no, return without saving.</span>
+<span class="sd">      Else:</span>
+<span class="sd">        Raise an IOError</span>
+<span class="sd">    Elif newProjectName != oldProjectName and there exists corresponding path (file/directory):</span>
+<span class="sd">      If overwriteExisting:</span>
+<span class="sd">        Delete the path.</span>
+<span class="sd">      Else if showYesNo:</span>
+<span class="sd">        Ask the user if it is ok to delete the path.</span>
+<span class="sd">        If yes, delete.  If no, return without saving.</span>
+<span class="sd">      Else:</span>
+<span class="sd">        Raise an IOError</span>
+<span class="sd">    If checkValid then does checkAllValid on project</span>
+<span class="sd">    If changeDataLocations then copy to project directory</span>
+<span class="sd">    If there is no exception or early return then at end userData is pointing to newPath.</span>
+<span class="sd">    Return True if save done, False if not (unless there is an exception)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  
+  <span class="n">undo</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_undo</span>
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># TODO NBNB This should be put in a proper try-except block to avoid</span>
+    <span class="c1"># errors preventing reset</span>
+    <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_logger</span>
+
+  <span class="c1"># check project valid (so don&#39;t save an obviously invalid project)</span>
+  <span class="k">if</span> <span class="n">checkValid</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">checkAllValid</span><span class="p">()</span>
+
+  <span class="c1"># only want to change path for userData</span>
+  <span class="n">userData</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;userData&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">userData</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s1">&#39;Problem: userData not found&#39;</span><span class="p">)</span>
+
+  <span class="n">oldPath</span> <span class="o">=</span> <span class="n">userData</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+
+  <span class="k">if</span> <span class="n">newPath</span><span class="p">:</span>
+    <span class="c1"># normalise newPath</span>
+    <span class="n">newPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">newPath</span><span class="p">,</span> <span class="n">makeAbsolute</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">newPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1"># NB this ensures that if we are going from V2 to V3 it will save in a new place</span>
+    <span class="n">newPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">oldPath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">newPath</span> <span class="o">!=</span> <span class="n">oldPath</span><span class="p">:</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Project has been upgraded - saved in new location:  </span><span class="si">%s</span><span class="s2"> &quot;</span>
+                           <span class="o">%</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">newPath</span><span class="p">))</span>
+
+  <span class="c1"># set newProjectName</span>
+  <span class="n">oldProjectName</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span>
+  <span class="k">if</span> <span class="n">newPath</span> <span class="o">==</span> <span class="n">oldPath</span><span class="p">:</span>
+    <span class="n">newProjectName</span> <span class="o">=</span> <span class="n">oldProjectName</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">newProjectName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
+
+  <span class="n">newProjectName</span> <span class="o">=</span> <span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">newProjectName</span><span class="p">)</span>
+
+  <span class="c1"># below is because of data model limit</span>
+  <span class="n">newProjectName</span> <span class="o">=</span> <span class="n">newProjectName</span><span class="p">[:</span><span class="mi">32</span><span class="p">]</span>
+
+  <span class="c1"># if newProjectName != oldProjectName:</span>
+  <span class="c1">#   _renameProject(project, newProjectName)</span>
+
+  <span class="c1"># if newPath same as oldPath, check if newProjectName already exists if it&#39;s not same as oldProjectName</span>
+  <span class="c1"># if newPath == oldPath:</span>
+  <span class="c1">#   if newProjectName != oldProjectName:</span>
+  <span class="c1">#     location = ApiPath.getTopObjectPath(project)</span>
+  <span class="c1">#     if not absentOrRemoved(location, overwriteExisting, showYesNo):</span>
+  <span class="c1">#       project.__dict__[&#39;name&#39;] = oldProjectName  # TBD: for now name is frozen so change this way</span>
+  <span class="c1">#       # deleteTemporaryDirectory(project)</span>
+  <span class="c1">#       if undo is not None:</span>
+  <span class="c1">#         undo.decreaseBlocking()</span>
+  <span class="c1">#       return False</span>
+  <span class="c1"># else: # check instead if newPath already exists</span>
+  <span class="k">if</span> <span class="n">newPath</span> <span class="o">!=</span> <span class="n">oldPath</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">absentOrRemoved</span><span class="p">(</span><span class="n">newPath</span><span class="p">,</span> <span class="n">overwriteExisting</span><span class="p">):</span>
+      <span class="n">upDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">upDir</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">upDir</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">newProjectName</span> <span class="o">!=</span> <span class="n">oldProjectName</span><span class="p">:</span>
+        <span class="n">_renameProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">newProjectName</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+      <span class="n">logger</span> <span class="o">=</span> <span class="n">_createLogger</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">useFileLogger</span><span class="o">=</span><span class="n">useFileLogger</span><span class="p">)</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Aborting Project.save - new target path already exists: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">newPath</span><span class="p">)</span>
+      <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="c1"># check if any topObject activeRepository is not either of above</span>
+    <span class="n">refData</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;refData&#39;</span><span class="p">)</span>
+    <span class="n">genData</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;generalData&#39;</span><span class="p">)</span>
+    <span class="n">topObjects</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">repositories</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">topObjects</span><span class="p">:</span>
+      <span class="n">repository</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">findFirstActiveRepository</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">repository</span> <span class="ow">and</span> <span class="n">repository</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">userData</span><span class="p">,</span> <span class="n">refData</span><span class="p">,</span> <span class="n">genData</span><span class="p">):</span>
+        <span class="n">topObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">topObject</span><span class="p">)</span>
+        <span class="n">repositories</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">repository</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">topObjects</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;TopObjects </span><span class="si">%s</span><span class="s1">, in repositories </span><span class="si">%s</span><span class="s1">, being left in original locations&#39;</span>
+                     <span class="o">%</span> <span class="p">(</span><span class="n">topObjects</span><span class="p">,</span> <span class="n">repositories</span><span class="p">))</span>
+
+  <span class="n">oldUrl</span> <span class="o">=</span> <span class="n">userData</span><span class="o">.</span><span class="n">url</span>
+  <span class="k">if</span> <span class="n">changeBackup</span><span class="p">:</span>
+    <span class="c1"># change project backup url to point to new path</span>
+    <span class="n">backupRepository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;backup&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">backupRepository</span><span class="p">:</span>
+      <span class="n">oldBackupUrl</span> <span class="o">=</span> <span class="n">backupRepository</span><span class="o">.</span><span class="n">url</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">changeBackup</span> <span class="o">=</span> <span class="bp">False</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="c1"># copy userData files over</span>
+    <span class="k">if</span> <span class="n">newPath</span> <span class="o">!=</span> <span class="n">oldPath</span><span class="p">:</span>
+      <span class="c1"># if os.path.exists(oldPath):  # only copy if this is a directory</span>
+      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">oldPath</span><span class="p">):</span>
+        <span class="c1"># just copy everything from oldPath to newPath</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+          <span class="s1">&#39;Copying directory </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> (this might take some time if there are big files)&#39;</span>
+          <span class="o">%</span> <span class="p">(</span><span class="n">oldPath</span><span class="p">,</span> <span class="n">newPath</span><span class="p">))</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">oldPath</span><span class="p">,</span> <span class="n">newPath</span><span class="p">)</span>
+
+        <span class="c1"># but need to remove all implementation files</span>
+        <span class="n">implPath</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getImplementationDirectory</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
+        <span class="c1">#implPath = pathImplDirectory(newPath)</span>
+        <span class="n">Path</span><span class="o">.</span><span class="n">deletePath</span><span class="p">(</span><span class="n">implPath</span><span class="p">)</span>
+
+        <span class="c1"># and need to repoint dataUrl&#39;s that were copied over</span>
+        <span class="n">oldPathP</span> <span class="o">=</span> <span class="n">oldPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+        <span class="k">for</span> <span class="n">dataLocationStore</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">dataLocationStores</span><span class="p">:</span>
+          <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">dataStores</span><span class="p">:</span>
+            <span class="n">oldDataPath</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">fullPath</span>
+            <span class="k">if</span> <span class="n">oldDataPath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">oldPathP</span><span class="p">):</span>
+              <span class="n">dataUrl</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">dataUrl</span>
+              <span class="n">oldDataUrlPath</span> <span class="o">=</span> <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span>
+              <span class="k">if</span> <span class="n">oldDataUrlPath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">oldPathP</span><span class="p">):</span> <span class="c1"># normally true</span>
+                <span class="n">newDataUrlPath</span> <span class="o">=</span> <span class="n">newPath</span> <span class="o">+</span> <span class="n">oldDataUrlPath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">oldPath</span><span class="p">):]</span>
+                <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newDataUrlPath</span><span class="p">)</span>
+              <span class="k">else</span><span class="p">:</span> <span class="c1"># path split awkwardly between absolute and relative</span>
+                <span class="n">newDataUrlPath</span> <span class="o">=</span> <span class="n">newPath</span>
+                <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newDataUrlPath</span><span class="p">)</span>
+                <span class="n">dataStore</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">oldDataPath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">oldPath</span><span class="p">):]</span>
+
+      <span class="c1"># change userData url to point to new path</span>
+      <span class="n">userData</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newPath</span><span class="p">)</span>
+      <span class="c1"># above will set project.isModified = True</span>
+
+      <span class="k">if</span> <span class="n">changeBackup</span><span class="p">:</span>
+        <span class="c1"># change project backup repository url to point to new path</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
+        <span class="n">backupRepository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="o">+</span><span class="n">Path</span><span class="o">.</span><span class="n">CCPN_BACKUP_SUFFIX</span><span class="o">+</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">)</span>
+
+    <span class="c1"># change project name</span>
+    <span class="k">if</span> <span class="n">newProjectName</span> <span class="o">!=</span> <span class="n">oldProjectName</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">project</span><span class="o">.</span><span class="n">isModified</span><span class="p">:</span> <span class="c1"># if it isModified it will be saved below</span>
+        <span class="k">if</span> <span class="n">createFallback</span><span class="p">:</span>
+          <span class="n">createTopObjectFallback</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+
+    <span class="c1"># create fallbacks and keep track of modified topObjects</span>
+    <span class="n">modifiedTopObjects</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">createFallback</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="p">(</span><span class="n">project</span><span class="p">,)</span><span class="o">+</span><span class="nb">tuple</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">topObjects</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">topObject</span><span class="o">.</span><span class="n">isDeleted</span> <span class="ow">and</span> <span class="n">topObject</span><span class="o">.</span><span class="n">isModified</span><span class="p">:</span>
+          <span class="n">createTopObjectFallback</span><span class="p">(</span><span class="n">topObject</span><span class="p">)</span>
+          <span class="n">modifiedTopObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">topObject</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">changeDataLocations</span><span class="p">:</span>
+      <span class="n">dataLocationStores</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">sortedDataLocationStores</span><span class="p">()</span>
+
+      <span class="n">userRepository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;userData&#39;</span><span class="p">)</span>
+      <span class="n">userPath</span> <span class="o">=</span> <span class="n">userRepository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span>
+      <span class="c1"># 2010 Aug 11: remove data directory from path</span>
+      <span class="c1">#dataPath = joinPath(userPath, &#39;data&#39;)</span>
+      <span class="n">dataPath</span> <span class="o">=</span> <span class="n">userPath</span>
+
+      <span class="c1"># 2010 Aug 11: change name</span>
+      <span class="c1">#dataStorePrefix = &#39;dataStore&#39;</span>
+      <span class="n">dataStorePrefix</span> <span class="o">=</span> <span class="s1">&#39;spectra&#39;</span>
+      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dataPath</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[</span><span class="n">xx</span> <span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dataPath</span><span class="p">)</span> <span class="k">if</span> <span class="n">xx</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">dataStorePrefix</span><span class="p">)]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+
+      <span class="n">copyingList</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">dataUrlDict</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">dataLocationStore</span> <span class="ow">in</span> <span class="n">dataLocationStores</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">sortedDataStores</span><span class="p">():</span>
+
+          <span class="c1"># wb104: 24 Mar 2010: below check is a complete kludge</span>
+          <span class="c1"># we should check whether dataStore is instance of</span>
+          <span class="c1"># NumericMatrix, etc., but those are in ccp so should</span>
+          <span class="c1"># not be imported here</span>
+          <span class="c1"># in any case, there is no proper way to find out if</span>
+          <span class="c1"># a dataStore is used without explicit knowledge of class</span>
+          <span class="n">knt</span> <span class="o">=</span> <span class="mi">0</span>
+          <span class="c1"># hicard = 1</span>
+          <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;nmrDataSourceImage&#39;</span><span class="p">,):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dataStore</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+              <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">dataStore</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+                <span class="n">knt</span> <span class="o">+=</span> <span class="mi">1</span>
+          <span class="c1"># hicard &gt; 1</span>
+          <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;externalDatas&#39;</span><span class="p">,</span> <span class="s1">&#39;nmrDataSources&#39;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">dataStore</span><span class="p">,</span> <span class="n">attr</span><span class="p">):</span>
+              <span class="n">knt</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">dataStore</span><span class="p">,</span> <span class="n">attr</span><span class="p">))</span>
+          <span class="k">if</span> <span class="n">knt</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">continue</span>
+
+          <span class="n">oldFullPath</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">fullPath</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">oldFullPath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">userPath</span><span class="o">+</span><span class="s1">&#39;/&#39;</span><span class="p">):</span>
+            <span class="c1"># first figure out new dataUrl path</span>
+            <span class="n">dataUrl</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">dataUrl</span>
+            <span class="n">oldPath</span> <span class="o">=</span> <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span>
+            <span class="k">if</span> <span class="n">dataUrl</span> <span class="ow">in</span> <span class="n">dataUrlDict</span><span class="p">:</span>
+              <span class="n">newUrl</span> <span class="o">=</span> <span class="n">dataUrlDict</span><span class="p">[</span><span class="n">dataUrl</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="n">offset</span> <span class="o">+=</span> <span class="mi">1</span>
+              <span class="n">newUrlPath</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">dataStorePrefix</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+              <span class="n">newUrlPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">dataPath</span><span class="p">,</span> <span class="n">newUrlPath</span><span class="p">)</span>
+              <span class="n">newUrl</span> <span class="o">=</span> <span class="n">dataUrlDict</span><span class="p">[</span><span class="n">dataUrl</span><span class="p">]</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">newUrlPath</span><span class="p">)</span>
+            <span class="c1"># then add to list to copy over if original data exists</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">oldFullPath</span><span class="p">):</span>
+              <span class="n">newFullPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">newUrl</span><span class="o">.</span><span class="n">dataLocation</span><span class="p">,</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+              <span class="n">copyingList</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">oldFullPath</span><span class="p">,</span> <span class="n">newFullPath</span><span class="p">))</span>
+
+      <span class="c1"># now copy data files over</span>
+      <span class="n">nfilesToCopy</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">copyingList</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="p">(</span><span class="n">oldFullPath</span><span class="p">,</span> <span class="n">newFullPath</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">copyingList</span><span class="p">):</span>
+        <span class="n">dirName</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">newFullPath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">dirName</span><span class="p">):</span>
+          <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">dirName</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Copying file </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%d</span><span class="s1"> of </span><span class="si">%d</span><span class="s1">)&#39;</span>
+                       <span class="o">%</span> <span class="p">(</span><span class="n">oldFullPath</span><span class="p">,</span> <span class="n">newFullPath</span><span class="p">,</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">nfilesToCopy</span><span class="p">))</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">oldFullPath</span><span class="p">,</span> <span class="n">newFullPath</span><span class="p">)</span>
+
+      <span class="c1"># finally change dataUrl paths</span>
+      <span class="k">for</span> <span class="n">dataUrl</span> <span class="ow">in</span> <span class="n">dataUrlDict</span><span class="p">:</span>
+        <span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">dataUrlDict</span><span class="p">[</span><span class="n">dataUrl</span><span class="p">]</span>
+
+    <span class="c1"># save modifications</span>
+    <span class="c1"># change way doing save in case exception is thrown</span>
+    <span class="k">if</span> <span class="n">createFallback</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="n">modifiedTopObjects</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+          <span class="n">topObject</span><span class="o">.</span><span class="n">save</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+          <span class="n">location</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getTopObjectPath</span><span class="p">(</span><span class="n">topObject</span><span class="p">)</span>
+          <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Exception working on topObject </span><span class="si">%s</span><span class="s1">, file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">topObject</span><span class="p">,</span> <span class="n">location</span><span class="p">))</span>
+          <span class="k">raise</span>
+      <span class="c1"># be safe and do below in case new modifications after</span>
+      <span class="c1"># modifiedTopObjects has been created</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">saveModified</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">saveModified</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">isWindowsOS</span><span class="p">():</span>
+      <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;touch &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">newPath</span><span class="p">)</span>  <span class="c1"># so that user can see which are most recent</span>
+
+    <span class="n">badTopObjects</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="n">modifiedTopObjects</span><span class="p">:</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">checkFileIntegrity</span><span class="p">(</span><span class="n">topObject</span><span class="p">):</span>
+        <span class="n">badTopObjects</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">topObject</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">badTopObjects</span><span class="p">:</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s1">&#39;Incomplete save - one or more files did not save completely, you should check them:&#39;</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="n">badTopObjects</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Bad save: </span><span class="si">%s</span><span class="s2"> - </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">topObject</span><span class="p">,</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getTopObjectPath</span><span class="p">(</span><span class="n">topObject</span><span class="p">)))</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">True</span>
+
+  <span class="k">except</span><span class="p">:</span>
+    <span class="c1"># saveModified failed so revert to old values</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">if</span> <span class="n">newProjectName</span> <span class="o">!=</span> <span class="n">oldProjectName</span><span class="p">:</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">__dict__</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">oldProjectName</span>  <span class="c1"># TBD: for now name is frozen so change this way</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING - error saving. Save did not complete&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">newPath</span> <span class="o">!=</span> <span class="n">oldPath</span><span class="p">:</span>
+      <span class="n">userData</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">oldUrl</span>
+      <span class="k">if</span> <span class="n">changeBackup</span><span class="p">:</span>
+        <span class="n">backupRepository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">oldBackupUrl</span>
+      <span class="n">Path</span><span class="o">.</span><span class="n">deletePath</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span>
+    <span class="k">raise</span>
+
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+  
+  <span class="k">if</span> <span class="n">newPath</span> <span class="o">==</span> <span class="n">oldPath</span><span class="p">:</span>
+    <span class="n">logger</span> <span class="o">=</span> <span class="n">_createLogger</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">useFileLogger</span><span class="o">=</span><span class="n">useFileLogger</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">and</span> <span class="p">(</span><span class="n">newProjectName</span> <span class="o">!=</span> <span class="n">oldProjectName</span> <span class="ow">or</span>
+                   <span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">newPath</span><span class="p">)</span> <span class="o">!=</span> <span class="n">removeCcpnDirectorySuffix</span><span class="p">(</span><span class="n">oldPath</span><span class="p">)):</span>
+    <span class="c1"># save in newlocation succeded - remove temporary directories</span>
+    <span class="n">deleteTemporaryDirectory</span><span class="p">(</span><span class="n">project</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="checkFileAtPath"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.checkFileAtPath">[docs]</a><span class="k">def</span> <span class="nf">checkFileAtPath</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Check that file on disk ends correctly</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+  <span class="n">size</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">getsize</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;rU&#39;</span><span class="p">)</span>
+
+  <span class="n">ss</span> <span class="o">=</span> <span class="s1">&#39;&lt;!--End of Memops Data--&gt;&#39;</span>
+  <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ss</span><span class="p">)</span>
+  <span class="n">fp</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">size</span><span class="o">-</span><span class="n">n</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># -2 just to be safe in case has \r\n as line ending</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="o">-</span><span class="n">n</span><span class="p">:]</span>
+  <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+  <span class="k">return</span> <span class="n">data</span> <span class="o">==</span> <span class="n">ss</span></div>
+
+<div class="viewcode-block" id="checkFileIntegrity"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.checkFileIntegrity">[docs]</a><span class="k">def</span> <span class="nf">checkFileIntegrity</span><span class="p">(</span><span class="n">topObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Check that topObject file on disk ends correctly</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">path</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getTopObjectPath</span><span class="p">(</span><span class="n">topObject</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">checkFileAtPath</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="createTopObjectFallback"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.createTopObjectFallback">[docs]</a><span class="k">def</span> <span class="nf">createTopObjectFallback</span><span class="p">(</span><span class="n">topObject</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Create backup of topObject in same directory as original file but with &#39;.bak&#39; appended.</span>
+<span class="sd">  This function is not intended to be used outside this module but could be.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+
+  <span class="n">location</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">getTopObjectPath</span><span class="p">(</span><span class="n">topObject</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">location</span><span class="p">):</span>
+    <span class="k">return</span>
+
+  <span class="n">backupLocation</span> <span class="o">=</span> <span class="n">location</span> <span class="o">+</span> <span class="s1">&#39;.bak&#39;</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">checkFileAtPath</span><span class="p">(</span><span class="n">location</span><span class="p">)</span> <span class="ow">and</span> <span class="n">checkFileAtPath</span><span class="p">(</span><span class="n">backupLocation</span><span class="p">):</span>
+    <span class="c1"># current file no good and current backup good so do not do backup</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;File at location &quot;</span><span class="si">%s</span><span class="s1">&quot; not complete so not backing up&#39;</span> <span class="o">%</span> <span class="n">location</span><span class="p">)</span>
+    <span class="k">return</span>
+
+  <span class="c1"># copy rather than move because will need that much disk space in any case</span>
+  <span class="c1"># and sometimes move fails at OS level if file with that name already exists</span>
+  <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">backupLocation</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+  <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">location</span><span class="p">,</span> <span class="n">backupLocation</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_renameProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">newProjectName</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Rename project.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="n">oldProjectName</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">name</span>
+
+  <span class="n">undo</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">_undo</span>
+  <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">undo</span><span class="o">.</span><span class="n">increaseBlocking</span><span class="p">()</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+
+  <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Renaming project </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">newProjectName</span><span class="p">))</span>
+
+  <span class="c1"># change project name</span>
+  <span class="k">if</span> <span class="n">newProjectName</span> <span class="o">==</span> <span class="n">oldProjectName</span><span class="p">:</span>
+    <span class="k">return</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">True</span> <span class="c1"># TBD: for now name is frozen so change this way</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="c1"># below constraint is not checked in setName() if override is True so repeat here</span>
+      <span class="n">isValid</span> <span class="o">=</span> <span class="n">newProjectName</span><span class="o">.</span><span class="n">isalnum</span><span class="p">()</span>  <span class="c1"># superfluous but faster in most cases</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">isValid</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">cc</span> <span class="ow">in</span> <span class="n">newProjectName</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">cc</span> <span class="o">!=</span> <span class="s1">&#39;_&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cc</span><span class="o">.</span><span class="n">isalnum</span><span class="p">():</span>
+            <span class="n">isValid</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">isValid</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">isValid</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s1">&#39;Illegal project name: </span><span class="si">%s</span><span class="se">\n</span><span class="s1"> Only alphanumeric or underscore allowed&#39;</span>
+                       <span class="o">%</span> <span class="n">newProjectName</span><span class="p">)</span>
+
+      <span class="c1"># below checks for length of name as well</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">newProjectName</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
+    <span class="k">finally</span><span class="p">:</span>
+      <span class="n">project</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="k">if</span> <span class="n">undo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">decreaseBlocking</span><span class="p">()</span>
+        <span class="n">undo</span><span class="o">.</span><span class="n">newItem</span><span class="p">(</span><span class="n">_renameProject</span><span class="p">,</span> <span class="n">_renameProject</span><span class="p">,</span> <span class="n">undoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">project</span><span class="p">,</span><span class="n">oldProjectName</span><span class="p">),</span>
+                     <span class="n">redoArgs</span><span class="o">=</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">newProjectName</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_downlinkTagsByImport</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; gives you the role names of links from MemopsRoot to TopObjects</span>
+<span class="sd">  in import order, so that imported packages come before importing packages</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+
+  <span class="n">leafPackages</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">packages</span> <span class="o">=</span> <span class="p">[</span><span class="n">root</span><span class="o">.</span><span class="n">metaclass</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">topPackage</span><span class="p">()]</span>
+  <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
+    <span class="n">childPackages</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">containedPackages</span>
+    <span class="k">if</span> <span class="n">childPackages</span><span class="p">:</span>
+      <span class="n">packages</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">childPackages</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">leafPackages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pp</span><span class="p">)</span>
+
+  <span class="c1"># sort leafPackages by import (imported before importing)</span>
+  <span class="n">leafPackages</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">topologicalSortSubgraph</span><span class="p">(</span><span class="n">leafPackages</span><span class="p">,</span>
+                                                  <span class="s1">&#39;accessedPackages&#39;</span><span class="p">)</span>
+  <span class="n">tags</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">pp</span> <span class="ow">in</span> <span class="n">leafPackages</span><span class="p">:</span>
+    <span class="n">cc</span> <span class="o">=</span> <span class="n">pp</span><span class="o">.</span><span class="n">topObjectClass</span>
+    <span class="k">if</span> <span class="n">cc</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">pr</span> <span class="o">=</span> <span class="n">cc</span><span class="o">.</span><span class="n">parentRole</span>
+      <span class="k">if</span> <span class="n">pr</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">tags</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pr</span><span class="o">.</span><span class="n">otherRole</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">tags</span>
+
+
+<div class="viewcode-block" id="loadAllData"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.loadAllData">[docs]</a><span class="k">def</span> <span class="nf">loadAllData</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; Load all data for a given root (version &gt;= 2.0)</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="c1"># load all new data before modifying IO map</span>
+  <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">_downlinkTagsByImport</span><span class="p">(</span><span class="n">root</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">topObj</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">tag</span><span class="p">):</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">topObj</span><span class="o">.</span><span class="n">isLoaded</span><span class="p">:</span>
+        <span class="n">topObj</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="backupProject"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.backupProject">[docs]</a><span class="k">def</span> <span class="nf">backupProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">dataLocationStores</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">skipRefData</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">clearOutDir</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">modificationTime</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">path</span><span class="p">)[</span><span class="mi">8</span><span class="p">]</span>
+
+  <span class="n">backupRepository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;backup&quot;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">backupRepository</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warning: no backup path set, so no backup done&#39;</span><span class="p">)</span>
+    <span class="k">return</span>
+
+  <span class="n">backupUrl</span> <span class="o">=</span> <span class="n">backupRepository</span><span class="o">.</span><span class="n">url</span>
+  <span class="n">backupPath</span> <span class="o">=</span> <span class="n">backupUrl</span><span class="o">.</span><span class="n">path</span>  
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">dataLocationStores</span><span class="p">:</span>
+    <span class="n">dataLocationStores</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="n">clearOutDir</span><span class="p">:</span>
+    <span class="n">Path</span><span class="o">.</span><span class="n">deletePath</span><span class="p">(</span><span class="n">backupPath</span><span class="p">)</span>
+
+  <span class="n">topObjects</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">project</span><span class="o">.</span><span class="n">topObjects</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">project</span><span class="p">,)</span>
+
+  <span class="k">for</span> <span class="n">topObject</span> <span class="ow">in</span> <span class="n">topObjects</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">skipRefData</span><span class="p">:</span>
+      <span class="n">repository</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">findFirstActiveRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;refData&#39;</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">repository</span><span class="p">:</span>
+        <span class="k">continue</span>
+
+    <span class="k">if</span> <span class="n">topObject</span><span class="o">.</span><span class="n">isModified</span><span class="p">:</span>
+      <span class="n">topObject</span><span class="o">.</span><span class="n">backup</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">repository</span> <span class="o">=</span> <span class="n">topObject</span><span class="o">.</span><span class="n">findFirstActiveRepository</span><span class="p">()</span>
+      <span class="k">if</span> <span class="n">repository</span><span class="p">:</span>
+        <span class="n">origFile</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">findTopObjectPath</span><span class="p">(</span><span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">topObject</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">origFile</span><span class="p">):</span>
+          <span class="c1"># problem with appending repository.name is that topObject.backup()</span>
+          <span class="c1"># above does not do it this way, so end up with inconsistent backup</span>
+          <span class="c1">###backupDir = joinPath(backupPath, repository.name)</span>
+          <span class="c1"># so use same backup pah as topObject.backup()</span>
+          <span class="n">backupDir</span> <span class="o">=</span> <span class="n">backupPath</span>
+          <span class="n">backupFile</span> <span class="o">=</span> <span class="n">ApiPath</span><span class="o">.</span><span class="n">findTopObjectPath</span><span class="p">(</span><span class="n">backupDir</span><span class="p">,</span> <span class="n">topObject</span><span class="p">)</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">backupFile</span><span class="p">)</span> <span class="ow">or</span> \
+              <span class="p">(</span><span class="n">modificationTime</span><span class="p">(</span><span class="n">backupFile</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">modificationTime</span><span class="p">(</span><span class="n">origFile</span><span class="p">)):</span>
+            <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">backupFile</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+              <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">origFile</span><span class="p">,</span> <span class="n">backupFile</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="c1"># one is stuffed</span>
+          <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warning: could not backup&quot; &quot;&#39;</span>
+                                  <span class="s1">&#39; </span><span class="si">%s</span><span class="s1"> since could not find original file &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span>
+                                  <span class="o">%</span> <span class="p">(</span><span class="n">topObject</span><span class="p">,</span> <span class="n">origFile</span><span class="p">))</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># one is stuffed</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warning: could not backup </span><span class="si">%s</span><span class="s1"> since could not find repository&#39;</span>
+                                <span class="o">%</span> <span class="n">topObject</span><span class="p">)</span>
+
+  <span class="n">dataBackupPath</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">backupPath</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">dataLocationStore</span> <span class="ow">in</span> <span class="n">dataLocationStores</span><span class="p">:</span>
+    <span class="n">dataBackupDir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">dataBackupPath</span><span class="p">,</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">dataStores</span><span class="p">:</span>
+      <span class="n">origFile</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+      <span class="n">backupFile</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">joinPath</span><span class="p">(</span><span class="n">dataBackupDir</span><span class="p">,</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+
+      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">origFile</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">backupFile</span><span class="p">)</span> <span class="ow">or</span> \
+            <span class="p">(</span><span class="n">modificationTime</span><span class="p">(</span><span class="n">backupFile</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">modificationTime</span><span class="p">(</span><span class="n">origFile</span><span class="p">)):</span>
+          <span class="n">directory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">backupFile</span><span class="p">)</span>
+          <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+          <span class="n">shutil</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">origFile</span><span class="p">,</span> <span class="n">backupFile</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Warning: could not backup dataStore &#39;</span>
+                                <span class="s1">&#39;&quot;</span><span class="si">%s</span><span class="s1">&quot; because could not find original file &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span>
+                                <span class="o">%</span> <span class="p">(</span><span class="n">dataStore</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">origFile</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="modifyPackageLocators"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.modifyPackageLocators">[docs]</a><span class="k">def</span> <span class="nf">modifyPackageLocators</span><span class="p">(</span><span class="n">project</span><span class="p">,</span><span class="n">repositoryName</span><span class="p">,</span><span class="n">repositoryPath</span><span class="p">,</span><span class="n">packageNames</span><span class="p">,</span><span class="n">resetPackageLocator</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span><span class="n">resetRepository</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Resets package locators for specified packages to specified repository.</span>
+
+<span class="sd">  Use as, for example:</span>
+
+<span class="sd">  modifyPackageLocators(project,&#39;newChemComps&#39;,&#39;/mydir/data/chemComps/&#39;,(&#39;ccp.molecule.ChemComp&#39;,</span>
+<span class="sd">  &#39;ccp.molecule.ChemCompCoord&#39;))</span>
+
+<span class="sd">  Additional args:</span>
+
+<span class="sd">  - resetPackageLocator:  True   will reset the package locator completely, removing old info</span>
+<span class="sd">                          False  will add the repository to the package locator.</span>
+
+<span class="sd">  - resetRepository:      True   will reset url for the repository, even if it already exists</span>
+<span class="sd">                          False  will not reset the url for the repository if it already exists</span>
+
+<span class="sd">  Returns the relevant repository.</span>
+
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">repository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span> <span class="o">=</span> <span class="n">repositoryName</span><span class="p">)</span>
+  <span class="n">ss</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">repositoryPath</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">repository</span><span class="p">:</span>
+    <span class="n">repository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">newRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span> <span class="n">repositoryName</span><span class="p">,</span>
+                                       <span class="n">url</span><span class="o">=</span><span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ss</span><span class="p">))</span>
+  <span class="k">elif</span> <span class="n">resetRepository</span> <span class="ow">and</span> <span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span> <span class="o">!=</span> <span class="n">repositoryPath</span><span class="p">:</span>
+    <span class="n">repository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">ss</span><span class="p">)</span>
+
+  <span class="k">for</span> <span class="n">packageName</span> <span class="ow">in</span> <span class="n">packageNames</span><span class="p">:</span>
+    <span class="n">packageLocator</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstPackageLocator</span><span class="p">(</span><span class="n">targetName</span> <span class="o">=</span> <span class="n">packageName</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">packageLocator</span><span class="p">:</span>
+      <span class="k">raise</span> <span class="n">ApiError</span><span class="p">(</span><span class="s2">&quot;Cannot modify repository &#39;any&#39; for package </span><span class="si">%s</span><span class="s2">&quot;</span>
+                     <span class="o">%</span> <span class="n">packageName</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">resetPackageLocator</span><span class="p">:</span>
+      <span class="n">packageLocator</span><span class="o">.</span><span class="n">repositories</span> <span class="o">=</span> <span class="p">(</span><span class="n">repository</span><span class="p">,)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">repository</span> <span class="ow">in</span> <span class="n">packageLocator</span><span class="o">.</span><span class="n">repositories</span><span class="p">:</span>
+      <span class="n">packageLocator</span><span class="o">.</span><span class="n">addRepository</span><span class="p">(</span><span class="n">repository</span><span class="p">)</span>
+
+  <span class="k">return</span> <span class="n">repository</span></div>
+
+<div class="viewcode-block" id="packageProject"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.packageProject">[docs]</a><span class="k">def</span> <span class="nf">packageProject</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">filePrefix</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">includeBackups</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">includeData</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">includeLogs</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
+                   <span class="n">includeArchives</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Package up project userData into one gzipped tar file.</span>
+<span class="sd">  If filePrefix is None then instead use the userData path.</span>
+<span class="sd">  The tar file is filePrefix+&quot;.tgz&quot;.</span>
+<span class="sd">  By default only \*.xml files are packaged up.</span>
+<span class="sd">  If includeBackups then also \*.xml.bak files are included.</span>
+<span class="sd">  If includeData then also dataStores located inside project directory are included.</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="c1"># NBNB TBD FIXME check how many dataLocations to package (and make sure you reset first)</span>
+
+  <span class="kn">import</span> <span class="nn">datetime</span>
+  <span class="kn">import</span> <span class="nn">tarfile</span>
+
+  <span class="n">projectPath</span> <span class="o">=</span> <span class="n">getRepositoryPath</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="s1">&#39;userData&#39;</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">filePrefix</span><span class="p">:</span>
+    <span class="n">now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">-%H%M%S&#39;</span><span class="p">)</span>
+    <span class="n">filePrefix</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)[:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">)],</span> <span class="n">now</span><span class="p">)</span>
+    <span class="n">filePrefix</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">projectPath</span><span class="p">,</span> <span class="n">CCPN_ARCHIVES_DIRECTORY</span><span class="p">,</span> <span class="n">filePrefix</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">includeData</span><span class="p">:</span>
+    <span class="n">projectPathP</span> <span class="o">=</span> <span class="n">projectPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">includedDataPaths</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">dataLocationStore</span> <span class="ow">in</span> <span class="n">project</span><span class="o">.</span><span class="n">dataLocationStores</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">dataStores</span><span class="p">:</span>
+        <span class="n">fullPath</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">fullPath</span>
+        <span class="k">if</span> <span class="n">fullPath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">projectPathP</span><span class="p">):</span>
+          <span class="n">includedDataPaths</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">fullPath</span><span class="p">[</span><span class="n">n</span><span class="p">:])</span>
+
+  <span class="k">def</span> <span class="nf">visitDir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+    <span class="n">tarFiles</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">relfile</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+      <span class="n">fullfile</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">directory</span><span class="p">,</span> <span class="n">relfile</span><span class="p">)</span>
+      <span class="n">include</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">fullfile</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">relfile</span> <span class="o">!=</span> <span class="n">CCPN_ARCHIVES_DIRECTORY</span> <span class="ow">or</span> <span class="n">includeArchives</span><span class="p">:</span>
+          <span class="n">tarFiles</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">visitDir</span><span class="p">(</span><span class="n">fullfile</span><span class="p">))</span>
+      <span class="k">elif</span> <span class="n">relfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xml&#39;</span><span class="p">):</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">elif</span> <span class="n">includeBackups</span> <span class="ow">and</span> <span class="n">relfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xml.bak&#39;</span><span class="p">):</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">elif</span> <span class="n">includeLogs</span> <span class="ow">and</span> <span class="n">relfile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;logs&#39;</span><span class="p">:</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
+      <span class="k">elif</span> <span class="n">includeData</span> <span class="ow">and</span> <span class="n">fullfile</span> <span class="ow">in</span> <span class="n">includedDataPaths</span><span class="p">:</span>
+        <span class="n">include</span> <span class="o">=</span> <span class="bp">True</span>
+
+      <span class="k">if</span> <span class="n">include</span><span class="p">:</span>
+        <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fullfile</span><span class="p">)</span>
+        <span class="n">tarFiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fullfile</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">tarFiles</span><span class="p">:</span>
+      <span class="n">tarFiles</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">directory</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tarFiles</span>
+
+  <span class="n">tarFileName</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.tgz&#39;</span> <span class="o">%</span> <span class="n">filePrefix</span>
+  <span class="n">tarDirectory</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">tarFileName</span><span class="p">)</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">tarDirectory</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">tarDirectory</span><span class="p">)</span>
+  <span class="n">tarFp</span> <span class="o">=</span> <span class="n">tarfile</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">tarFileName</span><span class="p">,</span> <span class="s1">&#39;w:gz&#39;</span><span class="p">)</span>
+
+  <span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+  <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">projectPath</span><span class="p">))</span>
+
+  <span class="k">try</span><span class="p">:</span>
+    <span class="n">project</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Files included in tar file:&#39;</span><span class="p">)</span>
+    <span class="n">files</span> <span class="o">=</span> <span class="n">visitDir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">projectPath</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">tarFile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+      <span class="n">tarFp</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">tarFile</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+  <span class="k">finally</span><span class="p">:</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span>
+    <span class="n">tarFp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+  <span class="k">return</span> <span class="n">tarFileName</span></div>
+
+
+<div class="viewcode-block" id="findCcpXmlFile"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.findCcpXmlFile">[docs]</a><span class="k">def</span> <span class="nf">findCcpXmlFile</span><span class="p">(</span><span class="n">project</span><span class="p">,</span><span class="n">packageName</span><span class="p">,</span><span class="n">fileSearchString</span><span class="p">):</span>
+
+  <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">  Finds an XML file by a file search pattern from all available package repositories</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+
+  <span class="n">ff</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstPackageLocator</span>
+  <span class="n">packageLocator</span> <span class="o">=</span> <span class="n">ff</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="n">packageName</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ff</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">)</span>
+
+  <span class="n">xmlFileName</span> <span class="o">=</span> <span class="bp">None</span>
+  <span class="c1"># The repositories link is ordered!</span>
+  <span class="k">for</span> <span class="n">repository</span> <span class="ow">in</span> <span class="n">packageLocator</span><span class="o">.</span><span class="n">repositories</span><span class="p">:</span>
+
+    <span class="n">fileLocation</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">getFileLocation</span><span class="p">(</span><span class="n">packageName</span><span class="p">)</span>
+    <span class="n">xmlFileNameMatches</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">fileLocation</span><span class="p">,</span><span class="n">fileSearchString</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">xmlFileNameMatches</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">xmlFileNameMatches</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.xml&#39;</span><span class="p">:</span>
+        <span class="n">xmlFileName</span> <span class="o">=</span> <span class="n">xmlFileNameMatches</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">break</span>
+
+  <span class="k">return</span> <span class="n">xmlFileName</span></div>
+
+<div class="viewcode-block" id="getRepositoryPath"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.getRepositoryPath">[docs]</a><span class="k">def</span> <span class="nf">getRepositoryPath</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">repositoryName</span><span class="p">):</span>
+
+  <span class="n">repository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">repositoryName</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">repository</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="bp">None</span>
+
+  <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="setRepositoryPath"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.setRepositoryPath">[docs]</a><span class="k">def</span> <span class="nf">setRepositoryPath</span><span class="p">(</span><span class="n">project</span><span class="p">,</span> <span class="n">repositoryName</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.api.memops.Implementation</span> <span class="kn">import</span> <span class="n">Url</span>
+
+  <span class="n">repository</span> <span class="o">=</span> <span class="n">project</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">repositoryName</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">repository</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="o">!=</span> <span class="n">repository</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">:</span>
+      <span class="c1"># TBD: should we copy anything over from old url?</span>
+      <span class="n">url</span> <span class="o">=</span> <span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="o">.</span><span class="n">normalisePath</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+      <span class="n">repository</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">url</span></div>
+
+  <span class="c1"># TBD: should we throw an exception if repository is not found?</span>
+
+
+<div class="viewcode-block" id="movePackageData"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.movePackageData">[docs]</a><span class="k">def</span> <span class="nf">movePackageData</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">newPackageName</span><span class="p">,</span> <span class="n">oldPackageName</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Move all data from package oldPackageName to newPackageName&quot;&quot;&quot;</span>
+  <span class="n">ff</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">findFirstPackageLocator</span>
+  <span class="n">repositories</span> <span class="o">=</span> <span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="n">newPackageName</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ff</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">repositories</span>
+  <span class="n">newLocations</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">getFileLocation</span><span class="p">(</span><span class="n">newPackageName</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">repositories</span><span class="p">]</span>
+
+  <span class="c1"># If there were data in correct location assume that project is fixed already</span>
+  <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">newLocations</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">x</span><span class="p">)):</span>
+    <span class="n">repositories</span> <span class="o">=</span> <span class="p">(</span><span class="n">ff</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="n">oldPackageName</span><span class="p">)</span> <span class="ow">or</span> <span class="n">ff</span><span class="p">(</span><span class="n">targetName</span><span class="o">=</span><span class="s1">&#39;any&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">repositories</span>
+    <span class="n">oldLocations</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">getFileLocation</span><span class="p">(</span><span class="n">oldPackageName</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">repositories</span><span class="p">]</span>
+    <span class="n">oldLocations</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">oldLocations</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">x</span><span class="p">)]</span>
+
+    <span class="k">if</span> <span class="n">oldLocations</span><span class="p">:</span>
+      <span class="c1"># there were old data in the wrong location. Move to new one.</span>
+      <span class="n">newDir</span> <span class="o">=</span> <span class="n">newLocations</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+      <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">newDir</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">oldDir</span> <span class="ow">in</span> <span class="n">oldLocations</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">filename</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">oldDir</span><span class="p">):</span>
+
+          <span class="k">if</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+            <span class="c1"># skip hidden files (on *nix/Mac)</span>
+            <span class="k">continue</span>
+
+          <span class="k">elif</span> <span class="n">filename</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.xml&#39;</span><span class="p">):</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">oldDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newDir</span><span class="p">,</span> <span class="n">filename</span><span class="p">))</span></div>
+
+
+<span class="k">def</span> <span class="nf">_initialiseStandardDataLocationStore</span><span class="p">(</span><span class="n">memopsRoot</span><span class="p">:</span><span class="n">Implementation</span><span class="o">.</span><span class="n">MemopsRoot</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Get or create standard DataLocationStore, and reset standard data location urls</span>
+<span class="sd">  to current location.</span>
+<span class="sd">   Called from MemopsRoot.__init__&quot;&quot;&quot;</span>
+
+  <span class="n">result</span> <span class="o">=</span> <span class="n">memopsRoot</span><span class="o">.</span><span class="n">findFirstDataLocationStore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># Normal case make the DataLocationStore and contents</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">memopsRoot</span><span class="o">.</span><span class="n">newDataLocationStore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span>
+
+  <span class="c1"># insideData = data inside the project</span>
+  <span class="n">dataUrlObject</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;insideData&#39;</span><span class="p">)</span>
+  <span class="n">projectUrl</span> <span class="o">=</span> <span class="n">memopsRoot</span><span class="o">.</span><span class="n">findFirstRepository</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;userData&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">url</span>
+  <span class="k">if</span> <span class="n">dataUrlObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># make new dataUrl</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">newDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;insideData&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">projectUrl</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">dataUrlObject</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">projectUrl</span>
+
+  <span class="c1"># alongsideData - points to directory containing project directory</span>
+  <span class="n">dataUrlObject</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;alongsideData&#39;</span><span class="p">)</span>
+  <span class="n">path</span><span class="p">,</span> <span class="n">junk</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">splitPath</span><span class="p">(</span><span class="n">projectUrl</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+  <span class="n">newUrl</span> <span class="o">=</span> <span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">dataUrlObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># make new dataUrl</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">newDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;alongsideData&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">newUrl</span><span class="p">)</span>
+  <span class="k">elif</span> <span class="n">path</span> <span class="o">!=</span> <span class="n">dataUrlObject</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">dataLocation</span><span class="p">:</span>
+    <span class="c1"># Update only if the alongside path has changed</span>
+    <span class="n">pointToExisting</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">dataUrlObject</span><span class="o">.</span><span class="n">dataStores</span> <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">fullPath</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">pointToExisting</span><span class="p">:</span>
+      <span class="c1"># If there are files in the old alongsideData that still exist, (typically if the</span>
+      <span class="c1"># project is moved elsewhere within the same file system) move them to a different</span>
+      <span class="c1"># dataUrl object so as not to break the link.</span>
+      <span class="c1"># If project comes from a different computer this will not normally happen</span>
+      <span class="n">newName</span> <span class="o">=</span> <span class="s1">&#39;alongsideData&#39;</span>
+      <span class="k">while</span> <span class="n">result</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">):</span>
+        <span class="n">newName</span> <span class="o">=</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">incrementName</span><span class="p">(</span><span class="n">newName</span><span class="p">)</span>
+      <span class="n">newDataUrlObject</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">newDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">newName</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">dataUrlObject</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">pointToExisting</span><span class="p">:</span>
+        <span class="n">dataStore</span><span class="o">.</span><span class="n">dataUrl</span> <span class="o">=</span> <span class="n">newDataUrlObject</span>
+    <span class="c1">#</span>
+    <span class="n">dataUrlObject</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">newUrl</span>
+
+  <span class="c1"># remoteData - initialised to home directory and not reset</span>
+  <span class="n">dataUrlObject</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;remoteData&#39;</span><span class="p">)</span>
+  <span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">&#39;~&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">dataUrlObject</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="c1"># make new dataUrl</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">newDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;remoteData&#39;</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">Implementation</span><span class="o">.</span><span class="n">Url</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">))</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span>
+
+<span class="k">def</span> <span class="nf">_compressDataLocations</span><span class="p">(</span><span class="n">memopsRoot</span><span class="p">:</span><span class="n">Implementation</span><span class="o">.</span><span class="n">MemopsRoot</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Reorganise DataLocations to use standard DataUrls&quot;&quot;&quot;</span>
+  <span class="n">standardStore</span> <span class="o">=</span> <span class="n">memopsRoot</span><span class="o">.</span><span class="n">findFirstDataLocationStore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span>
+  <span class="n">locationData</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">standardTags</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;insideData&#39;</span><span class="p">,</span> <span class="s1">&#39;alongsideData&#39;</span><span class="p">,</span> <span class="s1">&#39;remoteData&#39;</span><span class="p">)</span>
+  <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">standardTags</span><span class="p">:</span>
+    <span class="n">dataUrl</span> <span class="o">=</span> <span class="n">standardStore</span><span class="o">.</span><span class="n">findFirstDataUrl</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">tag</span><span class="p">)</span>
+    <span class="n">locationData</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataUrl</span><span class="o">.</span><span class="n">url</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="n">dataUrl</span><span class="p">))</span>
+  <span class="n">standardUrls</span> <span class="o">=</span> <span class="p">[</span><span class="n">tt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">tt</span> <span class="ow">in</span> <span class="n">locationData</span><span class="p">]</span>
+
+  <span class="k">for</span> <span class="n">dataLocationStore</span> <span class="ow">in</span> <span class="n">memopsRoot</span><span class="o">.</span><span class="n">dataLocationStores</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">dataUrl</span> <span class="ow">in</span> <span class="n">dataLocationStore</span><span class="o">.</span><span class="n">dataUrls</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">dataUrl</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">standardUrls</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">dataStore</span> <span class="ow">in</span> <span class="n">dataUrl</span><span class="o">.</span><span class="n">dataStores</span><span class="p">:</span>
+          <span class="n">fullPath</span> <span class="o">=</span> <span class="n">dataStore</span><span class="o">.</span><span class="n">fullPath</span>
+          <span class="k">for</span> <span class="n">directory</span><span class="p">,</span> <span class="n">targetUrl</span> <span class="ow">in</span> <span class="n">locationData</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">fullPath</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+              <span class="n">dataStore</span><span class="o">.</span><span class="n">repointToDataUrl</span><span class="p">(</span><span class="n">targetUrl</span><span class="p">)</span>
+              <span class="n">dataStore</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">fullPath</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">directory</span><span class="p">):]</span>
+              <span class="k">break</span>
+
+
+<div class="viewcode-block" id="copyV2ToV3Location"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Api.copyV2ToV3Location">[docs]</a><span class="k">def</span> <span class="nf">copyV2ToV3Location</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Copy V2 data to new directory with correct name and structure for V3</span>
+
+<span class="sd">  If project is already V3 does nothing (except converting &#39;xyz.ccpn/ccpn&#39; to &#39;xyz.ccpn&#39;&quot;&quot;&quot;</span>
+
+  <span class="n">apiDirNames</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;memops&#39;</span><span class="p">,</span> <span class="s1">&#39;ccp&#39;</span><span class="p">,</span> <span class="s1">&#39;ccpnmr&#39;</span><span class="p">,</span> <span class="s1">&#39;cambridge&#39;</span><span class="p">,</span> <span class="s1">&#39;molsim&#39;</span><span class="p">,</span> <span class="s1">&#39;utrecht&#39;</span> <span class="p">)</span>
+
+  <span class="n">logger</span> <span class="o">=</span> <span class="n">Logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="n">projectPath</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">):</span>
+    <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;V3&#39;</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">pt</span><span class="p">,</span><span class="n">dr</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dr</span> <span class="o">==</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_API_DIRECTORY</span> <span class="ow">and</span> <span class="n">pt</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">CCPN_DIRECTORY_SUFFIX</span><span class="p">):</span>
+      <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Interpreting path </span><span class="si">%s</span><span class="s2"> as project path </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">projectPath</span><span class="p">,</span> <span class="n">pt</span><span class="p">))</span>
+      <span class="n">projectPath</span> <span class="o">=</span> <span class="n">pt</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;V3&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">version</span> <span class="o">=</span> <span class="s1">&#39;V2&#39;</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">projectPath</span><span class="p">):</span>
+    <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="s2">&quot;No directory named </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">projectPath</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">version</span> <span class="o">==</span> <span class="s1">&#39;V2&#39;</span><span class="p">:</span>
+    <span class="n">newProjectPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="n">projectPath</span><span class="p">)</span>
+    <span class="n">ii</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">while</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newProjectPath</span><span class="p">):</span>
+      <span class="n">ii</span> <span class="o">+=</span> <span class="mi">1</span>
+      <span class="n">newProjectPath</span> <span class="o">=</span> <span class="n">addCcpnDirectorySuffix</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">projectPath</span><span class="p">,</span> <span class="n">ii</span><span class="p">))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+      <span class="s1">&#39;Copying directory </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> (this might take some time if there are big files)&#39;</span>
+      <span class="o">%</span> <span class="p">(</span><span class="n">projectPath</span><span class="p">,</span> <span class="n">newProjectPath</span><span class="p">))</span>
+
+    <span class="n">newApiFileDir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newProjectPath</span><span class="p">,</span> <span class="n">Path</span><span class="o">.</span><span class="n">CCPN_API_DIRECTORY</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">newApiFileDir</span><span class="p">):</span>
+      <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">newApiFileDir</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">projectPath</span><span class="p">):</span>
+      <span class="n">source</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">projectPath</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+      <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">apiDirNames</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newApiFileDir</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">newProjectPath</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+      <span class="c1">#</span>
+      <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copytree</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">newProjectPath</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">projectPath</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

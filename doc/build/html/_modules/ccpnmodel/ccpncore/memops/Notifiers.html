@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.Notifiers &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.Notifiers</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Implementation module. Contains Api implementation code.</span>
+
+
+<span class="sd">======================COPYRIGHT/LICENSE START==========================</span>
+
+<span class="sd">Implementation.py: Basic implementation class for CCPN Python data model API</span>
+
+<span class="sd">Copyright (C) 2005 Rasmus Fogh (CCPN Project)</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">This library is free software; you can redistribute it and/or</span>
+<span class="sd">modify it under the terms of the GNU Lesser General Public</span>
+<span class="sd">License as published by the Free Software Foundation; either</span>
+<span class="sd">version 2.1 of the License, or (at your option) any later version.</span>
+
+<span class="sd">A copy of this license can be found in ../../../license/LGPL.license</span>
+
+<span class="sd">This library is distributed in the hope that it will be useful,</span>
+<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="sd">Lesser General Public License for more details.</span>
+
+<span class="sd">You should have received a copy of the GNU Lesser General Public</span>
+<span class="sd">License along with this library; if not, write to the Free Software</span>
+<span class="sd">Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</span>
+
+
+<span class="sd">======================COPYRIGHT/LICENSE END============================</span>
+
+<span class="sd">for further information, please contact :</span>
+
+<span class="sd">- CCPN website (http://www.ccpn.ac.uk/)</span>
+
+<span class="sd">- email: ccpn@bioc.cam.ac.uk</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">If you are using this software for academic purposes, we suggest</span>
+<span class="sd">quoting the following references:</span>
+
+<span class="sd">===========================REFERENCE START=============================</span>
+<span class="sd">R. Fogh, J. Ionides, E. Ulrich, W. Boucher, W. Vranken, J.P. Linge, M.</span>
+<span class="sd">Habeck, W. Rieping, T.N. Bhat, J. Westbrook, K. Henrick, G. Gilliland,</span>
+<span class="sd">H. Berman, J. Thornton, M. Nilges, J. Markley and E. Laue (2002). The</span>
+<span class="sd">CCPN project: An interim report on a data model for the NMR community</span>
+<span class="sd">(Progress report). Nature Struct. Biol. 9, 416-418.</span>
+
+<span class="sd">Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne</span>
+<span class="sd">Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and</span>
+<span class="sd">Ernest D. Laue (2005). A framework for scientific data modeling and automated</span>
+<span class="sd">software development. Bioinformatics 21, 1678-1684.</span>
+
+<span class="sd">===========================REFERENCE END===============================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">__author__</span> <span class="o">=</span> <span class="s1">&#39;rhf22&#39;</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">coreUtil</span>
+
+
+<span class="c1"># Operations that change the data contents will execute registered notifies.</span>
+<span class="c1"># These operations are delete, __init__, set, remove, and add.</span>
+<span class="c1"># set, remove, and add functions will also execute notifies registered with</span>
+<span class="c1"># funcname = &#39;&#39;</span>
+<span class="c1"># Notifies are disabled during reading.</span>
+<span class="c1"># set, add, and remove notifies are disabled during delete and __init__</span>
+
+<div class="viewcode-block" id="registerNotify"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.memops.html#ccpnmodel.ccpncore.memops.Notifiers.registerNotify">[docs]</a><span class="k">def</span> <span class="nf">registerNotify</span><span class="p">(</span><span class="n">notify</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;register notifiers to class clazz (maybe given as API class or as class qualifiedName&quot;&quot;&quot;</span>
+
+  <span class="n">metaClasses</span> <span class="o">=</span> <span class="n">coreUtil</span><span class="o">.</span><span class="n">getClassFromFullName</span><span class="p">(</span><span class="n">classname</span><span class="p">)</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">getNonAbstractSubtypes</span><span class="p">()</span>
+
+  <span class="k">for</span> <span class="n">metaClass</span> <span class="ow">in</span> <span class="n">metaClasses</span><span class="p">:</span>
+    <span class="n">clazz</span> <span class="o">=</span>  <span class="n">coreUtil</span><span class="o">.</span><span class="n">getClassFromFullName</span><span class="p">(</span><span class="n">metaClass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span>
+    <span class="n">notifies</span> <span class="o">=</span> <span class="n">clazz</span><span class="o">.</span><span class="n">_notifies</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">notifies</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">funcname</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">ll</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">notifies</span><span class="p">[</span><span class="n">funcname</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">notify</span><span class="p">]</span>
+
+    <span class="k">elif</span> <span class="n">notify</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ll</span><span class="p">:</span>
+      <span class="n">ll</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">notify</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="unregisterNotify"><a class="viewcode-back" href="../../../../ccpnmodel/ccpnmodel.ccpncore.memops.html#ccpnmodel.ccpncore.memops.Notifiers.unregisterNotify">[docs]</a><span class="k">def</span> <span class="nf">unregisterNotify</span><span class="p">(</span><span class="n">notify</span><span class="p">,</span> <span class="n">classname</span><span class="p">,</span> <span class="n">funcname</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+
+  <span class="n">metaClasses</span> <span class="o">=</span> <span class="n">coreUtil</span><span class="o">.</span><span class="n">getClassFromFullName</span><span class="p">(</span><span class="n">classname</span><span class="p">)</span><span class="o">.</span><span class="n">_metaclass</span><span class="o">.</span><span class="n">getNonAbstractSubtypes</span><span class="p">()</span>
+
+  <span class="k">for</span> <span class="n">metaClass</span> <span class="ow">in</span> <span class="n">metaClasses</span><span class="p">:</span>
+    <span class="n">clazz</span> <span class="o">=</span>  <span class="n">coreUtil</span><span class="o">.</span><span class="n">getClassFromFullName</span><span class="p">(</span><span class="n">metaClass</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">())</span>
+    <span class="k">try</span><span class="p">:</span>
+      <span class="n">clazz</span><span class="o">.</span><span class="n">_notifies</span><span class="p">[</span><span class="n">funcname</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">notify</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+      <span class="k">pass</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

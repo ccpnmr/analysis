@@ -1,0 +1,754 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.metamodel.OpTypes &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.metamodel.OpTypes</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Data and functions for checking and manipulating operations and opTypes</span>
+<span class="sd">    NB must be usable in Python 2.1</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Constants</span> <span class="k">as</span> <span class="n">metaConstants</span>
+
+<span class="c1">######################################################################</span>
+<span class="c1"># hack for Python 2.1 compatibility  NBNB                            #</span>
+<span class="c1">######################################################################</span>
+<span class="k">try</span><span class="p">:</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="n">junk</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="k">except</span> <span class="ne">NameError</span><span class="p">:</span>
+  <span class="n">dd</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()</span>
+  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;True&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="mi">0</span>
+  <span class="n">dd</span><span class="p">[</span><span class="s1">&#39;False&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="ow">not</span> <span class="bp">True</span>
+  <span class="k">del</span> <span class="n">dd</span>
+
+<span class="c1"># input for operations</span>
+<span class="c1">#</span>
+<span class="c1"># Dictionary key is opType. Special cases where the operation is</span>
+<span class="c1"># different from the standard for the opType are handled in ModelAdapt</span>
+<span class="c1">#</span>
+<span class="c1"># subOps dictionary key is opSubType</span>
+<span class="c1">#</span>
+<span class="c1"># opSubType==None is the default form of the operation (with no suffix)</span>
+<span class="c1">#</span>
+<span class="c1"># The &#39;group&#39; classifies the operation with respect to access control</span>
+<span class="c1">#</span>
+<span class="c1"># suffix,  opDocTemplate,  parDocumentation</span>
+<span class="c1"># all default to empty strings.</span>
+<span class="c1">#</span>
+<span class="c1"># Operation targets (main dictionary) serve to derive parameters etc. </span>
+<span class="c1"># and is also involved in access control.</span>
+<span class="c1"># </span>
+<span class="c1"># Parameter targets (subOps parmeters) must be a (qualified name of a) </span>
+<span class="c1"># Model Element</span>
+<span class="c1"># If it is a Class or DataType this will be the type of the final parameter</span>
+<span class="c1"># If it is an Attribute or Role the final parameter will be calculated</span>
+<span class="c1"># from the target.</span>
+<span class="c1">#</span>
+<span class="c1"># useCollection determines whether something pertains to the collection of a</span>
+<span class="c1"># ClassElement, or to a single member of it.</span>
+<span class="c1"># For operations (main dictionary) it determins whether target name or basename</span>
+<span class="c1"># is used for the operation name. For parameters it setermines if the type is a</span>
+<span class="c1"># collection or a member element.</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1"># MetaParameters default to hicard:1,locard:1,isOrdered:False,isUnique:False</span>
+<span class="c1">#</span>
+<span class="c1"># The basic modelGen handles &#39;result&#39; (return value), &#39;value&#39; (input value)</span>
+<span class="c1"># and &#39;parent&#39; (parent class of given class)</span>
+<span class="c1"># whose specification is given by operation and context.</span>
+<span class="c1">#</span>
+<span class="c1"># parameter names are substituted according to self.varNames</span>
+<span class="c1"># Also parDocumentation is % formatted with self.varNames and documentations are</span>
+
+<span class="c1"># NBNB TBD parameter target strings - where if ever converted to real types?</span>
+
+<span class="n">operationData</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="s1">&#39;get&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;ClassElement&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+<span class="c1"># &#39;name&#39;:&#39;useInsteadOfOpType&#39;,</span>
+<span class="c1"># &#39;scope&#39;:ImpConstants.classifier_level # default is &#39;instance_level&#39;</span>
+<span class="c1"># &#39;taggedValues&#39;:{&#39;key:&#39;value&#39;, &#39;key:&#39;value&#39;}</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;findFirst&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;ClassElement&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;findAll&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;ClassElement&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;sorted&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;MetaRole&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;set&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;modify&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;ClassElement&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;add&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;modify&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;ClassElement&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;remove&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;modify&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;ClassElement&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;new&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;create&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;ChildClass&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;init&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;create&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;clone&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;create&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;fullDelete&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;fullUnDelete&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;_unDelete&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;checkDelete&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;_checkDelete&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;singleDelete&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;_singleDelete&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;singleUnDelete&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;_singleUnDelete&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;checkValid&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;checkAllValid&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;getAttr&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;get&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;setAttr&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;modify&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;set&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;getByKey&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;scope&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">classifier_level</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;getFullKey&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;getLocalKey&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;container&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;otherQuery&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;query&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;masterOp&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;otherModify&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;modify&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;masterOp&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;otherCreate&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;create&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;masterOp&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;otherDelete&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;delete&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;masterOp&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+ <span class="s1">&#39;other&#39;</span><span class="p">:{</span>
+ <span class="s1">&#39;group&#39;</span><span class="p">:</span><span class="s1">&#39;other&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;targetTag&#39;</span><span class="p">:</span><span class="s1">&#39;masterOp&#39;</span><span class="p">,</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># OperationData subOps and parameters - given separately for readability</span>
+<span class="c1">#</span>
+<span class="c1"># Note that parameters named &#39;parent&#39; or &#39;self&#39; are given as target</span>
+<span class="c1"># op.container.parentRole and op.container, respectively.</span>
+<span class="c1"># Other paremeters without a target are given op.target by default</span>
+
+<span class="c1"># NBNB TBD recheck mechanism for setting default types of parameters</span>
+
+<span class="c1"># get</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;get&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="c1"># &#39;suffix&#39;:&#39;var1&#39;, # suffix defaults to the subOpType</span>
+  <span class="c1">#                  # or to empty string if that is None</span>
+                     <span class="c1"># - only given where different from default</span>
+  <span class="c1"># &#39;taggedValues&#39;:{&#39;key:&#39;value&#39;, &#39;key:&#39;value&#39;}</span>
+  <span class="c1"># &#39;opDocTemplate&#39;:&quot;some text %s other text&quot;,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+    <span class="c1"># &#39;parDocumentation&#39;:&quot;some text, maybe with %(value)s formatting&quot;</span>
+    <span class="c1">#                     #making use of the self.varNames dictionary</span>
+    <span class="c1"># &#39;target&#39;:&#39;memops.Implementation.String&#39;, # dataType or class, qualName. </span>
+                                               <span class="c1"># May be None.</span>
+    <span class="c1">#&#39;hicard&#39;:2, &#39;locard&#39;:1, isOrdered:True, isUnique:True,</span>
+    <span class="c1"># &#39;defaultValue&#39;:aValue</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;findFirst&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;conditions&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.StringKeyDict&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;taggedValues&#39;</span><span class="p">:{</span><span class="s1">&#39;isSubdivided&#39;</span><span class="p">:</span><span class="s1">&#39;True&#39;</span><span class="p">},</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the first </span><span class="si">%(value)s</span><span class="s2"> that satisfies the </span><span class="si">%(conditions)s</span><span class="s2"> &quot;</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;findAll&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;conditions&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.StringKeyDict&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;taggedValues&#39;</span><span class="p">:{</span><span class="s1">&#39;isSubdivided&#39;</span><span class="p">:</span><span class="s1">&#39;True&#39;</span><span class="p">},</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;all </span><span class="si">%(value)s</span><span class="s2"> that satisfy the </span><span class="si">%(conditions)s</span><span class="s2"> &quot;</span><span class="p">,</span>
+    <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># sorted NBNB TBD see how the parameter is generated</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;sorted&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> 
+    <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># set</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;set&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;useCollection&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the </span><span class="si">%(value)s</span><span class="s2">(s) to set&quot;</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># add</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;add&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the </span><span class="si">%(value)s</span><span class="s2"> to add&quot;</span><span class="p">,},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># remove</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;remove&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the </span><span class="si">%(value)s</span><span class="s2"> to remove&quot;</span><span class="p">,},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># new</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;new&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;opDocTemplate&#39;</span><span class="p">:</span><span class="s1">&#39;Factory function to create </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;attrlinks&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.StringKeyDict&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;taggedValues&#39;</span><span class="p">:{</span><span class="s1">&#39;isSubdivided&#39;</span><span class="p">:</span><span class="s1">&#39;True&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the attribute and link parameters&quot;</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the new object&quot;</span><span class="p">,</span>
+   <span class="p">}</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># init</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;opDocTemplate&#39;</span><span class="p">:</span><span class="s1">&#39;Constructor for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;parent&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the parent object&quot;</span><span class="p">,},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;attrlinks&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.StringKeyDict&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;taggedValues&#39;</span><span class="p">:{</span><span class="s1">&#39;isSubdivided&#39;</span><span class="p">:</span><span class="s1">&#39;True&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the attribute and link parameters&quot;</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the new object&quot;</span><span class="p">,</span>
+   <span class="p">}</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># clone</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;clone&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;opDocTemplate&#39;</span><span class="p">:</span><span class="s1">&#39;Clone function for </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;attrDict&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.StringKeyDict&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;taggedValues&#39;</span><span class="p">:{</span><span class="s1">&#39;isSubdivided&#39;</span><span class="p">:</span><span class="s1">&#39;True&#39;</span><span class="p">},</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the attribute parameters&quot;</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the new object clone&quot;</span><span class="p">,</span>
+   <span class="p">}</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># checkValid</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;checkValid&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;complete&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;whether to do a complete but slow check&quot;</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Boolean&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;defaultValue&#39;</span><span class="p">:</span><span class="bp">False</span>
+    <span class="p">},</span>
+   <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># checkAllValid</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;checkAllValid&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;complete&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;whether to do a complete but slow check&quot;</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Boolean&#39;</span><span class="p">,</span>
+     <span class="s1">&#39;defaultValue&#39;</span><span class="p">:</span><span class="bp">False</span>
+    <span class="p">},</span>
+   <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># getAttr</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;getAttr&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the attribute or link name&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.String&#39;</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;get attribute or link by name&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Any&#39;</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># setAttr</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;setAttr&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;the attribute or link name&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.String&#39;</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;value to set attribute or link to&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Any&#39;</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># getFullKey</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;getFullKey&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;useGuid&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;whether to use guid instead of key for TopObject.&quot;</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Boolean&#39;</span><span class="p">,</span> 
+     <span class="s1">&#39;defaultValue&#39;</span><span class="p">:</span><span class="bp">False</span>
+    <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;list containing full object key&quot;</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Any&#39;</span><span class="p">,</span> <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span>
+     <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+    <span class="p">},</span>
+   <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># geLocalKey</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;getLocalKey&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;Local object key&quot;</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Any&#39;</span><span class="p">,</span> 
+    <span class="p">},</span>
+   <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># getByKey</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;getByKey&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;startObj&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;TopObject that is the start of the search&quot;</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.MemopsObject&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;fullKey&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;list containing full object key&quot;</span><span class="p">,</span>
+     <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Any&#39;</span><span class="p">,</span> <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span>
+     <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+    <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;result&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">return_direction</span><span class="p">,</span>
+     <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;object corresponding to key&quot;</span><span class="p">,</span>
+    <span class="p">},</span>
+   <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># fullUnDelete</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;fullUnDelete&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;opDocTemplate&#39;</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39;unDelete for %s:</span>
+<span class="sd">   reverses deletion for objects in objsToBeUnDeleted.</span>
+<span class="sd">   *Implementation function* - should be called only by API undo machinery.&#39;&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeUnDeleted&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;Set of objects to be undeleted (input/ouput)&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.MemopsObject&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span> <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;topObjectsToCheck&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;Set of TopObjects to check for permissions&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.TopObject&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span> <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># fullDelete</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;fullDelete&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span><span class="s1">&#39;parameters&#39;</span><span class="p">:[],},</span>
+<span class="p">}</span>
+
+<span class="c1"># singleDelete</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;singleDelete&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;opDocTemplate&#39;</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39;singleDelete for %s:   deletes objects</span>
+<span class="sd">*Implementation function* - will CORRUPT DATA if called outside the API delete function.&#39;&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeDeleted&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;Set of objects to be deleted&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.MemopsObject&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span> <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># singleUnDelete</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;singleUnDelete&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;opDocTemplate&#39;</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39;singleUnDelete for %s:   undeletes objects</span>
+<span class="sd">*Implementation function* - will CORRUPT DATA if called outside the API undo function.&#39;&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeUnDeleted&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;Set of objects to be undeleted&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.MemopsObject&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span> <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+<span class="c1"># checkDelete</span>
+<span class="n">operationData</span><span class="p">[</span><span class="s1">&#39;checkDelete&#39;</span><span class="p">][</span><span class="s1">&#39;subOps&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+ <span class="bp">None</span><span class="p">:{</span>
+  <span class="s1">&#39;opDocTemplate&#39;</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39;checkDelete for %s:</span>
+<span class="sd">   determines cascading deletes to follow from delete of object.</span>
+<span class="sd">   *Implementation function* - should be called only by API delete function.&#39;&#39;&#39;</span><span class="p">,</span>
+  <span class="s1">&#39;parameters&#39;</span><span class="p">:[</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeDeleted&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span><span class="s2">&quot;Set of objects to be deleted (input/ouput)&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.MemopsObject&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span> <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;objsToBeChecked&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span>
+    <span class="s2">&quot;List of objects to be checked for deletion (input/ouput)&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.MemopsObject&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;hicard&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">infinity</span><span class="p">,</span> <span class="s1">&#39;locard&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+    <span class="s1">&#39;isOrdered&#39;</span><span class="p">:</span><span class="bp">True</span><span class="p">,</span> <span class="s1">&#39;isUnique&#39;</span><span class="p">:</span><span class="bp">False</span><span class="p">,</span>
+   <span class="p">},</span>
+   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;linkCounter&#39;</span><span class="p">,</span> <span class="s1">&#39;direction&#39;</span><span class="p">:</span><span class="n">metaConstants</span><span class="o">.</span><span class="n">in_direction</span><span class="p">,</span>
+    <span class="s1">&#39;parDocumentation&#39;</span><span class="p">:</span>
+    <span class="s2">&quot;Dictionary to track links with locard checks (input/output)&quot;</span><span class="p">,</span>
+    <span class="s1">&#39;target&#39;</span><span class="p">:</span><span class="s1">&#39;memops.Implementation.Dict&#39;</span><span class="p">,</span>
+   <span class="p">},</span>
+  <span class="p">],</span>
+ <span class="p">},</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="getTarget"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.metamodel.html#ccpnmodel.ccpncore.memops.metamodel.OpTypes.getTarget">[docs]</a><span class="k">def</span> <span class="nf">getTarget</span><span class="p">(</span><span class="n">metaOp</span><span class="p">,</span> <span class="n">opData</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot; gets target for MetaOperation based on target class and operation name.</span>
+<span class="sd">  opData overrides the standard operationData, for use e.g. in ModelAdapt.</span>
+<span class="sd">  NB used within ObjectDomain to make targets for Operations entered in UML</span>
+<span class="sd">  </span>
+<span class="sd">  The  converse operation is ModelAdapt.getOperationName</span>
+
+<span class="sd">    - for target &#39;container&#39; assumes nothing</span>
+
+<span class="sd">    - for target &#39;masterOp&#39; assumes names of the form somename_somesubtypesuffix</span>
+
+<span class="sd">    - for ClassElement and ChildClass targets assumes names of the form</span>
+<span class="sd">      prefixElementname_somesubtypesuffix</span>
+<span class="sd">  &quot;&quot;&quot;</span>
+  <span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.MetaModel</span> <span class="kn">import</span> <span class="n">MemopsError</span>
+ 
+  <span class="c1"># set up</span>
+  <span class="n">opType</span> <span class="o">=</span> <span class="n">metaOp</span><span class="o">.</span><span class="n">opType</span>
+  <span class="k">if</span> <span class="n">opData</span><span class="p">:</span>
+    <span class="n">infoDict</span> <span class="o">=</span> <span class="n">opData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">opType</span><span class="p">)</span>
+  <span class="k">else</span><span class="p">:</span>
+    <span class="n">infoDict</span> <span class="o">=</span> <span class="n">operationData</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">opType</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">infoDict</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: operation has unrecognised opType </span><span class="si">%s</span><span class="s2">&quot;</span>
+                      <span class="o">%</span> <span class="p">(</span><span class="n">metaOp</span><span class="p">,</span><span class="n">opType</span><span class="p">))</span>
+  <span class="n">targetTag</span> <span class="o">=</span> <span class="n">infoDict</span><span class="p">[</span><span class="s1">&#39;targetTag&#39;</span><span class="p">]</span>
+  <span class="n">prefix</span> <span class="o">=</span> <span class="n">infoDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+  <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="n">prefix</span> <span class="o">=</span> <span class="n">opType</span>
+ 
+  <span class="c1"># process, depending on targettag</span>
+  <span class="k">if</span> <span class="n">targetTag</span> <span class="o">==</span> <span class="s1">&#39;container&#39;</span><span class="p">:</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">metaOp</span><span class="o">.</span><span class="n">container</span>
+ 
+  <span class="k">else</span><span class="p">:</span>
+ 
+    <span class="c1"># get master operation</span>
+    <span class="k">if</span> <span class="n">metaOp</span><span class="o">.</span><span class="n">opSubType</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="n">masterOp</span> <span class="o">=</span> <span class="n">metaOp</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># remove &#39;_suffix&#39; from name</span>
+      <span class="n">opName</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">metaOp</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+      <span class="c1">#get equivalent master operation</span>
+      <span class="n">masterOp</span> <span class="o">=</span> <span class="n">metaOp</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">opName</span><span class="p">)</span>
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">masterOp</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: no master operation (subType:None) found&quot;</span>
+                          <span class="o">%</span> <span class="p">(</span><span class="n">metaOp</span><span class="p">,))</span>
+ 
+    <span class="k">if</span> <span class="n">targetTag</span> <span class="o">==</span> <span class="s1">&#39;masterOp&#39;</span><span class="p">:</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="n">masterOp</span>
+ 
+ 
+    <span class="k">elif</span> <span class="n">targetTag</span> <span class="o">==</span> <span class="s1">&#39;ChildClass&#39;</span><span class="p">:</span>
+      <span class="n">targetName</span> <span class="o">=</span> <span class="n">masterOp</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):]</span>
+      <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+      <span class="k">for</span> <span class="n">childRole</span> <span class="ow">in</span> <span class="n">metaOp</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getChildRoles</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">childClass</span> <span class="ow">in</span> <span class="n">childRole</span><span class="o">.</span><span class="n">valueType</span><span class="o">.</span><span class="n">getAllSubtypes</span><span class="p">():</span>
+          <span class="k">if</span> <span class="n">childClass</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">targetName</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+              <span class="n">result</span> <span class="o">=</span> <span class="n">childClass</span>
+            <span class="k">else</span><span class="p">:</span>
+              <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+               <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: Ambiguous child class target for operation </span><span class="si">%s</span><span class="s2">&quot;</span>
+               <span class="o">%</span> <span class="p">(</span><span class="n">metaOp</span><span class="p">,</span> <span class="n">masterOp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+              <span class="p">)</span>
+      <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2">: No child class target for operation </span><span class="si">%s</span><span class="s2">&quot;</span>
+         <span class="o">%</span> <span class="p">(</span><span class="n">metaOp</span><span class="p">,</span> <span class="n">masterOp</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="p">)</span>
+      
+    <span class="k">else</span><span class="p">:</span>
+      <span class="c1"># target is a ClassElement</span>
+      <span class="n">ss</span> <span class="o">=</span> <span class="n">masterOp</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">prefix</span><span class="p">):]</span>
+      <span class="n">targetName</span> <span class="o">=</span> <span class="n">ss</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="n">ss</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+      <span class="k">if</span> <span class="n">infoDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;useCollection&#39;</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">metaOp</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getElement</span><span class="p">(</span><span class="n">targetName</span><span class="p">)</span>
+        
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">ll</span> <span class="o">=</span><span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">metaOp</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">getAllClassElements</span><span class="p">()</span>
+                 <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">baseName</span> <span class="o">==</span> <span class="n">targetName</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ll</span><span class="p">:</span>
+          <span class="n">result</span> <span class="o">=</span> <span class="n">ll</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="n">result</span> <span class="o">=</span> <span class="bp">None</span>
+ 
+      <span class="k">if</span> <span class="ow">not</span> <span class="n">result</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">MemopsError</span><span class="p">(</span>
+         <span class="s2">&quot;</span><span class="si">%s</span><span class="s2">, opType </span><span class="si">%s</span><span class="s2">, targetTag </span><span class="si">%s</span><span class="s2">: no target named </span><span class="si">%s</span><span class="s2"> found&quot;</span>
+         <span class="o">%</span> <span class="p">(</span><span class="n">metaOp</span><span class="p">,</span> <span class="n">opType</span><span class="p">,</span> <span class="n">targetTag</span><span class="p">,</span> <span class="n">targetName</span><span class="p">)</span>
+        <span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">result</span></div>
+
+  <span class="c1">###########################################################################</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

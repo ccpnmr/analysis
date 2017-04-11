@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.Io.Pdb &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.lib.Io.Pdb</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Pdb IO functions</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon Skinner, Geerten Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+               <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                 <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="n">NaN</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.lib.Io</span> <span class="kn">import</span> <span class="n">PyMMLibPDB</span> <span class="k">as</span> <span class="n">PdbLib</span>
+
+<div class="viewcode-block" id="PdbRecordProcessor"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Pdb.PdbRecordProcessor">[docs]</a><span class="k">class</span> <span class="nc">PdbRecordProcessor</span><span class="p">(</span><span class="n">PdbLib</span><span class="o">.</span><span class="n">RecordProcessor</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Class for custom record processing&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PdbRecordProcessor.process_ATOM"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Pdb.PdbRecordProcessor.process_ATOM">[docs]</a>  <span class="k">def</span> <span class="nf">process_ATOM</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rec</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;fix atom record - make only globally acceptable changes, special-case stuff is for later&quot;&quot;&quot;</span>
+
+    <span class="n">name</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+    <span class="c1"># If no name it cannot be fixed.</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+      <span class="c1"># move leading digit to end of atom name</span>
+      <span class="n">rec</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">+</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chainID&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+      <span class="c1"># replace empty chainID with seqID if length is suitable</span>
+      <span class="n">seqId</span> <span class="o">=</span> <span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;seqID&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+      <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">seqId</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">rec</span><span class="p">[</span><span class="s1">&#39;chainID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">seqId</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># May not be necessary, but just in case</span>
+        <span class="n">rec</span><span class="p">[</span><span class="s1">&#39;chainID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span></div></div>
+
+
+<div class="viewcode-block" id="readPdbRecorsds"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Pdb.readPdbRecorsds">[docs]</a><span class="k">def</span> <span class="nf">readPdbRecorsds</span><span class="p">(</span><span class="n">fil</span><span class="p">):</span>
+  <span class="sd">&quot;&quot;&quot;Read file or input stream, and return of PDBRecords, one per model</span>
+<span class="sd">  Header records are given in the first list&quot;&quot;&quot;</span>
+
+  <span class="n">pdbFile</span> <span class="o">=</span> <span class="n">PdbLib</span><span class="o">.</span><span class="n">PDBFile</span><span class="p">()</span>
+  <span class="n">pdbFile</span><span class="o">.</span><span class="n">load_file</span><span class="p">(</span><span class="n">fil</span><span class="p">)</span>
+  <span class="n">recordProcessor</span> <span class="o">=</span> <span class="n">PdbLib</span><span class="o">.</span><span class="n">RecordProcessor</span><span class="p">()</span>
+  <span class="n">recordProcessor</span><span class="o">.</span><span class="n">process_pdb_records</span><span class="p">(</span><span class="n">pdbFile</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">pdbFile</span></div>
+
+
+<div class="viewcode-block" id="readModelRecords"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Pdb.readModelRecords">[docs]</a><span class="k">def</span> <span class="nf">readModelRecords</span><span class="p">(</span><span class="n">fil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">PdbLib</span><span class="o">.</span><span class="n">PDBRecord</span><span class="p">],</span> <span class="n">List</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">PdbLib</span><span class="o">.</span><span class="n">PDBRecord</span><span class="p">]]]:</span>
+  <span class="sd">&quot;&quot;&quot;Read file or input stream, and return list-of-lists-of PDBRecords, one per model</span>
+<span class="sd">  All records are given in the first list, subsequent lists contain only ATOM records&quot;&quot;&quot;</span>
+
+  <span class="n">pdbFile</span> <span class="o">=</span> <span class="n">readPdbRecorsds</span><span class="p">(</span><span class="n">fil</span><span class="p">)</span>
+
+  <span class="n">model</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">header</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+  <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">pdbFile</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">rec</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="s1">&#39;ENDMDL&#39;</span><span class="p">:</span>
+      <span class="c1"># put model into result and make a new one</span>
+      <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+      <span class="n">model</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">elif</span> <span class="n">rec</span><span class="o">.</span><span class="n">_name</span> <span class="ow">in</span><span class="p">(</span><span class="s1">&#39;ATOM  &#39;</span><span class="p">,</span> <span class="s1">&#39;HETATM&#39;</span><span class="p">):</span>
+      <span class="c1"># Always append ATOM and HETATM records</span>
+      <span class="n">model</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="n">data</span><span class="p">:</span>
+      <span class="c1"># For the first model only append all records, in case we want them later</span>
+      <span class="n">header</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rec</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">if</span> <span class="n">model</span><span class="p">:</span>
+    <span class="c1"># Special case: ENDMDL record missing</span>
+    <span class="c1"># Only arrive here if we have had ATOM records since the last ENDMDL record (or beginning)</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+  <span class="c1">#</span>
+  <span class="k">return</span> <span class="n">header</span><span class="p">,</span> <span class="n">data</span></div>
+
+<div class="viewcode-block" id="loadStructureEnsemble"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.lib.Io.html#ccpnmodel.ccpncore.lib.Io.Pdb.loadStructureEnsemble">[docs]</a><span class="k">def</span> <span class="nf">loadStructureEnsemble</span><span class="p">(</span><span class="n">molSystem</span><span class="p">:</span><span class="s2">&quot;MolSystem&quot;</span><span class="p">,</span> <span class="n">fil</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;StructureEnsemble&quot;</span><span class="p">:</span>
+  <span class="sd">&quot;&quot;&quot;Load PDB file into new structure ensemble matching MolSystem</span>
+<span class="sd">  NB MolSystem is a required parameter for the data model,</span>
+<span class="sd">  but there is no requirement that the data match&quot;&quot;&quot;</span>
+
+  <span class="c1"># TBD further data extraction, use of header, match chains to existing one, make new chains?? ...</span>
+
+  <span class="n">header</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">readModelRecords</span><span class="p">(</span><span class="n">fil</span><span class="p">)</span>
+
+  <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+    <span class="n">atomCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">modelCount</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">!=</span> <span class="n">atomCount</span><span class="p">):</span>
+      <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Multiple models have different atom counts in PDB file </span><span class="si">%s</span><span class="s2"> - loading aborted&quot;</span><span class="p">)</span>
+
+
+    <span class="c1"># NBNB TBD check that names match in different models</span>
+
+    <span class="n">memopsRoot</span> <span class="o">=</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">root</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">ensembleId</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">molSystem</span><span class="o">.</span><span class="n">structureEnsembles</span><span class="p">]</span>
+    <span class="n">nextId</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">ll</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">ll</span> <span class="k">else</span> <span class="mi">1</span>
+    <span class="n">apiEnsemble</span> <span class="o">=</span> <span class="n">memopsRoot</span><span class="o">.</span><span class="n">newStructureEnsemble</span><span class="p">(</span><span class="n">molSystem</span><span class="o">=</span><span class="n">molSystem</span><span class="p">,</span> <span class="n">ensembleId</span><span class="o">=</span><span class="n">nextId</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+      <span class="n">chain</span> <span class="o">=</span> <span class="p">(</span><span class="n">apiEnsemble</span><span class="o">.</span><span class="n">findFirstCoordChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chainID&#39;</span><span class="p">))</span> <span class="ow">or</span>
+               <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">newChain</span><span class="p">(</span><span class="n">code</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;chainID&#39;</span><span class="p">)))</span>
+      <span class="n">residue</span> <span class="o">=</span> <span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">findFirstResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resSeq&#39;</span><span class="p">),</span>
+                                        <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;iCode&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">))</span> <span class="ow">or</span>
+                 <span class="n">chain</span><span class="o">.</span><span class="n">newResidue</span><span class="p">(</span><span class="n">seqCode</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resSeq&#39;</span><span class="p">),</span> <span class="n">seqInsertCode</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;iCode&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">),</span>
+                                  <span class="n">code3Letter</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resName&#39;</span><span class="p">)))</span>
+
+      <span class="c1"># NBNB Heuristic. We need an elementName</span>
+      <span class="n">elementName</span> <span class="o">=</span> <span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;element&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">name2ElementSymbol</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">))</span>
+                     <span class="ow">or</span> <span class="s1">&#39;Unknown&#39;</span><span class="p">)</span>
+      <span class="c1"># NBNB wil likely break with altLocated atoms. Meanwhile do it right</span>
+      <span class="n">residue</span><span class="o">.</span><span class="n">newAtom</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">),</span> <span class="n">altLocationCode</span><span class="o">=</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;altLoc&#39;</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">),</span>
+                      <span class="n">elementName</span><span class="o">=</span><span class="n">elementName</span><span class="o">.</span><span class="n">title</span><span class="p">())</span>
+
+
+    <span class="c1"># Gather data</span>
+    <span class="c1"># NBNB TBD atomNameData need doing</span>
+    <span class="k">for</span> <span class="n">modelData</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+      <span class="n">apiModel</span> <span class="o">=</span> <span class="n">apiEnsemble</span><span class="o">.</span><span class="n">newModel</span><span class="p">()</span>
+      <span class="n">coordinates</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">addCoordinate</span> <span class="o">=</span> <span class="n">coordinates</span><span class="o">.</span><span class="n">append</span>
+      <span class="n">occupancies</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">addOccupancy</span> <span class="o">=</span> <span class="n">occupancies</span><span class="o">.</span><span class="n">append</span>
+      <span class="n">bFactors</span> <span class="o">=</span> <span class="p">[]</span>
+      <span class="n">addBFactor</span> <span class="o">=</span> <span class="n">bFactors</span><span class="o">.</span><span class="n">append</span>
+      <span class="c1"># NBNB TBD Add atomNames array</span>
+      <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">modelData</span><span class="p">:</span>
+        <span class="n">addCoordinate</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">NaN</span><span class="p">))</span>
+        <span class="n">addCoordinate</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">NaN</span><span class="p">))</span>
+        <span class="n">addCoordinate</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;z&#39;</span><span class="p">,</span> <span class="n">NaN</span><span class="p">))</span>
+        <span class="n">addCoordinate</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;occupancy&#39;</span><span class="p">,</span> <span class="n">NaN</span><span class="p">))</span>
+        <span class="n">addCoordinate</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;tempFactor&#39;</span><span class="p">,</span> <span class="n">NaN</span><span class="p">))</span>
+      <span class="n">apiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s1">&#39;coordinates&#39;</span><span class="p">,</span> <span class="n">coordinates</span><span class="p">)</span>
+      <span class="n">apiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s1">&#39;occupancies&#39;</span><span class="p">,</span> <span class="n">occupancies</span><span class="p">)</span>
+      <span class="n">apiModel</span><span class="o">.</span><span class="n">setSubmatrixData</span><span class="p">(</span><span class="s1">&#39;bFactors&#39;</span><span class="p">,</span> <span class="n">bFactors</span><span class="p">)</span>
+
+    <span class="c1"># Set data</span>
+    <span class="c1"># apiEnsemble.findFirstDataMatrix(name=&#39;coordinates&#39;, shape=(modelCount, atomCount,3), data=coordinates)</span>
+    <span class="c1"># apiEnsemble.newDataMatrix(name=&#39;occupancies&#39;, shape=(modelCount, atomCount), data=occupancies)</span>
+    <span class="c1"># apiEnsemble.newDataMatrix(name=&#39;bFactors&#39;, shape=(modelCount, atomCount), data=bFactors)</span>
+
+    <span class="c1">#</span>
+    <span class="k">return</span> <span class="n">apiEnsemble</span>
+
+  <span class="k">else</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="s2">&quot;WARNING, no ATOM data in PDB file </span><span class="si">%s</span><span class="s2"> - loading aborted&quot;</span> <span class="o">%</span> <span class="n">fil</span><span class="p">)</span></div>
+
+
+
+
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,486 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.modules.ChemicalShiftsMappingModule &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="ccpn.ui.gui.modules" href="../modules.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" accesskey="U">ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.modules.ChemicalShiftsMappingModule</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">pyqtgraph</span> <span class="kn">as</span> <span class="nn">pg</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtCore</span><span class="p">,</span> <span class="n">QtGui</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.PeakList</span> <span class="kn">import</span> <span class="n">PeakList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.modules.CcpnModule</span> <span class="kn">import</span> <span class="n">CcpnModule</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.BarGraph</span> <span class="kn">import</span> <span class="n">BarGraph</span><span class="p">,</span> <span class="n">CustomViewBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ButtonList</span> <span class="kn">import</span> <span class="n">ButtonList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.DoubleSpinbox</span> <span class="kn">import</span> <span class="n">DoubleSpinbox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.GroupBox</span> <span class="kn">import</span> <span class="n">GroupBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Icon</span> <span class="kn">import</span> <span class="n">Icon</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.ScrollArea</span> <span class="kn">import</span> <span class="n">ScrollArea</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Widget</span> <span class="kn">import</span> <span class="n">Widget</span>
+
+
+<div class="viewcode-block" id="InputWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget">[docs]</a><span class="k">class</span> <span class="nc">InputWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">InputWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">l</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListInput</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;Select&#39;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sb</span> <span class="o">=</span> <span class="n">DoubleSpinbox</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sb</span><span class="o">.</span><span class="n">setSingleStep</span><span class="p">(</span><span class="mf">0.01</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">closeIcon</span> <span class="o">=</span> <span class="n">Icon</span><span class="p">(</span><span class="s1">&#39;icons/window-close&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deleteButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span><span class="n">icon</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">closeIcon</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deleteButton</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s2">&quot;background-color: transparent; border: 0px;&quot;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">deleteButton</span><span class="o">.</span><span class="n">setMaximumWidth</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListInput</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sb</span><span class="p">)</span>
+    <span class="n">l</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deleteButton</span><span class="p">)</span>
+
+<div class="viewcode-block" id="InputWidget.getParams"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget.getParams">[docs]</a>  <span class="k">def</span> <span class="nf">getParams</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListInput</span><span class="o">.</span><span class="n">getObject</span><span class="p">():</span> <span class="bp">self</span><span class="o">.</span><span class="n">sb</span><span class="o">.</span><span class="n">value</span><span class="p">()}</span></div>
+
+<div class="viewcode-block" id="InputWidget.setParams"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputWidget.setParams">[docs]</a>  <span class="k">def</span> <span class="nf">setParams</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">peakListObjs</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListInput</span><span class="o">.</span><span class="n">setData</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">peakListObjs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">select</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakListInput</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="n">select</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">sb</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span></div></div>
+
+
+
+<div class="viewcode-block" id="SettingWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget">[docs]</a><span class="k">class</span> <span class="nc">SettingWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">SettingWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">_ccpnApplication</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">project</span>
+    <span class="k">if</span> <span class="n">parent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">parent</span> <span class="o">=</span> <span class="n">parent</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">inputWidgetList</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">inputDataBoundary</span> <span class="o">=</span> <span class="n">InputDataBoundary</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">application</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QVBoxLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">initUIinputWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span> <span class="o">=</span> <span class="n">ButtonList</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="n">texts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Save&#39;</span><span class="p">,</span> <span class="s1">&#39;Update&#39;</span><span class="p">,</span> <span class="s1">&#39;Apply&#39;</span><span class="p">],</span>
+                                   <span class="n">callbacks</span><span class="o">=</span><span class="p">[</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sendDataToPlot</span><span class="p">],</span>
+                                   <span class="n">tipTexts</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">],</span> <span class="n">direction</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">,</span>
+                                   <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addStretch</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">applyButtons</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__registerNotifiers</span><span class="p">()</span>
+
+<div class="viewcode-block" id="SettingWidget.initUIinputWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.initUIinputWidget">[docs]</a>  <span class="k">def</span> <span class="nf">initUIinputWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">mygroupbox</span> <span class="o">=</span> <span class="n">GroupBox</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">myform</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QFormLayout</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">addInputWidget</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">myform</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">Button</span><span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="s1">&#39;Add Input&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">addInputWidget</span><span class="p">))</span>
+    <span class="n">mygroupbox</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">myform</span><span class="p">)</span>
+    <span class="n">scroll</span> <span class="o">=</span> <span class="n">ScrollArea</span><span class="p">(</span><span class="bp">None</span><span class="p">)</span>
+    <span class="n">scroll</span><span class="o">.</span><span class="n">setWidget</span><span class="p">(</span><span class="n">mygroupbox</span><span class="p">)</span>
+    <span class="n">scroll</span><span class="o">.</span><span class="n">setWidgetResizable</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainLayout</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="n">scroll</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SettingWidget.getInputPeakLists"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.getInputPeakLists">[docs]</a>  <span class="k">def</span> <span class="nf">getInputPeakLists</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="p">:</span>
+      <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">pl</span> <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakLists</span><span class="p">]</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;No peakList Found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">False</span></div>
+
+
+
+<div class="viewcode-block" id="SettingWidget.addInputWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.addInputWidget">[docs]</a>  <span class="k">def</span> <span class="nf">addInputWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">rc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">myform</span><span class="o">.</span><span class="n">rowCount</span><span class="p">()</span>
+    <span class="n">iw</span> <span class="o">=</span> <span class="n">InputWidget</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">inputWidgetList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iw</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">myform</span><span class="o">.</span><span class="n">insertRow</span><span class="p">(</span><span class="n">rc</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">iw</span><span class="p">)</span>
+    <span class="n">iw</span><span class="o">.</span><span class="n">deleteButton</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">deleteInputWidget</span><span class="p">,</span> <span class="n">iw</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_setInputWidgetData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputWidgetList</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">iw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputWidgetList</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInputPeakLists</span><span class="p">():</span>
+          <span class="n">pids</span> <span class="o">=</span><span class="p">[</span><span class="n">pl</span><span class="o">.</span><span class="n">pid</span> <span class="k">for</span> <span class="n">pl</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInputPeakLists</span><span class="p">()]</span>
+          <span class="n">pls</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getInputPeakLists</span><span class="p">()</span>
+          <span class="n">oldSelection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iw</span><span class="o">.</span><span class="n">getParams</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+          <span class="k">if</span> <span class="n">oldSelection</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">iw</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="n">pids</span><span class="p">,</span> <span class="n">peakListObjs</span><span class="o">=</span><span class="n">pls</span><span class="p">,</span> <span class="n">select</span><span class="o">=</span><span class="n">oldSelection</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="n">iw</span><span class="o">.</span><span class="n">setParams</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="n">pids</span><span class="p">,</span> <span class="n">peakListObjs</span><span class="o">=</span><span class="n">pls</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
+
+
+
+<div class="viewcode-block" id="SettingWidget.deleteInputWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.SettingWidget.deleteInputWidget">[docs]</a>  <span class="k">def</span> <span class="nf">deleteInputWidget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iw</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">iw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputWidgetList</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">inputWidgetList</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">iw</span><span class="p">)</span>
+    <span class="n">iw</span><span class="o">.</span><span class="n">deleteLater</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_getDataToPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">sources</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">pName</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">iw</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputWidgetList</span><span class="p">:</span>
+      <span class="n">iwParams</span> <span class="o">=</span> <span class="n">iw</span><span class="o">.</span><span class="n">getParams</span><span class="p">()</span>
+      <span class="n">sources</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">iwParams</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sources</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+      <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">PeakList</span><span class="p">):</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputDataBoundary</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="n">sources</span>
+        <span class="n">dataFrame</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDataBoundary</span><span class="o">.</span><span class="n">_setDataFrame</span><span class="p">()</span>
+
+        <span class="n">shifts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDataBoundary</span><span class="o">.</span><span class="n">calculateChemicalShift</span><span class="p">(</span><span class="n">dataFrame</span><span class="p">,</span> <span class="n">pName</span><span class="p">)</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inputDataBoundary</span><span class="o">.</span><span class="n">getChemicalShifts</span><span class="p">(</span><span class="n">shifts</span><span class="p">)</span>
+        <span class="n">pids</span> <span class="o">=</span> <span class="n">cs</span><span class="p">[</span><span class="s1">&#39;pid&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+        <span class="n">objs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">getByPid</span><span class="p">(</span><span class="n">pid</span><span class="p">)</span> <span class="k">for</span> <span class="n">pid</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">]</span>
+        <span class="n">xValues</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">cs</span><span class="p">[</span><span class="s1">&#39;numb&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+        <span class="n">yValues</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">cs</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">xValues</span><span class="p">,</span> <span class="n">yValues</span><span class="p">,</span> <span class="n">objs</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">False</span>
+
+
+  <span class="k">def</span> <span class="nf">_sendDataToPlot</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_getDataToPlot</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+      <span class="n">xValues</span><span class="p">,</span> <span class="n">yValues</span><span class="p">,</span> <span class="n">objs</span> <span class="o">=</span> <span class="n">data</span>
+
+      <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">barGraphWidget</span><span class="o">.</span><span class="n">_updateGraph</span><span class="p">()</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">barGraphWidget</span><span class="o">.</span><span class="n">setValue</span><span class="p">(</span><span class="n">xValues</span><span class="o">=</span><span class="n">xValues</span><span class="p">,</span> <span class="n">yValues</span><span class="o">=</span><span class="n">yValues</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="n">objs</span><span class="p">)</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">barGraphWidget</span><span class="o">.</span><span class="n">addBarItems</span><span class="p">()</span>
+
+
+  <span class="k">def</span> <span class="nf">__registerNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">registerNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">__deregisterNotifiers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;create&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;modify&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;rename&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">unRegisterNotifier</span><span class="p">(</span><span class="s1">&#39;PeakList&#39;</span><span class="p">,</span> <span class="s1">&#39;delete&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_setInputWidgetData</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ChemicalShiftsMapping"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.ChemicalShiftsMapping">[docs]</a><span class="k">class</span> <span class="nc">ChemicalShiftsMapping</span><span class="p">(</span><span class="n">CcpnModule</span><span class="p">):</span>
+  <span class="n">includeSettingsWidget</span> <span class="o">=</span> <span class="bp">True</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">ChemicalShiftsMapping</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+    <span class="n">CcpnModule</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Chemical Shifts Mapping&#39;</span><span class="p">,</span>  <span class="n">settingButton</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">QCoreApplication</span><span class="o">.</span><span class="n">instance</span><span class="p">()</span><span class="o">.</span><span class="n">_ccpnApplication</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">barGraphWidget</span> <span class="o">=</span> <span class="n">BarGraphWidget</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingWidget</span> <span class="o">=</span> <span class="n">SettingWidget</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settingWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">barGraphWidget</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+
+
+
+  <span class="k">def</span> <span class="nf">_closeModule</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Re-implementation of closeModule function from CcpnModule to unregister notification on current</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">settingWidget__deregisterNotifiers</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="BarGraphWidget"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget">[docs]</a><span class="k">class</span> <span class="nc">BarGraphWidget</span><span class="p">(</span><span class="n">Widget</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xValues</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">yValues</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">BarGraphWidget</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setViewBox</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setLayout</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">xValues</span> <span class="o">=</span> <span class="n">xValues</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">yValues</span> <span class="o">=</span> <span class="n">yValues</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addBarItems</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_addExtraItems</span><span class="p">()</span>
+
+  <span class="k">def</span> <span class="nf">_setViewBox</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span> <span class="o">=</span> <span class="n">CustomViewBox</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">setMenuEnabled</span><span class="p">(</span><span class="n">enableMenu</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>  <span class="c1"># override pg default context menu</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">PlotWidget</span><span class="p">(</span><span class="n">viewBox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="p">,</span> <span class="n">background</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">setParent</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_setLayout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">hbox</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QHBoxLayout</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setLayout</span><span class="p">(</span><span class="n">hbox</span><span class="p">)</span>
+    <span class="n">hbox</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_addExtraItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addLegend</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">addThresholdLine</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="BarGraphWidget.setValue"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.setValue">[docs]</a>  <span class="k">def</span> <span class="nf">setValue</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xValues</span><span class="p">,</span> <span class="n">yValues</span><span class="p">,</span> <span class="n">objects</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">xValues</span> <span class="o">=</span> <span class="n">xValues</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">yValues</span> <span class="o">=</span> <span class="n">yValues</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">objects</span> <span class="o">=</span> <span class="n">objects</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.setViewBoxLimits"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.setViewBoxLimits">[docs]</a>  <span class="k">def</span> <span class="nf">setViewBoxLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">xMin</span><span class="p">,</span> <span class="n">xMax</span><span class="p">,</span> <span class="n">yMin</span><span class="p">,</span> <span class="n">yMax</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">setLimits</span><span class="p">(</span><span class="n">xMin</span><span class="o">=</span><span class="n">xMin</span><span class="p">,</span> <span class="n">xMax</span><span class="o">=</span><span class="n">xMax</span><span class="p">,</span> <span class="n">yMin</span><span class="o">=</span><span class="n">yMin</span><span class="p">,</span> <span class="n">yMax</span><span class="o">=</span><span class="n">yMax</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.updateViewBoxLimits"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.updateViewBoxLimits">[docs]</a>  <span class="k">def</span> <span class="nf">updateViewBoxLimits</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Updates with default paarameters. Minimum values to show the data only&#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xValues</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">yValues</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">setLimits</span><span class="p">(</span><span class="n">xMin</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xValues</span><span class="p">),</span> <span class="n">xMax</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xValues</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xValues</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">),</span>
+                                   <span class="n">yMin</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yValues</span><span class="p">),</span><span class="n">yMax</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yValues</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">yValues</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.addBarItems"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addBarItems">[docs]</a>  <span class="k">def</span> <span class="nf">addBarItems</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">bg</span> <span class="o">=</span> <span class="n">BarGraph</span><span class="p">(</span><span class="n">viewBox</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="p">,</span> <span class="n">xValues</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">xValues</span><span class="p">,</span> <span class="n">yValues</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">yValues</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">objects</span><span class="p">,</span> <span class="n">brush</span> <span class="o">=</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">bg</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">updateViewBoxLimits</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.addThresholdLine"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addThresholdLine">[docs]</a>  <span class="k">def</span> <span class="nf">addThresholdLine</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">xLine</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">InfiniteLine</span><span class="p">(</span><span class="n">pos</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">angle</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">movable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="s1">&#39;b&#39;</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xLine</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.showThresholdLine"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.showThresholdLine">[docs]</a>  <span class="k">def</span> <span class="nf">showThresholdLine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="bp">True</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">xLine</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">xLine</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.addLegend"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addLegend">[docs]</a>  <span class="k">def</span> <span class="nf">addLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">legendItem</span> <span class="o">=</span> <span class="n">pg</span><span class="o">.</span><span class="n">LegendItem</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">60</span><span class="p">),</span> <span class="n">offset</span><span class="o">=</span><span class="p">(</span><span class="mi">70</span><span class="p">,</span> <span class="mi">30</span><span class="p">))</span>  <span class="c1"># args are (size, offset)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">legendItem</span><span class="o">.</span><span class="n">setParentItem</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">graphicsItem</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.addLegendItem"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.addLegendItem">[docs]</a>  <span class="k">def</span> <span class="nf">addLegendItem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pen</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">):</span>
+    <span class="n">c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">plotWidget</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">pen</span><span class="o">=</span><span class="n">pen</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">legendItem</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="BarGraphWidget.showLegend"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.BarGraphWidget.showLegend">[docs]</a>  <span class="k">def</span> <span class="nf">showLegend</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="bp">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">legendItem</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+     <span class="bp">self</span><span class="o">.</span><span class="n">legendItem</span><span class="o">.</span><span class="n">hide</span><span class="p">()</span></div>
+
+  <span class="k">def</span> <span class="nf">_updateGraph</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">customViewBox</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span></div>
+
+
+
+
+
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="kn">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="InputDataBoundary"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary">[docs]</a><span class="k">class</span> <span class="nc">InputDataBoundary</span><span class="p">:</span>
+  <span class="sd">&#39;&#39;&#39; Converts CCPN objects into dataFrame&#39;&#39;&#39;</span>
+  <span class="c1"># from ccpn.core.peakList import PeakList</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">application</span> <span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="p">{</span><span class="bp">None</span><span class="p">:</span> <span class="p">(</span><span class="bp">None</span><span class="p">,</span> <span class="bp">None</span><span class="p">)}</span>  <span class="c1">#{&#39;peakList&#39;:(&#39;param&#39;,&#39;value&#39;)}</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">application</span> <span class="o">=</span> <span class="n">application</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">application</span><span class="o">.</span><span class="n">project</span>
+
+
+<div class="viewcode-block" id="InputDataBoundary.getSources"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.getSources">[docs]</a>  <span class="k">def</span> <span class="nf">getSources</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span></div>
+
+<div class="viewcode-block" id="InputDataBoundary.setSources"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.setSources">[docs]</a>  <span class="k">def</span> <span class="nf">setSources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="p">,</span> <span class="n">param</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span><span class="nb">float</span> <span class="ow">or</span> <span class="nb">int</span> <span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">peakList</span><span class="p">:(</span><span class="n">param</span><span class="p">,</span><span class="n">value</span><span class="p">)})</span></div>
+
+  <span class="k">def</span> <span class="nf">_setDataFrame</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="s1">&#39;create a dataframe from sources&#39;</span>
+
+    <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">pl</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">pl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">createPeakListDF</span><span class="p">(</span><span class="n">pl</span><span class="p">,</span> <span class="s1">&#39;temp&#39;</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">dfs</span><span class="p">:</span>
+      <span class="n">dataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
+      <span class="k">return</span>  <span class="n">dataFrame</span>
+
+<div class="viewcode-block" id="InputDataBoundary.createPeakListDF"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.createPeakListDF">[docs]</a>  <span class="k">def</span> <span class="nf">createPeakListDF</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">peakList</span><span class="p">,</span> <span class="n">paramName</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    :param peakList: ccpnPeakList obj</span>
+<span class="sd">    :param paramName: str.  EG. Temperature, Concentration</span>
+<span class="sd">    :param value: parameter value</span>
+<span class="sd">    :return: dataframe of &#39;residueNumber&#39;, &#39;Nh&#39;, &#39;Hn&#39;, &#39;Hpos&#39;, &#39;Npos&#39;, &#39;height&#39;, &#39;paramValue&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">items</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;residueNumber&#39;</span><span class="p">,</span> <span class="s1">&#39;Hn&#39;</span><span class="p">,</span> <span class="s1">&#39;Nh&#39;</span><span class="p">,</span> <span class="s1">&#39;Hpos&#39;</span><span class="p">,</span> <span class="s1">&#39;Npos&#39;</span><span class="p">,</span> <span class="s1">&#39;height&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">paramName</span><span class="p">)]</span>
+    <span class="k">if</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+          <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">residueNumber</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">nmrResidue</span><span class="o">.</span><span class="n">sequenceCode</span>
+            <span class="n">Hn</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pid</span>
+            <span class="n">Nh</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">assignedNmrAtoms</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pid</span>
+            <span class="n">HnPos</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">NhPos</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">height</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">height</span><span class="p">)</span>
+            <span class="n">param</span> <span class="o">=</span> <span class="n">value</span>
+
+            <span class="n">items</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">residueNumber</span><span class="p">,</span> <span class="n">Hn</span><span class="p">,</span> <span class="n">Nh</span><span class="p">,</span> <span class="n">HnPos</span><span class="p">,</span> <span class="n">NhPos</span><span class="p">,</span> <span class="n">height</span><span class="p">,</span> <span class="n">param</span><span class="p">])</span>
+
+    <span class="n">dataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">items</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">dataFrame</span><span class="p">[</span><span class="s1">&#39;residue number&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dataFrame</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int&#39;</span><span class="p">)</span>
+
+    <span class="n">dataFrame</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">dataFrame</span><span class="p">[</span><span class="s1">&#39;residueNumber&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">dataFrame</span></div>
+
+<div class="viewcode-block" id="InputDataBoundary.calculateChemicalShift"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.calculateChemicalShift">[docs]</a>  <span class="k">def</span> <span class="nf">calculateChemicalShift</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">paramName</span><span class="p">):</span>
+
+    <span class="n">sel</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Hn&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+    <span class="n">sel</span> <span class="o">=</span> <span class="n">sel</span> <span class="o">&amp;</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Nh&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;N&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">sel</span><span class="p">]</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Hpos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Hpos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Npos&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Npos&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
+
+    <span class="n">shifts</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">r</span><span class="p">,</span> <span class="n">pid</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;residueNumber&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span> <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Hn&#39;</span><span class="p">]):</span>
+      <span class="n">d</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;residueNumber&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">r</span><span class="p">]</span>
+      <span class="n">d</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">temp</span>
+      <span class="n">minParm</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;temp&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+      <span class="k">print</span><span class="p">(</span><span class="n">minParm</span><span class="p">,</span> <span class="s1">&#39;min&#39;</span><span class="p">)</span>
+
+      <span class="n">start_H</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">minParm</span><span class="p">,</span> <span class="s1">&#39;Hpos&#39;</span><span class="p">])</span>
+      <span class="n">start_N</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">minParm</span><span class="p">,</span> <span class="s1">&#39;Npos&#39;</span><span class="p">])</span>
+
+      <span class="n">delta</span> <span class="o">=</span> <span class="p">(((</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;Hpos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_H</span><span class="p">)</span> <span class="o">*</span> <span class="mi">7</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;Npos&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">start_N</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mf">0.5</span>
+      <span class="n">delta</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">pid</span>
+      <span class="n">shifts</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">r</span><span class="p">)]</span> <span class="o">=</span> <span class="n">delta</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+    <span class="n">max_shift</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">shift</span> <span class="ow">in</span> <span class="n">shifts</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+      <span class="k">if</span> <span class="n">shift</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="n">max_shift</span><span class="p">:</span>
+        <span class="n">max_shift</span> <span class="o">=</span> <span class="n">shift</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">shifts</span></div>
+
+<div class="viewcode-block" id="InputDataBoundary.getChemicalShifts"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataBoundary.getChemicalShifts">[docs]</a>  <span class="k">def</span> <span class="nf">getChemicalShifts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">shifts</span><span class="p">):</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">shifts</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+      <span class="n">max_index</span> <span class="o">=</span> <span class="n">shifts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+      <span class="n">d</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">shifts</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">max_index</span><span class="p">])])</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;pid&#39;</span><span class="p">,</span> <span class="s1">&#39;numb&#39;</span><span class="p">,</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">g</span></div></div>
+
+
+
+
+
+<div class="viewcode-block" id="InputDataInteractor"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.modules.html#ccpn.ui.gui.modules.ChemicalShiftsMappingModule.InputDataInteractor">[docs]</a><span class="k">class</span> <span class="nc">InputDataInteractor</span><span class="p">:</span>
+  <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="p">()</span>
+
+  <span class="nd">@property</span>
+  <span class="k">def</span> <span class="nf">sources</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__sources</span>
+
+  <span class="nd">@sources.setter</span>
+  <span class="k">def</span> <span class="nf">sources</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">__sources</span> <span class="o">=</span> <span class="n">value</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="../modules.html" >ccpn.ui.gui.modules</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

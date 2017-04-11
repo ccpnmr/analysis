@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.lib.PeakAssignment &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.lib.PeakAssignment</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">import</span> <span class="nn">typing</span>
+<span class="kn">from</span> <span class="nn">ccpn.util</span> <span class="kn">import</span> <span class="n">Common</span> <span class="k">as</span> <span class="n">commonUtil</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.ChemicalShiftList</span> <span class="kn">import</span> <span class="n">ChemicalShiftList</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.NmrAtom</span> <span class="kn">import</span> <span class="n">NmrAtom</span>
+<span class="kn">from</span> <span class="nn">ccpn.core.Peak</span> <span class="kn">import</span> <span class="n">Peak</span>
+
+
+<div class="viewcode-block" id="nmrAtomsForPeaks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.nmrAtomsForPeaks">[docs]</a><span class="k">def</span> <span class="nf">nmrAtomsForPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">],</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">intraResidual</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">doubleTolerance</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Get a set of nmrAtoms that fit to the dimensions of the</span>
+<span class="sd">       peaks.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">selected</span> <span class="o">=</span> <span class="n">matchingNmrAtomsForPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">,</span> <span class="n">doubleTolerance</span><span class="o">=</span><span class="n">doubleTolerance</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">intraResidual</span><span class="p">:</span>
+        <span class="n">selected</span> <span class="o">=</span> <span class="n">filterIntraResidual</span><span class="p">(</span><span class="n">selected</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">selected</span></div>
+
+
+<div class="viewcode-block" id="filterIntraResidual"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.filterIntraResidual">[docs]</a><span class="k">def</span> <span class="nf">filterIntraResidual</span><span class="p">(</span><span class="n">nmrAtomsForDimensions</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">]):</span>
+    <span class="sd">&#39;&#39;&#39;Takes a N-list of lists of nmrAtoms, where N</span>
+<span class="sd">       is the number of peak dimensions and only returns</span>
+<span class="sd">       those which belong to residues that show up in</span>
+<span class="sd">       at least to of the dimensions (This is the behaviour</span>
+<span class="sd">       in v2, if I am correct).</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">nmrResiduesForDimensions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">allNmrResidues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">nmrAtoms</span> <span class="ow">in</span> <span class="n">nmrAtomsForDimensions</span><span class="p">:</span>
+        <span class="n">nmrResidues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span> <span class="k">if</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span><span class="p">])</span>
+        <span class="n">nmrResiduesForDimensions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">)</span>
+        <span class="n">allNmrResidues</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">nmrResidues</span><span class="p">)</span>
+
+    <span class="n">selectedNmrResidues</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">allNmrResidues</span><span class="p">:</span>
+        <span class="n">frequency</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">nmrResidues</span> <span class="ow">in</span> <span class="n">nmrResiduesForDimensions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">nmrResidues</span><span class="p">:</span>
+                <span class="n">frequency</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">frequency</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">selectedNmrResidues</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nmrResidue</span><span class="p">)</span>
+
+    <span class="n">nmrAtomsForDimenionsFiltered</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">nmrAtoms</span> <span class="ow">in</span> <span class="n">nmrAtomsForDimensions</span><span class="p">:</span>
+        <span class="n">nmrAtoms_filtered</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">nmrResidue</span> <span class="ow">in</span> <span class="n">selectedNmrResidues</span><span class="p">:</span>
+                <span class="n">nmrAtoms_filtered</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span>
+        <span class="n">nmrAtomsForDimenionsFiltered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">nmrAtoms_filtered</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">nmrAtomsForDimenionsFiltered</span></div>
+
+
+<div class="viewcode-block" id="matchingNmrAtomsForPeaks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForPeaks">[docs]</a><span class="k">def</span> <span class="nf">matchingNmrAtomsForPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">],</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span> <span class="n">doubleTolerance</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Get a set of nmrAtoms that fit to the dimensions of the</span>
+<span class="sd">       peaks. This function does the actual calculation and does</span>
+<span class="sd">       not involve filtering like in nmrAtoms_for_peaks, where</span>
+<span class="sd">       more filters can be specified in the future.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">dimensionCount</span> <span class="o">=</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">)</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">]</span>
+    <span class="c1">#All peaks should have the same number of dimensions.</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">dimensionCount</span><span class="p">))</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">N_dims</span> <span class="o">=</span> <span class="n">dimensionCount</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">dim_nmrAtoms</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">dim</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">N_dims</span><span class="p">):</span>
+        <span class="n">matching</span> <span class="o">=</span> <span class="n">matchingNmrAtomsForDimensionOfPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span>
+                                                            <span class="n">dim</span><span class="p">,</span>
+                                                            <span class="n">nmrAtoms</span><span class="p">,</span>
+                                                            <span class="n">doubleTolerance</span><span class="o">=</span><span class="n">doubleTolerance</span><span class="p">)</span>
+        <span class="n">dim_nmrAtoms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">matching</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dim_nmrAtoms</span></div>
+
+
+<div class="viewcode-block" id="matchingNmrAtomsForDimensionOfPeaks"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForDimensionOfPeaks">[docs]</a><span class="k">def</span> <span class="nf">matchingNmrAtomsForDimensionOfPeaks</span><span class="p">(</span><span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">],</span> <span class="n">dim</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span>
+                                             <span class="n">doubleTolerance</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Finds out which nmrAtom can be assigned to a specific</span>
+<span class="sd">       dimension of all the peaks, the N dimension for instance.</span>
+<span class="sd">       Only returns those nmrAtoms that can be assigned to this</span>
+<span class="sd">       dimension of all the selected peaks.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sameAxisCodes</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">fittingSets</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">:</span>
+        <span class="n">matchingNmrAtoms</span> <span class="o">=</span> <span class="n">matchingNmrAtomsForPeakDimension</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span>
+                                                            <span class="n">nmrAtoms</span><span class="p">,</span>
+                                                            <span class="n">doubleTolerance</span><span class="o">=</span><span class="n">doubleTolerance</span><span class="p">)</span>
+        <span class="c1"># &#39;&amp;=&#39; is set intersection update</span>
+        <span class="n">common</span> <span class="o">=</span> <span class="n">intersectionOfAll</span><span class="p">(</span><span class="n">fittingSets</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">matchingNmrAtoms</span></div>
+
+
+<div class="viewcode-block" id="matchingNmrAtomsForPeakDimension"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.matchingNmrAtomsForPeakDimension">[docs]</a><span class="k">def</span> <span class="nf">matchingNmrAtomsForPeakDimension</span><span class="p">(</span><span class="n">peak</span><span class="p">:</span><span class="n">Peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span> <span class="n">nmrAtoms</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">NmrAtom</span><span class="p">],</span>
+                                         <span class="n">doubleTolerance</span><span class="p">:</span><span class="nb">bool</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Just finds the nmrAtoms that fit a dimension of one peak.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">fitting_nmrAtoms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="c1"># shiftList = getShiftlistForPeak(peak)</span>
+    <span class="n">shiftList</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">chemicalShiftList</span>
+    <span class="n">position</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+    <span class="c1"># isotopeCode = getIsotopeCodeForPeakDimension(peak, dim)</span>
+    <span class="n">isotopeCode</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">isotopeCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">position</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">isotopeCode</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">shiftList</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">fitting_nmrAtoms</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">tolerance</span><span class="p">:</span>
+        <span class="n">tolerance</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="k">if</span> <span class="n">doubleTolerance</span><span class="p">:</span>
+        <span class="n">tolerance</span> <span class="o">*=</span> <span class="mi">2</span>
+
+    <span class="k">for</span> <span class="n">nmrAtom</span> <span class="ow">in</span> <span class="n">nmrAtoms</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">nmrAtom</span><span class="o">.</span><span class="n">isotopeCode</span> <span class="o">==</span> <span class="n">isotopeCode</span> <span class="ow">and</span> <span class="n">withinTolerance</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">,</span> <span class="n">position</span><span class="p">,</span>
+                                                                  <span class="n">shiftList</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">):</span>
+          <span class="n">fitting_nmrAtoms</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fitting_nmrAtoms</span></div>
+
+
+<div class="viewcode-block" id="withinTolerance"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.withinTolerance">[docs]</a><span class="k">def</span> <span class="nf">withinTolerance</span><span class="p">(</span><span class="n">nmrAtom</span><span class="p">:</span><span class="n">NmrAtom</span><span class="p">,</span> <span class="n">position</span><span class="p">:</span><span class="nb">float</span><span class="p">,</span> <span class="n">shiftList</span><span class="p">:</span><span class="n">ChemicalShiftList</span><span class="p">,</span> <span class="n">tolerance</span><span class="p">:</span><span class="nb">float</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Decides whether the shift of the nmrAtom is</span>
+<span class="sd">       within the tolerance to be assigned to the</span>
+<span class="sd">       peak dimension.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">shift</span> <span class="o">=</span> <span class="n">shiftList</span><span class="o">.</span><span class="n">getChemicalShift</span><span class="p">(</span><span class="n">nmrAtom</span><span class="o">.</span><span class="n">id</span><span class="p">)</span>
+    <span class="c1">#delta = delta_shift(nmrAtom, position, shiftList)</span>
+    <span class="k">if</span> <span class="n">shift</span> <span class="ow">and</span> <span class="nb">abs</span><span class="p">(</span><span class="n">position</span> <span class="o">-</span> <span class="n">shift</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<span class="c1">#def delta_shift(nmrAtom, position, shiftList):</span>
+
+<span class="c1">#    shift = shiftList.getChemicalShift(nmrAtom.id)</span>
+<span class="c1">#    if shift:</span>
+<span class="c1">#        return position - shift.value</span>
+<span class="c1">#    return None</span>
+
+
+<div class="viewcode-block" id="peaksAreOnLine"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.peaksAreOnLine">[docs]</a><span class="k">def</span> <span class="nf">peaksAreOnLine</span><span class="p">(</span><span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">],</span> <span class="n">dim</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Returns True when multiple peaks are located</span>
+<span class="sd">       on a line in the given dimensions.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sameAxisCodes</span><span class="p">(</span><span class="n">peaks</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">False</span>
+    <span class="c1"># Take the two furthest peaks (in this dimension) of the selection.</span>
+    <span class="n">positions</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">peak</span><span class="o">.</span><span class="n">position</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">])</span>
+    <span class="n">max_difference</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">positions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c1">#Use the smallest tolerance of all peaks.</span>
+    <span class="n">tolerance</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">getAssignmentToleranceForPeakDimension</span><span class="p">(</span><span class="n">peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">)</span> <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">max_difference</span> <span class="o">&lt;</span> <span class="n">tolerance</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span>
+    <span class="k">return</span> <span class="bp">False</span></div>
+
+
+<div class="viewcode-block" id="sameAxisCodes"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.sameAxisCodes">[docs]</a><span class="k">def</span> <span class="nf">sameAxisCodes</span><span class="p">(</span><span class="n">peaks</span><span class="p">:</span><span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Peak</span><span class="p">],</span> <span class="n">dim</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Checks whether all peaks have the same axisCode</span>
+<span class="sd">       for in the given dimension.</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peaks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># axisCode = getAxisCodeForPeakDimension(peaks[0], dim)</span>
+        <span class="n">axisCode</span> <span class="o">=</span> <span class="n">peaks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">peak</span> <span class="ow">in</span> <span class="n">peaks</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">commonUtil</span><span class="o">.</span><span class="n">axisCodesCompare</span><span class="p">(</span><span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span><span class="o">.</span><span class="n">axisCodes</span><span class="p">[</span><span class="n">dim</span><span class="p">],</span> <span class="n">axisCode</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="bp">True</span></div>
+
+
+<span class="c1"># Here come some functions that should probably live somewhere else.</span>
+<span class="c1"># They all involve api lookups that would otherwise make the</span>
+<span class="c1"># code less readable.</span>
+
+<span class="c1"># REplaced by project.nmrAtoms.</span>
+<span class="c1"># For isotope filtering, filter the result on nmrAtom.isotopeCode.</span>
+<span class="c1"># def getAllNmrAtoms(project, isotope=None):</span>
+<span class="c1">#     nmrAtoms = [nmrAtom for nmrResidue in project.nmrResidues for nmrAtom in nmrResidue.nmrAtoms]</span>
+<span class="c1">#     if isotope:</span>
+<span class="c1">#         selected = [a for a in nmrAtoms if a.isotope == isotope]</span>
+<span class="c1">#         nmrAtoms = selected</span>
+<span class="c1">#     return nmrAtoms</span>
+
+<span class="c1"># replaced by inline code</span>
+<span class="c1"># def getIsotopeCodeForPeakDimension(peak, dim):</span>
+<span class="c1">#     return peak.peakList.spectrum.isotopeCodes[dim]</span>
+
+
+<div class="viewcode-block" id="getAssignmentToleranceForPeakDimension"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.getAssignmentToleranceForPeakDimension">[docs]</a><span class="k">def</span> <span class="nf">getAssignmentToleranceForPeakDimension</span><span class="p">(</span><span class="n">peak</span><span class="p">:</span><span class="n">Peak</span><span class="p">,</span> <span class="n">dim</span><span class="p">:</span><span class="nb">int</span><span class="p">):</span>
+    <span class="n">spectrum</span> <span class="o">=</span> <span class="n">peak</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">spectrum</span>
+    <span class="k">if</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+      <span class="k">return</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">assignmentTolerances</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span><span class="p">)</span>
+      <span class="n">assignmentTolerances</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
+      <span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span> <span class="o">=</span> <span class="n">assignmentTolerances</span>
+      <span class="k">return</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">assignmentTolerances</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span></div>
+
+<span class="c1"># Replaced by nmrAtom.isotopeCode</span>
+<span class="c1"># def getIsotopeCode(nmrAtom):</span>
+<span class="c1">#     return nmrAtom._apiResonance.isotopeCode</span>
+
+
+<span class="c1"># replaced by inline code</span>
+<span class="c1"># def getAxisCodeForPeakDimension(peak, dim):</span>
+<span class="c1">#     return peak.peakList.spectrum.axisCodes[dim]</span>
+
+
+<span class="c1"># replaced by inline code</span>
+<span class="c1"># def getShiftlistForPeak(peak):</span>
+<span class="c1">#     return peak.peakList.spectrum.chemicalShiftList</span>
+
+<span class="c1"># Just Math</span>
+
+<span class="c1"># Replaced by set.intersection(*sets)</span>
+<div class="viewcode-block" id="intersectionOfAll"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.lib.html#ccpn.ui.gui.lib.PeakAssignment.intersectionOfAll">[docs]</a><span class="k">def</span> <span class="nf">intersectionOfAll</span><span class="p">(</span><span class="n">sets</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sets</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sets</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">intersection</span> <span class="o">=</span> <span class="n">sets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sets</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+        <span class="n">intersection</span> <span class="o">=</span> <span class="n">intersection</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">intersection</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

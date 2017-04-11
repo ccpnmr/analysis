@@ -242,13 +242,17 @@ class Peak(AbstractWrapperObject):
   @dimensionNmrAtoms.setter
   def dimensionNmrAtoms(self, value:Sequence):
 
+    isotopeCodes = self.peakList.spectrum.isotopeCodes
+
     apiPeak = self._wrappedData
     dimResonances = []
-    for atoms in value:
+    for ii,atoms in enumerate(value):
       if atoms is None:
         dimResonances.append(None)
 
       else:
+
+        isotopeCode = isotopeCodes[ii]
 
         if isinstance(atoms, str):
           raise ValueError("dimensionNmrAtoms cannot be set to a sequence of strings")
@@ -256,7 +260,13 @@ class Peak(AbstractWrapperObject):
           raise ValueError("dimensionNmrAtoms must be set to a sequence of list/tuples")
 
         atoms = tuple(self.getByPid(x) if isinstance(x, str) else x for x in atoms)
-        dimResonances.append(tuple(x._wrappedData for x in atoms if x is not None))
+        resonances = tuple(x._wrappedData for x in atoms if x is not None)
+        if isotopeCode and isotopeCode != '?':
+          # check for isotope match
+          if any(x.isotopeCode not in (isotopeCode, '?') for x in resonances):
+            raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
+                             % (ii+1, isotopeCode))
+        dimResonances.append(resonances)
 
     apiPeak.assignByDimensions(dimResonances)
 
@@ -309,6 +319,8 @@ class Peak(AbstractWrapperObject):
   @assignedNmrAtoms.setter
   def assignedNmrAtoms(self, value:Sequence):
 
+    isotopeCodes = tuple(None if x == '?' else x for x in self.peakList.spectrum.isotopeCodes)
+
     apiPeak = self._wrappedData
     peakDims = apiPeak.sortedPeakDims()
     dimensionCount = len(peakDims)
@@ -321,7 +333,12 @@ class Peak(AbstractWrapperObject):
       for ii, atom in enumerate(tt):
         atom = self.getByPid(atom) if isinstance(atom, str) else atom
         if atom is not None:
-          ll[ii] = atom._wrappedData
+          resonance = atom._wrappedData
+          if isotopeCodes[ii] and resonance.isotopeCode not in (isotopeCodes[ii], '?'):
+            raise ValueError("NmrAtom assigned to dimension %s must have isotope %s or '?'"
+                             % (ii+1, isotopeCodes[ii]))
+
+          ll[ii] = resonance
 
     # set assignments
     apiPeak.assignByContributions(resonances)
@@ -488,8 +505,8 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
   )
 
   undo = self._project._undo
-  self._startFunctionCommandBlock('newPeak', values=locals(), defaults=defaults,
-                                  parName='newPeak')
+  self._startCommandEchoBlock('newPeak', values=locals(), defaults=defaults,
+                              parName='newPeak')
   self._project.blankNotification()
   undo.increaseBlocking()
   try:
@@ -525,7 +542,7 @@ def _newPeak(self:PeakList,height:float=None, volume:float=None,
         peakDim.lineWidth = lineWidths[ii]
 
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
     self._project.unblankNotification()
     undo.decreaseBlocking()
 

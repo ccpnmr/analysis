@@ -1,0 +1,236 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.lib.chemComp package &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../index.html" />
+    <link rel="up" title="ccpnmodel.ccpncore.lib package" href="ccpnmodel.ccpncore.lib.html" />
+    <link rel="next" title="ccpnmodel.ccpncore.lib.molecule package" href="ccpnmodel.ccpncore.lib.molecule.html" />
+    <link rel="prev" title="ccpnmodel.ccpncore.lib.assignment package" href="ccpnmodel.ccpncore.lib.assignment.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpnmodel.ccpncore.lib.molecule.html" title="ccpnmodel.ccpncore.lib.molecule package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="ccpnmodel.ccpncore.lib.assignment.html" title="ccpnmodel.ccpncore.lib.assignment package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpnmodel.html" >ccpnmodel package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpnmodel.ccpncore.html" >ccpnmodel.ccpncore package</a> &raquo;</li>
+          <li class="nav-item nav-item-4"><a href="ccpnmodel.ccpncore.lib.html" accesskey="U">ccpnmodel.ccpncore.lib package</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-ccpnmodel.ccpncore.lib.chemComp">
+<span id="ccpnmodel-ccpncore-lib-chemcomp-package"></span><h1>ccpnmodel.ccpncore.lib.chemComp package<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.chemComp" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview">
+<span id="ccpnmodel-ccpncore-lib-chemcomp-chemcompoverview-module"></span><h2>ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpnmodel.ccpncore.lib.chemComp.Io">
+<span id="ccpnmodel-ccpncore-lib-chemcomp-io-module"></span><h2>ccpnmodel.ccpncore.lib.chemComp.Io module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.chemComp.Io" title="Permalink to this headline">¶</a></h2>
+<p>!/O functions for ChemComp handling</p>
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.downloadChemCompInfoFromCcpForge">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">downloadChemCompInfoFromCcpForge</code><span class="sig-paren">(</span><em>repository</em>, <em>molType</em>, <em>ccpCode</em>, <em>sourceName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#downloadChemCompInfoFromCcpForge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.downloadChemCompInfoFromCcpForge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch chemComp &#8216;molType&#8217;, &#8216;ccpCode&#8217; or, if sourceName given, the corresponding chemCompCoord, 
+to local repository &#8216;repository&#8217;
+from chemCompServer
+contexts
+Returns name of copied file, or None if unsuccessful</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.fetchChemComp">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">fetchChemComp</code><span class="sig-paren">(</span><em>project</em>, <em>molType</em>, <em>ccpCode</em>, <em>download=True</em>, <em>partialLoad=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#fetchChemComp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.fetchChemComp" title="Permalink to this definition">¶</a></dt>
+<dd><p>get ChemComp corresponding to molType,ccpCode, 
+looking 1) in memory, 2) in Repositories on lookup path,
+3)  downloading from PDBe ChemComp server.
+For 3) save new ChemComp in first Repository on PackageLocator lookup path
+Do 3) only if download==True</p>
+<p>partialLoad controls if only the TopObject (default) or the entire file is loaded</p>
+<p>copyFile can be set to False to avoid copying file from central archive (good for testing)</p>
+<p>Optimised to avoid mass reading.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.fetchChemCompCoord">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">fetchChemCompCoord</code><span class="sig-paren">(</span><em>project</em>, <em>sourceName</em>, <em>molType</em>, <em>ccpCode</em>, <em>download=True</em>, <em>partialLoad=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#fetchChemCompCoord"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.fetchChemCompCoord" title="Permalink to this definition">¶</a></dt>
+<dd><p>get ChemComp corresponding to molType,ccpCode,
+looking 1) in memory, 2) in Repositories on lookup path,
+3) in allChemCompCoordPath directory, 4) downloading from PDBe ChemComp server.
+For 3) and 4) save new ChemComp in first Repository on PAckageLocator lookup path
+Do 4) only if download==True</p>
+<p>partialLoad controls if only the TopObject (default) or the entire file is loaded</p>
+<p>copyFile can be set to False to avoid copying file from central archive (good for testing)</p>
+<p>Optimised to avoid mass reading.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.fetchStdChemComps">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">fetchStdChemComps</code><span class="sig-paren">(</span><em>project</em>, <em>molTypes=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#fetchStdChemComps"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.fetchStdChemComps" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.findCcpForgeDownloadLink">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">findCcpForgeDownloadLink</code><span class="sig-paren">(</span><em>dirData</em>, <em>fileType</em>, <em>ccpCode</em>, <em>ccpForgeDownloadUrl</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#findCcpForgeDownloadLink"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.findCcpForgeDownloadLink" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the relevant XML file name and download link for the ChemComp(Coord) from the repository
+directory data off CcpForge.
+Works by ccpCode only, assuming that info comes from right directory!</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.getCcpForgeUrls">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">getCcpForgeUrls</code><span class="sig-paren">(</span><em>molType</em>, <em>ccpCode</em>, <em>sourceName=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#getCcpForgeUrls"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.getCcpForgeUrls" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates the URL info for ChemComp(Coord) downloads from CcpForge</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.getChemCompArchiveXmlFilePath">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">getChemCompArchiveXmlFilePath</code><span class="sig-paren">(</span><em>chemCompPath</em>, <em>molType</em>, <em>ccpCode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#getChemCompArchiveXmlFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.getChemCompArchiveXmlFilePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Io.getChemCompCoordArchiveXmlFilePath">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Io.</code><code class="descname">getChemCompCoordArchiveXmlFilePath</code><span class="sig-paren">(</span><em>chemCompPath</em>, <em>sourceName</em>, <em>molType</em>, <em>ccpCode</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Io.html#getChemCompCoordArchiveXmlFilePath"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Io.getChemCompCoordArchiveXmlFilePath" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-ccpnmodel.ccpncore.lib.chemComp.ObsoleteChemComps">
+<span id="ccpnmodel-ccpncore-lib-chemcomp-obsoletechemcomps-module"></span><h2>ccpnmodel.ccpncore.lib.chemComp.ObsoleteChemComps module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.chemComp.ObsoleteChemComps" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-ccpnmodel.ccpncore.lib.chemComp.Util">
+<span id="ccpnmodel-ccpncore-lib-chemcomp-util-module"></span><h2>ccpnmodel.ccpncore.lib.chemComp.Util module<a class="headerlink" href="#module-ccpnmodel.ccpncore.lib.chemComp.Util" title="Permalink to this headline">¶</a></h2>
+<p>Utility functions for ChemComp handling</p>
+<dl class="function">
+<dt id="ccpnmodel.ccpncore.lib.chemComp.Util.chemAtomSetFromAtoms">
+<code class="descclassname">ccpnmodel.ccpncore.lib.chemComp.Util.</code><code class="descname">chemAtomSetFromAtoms</code><span class="sig-paren">(</span><em>atoms</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/ccpnmodel/ccpncore/lib/chemComp/Util.html#chemAtomSetFromAtoms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ccpnmodel.ccpncore.lib.chemComp.Util.chemAtomSetFromAtoms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a ChemAtomSet that matches all atoms</p>
+<dl class="describe">
+<dt>
+<code class="descname">Input</code></dt>
+<dd></dd></dl>
+
+<p>List of Nmr.AtomSet or NmrConstraint.FixedAtomSet</p>
+<dl class="describe">
+<dt>
+<code class="descname">Output</code></dt>
+<dd></dd></dl>
+
+<p>ChemComp.ChemAtomSet (or None)</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="../index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">ccpnmodel.ccpncore.lib.chemComp package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview">ccpnmodel.ccpncore.lib.chemComp.ChemCompOverview module</a></li>
+<li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.chemComp.Io">ccpnmodel.ccpncore.lib.chemComp.Io module</a></li>
+<li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.chemComp.ObsoleteChemComps">ccpnmodel.ccpncore.lib.chemComp.ObsoleteChemComps module</a></li>
+<li><a class="reference internal" href="#module-ccpnmodel.ccpncore.lib.chemComp.Util">ccpnmodel.ccpncore.lib.chemComp.Util module</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="ccpnmodel.ccpncore.lib.assignment.html"
+                        title="previous chapter">ccpnmodel.ccpncore.lib.assignment package</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="ccpnmodel.ccpncore.lib.molecule.html"
+                        title="next chapter">ccpnmodel.ccpncore.lib.molecule package</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="../_sources/ccpnmodel/ccpnmodel.ccpncore.lib.chemComp.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="ccpnmodel.ccpncore.lib.molecule.html" title="ccpnmodel.ccpncore.lib.molecule package"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="ccpnmodel.ccpncore.lib.assignment.html" title="ccpnmodel.ccpncore.lib.assignment package"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >CCPN</a> &raquo;</li>
+          <li class="nav-item nav-item-2"><a href="ccpnmodel.html" >ccpnmodel package</a> &raquo;</li>
+          <li class="nav-item nav-item-3"><a href="ccpnmodel.ccpncore.html" >ccpnmodel.ccpncore package</a> &raquo;</li>
+          <li class="nav-item nav-item-4"><a href="ccpnmodel.ccpncore.lib.html" >ccpnmodel.ccpncore.lib package</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

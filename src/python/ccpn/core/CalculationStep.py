@@ -213,15 +213,15 @@ def _newCalculationStep(self:DataSet, programName:str=None, programVersion:str=N
       raise ValueError("Either outputDataSet or inputDataUuid must be None - values were %s and %s"
                       % (outputDataSet, outputDataUuid))
 
-  self._startFunctionCommandBlock('newCalculationStep', values=locals(), defaults=defaults,
-                                  parName='newCalculationStep')
+  self._startCommandEchoBlock('newCalculationStep', values=locals(), defaults=defaults,
+                              parName='newCalculationStep')
   try:
     obj = self._wrappedData.newCalculationStep(programName=programName, programVersion=programVersion,
                                                scriptName=scriptName, script=script,
                                                inputDataUuid=inputDataUuid,
                                                outputDataUuid=outputDataUuid)
   finally:
-    project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   return project._data2Obj.get(obj)
 
 DataSet.newCalculationStep = _newCalculationStep

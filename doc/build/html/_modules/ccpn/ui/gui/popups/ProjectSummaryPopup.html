@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.popups.ProjectSummaryPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.popups.ProjectSummaryPopup</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date: 2016-09-07 12:42:52 +0100 (Wed, 07 Sep 2016) $&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author: skinnersp $&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date: 2016-09-07 12:42:52 +0100 (Wed, 07 Sep 2016) $&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision: 9852 $&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.core.lib</span> <span class="kn">import</span> <span class="n">Summary</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.FileDialog</span> <span class="kn">import</span> <span class="n">FileDialog</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Frame</span> <span class="kn">import</span> <span class="n">Frame</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Table</span> <span class="kn">import</span> <span class="n">ObjectTable</span><span class="p">,</span> <span class="n">Column</span>
+
+
+<div class="viewcode-block" id="ProjectSummaryPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.ProjectSummaryPopup.ProjectSummaryPopup">[docs]</a><span class="k">class</span> <span class="nc">ProjectSummaryPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">):</span>
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">project</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Project Summary&#39;</span><span class="p">,</span> <span class="n">modal</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">project</span> <span class="o">=</span> <span class="n">project</span>
+
+    <span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="n">parent</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">modal</span><span class="p">:</span>  <span class="c1"># Set before visible</span>
+      <span class="n">modality</span> <span class="o">=</span> <span class="n">QtCore</span><span class="o">.</span><span class="n">Qt</span><span class="o">.</span><span class="n">ApplicationModal</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">setWindowModality</span><span class="p">(</span><span class="n">modality</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">setWindowTitle</span><span class="p">(</span><span class="n">title</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_setupData</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span> <span class="o">=</span> <span class="n">frame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># SPECTRA</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Spectra&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">spectrum</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectrumNumberDict</span><span class="p">[</span><span class="n">spectrum</span><span class="p">],</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Spectrum id&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Dimension count&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">dimensionCount</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Spectrum dimension count&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Chemical shiftList&#39;</span><span class="p">,</span>
+             <span class="k">lambda</span> <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">chemicalShiftList</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Spectrum chemical shiftList&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;File path&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">spectrum</span><span class="p">:</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">filePath</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Spectrum data file path&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># PEAKLISTS</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;PeakLists&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peakList</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakListNumberDict</span><span class="p">[</span><span class="n">peakList</span><span class="p">],</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peakList</span><span class="p">:</span> <span class="n">peakList</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;PeakList id&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Peak count&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">peakList</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">peaks</span><span class="p">),</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number of peaks in peakList&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Partly assigned count&#39;</span><span class="p">,</span> <span class="n">Summary</span><span class="o">.</span><span class="n">partlyAssignedPeakCount</span><span class="p">,</span>
+             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number of peaks in peakList at least partially assigned&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Partly assigned %&#39;</span><span class="p">,</span> <span class="n">Summary</span><span class="o">.</span><span class="n">partlyAssignedPeakPercentage</span><span class="p">,</span>
+             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Percentage of peaks in peakList at least partially assigned&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Fully assigned count&#39;</span><span class="p">,</span> <span class="n">Summary</span><span class="o">.</span><span class="n">fullyAssignedPeakCount</span><span class="p">,</span>
+             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number of peaks in peakList fully assigned&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Fully assigned %&#39;</span><span class="p">,</span> <span class="n">Summary</span><span class="o">.</span><span class="n">fullyAssignedPeakPercentage</span><span class="p">,</span>
+             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Percentage of peaks in peakList fully assigned&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># CHAINS</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mainFrame</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="n">row</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Chains&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">hAlign</span><span class="o">=</span><span class="s1">&#39;l&#39;</span><span class="p">)</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">chain</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">chainNumberDict</span><span class="p">[</span><span class="n">chain</span><span class="p">],</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Id&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">chain</span><span class="p">:</span> <span class="n">chain</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Chain id&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Residue count&#39;</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">chain</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">residues</span><span class="p">),</span> <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number of residues in chain&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Assignable atom count&#39;</span><span class="p">,</span> <span class="n">Summary</span><span class="o">.</span><span class="n">assignableAtomCount</span><span class="p">,</span>
+             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number of atoms in chain which are assignable to&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Assigned atom count&#39;</span><span class="p">,</span> <span class="n">Summary</span><span class="o">.</span><span class="n">assignedAtomCount</span><span class="p">,</span>
+             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Number of atoms in chain which are assigned to&#39;</span><span class="p">),</span>
+      <span class="n">Column</span><span class="p">(</span><span class="s1">&#39;Assigned atom %&#39;</span><span class="p">,</span> <span class="n">Summary</span><span class="o">.</span><span class="n">assignedAtomPercentage</span><span class="p">,</span>
+             <span class="n">tipText</span><span class="o">=</span><span class="s1">&#39;Percentage of atoms in chain which are assigned to&#39;</span><span class="p">),</span>
+    <span class="p">]</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainTable</span> <span class="o">=</span> <span class="n">ObjectTable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">objects</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># buttons</span>
+
+    <span class="n">buttonFrame</span> <span class="o">=</span> <span class="n">Frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">buttonFrame</span><span class="p">,</span> <span class="s1">&#39;Save to PDF&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_saveToPdf</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="n">button</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="n">buttonFrame</span><span class="p">,</span> <span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+
+  <span class="k">def</span> <span class="nf">_setupData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="c1"># SPECTRA</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">spectra</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumNumberDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">spectrumNumberDict</span><span class="p">[</span><span class="n">spectrum</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span>
+
+    <span class="c1"># PEAKLISTS</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListNumberDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">for</span> <span class="n">spectrum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">spectra</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">peakLists</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">peakList</span> <span class="ow">in</span> <span class="n">spectrum</span><span class="o">.</span><span class="n">peakLists</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">peakListNumberDict</span><span class="p">[</span><span class="n">peakList</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span>
+        <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="c1"># CHAINS</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">chains</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">chains</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainNumberDict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">chain</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chains</span><span class="p">):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">chainNumberDict</span><span class="p">[</span><span class="n">chain</span><span class="p">]</span> <span class="o">=</span> <span class="n">n</span><span class="o">+</span><span class="mi">1</span>
+
+  <span class="k">def</span> <span class="nf">_saveToPdf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+    <span class="n">dialog</span> <span class="o">=</span> <span class="n">FileDialog</span><span class="p">(</span><span class="n">parent</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileMode</span><span class="o">=</span><span class="n">FileDialog</span><span class="o">.</span><span class="n">AnyFile</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Specify Output File&#39;</span><span class="p">,</span>
+                        <span class="n">preferences</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">()</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">preferences</span><span class="o">.</span><span class="n">general</span><span class="p">)</span>
+
+    <span class="n">path</span> <span class="o">=</span> <span class="n">dialog</span><span class="o">.</span><span class="n">selectedFile</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="p">:</span>
+      <span class="k">return</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.pdf&#39;</span><span class="p">):</span>
+      <span class="n">path</span> <span class="o">+=</span> <span class="s1">&#39;.pdf&#39;</span>
+
+    <span class="n">printer</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">ScreenResolution</span><span class="p">)</span>
+    <span class="n">printer</span><span class="o">.</span><span class="n">setPaperSize</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">A4</span><span class="p">)</span>
+    <span class="n">printer</span><span class="o">.</span><span class="n">setOrientation</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">Landscape</span><span class="p">)</span>
+    <span class="n">printer</span><span class="o">.</span><span class="n">setOutputFormat</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPrinter</span><span class="o">.</span><span class="n">PdfFormat</span><span class="p">)</span>
+    <span class="n">printer</span><span class="o">.</span><span class="n">setOutputFileName</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">painter</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QPainter</span><span class="p">(</span><span class="n">printer</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">spectrumFrame</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
+    <span class="n">printer</span><span class="o">.</span><span class="n">newPage</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListFrame</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
+    <span class="n">printer</span><span class="o">.</span><span class="n">newPage</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">chainFrame</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">painter</span><span class="p">)</span>
+    <span class="n">painter</span><span class="o">.</span><span class="n">end</span><span class="p">()</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

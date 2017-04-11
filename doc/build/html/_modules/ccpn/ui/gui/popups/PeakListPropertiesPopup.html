@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpn.ui.gui.popups.PeakListPropertiesPopup &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpn.ui.gui.popups.PeakListPropertiesPopup</h1><div class="highlight"><pre>
+<span></span>
+
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Base</span> <span class="kn">import</span> <span class="n">Base</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Button</span> <span class="kn">import</span> <span class="n">Button</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.Label</span> <span class="kn">import</span> <span class="n">Label</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.CheckBox</span> <span class="kn">import</span> <span class="n">CheckBox</span>
+<span class="kn">from</span> <span class="nn">ccpn.ui.gui.widgets.PulldownList</span> <span class="kn">import</span> <span class="n">PulldownList</span>
+
+<span class="kn">from</span> <span class="nn">ccpn.util.Colour</span> <span class="kn">import</span> <span class="n">spectrumColours</span>
+
+<span class="c1"># def _getColour(peakList, peakListViews, attr):</span>
+<span class="c1">#</span>
+<span class="c1">#   if peakListViews:</span>
+<span class="c1">#     colour = getattr(peakListViews[0], attr)</span>
+<span class="c1">#   else:</span>
+<span class="c1">#     colour = getattr(peakList, attr)</span>
+<span class="c1">#</span>
+<span class="c1">#   if not colour:</span>
+<span class="c1">#     colour = peakList.spectrum.positiveContourColour</span>
+<span class="c1">#</span>
+<span class="c1">#   return colour</span>
+
+<div class="viewcode-block" id="PeakListPropertiesPopup"><a class="viewcode-back" href="../../../../../ccpn/ccpn.ui.gui.popups.html#ccpn.ui.gui.popups.PeakListPropertiesPopup.PeakListPropertiesPopup">[docs]</a><span class="k">class</span> <span class="nc">PeakListPropertiesPopup</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QDialog</span><span class="p">,</span> <span class="n">Base</span><span class="p">):</span>
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">peakList</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">):</span>
+    <span class="c1"># DANGER: above allows peakList to be None but code below assumes it is not None</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">PeakListPropertiesPopup</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">parent</span><span class="p">)</span>
+    <span class="n">Base</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span> <span class="o">=</span> <span class="n">peakList</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListViews</span> <span class="o">=</span> <span class="p">[</span><span class="n">peakListView</span> <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="n">peakList</span><span class="o">.</span><span class="n">project</span><span class="o">.</span><span class="n">peakListViews</span> <span class="k">if</span> <span class="n">peakListView</span><span class="o">.</span><span class="n">peakList</span> <span class="o">==</span> <span class="n">peakList</span><span class="p">]</span>
+
+    <span class="c1"># symbolColour = _getColour(self.peakList, self.peakListViews, &#39;symbolColour&#39;)</span>
+    <span class="c1"># textColour = _getColour(self.peakList, self.peakListViews, &#39;textColour&#39;)</span>
+    <span class="c1"># NOTE: below is not sorted in any way, but if we change that, we also have to change loop in _fillColourPulldown</span>
+    <span class="n">spectrumColourKeys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;PeakList Name &quot;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakListLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">peakList</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">displayedLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Is displayed&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">displayedCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Peak Symbol&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolPulldown</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolPulldown</span><span class="o">.</span><span class="n">setData</span><span class="p">([</span><span class="s1">&#39;x&#39;</span><span class="p">])</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Peak Symbol Colour&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">spectrumColourKeys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">symbolColourPulldownList</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeSymbolColour</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">textColourLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Peak Text Colour&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span> <span class="o">=</span> <span class="n">PulldownList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">setCurrentIndex</span><span class="p">(</span><span class="n">spectrumColourKeys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">textColourPulldownList</span><span class="o">.</span><span class="n">currentIndexChanged</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_changeTextColour</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">minimalAnnotationLabel</span> <span class="o">=</span> <span class="n">Label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;Minimal Annotation&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">minimalAnnotationCheckBox</span> <span class="o">=</span> <span class="n">CheckBox</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">closeButton</span> <span class="o">=</span> <span class="n">Button</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="s1">&#39;Close&#39;</span><span class="p">,</span> <span class="n">grid</span><span class="o">=</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">callback</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">accept</span><span class="p">)</span>
+
+    <span class="k">if</span><span class="p">(</span><span class="nb">any</span><span class="p">([</span><span class="n">peakListView</span><span class="o">.</span><span class="n">isVisible</span><span class="p">()</span> <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">])):</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayedCheckBox</span><span class="o">.</span><span class="n">setChecked</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">peakListView</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">peakListViews</span><span class="p">:</span>
+      <span class="bp">self</span><span class="o">.</span><span class="n">displayedCheckBox</span><span class="o">.</span><span class="n">toggled</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">peakListView</span><span class="o">.</span><span class="n">setVisible</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">_changeSymbolColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">value</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">symbolColour</span> <span class="o">=</span> <span class="n">colour</span>
+    <span class="c1"># for peakListView in self.peakListViews:</span>
+    <span class="c1">#   peakListView.symbolColour = colour</span>
+
+
+  <span class="k">def</span> <span class="nf">_changeTextColour</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="n">colour</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">spectrumColours</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="n">value</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">peakList</span><span class="o">.</span><span class="n">textColour</span> <span class="o">=</span> <span class="n">colour</span>
+    <span class="c1"># for peakListView in self.peakListViews:</span>
+    <span class="c1">#   peakListView.textColour = colour</span>
+
+  <span class="k">def</span> <span class="nf">_fillColourPulldown</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pulldown</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">spectrumColours</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+      <span class="n">pix</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPixmap</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span> <span class="mi">20</span><span class="p">))</span>
+      <span class="n">pix</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QColor</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+      <span class="n">pulldown</span><span class="o">.</span><span class="n">addItem</span><span class="p">(</span><span class="n">icon</span><span class="o">=</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">pix</span><span class="p">),</span> <span class="n">text</span><span class="o">=</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

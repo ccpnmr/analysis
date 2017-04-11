@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ccpnmodel.ccpncore.memops.scripts.makeHandCodeList &mdash; Python  documentation</title>
+    
+    <link rel="stylesheet" href="../../../../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../../../',
+        VERSION:     '',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../../../_static/doctools.js"></script>
+    <link rel="top" title="Python  documentation" href="../../../../../index.html" />
+    <link rel="up" title="Module code" href="../../../../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for ccpnmodel.ccpncore.memops.scripts.makeHandCodeList</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Module Documentation here</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Licence, Reference and Credits</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__copyright__</span> <span class="o">=</span> <span class="s2">&quot;Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$&quot;</span>
+<span class="n">__credits__</span> <span class="o">=</span> <span class="s2">&quot;Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister&quot;</span>
+<span class="n">__license__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;CCPN license. See www.ccpn.ac.uk/license&quot;</span>
+              <span class="s2">&quot;or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text&quot;</span><span class="p">)</span>
+<span class="n">__reference__</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;For publications, please use reference from www.ccpn.ac.uk/license&quot;</span>
+                <span class="s2">&quot; or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference&quot;</span><span class="p">)</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Last code modification:</span>
+<span class="c1">#=========================================================================================</span>
+<span class="n">__author__</span> <span class="o">=</span> <span class="s2">&quot;$Author$&quot;</span>
+<span class="n">__date__</span> <span class="o">=</span> <span class="s2">&quot;$Date$&quot;</span>
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;$Revision$&quot;</span>
+
+<span class="c1">#=========================================================================================</span>
+<span class="c1"># Start of code</span>
+<span class="c1">#=========================================================================================</span>
+<span class="sd">&quot;&quot;&quot; Create list of handcode</span>
+<span class="sd">All data are read from and written to a file tree of the structure given by</span>
+<span class="sd">the code repository.</span>
+<span class="sd">Default is to use the same file tree as the code is loaded from,</span>
+<span class="sd">determined as the tree that contains memops.universal.constants.</span>
+
+<span class="sd">======================COPYRIGHT/LICENSE START==========================</span>
+
+<span class="sd">makeHandCodeList.py: Code generation for CCPN framework</span>
+
+<span class="sd">Copyright (C) 2007 Wayne Boucher (CCPN Project)</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">This library is free software; you can redistribute it and/or</span>
+<span class="sd">modify it under the terms of the GNU General Public</span>
+<span class="sd">License as published by the Free Software Foundation; either</span>
+<span class="sd">version 2 of the License, or (at your option) any later version.</span>
+<span class="sd"> </span>
+<span class="sd">A copy of this license can be found in ../../../license/GPL.license</span>
+<span class="sd"> </span>
+<span class="sd">This library is distributed in the hope that it will be useful,</span>
+<span class="sd">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="sd">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU</span>
+<span class="sd">General Public License for more details.</span>
+<span class="sd"> </span>
+<span class="sd">You should have received a copy of the GNU General Public</span>
+<span class="sd">License along with this library; if not, write to the Free Software</span>
+<span class="sd">Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA</span>
+
+
+<span class="sd">======================COPYRIGHT/LICENSE END============================</span>
+
+<span class="sd">for further information, please contact :</span>
+
+<span class="sd">- CCPN website (http://www.ccpn.ac.uk/)</span>
+
+<span class="sd">- email: ccpn@bioc.cam.ac.uk</span>
+
+<span class="sd">=======================================================================</span>
+
+<span class="sd">If you are using this software for academic purposes, we suggest</span>
+<span class="sd">quoting the following references:</span>
+
+<span class="sd">===========================REFERENCE START=============================</span>
+<span class="sd">R. Fogh, J. Ionides, E. Ulrich, W. Boucher, W. Vranken, J.P. Linge, M.</span>
+<span class="sd">Habeck, W. Rieping, T.N. Bhat, J. Westbrook, K. Henrick, G. Gilliland,</span>
+<span class="sd">H. Berman, J. Thornton, M. Nilges, J. Markley and E. Laue (2002). The</span>
+<span class="sd">CCPN project: An interim report on a data model for the NMR community</span>
+<span class="sd">(Progress report). Nature Struct. Biol. 9, 416-418.</span>
+
+<span class="sd">Rasmus H. Fogh, Wayne Boucher, Wim F. Vranken, Anne</span>
+<span class="sd">Pajon, Tim J. Stevens, T.N. Bhat, John Westbrook, John M.C. Ionides and</span>
+<span class="sd">Ernest D. Laue (2005). A framework for scientific data modeling and automated</span>
+<span class="sd">software development. Bioinformatics 21, 1678-1684.</span>
+
+<span class="sd">===========================REFERENCE END===============================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># Utility script for analysing model, getting handcode.</span>
+
+<span class="c1"># new machinery imports</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">XmlModelIo</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel</span> <span class="kn">import</span> <span class="n">Util</span> <span class="k">as</span> <span class="n">metaUtil</span>
+<span class="kn">from</span> <span class="nn">ccpnmodel.ccpncore.memops.metamodel.ModelPortal</span> <span class="kn">import</span> <span class="n">ModelPortal</span>
+
+<span class="n">codeStubKeys</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="s1">&#39;java&#39;</span><span class="p">)</span>
+
+<span class="n">stubSeparator</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">**</span><span class="si">%s</span><span class="s1">**</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="n">constraintSeparator</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="mi">80</span> <span class="o">*</span> <span class="s1">&#39;*&#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+
+<span class="c1"># set qualified names of package to generate from (None means default)</span>
+<span class="c1"># these seem to work by listing explicitly leaf packages</span>
+<span class="n">includePackageNames</span> <span class="o">=</span> <span class="bp">None</span>
+<span class="n">excludePackageNames</span> <span class="o">=</span> <span class="bp">None</span>
+
+<span class="c1"># this works by seeing if package starts with these</span>
+<span class="c1">#excludedPackages = (&#39;ccpnmr&#39;, &#39;molsim&#39;, &#39;utrecht&#39;)</span>
+<span class="n">excludedPackages</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;molsim&#39;</span><span class="p">,</span> <span class="s1">&#39;utrecht&#39;</span><span class="p">)</span>
+
+<span class="n">dataModelVersion</span> <span class="o">=</span> <span class="bp">None</span>    <span class="c1"># data model version object (default: current)</span>
+
+<span class="n">outputFile</span> <span class="o">=</span> <span class="s1">&#39;handcodeList.txt&#39;</span>
+
+<div class="viewcode-block" id="outputCodeStubs"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.html#ccpnmodel.ccpncore.memops.scripts.makeHandCodeList.outputCodeStubs">[docs]</a><span class="k">def</span> <span class="nf">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">codeStubs</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">codeStubs</span><span class="p">:</span>
+    <span class="k">return</span>
+
+  <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">name</span>
+
+  <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">elem</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">(),</span> <span class="n">name</span><span class="p">,</span> <span class="n">elem</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+  <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">codeStubKeys</span><span class="p">:</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">stubSeparator</span> <span class="o">%</span> <span class="n">key</span><span class="p">)</span>
+    <span class="n">code</span> <span class="o">=</span> <span class="n">codeStubs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">&#39;NO CODE SPECIFIED&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">code</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">:</span>
+      <span class="n">code</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+    <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+
+  <span class="n">fp</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">constraintSeparator</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="outputConstraints"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.html#ccpnmodel.ccpncore.memops.scripts.makeHandCodeList.outputConstraints">[docs]</a><span class="k">def</span> <span class="nf">outputConstraints</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">elem</span><span class="p">):</span>
+
+  <span class="k">for</span> <span class="n">constraint</span> <span class="ow">in</span> <span class="n">elem</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+    <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">elem</span><span class="p">,</span> <span class="n">constraint</span><span class="o">.</span><span class="n">codeStubs</span><span class="p">,</span> <span class="n">constraint</span><span class="o">.</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../../ccpnmodel/ccpnmodel.ccpncore.memops.scripts.html#ccpnmodel.ccpncore.memops.scripts.makeHandCodeList.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+
+  <span class="c1"># load model</span>
+  <span class="n">topPackage</span> <span class="o">=</span> <span class="n">XmlModelIo</span><span class="o">.</span><span class="n">readModel</span><span class="p">(</span><span class="n">includePackageNames</span><span class="o">=</span><span class="n">includePackageNames</span><span class="p">,</span>
+                                    <span class="n">excludePackageNames</span><span class="o">=</span><span class="n">excludePackageNames</span><span class="p">)</span>
+
+  <span class="n">modelPortal</span> <span class="o">=</span> <span class="n">ModelPortal</span><span class="p">(</span><span class="n">topPackage</span><span class="p">,</span> <span class="n">dataModelVersion</span><span class="o">=</span><span class="n">dataModelVersion</span><span class="p">)</span>
+
+  <span class="n">fp</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">outputFile</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+  <span class="n">packages</span> <span class="o">=</span> <span class="n">modelPortal</span><span class="o">.</span><span class="n">leafPackagesAlphabetic</span><span class="p">()</span>
+  <span class="k">for</span> <span class="n">package</span> <span class="ow">in</span> <span class="n">packages</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">package</span><span class="o">.</span><span class="n">qualifiedName</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">ss</span> <span class="ow">in</span> <span class="n">excludedPackages</span><span class="p">:</span>
+      <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">ss</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">ss</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+        <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="n">dataTypes</span> <span class="o">=</span> <span class="n">modelPortal</span><span class="o">.</span><span class="n">dataTypesAlphabetic</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">dataType</span> <span class="ow">in</span> <span class="n">dataTypes</span><span class="p">:</span>
+        <span class="n">outputConstraints</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">dataType</span><span class="p">)</span>
+
+      <span class="n">dataObjTypes</span> <span class="o">=</span> <span class="n">modelPortal</span><span class="o">.</span><span class="n">dataObjTypesAlphabetic</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">dataObjType</span> <span class="ow">in</span> <span class="n">dataObjTypes</span><span class="p">:</span>
+        <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">dataObjType</span><span class="p">,</span> <span class="n">dataObjType</span><span class="o">.</span><span class="n">constructorCodeStubs</span><span class="p">,</span> <span class="s1">&#39;constructor&#39;</span><span class="p">)</span>
+        <span class="n">outputConstraints</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">dataObjType</span><span class="p">)</span>
+  
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="n">dataObjType</span><span class="o">.</span><span class="n">attributes</span><span class="p">,</span> <span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+          <span class="n">outputConstraints</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+
+        <span class="n">operations</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="n">dataObjType</span><span class="o">.</span><span class="n">operations</span><span class="p">,</span> <span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="n">operations</span><span class="p">:</span>
+          <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">operation</span><span class="o">.</span><span class="n">codeStubs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+      <span class="n">classes</span> <span class="o">=</span> <span class="n">modelPortal</span><span class="o">.</span><span class="n">classesAlphabetic</span><span class="p">(</span><span class="n">package</span><span class="p">)</span>
+      <span class="k">for</span> <span class="n">clazz</span> <span class="ow">in</span> <span class="n">classes</span><span class="p">:</span>
+        <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">clazz</span><span class="p">,</span> <span class="n">clazz</span><span class="o">.</span><span class="n">constructorCodeStubs</span><span class="p">,</span> <span class="s1">&#39;constructor&#39;</span><span class="p">)</span>
+        <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">clazz</span><span class="p">,</span> <span class="n">clazz</span><span class="o">.</span><span class="n">destructorCodeStubs</span><span class="p">,</span> <span class="s1">&#39;destructor&#39;</span><span class="p">)</span>
+        <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">dataObjType</span><span class="p">,</span> <span class="n">dataObjType</span><span class="o">.</span><span class="n">postConstructorCodeStubs</span><span class="p">,</span> <span class="s1">&#39;postConstructor&#39;</span><span class="p">)</span>
+        <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">dataObjType</span><span class="p">,</span> <span class="n">dataObjType</span><span class="o">.</span><span class="n">postDestructorCodeStubs</span><span class="p">,</span> <span class="s1">&#39;postDestructor&#39;</span><span class="p">)</span>
+        <span class="n">outputConstraints</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">clazz</span><span class="p">)</span>
+
+        <span class="n">attributes</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="n">clazz</span><span class="o">.</span><span class="n">attributes</span><span class="p">,</span> <span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">attribute</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+          <span class="n">outputConstraints</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+
+        <span class="n">roles</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="n">clazz</span><span class="o">.</span><span class="n">roles</span><span class="p">,</span> <span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">roles</span><span class="p">:</span>
+          <span class="n">outputConstraints</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+
+        <span class="n">operations</span> <span class="o">=</span> <span class="n">metaUtil</span><span class="o">.</span><span class="n">sortByMethodCall</span><span class="p">(</span><span class="n">clazz</span><span class="o">.</span><span class="n">operations</span><span class="p">,</span> <span class="s1">&#39;qualifiedName&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">operation</span> <span class="ow">in</span> <span class="n">operations</span><span class="p">:</span>
+          <span class="n">outputCodeStubs</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">operation</span><span class="o">.</span><span class="n">codeStubs</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+
+  <span class="n">fp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+
+  <span class="n">main</span><span class="p">()</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../../../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../../../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../../../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../../../../index.html">Python  documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../../../../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright .
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.4.1.
+    </div>
+  </body>
+</html>

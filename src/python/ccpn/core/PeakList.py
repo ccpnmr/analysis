@@ -160,7 +160,7 @@ class PeakList(AbstractWrapperObject):
   # Library functions
 
   ###def pickPeaksNd(self, positions:Sequence[float]=None,
-  def pickPeaksNd(self, regionToPick: Sequence[float] = None,
+  def pickPeaksNd(self, regionToPick:Sequence[float]=None,
                     doPos:bool=True, doNeg:bool=True,
                   fitMethod:str='gaussian', excludedRegions=None,
                   excludedDiagonalDims=None, excludedDiagonalTransform=None,
@@ -174,27 +174,23 @@ class PeakList(AbstractWrapperObject):
       ###( ('positions', None), ('doPos', True), ('doNeg', True),
       ( ('regionToPick', None), ('doPos', True), ('doNeg', True),
          ('fitMethod', 'gaussian'), ('excludedRegions', None), ('excludedDiagonalDims', None),
-        ('excludedDiagonalTransform', None)
+        ('excludedDiagonalTransform', None), ('minDropfactor', 0.1)
       )
     )
-    # NBNB TODO dataDims are NOT being echoed.
-    # NBNB TODO function needs refactoring because 1) we have API objects (dataDims) as input
-    # which 2) makes proper echoing impossible.
-
-
-
-    # if len(positions[0]) != self.spectrum.dimensionCount:
-    ###positions = list(sorted(map(list, zip(*positions)))) # this transposed list of lists
     startPoint = []
     endPoint = []
     spectrum = self.spectrum
     dataDims = spectrum._apiDataSource.sortedDataDims()
     aliasingLimits = spectrum.aliasingLimits
     apiPeaks = []
-    for ii, dataDim in enumerate(dataDims):
+    # for ii, dataDim in enumerate(dataDims):
+    spectrumReferences = spectrum.mainSpectrumReferences
+    if None in spectrumReferences:
+      # TODO if we want to pick in Sampeld fo FId dimensions, this must be added
+      raise ValueError("pickPeaksNd() only works for Frequency dimensions"
+                       " with defined primary SpectrumReferences ")
+    for ii, spectrumReference in enumerate(spectrumReferences):
       aliasingLimit0, aliasingLimit1 = aliasingLimits[ii]
-      #value0 = positions[0][ii]
-      #value1 = positions[1][ii]
       value0 = regionToPick[ii][0]
       value1 = regionToPick[ii][1]
       value0, value1 = min(value0, value1), max(value0, value1)
@@ -203,8 +199,10 @@ class PeakList(AbstractWrapperObject):
       value0 = max(value0, aliasingLimit0)
       value1 = min(value1, aliasingLimit1)
       # -1 below because points start at 1 in data model
-      position0 = dataDim.primaryDataDimRef.valueToPoint(value0) - 1
-      position1 = dataDim.primaryDataDimRef.valueToPoint(value1) - 1
+      # position0 = dataDim.primaryDataDimRef.valueToPoint(value0) - 1
+      # position1 = dataDim.primaryDataDimRef.valueToPoint(value1) - 1
+      position0 = spectrumReference.valueToPoint(value0) - 1
+      position1 = spectrumReference.valueToPoint(value1) - 1
       position0, position1 = min(position0, position1), max(position0, position1)
       # want integer grid points above position0 and below position1
       # add 1 to position0 because above
@@ -212,8 +210,10 @@ class PeakList(AbstractWrapperObject):
       # yes, this negates -1 above but they are for different reasons
       position0 = int(position0+1)
       position1 = int(position1+1)
-      startPoint.append((dataDim.dim, position0))
-      endPoint.append((dataDim.dim, position1))
+      # startPoint.append((dataDim.dim, position0))
+      # endPoint.append((dataDim.dim, position1))
+      startPoint.append((spectrumReference.dimension, position0))
+      endPoint.append((spectrumReference.dimension, position1))
     else:
       startPoints = [point[1] for point in sorted(startPoint)]
       endPoints = [point[1] for point in sorted(endPoint)]
@@ -223,7 +223,7 @@ class PeakList(AbstractWrapperObject):
       negLevel = spectrum.negativeContourBase if doNeg else None
 
       undo = self._project._undo
-      self._startFunctionCommandBlock('pickPeaksNd', values=locals(), defaults=defaults)
+      self._startCommandEchoBlock('pickPeaksNd', values=locals(), defaults=defaults)
       self._project.blankNotification()
       # undo.increaseBlocking()
       try:
@@ -233,7 +233,7 @@ class PeakList(AbstractWrapperObject):
                                 excludedDiagonalTransform=excludedDiagonalTransform, minDropfactor=minDropfactor)
 
       finally:
-        self._project._appBase._endCommandBlock()
+        self._endCommandEchoBlock()
         self._project.unblankNotification()
         # undo.decreaseBlocking()
 
@@ -292,7 +292,7 @@ class PeakList(AbstractWrapperObject):
     """
     defaults = collections.OrderedDict((('size', 9), ('mode', 'wrap'), ('ignoredRegions', None), ('noiseThreshold', None)))
 
-    self._startFunctionCommandBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
+    self._startCommandEchoBlock('pickPeaks1dFiltered', values=locals(), defaults=defaults)
     ll = []
     try:
       if ignoredRegions is None:
@@ -334,7 +334,7 @@ class PeakList(AbstractWrapperObject):
         peaks.append(self.newPeak(height=float(height), position=peakPosition))
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     return peaks
 
@@ -381,8 +381,8 @@ class PeakList(AbstractWrapperObject):
         else:
           return peak
 
-    self._startFunctionCommandBlock('subtractPeakLists', values={'peakList2':peakList2},
-                                    parName='newPeakList')
+    self._startCommandEchoBlock('subtractPeakLists', values={'peakList2':peakList2},
+                                parName='newPeakList')
 
     try:
 
@@ -405,7 +405,7 @@ class PeakList(AbstractWrapperObject):
 
 
     finally:
-      self._project._appBase._endCommandBlock()
+      self._endCommandEchoBlock()
 
     return peakList3
 
@@ -455,8 +455,8 @@ def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
                                      )
 
   apiDataSource = self._wrappedData
-  self._startFunctionCommandBlock('newPeakList', values=locals(), defaults=defaults,
-                                  parName='newPeakList')
+  self._startCommandEchoBlock('newPeakList', values=locals(), defaults=defaults,
+                              parName='newPeakList')
   result = None
   try:
     obj = apiDataSource.newPeakList(name=title, details=comment, isSimulated=isSimulated,
@@ -473,7 +473,7 @@ def _newPeakList(self:Spectrum, title:str=None, comment:str=None,
       result._finaliseAction('rename')
 
   finally:
-    self._project._appBase._endCommandBlock()
+    self._endCommandEchoBlock()
   #
   return result
 

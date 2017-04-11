@@ -11,7 +11,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-11 15:17:39 +0100 (Tue, April 11, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-11 15:24:25 +0100 (Tue, April 11, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -769,11 +769,9 @@ class Framework:
                ))
 
     ms.append(('Molecules', [
-      ("Create Molecule...", self.showMoleculePopup),
-      ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
-                                                    ('checkable', True),
-                                                    ('checked', False)
-                                                    ]),
+      ("Chain from FASTA...", lambda:self.loadData(text='Load FASTA')),
+      (),
+      ("Generate Chain...", self.showMoleculePopup),
       ("Inspect...", self.inspectMolecule, [('enabled', False)]),
       (),
       ("Reference Chemical Shifts", self.showRefChemicalShifts,[('shortcut', 'rc')]),
@@ -790,6 +788,11 @@ class Framework:
       (),
       ("Sequence Graph", self.showSequenceGraph, [('shortcut', 'sg')]),
       ("Atom Selector", self.showAtomSelector, [('shortcut', 'as')]),
+      (),
+      ("Show Sequence", self.toggleSequenceModule, [('shortcut', 'sq'),
+                                                    ('checkable', True),
+                                                    ('checked', False)
+                                                    ]),
       (),
       ("Current", (("Show/Hide Toolbar", self.toggleToolbar, [('shortcut', 'tb')]),
                    ("Show/Hide Phasing Console", self.togglePhaseConsole, [('shortcut', 'pc')]),

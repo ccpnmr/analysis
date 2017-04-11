@@ -84,4 +84,4 @@ class SetupNmrResiduesPopup(QtGui.QDialog, Base):
         return
     finally:
       self.accept()
-      self._endCommandEchoBlock()
+      self.project._endCommandEchoBlock()

@@ -526,18 +526,6 @@ class GuiStrip(Widget): # DropBase needs to be first, else the drop events are n
       apiMark = mark._wrappedData
       for apiRuler in apiMark.rulers:
         self._rulerCreated(apiRuler)
-        
-  # def _mouseClicked(self, event):
-  #   print(event)
-
-
-  # def setStripToCurrent(self):
-  #   position = self.viewBox.mapSceneToView(pos)
-
-
-  # def mousePressEvent(self, event):
-  #
-  #   print('event')
 
   def _mouseMoved(self, positionPixel):
     """

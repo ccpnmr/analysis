@@ -73,7 +73,7 @@ def matchAxesAndNmrAtoms(strip:'GuiStrip', nmrAtoms:typing.List[NmrAtom]):
   for axis in strip.orderedAxes:
     shiftDict[axis.code] = []
     for atom in nmrAtoms:
-      if atom._apiResonance.isotopeCode == commonUtil.name2IsotopeCode(axis.code):
+      if atom.isotopeCode == commonUtil.name2IsotopeCode(axis.code):
         shift = shiftList.getChemicalShift(atom.id)
         if shift is not None and isPositionWithinfBounds(strip, shift, axis):
           shiftDict[axis.code].append(shift)

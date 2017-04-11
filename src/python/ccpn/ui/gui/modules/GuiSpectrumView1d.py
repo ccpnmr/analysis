@@ -141,8 +141,10 @@ class GuiSpectrumView1d(GuiSpectrumView):
       
     hPhasingPivot = self.strip.hPhasingPivot
     if hPhasingPivot.isVisible():
-      dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
-      pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
+      xAxisIndex = self._displayOrderSpectrumDimensionIndices[0]
+      pivot = self.spectrum.mainSpectrumReferences[xAxisIndex].valueToPoint(hPhasingPivot.getXPos())
+      # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[0]
+      # pivot = dataDim.primaryDataDimRef.valueToPoint(hPhasingPivot.getXPos())
     else:
       pivot = 1
       

@@ -35,7 +35,6 @@ from ccpn.core.Project import Project
 from ccpn.core.Peak import Peak
 
 
-from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import FreeStrip as ApiFreeStrip
 from ccpnmodel.ccpncore.api.ccpnmr.gui.Task import BoundDisplay as ApiBoundDisplay
 
 from ccpn.ui.gui.widgets.Icon import Icon

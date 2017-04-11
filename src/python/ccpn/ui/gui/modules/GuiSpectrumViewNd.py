@@ -307,8 +307,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
       ph1 = phasingFrame.slider1.value()
       pivotPpm = phasingFrame.pivotEntry.get()
       direction = phasingFrame.getDirection()
-      dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
-      pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+      # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[direction]
+      # pivot = dataDim.primaryDataDimRef.valueToPoint(pivotPpm)
+      axisIndex = self._displayOrderSpectrumDimensionIndices[direction]
+      pivot = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint(pivotPpm)
     else:
       ph0 = ph1 = direction = 0
       pivot = 1
@@ -1005,8 +1007,11 @@ class GuiSpectrumViewNd(GuiSpectrumView):
   def _getTranslateScale(self, ind:int, pixelViewBox0:float=None, pixelViewBox1:float=None):
     """Get translation data for X (ind==0) or Y (ind==1) dimension"""
 
-    dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
-    valueToPoint = dataDim.primaryDataDimRef.valueToPoint
+    # dataDim = self._apiStripSpectrumView.spectrumView.orderedDataDims[ind]
+    # valueToPoint = dataDim.primaryDataDimRef.valueToPoint
+
+    axisIndex = self._displayOrderSpectrumDimensionIndices[ind]
+    valueToPoint = self.spectrum.mainSpectrumReferences[axisIndex].valueToPoint
         
     strip = self.strip
     plotWidget = strip.plotWidget

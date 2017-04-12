@@ -44,7 +44,6 @@ class SpectrumGroupsWidget(QtGui.QWidget):
     QtGui.QWidget.__init__(self, parent)
     self.project = project
     self.strip = strip
-    self.setColours()
     self.spectrumGroup = self.project.getByPid(spectrumGroupPid)
     self.spectrumGroupButton = Button(self, text=self.spectrumGroup.id,toggle=True)
     self.spectrumGroupButton.setChecked(True)
@@ -64,8 +63,10 @@ class SpectrumGroupsWidget(QtGui.QWidget):
     self.peakListViews = [peakListView for peakListView in self.strip.spectrumDisplay.peakListViews ]
     self.peakListViewDisplayed = [peakListView.peakList for peakListView in self.strip.spectrumDisplay.peakListViews ]
 
-  def onContextMenu(self, point):
-    self.popMenu.exec_(self.spectrumGroupButton.mapToGlobal(point))
+  def onContextMenu(self, points):
+    positions = self.spectrumGroupButton.mapToGlobal(points)
+    self.popMenu.move(positions.x(), positions.y() + 10)
+    self.popMenu.exec()
 
   def toggleSpectrumGroups(self):
     spectrumViews = [spectrumView for spectrumView in self.strip.spectrumViews
@@ -108,17 +109,3 @@ class SpectrumGroupsWidget(QtGui.QWidget):
       for peakListView in self.strip.spectrumDisplay.peakListViews:
         if peakList == peakListView.peakList:
           peakListView.setVisible(True)
-
-  def setColours(self):
-
-    self.colourScheme = self.project._appBase.colourScheme
-    if self.colourScheme == 'dark':
-      self.setStyleSheet("""
-                      Button::checked {background-color: #020F31;}
-                      Button {background-color: #2a3358; }
-                      """)
-    else:
-      self.setStyleSheet("""
-                      Button::checked {background-color: #bd8413;}
-                      Button {background-color: #fbf4cc; border: 1px solid  #bd8413; color: #122043}
-                      """)

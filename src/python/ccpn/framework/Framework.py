@@ -1115,6 +1115,7 @@ class Framework:
       popup.exec_()
 
   def archiveProject(self):
+
     project = self.project
     apiProject = project._wrappedData.parent
     fileName = apiIo.packageProject(apiProject, includeBackups=True, includeLogs=True,
@@ -1123,11 +1124,38 @@ class Framework:
     MessageDialog.showInfo('Project Archived',
                            'Project archived to %s' % fileName, colourScheme=self.ui.mainWindow.colourScheme)
 
+    self.ui.mainWindow._updateRestoreArchiveMenu()
 
-  def restoreFromArchive(self, archive=None):
-    pass
+  def _archivePaths(self):
 
-  def _unpackCcpnTarfile(self, tarfilePath, outputPath=None):
+    archivesDirectory = os.path.join(self.project.path, Path.CCPN_ARCHIVES_DIRECTORY)
+    if os.path.exists(archivesDirectory):
+      fileNames = os.listdir(archivesDirectory)
+      paths = [os.path.join(archivesDirectory, fileName) for fileName in fileNames if fileName.endswith('.tgz')]
+    else:
+      paths = []
+
+    return paths
+
+  def restoreFromArchive(self, archivePath=None):
+
+    if not archivePath:
+      archivesDirectory = os.path.join(self.project.path, Path.CCPN_ARCHIVES_DIRECTORY)
+      dialog = FileDialog(self.ui.mainWindow, fileMode=FileDialog.ExistingFile, text="Select Archive",
+                          acceptMode=FileDialog.AcceptOpen, preferences=self.preferences.general,
+                          directory=archivesDirectory, filter='*.tgz')
+      archivePath = dialog.selectedFile()
+
+    if archivePath:
+      directoryPrefix = archivePath[:-4] # -4 removes the .tgz
+      outputPath, temporaryDirectory = self._unpackCcpnTarfile(archivePath, outputPath=directoryPrefix)
+      program = os.path.join(Path.getTopDirectory(), 'bin/assign') # TODO: fix hard-wired bin/assign
+      command = [program, outputPath]
+      # os.system(commmand) # this works but blocks the existing program
+      from subprocess import Popen, PIPE
+      Popen(command, stdout=PIPE, stderr=PIPE)
+
+  def _unpackCcpnTarfile(self, tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
     """
     # CCPN INTERNAL - called in loadData method of Project
     """
@@ -1137,7 +1165,7 @@ class Framework:
         os.makedirs(outputPath)
       temporaryDirectory = None
     else:
-      temporaryDirectory = tempfile.TemporaryDirectory(prefix='CcpnProject_')
+      temporaryDirectory = tempfile.TemporaryDirectory(prefix=directoryPrefix)
       outputPath = temporaryDirectory.name
 
     cwd = os.getcwd()

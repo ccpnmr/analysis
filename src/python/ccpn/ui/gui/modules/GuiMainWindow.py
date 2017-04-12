@@ -426,6 +426,11 @@ class GuiMainWindow(QtGui.QMainWindow, GuiWindow):
     # TODO: open as pop-out, not as part of MainWindow
     # self.moduleArea.moveModule(pluginModule, position='above', neighbor=None)
 
+  def _updateRestoreArchiveMenu(self):
+
+    action = self.getMenuAction('Project->Restore From Archive...')
+    action.setEnabled(bool(self.application._archivePaths()))
+
   def undo(self):
     self._project._undo.undo()
 

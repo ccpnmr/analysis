@@ -4,18 +4,18 @@
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan",
                "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-10 12:56:44 +0100 (Mon, April 10, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-12 16:40:29 +0100 (Wed, April 12, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -27,7 +27,7 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 #=========================================================================================
 
 import collections
-import typing                   # ejb66 - added for 'header'
+import typing                   # ejb - added for 'header'
 
 from ccpn.core.Project import Project
 from ccpn.core._implementation.AbstractWrapperObject import AbstractWrapperObject
@@ -89,15 +89,15 @@ class Note(AbstractWrapperObject):
     
   @text.setter
   def text(self, value:str):
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # self._wrappedData.text = value
     #
     if value is not None:
       if not isinstance(value, str):
-        raise TypeError("Note name text must be a string")  # ejb66 catch non-string
+        raise TypeError("Note name text must be a string")  # ejb catch non-string
     self._wrappedData.text = value
     #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
   @property
   def created(self) -> typing.Optional[str]:
@@ -110,7 +110,7 @@ class Note(AbstractWrapperObject):
     return self._wrappedData.lastModified.strftime(coreConstants.stdTimeFormat)
 
   @property
-  def header(self) -> typing.Optional[str]:       # ejb66 - changed from str
+  def header(self) -> typing.Optional[str]:       # ejb - changed from str
     """Note header == first line of note"""
     text = self._wrappedData.text
     if text:
@@ -124,7 +124,7 @@ class Note(AbstractWrapperObject):
   def rename(self, value:str):
     """Rename Note, changing its name and Pid."""
 
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
     # if not value:
     #   raise ValueError("Note name must be set")
     #
@@ -132,13 +132,13 @@ class Note(AbstractWrapperObject):
     #   raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
     #
     if not isinstance(value, str):
-      raise TypeError("Note name must be a string")   # ejb66 catch non-string
+      raise TypeError("Note name must be a string")   # ejb catch non-string
     elif not value:
-      raise ValueError("Note name must be set")       # ejb66 catch empty string
+      raise ValueError("Note name must be set")       # ejb catch empty string
     elif Pid.altCharacter in value:
       raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
     #
-    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
     else:
       self._startCommandEchoBlock('rename', value)
@@ -160,18 +160,18 @@ def _newNote(self:Project, name:str='Note', text:str=None) -> Note:
 
   defaults = collections.OrderedDict((('name', None), ('text', None)))
 
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
   # if name and Pid.altCharacter in name:
   #   raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
   #
   if not isinstance(name, str):
-    raise TypeError("Note name must be a string")     # ejb66 catch non-string
+    raise TypeError("Note name must be a string")     # ejb catch non-string
   elif not name:
-    raise ValueError("Note name must be set")         # ejb66 catch empty string
+    raise ValueError("Note name must be set")         # ejb catch empty string
   elif Pid.altCharacter in name:
     raise ValueError("Character %s not allowed in ccpn.Note.name" % Pid.altCharacter)
   #
-  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb66
+  #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ejb
 
   self._startCommandEchoBlock('newNote', values=locals(), defaults=defaults,
                               parName='newNote')

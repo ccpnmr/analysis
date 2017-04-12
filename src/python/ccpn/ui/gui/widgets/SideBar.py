@@ -424,13 +424,19 @@ class SideBar(DropBase, QtGui.QTreeWidget):
 
     return result
 
+  def setProjectName(self, project:Project):
+    """
+    (re)set project name in sidebar header.
+    """
+
+    self.projectItem.setText(0, project.name)
+
   def fillSideBar(self, project:Project):
     """
     Fills the sidebar with the relevant data from the project.
     """
+    self.setProjectName(project)
 
-    self.projectItem.setText(0, project.name)
-    # pid2Obj = project._pid2Obj
     for className, cls in classesInSideBar.items():
       for obj in getattr(project, cls._pluralLinkName):
         self._createItem(obj)

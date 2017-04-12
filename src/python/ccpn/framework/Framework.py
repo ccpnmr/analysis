@@ -353,6 +353,12 @@ class Framework:
       # The NoUi version has no mainWindow
       self.ui.initialize(None)
 
+  def _refreshAfterSave(self):
+    """Refresh user interface after project save (which may have caused project rename)"""
+
+    mainWindow = self.ui.mainWindow
+    if mainWindow is not None:
+      mainWindow.sideBar.setProjectName(self.project)
 
   def _getUI(self):
     if self.args.interface == 'Gui':
@@ -920,14 +926,6 @@ class Framework:
   def _loadNefFile(self, path:str) -> Project:
     """Load Project from NEF file at path, and do necessary setup"""
 
-    # mainWindow = None
-    # if hasattr(self.ui, 'mainWindow'):
-    #   mainWindow = self.ui.mainWindow
-    #
-    # if mainWindow is not None:
-    #   sys.stderr.write("==> NEF file loading not yet implemented for Gui interface. Aborting...")
-    #   return
-
     dataBlock = self.nefReader.getNefData(path)
     project = self.newProject(dataBlock.name)
     self._echoBlocking += 1
@@ -1041,7 +1039,8 @@ class Framework:
     if hasattr(self.project._wrappedData.root, '_temporaryDirectory'):
       return self.saveProjectAs()
     else:
-      return self._saveProject(newPath=newPath, createFallback=createFallback, overwriteExisting=overwriteExisting)
+      return self._saveProject(newPath=newPath, createFallback=createFallback,
+                               overwriteExisting=overwriteExisting)
 
 
   def _updateRecentFiles(self, oldPath=None):

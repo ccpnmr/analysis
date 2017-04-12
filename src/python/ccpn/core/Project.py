@@ -227,6 +227,9 @@ class Project(AbstractWrapperObject):
                                  changeDataLocations=changeDataLocations)
     if savedOk:
       self._resetIds()
+      application = self._appBase
+      if application is not None:
+        application._refreshAfterSave()
     #
     return savedOk
 

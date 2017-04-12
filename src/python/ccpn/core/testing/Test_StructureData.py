@@ -15,7 +15,7 @@ __reference__ = ("For publications, please use reference from http://www.ccpn.ac
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Ed Brooksbank $"
-__dateModified__ = "$dateModified: 2017-04-11 10:07:55 +0100 (Tue, April 11, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-12 09:52:58 +0100 (Wed, April 12, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -28,10 +28,16 @@ __date__ = "$Date: 2017-04-07 10:28:41 +0000 (Fri, April 07, 2017) $"
 
 import math
 import sys
+import os
 from ccpn.util import StructureData
 from ccpn.core.testing.WrapperTesting import WrapperTesting, checkGetSetAttr
+from ccpnmodel.ccpncore.testing.CoreTesting import TEST_PROJECTS_PATH
 
 nan = math.nan
+
+#=========================================================================================
+# TestPandasData
+#=========================================================================================
 
 class TestPandasData(WrapperTesting):
 
@@ -286,6 +292,16 @@ class TestPandasData(WrapperTesting):
     data['residueName'] = 'VAL'
     self.sorted = data.methylSelector       # this one crashes
 
+  def test_structureData_loadPDB(self):
+    ensemble = self.project.newStructureEnsemble()
+    data = ensemble.data
+
+    dataPath = '../structures/2CPP.pdb'
+    if not os.path.isabs(dataPath):
+      dataPath = os.path.join(TEST_PROJECTS_PATH, dataPath)
+
+    self.pd = data.from_pdb(dataPath)
+
 #=========================================================================================
 # test_StructureData_properties
 #=========================================================================================
@@ -302,7 +318,6 @@ class TestStructureData_properties(WrapperTesting):
     """
     with self.initialSetup():
       self.ensemble = self.project.newStructureEnsemble()
-
 
   #=========================================================================================
   # test_structureData_properties

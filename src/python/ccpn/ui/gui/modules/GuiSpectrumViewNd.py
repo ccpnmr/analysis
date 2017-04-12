@@ -629,10 +629,10 @@ class GuiSpectrumViewNd(GuiSpectrumView):
     ##self.drawContoursCounter += 1
     ##print('***drawContours counter (%s): %d' % (self, self.drawContoursCounter))
 
-    if self.positiveContourBase == 10000.0: # horrid
+    if self.spectrum.positiveContourBase == 10000.0: # horrid
       # base has not yet been set, so guess a sensible value
-      self.positiveContourBase = self.spectrum.estimateNoise()
-      self.negativeContourBase = - self.positiveContourBase
+      self.spectrum.positiveContourBase = self.spectrum.estimateNoise()
+      self.spectrum.negativeContourBase = - self.spectrum.positiveContourBase
 
     if self.displayPositiveContours:
       posLevels = _getLevels(self.positiveContourCount, self.positiveContourBase,

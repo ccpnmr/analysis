@@ -557,6 +557,9 @@ class ContoursTab(QtGui.QWidget, Base):
 
     self.pythonConsole = mainWindow.pythonConsole
     self.logger = self.spectrum.project._logger
+
+    # TODO self._changes looks unused, as do all the functions put in it
+    # Check if the lot can be removed
     self._changes = dict()
 
     positiveContoursLabel = Label(self, text="Show Positive Contours", grid=(1, 0), vAlign='t', hAlign='l')
@@ -597,10 +600,13 @@ class ContoursTab(QtGui.QWidget, Base):
       pix.fill(QtGui.QColor(item[0]))
       self.positiveColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
-      self.positiveColourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.positiveContourColour))
-      self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
+      indx = list(spectrumColours.keys()).index(spectrum.positiveContourColour)
     except ValueError:
-      pass
+      # Set to default (colour 0)
+      indx = 0
+      spectrum.positiveContourColour = list(spectrumColours.keys())[indx]
+    self.positiveColourBox.setCurrentIndex(indx)
+    self.positiveColourBox.currentIndexChanged.connect(partial(self._queueChangePosColourComboIndex, spectrum))
 
     self.positiveColourButton = Button(self, grid=(5, 2), vAlign='t', hAlign='l',
                                        icon='icons/colours', hPolicy='fixed')
@@ -635,7 +641,7 @@ class ContoursTab(QtGui.QWidget, Base):
     negativeContourCountData = Spinbox(self, grid=(9, 1), vAlign='t')
     negativeContourCountData.setValue(spectrum.negativeContourCount)
     negativeContourCountData.valueChanged.connect(partial(self._queueChangeNegativeContourCount, spectrum))
-    negativeContourColourLabel = Label(self, text="Colour",grid=(10, 0), vAlign='c', hAlign='l')
+    negativeContourColourLabel = Label(self, text="Negative Contour Colour",grid=(10, 0), vAlign='c', hAlign='l')
 
     self.negativeColourBox = PulldownList(self, grid=(10, 1), vAlign='t')
     for item in spectrumColours.items():
@@ -643,11 +649,15 @@ class ContoursTab(QtGui.QWidget, Base):
       pix.fill(QtGui.QColor(item[0]))
       self.negativeColourBox.addItem(icon=QtGui.QIcon(pix), text=item[1])
     try:
-      self.negativeColourBox.setCurrentIndex(list(spectrumColours.keys()).index(spectrum.negativeContourColour))
-      self.negativeColourBox.currentIndexChanged.connect(partial(self._queueChangeNegColourComboIndex, spectrum))
+      indx = list(spectrumColours.keys()).index(spectrum.negativeContourColour)
     except ValueError:
-      pass
-
+      # Set to default (colour 1)
+      indx = 1
+      spectrum.negativeContourColour = list(spectrumColours.keys())[indx]
+    self.negativeColourBox.setCurrentIndex(indx)
+    self.negativeColourBox.currentIndexChanged.connect(
+      partial(self._queueChangeNegColourComboIndex, spectrum)
+    )
     self.negativeColourButton = Button(self, grid=(10, 2), icon='icons/colours', hPolicy='fixed',
                                        vAlign='t', hAlign='l')
     self.negativeColourButton.clicked.connect(partial(self._changeNegSpectrumColour, spectrum))

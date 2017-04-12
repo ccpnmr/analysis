@@ -53,7 +53,8 @@ class SpectrumToolBar(ToolBar):
       button = self.childAt(event.pos())
       menu = self._createContextMenu(button)
       if menu:
-        menu.popup(event.globalPos())
+        menu.move(event.globalPos().x(), event.globalPos().y() + 10)
+        menu.exec()
 
   def _createContextMenu(self, button:QtGui.QToolButton):
     """

@@ -339,31 +339,21 @@ class ViewBox(pg.ViewBox):
       peaks = list(self.current.peaks)
       peakLists = []
 
-      # Set a single undo waypoint for the entire peak picking operation
-      undo = self.current.project._undo
-      if undo is not None:
-        undo.newWaypoint()
-        undo.increaseBlocking()
-      try:
-
-        for spectrumView in self.current.strip.spectrumViews:
-          if not spectrumView.peakListViews:
-            continue
-          peakListView = spectrumView.peakListViews[0]  # TODO: is there some way of specifying which peakListView
-          if not peakListView.isVisible():
-            continue
-          peakList = peakListView.peakList
-          peak = peakList.newPeak(position=position)
-          # note, the height below is not derived from any fitting
-          # but is a weighted average of the values at the neighbouring grid points
-          peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
-          #self.current.addPeak(peak)
-          # peak.isSelected = True
-          peaks.append(peak)
-          peakLists.append(peakList)
-      finally:
-        if undo is not None:
-          undo.decreaseBlocking()
+      for spectrumView in self.current.strip.spectrumViews:
+        if not spectrumView.peakListViews:
+          continue
+        peakListView = spectrumView.peakListViews[0]  # TODO: is there some way of specifying which peakListView
+        if not peakListView.isVisible():
+          continue
+        peakList = peakListView.peakList
+        peak = peakList.newPeak(position=position)
+        # note, the height below is not derived from any fitting
+        # but is a weighted average of the values at the neighbouring grid points
+        peak.height = spectrumView.spectrum.getPositionValue(peak.pointPosition)
+        #self.current.addPeak(peak)
+        # peak.isSelected = True
+        peaks.append(peak)
+        peakLists.append(peakList)
 
       self.current.peaks = peaks
       for peakList in peakLists:
@@ -532,53 +522,43 @@ class ViewBox(pg.ViewBox):
         minDropfactor = self.current.project._appBase.preferences.general.peakDropFactor
         peaks = list(self.current.peaks)
 
-        # Set a single undo waypoint for the entire peak picking operation
-        undo = self.current.project._undo
-        if undo is not None:
-          undo.newWaypoint()
-          undo.increaseBlocking()
-        try:
-          for spectrumView in self.current.strip.spectrumViews:
-            if not spectrumView.isVisible():
-              continue
-            peakList = spectrumView.spectrum.peakLists[0]
-            if self.current.project._appBase.ui.mainWindow is not None:
-              mainWindow = self.current.project._appBase.ui.mainWindow
-            else:
-              mainWindow = self.current.project._appBase._mainWindow
-            console = mainWindow.pythonConsole
+        for spectrumView in self.current.strip.spectrumViews:
+          if not spectrumView.isVisible():
+            continue
+          peakList = spectrumView.spectrum.peakLists[0]
+          if self.current.project._appBase.ui.mainWindow is not None:
+            mainWindow = self.current.project._appBase.ui.mainWindow
+          else:
+            mainWindow = self.current.project._appBase._mainWindow
+          console = mainWindow.pythonConsole
 
-            if spectrumView.spectrum.dimensionCount > 1:
-              sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
-              spectrumAxisCodes = spectrumView.spectrum.axisCodes
-              stripAxisCodes = self.current.strip.axisCodes
-              sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
+          if spectrumView.spectrum.dimensionCount > 1:
+            sortedSelectedRegion =[list(sorted(x)) for x in selectedRegion]
+            spectrumAxisCodes = spectrumView.spectrum.axisCodes
+            stripAxisCodes = self.current.strip.axisCodes
+            sortedSpectrumRegion = [0] * spectrumView.spectrum.dimensionCount
 
-              remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
-              for n, axisCode in enumerate(spectrumAxisCodes):
-                # idx = stripAxisCodes.index(axisCode)
-                idx = remapIndices[n]
-                sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
-              newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
-                                              doPos=spectrumView.displayPositiveContours,
-                                              doNeg=spectrumView.displayNegativeContours,
-                                              fitMethod='gaussian', minDropfactor=minDropfactor)
-            else:
-              # 1D's
-              y0 = startPosition.y()
-              y1 = endPosition.y()
-              y0, y1 = min(y0, y1), max(y0, y1)
-              newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
+            remapIndices = commonUtil._axisCodeMapIndices(stripAxisCodes, spectrumAxisCodes)
+            for n, axisCode in enumerate(spectrumAxisCodes):
+              # idx = stripAxisCodes.index(axisCode)
+              idx = remapIndices[n]
+              sortedSpectrumRegion[n] = sortedSelectedRegion[idx]
+            newPeaks = peakList.pickPeaksNd(sortedSpectrumRegion,
+                                            doPos=spectrumView.displayPositiveContours,
+                                            doNeg=spectrumView.displayNegativeContours,
+                                            fitMethod='gaussian', minDropfactor=minDropfactor)
+          else:
+            # 1D's
+            y0 = startPosition.y()
+            y1 = endPosition.y()
+            y0, y1 = min(y0, y1), max(y0, y1)
+            newPeaks = peakList.pickPeaks1d([startPosition.x(), endPosition.x()], [y0, y1])
 
-            # Add the new peaks to selection
-            #for peak in newPeaks:
-            #  # peak.isSelected = True
-            #  self.current.addPeak(peak)
-            peaks.extend(newPeaks)
-
-        finally:
-          if undo is not None:
-            undo.decreaseBlocking()
+          # Add the new peaks to selection
+          #for peak in newPeaks:
+          #  # peak.isSelected = True
+          #  self.current.addPeak(peak)
+          peaks.extend(newPeaks)
 
         self.current.peaks = peaks
 

@@ -117,7 +117,7 @@ class PeakList(AbstractWrapperObject):
 
   @property
   def symbolStyle(self) -> str:
-    """Symbol style for peak annotation display"""
+    """Symbol style for peak annotation display in all displays"""
     return self._wrappedData.symbolStyle
 
   @symbolStyle.setter
@@ -126,7 +126,7 @@ class PeakList(AbstractWrapperObject):
 
   @property
   def symbolColour(self) -> str:
-    """Symbol colour for peak annotation display"""
+    """Symbol colour for peak annotation display in all displays"""
     return self._wrappedData.symbolColour
 
   @symbolColour.setter
@@ -135,7 +135,7 @@ class PeakList(AbstractWrapperObject):
 
   @property
   def textColour(self) -> str:
-    """Text colour for peak annotation display"""
+    """Text colour for peak annotation display in all displays"""
     return self._wrappedData.textColour
 
   @textColour.setter

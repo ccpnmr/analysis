@@ -899,17 +899,6 @@ class NmrResidue(AbstractWrapperObject):
 def getter(self:Residue) -> NmrResidue:
   return self._project.getNmrResidue(self._id)
 
-  # apiResidue = self._wrappedData
-  # apiNmrProject = self._project._wrappedData
-  # apiNmrChain = apiNmrProject.findFirstNmrChain(code=apiResidue.chain.code)
-  # if apiNmrChain is not None:
-  #   obj = apiNmrChain.findFirstResonanceGroup(seqCode=apiResidue.seqCode,
-  #                                             seqInsertCode=apiResidue.seqInsertCode.strip() or None,
-  #                                             relativeOffset=None)
-  #   if obj is not None:
-  #     return self._project._data2Obj.get(obj)
-  # return None
-
 def setter(self:Residue, value:NmrResidue):
   oldValue = self.nmrResidue
   if oldValue is value:
@@ -921,6 +910,40 @@ def setter(self:Residue, value:NmrResidue):
     value.residue = self
 Residue.nmrResidue = property(getter, setter, None, "NmrResidue to which Residue is assigned")
 
+def getter(self:Residue) -> typing.Tuple[NmrResidue]:
+  result = []
+
+  nmrChain = self.chain.nmrChain
+  if nmrChain:
+    nmrResidue = self.nmrResidue
+    if nmrResidue is not None:
+      result = [nmrResidue]
+
+    for offset in set(x.relativeOffset for x in nmrChain.nmrResidues):
+      if offset is not None:
+        residue = self
+        if offset > 0:
+          for ii in range(offset):
+            residue = residue.previousResidue
+            if residue is None:
+              break
+        elif offset < 0:
+          for ii in range(offset):
+            residue = residue.nextResidue
+            if residue is None:
+              break
+        #
+        if residue is not None:
+          ll = residue.split(Pid.IDSEP)
+          ll[-2] = '%s%+d' % (ll[-2], offset)
+          nmrResidue = self._project.getNmrResidue(Pid.IDSEP.join(ll))
+          if nmrResidue is not None:
+            result.append(nmrResidue)
+  #
+  return tuple(sorted(result))
+Residue.allNmrResidues = property(getter, None, None,
+                                  "AllNmrResidues corresponding to Residue - E.g. (for MR:A.87)"
+                                  " NmrResidues NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
 
 def getter(self:NmrChain) -> typing.Tuple[NmrResidue]:
   result = list(self._project._data2Obj.get(x)for x in self._wrappedData.mainResonanceGroups)

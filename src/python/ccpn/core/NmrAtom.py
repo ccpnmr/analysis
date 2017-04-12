@@ -31,6 +31,7 @@ import collections
 import operator
 from typing import Union, Tuple
 
+from ccpn.core.Residue import Residue
 from ccpn.core.Atom import Atom
 from ccpn.core.NmrResidue import NmrResidue
 from ccpn.core.Peak import Peak
@@ -365,6 +366,17 @@ def setter(self:Atom, value:NmrAtom):
   else:
     value.atom = self
 Atom.nmrAtom = property(getter, setter, None, "NmrAtom to which Atom is assigned")
+
+
+def getter(self: Residue) -> Tuple[NmrAtom]:
+  result = []
+  for nmrResidue in self.allNmrResidues:
+    result.extend(nmrResidue.nmrAtoms)
+  #
+  return tuple(result)
+Residue.allNmrAtoms = property(getter, None, None,
+                                  "All NmrAtoms corresponding to Residue - E.g. (for MR:A.87)"
+                                  " NmrAtoms in NR:A.87, NR:A.87+0, NR:A.88-1, NR:A.82+5, etc.")
 
 del getter
 del setter

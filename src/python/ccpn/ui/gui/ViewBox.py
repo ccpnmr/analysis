@@ -47,18 +47,17 @@ By Mouse button:
 #=========================================================================================
 
 __copyright__ = "Copyright (C) CCPN project (http://www.ccpn.ac.uk) 2014 - 2017"
-__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan"
-               "Simon P Skinner & Geerten W Vuister")
-__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license"
+__credits__ = ("Wayne Boucher, Ed Brooksbank, Rasmus H Fogh, Luca Mureddu, Timothy J Ragan & Geerten W Vuister")
+__licence__ = ("CCPN licence. See http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for licence text")
-__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license"
+__reference__ = ("For publications, please use reference from http://www.ccpn.ac.uk/v3-software/downloads/license",
                "or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
 
 #=========================================================================================
 # Last code modification
 #=========================================================================================
 __modifiedBy__ = "$modifiedBy: Wayne Boucher $"
-__dateModified__ = "$dateModified: 2017-04-10 14:11:55 +0100 (Mon, April 10, 2017) $"
+__dateModified__ = "$dateModified: 2017-04-12 13:41:56 +0100 (Wed, April 12, 2017) $"
 __version__ = "$Revision: 3.0.b1 $"
 #=========================================================================================
 # Created
@@ -348,7 +347,12 @@ class ViewBox(pg.ViewBox):
       try:
 
         for spectrumView in self.current.strip.spectrumViews:
-          peakList = spectrumView.spectrum.peakLists[0]
+          if not spectrumView.peakListViews:
+            continue
+          peakListView = spectrumView.peakListViews[0]  # TODO: is there some way of specifying which peakListView
+          if not peakListView.isVisible():
+            continue
+          peakList = peakListView.peakList
           peak = peakList.newPeak(position=position)
           # note, the height below is not derived from any fitting
           # but is a weighted average of the values at the neighbouring grid points

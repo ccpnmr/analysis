@@ -351,6 +351,12 @@ class CcpnModuleLabel(DockLabel):
     #   else:
     #     self.setMinimumWidth(minSize)
 
+  def mouseMoveEvent(self, ev):
+    if hasattr(self, 'pressPos'):
+      if not self.startedDrag and (ev.pos() - self.pressPos).manhattanLength() > QtGui.QApplication.startDragDistance():
+        self.dock.startDrag()
+      ev.accept()
+
 
 
 

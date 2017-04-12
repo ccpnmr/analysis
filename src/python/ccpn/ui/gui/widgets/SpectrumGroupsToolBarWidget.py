@@ -64,8 +64,10 @@ class SpectrumGroupsWidget(QtGui.QWidget):
     self.peakListViews = [peakListView for peakListView in self.strip.spectrumDisplay.peakListViews ]
     self.peakListViewDisplayed = [peakListView.peakList for peakListView in self.strip.spectrumDisplay.peakListViews ]
 
-  def onContextMenu(self, point):
-    self.popMenu.exec_(self.spectrumGroupButton.mapToGlobal(point))
+  def onContextMenu(self, points):
+    positions = self.spectrumGroupButton.mapToGlobal(points)
+    self.popMenu.move(positions.x(), positions.y() + 10)
+    self.popMenu.exec()
 
   def toggleSpectrumGroups(self):
     spectrumViews = [spectrumView for spectrumView in self.strip.spectrumViews

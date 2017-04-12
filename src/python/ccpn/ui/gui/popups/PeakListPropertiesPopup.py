@@ -85,15 +85,11 @@ class PeakListPropertiesPopup(QtGui.QDialog):
   def _changeSymbolColour(self, value):
     colour = list(spectrumColours.keys())[value]
     self.peakList.symbolColour = colour
-    for peakListView in self.peakListViews:
-      peakListView.symbolColour = colour
 
 
   def _changeTextColour(self, value):
     colour = list(spectrumColours.keys())[value]
     self.peakList.textColour = colour
-    for peakListView in self.peakListViews:
-      peakListView.textColour = colour
 
   def _fillColourPulldown(self, pulldown):
     for item in spectrumColours.items():

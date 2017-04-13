@@ -50,6 +50,7 @@ CCPN_DIRECTORY_SUFFIX = '.ccpn'
 CCPN_BACKUP_SUFFIX = '_backup'
 CCPN_ARCHIVES_DIRECTORY = 'archives'
 CCPN_SUMMARIES_DIRECTORY = 'summaries'
+CCPN_LOGS_DIRECTORY = 'logs'
 
 CCPN_PYTHON = 'miniconda/bin/python'
 

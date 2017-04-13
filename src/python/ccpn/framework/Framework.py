@@ -1119,7 +1119,7 @@ class Framework:
     project = self.project
     apiProject = project._wrappedData.parent
     fileName = apiIo.packageProject(apiProject, includeBackups=True, includeLogs=True,
-                                    includeArchives=False)
+                                    includeArchives=False, includeSummaries=True)
 
     MessageDialog.showInfo('Project Archived',
                            'Project archived to %s' % fileName, colourScheme=self.ui.mainWindow.colourScheme)

@@ -17,7 +17,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-13 12:24:48 +0100 (Thu, April 13, 2017) $"
+__date__ = "$Date: 2017-04-13 20:44:04 +0100 (Thu, April 13, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -30,7 +30,7 @@ from ccpn.ui.gui.modules.CcpnModule import CcpnModule
 #from ccpn.ui.gui.widgets.PulldownList import PulldownList, PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
 #from ccpn.core.lib.Notifiers import Notifier
-from ccpn.ui.gui.widgets.PulldownListsForObjects import nmrChainPulldown
+from ccpn.ui.gui.widgets.PulldownListsForObjects import NmrChainPulldown
 
 
 class NmrResidueTableModule(CcpnModule):
@@ -52,7 +52,7 @@ class NmrResidueTable(Widget):
     self.nmrChains = project.nmrChains
     self.callback = callback
 
-    self.ncWidget = nmrChainPulldown(parent=self, project=project,
+    self.ncWidget = NmrChainPulldown(parent=self, project=project,
                                      grid=(0,0), gridSpan=(1,2), minimumWidths=(0,100)
                                      )
 

@@ -16,7 +16,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-13 12:24:48 +0100 (Thu, April 13, 2017) $"
+__date__ = "$Date: 2017-04-13 20:44:04 +0100 (Thu, April 13, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -40,6 +40,9 @@ class CompoundBaseWidget(Frame):
     """
     :param parent: parent widget
     :param showBorder: flag to display the border of Frame (True, False)
+    :param layoutDict: dictionary of orientation, griddingList key,value pairs; griddingList should
+                       contain a (x,y) tuple for each widget to be added later-on
+    :param orientation: orientation keyword
     :param kwds: (optional) keyword, value pairs for the gridding of Frame
     """
     Frame.__init__(self, parent=parent, showBorder=showBorder, **kwds)

@@ -18,9 +18,8 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 #=========================================================================================
 # Last code modification:
 #=========================================================================================
-__author__ = "$Author$"
-__date__ = "$Date$"
-__version__ = "$Revision$"
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-13 20:44:04 +0100 (Thu, April 13, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -40,7 +39,6 @@ from ccpn.ui.gui.widgets.MessageDialog import showYesNo
 
 
 class SequenceModule(CcpnModule):
-
   """
   The module displays all chains in the project as one-letter amino acids. The one letter residue
   sequence codes are all instances of the GuiChainResidue class and the style applied to a residue
@@ -51,6 +49,7 @@ class SequenceModule(CcpnModule):
 
   def __init__(self, project):
     #CcpnModule.__init__(self, size=(10, 30), name='Sequence', closable=False)
+    #TODO: make closable
     CcpnModule.__init__(self, name='Sequence', closable=False)
 
     self.project = project
@@ -161,6 +160,7 @@ class GuiChainLabel(QtGui.QGraphicsTextItem):
         self.residueDict[residue.sequenceCode] = newResidue
         i += 1
 
+
 class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
 
   fontSize = 20
@@ -204,7 +204,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable | self.flags())
     self._styleResidue()
 
-
   def _styleResidue(self):
     """
     A convenience function for applying the correct styling to GuiChainResidues depending on their state.
@@ -215,7 +214,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     else:
       self.setHtml('<div style="color: %s; "text-align: center;">'% self.colour1 + self.residue.shortName+'</div')
 
-
   def _setFontBold(self):
     """
     Sets font to bold, necessary as QtGui.QGraphicsTextItems are used for display of residue
@@ -224,7 +222,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
     format = QtGui.QTextCharFormat()
     format.setFontWeight(75)
     self.textCursor().mergeCharFormat(format)
-
 
   def _dragEnterEvent(self, event:QtGui.QMouseEvent):
     """
@@ -253,7 +250,6 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
       item.setDefaultTextColor(QtGui.QColor(colour))
     event.accept()
 
-
   def processNmrChains(self, data:typing.List[str], event:QtGui.QMouseEvent):
     """
     Processes a list of NmrResidue Pids and assigns the residue onto which the data is dropped and
@@ -279,18 +275,18 @@ class GuiChainResidue(DropBase, QtGui.QGraphicsTextItem):
         guiResidue = self.parent.residueDict.get(res.sequenceCode)
         guiResidue.setHtml('<div style="color: %s; text-align: center;"><strong>' % colour +
                              res.shortName+'</strong></div>')
-      if self._appBase is not None:
-        appBase = self._appBase
-      else:
-        appBase = self._appBase
-      if hasattr(appBase, 'backboneModule'):
-        nmrResidueTable = appBase.backboneModule.nmrResidueTable
-        nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
-        nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
-
-      event.accept()
-    self.parent.parent.overlay.hide()
-    self.project._appBase.sequenceGraph.resetSequenceGraph()
+    #   if self._appBase is not None:
+    #     appBase = self._appBase
+    #   else:
+    #     appBase = self._appBase
+    #   if hasattr(appBase, 'backboneModule'):
+    #     nmrResidueTable = appBase.backboneModule.nmrResidueTable
+    #     nmrResidueTable.nmrResidueTable.objectLists = self.project.nmrChains
+    #     nmrResidueTable.nmrChainPulldown.select(residues[0].chain.nmrChain.pid)
+    #
+    #   event.accept()
+    # self.parent.parent.overlay.hide()
+    # self.project._appBase.sequenceGraph.resetSequenceGraph()
 
 
 

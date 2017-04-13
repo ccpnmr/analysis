@@ -29,6 +29,9 @@ __date__ = "$Date: 2016-09-07 12:42:52 +0100 (Wed, 07 Sep 2016) $"
 
 import os
 import datetime
+
+import pandas as pd
+
 from PyQt4 import QtGui, QtCore
 
 from ccpn.core.lib import Summary
@@ -125,8 +128,9 @@ class ProjectSummaryPopup(QtGui.QDialog):
     # buttons
 
     buttonFrame = Frame(self, grid=(1, 0))
-    button = Button(buttonFrame, 'Save to PDF', callback=self._saveToPdf, grid=(0, 0))
-    button = Button(buttonFrame, 'Close', callback=self.accept, grid=(0, 1))
+    button = Button(buttonFrame, 'Save to Excel', callback=self._saveToExcel, grid=(0, 0))
+    button = Button(buttonFrame, 'Save to PDF', callback=self._saveToPdf, grid=(0, 1))
+    button = Button(buttonFrame, 'Close', callback=self.accept, grid=(0, 2))
 
     row += 1
 
@@ -194,5 +198,21 @@ class ProjectSummaryPopup(QtGui.QDialog):
     printer.newPage()
     self.chainFrame.render(painter)
     painter.end()
+
+    self._showMessage(path)
+
+  def _saveToExcel(self):
+
+    path = self._getPathPrefix() + '.xlsx'
+
+    writer = pd.ExcelWriter(path, engine='xlsxwriter')
+
+    for (table, name) in ((self.spectrumTable, 'spectrum'),
+                          (self.peakListTable, 'peakList'),
+                          (self.chainTable, 'chain')):
+      dataFrame = table.tableToDataFrame()
+      dataFrame.to_excel(writer, sheet_name=name, index=False)
+
+    writer.save()
 
     self._showMessage(path)

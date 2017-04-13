@@ -1149,11 +1149,10 @@ class Framework:
     if archivePath:
       directoryPrefix = archivePath[:-4] # -4 removes the .tgz
       outputPath, temporaryDirectory = self._unpackCcpnTarfile(archivePath, outputPath=directoryPrefix)
-      program = os.path.join(Path.getTopDirectory(), 'bin/assign') # TODO: fix hard-wired bin/assign
-      command = [program, outputPath]
-      # os.system(commmand) # this works but blocks the existing program
-      from subprocess import Popen, PIPE
-      Popen(command, stdout=PIPE, stderr=PIPE)
+      pythonExe = os.path.join(Path.getTopDirectory(), Path.CCPN_PYTHON)
+      command = [pythonExe, sys.argv[0], outputPath]
+      from subprocess import Popen
+      Popen(command)
 
   def _unpackCcpnTarfile(self, tarfilePath, outputPath=None, directoryPrefix='CcpnProject_'):
     """

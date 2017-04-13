@@ -51,6 +51,8 @@ CCPN_BACKUP_SUFFIX = '_backup'
 CCPN_ARCHIVES_DIRECTORY = 'archives'
 CCPN_SUMMARIES_DIRECTORY = 'summaries'
 
+CCPN_PYTHON = 'miniconda/bin/python'
+
 def normalisePath(path, makeAbsolute=None):
   """
   Normalises the path, e.g. removes redundant .. and slashes and

@@ -17,7 +17,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
+__date__ = "$Date: 2017-04-13 12:24:48 +0100 (Thu, April 13, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -26,9 +26,11 @@ __date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
 from ccpn.core.lib import CcpnSorting
 from ccpn.ui.gui.modules.GuiTableGenerator import GuiTableGenerator
 from ccpn.ui.gui.modules.CcpnModule import CcpnModule
-from ccpn.ui.gui.widgets.Label import Label
-from ccpn.ui.gui.widgets.PulldownList import PulldownList, PulldownListCompoundWidget
+#from ccpn.ui.gui.widgets.Label import Label
+#from ccpn.ui.gui.widgets.PulldownList import PulldownList, PulldownListCompoundWidget
 from ccpn.ui.gui.widgets.Widget import Widget
+#from ccpn.core.lib.Notifiers import Notifier
+from ccpn.ui.gui.widgets.PulldownListsForObjects import nmrChainPulldown
 
 
 class NmrResidueTableModule(CcpnModule):
@@ -50,10 +52,9 @@ class NmrResidueTable(Widget):
     self.nmrChains = project.nmrChains
     self.callback = callback
 
-    self.ncWidget = PulldownListCompoundWidget(parent=self, labelText="NmrChain:",
-                                               grid=(0,0), gridSpan=(1,2),
-                                               minimumWidths=(0,100)
-                                              )
+    self.ncWidget = nmrChainPulldown(parent=self, project=project,
+                                     grid=(0,0), gridSpan=(1,2), minimumWidths=(0,100)
+                                     )
 
     columns = [('#', lambda nmrResidue: nmrResidue.serial),
                ('NmrChain', lambda nmrResidue: nmrResidue._parent.id),
@@ -86,7 +87,7 @@ class NmrResidueTable(Widget):
     return len(set(l1))
 
   def _setNmrResidue(self, nmrResidue, row, col):
-    self.current.nmrResidue = nmrResidue
+    self.project._appBase.current.nmrResidue = nmrResidue
 
   def updateTable(self):
     self.nmrResidueTable.updateTable()

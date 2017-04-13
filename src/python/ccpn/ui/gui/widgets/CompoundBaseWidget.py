@@ -1,0 +1,110 @@
+"""
+Base class for compound widgets
+
+"""
+#=========================================================================================
+# Licence, Reference and Credits
+#=========================================================================================
+__copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Geerten W Vuister"
+__license__ = ("CCPN license. See www.ccpn.ac.uk/license"
+              "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
+__reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
+                " or ccpnmodel.ccpncore.memops.Credits.CcpNmrReference")
+
+#=========================================================================================
+# Last code modification:
+#=========================================================================================
+__author__ = "$Author: Geerten Vuister $"
+__date__ = "$Date: 2017-04-13 12:24:48 +0100 (Thu, April 13, 2017) $"
+
+#=========================================================================================
+# Start of code
+#=========================================================================================
+
+from ccpn.ui.gui.widgets.Frame import Frame
+from ccpn.core.lib.Notifiers import Notifier
+
+from ccpn.util.Logging import getLogger
+logger = getLogger()
+
+NULL = object()
+
+
+class CompoundBaseWidget(Frame):
+  """
+  Base widget for Compound classes; inherits from Frame (and hence Base)
+  Implements the addNotifier and deleteNotifiers methods
+  """
+  def __init__(self, parent, layoutDict, orientation, showBorder, **kwds):
+    """
+    :param parent: parent widget
+    :param showBorder: flag to display the border of Frame (True, False)
+    :param kwds: (optional) keyword, value pairs for the gridding of Frame
+    """
+    Frame.__init__(self, parent=parent, showBorder=showBorder, **kwds)
+
+    if not orientation in layoutDict:
+      raise RuntimeError('Invalid parameter "orientation" (%s)' % orientation)
+    self._orientation = orientation
+    self._gridding = layoutDict[orientation] # list of grid tuples for all succesive widgets
+    self._widgets = []    # list of all the widgets; use addWidget to add using the layoutDict
+
+    # notifiers
+    self._notifiers = []  # list of all notifiers for this widget
+
+  def addWidget(self, widget):
+    "Add widget, using the layout as defined previously by layoutDict and orientation"
+    if len(self._gridding) < len(self._widgets)+1:
+      raise RuntimeError('Cannot add widget; invalid gridding')
+    gx, gy = self._gridding[len(self._widgets)]
+    self._widgets.append(widget)
+    self.layout().addWidget(widget, gx, gy)
+
+  def setMinimumWidths(self, minimumWidths):
+    "Set minimumwidths of widgets"
+    if len(minimumWidths) < len(self._widgets):
+      raise RuntimeError('Not enough values to set minimum widths of all widgets')
+    for i, width in enumerate(minimumWidths):
+      self._widgets[i].setMinimumWidth(width)
+
+  def setMaximumWidths(self, maximumWidths):
+    "Set maximumWidths of widgets"
+    if len(maximumWidths) < len(self._widgets):
+      raise RuntimeError('Not enough values to set maximum widths of all widgets')
+    for i, width in enumerate(maximumWidths):
+      self._widgets[i].setMaximumWidth(width)
+
+  def addNotifier(self, theObject, triggers, targetName, func, *args, **kwds):
+    """
+    Add and store a notifier with widget; 
+
+    :param theObject: A valid V3 core or current object
+    :param triggers: any of the triggers, as defined in Notifier class
+    :param targetName: a valid target for theObject, as defined in the Notifier class
+    :param func: callback function on triggering
+    :param args: optional arguments to func
+    :param kwds: optional keyword arguments to func
+    :return: Notifier instance
+    """
+    notifier = Notifier(theObject, triggers, targetName, func, *args, **kwds)
+    self._notifiers.append(notifier)
+    logger.debug('Added notifier %s to widget %s' % (notifier, self))
+    return notifier
+
+  def deleteNotifiers(self):
+    "Delete all notifiers associated with the widget"
+    while len(self._notifiers) > 0:
+        notifier = self._notifiers.pop()
+        #print('>deleteNotifier>', notifier)
+        notifier.unRegister()
+        del(notifier)
+
+  def __del__(self):
+    # The project and all its things are already disassembled when closing the program;
+    # hence, the deregistering of notifiers fails and needs to be caught
+    try:
+      self.deleteNotifiers()
+    except:
+      pass
+

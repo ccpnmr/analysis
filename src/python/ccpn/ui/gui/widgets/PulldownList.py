@@ -1,11 +1,12 @@
-"""Module Documentation here
+"""
+PulldownList and PulldownListCompoundWidget
 
 """
 #=========================================================================================
 # Licence, Reference and Credits
 #=========================================================================================
 __copyright__ = "Copyright (C) CCPN project (www.ccpn.ac.uk) 2014 - $Date$"
-__credits__ = "Wayne Boucher, Rasmus H Fogh, Simon P Skinner, Geerten W Vuister"
+__credits__ = "Wayne Boucher, Rasmus H Fogh, Geerten W Vuister"
 __license__ = ("CCPN license. See www.ccpn.ac.uk/license"
               "or ccpnmodel.ccpncore.memops.Credits.CcpnLicense for license text")
 __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/license"
@@ -15,7 +16,7 @@ __reference__ = ("For publications, please use reference from www.ccpn.ac.uk/lic
 # Last code modification:
 #=========================================================================================
 __author__ = "$Author: Geerten Vuister $"
-__date__ = "$Date: 2017-04-11 22:04:47 +0100 (Tue, April 11, 2017) $"
+__date__ = "$Date: 2017-04-13 12:24:48 +0100 (Thu, April 13, 2017) $"
 
 #=========================================================================================
 # Start of code
@@ -25,19 +26,41 @@ from PyQt4 import QtCore, QtGui
 
 from ccpn.ui.gui.widgets.Base import Base
 from ccpn.ui.gui.widgets.Icon import Icon
-from ccpn.ui.gui.widgets.Frame import Frame
 from ccpn.ui.gui.widgets.Label import Label
+from ccpn.ui.gui.widgets.CompoundBaseWidget import CompoundBaseWidget
 
-# TBD: Cascading categories, prob via Menu
+from ccpn.util.Logging import getLogger
+logger = getLogger()
 
 NULL = object()
 
-class PulldownListCompoundWidget(Frame):
+
+class PulldownListCompoundWidget(CompoundBaseWidget):
   """
-  Compound class comprising a Label and a PulldownList, combined in a Frame
+  Compound class comprising a Label and a PulldownList, combined in a CompoundBaseWidget (i.e. a Frame)
+  
+    left:             Label       PullDown         
+           
+    right:            PullDown    Label   
+    
+    top:              Label
+                      PullDown       
+    
+    bottom:           PullDown       
+                      Label
+    
+
   """
-  def __init__(self, parent, showBorder=False, orientation='left', minimumWidths=None, labelText='',
-                             texts=None, objects=None, icons=None, callback=None, index=0, **kwds):
+  layoutDict = dict(
+    # grid positions for label and pulldown for the different orientations
+    left   = [(0, 0), (0, 1)],
+    right  = [(0, 1), (0, 0)],
+    top    = [(0, 0), (1, 0)],
+    bottom = [(1, 0), (0, 0)],
+  )
+
+  def __init__(self, parent, showBorder=False, orientation='left', minimumWidths=None, maximumWidths=None,
+               labelText='', texts=None, callback=None, default=None, **kwds):
     """
     :param parent: parent widget
     :param showBorder: flag to display the border of Frame (True, False)
@@ -45,38 +68,71 @@ class PulldownListCompoundWidget(Frame):
                         Allowed values: 'left', 'right', 'top', 'bottom'
     :param minimumWidths: tuple of two values specifying the minimum width of the Label and Pulldown widget, respectively
     :param labelText: Text for the Label
-    :param texts: list of (optional) text values for the Pulldown
-    :param objects: list of (optional) objects for the Pulldown
-    :param icons: list of (optional) icons for the Pulldown
-    :param callback: callback for the Pulldown
-    :param index: initially selected element of the Pulldown
-    :param kwds: (optional) keyword, value pairs for the gridding
+    :param texts: (optional) iterable generating text values for the Pulldown
+    :param callback: (optional) callback for the Pulldown
+    :param default: (optional) initially selected element of the Pulldown (text or index)
+    :param kwds: (optional) keyword, value pairs for the gridding of Frame
     """
 
-    Frame.__init__(self, parent=parent, showBorder=showBorder, **kwds)
+    CompoundBaseWidget.__init__(self, parent=parent, layoutDict=self.layoutDict, orientation=orientation,
+                                showBorder=showBorder, **kwds)
 
     self.label = Label(parent=self, text=labelText, vAlign='center')
-    self.pulldownList = PulldownList(parent=self, texts=texts, objects=objects,
-                                     icons=icons, callback=callback, index=index)
+    self.addWidget(self.label)
 
-    if minimumWidths is not None and len(minimumWidths) == 2:
-      self.label.setMinimumWidth(minimumWidths[0])
-      self.pulldownList.setMinimumWidth(minimumWidths[1])
+    # pulldown
+    index = 0
+    if texts is not None:
+      texts = list(texts)
+    if default is not None and texts is not None:
+      if default in texts:
+        index = texts.index(default)
+      else:
+        try:
+          index = int(default)
+        except:
+          pass
+    self.pulldownList = PulldownList(parent=self, texts=texts, callback=callback, index=index)
+    self.addWidget(self.pulldownList)
 
-    layoutDict = dict(
-      # grid positions for label and pulldown
-      left =   [(0, 0), (0, 1)],
-      right =  [(0, 1), (0, 0)],
-      top =    [(0, 0), (1, 0)],
-      bottom = [(1, 0), (0, 0)],
-    )
-    if orientation in layoutDict:
-      lbl, pld = layoutDict[orientation]
-      self.layout().addWidget(self.label, lbl[0], lbl[1])
-      self.layout().addWidget(self.pulldownList, pld[0], pld[1])
+    if minimumWidths is not None:
+      self.setMinimumWidths(minimumWidths)
 
-    else:
-      raise RuntimeError('Invalid parameter "orientation" (%s)' % orientation)
+    if maximumWidths is not None:
+      self.setMinimumWidths(maximumWidths)
+
+  def getText(self):
+    "Convenience: Return selected text in Pulldown"
+    return self.pulldownList.currentText()
+
+  def updatePulldownList(self, theObject, triggers, targetName, func, *args, **kwds):
+    """
+    Define a notifier to update the pulldown list; 
+      
+    :param theObject: A valid V3 core or current object
+    :param triggers: any of the triggers, as defined in Notifier class
+    :param targetName: a valid target for theObject, as defined in the Notifier class
+    :param func: func(theObject, *args, **kwds) should return a list with the new pulldown elements
+    :param args: optional arguments to func
+    :param kwds: optional keyword arguments to func
+    :return: Notifier instance
+    """
+    notifier = self.addNotifier(theObject, triggers, targetName, self._updatePulldownList, *args, **kwds)
+    notifier._listFunc = func
+    return notifier
+
+  def _updatePulldownList(self, callbackDict, *args, **kwds):
+    "Here the action is done to update the pulldown list"
+
+    #print('>updatePulldown>', callbackDict, args, kwds)
+    listFunc = callbackDict['notifier']._listFunc
+    theObject = callbackDict['theObject']
+    texts = listFunc(theObject, *args, **kwds)
+    #print('>updatePulldown>', texts)
+    if texts is None:
+      raise RuntimeError('Unable to update pulldownList')
+    self.pulldownList.clear()
+    self.pulldownList.setData(texts=texts)
 
 
 class PulldownList(QtGui.QComboBox, Base):
@@ -282,6 +338,32 @@ class PulldownList(QtGui.QComboBox, Base):
       elif self.texts:
         self.callback(self.texts[index])
 
+
+class ObjectPulldownlist(PulldownListCompoundWidget):
+  """
+  A class to have objects of a V3 project in the Pulldownlist widget
+  has automatic callback to update the list
+  """
+
+  def __init__(self, object, targetName,
+                     parent=None, showBorder=False, orientation='left', minimumWidths=None, labelText='',
+                     texts=None, callback=None, default=None, **kwds):
+    """
+    :param parent: parent widget
+    :param showBorder: flag to display the border of Frame (True, False)
+    :param orientation: flag to determine the orientation of the labelText relative to the pulldown widget.
+                        Allowed values: 'left', 'right', 'top', 'bottom'
+    :param minimumWidths: tuple of two values specifying the minimum width of the Label and Pulldown widget, respectively
+    :param labelText: Text for the Label
+    :param texts: (optional) iterable generating text values for the Pulldown
+    :param callback: (optional) callback for the Pulldown
+    :param default: (optional) initially selected element of the Pulldown (text or index)
+    :param kwds: (optional) keyword, value pairs for the gridding of Frame):
+    """
+    PulldownListCompoundWidget.__init__(self, parent=parent, showBorder=showBorder, orientation=orientation, minimumWidths=None, labelText='',
+                     texts=None, callback=None, default=None, **kwds)
+
+
 if __name__ == '__main__':
 
   from ccpn.ui.gui.widgets.Application import TestApplication
@@ -317,17 +399,17 @@ if __name__ == '__main__':
   pulldownList = PulldownList(parent=popup, texts=texts, icons=icons,
                               objects=objects, callback=callback, grid=(0,0), **policyDict
                               )
+  pulldownList.clearEditText()
 
   pulldownListwidget = PulldownListCompoundWidget(parent=popup, orientation='left', showBorder=True, minimumWidths=(150,100),
-                                          labelText='test-label', texts=texts, icons=icons,
-                                          objects=objects, callback=callback2, grid=(1,1),
-                                          **policyDict )
+                                                  labelText='test-label', texts=texts,
+                                                  callback=callback2, grid=(1,1), default=0,
+                                                  **policyDict )
 
-  pulldownListwidget2 = PulldownListCompoundWidget(parent=popup, orientation='left', showBorder=True, minimumWidths=(150,100),
-                                          labelText='test-label which is longer', texts=texts, icons=icons,
-                                          objects=objects, callback=callback2, grid=(2,1),
-                                           **policyDict )
+  pulldownListwidget2 = PulldownListCompoundWidget(parent=popup, orientation='right', showBorder=True, maximumWidths=(10,10),
+                                                  labelText='test-label on top which is longer', texts=texts,
+                                                  callback=callback2, grid=(0,2), default='Float',
+                                                  **policyDict )
 
-  pulldownList.clearEditText()
   app.start()
 
